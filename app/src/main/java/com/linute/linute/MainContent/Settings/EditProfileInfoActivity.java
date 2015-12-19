@@ -105,7 +105,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
 
     //fragment with our settings layout
-    public static class LinuteEditProfileFragment extends PreferenceFragment implements DatePickerDialog.OnDateSetListener
+    public static class LinuteEditProfileFragment extends PreferenceFragment
     {
         private Preference mEditName;
         private Preference mEditStatus;
@@ -120,7 +120,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
             bindPreferences();
             setOnClickListeners();
-            setTitles();
+            setSummaries();
 
             setUpPrefChangeListeners();
         }
@@ -191,20 +191,13 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
         }
 
-        private void setTitles(){
+        private void setSummaries(){
             mEditName.setSummary(mSharedPreferences.getString("firstName", " ")
                     + " " + mSharedPreferences.getString("lastName", " "));
 
             String status = mSharedPreferences.getString("status", "");
             mEditStatus.setSummary(status.equals("") ? "Tell us about yourself" : status);
         }
-
-        //date was picked
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-
-        }
-
 
     }
 

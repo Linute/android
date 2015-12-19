@@ -151,6 +151,7 @@ public class SettingActivity extends AppCompatActivity {
 
 
             //privacy policy
+            //FIXME : open in browser
             mPrivacyPolicy.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
