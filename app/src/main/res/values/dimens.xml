@@ -10,5 +10,6 @@
     <dimen name="profilefragment_list_item_profile_radius">50dp</dimen>
     <dimen name="profilefragment_list_item_event_side">55dp</dimen>
     <dimen name="editprofile_image_dimen">100dp</dimen>
+    <dimen name="padding_s">4dp</dimen>
 
 </resources>
