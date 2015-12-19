@@ -1,0 +1,126 @@
+package com.linute.linute.UtilsAndHelpers;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.util.Base64;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+
+/**
+ * Created by QiFeng on 11/28/15.
+ */
+public class Utils {
+
+
+    public static String CONTENT_TYPE = "application/json";
+
+    //encodes input String
+    //returns empty if can't encode (should never happen)
+    public static String encode_base64(String input)
+    {
+        try{
+            return Base64.encodeToString(input.getBytes("UTF-8"), Base64.DEFAULT);
+        }
+        catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public static String encodeImageBase64(Bitmap bitmap){
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteFormat = stream.toByteArray();
+        // get the base 64 string
+        String imgString = Base64.encodeToString(byteFormat, Base64.DEFAULT);
+        return imgString;
+    }
+
+
+    public static boolean isNetworkAvailable(final Context context) {
+        final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+    }
+
+    public static String getTimeZone() {
+        return TimeZone.getDefault().getID();
+    }
+
+    //toast saying bad connection
+    public static void showBadConnectionToast(Context context) {
+        Toast.makeText(context, R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
+    }
+
+    //problem occured communicating with server
+    public static void showServerErrorToast(Context context){
+        Toast.makeText(context, R.string.error_communicating_server, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void testLog(Context context, String TAG){
+        //Test
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, context.MODE_PRIVATE);
+        Log.v(TAG, "image: " + sharedPreferences.getString("profileImage", "nothing"));
+        Log.v(TAG, "uID: " + sharedPreferences.getString("userID", "nothing"));
+        Log.v(TAG, "first name: " + sharedPreferences.getString("firstName", "nothing"));
+        Log.v(TAG, "last name: " + sharedPreferences.getString("lastName", "nothing"));
+        Log.v(TAG, "email: " + sharedPreferences.getString("email", "nothing"));
+        Log.v(TAG, "status: " + sharedPreferences.getString("status", "nothing"));
+        Log.v(TAG, "facebook: " + sharedPreferences.getString("socialFacebook", "nothing"));
+        Log.v(TAG, "logged in: " + (sharedPreferences.getBoolean("isLoggedIn", false) ? "true" : "false"));
+    }
+
+    //clears user information
+    //NOTE: RESET OTHER THINGS WHEN THEY COME UP
+    public static void resetUserInformation(SharedPreferences.Editor pref){
+        pref.putString("profileImage", "");
+        pref.putString("userID", "");
+        pref.putString("firstName", "");
+        pref.putString("lastName", "");
+        pref.putString("email", "");
+        pref.putString("status", "");
+        pref.putString("socialFacebook", "");
+        pref.putString("dob", "");
+        pref.putInt("sex", 0);
+
+        pref.putBoolean("isLoggedIn", false);
+
+        pref.putInt("numOfAttendedEvents", 0);
+        pref.putInt("numOfHostedEvents", 0);
+        pref.putInt("numOfFriends", 0);
+        pref.commit();
+    }
+
+    public static String getEventImageURL(String jpegName){
+        return "http://images.linute.com/events/original/" + jpegName;
+    }
+
+    //return url to a profile image of user
+    public static String getImageUrlOfUser(String userImage){
+        return "http://images.linute.com/profiles/original/"+userImage;
+    }
+
+    public static String formatToReadableString(String date){
+        if (date.isEmpty()) return "";
+
+        SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            return SimpleDateFormat.getDateInstance().format(fm.parse(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
+}

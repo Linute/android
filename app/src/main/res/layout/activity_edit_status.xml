@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.linute.linute.MainContent.Settings.EditNameActivity">
+
+    <include android:id="@+id/editstatus_toolbar"
+             layout="@layout/tool_bar"/>
+
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="85dp">
+
+        <EditText
+            android:id="@+id/editstatus_status_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/bio_hint"
+            android:lines="3"
+            android:maxLength="60" android:maxLines="3" android:textSize="14sp"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <LinearLayout android:id="@+id/editstatus_buttons"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:orientation="horizontal"
+                  android:weightSum="2">
+
+        <Button android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancel"
+            android:id="@+id/editstatus_cancel"/>
+
+        <Button android:id="@+id/editstatus_save"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save Changes"/>
+
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/editstatus_progressbar"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>

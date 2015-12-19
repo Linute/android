@@ -1,0 +1,72 @@
+package com.linute.linute.MainContent;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
+
+import com.linute.linute.MainContent.ProfileFragment.ProfileFragment;
+import com.linute.linute.R;
+
+/**
+ * Created by QiFeng on 11/17/15.
+ */
+
+
+public class LinuteFragmentAdapter extends FragmentPagerAdapter{
+
+    private Context mContext;
+
+    //icons we will use
+    //these are currently 30 pxl
+    private int[] TAB_ICON_IDS = {
+            R.drawable.ic_time_line,
+            R.drawable.ic_friends,
+            R.drawable.ic_notification,
+            R.drawable.ic_profile
+    };
+
+
+
+    public LinuteFragmentAdapter(FragmentManager fm, Context context) {
+        super(fm);
+        this.mContext = context;
+    }
+
+    @Override
+    public int getCount() {
+        return TAB_ICON_IDS.length;
+    }
+
+
+    //returns correct fragment
+    @Override
+    public Fragment getItem(int position) {
+        //add others later
+        //TODO: ADD OTHER FRAGMENTS
+        switch (position){
+            case 0:
+                return  new DiscoverFragment();
+            case 1:
+                return new DiscoverFragment();
+            case 3:
+                return new ProfileFragment();
+            default:
+                return new DiscoverFragment();
+        }
+    }
+
+    public int getDrawableIconId(int position){
+        return TAB_ICON_IDS[position];
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        return null;
+    }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Public Info">
+        <Preference android:defaultValue="fullName"
+                    android:key="edit_name_pref"
+                    android:title="Name"/>
+        <Preference android:key="edit_status_pref"
+                    android:title="Bio"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Private Info">
+        <Preference android:key="edit_birthday_pref"
+                    android:title="Birthday"/>
+        <Preference android:key="edit_sex_pref"
+                    android:title="Sex"/>
+    </PreferenceCategory>
+</PreferenceScreen>

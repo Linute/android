@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                tools:background="@android:color/holo_red_light"
+    >
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/profilelistitem_prof_image"
+            android:layout_width="@dimen/profilefragment_list_item_profile_radius"
+            android:layout_height="@dimen/profilefragment_list_item_profile_radius"
+            android:layout_marginBottom="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/profile_picture_placeholder"
+            app:border_color="@android:color/darker_gray"
+            app:border_width="1dp"/>
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:orientation="vertical">
+
+            <TextView android:id="@+id/profilelistitem_name"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="@android:color/holo_blue_dark"
+                      tools:text="FirstName LastName"
+                />
+            <TextView android:id="@+id/profilelistitem_description"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      tools:text="attended an event"
+                />
+            <TextView android:id="@+id/profilelistitem_time"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="@android:color/darker_gray"
+                      tools:text="1 month ago"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/profilelistitem_event_image"
+        android:layout_width="@dimen/profilefragment_list_item_event_side"
+        android:layout_height="@dimen/profilefragment_list_item_event_side"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="15dp" android:scaleType="fitCenter"
+        android:src="@drawable/no_image_placeholder"/>
+
+
+</RelativeLayout>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.linute.linute.MainContent.Settings.EditBirthday">
+
+    <include android:id="@+id/editbirthday_toolbar"
+             layout="@layout/tool_bar"/>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginLeft="25dp"
+                  android:layout_marginRight="25dp"
+                  android:layout_marginTop="85dp"
+                  android:orientation="horizontal"
+                  android:weightSum="4">
+
+        <TextView android:id="@+id/editbirthday_birthday_text"
+                  android:layout_width="0px"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center"
+                  android:layout_weight="3"
+                  android:gravity="center"
+                  android:text="Jan 1 2001"
+                  android:textSize="25dp"/>
+        <Button android:id="@+id/editbirthday_edit_button"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/editbirthday_buttons"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:orientation="horizontal"
+                  android:weightSum="2">
+
+        <Button android:id="@+id/editbirthday_cancel_button"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cancel"/>
+
+        <Button android:id="@+id/editbirthday_save_button"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save Changes"/>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/editbirthday_progressbar"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+</RelativeLayout>
