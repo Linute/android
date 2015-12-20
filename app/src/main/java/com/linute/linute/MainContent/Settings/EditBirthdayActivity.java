@@ -2,19 +2,18 @@ package com.linute.linute.MainContent.Settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.DatePickerDialog;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.DatePicker;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -29,119 +28,126 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditStatusActivity extends AppCompatActivity {
+public class EditBirthdayActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
-    private static final String TAG = "EditStatusActivity";
-    private SharedPreferences mSharedPreferences;
-    private Toolbar mToolBar;
-
+    private static final String TAG = "EditBirthdayActivity";
     private ProgressBar mProgressBar;
-    private EditText mStatusText;
+    private TextView mBirthdayText;
     private Button mSaveButton;
     private Button mCancelButton;
-
+    private Button mEditBirthdayButton;
     private View mButtonLayer;
+    private Toolbar mToolBar;
+
+    private String mBirthdayString;
+
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_status);
+        setContentView(R.layout.activity_edit_birthday);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-
-        bindView();
+        bindViews();
         setUpToolbar();
         setDefaultValues();
         setUpOnClickListeners();
-        setUpEditTextMaxLines();
     }
 
-
-    private void bindView() {
-        mProgressBar = (ProgressBar) findViewById(R.id.editstatus_progressbar);
-        mSaveButton = (Button) findViewById(R.id.editstatus_save);
-        mStatusText = (EditText) findViewById(R.id.editstatus_status_text);
-        mCancelButton = (Button) findViewById(R.id.editstatus_cancel);
-        mButtonLayer = findViewById(R.id.editstatus_buttons);
+    private void bindViews(){
+        mProgressBar = (ProgressBar) findViewById(R.id.editbirthday_progressbar);
+        mBirthdayText = (TextView) findViewById(R.id.editbirthday_birthday_text);
+        mSaveButton = (Button) findViewById(R.id.editbirthday_save_button);
+        mCancelButton = (Button) findViewById(R.id.editbirthday_cancel_button);
+        mEditBirthdayButton = (Button) findViewById(R.id.editbirthday_edit_button);
+        mButtonLayer = findViewById(R.id.editbirthday_buttons);
     }
 
     private void setUpToolbar(){
-        mToolBar = (Toolbar) findViewById(R.id.editstatus_toolbar);
+        mToolBar = (Toolbar) findViewById(R.id.editbirthday_toolbar);
         setSupportActionBar(mToolBar);
 
-        getSupportActionBar().setTitle("Status");
+        getSupportActionBar().setTitle("Birthday");
     }
 
     private void setDefaultValues(){
-        String status = mSharedPreferences.getString("status", ""); //if there is a status, set it as default
-        if (!status.equals(""))
-            mStatusText.append(status);
+        String dob = mSharedPreferences.getString("dob", "");
+        Log.v(TAG, dob);
+        mBirthdayText.setText(Utils.formatToReadableString(
+                dob.equals("") ? "Jan 1, 2000" : dob));
     }
 
 
-    private void setUpOnClickListeners() {
+    private void setUpOnClickListeners(){
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveStatus();
+
+                saveBirthday();
             }
         });
+
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
-                overridePendingTransition(0, 0); //no transitions
+                overridePendingTransition(0, 0);
             }
         });
-    }
 
-    //sets max line number to 3
-    private void setUpEditTextMaxLines(){
-        mStatusText.addTextChangedListener(new TextWatcher() {
-            private String text;
+        mEditBirthdayButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                text = s.toString();
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (mStatusText.getLineCount() > 3){
-                    mStatusText.setText(text);
-                }
-
+            public void onClick(View v) {
+                showDatePicker();
             }
         });
     }
 
 
-    private void saveStatus(){
-        String status = mStatusText.getText().toString();
 
-        //if no changes made, do nothing
-        if (!changesMadeToStatus(status)) return;
+    private void showDatePicker(){
+        final Calendar c = Calendar.getInstance();
+
+        new DatePickerDialog(this, this, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH))
+                .show();
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        mBirthdayString = formatDateFromInts(year, monthOfYear, dayOfMonth);
+        mBirthdayText.setText(Utils.formatToReadableString(mBirthdayString));
+    }
+
+    public String formatDateFromInts(int year, int month, int day){
+        String date = year+"-";
+        date += (month < 10 ? "0" + month : month) + "-";
+        date += day < 10 ? "0" + day : day;
+        return date;
+    }
+
+    private void saveBirthday(){
+
+        if (mBirthdayString == null || !birthdayHasBeenEditted(mBirthdayString))
+            return;
 
         LSDKUser user = new LSDKUser(this);
-        showProgress(true); //show  progress bar
 
         Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("status", status);
+        userInfo.put("dob", mBirthdayString);
+        showProgress(true);
 
-        //query server
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(EditStatusActivity.this);
+                        Utils.showBadConnectionToast(EditBirthdayActivity.this);
                         showProgress(false);
                     }
                 });
@@ -149,32 +155,30 @@ public class EditStatusActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){ //good response
+                if (response.isSuccessful()) {
                     try {
-                        LinuteUser user = new LinuteUser(new JSONObject(response.body().string())); //create container
-                        persistData(user); //save data
-                    } catch (JSONException e) { //error parsing data
+                        LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
+                        persistData(user);
+                    }
+                    catch (JSONException e) { //caught error
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditStatusActivity.this);
+                                Utils.showServerErrorToast(EditBirthdayActivity.this);
                             }
                         });
                     }
 
-                }
-                else {
+                } else { //log error and show server error
                     Log.e(TAG, response.body().string());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showServerErrorToast(EditStatusActivity.this);
+                            Utils.showServerErrorToast(EditBirthdayActivity.this);
                         }
                     });
                 }
-
-                //hide progressbar
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -185,12 +189,15 @@ public class EditStatusActivity extends AppCompatActivity {
         });
     }
 
-    //checks if any changes were made to status
-    //if no changes were made, we won't query server
-    private boolean changesMadeToStatus(String status){
-        if (mSharedPreferences.getString("status", "").equals(status))
-            return false;
+    private void persistData(LinuteUser user) {
+        mSharedPreferences.edit().putString("dob", user.getDob()).commit();
+    }
 
+    private boolean birthdayHasBeenEditted(String birthday){
+        String bday = mSharedPreferences.getString("dob", "");
+        if (bday.isEmpty() || bday.equals(birthday)){
+            return false;
+        }
         return true;
     }
 
@@ -226,20 +233,7 @@ public class EditStatusActivity extends AppCompatActivity {
             mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
         }
 
-        setFocusable(!show);
+        mEditBirthdayButton.setClickable(!show); //don't allow edit when querying
     }
 
-    private void setFocusable(boolean focusable){
-        if (focusable) { //turn on
-            mStatusText.setFocusableInTouchMode(focusable);
-        }
-        else {
-            mStatusText.setFocusable(focusable);
-        }
-    }
-
-    //save status to Shared Prefs
-    private void persistData(LinuteUser user){
-        mSharedPreferences.edit().putString("status", user.getStatus()).commit();
-    }
 }
