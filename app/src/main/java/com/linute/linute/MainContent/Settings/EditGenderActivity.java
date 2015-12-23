@@ -9,9 +9,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -26,80 +27,76 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditBirthdayActivity extends AppCompatActivity {
+public class EditGenderActivity extends AppCompatActivity {
 
-    private static final String TAG = "EditBirthdayActivity";
-    private ProgressBar mProgressBar;
-    private DatePicker mDatePicker;
+    private static final String TAG = "EditGenderActivity";
+    private Spinner mSpinner;
+
     private Button mSaveButton;
     private Button mCancelButton;
     private View mButtonLayer;
 
-    private String mDob;
+    private ProgressBar mProgressBar;
 
     private SharedPreferences mSharedPreferences;
+
+    private int mSavedGender = 0; //gender saved to sharedPref
+
+    //List of choices
+    private String [] mGenders = {"Not Specified", "Male", "Female"};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_birthday);
+        setContentView(R.layout.activity_edit_gender);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
         bindViews();
-        setUpToolbar();
+        setupToolbar();
+        setUpSpinner();
         setDefaultValues();
-        setUpOnClickListeners();
+        setUpOnClickLisenters();
     }
 
-    private void bindViews(){
-        mProgressBar = (ProgressBar) findViewById(R.id.editbirthday_progressbar);
-        mDatePicker = (DatePicker) findViewById(R.id.editbirthday_datepicker);
-        mSaveButton = (Button) findViewById(R.id.editbirthday_save_button);
-        mCancelButton = (Button) findViewById(R.id.editbirthday_cancel_button);
-        mButtonLayer = findViewById(R.id.editbirthday_buttons);
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.editgender_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Sex");
     }
 
-    private void setUpToolbar(){
-        Toolbar toolBar = (Toolbar) findViewById(R.id.editbirthday_toolbar);
-        setSupportActionBar(toolBar);
 
-        getSupportActionBar().setTitle("Birthday");
+    private void bindViews() {
+        mSpinner = (Spinner) findViewById(R.id.editgender_spinner);
+        mSaveButton = (Button) findViewById(R.id.editgender_save_button);
+        mCancelButton = (Button) findViewById(R.id.editgender_cancel_button);
+
+        mButtonLayer = findViewById(R.id.editgender_buttons);
+
+        mProgressBar = (ProgressBar) findViewById(R.id.editgender_progressbar);
+    }
+
+    private void setUpSpinner(){
+
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_spinner_item,
+                        mGenders);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner.setAdapter(adapter);
     }
 
     private void setDefaultValues(){
-        String dob = mSharedPreferences.getString("dob", "");
-
-        Calendar c = Calendar.getInstance();
-
-        //try to set date picker to person's birthday
-        try {
-            if (!dob.equals("")) {
-                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                c.setTime(fm.parse(dob));
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        mDatePicker.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        mDob = formatDateFromInts(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+        mSavedGender = mSharedPreferences.getInt("sex", 0);
+        mSpinner.setSelection(mSavedGender);
     }
 
-
-    private void setUpOnClickListeners(){
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveBirthday();
-            }
-        });
-
+    private void setUpOnClickLisenters(){
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,28 +104,27 @@ public class EditBirthdayActivity extends AppCompatActivity {
                 overridePendingTransition(0, 0);
             }
         });
+
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveGender();
+            }
+        });
     }
 
+    private void saveGender() {
+        final int gender = mSpinner.getSelectedItemPosition();
 
-    public String formatDateFromInts(int year, int month, int day){
-        String date = year+"-";
-        month++; //month is in range 0-11 so we need to add one
-        date += (month < 10 ? "0" + month : month) + "-";
-        date += day < 10 ? "0" + day : day;
-        return date;
-    }
-
-    private void saveBirthday(){
-
-        final String dob = formatDateFromInts(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
-
-        if (!birthdayHasBeenEditted(dob))
+        //gender hasn't been editted
+        if(!genderEditted(gender))
             return;
 
         LSDKUser user = new LSDKUser(this);
 
         Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("dob", dob);
+        userInfo.put("sex", gender+"");
+
         showProgress(true);
 
         user.updateUserInfo(userInfo, null, new Callback() {
@@ -137,7 +133,7 @@ public class EditBirthdayActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(EditBirthdayActivity.this);
+                        Utils.showBadConnectionToast(EditGenderActivity.this);
                         showProgress(false);
                     }
                 });
@@ -149,14 +145,13 @@ public class EditBirthdayActivity extends AppCompatActivity {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
-                        mDob = dob;
-                    }
-                    catch (JSONException e) { //caught error
+                        mSavedGender = gender;
+                    } catch (JSONException e) { //caught error
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditBirthdayActivity.this);
+                                Utils.showServerErrorToast(EditGenderActivity.this);
                             }
                         });
                     }
@@ -166,7 +161,7 @@ public class EditBirthdayActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showServerErrorToast(EditBirthdayActivity.this);
+                            Utils.showServerErrorToast(EditGenderActivity.this);
                         }
                     });
                 }
@@ -178,16 +173,16 @@ public class EditBirthdayActivity extends AppCompatActivity {
                 });
             }
         });
+
+    }
+
+    private boolean genderEditted(int gender){
+        return gender != mSavedGender;
     }
 
     private void persistData(LinuteUser user) {
-        mSharedPreferences.edit().putString("dob", user.getDob()).apply();
+        mSharedPreferences.edit().putInt("sex", user.getSex()).apply();
     }
-
-    private boolean birthdayHasBeenEditted(String birthday){
-        return !mDob.equals(birthday);
-    }
-
 
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -220,7 +215,20 @@ public class EditBirthdayActivity extends AppCompatActivity {
             mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
         }
 
-        mDatePicker.setClickable(!show); //don't allow edit when querying
+        mSpinner.setClickable(!show); //don't allow edit when querying
+    }
+
+    public static String getGenderFromIndex(int position){
+        switch (position) {
+            case 0:
+                return "Not Specified";
+            case 1:
+                return "Male";
+            case 2:
+                return "Female";
+            default:
+                return "Not Specified";
+        }
     }
 
 }

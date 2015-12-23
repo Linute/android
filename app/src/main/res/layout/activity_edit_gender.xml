@@ -4,36 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/editbirthday_toolbar"
+    <include android:id="@+id/editgender_toolbar"
              layout="@layout/tool_bar"/>
 
-    <DatePicker
-        android:id="@+id/editbirthday_datepicker"
+
+    <Spinner
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editbirthday_toolbar"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:spinnersShown="true"/>
+        android:id="@+id/editgender_spinner"
+        android:gravity="center"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginTop="75dp"
+        android:layout_below="@id/editgender_toolbar"
+        android:layout_centerHorizontal="true"/>
 
-
-    <LinearLayout android:id="@+id/editbirthday_buttons"
+    <LinearLayout android:id="@+id/editgender_buttons"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_below="@id/editbirthday_datepicker"
-                  android:layout_marginTop="35dp"
+                  android:layout_below="@id/editgender_spinner"
+                  android:layout_marginTop="65dp"
                   android:orientation="horizontal"
                   android:weightSum="2">
 
-        <Button android:id="@+id/editbirthday_cancel_button"
+        <Button android:id="@+id/editgender_cancel_button"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Cancel"/>
 
-        <Button android:id="@+id/editbirthday_save_button"
+        <Button android:id="@+id/editgender_save_button"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -41,11 +41,11 @@
     </LinearLayout>
 
     <ProgressBar
-        android:id="@+id/editbirthday_progressbar"
+        android:id="@+id/editgender_progressbar"
+        android:layout_below="@id/editgender_spinner"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editbirthday_datepicker"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp"
         android:visibility="gone"/>

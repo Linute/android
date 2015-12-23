@@ -1,10 +1,10 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.v4.app.ListFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
@@ -34,7 +34,6 @@ import com.squareup.okhttp.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +45,6 @@ public class ProfileFragment extends ListFragment {
 
     public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
     public static final String HAS_UPDATED_KEY = "profileFragmentHasUpdatedFromDB";
-    public static final String SHOW_EMPTY_LIST = "profileFragmentShowEmptyList";
 
     private boolean mHasUpdatedFromDB = false; //if we have gotten information from Database
 
@@ -79,9 +77,7 @@ public class ProfileFragment extends ListFragment {
         View rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         mUser = new LSDKUser(getContext());
-
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME , Context.MODE_PRIVATE);
-
         mEmptyListView = (View) rootView.findViewById(R.id.profilefrag_empty_list);
 
         //set up swipe refresh
@@ -104,7 +100,13 @@ public class ProfileFragment extends ListFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        bindViews();
+        //set listview adapter
+        mAdapter = new ProfileActivityListAdapter(getContext(), mUserActivityItems);
+        setListAdapter(mAdapter);
+    }
 
+    private void bindViews(){
         //add header
         ViewGroup header = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.fragment_profile_header, getListView(), false);
         getListView().addHeaderView(header, null, false);
@@ -116,11 +118,8 @@ public class ProfileFragment extends ListFragment {
         mFullNameText = (TextView) header.findViewById(R.id.profilefrag_fullname);
         mProfilePicture = (CircularImageView) header.findViewById(R.id.profilefrag_prof_image);
         mStatusText = (TextView) header.findViewById(R.id.profilefrag_status);
-
-        //set listview adapter
-        mAdapter = new ProfileActivityListAdapter(getContext(), mUserActivityItems);
-        setListAdapter(mAdapter);
     }
+
 
     @Override
     public void onResume() {
@@ -140,7 +139,6 @@ public class ProfileFragment extends ListFragment {
     public void onSaveInstanceState(Bundle outState) { //saves fragment state
         outState.putBoolean(HAS_UPDATED_KEY, mHasUpdatedFromDB); //so we don't update info again
         outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
-        outState.putBoolean(SHOW_EMPTY_LIST, mShowEmptyView);
         super.onSaveInstanceState(outState);
     }
 
@@ -149,7 +147,7 @@ public class ProfileFragment extends ListFragment {
         if (savedInstanceState != null) {
             mHasUpdatedFromDB = savedInstanceState.getBoolean(HAS_UPDATED_KEY);
             mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
-            mShowEmptyView = savedInstanceState.getBoolean(SHOW_EMPTY_LIST);
+            mShowEmptyView = mUserActivityItems.isEmpty();
         }
 
         //if we come back and list still empty, show mUserActivityView. else hide
@@ -263,7 +261,7 @@ public class ProfileFragment extends ListFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mShowEmptyView = activities.length() == 0 ? true : false; //determine if list empty
+                                mShowEmptyView = activities.length() == 0; //determine if list empty
                                 showEmptyView(mShowEmptyView);  //if empty, show empty view. if not, hide empty view
                             }
                         });
@@ -362,6 +360,8 @@ public class ProfileFragment extends ListFragment {
         inflater.inflate(R.menu.profile_fragment_menu, menu);
     }
 
+    public static final int IMAGE_CHANGED = 1234;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -369,11 +369,23 @@ public class ProfileFragment extends ListFragment {
 
         if (R.id.profile_fragment_menu_settings == id){
             Intent i = new Intent(getContext(), SettingActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
+            startActivityForResult(i, IMAGE_CHANGED);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_CHANGED && resultCode == Activity.RESULT_OK){ //profile image changed
+            //tell our items to update
+            mHasUpdatedFromDB = false;
+            mUserActivityItems.clear();
+            Log.v(TAG, "YES NEED TO UPDATE");
+        }else {
+            Log.v(TAG, "No update Found");
+        }
     }
 }

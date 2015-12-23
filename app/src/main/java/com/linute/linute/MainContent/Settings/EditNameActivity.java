@@ -7,7 +7,6 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -31,7 +30,7 @@ import java.util.Map;
 
 public class EditNameActivity extends AppCompatActivity {
 
-    private static final String TAG = "EditNameAcivity";
+    public static final String TAG = "EditNameAcivity";
 
     private EditText mFirstName;
     private EditText mLastName;
@@ -73,7 +72,7 @@ public class EditNameActivity extends AppCompatActivity {
         mSaveButton = (Button) findViewById(R.id.editname_save_button);
         mProgressBar = (ProgressBar) findViewById(R.id.prof_edit_name_progressbar);
         mCancelButton = (Button) findViewById(R.id.editname_cancel_button);
-        mButtonLayer = (View) findViewById(R.id.editname_buttons);
+        mButtonLayer = findViewById(R.id.editname_buttons);
     }
 
     private void setUpOnClickListeners(){
@@ -210,25 +209,20 @@ public class EditNameActivity extends AppCompatActivity {
 
     private void setFocusable(boolean focusable){
         if (focusable) { //turn on
-            mFirstName.setFocusableInTouchMode(focusable);
-            mLastName.setFocusableInTouchMode(focusable);
+            mFirstName.setFocusableInTouchMode(true);
+            mLastName.setFocusableInTouchMode(true);
         }
         else {
-            mFirstName.setFocusable(focusable);
-            mLastName.setFocusable(focusable);
+            mFirstName.setFocusable(false);
+            mLastName.setFocusable(false);
         }
     }
 
     private void saveInfo(LinuteUser user){
-        Log.v(TAG, user.getFirstName());
-        Log.v(TAG, user.getLastName());
-        Log.v(TAG, mSharedPreferences.getString("lastName", "nothing"));
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("firstName", user.getFirstName());
         editor.putString("lastName", user.getLastName());
-        editor.commit();
-        Log.v(TAG, mSharedPreferences.getString("firstName", "nothing"));
-        Log.v(TAG, mSharedPreferences.getString("lastName", "nothing"));
+        editor.apply();
     }
 
 }

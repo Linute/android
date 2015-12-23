@@ -7,19 +7,21 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import java.util.TimeZone;
+
+
 public class EditProfileInfoActivity extends AppCompatActivity {
 
     public static final String TAG = "EditProfileInfoActivity";
 
     private Toolbar mToolbar;
-
-    private SharedPreferences mSharedPreferences;
 
     private boolean mEdittedProfile = false;
 
@@ -28,12 +30,12 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         setUpToolBar();
 
         LinuteEditProfileFragment profileEditor = new LinuteEditProfileFragment();
-        profileEditor.setDefault(mSharedPreferences);
+        profileEditor.setDefault(sharedPreferences);
 
         getFragmentManager().beginTransaction().replace(R.id.setting_fragment, profileEditor).commit();
     }
@@ -76,6 +78,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         private Preference mEditName;
         private Preference mEditStatus;
         private Preference mDob;
+        private Preference mEditGender;
         private SharedPreferences mSharedPreferences;
 
         @Override
@@ -98,9 +101,10 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
 
         private void bindPreferences(){
-            mEditName = (Preference) findPreference("edit_name_pref");
-            mEditStatus = (Preference) findPreference("edit_status_pref");
-            mDob = (Preference) findPreference("edit_birthday_pref");
+            mEditName =  findPreference("edit_name_pref");
+            mEditStatus = findPreference("edit_status_pref");
+            mDob =  findPreference("edit_birthday_pref");
+            mEditGender = findPreference("edit_sex_pref");
         }
 
         //checks if preferences where changed
@@ -113,8 +117,9 @@ public class EditProfileInfoActivity extends AppCompatActivity {
                     else if (key.equals("status"))
                         mEditStatus.setSummary(sharedPreferences.getString("status", ""));
                     else if (key.equals("dob"))
-                        mDob.setSummary(Utils.formatToReadableString(sharedPreferences.getString("dob", "")));
-
+                        mDob.setSummary(Utils.formatDateToReadableString(sharedPreferences.getString("dob", "")));
+                    else if (key.equals("sex"))
+                        mEditGender.setSummary(EditGenderActivity.getGenderFromIndex(sharedPreferences.getInt("sex",0)));
                 }
             });
         }
@@ -128,7 +133,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
                     Intent i = new Intent(getActivity(), EditNameActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
-                    getActivity().overridePendingTransition(0,0); //NOTE: FIX
+                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
                     return true;
                 }
             });
@@ -155,16 +160,37 @@ public class EditProfileInfoActivity extends AppCompatActivity {
                 }
             });
 
+            mEditGender.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), EditGenderActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
+                    return true;
+                }
+            });
+
         }
 
         private void setSummaries(){
             mEditName.setSummary(mSharedPreferences.getString("firstName", " ")
                     + " " + mSharedPreferences.getString("lastName", " "));
 
+
             String status = mSharedPreferences.getString("status", "");
             mEditStatus.setSummary(status.equals("") ? "Tell us about yourself" : status);
-        }
 
+
+            String dob = mSharedPreferences.getString("dob", "");
+            if (!dob.isEmpty() && !dob.equals("null"))
+                dob = Utils.formatDateToReadableString(dob);
+            else dob = "Tell us your birthday";
+            mDob.setSummary(dob);
+
+            mEditGender.setSummary(EditGenderActivity.getGenderFromIndex(mSharedPreferences.getInt("sex", 0)));
+        }
     }
+
 
 }

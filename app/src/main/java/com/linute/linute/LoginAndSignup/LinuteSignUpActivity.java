@@ -44,7 +44,6 @@ import com.soundcloud.android.crop.Crop;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.internal.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,8 +68,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     private Bitmap mProfilePictureBitmap;
 
     private CircularImageView mProfilePictureView;
-    ;
-
 
     private boolean mCredentialCheckInProgress = false; //determine if currently querying database
 
@@ -85,18 +82,25 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         //create LSDKUser
         mLSDKUser = new LSDKUser(this);
 
-        mEmailView = (EditText) findViewById(R.id.signup_email_text);
+        bindViews();
+        setUpOnClickListeners();
 
+    }
+
+    private void bindViews(){
+        mEmailView = (EditText) findViewById(R.id.signup_email_text);
         mPasswordView = (EditText) findViewById(R.id.signup_password);
         mFirstNameTextView = (EditText) findViewById(R.id.signup_fname_text);
         mLastNameTextView = (EditText) findViewById(R.id.signup_lname_text);
-
         mProfilePictureView = (CircularImageView) findViewById(R.id.signup_profile_pic_view);
-        mProfilePictureView.setOnClickListener(imageOnClickListener);
+        mProgressBar = (ProgressBar) findViewById(R.id.signup_progress_bar);
+        mEmailSignUpButton = (Button) findViewById(R.id.signup_submit_button);
 
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
+    }
 
-        mEmailSignUpButton = (Button) findViewById(R.id.signup_submit_button);
+    private void setUpOnClickListeners(){
+        //attempt to sign up when button pressed
         mEmailSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -104,23 +108,18 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             }
         });
 
-
-        mProgressBar = (ProgressBar) findViewById(R.id.signup_progress_bar);
+        //when imaged pressed, user can select where to find profile image
+        mProfilePictureView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(LinuteSignUpActivity.this);
+                builder.setTitle("Image Source");
+                String[] options = {"Camera", "Photo Gallery", "Cancel"};
+                builder.setItems(options, actionListener);
+                builder.create().show();
+            }
+        });
     }
-
-
-    //presents a dialog that asks the user if they want to import profile picture from gallery or camera
-    OnClickListener imageOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(LinuteSignUpActivity.this);
-            builder.setTitle("Image Source");
-            String[] options = {"Camera", "Photo Gallery", "Cancel"};
-            builder.setItems(options, actionListener);
-            builder.create().show();
-        }
-    };
-
 
     //select between camera and photogallery
     DialogInterface.OnClickListener actionListener = new DialogInterface.OnClickListener() {
@@ -132,7 +131,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                     dispatchTakePictureIntent();
                     break;
                 case 1:
-                    Log.v(TAG, "Gallery selected");
                     //go to gallery
                     Crop.pickImage(LinuteSignUpActivity.this);
                     break;
@@ -185,13 +183,12 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         signUp(email, password, fName, lName);
                     } else { //another error
                         Log.e(TAG, response.body().string());
-                        runOnUiThread(rServerErrorAction);
+                        runOnUiThread(rNotUniqueEmailAction);
                     }
                 }
             });
         }
     }
-
 
     //checks if provided credentials are good
     //marks them if they are invalid credentials
@@ -302,22 +299,22 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     private void setTextEditsFocus(boolean focus) {
         //making content focusable uses different functions for some reason
         if (focus) { //turn on
-            mEmailView.setFocusableInTouchMode(focus);
-            mPasswordView.setFocusableInTouchMode(focus);
-            mFirstNameTextView.setFocusableInTouchMode(focus);
-            mLastNameTextView.setFocusableInTouchMode(focus);
+            mEmailView.setFocusableInTouchMode(true);
+            mPasswordView.setFocusableInTouchMode(true);
+            mFirstNameTextView.setFocusableInTouchMode(true);
+            mLastNameTextView.setFocusableInTouchMode(true);
         } else { //turn off
-            mEmailView.setFocusable(focus);
-            mPasswordView.setFocusable(focus);
-            mFirstNameTextView.setFocusable(focus);
-            mLastNameTextView.setFocusable(focus);
+            mEmailView.setFocusable(false);
+            mPasswordView.setFocusable(false);
+            mFirstNameTextView.setFocusable(false);
+            mLastNameTextView.setFocusable(false);
         }
         mProfilePictureView.setClickable(focus);
     }
 
     private void signUp(String email, final String password, String fName, String lName) {
 
-        Map<String, String> userInfo = new HashMap<String, String>();
+        Map<String, String> userInfo = new HashMap<>();
         String encodedProfilePicture;
 
         encodedProfilePicture = Utils.encodeImageBase64(
@@ -385,7 +382,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
-        sharedPreferences.commit();
+        sharedPreferences.apply();
 
         Utils.testLog(this, TAG);
 
@@ -394,7 +391,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     //confirm email code activity?
     private void goToNextActivity() {
-        Log.v(TAG, "signed in");
 
         //FIXME: maybe confirm email first?
 
@@ -437,18 +433,25 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) { //got image from camera
-            File f = new File(mCurrentPhotoPath);
-            Uri contentUri = Uri.fromFile(f);
-            galleryAddPic(contentUri); // add to gallery
-            beginCrop(contentUri); //crop image
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_TAKE_PHOTO) { //got response from camera
+            if (resultCode == RESULT_OK) {  //was able to get picture
+                File f = new File(mCurrentPhotoPath);
+                Uri contentUri = Uri.fromFile(f);
+                galleryAddPic(contentUri); // add to gallery
+                beginCrop(contentUri); //crop image
+            } else { //no picture captured. delete the temp file created to hold image
+                if (!new File(mCurrentPhotoPath).delete())
+                    Log.v(TAG, "could not delete temp file");
+                mCurrentPhotoPath = null;
+            }
         } else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
             beginCrop(data.getData()); //crop image
         } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             if (resultCode == RESULT_OK) {
                 Uri imageUri = Crop.getOutput(data);
                 try {
-
                     //release old pictures resources
                     if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();
 

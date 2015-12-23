@@ -163,14 +163,41 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.EditProfileInfoActivity"/>
         </activity>
-        <activity android:name=".MainContent.Settings.EditBirthdayActivity"
-                  android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"
-                  android:windowSoftInputMode="adjustResize">
+        <activity
+            android:name=".MainContent.Settings.EditBirthdayActivity"
+            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.EditProfileInfoActivity"/>
+        </activity>
+        <activity
+            android:name=".MainContent.Settings.EditGenderActivity"
+            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.linute.linute.MainContent.Settings.EditProfileInfoActivity"/>
+        </activity>
+        <activity
+            android:name=".MainContent.Settings.ChangeEmailActivity"
+            android:parentActivityName=".MainContent.Settings.SettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
+        </activity>
+        <activity android:name=".MainContent.Settings.ChangeProfileImageActivity"
+                  android:parentActivityName=".MainContent.Settings.SettingActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
         </activity>
     </application>
 

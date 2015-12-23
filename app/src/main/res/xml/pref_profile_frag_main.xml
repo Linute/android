@@ -15,6 +15,8 @@
         android:title="ACCOUNT">
         <Preference android:key="edit_profile"
                     android:title="Edit Profile"/>
+        <Preference android:key="edit_image"
+                    android:title="Change Profile Image"/>
         <Preference android:key="change_email"
                     android:title="Change email"/>
         <Preference android:key="change_phone_number"

@@ -100,5 +100,6 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="bio_hint">Tell us about yourself</string>
+    <string name="birthday_hint">Tell us your birthday</string>
 
 </resources>

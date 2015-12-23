@@ -7,10 +7,11 @@ import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import com.linute.linute.API.LSDKUser;
@@ -26,69 +27,53 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditBirthdayActivity extends AppCompatActivity {
+public class ChangeEmailActivity extends AppCompatActivity {
 
-    private static final String TAG = "EditBirthdayActivity";
-    private ProgressBar mProgressBar;
-    private DatePicker mDatePicker;
+    public static final String TAG = "ChangeEmailActivity";
+    private SharedPreferences mSharedPreferences;
+
+    private EditText mEmailText;
+    private String mSavedEmail;
+
     private Button mSaveButton;
     private Button mCancelButton;
     private View mButtonLayer;
 
-    private String mDob;
-
-    private SharedPreferences mSharedPreferences;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_birthday);
-
+        setContentView(R.layout.activity_change_email);
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        setupToolbar();
         bindViews();
-        setUpToolbar();
         setDefaultValues();
         setUpOnClickListeners();
     }
 
-    private void bindViews(){
-        mProgressBar = (ProgressBar) findViewById(R.id.editbirthday_progressbar);
-        mDatePicker = (DatePicker) findViewById(R.id.editbirthday_datepicker);
-        mSaveButton = (Button) findViewById(R.id.editbirthday_save_button);
-        mCancelButton = (Button) findViewById(R.id.editbirthday_cancel_button);
-        mButtonLayer = findViewById(R.id.editbirthday_buttons);
+    private void setupToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.changeemail_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Change Email");
     }
 
-    private void setUpToolbar(){
-        Toolbar toolBar = (Toolbar) findViewById(R.id.editbirthday_toolbar);
-        setSupportActionBar(toolBar);
 
-        getSupportActionBar().setTitle("Birthday");
+    private void bindViews(){
+        mEmailText = (EditText) findViewById(R.id.changeemail_text);
+        mSaveButton = (Button) findViewById(R.id.changeemail_save_button);
+        mButtonLayer = findViewById(R.id.changeemail_buttons);
+        mCancelButton = (Button) findViewById(R.id.changeemail_cancel_button);
+        mProgressBar = (ProgressBar) findViewById(R.id.changeemail_progressbar);
     }
 
     private void setDefaultValues(){
-        String dob = mSharedPreferences.getString("dob", "");
-
-        Calendar c = Calendar.getInstance();
-
-        //try to set date picker to person's birthday
-        try {
-            if (!dob.equals("")) {
-                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                c.setTime(fm.parse(dob));
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        mDatePicker.updateDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        mDob = formatDateFromInts(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+        mSavedEmail = mSharedPreferences.getString("email", "");
+        mEmailText.append(mSavedEmail);
     }
 
 
@@ -96,10 +81,9 @@ public class EditBirthdayActivity extends AppCompatActivity {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveBirthday();
+                checkEmailUniquenessAndSave();
             }
         });
-
         mCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,34 +94,24 @@ public class EditBirthdayActivity extends AppCompatActivity {
     }
 
 
-    public String formatDateFromInts(int year, int month, int day){
-        String date = year+"-";
-        month++; //month is in range 0-11 so we need to add one
-        date += (month < 10 ? "0" + month : month) + "-";
-        date += day < 10 ? "0" + day : day;
-        return date;
-    }
 
-    private void saveBirthday(){
+    private void checkEmailUniquenessAndSave(){
+        final String email = mEmailText.getText().toString();
 
-        final String dob = formatDateFromInts(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
+        //not valid email or user hasn't eddited email
+        if (!edittedEmail(email) || !isEmailValid(email)) return;
 
-        if (!birthdayHasBeenEditted(dob))
-            return;
+        showProgress(true);
 
         LSDKUser user = new LSDKUser(this);
 
-        Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("dob", dob);
-        showProgress(true);
-
-        user.updateUserInfo(userInfo, null, new Callback() {
+        user.isUniqueEmail(email, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Request request, IOException e) { //no connection
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(EditBirthdayActivity.this);
+                        Utils.showBadConnectionToast(ChangeEmailActivity.this); //show error
                         showProgress(false);
                     }
                 });
@@ -145,28 +119,64 @@ public class EditBirthdayActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful()){//unique email
+                    saveEmail(email);
+                }
+                else{//not unique
+                    Log.v(TAG, response.body().string());
+                    runOnUiThread(new Runnable() { //show error
+                        @Override
+                        public void run() {
+                            showProgress(false);
+                            emailAlreadyTaken();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void saveEmail(final String email) {
+
+        LSDKUser user = new LSDKUser(this);
+
+        Map<String, String> userInfo = new HashMap<>();
+        userInfo.put("email", email);
+
+        user.updateUserInfo(userInfo, null, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(ChangeEmailActivity.this);
+                        showProgress(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()){
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
-                        mDob = dob;
-                    }
-                    catch (JSONException e) { //caught error
+                        mSavedEmail = email;
+                    } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditBirthdayActivity.this);
+                                Utils.showServerErrorToast(ChangeEmailActivity.this);
                             }
                         });
                     }
-
-                } else { //log error and show server error
-                    Log.e(TAG, response.body().string());
+                }else{
+                    Log.v(TAG, response.body().string());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showServerErrorToast(EditBirthdayActivity.this);
+                            Utils.showServerErrorToast(ChangeEmailActivity.this);
                         }
                     });
                 }
@@ -180,14 +190,37 @@ public class EditBirthdayActivity extends AppCompatActivity {
         });
     }
 
-    private void persistData(LinuteUser user) {
-        mSharedPreferences.edit().putString("dob", user.getDob()).apply();
+    private void emailAlreadyTaken(){
+        mEmailText.setError(getString(R.string.signup_error_email_taken));
+        mEmailText.requestFocus();
     }
 
-    private boolean birthdayHasBeenEditted(String birthday){
-        return !mDob.equals(birthday);
+    private boolean edittedEmail(String email){
+        return !email.equals(mSavedEmail);
     }
 
+
+    //TODO: ADD ERROR FOR NON EDU EMAIL
+    private boolean isEmailValid(String email) {
+        if (TextUtils.isEmpty(email)) {
+            mEmailText.setError(getString(R.string.error_field_required));
+            mEmailText.requestFocus();
+            return false;
+        }
+        // no @                     //not edu email             //@cuny.edu
+        if (!email.contains("@") || !email.endsWith(".edu") || email.startsWith("@") ||
+                email.contains("@.") || email.contains(" ")) {
+            //me@.edu                   //whitespace
+            mEmailText.setError(getString(R.string.error_invalid_email));
+            mEmailText.requestFocus();
+            return false;
+        }
+        return true;
+    }
+
+    private void persistData(LinuteUser user){
+        mSharedPreferences.edit().putString("email", user.getEmail()).apply();
+    }
 
     private void showProgress(final boolean show) {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
@@ -220,7 +253,13 @@ public class EditBirthdayActivity extends AppCompatActivity {
             mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
         }
 
-        mDatePicker.setClickable(!show); //don't allow edit when querying
+        setFocusable(!show);
     }
 
+    private void setFocusable(boolean focusable){
+        if (focusable)  //turn on
+            mEmailText.setFocusableInTouchMode(true);
+
+        else mEmailText.setFocusable(false);
+    }
 }

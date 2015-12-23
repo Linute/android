@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.linute.linute.MainContent.Settings.EditNameActivity">
+    android:layout_height="match_parent">
 
-    <include android:id="@+id/editstatus_toolbar"
+    <include android:id="@+id/changeemail_toolbar"
              layout="@layout/tool_bar"/>
-
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
@@ -18,44 +15,43 @@
         android:layout_marginTop="85dp">
 
         <EditText
-            android:id="@+id/editstatus_status_text"
+            android:id="@+id/changeemail_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:gravity="center"
-            android:hint="@string/bio_hint"
-            android:lines="3"
-            android:maxLength="60" android:maxLines="3" android:textSize="14sp"/>
+            android:layout_height="wrap_content"
+            android:hint="@string/prompt_email"
+            android:singleLine="true"
+            android:inputType="textEmailAddress"
+            android:maxLines="3" />
     </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout android:id="@+id/editstatus_buttons"
-                  android:layout_width="match_parent"
+    <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_alignParentBottom="true"
+                  android:weightSum="2"
                   android:orientation="horizontal"
-                  android:weightSum="2">
+                  android:id="@+id/changeemail_buttons">
 
-        <Button android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cancel"
-            android:id="@+id/editstatus_cancel"/>
-
-        <Button android:id="@+id/editstatus_save"
+        <Button android:id="@+id/changeemail_cancel_button"
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Save Changes"/>
+                android:text="Cancel"
+                android:layout_weight="1"/>
 
-
+        <Button android:id="@+id/changeemail_save_button"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:text="Save Changes"
+                android:layout_weight="1"/>
     </LinearLayout>
 
     <ProgressBar
-        android:id="@+id/editstatus_progressbar"
+        android:id="@+id/changeemail_progressbar"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
         android:visibility="gone"/>
 
 </RelativeLayout>

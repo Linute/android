@@ -1,12 +1,12 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -21,7 +21,8 @@ public class SettingActivity extends AppCompatActivity {
 
     //use a variable to keep track of if user made changes to account info
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
-    private Boolean mEditedProfile = false;
+    private Boolean mEditedProfileImage = false;
+    public static String TAG = "SettingActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,26 +46,39 @@ public class SettingActivity extends AppCompatActivity {
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mEditedProfile)setResult(RESULT_OK); //tell parent to update
-                else setResult(RESULT_CANCELED); //tell user not to update
                 onBackPressed();
             }
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mEditedProfileImage)setResult(RESULT_OK); //tell parent to update
+        else setResult(RESULT_CANCELED); //tell user not to update
+        super.onBackPressed();
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(this.getClass().toString(), mEditedProfile);
+        outState.putBoolean(this.getClass().toString(), mEditedProfileImage);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null){
-            mEditedProfile = savedInstanceState.getBoolean(this.getClass().toString());
+            mEditedProfileImage = savedInstanceState.getBoolean(this.getClass().toString());
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LinutePreferenceFragment.IMAGE_CHANGED && resultCode == RESULT_OK)//image was changed
+            mEditedProfileImage = true;
+
     }
 
     //fragment with our settings layout
@@ -73,6 +87,7 @@ public class SettingActivity extends AppCompatActivity {
         Preference mFindFriendsFacebook;
         Preference mFindFriendsContacts;
         Preference mEditProfileInfo;
+        Preference mEditProfilePicture;
         Preference mChangeEmail;
         Preference mChangePhoneNumber;
         Preference mTalkToUs;
@@ -92,16 +107,17 @@ public class SettingActivity extends AppCompatActivity {
         }
 
         private void bindPreferences(){
-            mFindFriendsFacebook = (Preference) findPreference("find_friends_facebook_pref");
-            mFindFriendsContacts = (Preference) findPreference("find_friends_contacts_pref");
-            mEditProfileInfo = (Preference) findPreference("edit_profile");
-            mChangeEmail = (Preference) findPreference("change_email");
-            mChangePhoneNumber = (Preference) findPreference("change_phone_number");
-            mTalkToUs = (Preference) findPreference("talk_to_us");
-            mGiveFeedback = (Preference) findPreference("give_feedback");
-            mPrivacyPolicy = (Preference) findPreference("privacy policy");
-            mTermsOfService = (Preference) findPreference("terms_of_service");
-            mLogOut = (Preference) findPreference("logout");
+            mFindFriendsFacebook = findPreference("find_friends_facebook_pref");
+            mFindFriendsContacts = findPreference("find_friends_contacts_pref");
+            mEditProfileInfo =  findPreference("edit_profile");
+            mEditProfilePicture = findPreference("edit_image");
+            mChangeEmail = findPreference("change_email");
+            mChangePhoneNumber = findPreference("change_phone_number");
+            mTalkToUs = findPreference("talk_to_us");
+            mGiveFeedback = findPreference("give_feedback");
+            mPrivacyPolicy = findPreference("privacy policy");
+            mTermsOfService = findPreference("terms_of_service");
+            mLogOut = findPreference("logout");
         }
 
 
@@ -122,6 +138,8 @@ public class SettingActivity extends AppCompatActivity {
                 mChangePhoneNumber
          */
 
+
+        public static final int IMAGE_CHANGED = 123;
         private void setOnClickListeners(){
             //logout
             mLogOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -143,7 +161,15 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), EditProfileInfoActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    return true;
+                }
+            });
+
+            mChangeEmail.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), ChangeEmailActivity.class);
                     startActivity(i);
                     return true;
                 }
@@ -156,7 +182,6 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), PrivacyPolicyActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
                     return true;
                 }
@@ -168,8 +193,16 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), TermsOfServiceActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
+                    return true;
+                }
+            });
+
+            mEditProfilePicture.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), ChangeProfileImageActivity.class);
+                    getActivity().startActivityForResult(i, IMAGE_CHANGED);
                     return true;
                 }
             });

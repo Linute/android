@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
+import android.nfc.Tag;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateUtils;
@@ -50,7 +51,10 @@ public class UserActivityItem implements Parcelable {
              //try to get event image
             try {
                 JSONArray eventImages = event.getJSONArray("images");
-                mEventImagePath = Utils.getEventImageURL(eventImages.getString(0)); //get the first image
+                if (eventImages.length() > 0)
+                    mEventImagePath = Utils.getEventImageURL(eventImages.getString(0)); //get the first image
+                else
+                    Log.e("UserActivityItem", "eventImages was empty");
             } catch (JSONException e) { //counld't get image
                 e.printStackTrace();
                 mEventImagePath = null;

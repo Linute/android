@@ -9,7 +9,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -43,8 +42,7 @@ public class Utils {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         byte[] byteFormat = stream.toByteArray();
         // get the base 64 string
-        String imgString = Base64.encodeToString(byteFormat, Base64.DEFAULT);
-        return imgString;
+        return Base64.encodeToString(byteFormat, Base64.DEFAULT);
     }
 
 
@@ -110,10 +108,9 @@ public class Utils {
         return "http://images.linute.com/profiles/original/"+userImage;
     }
 
-    public static String formatToReadableString(String date){
-        if (date.isEmpty()) return "";
 
-        SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd");
+    public static String formatDateToReadableString(String date){
+        SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
             return SimpleDateFormat.getDateInstance().format(fm.parse(date));
         } catch (ParseException e) {
@@ -121,6 +118,5 @@ public class Utils {
             return "";
         }
     }
-
 
 }
