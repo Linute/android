@@ -10,7 +10,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
@@ -111,6 +113,7 @@ public class ProfileActivityListAdapter extends BaseAdapter {
             Glide.with(mContext)
                     .load(item.getEventImagePath())
                     .asBitmap()
+                    .signature(new StringSignature(mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .override(mEventPictureSide, mEventPictureSide)
                     .placeholder(R.drawable.no_image_placeholder)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)

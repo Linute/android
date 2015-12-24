@@ -14,6 +14,8 @@
         android:layout_height="@dimen/changeprofile_image_dimen"
         android:layout_below="@id/changeprofileimage_toolbar"
         android:layout_marginTop="65dp"
+        app:border_color="@android:color/darker_gray"
+        app:border_width="1dp"
         android:layout_centerHorizontal="true"
         android:scaleType="fitCenter"/>
 

@@ -20,8 +20,6 @@ import java.util.TimeZone;
  * Created by QiFeng on 11/28/15.
  */
 public class Utils {
-
-
     public static String CONTENT_TYPE = "application/json";
 
     //encodes input String

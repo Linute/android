@@ -19,7 +19,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.Settings.ChangeProfileImageActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -67,6 +69,9 @@ public class ProfileFragment extends ListFragment {
     private SharedPreferences mSharedPreferences;
     private String mProfileImagePath;
 
+
+    public static final int IMAGE_CHANGED = 1234;
+
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -104,6 +109,8 @@ public class ProfileFragment extends ListFragment {
         //set listview adapter
         mAdapter = new ProfileActivityListAdapter(getContext(), mUserActivityItems);
         setListAdapter(mAdapter);
+
+        setUpOnClickListeners();
     }
 
     private void bindViews(){
@@ -118,6 +125,16 @@ public class ProfileFragment extends ListFragment {
         mFullNameText = (TextView) header.findViewById(R.id.profilefrag_fullname);
         mProfilePicture = (CircularImageView) header.findViewById(R.id.profilefrag_prof_image);
         mStatusText = (TextView) header.findViewById(R.id.profilefrag_status);
+    }
+
+    private void setUpOnClickListeners(){
+        mProfilePicture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getContext(), ChangeProfileImageActivity.class);
+                startActivityForResult(i, IMAGE_CHANGED);
+            }
+        });
     }
 
 
@@ -332,6 +349,7 @@ public class ProfileFragment extends ListFragment {
         Glide.with(this)
                 .load(imagePath)
                 .asBitmap()
+                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .override(width, height) //change image to the size we want
                 .placeholder(R.drawable.profile_picture_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -360,8 +378,6 @@ public class ProfileFragment extends ListFragment {
         inflater.inflate(R.menu.profile_fragment_menu, menu);
     }
 
-    public static final int IMAGE_CHANGED = 1234;
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -369,7 +385,7 @@ public class ProfileFragment extends ListFragment {
 
         if (R.id.profile_fragment_menu_settings == id){
             Intent i = new Intent(getContext(), SettingActivity.class);
-            startActivityForResult(i, IMAGE_CHANGED);
+            startActivity(i);
             return true;
         }
 

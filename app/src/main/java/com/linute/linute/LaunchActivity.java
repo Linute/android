@@ -31,6 +31,7 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 
 /*
@@ -56,6 +57,8 @@ public class LaunchActivity extends Activity {
         setContentView(R.layout.activity_launch);
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
+        generateNewSigniture();
+
         //set broadcast receiver
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -68,6 +71,7 @@ public class LaunchActivity extends Activity {
                         .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
 
                 String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
+
 
                 //token was sent or we already have token
                 //we need a token for this app to work. Will stop app if there is no token available
@@ -114,6 +118,16 @@ public class LaunchActivity extends Activity {
                 }
             }
         };
+    }
+
+    //signiture for profile image
+    private void generateNewSigniture(){
+        if(Utils.isNetworkAvailable(this)){
+            getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
+                    .edit()
+                    .putString("imageSigniture", ""+ new Random().nextInt())
+                    .apply();
+        }
     }
 
     //register device

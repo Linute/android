@@ -88,12 +88,15 @@ public class ChangeEmailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
-                overridePendingTransition(0, 0);
             }
         });
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(0, 0);
+    }
 
     private void checkEmailUniquenessAndSave(){
         final String email = mEmailText.getText().toString();

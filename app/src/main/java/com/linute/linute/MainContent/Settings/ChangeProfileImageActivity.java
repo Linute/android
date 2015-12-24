@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.Settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -43,6 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.TimeZone;
 
 public class ChangeProfileImageActivity extends AppCompatActivity {
@@ -165,6 +166,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
                 .asBitmap()
+                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .override(mImageRadius, mImageRadius) //change image to the size we want
                 .placeholder(R.drawable.profile_picture_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -334,6 +336,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
 
     private void persistData(LinuteUser user){
         mSharedPreferences.edit().putString("profileImage", user.getProfileImage()).apply();
+        mSharedPreferences.edit().putString("imageSigniture", new Random().nextInt() + "").apply();
     }
 
     private void showProgress(final boolean show) {

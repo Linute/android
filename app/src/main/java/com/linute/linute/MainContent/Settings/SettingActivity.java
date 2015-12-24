@@ -21,7 +21,6 @@ public class SettingActivity extends AppCompatActivity {
 
     //use a variable to keep track of if user made changes to account info
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
-    private Boolean mEditedProfileImage = false;
     public static String TAG = "SettingActivity";
 
     @Override
@@ -53,33 +52,9 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mEditedProfileImage)setResult(RESULT_OK); //tell parent to update
-        else setResult(RESULT_CANCELED); //tell user not to update
         super.onBackPressed();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(this.getClass().toString(), mEditedProfileImage);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null){
-            mEditedProfileImage = savedInstanceState.getBoolean(this.getClass().toString());
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == LinutePreferenceFragment.IMAGE_CHANGED && resultCode == RESULT_OK)//image was changed
-            mEditedProfileImage = true;
-
-    }
 
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment
@@ -87,7 +62,6 @@ public class SettingActivity extends AppCompatActivity {
         Preference mFindFriendsFacebook;
         Preference mFindFriendsContacts;
         Preference mEditProfileInfo;
-        Preference mEditProfilePicture;
         Preference mChangeEmail;
         Preference mChangePhoneNumber;
         Preference mTalkToUs;
@@ -110,7 +84,6 @@ public class SettingActivity extends AppCompatActivity {
             mFindFriendsFacebook = findPreference("find_friends_facebook_pref");
             mFindFriendsContacts = findPreference("find_friends_contacts_pref");
             mEditProfileInfo =  findPreference("edit_profile");
-            mEditProfilePicture = findPreference("edit_image");
             mChangeEmail = findPreference("change_email");
             mChangePhoneNumber = findPreference("change_phone_number");
             mTalkToUs = findPreference("talk_to_us");
@@ -138,8 +111,6 @@ public class SettingActivity extends AppCompatActivity {
                 mChangePhoneNumber
          */
 
-
-        public static final int IMAGE_CHANGED = 123;
         private void setOnClickListeners(){
             //logout
             mLogOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -198,14 +169,6 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
 
-            mEditProfilePicture.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), ChangeProfileImageActivity.class);
-                    getActivity().startActivityForResult(i, IMAGE_CHANGED);
-                    return true;
-                }
-            });
         }
     }
 }
