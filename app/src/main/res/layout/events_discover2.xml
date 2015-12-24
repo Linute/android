@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="5dp">
+
+    <View
+        android:id="@+id/postTopBorder"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_below="@+id/eventUserImage"
+        android:layout_marginTop="-25dp"
+        android:background="#ffffff"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/postText"
+        android:gravity="center"
+        android:textSize="14sp"/>
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:id="@+id/postPicture"
+        android:layout_below="@+id/postTopBorder"
+        android:background="@drawable/college_walk1"
+        android:scaleType="centerCrop"/>
+
+    <!--<ImageView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_below="@+id/postTopBorder"-->
+    <!--android:adjustViewBounds="true"-->
+    <!--android:background="@drawable/college_walk1"-->
+    <!--android:scaleType="fitCenter"/>-->
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/eventUserImage"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerInParent="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/college_walk1"
+        card_view:border="false"
+        card_view:border_color="#EEEEEE"
+        card_view:border_width="0dp"
+        card_view:shadow="false"
+        card_view:shadow_color="#8BC34A"
+        card_view:shadow_radius="10"/>
+</RelativeLayout>
+
+
+

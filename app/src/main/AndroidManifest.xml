@@ -61,7 +61,7 @@
 
         <activity
             android:name=".MainContent.MainActivity"
-            android:configChanges="orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait">
         </activity>
         <activity
@@ -95,7 +95,7 @@
         </activity>
         <activity
             android:name=".LaunchActivity"
-            android:configChanges="orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <intent-filter>

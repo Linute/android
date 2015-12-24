@@ -10,14 +10,6 @@
     tools:context="com.linute.linute.MainContent.SlidingTab.Main2Activity"
     tools:showIn="@layout/activity_main">
 
-    <!--add tabs -->
-    <com.linute.linute.MainContent.SlidingTab.SlidingTabLayout
-        android:id="@+id/mainactivity_tabbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"/>
-
 
     <android.support.v4.view.ViewPager
         android:id="@+id/mainactivity_viewpager"
