@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fitsSystemWindows="true"
+    tools:context="com.linute.linute.MainContent.SlidingTab.Main2Activity">
 
-    <!--added toolbar-->
-    <include android:id="@+id/mainactivity_toolbar"
-             layout="@layout/tool_bar"/>
-
-    <!--add tabs -->
-    <com.linute.linute.MainContent.SlidingTab.SlidingTabLayout android:layout_width="match_parent"
-                                                               android:layout_height="wrap_content"
-                                                               android:background="@color/colorPrimary"
-                                                               android:elevation="4dp"
-                                                               android:id="@+id/mainactivity_tabbar"/>
-
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/mainactivity_viewpager"
+    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:background="@android:color/white"/>
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-</LinearLayout>
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/mainactivity_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_main"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_menu_add"/>
+
+</android.support.design.widget.CoordinatorLayout>
