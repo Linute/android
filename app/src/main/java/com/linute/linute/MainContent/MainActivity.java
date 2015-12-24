@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
@@ -37,6 +38,13 @@ public class MainActivity extends AppCompatActivity {
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
+        TextView mTitle = (TextView) mToolbar.findViewById(R.id.toolbar_title);
+        try {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        } catch (NullPointerException ne) {
+            ne.printStackTrace();
+        }
+        mTitle.setText("Discover");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
