@@ -150,6 +150,12 @@ public class EditBirthdayActivity extends AppCompatActivity {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
                         mDob = dob;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showSavedToast(EditBirthdayActivity.this);
+                            }
+                        });
                     }
                     catch (JSONException e) { //caught error
                         e.printStackTrace();

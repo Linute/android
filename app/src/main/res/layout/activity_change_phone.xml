@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <include android:id="@+id/changephone_toolbar"
+             layout="@layout/tool_bar"/>
+    <ViewSwitcher
+        android:id="@+id/changePhone_viewSwitcher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/changePhone_phone_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginTop="40dp">
+
+                <EditText
+                    android:id="@+id/changePhone_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:hint="@string/change_phone_phone_hint"
+                    android:inputType="phone"
+                    android:singleLine="true"
+                    />
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/changePhone_phone_input"
+                      android:layout_gravity="center_horizontal"
+                      android:layout_marginLeft="40dp"
+                      android:layout_marginRight="40dp"
+                      android:layout_marginTop="20dp"
+                      android:gravity="center"
+                      android:text="@string/change_phone_only_us"
+                />
+
+
+            <Button android:id="@+id/changePhone_get_confirmation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:text="Send Confirmation"/>
+
+
+            <ProgressBar
+                android:id="@+id/changePhone_progressbar1"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/changePhone_code_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginTop="40dp">
+
+                <EditText
+                    android:id="@+id/changePhone_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:hint="@string/change_phone_confirm_hint"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    />
+            </android.support.design.widget.TextInputLayout>
+
+            <LinearLayout android:id="@+id/changePhone_second_view_buttons"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_alignParentBottom="true"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
+
+                <Button android:id="@+id/changePhone_new_number"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="New Number"/>
+
+                <Button android:id="@+id/changePhone_save_button"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Confirm"/>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/changePhone_progressbar2"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/>
+        </RelativeLayout>
+    </ViewSwitcher>
+</LinearLayout>

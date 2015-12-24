@@ -5,5 +5,6 @@ package com.linute.linute.UtilsAndHelpers;
  */
 public class LinuteConstants {
     public static final String SHARED_PREF_NAME = "main_info";
+    public static final String SHARED_TEMP_NAME = "temp_info";
 
 }

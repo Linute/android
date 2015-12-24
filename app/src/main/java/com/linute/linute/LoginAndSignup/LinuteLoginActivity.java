@@ -343,6 +343,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         sharedPreferences.putString("status", user.getStatus());
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
+        sharedPreferences.putString("phone", user.getPhone());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.commit();

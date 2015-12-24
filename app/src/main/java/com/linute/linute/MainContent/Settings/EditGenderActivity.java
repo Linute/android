@@ -146,6 +146,13 @@ public class EditGenderActivity extends AppCompatActivity {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
                         mSavedGender = gender;
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showSavedToast(EditGenderActivity.this);
+                            }
+                        });
                     } catch (JSONException e) { //caught error
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {

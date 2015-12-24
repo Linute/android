@@ -17,6 +17,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -28,7 +29,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.soundcloud.android.crop.Crop;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -44,7 +44,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.TimeZone;
 
 public class ChangeProfileImageActivity extends AppCompatActivity {
 
@@ -58,7 +57,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
     private Button mCancelButton;
     private View mButtonLayer;
 
-    private CircularImageView mImageView;
+    private ImageView mImageView;
 
     private SharedPreferences mSharedPreferences;
 
@@ -76,7 +75,6 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
 
         mImageRadius = getResources().getDimensionPixelSize(R.dimen.changeprofile_image_dimen);
 
-        setupToolbar();
         bindViews();
 
         if (!Utils.isNetworkAvailable(this)) Utils.showBadConnectionToast(this);
@@ -85,18 +83,13 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
         setUpOnClickListeners();
     }
 
-    private void setupToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.changeprofileimage_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Change Profile Image");
-    }
 
     private void bindViews(){
         mSaveButton = (Button) findViewById(R.id.changeprofileimage_save_button);
         mCancelButton = (Button) findViewById(R.id.changeprofileimage_cancel_button);
         mButtonLayer = findViewById(R.id.changeprofileimage_buttons);
 
-        mImageView = (CircularImageView) findViewById(R.id.changeprofileimage_image);
+        mImageView = (ImageView) findViewById(R.id.changeprofileimage_image);
 
         mProgressBar = (ProgressBar) findViewById(R.id.changeprofileimage_progressbar);
     }
@@ -202,6 +195,13 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
                         persistData(user);
                         mHasSavedImage = true;
                         mHasChangedImage = false;
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showSavedToast(ChangeProfileImageActivity.this);
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {

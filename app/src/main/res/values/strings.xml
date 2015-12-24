@@ -101,5 +101,14 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="bio_hint">Tell us about yourself</string>
     <string name="birthday_hint">Tell us your birthday</string>
+    <string name="change_phone_phone_hint">Phone Number</string>
+    <string name="change_phone_only_us">We currently only accept United States phone numbers. Please
+        do not enter your number if you are located outside of the US. Thank you, and we will inform
+        you when this has changed in future updates.
+    </string>
+    <string name="change_phone_confirm_hint">Confirmation Code</string>
+    <string name="changephone_number_in_use">Number already being used.</string>
+    <string name="change_phone_invalid_code">Invalid code</string>
+    <string name="data_saved">Saved</string>
 
 </resources>
