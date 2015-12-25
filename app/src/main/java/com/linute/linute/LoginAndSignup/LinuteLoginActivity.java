@@ -42,7 +42,6 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.internal.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -236,11 +235,11 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
 
     private void setFocusable(boolean focusable) {
         if (focusable) { //turn on
-            mEmailView.setFocusableInTouchMode(focusable);
-            mPasswordView.setFocusableInTouchMode(focusable);
+            mEmailView.setFocusableInTouchMode(true);
+            mPasswordView.setFocusableInTouchMode(true);
         } else {
-            mEmailView.setFocusable(focusable);
-            mPasswordView.setFocusable(focusable);
+            mEmailView.setFocusable(false);
+            mPasswordView.setFocusable(false);
         }
     }
 
@@ -333,7 +332,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         sharedPreferences.putString("phone", user.getPhone());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
-        sharedPreferences.commit();
+        sharedPreferences.apply();
 
         Utils.testLog(this, TAG);
     }
@@ -379,7 +378,6 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
 

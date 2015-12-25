@@ -2,13 +2,13 @@ package com.linute.linute.API;
 
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -105,10 +105,10 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationDevice(String token) {
-        Map<String,String> headers = new HashMap<String,String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Map<String,String> device = new HashMap<String,String>();
+        Map<String, String> device = new HashMap<>();
         device.put("token", token);
         device.put("os", "android");
         Device.createDevice(headers, device, new Callback() {
@@ -119,12 +119,12 @@ public class RegistrationIntentService extends IntentService {
 
             @Override
             public void onResponse(Response response) throws IOException {
-               if (!response.isSuccessful()) {
-                   Log.e(TAG, response.body().string());
-                   Log.e(TAG, "ERROR REGISTERING TOKEN");
-                }else{
-                   Log.v(TAG, response.body().string());
-               }
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, response.body().string());
+                    Log.e(TAG, "ERROR REGISTERING TOKEN");
+                } else {
+                    Log.v(TAG, response.body().string());
+                }
             }
         });
 
