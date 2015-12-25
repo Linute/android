@@ -26,6 +26,9 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmPubSub;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -37,7 +40,7 @@ import java.util.Map;
 
 public class RegistrationIntentService extends IntentService {
 
-    private static final String TAG = "My";
+    private static final String TAG = "Registration";
     private static final String[] TOPICS = {"global"};
 
     public RegistrationIntentService() {
@@ -57,15 +60,15 @@ public class RegistrationIntentService extends IntentService {
             // See https://developers.google.com/cloud-messaging/android/start for details on this file.
             // [START get_token]
 
-            /*
+
+            /*FIXME: REMOVE BEFORE RELEASE
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 */
-            // [END get_token]
 
-            //FIXME: Currently using test token
-            String token = "123";
+            String token = "123456";
+
 
             Log.v(TAG, "GCM Registration Token: " + token);
 
@@ -116,17 +119,12 @@ public class RegistrationIntentService extends IntentService {
 
             @Override
             public void onResponse(Response response) throws IOException {
-               /* if (response.isSuccessful()) {
-                    int httpCode = response.code();
-                    if (httpCode == 200) { //if valid query
-                        Log.v(TAG, response.body().string());
-                    }
-                    else {
-                        Log.e(TAG, "Invalid");
-                    }
-                }else {
-                    Log.v(TAG, String.valueOf(response.code()));
-                }*/
+               if (!response.isSuccessful()) {
+                   Log.e(TAG, response.body().string());
+                   Log.e(TAG, "ERROR REGISTERING TOKEN");
+                }else{
+                   Log.v(TAG, response.body().string());
+               }
             }
         });
 

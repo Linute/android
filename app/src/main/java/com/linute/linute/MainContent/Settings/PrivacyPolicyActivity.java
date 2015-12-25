@@ -29,14 +29,8 @@ public class PrivacyPolicyActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.webviewactivity_toolbar);
         mToolbar.setTitle("Privacy Policy");
 
-        mToolbar.setNavigationIcon(R.drawable.ic_back);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void setUpWebView(){

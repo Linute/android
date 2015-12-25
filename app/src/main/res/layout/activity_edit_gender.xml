@@ -9,43 +9,29 @@
 
 
     <Spinner
+        android:id="@+id/editgender_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/editgender_spinner"
-        android:gravity="center"
+        android:layout_below="@id/editgender_toolbar"
+        android:layout_centerHorizontal="true"
         android:layout_marginLeft="35dp"
         android:layout_marginRight="35dp"
         android:layout_marginTop="75dp"
-        android:layout_below="@id/editgender_toolbar"
-        android:layout_centerHorizontal="true"/>
+        android:gravity="center"/>
 
-    <LinearLayout android:id="@+id/editgender_buttons"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/editgender_spinner"
-                  android:layout_marginTop="65dp"
-                  android:orientation="horizontal"
-                  android:weightSum="2">
 
-        <Button android:id="@+id/editgender_cancel_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cancel"/>
-
-        <Button android:id="@+id/editgender_save_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Save Changes"/>
-    </LinearLayout>
+    <Button android:id="@+id/editgender_save_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Save Changes"/>
 
     <ProgressBar
         android:id="@+id/editgender_progressbar"
-        android:layout_below="@id/editgender_spinner"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/editgender_spinner"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp"
         android:visibility="gone"/>

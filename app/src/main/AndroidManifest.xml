@@ -195,7 +195,7 @@
             android:name=".MainContent.Settings.ChangeProfileImageActivity"
             android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Translucent">
+            android:theme="@style/AppTheme.BlackBackground">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>

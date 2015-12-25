@@ -29,8 +29,8 @@
                 android:id="@+id/prof_edit_fname_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/first_name_hint"
                 android:gravity="center"
+                android:hint="@string/first_name_hint"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textSize="14sp"/>
@@ -47,9 +47,9 @@
                 android:id="@+id/prof_edit_lname_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:hint="@string/last_name_hint"
                 android:maxLines="1"
-                android:gravity="center"
                 android:singleLine="true"
                 android:textSize="14sp"/>
 
@@ -57,33 +57,21 @@
 
     </LinearLayout>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentBottom="true"
-                  android:weightSum="2"
-                  android:orientation="horizontal"
-                  android:id="@+id/editname_buttons">
 
-        <Button android:id="@+id/editname_cancel_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:layout_weight="1"/>
+    <Button android:id="@+id/editname_save_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Save Changes"/>
 
-        <Button android:id="@+id/editname_save_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:text="Save Changes"
-                android:layout_weight="1"/>
-    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/prof_edit_name_progressbar"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:visibility="gone"/>
 
 </RelativeLayout>

@@ -23,8 +23,6 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
 
-    private boolean mEdittedProfile = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,32 +43,11 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         mToolbar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
         mToolbar.setTitle("Edit Profile");
 
-        mToolbar.setNavigationIcon(R.drawable.ic_back);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
         setSupportActionBar(mToolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
     }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(this.getClass().toString(), mEdittedProfile);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState != null){
-            mEdittedProfile = savedInstanceState.getBoolean(this.getClass().toString());
-        }
-    }
-
-
 
     //fragment with our settings layout
     public static class LinuteEditProfileFragment extends PreferenceFragment

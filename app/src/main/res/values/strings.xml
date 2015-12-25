@@ -108,7 +108,7 @@
     </string>
     <string name="change_phone_confirm_hint">Confirmation Code</string>
     <string name="changephone_number_in_use">Number already being used.</string>
-    <string name="change_phone_invalid_code">Invalid code</string>
+    <string name="change_phone_invalid_code">Incorrect code</string>
     <string name="data_saved">Saved</string>
 
 </resources>

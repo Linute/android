@@ -41,9 +41,7 @@ public class EditStatusActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private EditText mStatusText;
     private Button mSaveButton;
-    private Button mCancelButton;
 
-    private View mButtonLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,18 +62,17 @@ public class EditStatusActivity extends AppCompatActivity {
         mProgressBar = (ProgressBar) findViewById(R.id.editstatus_progressbar);
         mSaveButton = (Button) findViewById(R.id.editstatus_save);
         mStatusText = (EditText) findViewById(R.id.editstatus_status_text);
-        mCancelButton = (Button) findViewById(R.id.editstatus_cancel);
-        mButtonLayer = findViewById(R.id.editstatus_buttons);
     }
 
-    private void setUpToolbar(){
+    private void setUpToolbar() {
         mToolBar = (Toolbar) findViewById(R.id.editstatus_toolbar);
         setSupportActionBar(mToolBar);
 
         getSupportActionBar().setTitle("Status");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
         String status = mSharedPreferences.getString("status", ""); //if there is a status, set it as default
         if (!status.equals(""))
             mStatusText.append(status);
@@ -89,19 +86,13 @@ public class EditStatusActivity extends AppCompatActivity {
                 saveStatus();
             }
         });
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                overridePendingTransition(0, 0); //no transitions
-            }
-        });
     }
 
     //sets max line number to 3
-    private void setUpEditTextMaxLines(){
+    private void setUpEditTextMaxLines() {
         mStatusText.addTextChangedListener(new TextWatcher() {
             private String text;
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 text = s.toString();
@@ -113,7 +104,7 @@ public class EditStatusActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (mStatusText.getLineCount() > 3){
+                if (mStatusText.getLineCount() > 3) {
                     mStatusText.setText(text);
                 }
 
@@ -122,7 +113,7 @@ public class EditStatusActivity extends AppCompatActivity {
     }
 
 
-    private void saveStatus(){
+    private void saveStatus() {
         String status = mStatusText.getText().toString();
 
         //if no changes made, do nothing
@@ -149,7 +140,7 @@ public class EditStatusActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){ //good response
+                if (response.isSuccessful()) { //good response
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string())); //create container
                         persistData(user); //save data
@@ -170,8 +161,7 @@ public class EditStatusActivity extends AppCompatActivity {
                         });
                     }
 
-                }
-                else {
+                } else {
                     Log.e(TAG, response.body().string());
                     runOnUiThread(new Runnable() {
                         @Override
@@ -194,7 +184,7 @@ public class EditStatusActivity extends AppCompatActivity {
 
     //checks if any changes were made to status
     //if no changes were made, we won't query server
-    private boolean changesMadeToStatus(String status){
+    private boolean changesMadeToStatus(String status) {
         if (mSharedPreferences.getString("status", "").equals(status))
             return false;
 
@@ -203,50 +193,39 @@ public class EditStatusActivity extends AppCompatActivity {
 
 
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
 
         setFocusable(!show);
     }
 
-    private void setFocusable(boolean focusable){
+    private void setFocusable(boolean focusable) {
         if (focusable) { //turn on
             mStatusText.setFocusableInTouchMode(focusable);
-        }
-        else {
+        } else {
             mStatusText.setFocusable(focusable);
         }
     }
 
     //save status to Shared Prefs
-    private void persistData(LinuteUser user){
+    private void persistData(LinuteUser user) {
         mSharedPreferences.edit().putString("status", user.getStatus()).commit();
     }
 }

@@ -36,8 +36,6 @@ public class EditGenderActivity extends AppCompatActivity {
     private Spinner mSpinner;
 
     private Button mSaveButton;
-    private Button mCancelButton;
-    private View mButtonLayer;
 
     private ProgressBar mProgressBar;
 
@@ -46,7 +44,7 @@ public class EditGenderActivity extends AppCompatActivity {
     private int mSavedGender = 0; //gender saved to sharedPref
 
     //List of choices
-    private String [] mGenders = {"Not Specified", "Male", "Female"};
+    private String[] mGenders = {"Not Specified", "Male", "Female"};
 
 
     @Override
@@ -67,20 +65,18 @@ public class EditGenderActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.editgender_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Sex");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 
     private void bindViews() {
         mSpinner = (Spinner) findViewById(R.id.editgender_spinner);
         mSaveButton = (Button) findViewById(R.id.editgender_save_button);
-        mCancelButton = (Button) findViewById(R.id.editgender_cancel_button);
-
-        mButtonLayer = findViewById(R.id.editgender_buttons);
 
         mProgressBar = (ProgressBar) findViewById(R.id.editgender_progressbar);
     }
 
-    private void setUpSpinner(){
+    private void setUpSpinner() {
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
@@ -91,19 +87,12 @@ public class EditGenderActivity extends AppCompatActivity {
         mSpinner.setAdapter(adapter);
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
         mSavedGender = mSharedPreferences.getInt("sex", 0);
         mSpinner.setSelection(mSavedGender);
     }
 
-    private void setUpOnClickLisenters(){
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                overridePendingTransition(0, 0);
-            }
-        });
+    private void setUpOnClickLisenters() {
 
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,13 +106,13 @@ public class EditGenderActivity extends AppCompatActivity {
         final int gender = mSpinner.getSelectedItemPosition();
 
         //gender hasn't been editted
-        if(!genderEditted(gender))
+        if (!genderEditted(gender))
             return;
 
         LSDKUser user = new LSDKUser(this);
 
         Map<String, String> userInfo = new HashMap<>();
-        userInfo.put("sex", gender+"");
+        userInfo.put("sex", gender + "");
 
         showProgress(true);
 
@@ -183,7 +172,7 @@ public class EditGenderActivity extends AppCompatActivity {
 
     }
 
-    private boolean genderEditted(int gender){
+    private boolean genderEditted(int gender) {
         return gender != mSavedGender;
     }
 
@@ -192,40 +181,29 @@ public class EditGenderActivity extends AppCompatActivity {
     }
 
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
         mSpinner.setClickable(!show); //don't allow edit when querying
     }
 
-    public static String getGenderFromIndex(int position){
+    public static String getGenderFromIndex(int position) {
         switch (position) {
             case 0:
                 return "Not Specified";

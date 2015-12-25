@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -41,19 +42,18 @@ public class SettingActivity extends AppCompatActivity {
         setSupportActionBar(mToolBar);
 
         getSupportActionBar().setTitle("Settings");
-
-        mToolBar.setNavigationIcon(R.drawable.ic_back);
-        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+
+    //override up button to go back
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return false;
     }
 
 
@@ -102,8 +102,6 @@ public class SettingActivity extends AppCompatActivity {
                 mFindFriendFacebook
                 mFindFriendsContacts
                 mTalkToUs
-
-                mChangePhoneNumber
          */
 
         private void setOnClickListeners(){
