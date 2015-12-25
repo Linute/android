@@ -56,6 +56,16 @@ public class DiscoverFragment extends Fragment {
         postBox = (EditText) rootView.findViewById(R.id.postBox);
 
         final RelativeLayout relativeLayout = (RelativeLayout) rootView.findViewById(R.id.discoverFragmentLayout);
+        recList.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                postBox.clearFocus();
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(postBox.getWindowToken(), 0);
+
+                return false;
+            }
+        });
         recList.setOnScrollListener(new HidingScrollListener() {
             @Override
             public void onHide() {
