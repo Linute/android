@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
     private Toolbar mToolbar;
+    private TextView mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,20 +39,20 @@ public class MainActivity extends AppCompatActivity {
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
-        TextView mTitle = (TextView) mToolbar.findViewById(R.id.toolbar_title);
+        mTitle = (TextView) mToolbar.findViewById(R.id.toolbar_title);
         try {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         } catch (NullPointerException ne) {
             ne.printStackTrace();
         }
-        mTitle.setText("Discover");
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
             }
         });
 
@@ -84,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
         //Restore tab user was on
         mViewPager.setCurrentItem(savedInstanceState.getInt(getString(R.string.current_tab)));
+    }
+
+    public void setTitle(String title) {
+        mTitle.setText(title);
     }
 
     /*

@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_margin="5dp">
 
     <View
@@ -14,17 +14,20 @@
         android:layout_marginTop="-25dp"
         android:background="#ffffff"/>
 
+
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/postText"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_below="@+id/postTopBorder"
         android:gravity="center"
         android:textSize="14sp"/>
 
     <ImageView
+        android:id="@+id/postPicture"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:id="@+id/postPicture"
         android:layout_below="@+id/postTopBorder"
         android:background="@drawable/college_walk1"
         android:scaleType="centerCrop"/>
@@ -51,6 +54,45 @@
         card_view:shadow="false"
         card_view:shadow_color="#8BC34A"
         card_view:shadow_radius="10"/>
+
+    <View
+        android:id="@+id/postBottomBorder"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/postPicture"
+        android:layout_marginTop="-40dp"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/postBottomBorder"
+        android:orientation="horizontal"
+        android:layout_alignTop="@+id/postBottomBorder">
+
+        <ImageView
+            android:id="@+id/postLikes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/heart"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:id="@+id/postLikesNum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/postLikes"
+            android:layout_toRightOf="@id/postLikes"
+            android:layout_centerVertical="true"
+            android:paddingEnd="4dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:paddingStart="4dp"
+            android:text="7"
+            android:textAppearance="@android:style/TextAppearance.Small"
+            android:textColor="#FFFFFF"/>
+    </RelativeLayout>
 </RelativeLayout>
 
 

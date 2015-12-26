@@ -47,6 +47,7 @@ public class DiscoverFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_discover,container,false); //setContent
 
 
+        ((MainActivity) getActivity()).setTitle("My Campus");
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
         llm = new LinearLayoutManager(getActivity());
@@ -55,12 +56,11 @@ public class DiscoverFragment extends Fragment {
 
         postBox = (EditText) rootView.findViewById(R.id.postBox);
 
-        final RelativeLayout relativeLayout = (RelativeLayout) rootView.findViewById(R.id.discoverFragmentLayout);
+        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         recList.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 postBox.clearFocus();
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(postBox.getWindowToken(), 0);
 
                 return false;
