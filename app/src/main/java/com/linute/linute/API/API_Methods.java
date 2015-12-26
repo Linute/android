@@ -161,7 +161,6 @@ public class API_Methods {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorizationDevice", "Basic " + authDeviceToken);
-        Log.v(TAG, authDeviceToken);
         return header;
     }
 
