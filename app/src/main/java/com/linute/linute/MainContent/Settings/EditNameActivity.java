@@ -140,6 +140,12 @@ public class EditNameActivity extends AppCompatActivity {
                         try {
                             LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                             saveInfo(user);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showSavedToast(EditNameActivity.this);
+                                }
+                            });
 
                         } catch (JSONException e) {
                             e.printStackTrace();

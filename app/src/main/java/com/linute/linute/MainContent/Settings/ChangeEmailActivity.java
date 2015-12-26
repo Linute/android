@@ -122,10 +122,9 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){//unique email
+                if (response.isSuccessful()) {//unique email
                     saveEmail(email);
-                }
-                else{//not unique
+                } else {//not unique
                     Log.v(TAG, response.body().string());
                     runOnUiThread(new Runnable() { //show error
                         @Override
@@ -160,11 +159,18 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
                         mSavedEmail = email;
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showSavedToast(ChangeEmailActivity.this);
+                            }
+                        });
                     } catch (JSONException e) {
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
@@ -174,7 +180,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
                             }
                         });
                     }
-                }else{
+                } else {
                     Log.v(TAG, response.body().string());
                     runOnUiThread(new Runnable() {
                         @Override

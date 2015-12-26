@@ -153,6 +153,13 @@ public class EditStatusActivity extends AppCompatActivity {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string())); //create container
                         persistData(user); //save data
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showSavedToast(EditStatusActivity.this);
+                            }
+                        });
+
                     } catch (JSONException e) { //error parsing data
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {

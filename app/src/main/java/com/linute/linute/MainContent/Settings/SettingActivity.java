@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -101,13 +102,7 @@ public class SettingActivity extends AppCompatActivity {
                 mFindFriendFacebook
                 mFindFriendsContacts
                 mTalkToUs
-                mGiveFeedback
-                mPrivacyPolicy
-                mTermsOfService
 
-                mEditPublic
-                mEditPrivate
-                mChangeEmail
                 mChangePhoneNumber
          */
 
@@ -119,6 +114,8 @@ public class SettingActivity extends AppCompatActivity {
                     //clear saved information
                     Utils.resetUserInformation(getActivity()
                             .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit());
+                    Utils.deleteTempSharedPreference(getActivity()
+                            .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit());
                     //start new
                     Intent i = new Intent(getActivity(), PreLoginActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
@@ -146,6 +143,14 @@ public class SettingActivity extends AppCompatActivity {
                 }
             });
 
+            mChangePhoneNumber.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), ChangePhoneActivity.class);
+                    startActivity(i);
+                    return true;
+                }
+            });
 
             //privacy policy
             //FIXME : open in browser
@@ -165,6 +170,21 @@ public class SettingActivity extends AppCompatActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), TermsOfServiceActivity.class);
                     startActivity(i);
+                    return true;
+                }
+            });
+
+            mGiveFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String [] {"info@linute.com"});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Linute Feedback");
+                    intent.putExtra(android.content.Intent.EXTRA_TEXT, "Replace this text with any feedback you'd like to give us!");
+                    if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                        startActivity(intent);
+                    }
                     return true;
                 }
             });

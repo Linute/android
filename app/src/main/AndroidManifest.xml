@@ -191,10 +191,20 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
         </activity>
-        <activity android:name=".MainContent.Settings.ChangeProfileImageActivity"
+        <activity
+            android:name=".MainContent.Settings.ChangeProfileImageActivity"
+            android:parentActivityName=".MainContent.Settings.SettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Translucent">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
+        </activity>
+        <activity android:name=".MainContent.Settings.ChangePhoneActivity"
                   android:parentActivityName=".MainContent.Settings.SettingActivity"
                   android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme">
+                  android:theme="@style/AppTheme"
+                  android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>

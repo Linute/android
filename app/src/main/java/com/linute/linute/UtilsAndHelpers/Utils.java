@@ -62,6 +62,10 @@ public class Utils {
         Toast.makeText(context, R.string.error_communicating_server, Toast.LENGTH_SHORT).show();
     }
 
+    public static void showSavedToast(Context context) {
+        Toast.makeText(context, R.string.data_saved, Toast.LENGTH_SHORT).show();
+    }
+
     public static void testLog(Context context, String TAG) {
         //Test
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, context.MODE_PRIVATE);
@@ -96,8 +100,13 @@ public class Utils {
         pref.commit();
     }
 
+    public static void deleteTempSharedPreference(SharedPreferences.Editor temp) {
+        temp.putString("tempCode", "").apply();
+        temp.putString("tempPhone", "").apply();
+    }
+
     public static String getEventImageURL(String jpegName) {
-        return "http://images.linute.com/events_discover/original/" + jpegName;
+        return "http://images.linute.com/events/original/" + jpegName;
     }
 
     //return url to a profile image of user

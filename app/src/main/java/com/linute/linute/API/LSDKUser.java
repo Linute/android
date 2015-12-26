@@ -147,6 +147,22 @@ public class LSDKUser {
                 callback);
     }
 
+
+
+    //get phone number confirmation code
+    //@param phoneNumber - phone number; NOTE: make sure phone unique first
+    //@param callback - what to do if success or failure
+    public Call getConfirmationCodeForPhone(String phoneNumber,
+                                            Callback callback){
+
+        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("phone", phoneNumber);
+
+        return API_Methods.post("/users/confirm-phone", header, param, callback);
+    }
+
     /*TODO: Still needs to be implemented :
         authFacebook
 
