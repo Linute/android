@@ -307,7 +307,12 @@ public class ProfileFragment extends ListFragment {
                     }
                 } else { //unable to connect with DB
                     Log.v(TAG, response.body().string());
-                    Utils.showServerErrorToast(getContext());
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(getContext());
+                        }
+                    });
                 }
 
                 //turn refresh off if it's on and notify ListView we might have updated information
