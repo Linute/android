@@ -2,6 +2,8 @@ package com.linute.linute.API;
 
 
 
+import android.util.Log;
+
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -159,6 +161,7 @@ public class API_Methods {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorizationDevice", "Basic " + authDeviceToken);
+        Log.v(TAG, authDeviceToken);
         return header;
     }
 

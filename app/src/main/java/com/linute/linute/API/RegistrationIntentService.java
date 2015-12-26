@@ -30,6 +30,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -61,14 +62,10 @@ public class RegistrationIntentService extends IntentService {
             // [START get_token]
 
 
-            /*FIXME: REMOVE BEFORE RELEASE
+            /*FIXME: REMOVE BEFORE RELEASE*/
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-*/
-
-            String token = "123456";
-
 
             Log.v(TAG, "GCM Registration Token: " + token);
 
@@ -109,7 +106,7 @@ public class RegistrationIntentService extends IntentService {
         headers.put("Content-Type", "application/json");
 
         Map<String, String> device = new HashMap<>();
-        device.put("token", token);
+        device.put("token", Utils.encode_base64(token));
         device.put("os", "android");
         Device.createDevice(headers, device, new Callback() {
             @Override

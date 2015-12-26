@@ -59,7 +59,7 @@ public class ChangePhoneActivity extends AppCompatActivity {
         setContentView(R.layout.activity_change_phone);
 
         mTempSharedPref = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE);
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         mUser = new LSDKUser(this);
 
@@ -96,9 +96,13 @@ public class ChangePhoneActivity extends AppCompatActivity {
         //check if there is already a phone number associated with account
         String phone = mSharedPreferences.getString("phone", "");
 
+        Log.v(TAG, phone);
+
         //if no number associated, check if theres a temp number stored
         if (phone.equals("null") || phone.equals(""))
             phone = mTempSharedPref.getString("tempPhone", "");
+
+        Log.v(TAG, phone);
 
         mPhoneNumber.append(phone.equals("") ? "+1" : phone);
     }

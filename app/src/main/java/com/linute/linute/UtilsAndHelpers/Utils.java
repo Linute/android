@@ -27,7 +27,7 @@ public class Utils {
     public static String encode_base64(String input)
     {
         try{
-            return Base64.encodeToString(input.getBytes("UTF-8"), Base64.DEFAULT);
+            return Base64.encodeToString(input.getBytes("UTF-8"), Base64.NO_WRAP);
         }
         catch (UnsupportedEncodingException e) {
             e.printStackTrace();
