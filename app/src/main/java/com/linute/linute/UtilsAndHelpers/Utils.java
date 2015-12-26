@@ -2,6 +2,7 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.util.Base64;
@@ -35,7 +36,7 @@ public class Utils {
         }
     }
 
-    public static String encodeImageBase64(Bitmap bitmap){
+    public static String encodeImageBase64(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         byte[] byteFormat = stream.toByteArray();
@@ -59,15 +60,15 @@ public class Utils {
     }
 
     //problem occured communicating with server
-    public static void showServerErrorToast(Context context){
+    public static void showServerErrorToast(Context context) {
         Toast.makeText(context, R.string.error_communicating_server, Toast.LENGTH_SHORT).show();
     }
 
-    public static void showSavedToast(Context context){
+    public static void showSavedToast(Context context) {
         Toast.makeText(context, R.string.data_saved, Toast.LENGTH_SHORT).show();
     }
 
-    public static void testLog(Context context, String TAG){
+    public static void testLog(Context context, String TAG) {
         //Test
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, context.MODE_PRIVATE);
         Log.v(TAG, "image: " + sharedPreferences.getString("profileImage", "nothing"));
@@ -82,7 +83,7 @@ public class Utils {
 
     //clears user information
     //NOTE: RESET OTHER THINGS WHEN THEY COME UP
-    public static void resetUserInformation(SharedPreferences.Editor pref){
+    public static void resetUserInformation(SharedPreferences.Editor pref) {
         pref.putString("profileImage", "");
         pref.putString("userID", "");
         pref.putString("firstName", "");
@@ -101,23 +102,22 @@ public class Utils {
         pref.commit();
     }
 
-
-    public static void deleteTempSharedPreference(SharedPreferences.Editor temp){
+    public static void deleteTempSharedPreference(SharedPreferences.Editor temp) {
         temp.putString("tempCode", "").apply();
         temp.putString("tempPhone", "").apply();
     }
 
-    public static String getEventImageURL(String jpegName){
+    public static String getEventImageURL(String jpegName) {
         return "http://images.linute.com/events/original/" + jpegName;
     }
 
     //return url to a profile image of user
-    public static String getImageUrlOfUser(String userImage){
-        return "http://images.linute.com/profiles/original/"+userImage;
+    public static String getImageUrlOfUser(String userImage) {
+        return "http://images.linute.com/profiles/original/" + userImage;
     }
 
 
-    public static String formatDateToReadableString(String date){
+    public static String formatDateToReadableString(String date) {
         SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
             return SimpleDateFormat.getDateInstance().format(fm.parse(date));
@@ -125,6 +125,15 @@ public class Utils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static int getToolbarHeight(Context context) {
+        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+                new int[]{R.attr.actionBarSize});
+        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
+        styledAttributes.recycle();
+
+        return toolbarHeight;
     }
 
 }
