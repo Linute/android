@@ -67,6 +67,7 @@ public class RegistrationIntentService extends IntentService {
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
+            //String token = "1234";
             Log.v(TAG, "GCM Registration Token: " + token);
 
             sendRegistrationDevice(token);
@@ -106,7 +107,7 @@ public class RegistrationIntentService extends IntentService {
         headers.put("Content-Type", "application/json");
 
         Map<String, String> device = new HashMap<>();
-        device.put("token", Utils.encode_base64(token));
+        device.put("token", token);
         device.put("os", "android");
         Device.createDevice(headers, device, new Callback() {
             @Override
