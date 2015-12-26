@@ -2,13 +2,13 @@ package com.linute.linute.API;
 
 /**
  * Copyright 2015 Google Inc. All Rights Reserved.
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * <p/>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,11 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmPubSub;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -37,7 +41,7 @@ import java.util.Map;
 
 public class RegistrationIntentService extends IntentService {
 
-    private static final String TAG = "My";
+    private static final String TAG = "Registration";
     private static final String[] TOPICS = {"global"};
 
     public RegistrationIntentService() {
@@ -57,15 +61,11 @@ public class RegistrationIntentService extends IntentService {
             // See https://developers.google.com/cloud-messaging/android/start for details on this file.
             // [START get_token]
 
-            /*
+
+            /*FIXME: REMOVE BEFORE RELEASE*/
             InstanceID instanceID = InstanceID.getInstance(this);
             String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-*/
-            // [END get_token]
-
-            //FIXME: Currently using test token
-            String token = "123";
 
             Log.v(TAG, "GCM Registration Token: " + token);
 
@@ -102,11 +102,11 @@ public class RegistrationIntentService extends IntentService {
      * @param token The new token.
      */
     private void sendRegistrationDevice(String token) {
-        Map<String,String> headers = new HashMap<String,String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Map<String,String> device = new HashMap<String,String>();
-        device.put("token", token);
+        Map<String, String> device = new HashMap<>();
+        device.put("token", Utils.encode_base64(token));
         device.put("os", "android");
         Device.createDevice(headers, device, new Callback() {
             @Override
@@ -116,17 +116,12 @@ public class RegistrationIntentService extends IntentService {
 
             @Override
             public void onResponse(Response response) throws IOException {
-               /* if (response.isSuccessful()) {
-                    int httpCode = response.code();
-                    if (httpCode == 200) { //if valid query
-                        Log.v(TAG, response.body().string());
-                    }
-                    else {
-                        Log.e(TAG, "Invalid");
-                    }
-                }else {
-                    Log.v(TAG, String.valueOf(response.code()));
-                }*/
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, response.body().string());
+                    Log.e(TAG, "ERROR REGISTERING TOKEN");
+                } else {
+                    Log.v(TAG, response.body().string());
+                }
             }
         });
 

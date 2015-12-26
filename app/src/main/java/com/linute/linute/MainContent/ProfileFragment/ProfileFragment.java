@@ -63,7 +63,7 @@ public class ProfileFragment extends ListFragment {
     private boolean mShowEmptyView = false; //determines if empty view should be shown
 
     //array of our activities
-    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<UserActivityItem>();
+    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
@@ -83,7 +83,7 @@ public class ProfileFragment extends ListFragment {
 
         mUser = new LSDKUser(getContext());
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME , Context.MODE_PRIVATE);
-        mEmptyListView = (View) rootView.findViewById(R.id.profilefrag_empty_list);
+        mEmptyListView =  rootView.findViewById(R.id.profilefrag_empty_list);
 
         //set up swipe refresh
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag_swipe_refresh);
@@ -164,7 +164,7 @@ public class ProfileFragment extends ListFragment {
         if (savedInstanceState != null) {
             mHasUpdatedFromDB = savedInstanceState.getBoolean(HAS_UPDATED_KEY);
             mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
-            mShowEmptyView = mUserActivityItems.isEmpty();
+            mShowEmptyView = mUserActivityItems == null || mUserActivityItems.isEmpty();
         }
 
         //if we come back and list still empty, show mUserActivityView. else hide
@@ -178,14 +178,18 @@ public class ProfileFragment extends ListFragment {
         mUser.getProfileInfo(mSharedPreferences.getString("userID", null), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                getActivity().runOnUiThread(rFailedConnectionAction);
+                if (getActivity() != null) {
+                    mHasUpdatedFromDB = true;  //successfully updated profile with updated info
+                    getActivity().runOnUiThread(rFailedConnectionAction);
+                }
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
+                mHasUpdatedFromDB = true;  //successfully updated profile with updated info
                 if (response.isSuccessful()) { //attempt to update view with response
-                    mHasUpdatedFromDB = true;  //successfully updated profile with updated info
                     final String body = response.body().string();
+                    if (getActivity() == null) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -399,9 +403,6 @@ public class ProfileFragment extends ListFragment {
             //tell our items to update
             mHasUpdatedFromDB = false;
             mUserActivityItems.clear();
-            Log.v(TAG, "YES NEED TO UPDATE");
-        }else {
-            Log.v(TAG, "No update Found");
         }
     }
 }

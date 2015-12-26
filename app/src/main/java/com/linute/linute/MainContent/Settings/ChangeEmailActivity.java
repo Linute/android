@@ -39,8 +39,6 @@ public class ChangeEmailActivity extends AppCompatActivity {
     private String mSavedEmail;
 
     private Button mSaveButton;
-    private Button mCancelButton;
-    private View mButtonLayer;
 
     private ProgressBar mProgressBar;
 
@@ -59,35 +57,28 @@ public class ChangeEmailActivity extends AppCompatActivity {
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.changeemail_toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Change Email");
+        getSupportActionBar().setTitle("Email");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 
-    private void bindViews(){
+    private void bindViews() {
         mEmailText = (EditText) findViewById(R.id.changeemail_text);
         mSaveButton = (Button) findViewById(R.id.changeemail_save_button);
-        mButtonLayer = findViewById(R.id.changeemail_buttons);
-        mCancelButton = (Button) findViewById(R.id.changeemail_cancel_button);
         mProgressBar = (ProgressBar) findViewById(R.id.changeemail_progressbar);
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
         mSavedEmail = mSharedPreferences.getString("email", "");
         mEmailText.append(mSavedEmail);
     }
 
 
-    private void setUpOnClickListeners(){
+    private void setUpOnClickListeners() {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkEmailUniquenessAndSave();
-            }
-        });
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
             }
         });
     }
@@ -98,7 +89,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
         overridePendingTransition(0, 0);
     }
 
-    private void checkEmailUniquenessAndSave(){
+    private void checkEmailUniquenessAndSave() {
         final String email = mEmailText.getText().toString();
 
         //not valid email or user hasn't eddited email
@@ -199,12 +190,12 @@ public class ChangeEmailActivity extends AppCompatActivity {
         });
     }
 
-    private void emailAlreadyTaken(){
+    private void emailAlreadyTaken() {
         mEmailText.setError(getString(R.string.signup_error_email_taken));
         mEmailText.requestFocus();
     }
 
-    private boolean edittedEmail(String email){
+    private boolean edittedEmail(String email) {
         return !email.equals(mSavedEmail);
     }
 
@@ -227,45 +218,36 @@ public class ChangeEmailActivity extends AppCompatActivity {
         return true;
     }
 
-    private void persistData(LinuteUser user){
+    private void persistData(LinuteUser user) {
         mSharedPreferences.edit().putString("email", user.getEmail()).apply();
     }
 
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+
 
         setFocusable(!show);
     }
 
-    private void setFocusable(boolean focusable){
+    private void setFocusable(boolean focusable) {
         if (focusable)  //turn on
             mEmailText.setFocusableInTouchMode(true);
 

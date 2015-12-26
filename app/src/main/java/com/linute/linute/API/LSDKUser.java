@@ -11,7 +11,6 @@ import com.squareup.okhttp.Callback;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by QiFeng on 11/22/15.
@@ -37,7 +36,7 @@ public class LSDKUser {
         //create headers
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
         //create post parameters
-        Map<String, String> postParam = new HashMap<String, String>();
+        Map<String, String> postParam = new HashMap<>();
         postParam.put("email", email);
 
         return API_Methods.post("users/is-unique-email", header, postParam, callback);
@@ -53,7 +52,7 @@ public class LSDKUser {
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
         //create post parameters
-        Map<String, String> postParam = new HashMap<String, String>();
+        Map<String, String> postParam = new HashMap<>();
         postParam.put("phone", phone);
 
         return API_Methods.post("users/is-unique-phone", header, postParam, callback);
@@ -81,7 +80,7 @@ public class LSDKUser {
 
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
-        Map<String, String> postParam = new HashMap<String, String>();
+        Map<String, String> postParam = new HashMap<>();
         postParam.put("email", email);
         postParam.put("password", password);
 
@@ -91,7 +90,7 @@ public class LSDKUser {
 
     public Call getUserActivities(Callback callback) {
 
-        Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> params = new HashMap<>();
         params.put("action[0]", "blasted");
         params.put("action[1]", "host");
         params.put("action[2]", "attend");

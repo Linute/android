@@ -17,41 +17,29 @@
         <EditText
             android:id="@+id/changeemail_text"
             android:layout_width="match_parent"
-            android:gravity="center"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:hint="@string/prompt_email"
-            android:singleLine="true"
             android:inputType="textEmailAddress"
+            android:singleLine="true"
             />
     </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentBottom="true"
-                  android:weightSum="2"
-                  android:orientation="horizontal"
-                  android:id="@+id/changeemail_buttons">
 
-        <Button android:id="@+id/changeemail_cancel_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:layout_weight="1"/>
-
-        <Button android:id="@+id/changeemail_save_button"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:text="Save Changes"
-                android:layout_weight="1"/>
-    </LinearLayout>
+    <Button android:id="@+id/changeemail_save_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Changes"
+            android:layout_alignParentBottom="true"
+        />
 
     <ProgressBar
         android:id="@+id/changeemail_progressbar"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:visibility="gone"/>
 
 </RelativeLayout>

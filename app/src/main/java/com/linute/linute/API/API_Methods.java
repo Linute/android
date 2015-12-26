@@ -1,7 +1,7 @@
 package com.linute.linute.API;
 
-import android.graphics.Bitmap;
-import android.util.Base64;
+
+
 import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -16,9 +16,6 @@ import com.squareup.okhttp.RequestBody;
 
 import org.json.JSONObject;
 
-
-import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -161,9 +158,10 @@ public class API_Methods {
 
     // returns main header containing: Content-Type and authorizationDevice
     public static Map<String,String> getMainHeader(String authDeviceToken){
-        Map<String, String> header = new HashMap<String,String>();
+        Map<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorizationDevice", "Basic " + authDeviceToken);
+        Log.v(TAG, authDeviceToken);
         return header;
     }
 

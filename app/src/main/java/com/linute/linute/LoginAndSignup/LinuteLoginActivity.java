@@ -42,7 +42,6 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-import com.squareup.okhttp.internal.Util;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -143,7 +142,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         if (mCheckingCredentials) { //already checking credentials
             return;
         }
-        if (!Utils.isNetworkAvailable(this)){
+        if (!Utils.isNetworkAvailable(this)) {
             Utils.showBadConnectionToast(this);
             return;
         }
@@ -195,10 +194,10 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
          *      we have to take them to a update email activity in that situation
          *
          */
-            // @.edu                        //hey@.edu          //hey.edu
+        // @.edu                        //hey@.edu          //hey.edu
         if (email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
                 !email.contains(".") || email.contains(" "))
-                //hello@edededu             //whitespace
+            //hello@edededu             //whitespace
             return false;
         return true;
     }
@@ -208,57 +207,43 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         return password.length() >= 6 && !password.contains(" ");
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
-            mSigninButton.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSigninButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+
 
         mCheckingCredentials = show;
         setFocusable(!show);
     }
 
-    private void setFocusable(boolean focusable){
+    private void setFocusable(boolean focusable) {
         if (focusable) { //turn on
-            mEmailView.setFocusableInTouchMode(focusable);
-            mPasswordView.setFocusableInTouchMode(focusable);
-        }
-        else {
-            mEmailView.setFocusable(focusable);
-            mPasswordView.setFocusable(focusable);
+            mEmailView.setFocusableInTouchMode(true);
+            mPasswordView.setFocusableInTouchMode(true);
+        } else {
+            mEmailView.setFocusable(false);
+            mPasswordView.setFocusable(false);
         }
     }
 
-    private void checkCredentialsWithDB(String email, final String password){
+    private void checkCredentialsWithDB(String email, final String password) {
 
         LSDKUser checker = new LSDKUser(this);
         checker.loginUserWithEmail(email, password, new Callback() {
@@ -269,22 +254,22 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){
-                        try {
-                            saveCredentials(response.body().string(), password);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    //FIXME: maybe check email has been confirmed first
-                                    goToMainActivity();
-                                }
-                            });
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            Log.e(TAG, "Credentials weren't saved");
-                        }
+                if (response.isSuccessful()) {
+                    try {
+                        saveCredentials(response.body().string(), password);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //FIXME: maybe check email has been confirmed first
+                                goToMainActivity();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "Credentials weren't saved");
+                    }
 
-                }else if (response.code() == 404){ //bad credentials
+                } else if (response.code() == 404) { //bad credentials
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -297,6 +282,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
                         @Override
                         public void run() {
                             Utils.showServerErrorToast(LinuteLoginActivity.this);
+                            showProgress(false);
                         }
                     });
 
@@ -321,7 +307,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         }
     };
 
-    private void invalidCredentials(){
+    private void invalidCredentials() {
         showProgress(false);
         mEmailView.setError("Invalid email or password");
         mPasswordView.setError("Invalid email or password");
@@ -346,7 +332,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         sharedPreferences.putString("phone", user.getPhone());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
-        sharedPreferences.commit();
+        sharedPreferences.apply();
 
         Utils.testLog(this, TAG);
     }
@@ -392,7 +378,6 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         };
 
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
 

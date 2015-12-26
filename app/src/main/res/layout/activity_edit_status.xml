@@ -27,27 +27,13 @@
             android:maxLength="60" android:maxLines="3" android:textSize="14sp"/>
     </android.support.design.widget.TextInputLayout>
 
-    <LinearLayout android:id="@+id/editstatus_buttons"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentBottom="true"
-                  android:orientation="horizontal"
-                  android:weightSum="2">
 
-        <Button android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cancel"
-            android:id="@+id/editstatus_cancel"/>
+    <Button android:id="@+id/editstatus_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Save Changes"/>
 
-        <Button android:id="@+id/editstatus_save"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Save Changes"/>
-
-
-    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/editstatus_progressbar"

@@ -87,7 +87,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     }
 
-    private void bindViews(){
+    private void bindViews() {
         mEmailView = (EditText) findViewById(R.id.signup_email_text);
         mPasswordView = (EditText) findViewById(R.id.signup_password);
         mFirstNameTextView = (EditText) findViewById(R.id.signup_fname_text);
@@ -99,7 +99,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
     }
 
-    private void setUpOnClickListeners(){
+    private void setUpOnClickListeners() {
         //attempt to sign up when button pressed
         mEmailSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -181,9 +181,11 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                 public void onResponse(Response response) throws IOException {
                     if (response.code() == 200) {
                         signUp(email, password, fName, lName);
-                    } else { //another error
+                    } else if(response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
                         runOnUiThread(rNotUniqueEmailAction);
+                    }else {
+                        runOnUiThread(rServerErrorAction);
                     }
                 }
             });
@@ -254,41 +256,26 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         return password.length() >= 6 && !password.contains(" ");
     }
 
-
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-            mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
 
         setTextEditsFocus(!show); //when progess shown, don't focus this
         mCredentialCheckInProgress = show;

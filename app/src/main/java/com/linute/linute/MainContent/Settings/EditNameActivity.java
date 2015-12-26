@@ -38,8 +38,6 @@ public class EditNameActivity extends AppCompatActivity {
     private Button mSaveButton;
     private ProgressBar mProgressBar;
     private Toolbar mToolBar;
-    private View mButtonLayer;
-    private Button mCancelButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +52,15 @@ public class EditNameActivity extends AppCompatActivity {
         setUpOnClickListeners();
     }
 
-    private void setUpToolbar(){
+    private void setUpToolbar() {
         mToolBar = (Toolbar) findViewById(R.id.editname_toolbar);
         setSupportActionBar(mToolBar);
 
         getSupportActionBar().setTitle("Name");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
         mFirstName.append(mSharedPreferences.getString("firstName", ""));
         mLastName.append(mSharedPreferences.getString("lastName", ""));
     }
@@ -71,22 +70,13 @@ public class EditNameActivity extends AppCompatActivity {
         mLastName = (EditText) findViewById(R.id.prof_edit_lname_text);
         mSaveButton = (Button) findViewById(R.id.editname_save_button);
         mProgressBar = (ProgressBar) findViewById(R.id.prof_edit_name_progressbar);
-        mCancelButton = (Button) findViewById(R.id.editname_cancel_button);
-        mButtonLayer = findViewById(R.id.editname_buttons);
     }
 
-    private void setUpOnClickListeners(){
+    private void setUpOnClickListeners() {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveName();
-            }
-        });
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                overridePendingTransition(0,0);
             }
         });
     }
@@ -104,7 +94,7 @@ public class EditNameActivity extends AppCompatActivity {
             mLastName.requestFocus();
             areValid = false;
         }
-        if (firstName.isEmpty()){
+        if (firstName.isEmpty()) {
             mFirstName.setError(getString(R.string.error_field_required));
             mFirstName.requestFocus();
             areValid = false;
@@ -112,11 +102,11 @@ public class EditNameActivity extends AppCompatActivity {
         return areValid;
     }
 
-    private void saveName(){
+    private void saveName() {
         String lastName = mLastName.getText().toString();
         String firstName = mFirstName.getText().toString();
 
-        if(areValidFields(firstName, lastName)){
+        if (areValidFields(firstName, lastName)) {
             LSDKUser user = new LSDKUser(this);
             showProgress(true);
             Map<String, String> userInfo = new HashMap<>();
@@ -136,7 +126,7 @@ public class EditNameActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Response response) throws IOException {
-                    if (response.isSuccessful()){
+                    if (response.isSuccessful()) {
                         try {
                             LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                             saveInfo(user);
@@ -158,7 +148,7 @@ public class EditNameActivity extends AppCompatActivity {
                         }
 
 
-                    }else{
+                    } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -178,53 +168,42 @@ public class EditNameActivity extends AppCompatActivity {
     }
 
 
-
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+
 
         setFocusable(!show);
     }
 
-    private void setFocusable(boolean focusable){
+    private void setFocusable(boolean focusable) {
         if (focusable) { //turn on
             mFirstName.setFocusableInTouchMode(true);
             mLastName.setFocusableInTouchMode(true);
-        }
-        else {
+        } else {
             mFirstName.setFocusable(false);
             mLastName.setFocusable(false);
         }
     }
 
-    private void saveInfo(LinuteUser user){
+    private void saveInfo(LinuteUser user) {
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.putString("firstName", user.getFirstName());
         editor.putString("lastName", user.getLastName());

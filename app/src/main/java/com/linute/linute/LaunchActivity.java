@@ -11,26 +11,17 @@ import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ProgressBar;
 
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.LSDKUser;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 
@@ -49,13 +40,10 @@ public class LaunchActivity extends Activity {
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
-    private ProgressBar mProgressBar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         generateNewSigniture();
 
@@ -64,14 +52,11 @@ public class LaunchActivity extends Activity {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                //SharedPreferences sharedPreferences = new SecurePreferences(getApplicationContext(), "BtE3eRHzZq", LinuteConstants.SharedPrefName);
-
                 SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
                 boolean sentToken = sharedPreferences
                         .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
 
                 String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
-
 
                 //token was sent or we already have token
                 //we need a token for this app to work. Will stop app if there is no token available
@@ -80,7 +65,7 @@ public class LaunchActivity extends Activity {
                     Class nextActivity; //the next activity we go to
 
                     //if user is logged in
-                    if (sharedPreferences.getBoolean("isLoggedIn", false) && sharedPreferences.getString("email", "noAuth") != "noAuth") {
+                    if (sharedPreferences.getBoolean("isLoggedIn", false) && !sharedPreferences.getString("email", "noAuth").equals("noAuth")) {
                         //if email has been confirmed
                         nextActivity = MainActivity.class; // go to MainActivty
                         //nextActivity = PreLoginActivity.class;
@@ -94,6 +79,7 @@ public class LaunchActivity extends Activity {
                     Intent i = new Intent(LaunchActivity.this, nextActivity);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
+                    overridePendingTransition(0, 0); //no transition effects
                     LaunchActivity.this.finish();
 
                 }
@@ -121,11 +107,11 @@ public class LaunchActivity extends Activity {
     }
 
     //signiture for profile image
-    private void generateNewSigniture(){
-        if(Utils.isNetworkAvailable(this)){
+    private void generateNewSigniture() {
+        if (Utils.isNetworkAvailable(this)) {
             getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
                     .edit()
-                    .putString("imageSigniture", ""+ new Random().nextInt())
+                    .putString("imageSigniture", "" + new Random().nextInt())
                     .apply();
         }
     }
@@ -145,9 +131,9 @@ public class LaunchActivity extends Activity {
 
         //register gcm token
         //FIXME: take out comment when running on actual device
-        //if (checkPlayServices()){
-        runRegistrationIntentService();
-        //}
+        if (checkPlayServices()) {
+            runRegistrationIntentService();
+        }
     }
 
     @Override

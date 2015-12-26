@@ -8,12 +8,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +26,7 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
+import com.linute.linute.UtilsAndHelpers.SquareImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.soundcloud.android.crop.Crop;
 import com.squareup.okhttp.Callback;
@@ -57,13 +56,11 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
     private Button mCancelButton;
     private View mButtonLayer;
 
-    private ImageView mImageView;
+    private SquareImageView mImageView;
 
     private SharedPreferences mSharedPreferences;
 
     private ProgressBar mProgressBar;
-
-    private int mImageRadius;
 
     private Bitmap mProfilePictureBitmap;
 
@@ -72,8 +69,6 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_profile_image);
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-
-        mImageRadius = getResources().getDimensionPixelSize(R.dimen.changeprofile_image_dimen);
 
         bindViews();
 
@@ -84,17 +79,19 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
     }
 
 
-    private void bindViews(){
+
+
+    private void bindViews() {
         mSaveButton = (Button) findViewById(R.id.changeprofileimage_save_button);
         mCancelButton = (Button) findViewById(R.id.changeprofileimage_cancel_button);
         mButtonLayer = findViewById(R.id.changeprofileimage_buttons);
 
-        mImageView = (ImageView) findViewById(R.id.changeprofileimage_image);
+        mImageView = (SquareImageView) findViewById(R.id.changeprofileimage_image);
 
         mProgressBar = (ProgressBar) findViewById(R.id.changeprofileimage_progressbar);
     }
 
-    private void setUpOnClickListeners(){
+    private void setUpOnClickListeners() {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,7 +121,6 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //mImageView.invalidate();
     }
 
     //select between camera and photogallery
@@ -150,24 +146,24 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mHasSavedImage)setResult(RESULT_OK); //tell parent to update
+        if (mHasSavedImage) setResult(RESULT_OK); //tell parent to update
         else setResult(RESULT_CANCELED); //tell parent not to update
         super.onBackPressed();
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
+
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .override(mImageRadius, mImageRadius) //change image to the size we want
                 .placeholder(R.drawable.profile_picture_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(mImageView);
     }
 
 
-    private void saveImage(){
+    private void saveImage() {
         if (!mHasChangedImage) return; //no edits to image
         LSDKUser user = new LSDKUser(this);
         showProgress(true);
@@ -261,7 +257,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
                     //scale cropped image to 1080 x 1080 (will be sent to database
                     mProfilePictureBitmap = Bitmap.createScaledBitmap(
                             MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri),
-                            540, 540, false);
+                            1080, 1080, false);
 
                     mImageView.setImageBitmap(mProfilePictureBitmap);
                     mHasChangedImage = true;
@@ -275,7 +271,6 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
 
         }
     }
-
 
 
     private void beginCrop(Uri source) { //begin crop activity
@@ -334,46 +329,36 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
     }
 
 
-    private void persistData(LinuteUser user){
+    private void persistData(LinuteUser user) {
         mSharedPreferences.edit().putString("profileImage", user.getProfileImage()).apply();
         mSharedPreferences.edit().putString("imageSigniture", new Random().nextInt() + "").apply();
     }
 
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+        mButtonLayer.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
 
         setFocusable(!show);
     }
 
-    private void setFocusable(boolean focusable){
+    private void setFocusable(boolean focusable) {
         mImageView.setClickable(focusable);
     }
 }

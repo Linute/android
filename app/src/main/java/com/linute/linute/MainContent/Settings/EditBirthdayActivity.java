@@ -38,8 +38,6 @@ public class EditBirthdayActivity extends AppCompatActivity {
     private ProgressBar mProgressBar;
     private DatePicker mDatePicker;
     private Button mSaveButton;
-    private Button mCancelButton;
-    private View mButtonLayer;
 
     private String mDob;
 
@@ -57,22 +55,21 @@ public class EditBirthdayActivity extends AppCompatActivity {
         setUpOnClickListeners();
     }
 
-    private void bindViews(){
+    private void bindViews() {
         mProgressBar = (ProgressBar) findViewById(R.id.editbirthday_progressbar);
         mDatePicker = (DatePicker) findViewById(R.id.editbirthday_datepicker);
         mSaveButton = (Button) findViewById(R.id.editbirthday_save_button);
-        mCancelButton = (Button) findViewById(R.id.editbirthday_cancel_button);
-        mButtonLayer = findViewById(R.id.editbirthday_buttons);
     }
 
-    private void setUpToolbar(){
+    private void setUpToolbar() {
         Toolbar toolBar = (Toolbar) findViewById(R.id.editbirthday_toolbar);
         setSupportActionBar(toolBar);
 
         getSupportActionBar().setTitle("Birthday");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    private void setDefaultValues(){
+    private void setDefaultValues() {
         String dob = mSharedPreferences.getString("dob", "");
 
         Calendar c = Calendar.getInstance();
@@ -92,33 +89,25 @@ public class EditBirthdayActivity extends AppCompatActivity {
     }
 
 
-    private void setUpOnClickListeners(){
+    private void setUpOnClickListeners() {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveBirthday();
             }
         });
-
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-                overridePendingTransition(0, 0);
-            }
-        });
     }
 
 
-    public String formatDateFromInts(int year, int month, int day){
-        String date = year+"-";
+    public String formatDateFromInts(int year, int month, int day) {
+        String date = year + "-";
         month++; //month is in range 0-11 so we need to add one
         date += (month < 10 ? "0" + month : month) + "-";
         date += day < 10 ? "0" + day : day;
         return date;
     }
 
-    private void saveBirthday(){
+    private void saveBirthday() {
 
         final String dob = formatDateFromInts(mDatePicker.getYear(), mDatePicker.getMonth(), mDatePicker.getDayOfMonth());
 
@@ -156,8 +145,7 @@ public class EditBirthdayActivity extends AppCompatActivity {
                                 Utils.showSavedToast(EditBirthdayActivity.this);
                             }
                         });
-                    }
-                    catch (JSONException e) { //caught error
+                    } catch (JSONException e) { //caught error
                         e.printStackTrace();
                         runOnUiThread(new Runnable() {
                             @Override
@@ -190,41 +178,32 @@ public class EditBirthdayActivity extends AppCompatActivity {
         mSharedPreferences.edit().putString("dob", user.getDob()).apply();
     }
 
-    private boolean birthdayHasBeenEditted(String birthday){
+    private boolean birthdayHasBeenEditted(String birthday) {
         return !mDob.equals(birthday);
     }
 
 
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+
 
         mDatePicker.setClickable(!show); //don't allow edit when querying
     }

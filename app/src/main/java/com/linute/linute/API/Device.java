@@ -10,12 +10,8 @@ import java.util.Map;
  */
 public class Device {
 
-    private String mOS;
-    private String mToken;
+    public Device(){
 
-    public Device(String token, String OS){
-        mOS = OS;
-        mToken = token;
     }
 
     public static Call createDevice( Map<String,String> header,
