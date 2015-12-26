@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
     private Toolbar mToolbar;
+    private TextView mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,12 @@ public class MainActivity extends AppCompatActivity {
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
+        mTitle = (TextView) mToolbar.findViewById(R.id.toolbar_title);
+        try {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        } catch (NullPointerException ne) {
+            ne.printStackTrace();
+        }
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -76,6 +84,10 @@ public class MainActivity extends AppCompatActivity {
 
         //Restore tab user was on
         mViewPager.setCurrentItem(savedInstanceState.getInt(getString(R.string.current_tab)));
+    }
+
+    public void setTitle(String title) {
+        mTitle.setText(title);
     }
 
     /*
