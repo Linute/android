@@ -12,4 +12,8 @@
 
     </style>
 -->
+
+    <style name="squarecamera__CameraFullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
 </resources>

@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.Settings.ChangeProfileImageActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -69,6 +71,8 @@ public class ProfileFragment extends ListFragment {
     private SharedPreferences mSharedPreferences;
     private String mProfileImagePath;
 
+    private Button mCreateButton;
+
 
     public static final int IMAGE_CHANGED = 1234;
 
@@ -84,6 +88,8 @@ public class ProfileFragment extends ListFragment {
         mUser = new LSDKUser(getContext());
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME , Context.MODE_PRIVATE);
         mEmptyListView =  rootView.findViewById(R.id.profilefrag_empty_list);
+
+        mCreateButton = (Button) rootView.findViewById(R.id.profilefrag_create_event_button);
 
         //set up swipe refresh
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag_swipe_refresh);
@@ -133,6 +139,14 @@ public class ProfileFragment extends ListFragment {
             public void onClick(View v) {
                 Intent i = new Intent(getContext(), ChangeProfileImageActivity.class);
                 startActivityForResult(i, IMAGE_CHANGED);
+            }
+        });
+
+        mCreateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                startActivity(i);
             }
         });
     }
