@@ -22,6 +22,7 @@ import android.widget.Switch;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.Request;
@@ -106,6 +107,8 @@ public class PostContentPage extends DialogFragment {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
 //                Intent cameraIntent = new InputMethodManager(getActivity(), CameraActivity.class);
 //                cameraIntent.putExtra("CURRENT_PAGE", mCurrentPage);
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                startActivity(i);
 
 
             }

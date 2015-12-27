@@ -19,25 +19,18 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_below="@+id/postTopBorder"
+        android:background="#ffffff"
         android:gravity="center"
         android:textSize="14sp"/>
 
-    <!--<ImageView-->
-    <!--android:id="@+id/postPicture"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="300dp"-->
-    <!--android:layout_below="@+id/postTopBorder"-->
-    <!--android:background="@drawable/college_walk1"-->
-    <!--android:scaleType="centerCrop"/>-->
-
     <ImageView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/postPicture"
-    android:layout_below="@+id/postTopBorder"
-    android:adjustViewBounds="true"
-    android:background="@drawable/college_walk1"
-    android:scaleType="fitCenter"/>
+        android:id="@+id/postPicture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/postTopBorder"
+        android:adjustViewBounds="true"
+        android:background="@drawable/college_walk1"
+        android:scaleType="fitCenter"/>
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/eventUserImage"
@@ -62,29 +55,29 @@
         android:layout_marginTop="-40dp"/>
 
     <RelativeLayout
+        android:id="@+id/likesRelativeLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/postBottomBorder"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:id="@+id/likesRelativeLayout"
-        android:layout_above="@+id/postBottomBorder"
-        android:orientation="horizontal"
-        android:layout_alignTop="@+id/postBottomBorder">
+        android:layout_alignTop="@+id/postBottomBorder"
+        android:orientation="horizontal">
 
         <CheckBox
             android:id="@+id/postLikesHeart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:button="@drawable/post_likes_selector"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true"
+            android:button="@drawable/post_likes_selector"/>
 
         <TextView
             android:id="@+id/postLikesNum"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_toEndOf="@+id/postLikesHeart"
             android:layout_toRightOf="@id/postLikesHeart"
-            android:layout_centerVertical="true"
             android:paddingEnd="4dp"
             android:paddingLeft="4dp"
             android:paddingRight="4dp"

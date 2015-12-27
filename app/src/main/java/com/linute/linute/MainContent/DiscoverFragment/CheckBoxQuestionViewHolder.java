@@ -3,7 +3,9 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -50,7 +52,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         mCheckBoxChoiceCapableAdapters = adapter;
 
         vPostText = (TextView) itemView.findViewById(R.id.postText);
-//        vLikesText = (TextView) itemView.findViewById(R.id.postLikesNum);
+        vLikesText = (TextView) itemView.findViewById(R.id.postLikesNum);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postLikesHeart);
         vPostImage = (ImageView) itemView.findViewById(R.id.postPicture);
         vUserImage = (CircularImageView) itemView.findViewById(R.id.eventUserImage);
@@ -65,33 +67,34 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         mCheckBoxChoiceCapableAdapters.onChecked(getAdapterPosition(), isChecked);
         if (mCheckBoxChoiceCapableAdapters.isChecked(getAdapterPosition())) {
-            mPosts.get(getAdapterPosition()).setNumLike(mPosts.get(getAdapterPosition()).getNumLike() + 1);
+            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
         } else {
-            mPosts.get(getAdapterPosition()).setNumLike(mPosts.get(getAdapterPosition()).getNumLike() - 1);
+            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
         }
     }
 
     void bindModel(Post post) {
         // Set User Image
         getImage(post, 1);
+        Log.d("TAG", Utils.getEventImageURL(post.getImage()));
         if (!post.getImage().equals("")) {
             // Set Post Image
             getImage(post, 2);
-//            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-//                    ViewGroup.LayoutParams.WRAP_CONTENT);
-//            p.addRule(RelativeLayout.BELOW, R.id.postPicture);
-//            vBottomBorder.setLayoutParams(p);
-//            vPostImage.setVisibility(View.VISIBLE);
+            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            p.addRule(RelativeLayout.BELOW, R.id.postPicture);
+            vBottomBorder.setLayoutParams(p);
+            vPostImage.setVisibility(View.VISIBLE);
         } else {
-//            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-//                    ViewGroup.LayoutParams.WRAP_CONTENT);
-//            p.addRule(RelativeLayout.BELOW, R.id.postText);
-//            vBottomBorder.setLayoutParams(p);
-//            vPostImage.setVisibility(View.GONE);
+            RelativeLayout.LayoutParams p = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            p.addRule(RelativeLayout.BELOW, R.id.postText);
+            vBottomBorder.setLayoutParams(p);
+            vPostImage.setVisibility(View.GONE);
             vPostText.setText(post.getTitle());
         }
-//        vLikesText.setText(post.getNumLike());
-        if (post.getNumLike() != 0) {
+        vLikesText.setText(post.getNumLike());
+        if (Integer.parseInt(post.getNumLike()) != 0) {
             mCheckBoxChoiceCapableAdapters.onChecked(getAdapterPosition(), true);
         }
         vLikesHeart.setChecked(mCheckBoxChoiceCapableAdapters.isChecked(getAdapterPosition()));
