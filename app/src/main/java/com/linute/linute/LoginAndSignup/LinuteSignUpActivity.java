@@ -301,7 +301,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     private void signUp(String email, final String password, String fName, String lName) {
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         String encodedProfilePicture;
 
         encodedProfilePicture = Utils.encodeImageBase64(

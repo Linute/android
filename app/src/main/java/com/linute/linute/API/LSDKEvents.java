@@ -9,6 +9,7 @@ import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by QiFeng on 12/12/15.
@@ -20,12 +21,12 @@ public class LSDKEvents {
 
     private static String mEncodedToken;
 
-    public LSDKEvents(Context context){
+    public LSDKEvents(Context context) {
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mEncodedToken = Utils.encode_base64(mSharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null));
     }
 
-    public Call getEvents (Map<String, String> param, Callback callback){
+    public Call getEvents(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),
                 mSharedPreferences.getString("password", null),
@@ -36,5 +37,13 @@ public class LSDKEvents {
         return API_Methods.get(path, header, param, callback);
     }
 
+    public Call postEvent(Map<String, Object> param, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        return API_Methods.post("events", header, param, callback);
+    }
 
 }
