@@ -57,5 +57,10 @@
         <item name="android:windowDisablePreview">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
+    <!--<style name="PostDialog" parent="android:Theme.Dialog" >-->
+        <!--<item name="android:windowNoTitle">false</item>-->
+        <!--<item name="android:windowFullscreen">false</item>-->
+        <!--<item name="android:windowIsFloating">false</item>-->
+    <!--</style>-->
 
 </resources>

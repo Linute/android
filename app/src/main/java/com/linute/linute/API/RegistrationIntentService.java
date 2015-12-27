@@ -106,7 +106,7 @@ public class RegistrationIntentService extends IntentService {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Map<String, String> device = new HashMap<>();
+        Map<String, Object> device = new HashMap<>();
         device.put("token", token);
         device.put("os", "android");
         Device.createDevice(headers, device, new Callback() {

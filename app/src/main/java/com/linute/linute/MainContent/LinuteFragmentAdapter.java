@@ -1,15 +1,11 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ImageSpan;
 
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.ProfileFragment.ProfileFragment;
 import com.linute.linute.R;
 
@@ -18,7 +14,7 @@ import com.linute.linute.R;
  */
 
 
-public class LinuteFragmentAdapter extends FragmentPagerAdapter{
+public class LinuteFragmentAdapter extends FragmentPagerAdapter {
 
     private Context mContext;
 
@@ -30,7 +26,6 @@ public class LinuteFragmentAdapter extends FragmentPagerAdapter{
             R.drawable.ic_notification,
             R.drawable.ic_profile
     };
-
 
 
     public LinuteFragmentAdapter(FragmentManager fm, Context context) {
@@ -49,19 +44,21 @@ public class LinuteFragmentAdapter extends FragmentPagerAdapter{
     public Fragment getItem(int position) {
         //add others later
         //TODO: ADD OTHER FRAGMENTS
-        switch (position){
+        switch (position) {
             case 0:
-                return  new DiscoverFragment();
+
+                return new DiscoverFragment();
             case 1:
                 return new DiscoverFragment();
             case 3:
+                ((MainActivity) mContext).resetToolbar();
                 return new ProfileFragment();
             default:
                 return new DiscoverFragment();
         }
     }
 
-    public int getDrawableIconId(int position){
+    public int getDrawableIconId(int position) {
         return TAB_ICON_IDS[position];
     }
 
