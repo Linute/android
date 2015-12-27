@@ -1,41 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<FrameLayout
+    android:id="@+id/postContainer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.linute.linute.MainContent.SlidingTab.Main2Activity">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinator"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context="com.linute.linute.MainContent.SlidingTab.Main2Activity">
 
-        <include
-            android:id="@+id/mainactivity_toolbar"
-            layout="@layout/tool_bar"/>
-
-        <!--add tabs -->
-        <com.linute.linute.MainContent.SlidingTab.SlidingTabLayout
-            android:id="@+id/mainactivity_tabbar"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary"
-            android:elevation="4dp"/>
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-    </android.support.design.widget.AppBarLayout>
+            <include
+                android:id="@+id/mainactivity_toolbar"
+                layout="@layout/tool_bar"/>
 
-    <include layout="@layout/content_main"/>
+            <!--add tabs -->
+            <com.linute.linute.MainContent.SlidingTab.SlidingTabLayout
+                android:id="@+id/mainactivity_tabbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:elevation="4dp"/>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:src="@android:drawable/ic_menu_add"
-        app:borderWidth="0dp"
-        app:layout_behavior="com.linute.linute.UtilsAndHelpers.ScrollingFABBehavior"/>
+        </android.support.design.widget.AppBarLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+        <include layout="@layout/content_main"/>
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:src="@android:drawable/ic_menu_add"
+            app:borderWidth="0dp"
+            app:layout_behavior="com.linute.linute.UtilsAndHelpers.ScrollingFABBehavior"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</FrameLayout>

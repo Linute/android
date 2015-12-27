@@ -36,7 +36,7 @@ public class LSDKUser {
         //create headers
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
         //create post parameters
-        Map<String, String> postParam = new HashMap<>();
+        Map<String, Object> postParam = new HashMap<>();
         postParam.put("email", email);
 
         return API_Methods.post("users/is-unique-email", header, postParam, callback);
@@ -52,7 +52,7 @@ public class LSDKUser {
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
         //create post parameters
-        Map<String, String> postParam = new HashMap<>();
+        Map<String, Object> postParam = new HashMap<>();
         postParam.put("phone", phone);
 
         return API_Methods.post("users/is-unique-phone", header, postParam, callback);
@@ -61,7 +61,7 @@ public class LSDKUser {
     //creates new account
     //@param userInfo - information to sign up with
     //@param callback - handles response
-    public Call createUser(Map<String, String> userInfo,
+    public Call createUser(Map<String, Object> userInfo,
                            Callback callback) {
 
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
@@ -80,7 +80,7 @@ public class LSDKUser {
 
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
-        Map<String, String> postParam = new HashMap<>();
+        Map<String, Object> postParam = new HashMap<>();
         postParam.put("email", email);
         postParam.put("password", password);
 
@@ -156,7 +156,7 @@ public class LSDKUser {
 
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("phone", phoneNumber);
 
         return API_Methods.post("/users/confirm-phone", header, param, callback);
