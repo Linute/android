@@ -43,15 +43,26 @@
             android:background="@android:color/transparent"
             android:padding="10dp"
             android:src="@drawable/squarecamera__save_photo_drawable"/>
-    </LinearLayout>
-
         <Switch
             android:id="@+id/squareCamera_post_anon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/squareCamEdit_buttons"
-            android:layout_marginBottom="10dp"
+            android:layout_above="@id/cancel"
             android:layout_centerHorizontal="true"
-            android:textColor="@android:color/white"
-            android:text="Post as anon"/>
+            android:layout_marginBottom="10dp"
+            android:text="Post as anon"
+            android:textColor="@android:color/white"/>
+    </LinearLayout>
+
+
+    <ProgressBar
+        android:id="@+id/squareCamEdit_progress_bar"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="25dp"
+        android:visibility="gone"/>
+
 </RelativeLayout>

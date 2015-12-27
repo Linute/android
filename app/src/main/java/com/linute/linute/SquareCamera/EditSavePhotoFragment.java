@@ -1,6 +1,8 @@
 package com.linute.linute.SquareCamera;
 
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -10,12 +12,28 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Switch;
 
+import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.Utils;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -29,6 +47,10 @@ public class EditSavePhotoFragment extends Fragment {
     public static final String IMAGE_INFO = "image_info";
 
     private static final int REQUEST_STORAGE = 1;
+
+    private Switch mAnonSwitch;
+    private View mButtonLayer;
+    private ProgressBar mProgressBar;
 
     public static Fragment newInstance(byte[] bitmapByteArray, int rotation,
                                        @NonNull ImageParameters parameters) {
@@ -55,6 +77,11 @@ public class EditSavePhotoFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mAnonSwitch = (Switch) view.findViewById(R.id.squareCamera_post_anon);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.squareCamEdit_progress_bar);
+        mButtonLayer = view.findViewById(R.id.squareCamEdit_buttons);
+
 
         int rotation = getArguments().getInt(ROTATION_KEY);
         byte[] data = getArguments().getByteArray(BITMAP_KEY);
@@ -110,14 +137,96 @@ public class EditSavePhotoFragment extends Fragment {
         if (view != null) {
             ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
-            Bitmap bitmap = ((BitmapDrawable) photoImageView.getDrawable()).getBitmap();
-            Uri photoUri = ImageUtility.savePicture(getActivity(), bitmap);
+            //get bitmap and scale it
+            Bitmap bitmap = Bitmap.createScaledBitmap(((BitmapDrawable) photoImageView.getDrawable())
+                    .getBitmap(), 1080, 1080, true);
 
-            ((CameraActivity) getActivity()).returnPhotoUri(photoUri);
+            //((CameraActivity) getActivity()).returnPhotoUri(photoUri);
+
+            JSONArray coord = new JSONArray();
+            JSONObject jsonObject = new JSONObject();
+            JSONArray images = new JSONArray();
+            try {
+                coord.put(0);
+                coord.put(0);
+                jsonObject.put("coordinates", coord);
+                images.put(Utils.encodeImageBase64(bitmap));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+
+            Map<String, Object> postData = new HashMap<>();
+
+            postData.put("college", "564a46ff8ac4a559174247af");
+            postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+            postData.put("images", images);
+            postData.put("title", "Hello");
+            postData.put("geo", jsonObject);
+
+            showProgress(true);
+
+            new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                            showProgress(false);
+                        }
+                    });
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    if (response.isSuccessful()){
+                        getActivity().finish();
+                        Log.i(TAG, "onResponse: "+"Posted");
+                    }else {
+                        showServerError();
+                        Log.e(TAG, "onResponse: "+response.body().string() );
+                    }
+                }
+            });
+
         }
     }
 
 
+
+    private void showServerError(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Utils.showServerErrorToast(getActivity());
+                showProgress(false);
+            }
+        });
+    }
+
+    private void showProgress(final boolean show) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+        mButtonLayer.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
 
 /*
     @Override
