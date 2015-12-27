@@ -19,8 +19,8 @@ public class Post {
         mNumLikes = numLike;
     }
 
-    public int getNumLike() {
-        return mNumLikes;
+    public String getNumLike() {
+        return mNumLikes + "";
     }
 
     public void setNumLike(int numLike) {

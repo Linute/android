@@ -19,6 +19,7 @@ import android.widget.EditText;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.PostContentPage;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.HidingScrollListener;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
