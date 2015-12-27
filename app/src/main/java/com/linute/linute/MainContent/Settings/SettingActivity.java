@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;

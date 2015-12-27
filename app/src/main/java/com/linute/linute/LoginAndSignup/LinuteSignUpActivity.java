@@ -1,21 +1,24 @@
 package com.linute.linute.LoginAndSignup;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
 import android.net.Uri;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,8 +32,10 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.linute.linute.API.LSDKUser;
@@ -84,7 +89,32 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
         bindViews();
         setUpOnClickListeners();
+    }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //outState.putString("mCurrentPhotoPath", mCurrentPhotoPath);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        /*if (savedInstanceState != null) {
+            mCurrentPhotoPath = savedInstanceState.getString("mCurrentPhotoPath", null);
+            if (mCurrentPhotoPath != null) {
+                File imgFile = new File(mCurrentPhotoPath);
+                if (imgFile.exists()) {
+                    mProfilePictureBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    if (mProfilePictureBitmap!=null)
+                        mProfilePictureBitmap = Bitmap.createScaledBitmap(mProfilePictureBitmap, 1080, 1080, true);
+                } else {
+                    Log.i(TAG, "onRestoreInstanceState: no such imagefile");
+                }
+            }
+        }*/
     }
 
     private void bindViews() {
@@ -113,7 +143,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(LinuteSignUpActivity.this);
-                builder.setTitle("Image Source");
                 String[] options = {"Camera", "Photo Gallery", "Cancel"};
                 builder.setItems(options, actionListener);
                 builder.create().show();
@@ -128,7 +157,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             switch (which) {
                 case 0:
                     //go to camera
-                    dispatchTakePictureIntent();
+                    requestPermissions();
                     break;
                 case 1:
                     //go to gallery
@@ -181,10 +210,10 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                 public void onResponse(Response response) throws IOException {
                     if (response.code() == 200) {
                         signUp(email, password, fName, lName);
-                    } else if(response.code() == 404) { //another error
+                    } else if (response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
                         runOnUiThread(rNotUniqueEmailAction);
-                    }else {
+                    } else {
                         runOnUiThread(rServerErrorAction);
                     }
                 }
@@ -417,17 +446,22 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     static final int REQUEST_TAKE_PHOTO = 1;
 
+    //Request Permissiosns
+    private static final int REQUEST_PERMISSIONS = 17;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == REQUEST_TAKE_PHOTO) { //got response from camera
             if (resultCode == RESULT_OK) {  //was able to get picture
-                File f = new File(mCurrentPhotoPath);
-                Uri contentUri = Uri.fromFile(f);
-                galleryAddPic(contentUri); // add to gallery
-                beginCrop(contentUri); //crop image
+                if (hasWritePermission()) {
+                    File f = new File(mCurrentPhotoPath);
+                    Uri contentUri = Uri.fromFile(f);
+                    galleryAddPic(contentUri); // add to gallery
+                    beginCrop(contentUri); //crop image
+                }else {
+                    showRationalizationDialog();
+                }
             } else { //no picture captured. delete the temp file created to hold image
                 if (!new File(mCurrentPhotoPath).delete())
                     Log.v(TAG, "could not delete temp file");
@@ -449,19 +483,77 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
                     mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
 
+                    //save mCurrentFilePath
+                    mCurrentPhotoPath = imageUri.getPath();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
                 Toast.makeText(this, Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 
     private void beginCrop(Uri source) { //begin crop activity
         Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
         Crop.of(source, destination).asSquare().start(this);
+    }
+
+
+    public void requestPermissions() {
+        List<String> permissions = new ArrayList<>();
+        //check for camera
+        if (!hasCameraPermissions()) {
+            permissions.add(Manifest.permission.CAMERA);
+        }
+        //check for write
+        if (!hasWritePermission()) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        //we need permissions
+        if (!permissions.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    permissions.toArray(new String[permissions.size()]),
+                    REQUEST_PERMISSIONS);
+        } else {
+            //we have permissions : show camera
+            dispatchTakePictureIntent();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSIONS:
+                for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        showRationalizationDialog();
+                        return;
+                    }
+                dispatchTakePictureIntent();
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private void showRationalizationDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Allow Woohoo to Use your phone's storage?")
+                .setMessage("Woohoo needs access to your phone's camera and storage to take and save images.")
+                .setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        requestPermissions();
+                    }
+                })
+                .setNegativeButton("Deny", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .show();
     }
 
 
@@ -514,5 +606,14 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         this.sendBroadcast(mediaScanIntent);
     }
 
+
+    private boolean hasWritePermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean hasCameraPermissions() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+
+    }
 }
 

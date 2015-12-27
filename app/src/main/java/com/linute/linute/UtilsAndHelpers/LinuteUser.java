@@ -33,6 +33,8 @@ public class LinuteUser {
     private int mFriendsNumber;
     private int mAttendedNumber;
     private int mHostedNumber;
+    private String mCollege;
+    private String mCampus;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
 
@@ -59,7 +61,8 @@ public class LinuteUser {
         mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
         mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
         mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
-
+        mCollege = getStringFromJson("college", userInfo);
+        mCampus = getStringFromJson("campus", userInfo);
     }
 
     private static String getStringFromJson(String key, JSONObject userInfo){
@@ -253,6 +256,14 @@ public class LinuteUser {
 
     public void setUserID(String userID) {
         mUserID = userID;
+    }
+
+    public String getCampus() {
+        return mCampus;
+    }
+
+    public String getCollege() {
+        return mCollege;
     }
 
 
