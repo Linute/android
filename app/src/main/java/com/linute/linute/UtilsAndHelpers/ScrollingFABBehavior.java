@@ -3,9 +3,10 @@ package com.linute.linute.UtilsAndHelpers;
 import android.content.Context;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 /**
  * Source: https://mzgreen.github.io/2015/06/23/How-to-hideshow-Toolbar-when-list-is-scrolling(part3)/
@@ -15,7 +16,7 @@ public class ScrollingFABBehavior extends CoordinatorLayout.Behavior<FloatingAct
 
     public ScrollingFABBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.toolbarHeight = Utils.getToolbarHeight(context) - 100;
+        this.toolbarHeight = Utils.getToolbarHeight(context);
     }
 
     @Override

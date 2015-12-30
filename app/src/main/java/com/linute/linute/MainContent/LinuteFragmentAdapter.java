@@ -4,6 +4,8 @@ import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.widget.Toast;
 
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.ProfileFragment.ProfileFragment;
@@ -14,9 +16,10 @@ import com.linute.linute.R;
  */
 
 
-public class LinuteFragmentAdapter extends FragmentPagerAdapter {
+public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
 
     private Context mContext;
+    private Fragment [] mFragments;
 
     //icons we will use
     //these are currently 30 pxl
@@ -31,6 +34,11 @@ public class LinuteFragmentAdapter extends FragmentPagerAdapter {
     public LinuteFragmentAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.mContext = context;
+        mFragments = new Fragment[4];
+        mFragments[0] = new DiscoverFragment();
+        mFragments[1] = new DiscoverFragment();
+        mFragments[2] = new DiscoverFragment();
+        mFragments[3] = new ProfileFragment();
     }
 
     @Override
@@ -38,24 +46,29 @@ public class LinuteFragmentAdapter extends FragmentPagerAdapter {
         return TAB_ICON_IDS.length;
     }
 
-
     //returns correct fragment
     @Override
     public Fragment getItem(int position) {
         //add others later
         //TODO: ADD OTHER FRAGMENTS
+        ((MainActivity) mContext).resetToolbar();
         switch (position) {
             case 0:
-
-                return new DiscoverFragment();
+                return mFragments[0];
             case 1:
-                return new DiscoverFragment();
+                return mFragments[1];
+            case 2:
+                return mFragments[2];
             case 3:
-                ((MainActivity) mContext).resetToolbar();
-                return new ProfileFragment();
+                return mFragments[3];
             default:
-                return new DiscoverFragment();
+                return mFragments[0];
         }
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return POSITION_NONE;
     }
 
     public int getDrawableIconId(int position) {

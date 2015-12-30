@@ -1,9 +1,10 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.animation.Animator;
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,15 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.LinuteFragmentAdapter;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostContentPage;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.HidingScrollListener;
+import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -56,7 +57,7 @@ public class DiscoverFragment extends Fragment {
     //called when fragment drawn the first time
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_discover, container, false); //setContent
+        final View rootView = inflater.inflate(R.layout.fragment_discover_feed, container, false); //setContent
 
         mPosts = new ArrayList<>();
 
@@ -66,41 +67,64 @@ public class DiscoverFragment extends Fragment {
         llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
+        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
-        getFeed();
-
-        postBox = (EditText) rootView.findViewById(R.id.postBox);
-        postBox.setFocusable(false);
-        postBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((MainActivity) getActivity()).newPost();
-            }
-        });
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                if (!Utils.isNetworkAvailable(getActivity())) {
+                    ((MainActivity) getActivity()).noInternet();
+                    refreshLayout.setRefreshing(false);
+                    return;
+                }
                 getFeed();
             }
         });
 
-        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        recList.setOnScrollListener(new HidingScrollListener() {
-            @Override
-            public void onHide() {
-                hideViews();
-            }
+        refreshLayout.setRefreshing(true);
+        getFeed();
+        if (!Utils.isNetworkAvailable(getActivity())) {
+            ((MainActivity) getActivity()).noInternet();
+            refreshLayout.setRefreshing(false);
 
-            @Override
-            public void onShow() {
-                showViews();
-            }
+        }
 
+//        postBox = (EditText) rootView.findViewById(R.id.postBox);
+//        postBox.setFocusable(false);
+//        postBox.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ((MainActivity) getActivity()).newPost();
+//            }
+//        });
+
+
+//        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//        recList.setOnScrollListener(new HidingScrollListener() {
+//            @Override
+//            public void onHide() {
+//                hideViews();
+//            }
+//
+//            @Override
+//            public void onShow() {
+//                showViews();
+//            }
+//
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+//                refreshLayout.setEnabled(firstVisibleItem == 0);
+//            }
+//        });
+
+        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -150,6 +174,8 @@ public class DiscoverFragment extends Fragment {
             public void onResponse(Response response) throws IOException {
                 if (!response.isSuccessful())
                     Log.d("HEY", "STOP IT");
+
+                mPosts.clear();
                 String json = response.body().string();
                 JSONObject jsonObject = null;
                 JSONArray jsonArray = null;
@@ -163,11 +189,13 @@ public class DiscoverFragment extends Fragment {
                         if (jsonObject.getJSONArray("images").length() > 0)
                             postImage = (String) jsonObject.getJSONArray("images").get(0);
                         post = new Post(
+                                jsonObject.getJSONObject("owner").getString("fullName"),
                                 jsonObject.getJSONObject("owner").getString("profileImage"),
                                 jsonObject.getString("title"),
                                 postImage,
                                 jsonObject.getInt("privacy"),
-                                jsonObject.getInt("numberOfLikes"));
+                                jsonObject.getInt("numberOfLikes"),
+                                jsonObject.getString("likeID"));
 
                         Log.d("TAG", post.getImage());
                         Log.d("TAG", post.getUserImage());
@@ -177,18 +205,21 @@ public class DiscoverFragment extends Fragment {
                         mPosts.add(post);
                         postImage = "";
                     }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (refreshLayout.isRefreshing())
-                                refreshLayout.setRefreshing(false);
-
-                            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
-                        }
-                    });
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (refreshLayout.isRefreshing())
+                            refreshLayout.setRefreshing(false);
+
+//                        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+
+                        mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }
@@ -242,4 +273,6 @@ public class DiscoverFragment extends Fragment {
             }
         });
     }
+
+
 }
