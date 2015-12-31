@@ -77,7 +77,7 @@ public class TakePictureFragment extends Fragment {
         bindViews(rootView);
         setUpButtons();
 
-        mCameraView.setHost(((CameraActivity) getActivity()).getCameraHost());
+        //mCameraView.setHost(((CameraActivity) getActivity()).getCameraHost());
         return rootView;
     }
 
@@ -104,11 +104,10 @@ public class TakePictureFragment extends Fragment {
 
     @Override
     public void onResume() {
+        Log.i(TAG, "onResume: fragg");
         super.onResume();
-        if (!mHasCheckedPermissions) {
-            Log.i(TAG, "onResume: llllll");
-            requestPermissions();
-        }
+        mCameraView.setHost(((CameraActivity) getActivity()).getCameraHost());
+        mCameraView.onResume();
     }
 
     @Override
@@ -116,6 +115,12 @@ public class TakePictureFragment extends Fragment {
         super.onPause();
         Log.i(TAG, "onPause: test");
         mCameraView.onPause();
+        mCameraView.removeHost();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -123,75 +128,6 @@ public class TakePictureFragment extends Fragment {
 
         outState.putBoolean("Stop", true);
         super.onSaveInstanceState(outState);
-    }
-
-    private static final int REQUEST_PERMISSIONS = 21;
-
-    public void requestPermissions() {
-
-        /*
-        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                Manifest.permission.CAMERA) && ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            showPermissionNeeded();
-            return;
-        }*/
-
-        List<String> permissions = new ArrayList<>();
-        //check for camera
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.CAMERA);
-        }
-        //check for write
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        //we need permissions
-        if (!permissions.isEmpty()) {
-            requestPermissions(
-                    permissions.toArray(new String[permissions.size()]),
-                    REQUEST_PERMISSIONS);
-        } else {
-            //we have permissions : show camera
-            Log.i(TAG, "heelllooo");
-            launchCamera();
-        }
-    }
-
-    private void launchCamera() {
-        if (mRationailityLayer.getVisibility() == View.VISIBLE) {
-            mRationailityLayer.setVisibility(View.GONE);
-        }
-        if (mCameraView.getVisibility() == View.INVISIBLE)
-            mCameraView.setVisibility(View.VISIBLE);
-        Log.i(TAG, "launchCamera: ");
-        mCameraView.onResume();
-    }
-
-    private void showPermissionNeeded() {
-        if (mRationailityLayer.getVisibility() == View.GONE) {
-            mRationailityLayer.setVisibility(View.VISIBLE);
-            mCameraView.setVisibility(View.INVISIBLE);
-        }
-    }
-
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSIONS:
-                mHasCheckedPermissions = true;
-                for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
-                    if (result != PackageManager.PERMISSION_GRANTED) {
-                        showPermissionNeeded();
-                        Log.i(TAG, "onRequestPermissionsResult: ");
-                        return;
-                    }
-                launchCamera();
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
     }
 
     public void onTakePhotoClick() {

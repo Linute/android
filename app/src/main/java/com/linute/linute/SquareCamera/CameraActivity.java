@@ -36,15 +36,7 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_camera);
-
-        if (savedInstanceState == null) {
-            Log.i(TAG, "onCreate: ");
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.camera_fragment_container, TakePictureFragment.newInstance(), TakePictureFragment.TAG)
-                    .commit();
-            //requestPermissions();
-        }
+        requestPermissions();
     }
 
     public File getPhotoFile() {
@@ -74,6 +66,13 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
 
     public void onCancel(View view) {
         getSupportFragmentManager().popBackStack();
+    }
+*/
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //getSupportFragmentManager().popBackStack();
     }
 
     private static final int REQUEST_PERMISSIONS = 21;
@@ -118,16 +117,16 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
     private void launchCameraFragment(){
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                .replace(R.id.camera_fragment_container, TakePictureFragment.newInstance(), TakePictureFragment.TAG)
                 .commitAllowingStateLoss();
     }
 
     private void launchPermissionNeededFragment(){
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
+                .replace(R.id.camera_fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
                 .commitAllowingStateLoss();
-    }*/
+    }
 
     class MyCameraHost extends SimpleCameraHost {
 

@@ -94,6 +94,11 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
     }
   }
 
+  public void removeHost(){
+    host = null;
+    previewStrategy = null;
+  }
+
   @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
   public void onResume() {
     addView(previewStrategy.getWidget());

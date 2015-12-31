@@ -39,7 +39,7 @@ public class NeedPermissionsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 CameraActivity main = (CameraActivity) getActivity();
-                //main.requestPermissions();
+                main.requestPermissions();
                 //TODO:FIX
             }
         });
