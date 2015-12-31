@@ -33,6 +33,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     protected TextView vPostUserName;
     protected TextView vPostText;
     protected TextView vLikesText;
+    protected TextView vPostTime;
     protected CheckBox vLikesHeart;
     protected ImageView vPostImage;
     protected CircularImageView vUserImage;
@@ -57,6 +58,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeartStatus);
         vPostImage = (ImageView) itemView.findViewById(R.id.postImage);
         vUserImage = (CircularImageView) itemView.findViewById(R.id.postUserImage);
+        vPostTime = (TextView) itemView.findViewById(R.id.postTimeElapsed);
 
         vLikesHeart.setOnCheckedChangeListener(this);
     }
@@ -71,7 +73,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
     void bindModel(Post post) {
         // Set User Image
-        if (post.getPrivacy() == 1)
+        if (post.getPrivacy() == 0)
             getImage(post, 1);
         else
             vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
@@ -91,6 +93,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         // Set Like/Number
         vLikesText.setText(post.getNumLike());
         vLikesHeart.setChecked(post.isPostLiked());
+        vPostTime.setText(post.getPostTime());
     }
 
     private void getImage(Post post, int type) {

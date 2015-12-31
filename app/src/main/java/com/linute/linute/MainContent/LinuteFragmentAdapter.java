@@ -34,6 +34,7 @@ public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
     public LinuteFragmentAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.mContext = context;
+
         mFragments = new Fragment[4];
         mFragments[0] = new DiscoverFragment();
         mFragments[1] = new DiscoverFragment();

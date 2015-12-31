@@ -33,10 +33,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by QiFeng on 11/17/15.
@@ -184,10 +190,34 @@ public class DiscoverFragment extends Fragment {
                     jsonArray = jsonObject.getJSONArray("events");
                     Post post = null;
                     String postImage = "";
+                    SimpleDateFormat simpleDateFormat;
+                    Date myDate;
+                    String postString;
+                    Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jsonObject = (JSONObject) jsonArray.get(i);
                         if (jsonObject.getJSONArray("images").length() > 0)
                             postImage = (String) jsonObject.getJSONArray("images").get(0);
+                        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
+                        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                        String[] date = jsonObject.toString().split(" ");
+                        if (date[1].equals(getStringMonth(calendar.get(Calendar.MONTH)))) {
+                            if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) == 0) {
+                                postString = Calendar.HOUR_OF_DAY - Integer.parseInt(date[3].substring(0, 2)) + "";
+                                postString += "h";
+                            } else if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) > 7) {
+                                postString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
+                                postString += "w";
+                            } else {
+                                postString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
+                                postString += "d";
+                            }
+                        } else {
+                            postString = calendar.get(Calendar.MONTH) - getIntMonth(date[1]) + "";
+                            postString += "m";
+                        }
+                        Log.d("-TAG-", myDate + " ");
                         post = new Post(
                                 jsonObject.getJSONObject("owner").getString("fullName"),
                                 jsonObject.getJSONObject("owner").getString("profileImage"),
@@ -195,17 +225,14 @@ public class DiscoverFragment extends Fragment {
                                 postImage,
                                 jsonObject.getInt("privacy"),
                                 jsonObject.getInt("numberOfLikes"),
-                                jsonObject.getString("likeID"));
-
-                        Log.d("TAG", post.getImage());
-                        Log.d("TAG", post.getUserImage());
-                        Log.d("TAG", post.getTitle());
-                        Log.d("TAG", post.getNumLike() + "");
-                        Log.d("TAG", post.getPrivacy() + "");
+                                jsonObject.getString("likeID"),
+                                postString);
                         mPosts.add(post);
                         postImage = "";
                     }
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
@@ -274,5 +301,64 @@ public class DiscoverFragment extends Fragment {
         });
     }
 
+    public String getStringMonth(int intMonth) {
+        switch (intMonth) {
+            case 0:
+                return "January";
+            case 1:
+                return "February";
+            case 2:
+                return "March";
+            case 3:
+                return "April";
+            case 4:
+                return "May";
+            case 5:
+                return "June";
+            case 6:
+                return "July";
+            case 7:
+                return "August";
+            case 8:
+                return "September";
+            case 9:
+                return "October";
+            case 10:
+                return "November";
+            case 11:
+                return "December";
+        }
+        return "";
+    }
+
+    public int getIntMonth(String stringMonth) {
+        switch (stringMonth) {
+            case "Jan":
+                return 1;
+            case "Feb":
+                return 2;
+            case "Mar":
+                return 3;
+            case "Apr":
+                return 4;
+            case "May":
+                return 5;
+            case "Jun":
+                return 6;
+            case "Jul":
+                return 7;
+            case "Aug":
+                return 8;
+            case "Sep":
+                return 9;
+            case "Oct":
+                return 10;
+            case "Nov":
+                return 11;
+            case "Dec":
+                return 12;
+        }
+        return 0;
+    }
 
 }
