@@ -1,8 +1,11 @@
 package com.linute.linute.SquareCamera;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -11,37 +14,50 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.linute.linute.Camera.commonsware.cwac.camera.CameraHost;
+import com.linute.linute.Camera.commonsware.cwac.camera.CameraHostProvider;
+import com.linute.linute.Camera.commonsware.cwac.camera.PictureTransaction;
+import com.linute.linute.Camera.commonsware.cwac.camera.SimpleCameraHost;
 import com.linute.linute.R;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 //TODO: might have to keep track of fragments
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends AppCompatActivity implements CameraHostProvider {
 
     public static final String TAG = CameraActivity.class.getSimpleName();
 
+    private File mPhotoFile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.squarecamera__CameraFullScreenTheme);
         super.onCreate(savedInstanceState);
 
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-        setContentView(R.layout.squarecamera__activity_camera);
-        Log.i(TAG, "onCreate: ");
-        requestPermissions();
-        /*if (savedInstanceState == null) {
+        setContentView(R.layout.activity_camera);
+
+        if (savedInstanceState == null) {
+            Log.i(TAG, "onCreate: ");
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                    .replace(R.id.camera_fragment_container, TakePictureFragment.newInstance(), TakePictureFragment.TAG)
                     .commit();
-        }*/
+            //requestPermissions();
+        }
+    }
+
+    public File getPhotoFile() {
+        return mPhotoFile;
+    }
+
+    @Override
+    public CameraHost getCameraHost() {
+        return new MyCameraHost(this);
     }
 
 
-
+/*
     public void returnPhotoUri(Uri uri) {
         Intent data = new Intent();
 
@@ -111,6 +127,44 @@ public class CameraActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
                 .commitAllowingStateLoss();
+    }*/
+
+    class MyCameraHost extends SimpleCameraHost {
+
+        private Camera.Size previewSize;
+
+        public MyCameraHost(Context ctxt) {
+            super(ctxt);
+        }
+
+        @Override
+        public boolean useFullBleedPreview() {
+            return true;
+        }
+
+        @Override
+        public Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters) {
+            return previewSize;
+        }
+
+        @Override
+        public Camera.Parameters adjustPreviewParameters(Camera.Parameters parameters) {
+            Camera.Parameters parameters1 = super.adjustPreviewParameters(parameters);
+            previewSize = parameters1.getPreviewSize();
+            return parameters1;
+        }
+
+        @Override
+        public void saveImage(PictureTransaction xact, final Bitmap bitmap) {
+            //TODO: Go to edit fragment
+            Log.i("TAKENPHOTO", "TAKEN");
+        }
+
+        @Override
+        public void saveImage(PictureTransaction xact, byte[] image) {
+            super.saveImage(xact, image);
+            mPhotoFile = getPhotoPath();
+        }
     }
 }
 

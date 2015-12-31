@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@android:color/black">
+
+    <LinearLayout
+        android:id="@+id/takePic_upper_layer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:paddingLeft="24dp"
+            android:paddingRight="24dp">
+
+
+            <ImageButton
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/btn_default_light"
+                android:src="@drawable/ic_close_white_24dp"/>
+
+        </LinearLayout>
+
+
+        <com.linute.linute.SquareCamera.SquaredFrameLayout
+            android:id="@+id/vPhotoRoot"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RelativeLayout android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:visibility="gone"
+                            android:id="@+id/takePic_rationality_text_layer"
+                >
+                <LinearLayout android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_centerInParent="true"
+                              android:layout_marginLeft="32dp"
+                              android:layout_marginRight="32dp"
+                              android:orientation="vertical">
+
+                    <TextView android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:layout_marginBottom="8dp"
+                              android:text="Take pictures with the Woohoo app"
+                              android:textColor="@android:color/white"
+                              android:textSize="16dp"
+                              android:textStyle="bold"/>
+                    <TextView android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_marginBottom="10dp"
+                              android:gravity="center"
+                              android:text="Woohoo needs access to your phone's camera and storage to take and save pictures."
+                              android:textColor="@android:color/white"
+                        />
+                    <TextView android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_gravity="center"
+                              android:text="Turn on"
+                              android:textSize="18dp"
+                              android:textColor="@android:color/holo_blue_dark"/>
+
+                </LinearLayout>
+            </RelativeLayout>
+
+            <com.linute.linute.Camera.commonsware.cwac.camera.CameraView
+                android:id="@+id/cameraView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                />
+
+            <View
+                android:id="@+id/vShutter"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#ffffff"
+                android:visibility="gone"/>
+        </com.linute.linute.SquareCamera.SquaredFrameLayout>
+
+
+        <LinearLayout
+            android:id="@+id/takePic_lower_layer"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/btn_capture_options"
+                    android:src="@drawable/ic_collections_white_24dp"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:id="@+id/btnTakePhoto"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/btn_capture"/>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/btn_capture_options"
+                    android:src="@drawable/ic_collections_white_24dp"/>
+            </FrameLayout>
+        </LinearLayout>
+
+
+    </LinearLayout>
+</FrameLayout>

@@ -28,7 +28,6 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.SquareImageView;

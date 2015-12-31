@@ -14,7 +14,7 @@
                   android:layout_marginBottom="10dp"
                   android:gravity="center"
                   android:text="Take photos with Woohoo's camera"
-                  android:textColor="@color/squarecamera__white"
+                  android:textColor="@android:color/white"
                   android:textSize="18dp"
                   android:textStyle="bold"/>
         <TextView android:layout_width="match_parent"
