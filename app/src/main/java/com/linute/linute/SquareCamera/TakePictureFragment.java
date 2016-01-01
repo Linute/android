@@ -27,8 +27,6 @@ import com.linute.linute.Camera.commonsware.cwac.camera.CameraView;
 import com.linute.linute.R;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TakePictureFragment extends Fragment {
 
@@ -77,6 +75,9 @@ public class TakePictureFragment extends Fragment {
         bindViews(rootView);
         setUpButtons();
 
+
+        mCameraView.setHost(new CameraActivity.MyCameraHost(getActivity()));
+
         //mCameraView.setHost(((CameraActivity) getActivity()).getCameraHost());
         return rootView;
     }
@@ -106,7 +107,6 @@ public class TakePictureFragment extends Fragment {
     public void onResume() {
         Log.i(TAG, "onResume: fragg");
         super.onResume();
-        mCameraView.setHost(((CameraActivity) getActivity()).getCameraHost());
         mCameraView.onResume();
     }
 
@@ -115,11 +115,19 @@ public class TakePictureFragment extends Fragment {
         super.onPause();
         Log.i(TAG, "onPause: test");
         mCameraView.onPause();
-        mCameraView.removeHost();
+        //mCameraView.removeHost();
+    }
+
+    @Override
+    public void onDetach() {
+        Log.i(TAG, "onDetach: ");
+        super.onDetach();
     }
 
     @Override
     public void onDestroy() {
+        Log.i(TAG, "onDestroy: ");
+        mCameraView.removeHost();
         super.onDestroy();
     }
 

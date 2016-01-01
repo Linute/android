@@ -1,6 +1,8 @@
 package com.linute.linute.SquareCamera;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -31,12 +34,30 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
 
     private File mPhotoFile;
 
+    private boolean mShowCamera;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_camera);
+        mShowCamera = false;
         requestPermissions();
+        Log.i(TAG, "onCreate: ");
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.i(TAG, "onCreate: " + getSupportFragmentManager().getBackStackEntryCount());
+        if (mShowCamera)
+            launchCameraFragment();
     }
 
     public File getPhotoFile() {
@@ -94,7 +115,7 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
                     REQUEST_PERMISSIONS);
         }else {
             //we have permissions : show camera
-            launchCameraFragment();
+            mShowCamera = true;
         }
     }
 
@@ -104,10 +125,12 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
             case REQUEST_PERMISSIONS:
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
                     if (result != PackageManager.PERMISSION_GRANTED) {
+                        //
                         launchPermissionNeededFragment();
+                        mShowCamera = false;
                         return;
                     }
-                launchCameraFragment();
+                mShowCamera = true;
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -115,9 +138,11 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
     }
 
     private void launchCameraFragment(){
+        Log.i(TAG, "onRequestPermissionsResult: 1");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.camera_fragment_container, TakePictureFragment.newInstance(), TakePictureFragment.TAG)
+                .disallowAddToBackStack()
                 .commitAllowingStateLoss();
     }
 
@@ -125,10 +150,11 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.camera_fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
+                .disallowAddToBackStack()
                 .commitAllowingStateLoss();
     }
 
-    class MyCameraHost extends SimpleCameraHost {
+    public static class MyCameraHost extends SimpleCameraHost {
 
         private Camera.Size previewSize;
 
@@ -162,7 +188,7 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
         @Override
         public void saveImage(PictureTransaction xact, byte[] image) {
             super.saveImage(xact, image);
-            mPhotoFile = getPhotoPath();
+            //mPhotoFile = getPhotoPath();
         }
     }
 }

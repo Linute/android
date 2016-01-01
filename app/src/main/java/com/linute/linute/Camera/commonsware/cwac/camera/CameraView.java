@@ -103,9 +103,7 @@ public class CameraView extends ViewGroup implements AutoFocusCallback {
   public void onResume() {
     addView(previewStrategy.getWidget());
 
-    Log.i(TAG, "onResume: OOOOOOOOO");
     if (camera == null) {
-      Log.i(TAG, "onResume: inside");
       try {
         cameraId=getHost().getCameraId();
 
