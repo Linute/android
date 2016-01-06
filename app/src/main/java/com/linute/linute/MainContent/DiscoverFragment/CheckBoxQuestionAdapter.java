@@ -39,4 +39,13 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     public int getItemCount() {
         return mPosts.size();
     }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
+    }
+
+    private boolean isPositionHeader(int position) {
+        return position == 0;
+    }
 }

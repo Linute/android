@@ -67,8 +67,6 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked())
             Toast.makeText(mContext, "Update Server", Toast.LENGTH_SHORT).show();
-
-
     }
 
     void bindModel(Post post) {

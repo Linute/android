@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.animation.Animator;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -48,14 +50,11 @@ import java.util.TimeZone;
  * Created by QiFeng on 11/17/15.
  */
 public class DiscoverFragment extends Fragment {
-
-
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private EditText postBox;
 
     private SwipeRefreshLayout refreshLayout;
-
 
     private List<Post> mPosts;
     private ChoiceCapableAdapter<?> mCheckBoxChoiceCapableAdapters = null;
@@ -67,7 +66,9 @@ public class DiscoverFragment extends Fragment {
 
         mPosts = new ArrayList<>();
 
-        ((MainActivity) getActivity()).setTitle("My Campus");
+//        ((MainActivity) getActivity()).setTitle("My Campus");
+//        ((MainActivity) getActivity()).resetToolbar();
+
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
         llm = new LinearLayoutManager(getActivity());
@@ -77,6 +78,14 @@ public class DiscoverFragment extends Fragment {
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
+
+        recList.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                ((MainActivity) getActivity()).toggleFam();
+                return false;
+            }
+        });
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
@@ -145,25 +154,6 @@ public class DiscoverFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        // Button but = (Button) getActivity().findViewById(R.id.button);
-        /*
-        but.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
-            }
-
-        });
-
-        Button but2 = (Button)getActivity().findViewById(R.id.button2);
-        but2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((AppCompatActivity)getActivity()).getSupportActionBar().show();
-            }
-        });*/
-
     }
 
     public void getFeed() {
@@ -236,6 +226,8 @@ public class DiscoverFragment extends Fragment {
                     e.printStackTrace();
                 }
 
+                if (getActivity() == null)
+                    return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -360,5 +352,6 @@ public class DiscoverFragment extends Fragment {
         }
         return 0;
     }
+
 
 }

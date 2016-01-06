@@ -35,10 +35,16 @@ public class LinuteUser {
     private int mHostedNumber;
     private String mCollege;
     private String mCampus;
+
+    private int mPosts;
+    private int mFollowers;
+    private int mFollowing;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
 
 
+    public LinuteUser() {
+    }
 
     public LinuteUser(JSONObject userInfo){
 
@@ -58,9 +64,15 @@ public class LinuteUser {
         mProfileImage = getStringFromJson("profileImage", userInfo);
         mRegistrationDate = getStringFromJson("registrationDate", userInfo);
         mDob = getStringFromJson("dob", userInfo);
+        // OLD
         mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
         mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
         mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
+        // NEW start
+        mPosts = getIntFromJson("numberOfEvents", userInfo);
+        mFollowers = getIntFromJson("numberOfFollowers", userInfo);
+        mFollowing = getIntFromJson("numberOfFollowing", userInfo);
+        // NEW end
         mCollege = getStringFromJson("college", userInfo);
         mCampus = getStringFromJson("campus", userInfo);
     }
@@ -264,6 +276,18 @@ public class LinuteUser {
 
     public String getCollege() {
         return mCollege;
+    }
+
+    public int getPosts() {
+        return mPosts;
+    }
+
+    public int getFollowers() {
+        return mFollowers;
+    }
+
+    public int getFollowing() {
+        return mFollowing;
     }
 
 
