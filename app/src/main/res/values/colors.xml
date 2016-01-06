@@ -6,14 +6,19 @@
     <color name="tabsScrollColor">#8a140e</color>
 
 
-    <!--square camera values -->
-    <color name="btn_default_light_pressed">#40ffffff</color>
-    <color name="btn_default_light_normal">#00000000</color>
-
-
 
 
 
     <color name="primary_material_light">#b2aead</color>
     <color name="background_material_light">#d7a5a5</color>
+
+
+
+    <!-- square camera attributes-->
+    <color name="squarecamera__red">#F0001D</color>
+    <color name="squarecamera__pressed_red">#B3F0001D</color>
+    <color name="squarecamera__white">#FFFFFF</color>
+    <color name="squarecamera__pressed_white">#99FFFFFF</color>
+    <color name="grey_color">#505050</color>
 </resources>
+

@@ -1,79 +1,86 @@
 package com.linute.linute.SquareCamera;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
-import com.linute.linute.Camera.commonsware.cwac.camera.CameraHost;
-import com.linute.linute.Camera.commonsware.cwac.camera.CameraHostProvider;
-import com.linute.linute.Camera.commonsware.cwac.camera.PictureTransaction;
-import com.linute.linute.Camera.commonsware.cwac.camera.SimpleCameraHost;
 import com.linute.linute.R;
+import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: might have to keep track of fragments
-public class CameraActivity extends AppCompatActivity implements CameraHostProvider {
+
+public class CameraActivity extends AppCompatActivity {
 
     public static final String TAG = CameraActivity.class.getSimpleName();
 
-    private File mPhotoFile;
-
-    private boolean mShowCamera;
+    private boolean mHasWriteAndCameraPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.squarecamera__CameraFullScreenTheme);
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_camera);
-        mShowCamera = false;
+        setContentView(R.layout.squarecamera__activity_camera);
+
         requestPermissions();
-        Log.i(TAG, "onCreate: ");
+
+        if (savedInstanceState == null && mHasWriteAndCameraPermission) {
+            Log.i(TAG, "onCreate: MAIN");
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                    .commit();
+        }
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+    protected void onResume() {
+        super.onResume();
+
+        if (mRecievedRequestPermissionResults){
+            Log.i(TAG, "onResume: PERMISSIONS");
+            clearBackStack();
+            if (mHasWriteAndCameraPermission) launchCameraFragment();
+            else launchPermissionNeededFragment();
+        }
     }
+
 
     @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        Log.i(TAG, "onCreate: " + getSupportFragmentManager().getBackStackEntryCount());
-        if (mShowCamera)
-            launchCameraFragment();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (!hasCameraAndWritePermission()) return;
+
+        if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
+            beginCrop(data.getData()); //crop image
+        } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+            if (resultCode == RESULT_OK) {
+                Uri imageUri = Crop.getOutput(data);
+
+            } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
+                Toast.makeText(this, Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
-    public File getPhotoFile() {
-        return mPhotoFile;
-    }
-
-    @Override
-    public CameraHost getCameraHost() {
-        return new MyCameraHost(this);
-    }
-
-
-/*
     public void returnPhotoUri(Uri uri) {
         Intent data = new Intent();
-
         data.setData(uri);
 
         if (getParent() == null) {
@@ -85,111 +92,99 @@ public class CameraActivity extends AppCompatActivity implements CameraHostProvi
         finish();
     }
 
+    private void beginCrop(Uri source) { //begin crop activity
+        Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
+        Crop.of(source, destination).asSquare().start(this);
+    }
+
     public void onCancel(View view) {
         getSupportFragmentManager().popBackStack();
     }
-*/
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //getSupportFragmentManager().popBackStack();
+    //Permissions
+    private boolean hasPermission(String permission) {
+        return ContextCompat.checkSelfPermission(this, permission)
+                == PackageManager.PERMISSION_GRANTED;
     }
+
+    private boolean hasCameraAndWritePermission() {
+        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                && hasPermission(Manifest.permission.CAMERA);
+    }
+
 
     private static final int REQUEST_PERMISSIONS = 21;
 
-    public void requestPermissions(){
+    public void requestPermissions() {
         List<String> permissions = new ArrayList<>();
         //check for camera
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA);
         }
         //check for write
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
         //we need permissions
-        if (!permissions.isEmpty()){
+        if (!permissions.isEmpty()) {
             ActivityCompat.requestPermissions(this,
                     permissions.toArray(new String[permissions.size()]),
                     REQUEST_PERMISSIONS);
-        }else {
+        } else {
             //we have permissions : show camera
-            mShowCamera = true;
+            mHasWriteAndCameraPermission = true;
         }
     }
+
+
+    private boolean mRecievedRequestPermissionResults = false;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
+
+                mRecievedRequestPermissionResults = true;
+
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
                     if (result != PackageManager.PERMISSION_GRANTED) {
-                        //
-                        launchPermissionNeededFragment();
-                        mShowCamera = false;
+                        mHasWriteAndCameraPermission = false;
                         return;
                     }
-                mShowCamera = true;
+
+                mHasWriteAndCameraPermission = true;
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-    private void launchCameraFragment(){
-        Log.i(TAG, "onRequestPermissionsResult: 1");
+
+    private void launchCameraFragment() {
+        Log.i(TAG, "launchedCamera");
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.camera_fragment_container, TakePictureFragment.newInstance(), TakePictureFragment.TAG)
-                .disallowAddToBackStack()
-                .commitAllowingStateLoss();
+                .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                .commit();
     }
 
-    private void launchPermissionNeededFragment(){
+    private void launchPermissionNeededFragment() {
+        Log.i(TAG, "launchPermissionNeededFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.camera_fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
-                .disallowAddToBackStack()
-                .commitAllowingStateLoss();
+                .replace(R.id.fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
+                .commit();
     }
 
-    public static class MyCameraHost extends SimpleCameraHost {
+    private void launchEditAndSaveFragment(Uri uri){
 
-        private Camera.Size previewSize;
+    }
 
-        public MyCameraHost(Context ctxt) {
-            super(ctxt);
-        }
+    private void clearBackStack() {
+        FragmentManager manager = getSupportFragmentManager();
 
-        @Override
-        public boolean useFullBleedPreview() {
-            return true;
-        }
-
-        @Override
-        public Camera.Size getPictureSize(PictureTransaction xact, Camera.Parameters parameters) {
-            return previewSize;
-        }
-
-        @Override
-        public Camera.Parameters adjustPreviewParameters(Camera.Parameters parameters) {
-            Camera.Parameters parameters1 = super.adjustPreviewParameters(parameters);
-            previewSize = parameters1.getPreviewSize();
-            return parameters1;
-        }
-
-        @Override
-        public void saveImage(PictureTransaction xact, final Bitmap bitmap) {
-            //TODO: Go to edit fragment
-            Log.i("TAKENPHOTO", "TAKEN");
-        }
-
-        @Override
-        public void saveImage(PictureTransaction xact, byte[] image) {
-            super.saveImage(xact, image);
-            //mPhotoFile = getPhotoPath();
-        }
+        //if we are currently in edit photo
+        if (manager.getBackStackEntryCount() == 1)
+            manager.popBackStack();
     }
 }
-

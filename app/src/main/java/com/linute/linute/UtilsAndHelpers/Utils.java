@@ -38,7 +38,7 @@ public class Utils {
 
     public static String encodeImageBase64(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream); //NOTE: Change Compression as needed
         byte[] byteFormat = stream.toByteArray();
         // get the base 64 string
         return Base64.encodeToString(byteFormat, Base64.DEFAULT);

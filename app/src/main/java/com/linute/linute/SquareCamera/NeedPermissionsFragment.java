@@ -40,8 +40,8 @@ public class NeedPermissionsFragment extends Fragment {
             public void onClick(View v) {
                 CameraActivity main = (CameraActivity) getActivity();
                 main.requestPermissions();
-                //TODO:FIX
             }
         });
     }
 }
+

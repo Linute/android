@@ -32,11 +32,11 @@
 
     <!--Square Camera-->
     <!-- Base application theme. -->
-    <style name="squarecamera__CameraFullScreenTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="squarecamera__CameraFullScreenTheme" parent="squarecamera__CameraFullScreenTheme.Base">
 
     </style>
 
-    <style name="squarecamera__CameraFullScreenTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="squarecamera__CameraFullScreenTheme.Base" parent="AppTheme">
         <!-- Customize your theme here. -->
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
@@ -50,13 +50,6 @@
     <style name="squarecamera__CameraFullScreenTheme.PopupOverlay"
            parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="squarecamera__CameraFullScreenTheme.NoUI" parent="squarecamera__CameraFullScreenTheme.Base">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowDisablePreview">true</item>
-        <item name="android:windowIsFloating">true</item>
-    </style>
     <!--<style name="PostDialog" parent="android:Theme.Dialog" >-->
         <!--<item name="android:windowNoTitle">false</item>-->
         <!--<item name="android:windowFullscreen">false</item>-->

@@ -1,0 +1,97 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black"
+                tools:context="com.desmond.squarecamera.EditSavePhotoFragment">
+
+    <View
+        android:id="@+id/topView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+
+    <RelativeLayout android:id="@+id/frame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/topView"
+                    android:background="@android:color/white"
+                    android:focusableInTouchMode="true">
+
+        <com.linute.linute.SquareCamera.SquareImageView
+            android:id="@+id/photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"/>
+
+
+        <EditText android:id="@+id/editFragment_title_text"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_centerVertical="true"
+                  android:alpha="0.5"
+                  android:background="@android:color/black"
+                  android:gravity="center"
+                  android:imeOptions="actionDone"
+                  android:inputType="textPhonetic"
+                  android:maxLength="20"
+                  android:paddingBottom="5dp"
+                  android:paddingTop="5dp"
+                  android:singleLine="true"
+                  android:textColor="@android:color/white"
+                  android:visibility="gone"/>
+
+    </RelativeLayout>
+
+    <LinearLayout android:id="@+id/editFragment_button_layer"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:layout_marginBottom="16dp"
+                  android:orientation="vertical">
+
+        <Switch android:id="@+id/editFragment_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Post Anon"
+                android:textColor="@android:color/white"
+            />
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:weightSum="2">
+
+            <ImageButton
+                android:id="@+id/cancel"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:onClick="onCancel"
+                android:padding="10dp"
+                android:src="@drawable/squarecamera__cancel_drawable"/>
+
+            <ImageButton
+                android:id="@+id/save_photo"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:padding="10dp"
+                android:src="@drawable/squarecamera__save_photo_drawable"/>
+
+
+        </LinearLayout>
+    </LinearLayout>
+    <ProgressBar
+        android:id="@+id/editFragment_progress_bar"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+
+</RelativeLayout>
