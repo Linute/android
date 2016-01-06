@@ -34,7 +34,6 @@ import android.widget.TextView;
 
 
 import com.linute.linute.R;
-import com.soundcloud.android.crop.Crop;
 
 import java.io.IOException;
 import java.util.List;
@@ -121,7 +120,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         ((ImageButton) view.findViewById(R.id.cameraFragment_galleryButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goToGalleryAndCrop();
+                ((CameraActivity)getActivity()).launchGalleryFragment();
             }
         });
 
@@ -157,7 +156,10 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                     topCoverView.requestLayout();
                     btnCoverView.requestLayout();
 
-                    Log.i(TAG, "onGlobalLayout: "+topCoverView.getLayoutParams().height);
+                    //save image parameters ; top cover and lower cover
+                    //we need this for EditAndSaveFragment
+                    if (getActivity() != null)
+                        ((CameraActivity)getActivity()).setImageParameters(mImageParameters.createCopy());
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         mPreviewView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -167,8 +169,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 }
             });
         } else {
-            Log.i(TAG, "setUpCovers: else");
             resizeTopAndBtmCover(topCoverView, btnCoverView);
+
+            //save image parameters ; top cover and lower cover
+            //we need this for EditAndSaveFragment
+            ((CameraActivity)getActivity()).setImageParameters(mImageParameters.createCopy());
         }
     }
 
@@ -268,6 +273,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
      */
     private void restartPreview() {
 
+        Log.i(TAG, "restartPreview: tedst");
         if (mCamera != null) {
             stopCameraPreview();
             mCamera.release();
@@ -276,8 +282,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         if (getCamera(mCameraID)) { //were able to find a camera to use
             startCameraPreview();
+            Log.i(TAG, "restartPreview: true");
             mPreviewView.setBackgroundColor(Color.TRANSPARENT);
             setOnClickListeners(); //activate buttons
+        }else {
+            Log.i(TAG, "restartPreview: false");
         }
     }
 
@@ -538,20 +547,12 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         mSurfaceAlreadyCreated = false;
-        // The surface is destroyed with the visibility of the SurfaceView is set to View.Invisible
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode != Activity.RESULT_OK) return;
-
-        switch (requestCode) {
-            case 1:
-                Uri imageUri = data.getData();
-                break;
-
-            default:
-                super.onActivityResult(requestCode, resultCode, data);
+        // stop the preview
+        if (mCamera != null) {
+            mShowCameraHandler.removeCallbacks(mShowPreview);
+            stopCameraPreview();
+            mCamera.release();
+            mCamera = null;
         }
     }
 
@@ -680,9 +681,5 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     private boolean hasCameraAndWritePermission(){
         return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 && hasPermission(Manifest.permission.CAMERA);
-    }
-
-    private void goToGalleryAndCrop(){
-        Crop.pickImage(getActivity());
     }
 }

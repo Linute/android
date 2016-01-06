@@ -41,7 +41,7 @@ public class Utils {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 60, stream); //NOTE: Change Compression as needed
         byte[] byteFormat = stream.toByteArray();
         // get the base 64 string
-        return Base64.encodeToString(byteFormat, Base64.DEFAULT);
+        return Base64.encodeToString(byteFormat, Base64.NO_WRAP);
     }
 
 

@@ -68,7 +68,10 @@ public class EditSavePhotoFragment extends Fragment {
         Fragment fragment = new EditSavePhotoFragment();
 
         Bundle args = new Bundle();
-        args.putParcelable(BITMAP_URI, imageUri);
+
+        if (imageUri != null)
+            args.putParcelable(BITMAP_URI, imageUri);
+
         args.putParcelable(IMAGE_INFO, parameters);
 
         fragment.setArguments(args);
@@ -96,6 +99,7 @@ public class EditSavePhotoFragment extends Fragment {
         //setup ImageView
         Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
+        
         photoImageView.setImageURI(imageUri);
 
         imageParameters.mIsPortrait =
@@ -132,6 +136,13 @@ public class EditSavePhotoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 savePicture();
+            }
+        });
+
+        view.findViewById((R.id.cancel)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((CameraActivity)getActivity()).clearBackStack();
             }
         });
 
@@ -230,7 +241,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         Map<String, Object> postData = new HashMap<>();
         postData.put("college", "564a46ff8ac4a559174247af");
-        postData.put("privacy", (mAnonSwitch.isChecked() ? 0 : 1) + "");
+        postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
         postData.put("images", images);
         postData.put("title", mText.getText().toString()); //TODO: What if empty?
         postData.put("geo", jsonObject);
@@ -261,6 +272,7 @@ public class EditSavePhotoFragment extends Fragment {
                     Log.i(TAG, "onResponse: " + "Posted");
                 }else {
                     showServerError();
+                    Log.i(TAG, "onResponse: "+response.code());
                     Log.e(TAG, "onResponse: "+response.body().string() );
                 }
             }
