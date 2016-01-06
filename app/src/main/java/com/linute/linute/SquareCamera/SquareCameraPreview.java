@@ -176,7 +176,7 @@ public class SquareCameraPreview extends SurfaceView{
         List<String> supportedFocusModes = params.getSupportedFocusModes();
         if (supportedFocusModes != null
                 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            Log.d(TAG, mFocusAreas.size() + "");
+            //Log.d(TAG, mFocusAreas.size() + "");
             params.setFocusAreas(mFocusAreas);
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             mCamera.setParameters(params);

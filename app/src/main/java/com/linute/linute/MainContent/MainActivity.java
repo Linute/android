@@ -3,6 +3,7 @@ package com.linute.linute.MainContent;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.PersistableBundle;
 import android.support.design.widget.AppBarLayout;
@@ -25,6 +26,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -80,8 +82,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-                newPost();
-
+                //newPost();
+                Intent i = new Intent(MainActivity.this, CameraActivity.class);
+                startActivity(i);
             }
         });
     }

@@ -1,9 +1,7 @@
 package com.linute.linute.SquareCamera;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -140,7 +138,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         final View btnCoverView = view.findViewById(R.id.cover_bottom_view);
 
         if (!hasSavedInstance) { //we need to know how big the camera preview is
-            Log.i(TAG, "setUpCovers: if");
             ViewTreeObserver observer = mPreviewView.getViewTreeObserver();
             observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -273,7 +270,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
      */
     private void restartPreview() {
 
-        Log.i(TAG, "restartPreview: tedst");
         if (mCamera != null) {
             stopCameraPreview();
             mCamera.release();
@@ -282,11 +278,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         if (getCamera(mCameraID)) { //were able to find a camera to use
             startCameraPreview();
-            Log.i(TAG, "restartPreview: true");
             mPreviewView.setBackgroundColor(Color.TRANSPARENT);
             setOnClickListeners(); //activate buttons
-        }else {
-            Log.i(TAG, "restartPreview: false");
         }
     }
 
@@ -487,7 +480,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         //restartPreview() is called when camera preview surface is created
         //to prevent redundancy, only run this one if surfaceCreated() isn't called when fragment resumed
         if (mSurfaceAlreadyCreated && hasCameraAndWritePermission()) {
-            Log.i(TAG, "onResume: Fragment");
             if (mCamera == null) {
                 restartPreview();
             }
@@ -534,7 +526,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mSurfaceHolder = holder;
 
         if (hasCameraAndWritePermission()) {
-            Log.i(TAG, "surfaceCreated: ");
             mSurfaceAlreadyCreated = true;
             mShowCameraHandler.postDelayed(mShowPreview, 250);
         }
@@ -573,7 +564,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                         R.id.fragment_container,
                         EditSavePhotoFragment.newInstance(uri, mImageParameters.createCopy()),
                         EditSavePhotoFragment.TAG)
-                .addToBackStack(null)
+                .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
 
         setSafeToTakePhoto(true);

@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -48,14 +50,14 @@ public class CameraActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mRecievedRequestPermissionResults){ //only runs if we have updated permissions information
+        if (mRecievedRequestPermissionResults) { //only runs if we have updated permissions information
             clearBackStack(); //clears gallery or camera fragment
-            if (mHasWriteAndCameraPermission)launchCameraFragment();
+            if (mHasWriteAndCameraPermission) launchCameraFragment();
             else launchPermissionNeededFragment();
-       }
+        }
     }
 
-    public void setImageParameters(ImageParameters param){
+    public void setImageParameters(ImageParameters param) {
         mImageParameters = param;
     }
 
@@ -66,13 +68,15 @@ public class CameraActivity extends AppCompatActivity {
 
         if (!hasCameraAndWritePermission()) return;
 
-        if (resultCode == RESULT_CANCELED){ //cancelled gallery pick or crop
+        if (resultCode == RESULT_CANCELED) { //cancelled gallery pick or crop
             clearBackStack(); //remove gallery fragment
         }
 
-        if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
+        else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
             beginCrop(data.getData()); //crop image
-        } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+        }
+
+        else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = Crop.getOutput(data);
@@ -127,24 +131,20 @@ public class CameraActivity extends AppCompatActivity {
 
     private boolean mRecievedRequestPermissionResults = false;
 
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
 
-                Log.i(TAG, "onRequestPermissionsResult: ");
                 mRecievedRequestPermissionResults = true;
 
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
                     if (result != PackageManager.PERMISSION_GRANTED) {
                         mHasWriteAndCameraPermission = false;
-                        //launchPermissionNeededFragment();
                         return;
                     }
 
                 mHasWriteAndCameraPermission = true;
-                //launchCameraFragment();
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -153,7 +153,6 @@ public class CameraActivity extends AppCompatActivity {
 
 
     private void launchCameraFragment() {
-        Log.i(TAG, "launchedCamera");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
@@ -167,23 +166,22 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void launchEditAndSaveFragment(Uri uri){
-        clearBackStack();
+    private void launchEditAndSaveFragment(Uri uri) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
                         R.id.fragment_container,
                         EditSavePhotoFragment.newInstance(uri, mImageParameters),
                         EditSavePhotoFragment.TAG)
-                .addToBackStack(null)
+                .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
     }
 
-    public void clearBackStack() {
-        if (getSupportFragmentManager().getBackStackEntryCount() == 1)
-            getSupportFragmentManager().popBackStack();
+    public void clearBackStack() { //pops all frag with name
+        getSupportFragmentManager().popBackStack(EDIT_AND_GALLERY_STACK_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
+    public static final String EDIT_AND_GALLERY_STACK_NAME = "edit_and_gallery_stack_name";
 
     public void launchGalleryFragment() {
         getSupportFragmentManager()
@@ -192,12 +190,13 @@ public class CameraActivity extends AppCompatActivity {
                         R.id.fragment_container,
                         GalleryFragment.newInstance(),
                         GalleryFragment.TAG)
-                .addToBackStack(null)
+                .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
+
         goToGalleryAndCrop();
     }
 
-    private void goToGalleryAndCrop(){
+    private void goToGalleryAndCrop() {
         Crop.pickImage(this);
     }
 }
