@@ -73,7 +73,6 @@ public class ProfileActivityListAdapter extends BaseAdapter {
         //set new values
         holder.bindToActivityItem(mUserActivityItems.get(position));
 
-
         return convertView;
     }
 
