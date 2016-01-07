@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.widget.Toast;
 
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
+import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.ProfileFragment.ProfileFragment;
 import com.linute.linute.R;
 
@@ -19,7 +20,7 @@ import com.linute.linute.R;
 public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
 
     private Context mContext;
-    private Fragment [] mFragments;
+    private Fragment[] mFragments;
 
     //icons we will use
     //these are currently 30 pxl
@@ -31,15 +32,11 @@ public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
     };
 
 
-    public LinuteFragmentAdapter(FragmentManager fm, Context context) {
+    public LinuteFragmentAdapter(FragmentManager fm, Context context, Fragment[] pageFragments) {
         super(fm);
         this.mContext = context;
 
-        mFragments = new Fragment[4];
-        mFragments[0] = new DiscoverFragment();
-        mFragments[1] = new DiscoverFragment();
-        mFragments[2] = new DiscoverFragment();
-        mFragments[3] = new ProfileFragment();
+        mFragments = pageFragments;
     }
 
     @Override
@@ -52,7 +49,6 @@ public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         //add others later
         //TODO: ADD OTHER FRAGMENTS
-        ((MainActivity) mContext).resetToolbar();
         switch (position) {
             case 0:
                 return mFragments[0];

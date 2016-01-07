@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#051b2e</color>
-    <color name="colorPrimaryDark">#051e33</color>
+    <color name="colorPrimary">#142029</color>
+    <color name="colorPrimaryDark">#0f181e</color>
     <color name="colorAccent">#1d4261</color>
     <color name="tabsScrollColor">#8a140e</color>
 
@@ -13,4 +13,7 @@
     <color name="squarecamera__pressed_white">#99FFFFFF</color>
     <color name="primary_material_light">#b2aead</color>
     <color name="background_material_light">#d7a5a5</color>
+
+    <color name="white">#fafafa</color>
+    <color name="white_pressed">#f1f1f1</color>
 </resources>
