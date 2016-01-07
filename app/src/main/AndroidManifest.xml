@@ -209,7 +209,11 @@
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
         </activity>
         <activity android:name=".SquareCamera.CameraActivity"
-                  android:screenOrientation="portrait"/>
+                  android:screenOrientation="portrait"
+                  android:theme="@style/squarecamera__CameraFullScreenTheme"
+            >
+
+        </activity>
     </application>
 
 </manifest>

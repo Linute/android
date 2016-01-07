@@ -39,7 +39,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             //inflate your layout and pass it to view holder
             return new ProfileViewHolder(LayoutInflater.
                     from(parent.getContext()).
-                    inflate(R.layout.fragment_profile2, parent, false), context);
+                    inflate(R.layout.list_item_profile_frag, parent, false), context);
         } else if (viewType == TYPE_HEADER) {
             //inflate your layout and pass it to view holder
             return new ProfileHeaderViewHolder(LayoutInflater

@@ -4,13 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.Point;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.util.Base64;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -28,46 +25,13 @@ import java.util.Date;
  */
 public class ImageUtility {
 
-    public static String convertBitmapToString(Bitmap bitmap) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
-
-        return Base64.encodeToString(out.toByteArray(), Base64.DEFAULT);
-    }
-
-    public static byte[] convertBitmapStringToByteArray(String bitmapByteString) {
-        return Base64.decode(bitmapByteString, Base64.DEFAULT);
-    }
-
-    public static Bitmap rotatePicture(Context context, int rotation, byte[] data) {
-        Bitmap bitmap = decodeSampledBitmapFromByte(context, data);
-
-        if (rotation != 0) {
-            Bitmap oldBitmap = bitmap;
-
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotation);
-
-            bitmap = Bitmap.createBitmap(
-                    oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
-            );
-
-            oldBitmap.recycle();
-        }
-
-        return bitmap;
-    }
 
     public static Uri savePicture(Context context, Bitmap bitmap) {
-        int cropHeight;
-        if (bitmap.getHeight() > bitmap.getWidth()) cropHeight = bitmap.getWidth();
-        else                                        cropHeight = bitmap.getHeight();
 
-        bitmap = ThumbnailUtils.extractThumbnail(bitmap, cropHeight, cropHeight, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
 
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                context.getString(R.string.squarecamera__app_name)
+                context.getString(R.string.app_name)
         );
 
         if (!mediaStorageDir.exists()) {
@@ -103,24 +67,7 @@ public class ImageUtility {
         return fileContentUri;
     }
 
-    public static Bitmap decodeSampledBitmapFromPath(String path, int reqWidth, int reqHeight) {
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        options.inMutable = true;
-        options.inBitmap = BitmapFactory.decodeFile(path, options);
 
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        options.inScaled = true;
-        options.inDensity = options.outWidth;
-        options.inTargetDensity = reqWidth * options.inSampleSize;
-
-        options.inJustDecodeBounds = false;
-        options.inPurgeable = true;
-        options.inInputShareable = true;
-
-        return BitmapFactory.decodeFile(path, options);
-    }
     /**
      * Decode and sample down a bitmap from a byte stream
      */

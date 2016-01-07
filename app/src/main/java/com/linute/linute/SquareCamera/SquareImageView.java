@@ -26,9 +26,7 @@ public class SquareImageView extends ImageView {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int width = getMeasuredWidth();
-        int height = getMeasuredHeight();
 
-        int squareLen = width > height ? height : width;
-        setMeasuredDimension(squareLen, squareLen);
+        setMeasuredDimension(width,width);
     }
 }

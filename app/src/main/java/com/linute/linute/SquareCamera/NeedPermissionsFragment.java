@@ -44,3 +44,4 @@ public class NeedPermissionsFragment extends Fragment {
         });
     }
 }
+

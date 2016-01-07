@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.List;
 /**
  *
  */
-public class SquareCameraPreview extends SurfaceView {
+public class SquareCameraPreview extends SurfaceView{
 
     public static final String TAG = SquareCameraPreview.class.getSimpleName();
     private static final int INVALID_POINTER_ID = -1;
@@ -175,7 +176,7 @@ public class SquareCameraPreview extends SurfaceView {
         List<String> supportedFocusModes = params.getSupportedFocusModes();
         if (supportedFocusModes != null
                 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
-            Log.d(TAG, mFocusAreas.size() + "");
+            //Log.d(TAG, mFocusAreas.size() + "");
             params.setFocusAreas(mFocusAreas);
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             mCamera.setParameters(params);

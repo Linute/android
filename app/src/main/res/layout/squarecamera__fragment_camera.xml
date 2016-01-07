@@ -3,19 +3,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/darker_gray"
     tools:context="com.desmond.squarecamera.CameraFragment">
 
     <com.linute.linute.SquareCamera.SquareCameraPreview
         android:id="@+id/camera_preview_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:background="@color/grey_color"/>
 
-    <View
+    <LinearLayout
         android:id="@+id/cover_top_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/squarecamera__cover_start_height"
         android:layout_alignTop="@id/camera_preview_view"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <ImageButton
+            android:id="@+id/camera_cancel"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:src="@drawable/squarecamera__cancel_drawable"/>
+
+        <View android:layout_width="0px"
+              android:layout_height="1dp"
+              android:layout_weight="1"
+            />
+        <View android:layout_width="0px"
+              android:layout_height="1dp"
+              android:layout_weight="1"/>
+
+        <ImageButton android:id="@+id/cameraFragment_galleryButton"
+                     android:layout_width="0px"
+                     android:layout_height="wrap_content"
+                     android:background="@android:color/transparent"
+                     android:src="@drawable/ic_profile"
+                     android:layout_gravity="center"
+                     android:layout_weight="1"/>
+
+    </LinearLayout>
+
 
     <View
         android:id="@+id/cover_bottom_view"
@@ -24,30 +56,67 @@
         android:layout_alignBottom="@id/camera_preview_view"
         android:background="@android:color/black"/>
 
+
+    <!--<LinearLayout android:id="@+id/square_camera_ask_permission_layer"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignBottom="@id/cover_top_view"-->
+    <!--android:layout_marginLeft="32dp"-->
+    <!--android:layout_marginRight="32dp"-->
+    <!--android:orientation="vertical"-->
+    <!--android:visibility="gone">-->
+    <!--<TextView android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center"-->
+    <!--android:padding="10dp"-->
+    <!--android:text="Use Woohoo's Camera"-->
+    <!--android:textColor="@android:color/darker_gray"-->
+    <!--android:textSize="20dp"-->
+    <!--android:textStyle="bold"/>-->
+    <!--<TextView android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center"-->
+    <!--android:padding="8dp"-->
+    <!--android:text="Take photos with this the Woohoo app."-->
+    <!--android:textColor="@android:color/darker_gray"-->
+    <!--android:textSize="16dp"/>-->
+
+    <!--<TextView android:id="@+id/square_camera_ask_button"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center"-->
+    <!--android:padding="6dp"-->
+    <!--android:text="Turn on"-->
+    <!--android:textColor="@android:color/holo_green_light"-->
+    <!--android:textSize="16dp"/>-->
+
+
+    <!--</LinearLayout>-->
+
     <LinearLayout
         android:id="@+id/camera_tools_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/camera_preview_view"
         android:layout_alignParentBottom="true"
-        android:padding="10dp"
-        android:orientation="horizontal"
+        android:layout_below="@id/camera_preview_view"
         android:background="@android:color/black"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
 
         <ImageView
             android:id="@+id/change_camera"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/squarecamera__camera"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:src="@drawable/squarecamera__camera"/>
 
         <ImageView
             android:id="@+id/capture_image_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@drawable/squarecamera__capture_photo_button"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:src="@drawable/squarecamera__capture_photo_button"/>
 
         <LinearLayout
             android:id="@+id/flash"
@@ -61,15 +130,15 @@
                 android:id="@+id/flash_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/squarecamera__toggle_flash" />
+                android:src="@drawable/squarecamera__toggle_flash"/>
 
             <TextView
                 android:id="@+id/auto_flash_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_gravity="center_vertical"
                 android:text="Auto"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"/>
