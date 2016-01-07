@@ -3,6 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@android:color/black"
+                android:focusableInTouchMode="true"
                 tools:context="com.desmond.squarecamera.EditSavePhotoFragment">
 
     <View
@@ -14,8 +15,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/topView"
-                    android:background="@android:color/white"
-                    android:focusableInTouchMode="true">
+                    android:background="@android:color/white">
 
         <com.linute.linute.SquareCamera.SquareImageView
             android:id="@+id/photo"
@@ -24,21 +24,22 @@
             android:scaleType="centerCrop"/>
 
 
-        <EditText android:id="@+id/editFragment_title_text"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_centerVertical="true"
-                  android:alpha="0.5"
-                  android:background="@android:color/black"
-                  android:gravity="center"
-                  android:imeOptions="actionDone"
-                  android:inputType="textPhonetic"
-                  android:maxLength="20"
-                  android:paddingBottom="5dp"
-                  android:paddingTop="5dp"
-                  android:singleLine="true"
-                  android:textColor="@android:color/white"
-                  android:visibility="gone"
+        <view android:id="@+id/editFragment_title_text"
+              class="com.linute.linute.SquareCamera.EditSavePhotoFragment$EditSaveEditText"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="80dp"
+              android:alpha="0.6"
+              android:background="@android:color/black"
+              android:gravity="center"
+              android:imeOptions="actionDone"
+              android:inputType="textPhonetic"
+              android:maxLength="20"
+              android:paddingBottom="5dp"
+              android:paddingTop="5dp"
+              android:singleLine="true"
+              android:textColor="@android:color/white"
+              android:visibility="gone"
             />
 
     </RelativeLayout>

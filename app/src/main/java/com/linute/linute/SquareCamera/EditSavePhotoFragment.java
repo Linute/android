@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,7 +59,7 @@ public class EditSavePhotoFragment extends Fragment {
 
     private View mFrame; //frame where we put edittext and picture
 
-    private EditText mText; //text
+    private EditSaveEditText mText; //text
     private ProgressBar mProgressBar;
     private View mButtonLayer;
     private Switch mAnonSwitch;
@@ -105,7 +107,7 @@ public class EditSavePhotoFragment extends Fragment {
         imageParameters.mIsPortrait =
                 getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
-        //shows the text strip
+        //shows the text strip when image touched
         photoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,6 +115,7 @@ public class EditSavePhotoFragment extends Fragment {
                     mText.setVisibility(View.VISIBLE);
                     mText.requestFocus();
                     showKeyboard();
+                    mCanMove = false; //can't mvoe strip while in edit
                 }
             }
         });
@@ -126,7 +129,7 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
-        mText = (EditText) view.findViewById(R.id.editFragment_title_text);
+        mText = (EditSaveEditText) view.findViewById(R.id.editFragment_title_text);
         mButtonLayer = view.findViewById(R.id.editFragment_button_layer);
         mProgressBar = (ProgressBar) view.findViewById(R.id.editFragment_progress_bar);
         mAnonSwitch = (Switch) view.findViewById(R.id.editFragment_switch);
@@ -149,14 +152,34 @@ public class EditSavePhotoFragment extends Fragment {
         setUpEditText();
     }
 
+    //text strip can move or not
+    //can't move during edit
+    private boolean mCanMove = true;
 
     private void setUpEditText(){
+
+        //when back is pressed
+        mText.setBackAction(new BackButtonAction() {
+            @Override
+            public void backPressed() {
+                hideKeyboard();
+
+                mCanMove = true;
+
+                //if EditText is empty, hide it
+                if (mText.getText().toString().trim().isEmpty())
+                    mText.setVisibility(View.GONE);
+            }
+        });
+
         //when done is pressed on keyboard
         mText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     hideKeyboard();
+
+                    mCanMove = true;
 
                     //if EditText is empty, hide it
                     if (mText.getText().toString().trim().isEmpty())
@@ -172,8 +195,12 @@ public class EditSavePhotoFragment extends Fragment {
             private boolean stopped = true;
             float totalMovement;
 
+
+
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                if (!mCanMove) return false; //can't move, so stop
 
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
@@ -186,6 +213,7 @@ public class EditSavePhotoFragment extends Fragment {
                         if (totalMovement <= 2) { //tapped and no movement
                             mText.requestFocus(); //open edittext
                             showKeyboard();
+                            mCanMove = false;
                         }
                         stopped = true;
                         break;
@@ -197,17 +225,23 @@ public class EditSavePhotoFragment extends Fragment {
                         int change = (int) (event.getY() - prevY);
                         totalMovement += Math.abs(change);
                         if (!stopped) { //move the edittext around
-                            v.setTop(v.getTop() + change);
-                            v.setBottom(v.getBottom() + change);
-                            if (v.getTop() < 0) { //if editext is at the top, stop moving
-                                v.setBottom(v.getHeight());
-                                v.setTop(0);
-                                stopped = true;
-                            } else if (v.getBottom() > mFrame.getHeight()) { //edittext at the bottom stop moving
-                                v.setTop(mFrame.getHeight() - v.getHeight());
-                                v.setBottom(mFrame.getHeight());
+
+                            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) v.getLayoutParams();
+
+                            int newTop = params.topMargin + change; //new margintop
+
+                            if (newTop < 0) { //over the top edge
+                                newTop = 0;
                                 stopped = true;
                             }
+
+                            else if (newTop >  mFrame.getHeight() - v.getHeight()){ //under the bottom edge
+                                newTop = mFrame.getHeight() - v.getHeight();
+                                stopped = true;
+                            }
+
+                            params.setMargins(0, newTop,0,0); //set new margin
+                            v.setLayoutParams(params);
                         }
                         break;
                 }
@@ -219,12 +253,6 @@ public class EditSavePhotoFragment extends Fragment {
     }
 
     private void savePicture() {
-        //hide text strip if no text inputted
-        if (mText.getText().toString().trim().isEmpty()) {
-            mText.setVisibility(View.GONE);
-        }
-
-        mFrame.requestFocus();
 
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
@@ -301,7 +329,7 @@ public class EditSavePhotoFragment extends Fragment {
     }
 
     private void hideKeyboard(){
-        mFrame.requestFocus(); //release focus from EditText and hide keyboard
+        mText.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
     }
@@ -340,5 +368,32 @@ public class EditSavePhotoFragment extends Fragment {
                 mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
+    }
+
+
+    public static class EditSaveEditText extends EditText{
+
+        BackButtonAction mBackAction;
+
+        public EditSaveEditText(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                // User has pressed Back key. So hide the keyboard
+                mBackAction.backPressed();
+            }
+            return false;
+        }
+
+        public void setBackAction(BackButtonAction action) {
+            mBackAction = action;
+        }
+    }
+
+    interface BackButtonAction {
+        public void backPressed();
     }
 }

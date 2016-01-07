@@ -122,6 +122,10 @@ public class Profile extends Fragment {
             }
         });
 
+        user = LinuteUser.getDefaultUser(getContext());
+        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
+        recList.setAdapter(mProfileAdapter);
+
         if (!mHasUpdatedFromDB) {
             updateAndSetHeader(); //get information from server to update profile
             setActivities();
@@ -181,12 +185,15 @@ public class Profile extends Fragment {
                         e.printStackTrace();
                     }
                     user = new LinuteUser(jsonObject); //container for new information
-                    Log.d("TAG", body);
+
+                    savePreferences(user);
+                    Log.d(TAG, body);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            /* NOTE: I MOVED THIS TO ON CreateView
                             mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
-                            recList.setAdapter(mProfileAdapter);
+                            recList.setAdapter(mProfileAdapter);*/
                             mProfileAdapter.notifyDataSetChanged();
                             if (!hasSetTitle) {
                                 ((MainActivity) getActivity()).setTitle(user.getFirstName() + " " + user.getLastName());
@@ -202,32 +209,20 @@ public class Profile extends Fragment {
         });
     }
 
-    private void setTextAndImageViewsAndSaveToPrefs(String response) {
-//        try { //try to get new information
-
-
-//            mProfileImagePath = Utils.getImageUrlOfUser(user.getProfileImage());
-//            if (mProfileImagePath != null)
-//                setProfilePicture();
-//
-//            //save the new info
-//            SharedPreferences.Editor editor = mSharedPreferences.edit();
-//            editor.putString("firstName", user.getFirstName());
-//            editor.putString("lastName", user.getLastName());
-//            editor.putString("status", user.getStatus());
-//            editor.putInt("numOfFriends", user.getFriendsNumber());
-//            editor.putInt("numOfAttendedEvents", user.getAttendedNumber());
-//            editor.putInt("numOfHostedEvents", user.getHostedNumber());
-//            editor.apply();
-
-//        } catch (JSONException e) { //apply saved or cached data
-//            e.printStackTrace();
-//            Log.v(TAG, "Couldn't save info");
-//        }
+    private void savePreferences(LinuteUser user) {
+            //save the new info
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString("firstName", user.getFirstName());
+            editor.putString("lastName", user.getLastName());
+            editor.putString("status", user.getStatus());
+            editor.putInt("posts", user.getPosts());
+            editor.putInt("followers", user.getFollowers());
+            editor.putInt("following", user.getFollowing());
+            editor.apply();
     }
 
     //set our views with the default or cached data
-    //used when there is trouble retrieving data from server
+//    //used when there is trouble retrieving data from server
 //    private void setDefaultHeader() {
 //        mFullNameText.setText(
 //                mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""));
@@ -236,7 +231,7 @@ public class Profile extends Fragment {
 //        mNumOfFriends.setText(String.valueOf(mSharedPreferences.getInt("numOfFriends", 0)));
 //        mStatusText.setText(mSharedPreferences.getString("status", ""));
 //
-//        setCachedProfilePicture();
+//        //setCachedProfilePicture();
 //    }
 
     //try to load image from cache

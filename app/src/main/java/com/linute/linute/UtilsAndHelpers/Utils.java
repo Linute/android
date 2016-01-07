@@ -97,9 +97,11 @@ public class Utils {
 
         pref.putBoolean("isLoggedIn", false);
 
-        pref.putInt("numOfAttendedEvents", 0);
-        pref.putInt("numOfHostedEvents", 0);
-        pref.putInt("numOfFriends", 0);
+        pref.putInt("posts", 0);
+        pref.putInt("followers", 0);
+        pref.putInt("following", 0);
+        pref.putString("college", "");
+        pref.putString("campus", "");
         pref.commit();
     }
 
