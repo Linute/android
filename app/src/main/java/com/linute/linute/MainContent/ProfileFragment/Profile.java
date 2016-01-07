@@ -301,7 +301,7 @@ public class Profile extends Fragment {
                                 mUserActivityItems.add(
                                         new UserActivityItem(
                                                 activities.getJSONObject(i),
-                                                mProfileImagePath,
+                                                activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
                                                 mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
                                         )); //create activity objects and add to array
                             }

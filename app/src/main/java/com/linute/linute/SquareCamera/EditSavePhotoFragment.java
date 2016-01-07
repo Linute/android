@@ -169,8 +169,8 @@ public class EditSavePhotoFragment extends Fragment {
         //movement
         mText.setOnTouchListener(new View.OnTouchListener() {
             float prevY;
-            boolean hasMoved = false;
             private boolean stopped = true;
+            float totalMovement;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -179,11 +179,11 @@ public class EditSavePhotoFragment extends Fragment {
                     case MotionEvent.ACTION_DOWN:
                         prevY = event.getY();
                         stopped = false;
-                        hasMoved = false;
+                        totalMovement = 0;
                         break;
 
                     case MotionEvent.ACTION_UP:
-                        if (!hasMoved) { //tapped and no movement
+                        if (totalMovement <= 2) { //tapped and no movement
                             mText.requestFocus(); //open edittext
                             showKeyboard();
                         }
@@ -194,9 +194,9 @@ public class EditSavePhotoFragment extends Fragment {
                     case MotionEvent.ACTION_POINTER_UP:
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        hasMoved = true;
+                        int change = (int) (event.getY() - prevY);
+                        totalMovement += Math.abs(change);
                         if (!stopped) { //move the edittext around
-                            int change = (int) (event.getY() - prevY);
                             v.setTop(v.getTop() + change);
                             v.setBottom(v.getBottom() + change);
                             if (v.getTop() < 0) { //if editext is at the top, stop moving

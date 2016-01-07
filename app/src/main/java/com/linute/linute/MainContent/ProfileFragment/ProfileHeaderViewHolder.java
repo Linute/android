@@ -4,11 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
+import com.google.android.gms.vision.Frame;
 import com.linute.linute.MainContent.Settings.ChangeProfileImageActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BlurBuilder;
@@ -36,6 +39,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView vFollowing;
     protected TextView vFollowers;
     protected ImageView vBlurBack;
+    protected FrameLayout vBlurFrame;
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
@@ -54,6 +58,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
         vFollowing = (TextView) itemView.findViewById(R.id.profilefrag_num_following);
         vBlurBack = (ImageView) itemView.findViewById(R.id.profile_blur_back);
+        vBlurFrame = (FrameLayout) itemView.findViewById(R.id.profile_blur_frame);
 
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,16 +87,28 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
+                .centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
                         // Do something with bitmap here.
-                        Drawable drawable = mContext.getResources().getDrawable(R.drawable.college_walk1, null);
-                        Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
-                        Bitmap blurredBitmap = BlurBuilder.blur(mContext, originalBitmap);
+//                        Drawable drawable = mContext.getResources().getDrawable(R.drawable.profile_picture_placeholder, null);
+                        Bitmap copyBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+//                        Bitmap originalBitmap = ((BitmapDrawable) drawable).getBitmap();
+                        Bitmap blurredBitmap = BlurBuilder.blur(mContext, copyBitmap);
                         vBlurBack.setBackground(new BitmapDrawable(mContext.getResources(), blurredBitmap));
 //                        vBlurBack.setBackground(new BitmapDrawable(mContext.getResources(), bitmap));
+
+                        int pixel = copyBitmap.getPixel(5, 5);
+
+                        int redValue = Color.red(pixel);
+                        int blueValue = Color.blue(pixel);
+                        int greenValue = Color.green(pixel);
+
+                        Log.d("TAG", redValue + " " + greenValue + " " + blueValue);
+
+                        vBlurFrame.setBackgroundColor(Color.parseColor(String.format("#%02x%02x%02x", redValue, greenValue, blueValue)));
                     }
                 });
     }

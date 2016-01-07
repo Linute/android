@@ -46,13 +46,6 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:text="Text"/>
-
-                <RadioButton
-                    android:id="@+id/postImageRadio"
-                    style="@style/RadioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Image"/>
             </info.hoang8f.android.segmented.SegmentedGroup>
 
             <ImageView
