@@ -223,6 +223,7 @@ public class EditSavePhotoFragment extends Fragment {
         if (mText.getText().toString().trim().isEmpty()) {
             mText.setVisibility(View.GONE);
         }
+
         mFrame.requestFocus();
 
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
@@ -240,11 +241,12 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         Map<String, Object> postData = new HashMap<>();
-        postData.put("college", "564a46ff8ac4a559174247af");
+        postData.put("college", "564a46ff8ac4a559174247af"); //TODO: FIX COLLEGE
         postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
         postData.put("images", images);
         postData.put("title", mText.getText().toString()); //TODO: What if empty?
         postData.put("geo", jsonObject);
+
         showProgress(true);
 
         new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
@@ -260,20 +262,23 @@ public class EditSavePhotoFragment extends Fragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(final Response response) throws IOException {
                 if (response.isSuccessful()){
                     getActivity().finish();
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(getActivity(), "Picture Posted", Toast.LENGTH_SHORT).show();
+                            try {
+                                Log.i(TAG, "run: "+response.body().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                     });
-                    Log.i(TAG, "onResponse: " + "Posted");
                 }else {
                     showServerError();
-                    Log.i(TAG, "onResponse: "+response.code());
-                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    Log.e(TAG, "onResponse: "+response.code()+" : "+response.body().string() );
                 }
             }
         });

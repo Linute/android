@@ -42,6 +42,7 @@ public class Utils {
         byte[] byteFormat = stream.toByteArray();
         // get the base 64 string
         return Base64.encodeToString(byteFormat, Base64.NO_WRAP);
+        //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
     }
 
 
