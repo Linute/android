@@ -7,25 +7,26 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 /**
  * Source: https://mzgreen.github.io/2015/06/23/How-to-hideshow-Toolbar-when-list-is-scrolling(part3)/
  */
-public class ScrollingFABBehavior extends CoordinatorLayout.Behavior<FloatingActionButton> {
+public class ScrollingFAMBehavior extends CoordinatorLayout.Behavior<FloatingActionsMenu> {
     private int toolbarHeight;
 
-    public ScrollingFABBehavior(Context context, AttributeSet attrs) {
+    public ScrollingFAMBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.toolbarHeight = Utils.getToolbarHeight(context);
     }
 
     @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent, FloatingActionButton fab, View dependency) {
+    public boolean layoutDependsOn(CoordinatorLayout parent, FloatingActionsMenu fab, View dependency) {
         return dependency instanceof AppBarLayout;
     }
 
     @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, FloatingActionButton fab, View dependency) {
+    public boolean onDependentViewChanged(CoordinatorLayout parent, FloatingActionsMenu fab, View dependency) {
         if (dependency instanceof AppBarLayout) {
             CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) fab.getLayoutParams();
             int fabBottomMargin = lp.bottomMargin;

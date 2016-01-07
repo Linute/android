@@ -3,9 +3,9 @@
     android:id="@+id/postContainer"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinator"
@@ -37,15 +37,30 @@
 
         <include layout="@layout/content_main"/>
 
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
+        <com.getbase.floatingactionbutton.FloatingActionsMenu
+            android:id="@+id/fabmenu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:src="@android:drawable/ic_menu_add"
             app:borderWidth="0dp"
-            app:layout_behavior="com.linute.linute.UtilsAndHelpers.ScrollingFABBehavior"/>
+            app:fab_expandDirection="up"
+            app:layout_behavior="com.linute.linute.UtilsAndHelpers.ScrollingFAMBehavior">
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/white"
+                app:fab_colorPressed="@color/white_pressed"/>
+
+            <com.getbase.floatingactionbutton.FloatingActionButton
+                android:id="@+id/fabText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_colorNormal="@color/white"
+                app:fab_colorPressed="@color/white_pressed"/>
+
+        </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
     </android.support.design.widget.CoordinatorLayout>
 </FrameLayout>

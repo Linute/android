@@ -19,6 +19,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.squareup.okhttp.Callback;
@@ -149,20 +150,19 @@ public class PostContentPage extends DialogFragment {
                 new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
                     @Override
                     public void onFailure(Request request, IOException e) {
-                        Log.d("TAG", "Failed");
+                        e.printStackTrace();
                     }
 
                     @Override
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d("TAG", "Not successful");
-                            Log.d("TAG", response.request().url().toString());
                             Log.d("TAG", response.body().string());
                         }
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 PostContentPage.this.dismiss();
+                                imm.hideSoftInputFromWindow(rootView.findViewById(R.id.postContentPageEditText).getWindowToken(), 0);
                             }
                         });
                     }

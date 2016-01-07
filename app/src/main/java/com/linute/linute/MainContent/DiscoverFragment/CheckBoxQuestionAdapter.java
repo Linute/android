@@ -27,7 +27,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     public CheckBoxQuestionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new CheckBoxQuestionViewHolder(this, LayoutInflater.
                 from(parent.getContext()).
-                inflate(R.layout.events_discover2, parent, false), mPosts, context);
+                inflate(R.layout.feed_discover, parent, false), mPosts, context);
     }
 
     @Override
@@ -38,5 +38,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     @Override
     public int getItemCount() {
         return mPosts.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return super.getItemViewType(position);
+    }
+
+    private boolean isPositionHeader(int position) {
+        return position == 0;
     }
 }
