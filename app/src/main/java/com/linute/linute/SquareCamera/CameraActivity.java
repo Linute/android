@@ -199,4 +199,5 @@ public class CameraActivity extends AppCompatActivity {
     private void goToGalleryAndCrop() {
         Crop.pickImage(this);
     }
+
 }

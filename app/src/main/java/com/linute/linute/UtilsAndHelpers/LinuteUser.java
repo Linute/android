@@ -1,5 +1,8 @@
 package com.linute.linute.UtilsAndHelpers;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import com.linute.linute.API.API_Methods;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -44,6 +47,22 @@ public class LinuteUser {
 
 
     public LinuteUser() {
+    }
+
+
+    public static LinuteUser getDefaultUser(Context context){
+
+        LinuteUser user = new LinuteUser();
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        user.setProfileImage(sharedPreferences.getString("profileImage", ""));
+        user.setFirstName(sharedPreferences.getString("firstName", ""));
+        user.setLastName(sharedPreferences.getString("lastName", ""));
+        user.setStatus(sharedPreferences.getString("status", ""));
+        user.setPosts(sharedPreferences.getInt("posts", 0));
+        user.setFollowers(sharedPreferences.getInt("followers", 0));
+        user.setFollowing(sharedPreferences.getInt("following", 0));
+
+        return user;
     }
 
     public LinuteUser(JSONObject userInfo){
@@ -282,13 +301,19 @@ public class LinuteUser {
         return mPosts;
     }
 
+    public void setPosts(int posts) {mPosts = posts;}
+
     public int getFollowers() {
         return mFollowers;
     }
 
+    public void setFollowers(int followers){mFollowers = followers;}
+
     public int getFollowing() {
         return mFollowing;
     }
+
+    public void setFollowing(int following){ mFollowing =following;}
 
 
     /*TODO: SEARCH
