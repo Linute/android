@@ -1,7 +1,9 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +14,7 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
 /**
@@ -27,11 +30,13 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
     private Context mContext;
     private int mActivityProfilePictureRadius;
     private int mEventPictureSide;
+    private SharedPreferences mSharedPreferences;
 
     public ProfileViewHolder(View itemView, Context context) {
         super(itemView);
 
         mContext = context;
+        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mActivityProfilePictureRadius = mContext.getResources().getDimensionPixelSize(R.dimen.profilefragment_list_item_profile_radius);
         mEventPictureSide = mContext.getResources().getDimensionPixelSize(R.dimen.profilefragment_list_item_event_side);
 
@@ -49,10 +54,11 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
 
         //profile image on the left
         Glide.with(mContext)
-                .load(userActivityItem.getProfileImagePath())
+                .load((Utils.getImageUrlOfUser(userActivityItem.getProfileImagePath())))
                 .asBitmap()
                 .override(mActivityProfilePictureRadius, mActivityProfilePictureRadius) //change image to the size we want
                 .placeholder(R.drawable.profile_picture_placeholder)
+                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfileImage);
 
@@ -60,7 +66,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
         Glide.with(mContext)
                 .load(userActivityItem.getEventImagePath())
                 .asBitmap()
-                .signature(new StringSignature(mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                 .override(mEventPictureSide, mEventPictureSide)
                 .placeholder(R.drawable.no_image_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
