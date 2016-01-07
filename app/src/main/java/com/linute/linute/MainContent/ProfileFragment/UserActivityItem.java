@@ -41,7 +41,7 @@ public class UserActivityItem implements Parcelable {
             //try to get time
             try{
                 mStartTime = dateFormat.parse(getStringValue(event, "timeStart" )).getTime();
-                mEndTime = dateFormat.parse(getStringValue(event, "timeEnd")).getTime();
+                mEndTime = 0; //dateFormat.parse(getStringValue(event, "timeEnd")).getTime();
             } catch (ParseException e) {
                 e.printStackTrace();
                 mStartTime = 0;

@@ -98,20 +98,6 @@ public class PostContentPage extends DialogFragment {
             }
         });
 
-        // Post or Image
-        SegmentedGroup segmentedGroup = (SegmentedGroup) rootView.findViewById(R.id.segmented2);
-        segmentedGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-//                Intent cameraIntent = new InputMethodManager(getActivity(), CameraActivity.class);
-//                cameraIntent.putExtra("CURRENT_PAGE", mCurrentPage);
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                startActivity(i);
-
-
-            }
-        });
-
         textContent = (EditText) rootView.findViewById(R.id.postContentPageEditText);
         anonymousSwitch = (Switch) rootView.findViewById(R.id.anonymous);
 
