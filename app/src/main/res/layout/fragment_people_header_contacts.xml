@@ -2,14 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="60dp"
-              android:background="#c75526"
+              android:background="#f1983b"
               android:gravity="center_vertical"
               android:orientation="horizontal">
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/search_name"
+        android:src="@drawable/contacts"
         android:layout_marginLeft="25dp"
         android:layout_marginStart="25dp"
         android:layout_marginRight="25dp"
@@ -18,7 +18,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name"
+        android:text="Cpntacts"
         android:textColor="@color/white"/>
 
 </LinearLayout>
