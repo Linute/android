@@ -134,7 +134,7 @@ public class EditBirthdayActivity extends AppCompatActivity {
 
         LSDKUser user = new LSDKUser(this);
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("dob", dob);
         showProgress(true);
 

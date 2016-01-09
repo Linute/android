@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     android:focusable="true"
     android:focusableInTouchMode="true"
+    android:clickable="true"
     tools:context="com.linute.linute.MainContent.PostContentPage">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-        <!-- TODO: Update blank fragment layout -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

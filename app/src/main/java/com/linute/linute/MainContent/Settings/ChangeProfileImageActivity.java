@@ -176,7 +176,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity {
         LSDKUser user = new LSDKUser(this);
         showProgress(true);
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("profileImage", Utils.encodeImageBase64(mProfilePictureBitmap));
 
         user.updateUserInfo(userInfo, null, new Callback() {

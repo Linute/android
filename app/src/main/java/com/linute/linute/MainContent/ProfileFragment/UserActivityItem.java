@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
-import android.nfc.Tag;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.format.DateUtils;
@@ -15,6 +14,8 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by QiFeng on 12/4/15.
@@ -27,34 +28,49 @@ public class UserActivityItem implements Parcelable {
     private long mStartTime;            //when event starts
     private long mEndTime;              //when event ends
     private String mEventImagePath;     //exact url to image of event
+    private boolean isImagePost;
+    private String mPostDate;
 
-    protected UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName){
+    public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
         mProfileImagePath = profileImagePath;
         mUserName = userName;
 
-        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
+//        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
 
+        mDescription = "";
         JSONObject event = getObject(activityInfo, "event");
 
-        if (event != null ) {
+        if (event != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             //try to get time
-            try{
-                mStartTime = dateFormat.parse(getStringValue(event, "timeStart" )).getTime();
+            try {
+                mStartTime = dateFormat.parse(getStringValue(event, "timeStart")).getTime();
                 mEndTime = 0; //dateFormat.parse(getStringValue(event, "timeEnd")).getTime();
+
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date myDate;
+                myDate = simpleDateFormat.parse(getStringValue(event, "timeStart"));
+                mPostDate = Utils.getEventTime(myDate);
+
+                mDescription = getStringValue(event, "title");
+
             } catch (ParseException e) {
                 e.printStackTrace();
                 mStartTime = 0;
                 mEndTime = 0;
             }
 
-             //try to get event image
+            //try to get event image
             try {
                 JSONArray eventImages = event.getJSONArray("images");
-                if (eventImages.length() > 0)
+                if (eventImages.length() > 0) {
                     mEventImagePath = Utils.getEventImageURL(eventImages.getString(0)); //get the first image
-                else
-                    Log.e("UserActivityItem", "eventImages was empty");
+                    isImagePost = true;
+                } else {
+                    Log.i("UserActivityItem", "eventImages was empty");
+                    isImagePost = false;
+                }
             } catch (JSONException e) { //counld't get image
                 e.printStackTrace();
                 mEventImagePath = null;
@@ -68,20 +84,19 @@ public class UserActivityItem implements Parcelable {
     }
 
 
-    private JSONObject getObject(JSONObject obj, String key){
+    private JSONObject getObject(JSONObject obj, String key) {
         try {
             return obj.getJSONObject(key);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             return null;
         }
     }
 
 
-
-    private String getStringValue(JSONObject obj, String key){
-        try{
+    private String getStringValue(JSONObject obj, String key) {
+        try {
             return obj.getString(key);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             return "";
         }
     }
@@ -125,9 +140,9 @@ public class UserActivityItem implements Parcelable {
 
         long nowTime = new Date().getTime();
 
-        if (nowTime >= mStartTime && nowTime <= mEndTime){ //going on
+        if (nowTime >= mStartTime && nowTime <= mEndTime) { //going on
             return "going on right now";
-        }else { //in the future or past
+        } else { //in the future or past
             return DateUtils.getRelativeTimeSpanString(mEndTime, nowTime, DateUtils.SECOND_IN_MILLIS).toString();
         }
     }
@@ -147,7 +162,7 @@ public class UserActivityItem implements Parcelable {
         dest.writeString(mEventImagePath);
     }
 
-    private UserActivityItem(Parcel in){
+    private UserActivityItem(Parcel in) {
         mProfileImagePath = in.readString();
         mUserName = in.readString();
         mDescription = in.readString();
@@ -167,4 +182,12 @@ public class UserActivityItem implements Parcelable {
             return new UserActivityItem[size];
         }
     };
+
+    public boolean isImagePost() {
+        return isImagePost;
+    }
+
+    public String getPostDate() {
+        return mPostDate;
+    }
 }

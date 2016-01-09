@@ -14,10 +14,9 @@
 
         <ImageView
             android:id="@+id/profile_blur_back"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:adjustViewBounds="true"/>
+            android:scaleType="fitCenter"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,18 +63,41 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
 
-                <TextView
+                <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginStart="30dp"
-                    android:text="FOLLOW"/>
-            </LinearLayout>
+                    android:layout_marginStart="25dp"
+                    android:id="@+id/follow_button"
+                    android:src="@drawable/follow"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/profile_student"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Syracuse University"
+                        android:textColor="#56bb1d"
+                        android:layout_marginEnd="20dp"/>
+
+                </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
     </FrameLayout>
 

@@ -15,6 +15,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -25,12 +27,10 @@ public class Utils {
 
     //encodes input String
     //returns empty if can't encode (should never happen)
-    public static String encode_base64(String input)
-    {
-        try{
+    public static String encode_base64(String input) {
+        try {
             return Base64.encodeToString(input.getBytes("UTF-8"), Base64.NO_WRAP);
-        }
-        catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return "";
         }
@@ -139,15 +139,101 @@ public class Utils {
         return toolbarHeight;
     }
 
+
+    public static String getEventTime(Date myDate) {
+        String dateString = "";
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+        String[] date = myDate.toString().split(" ");
+
+        if (date[1].equals(getStringMonth(calendar.get(Calendar.MONTH)))) {
+            if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) == 0) {
+                dateString = (Calendar.HOUR - (Integer.parseInt(date[3].substring(0, 2)) - 12)) + "";
+                dateString += "h";
+            } else if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) > 7) {
+                dateString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
+                dateString += "w";
+            } else {
+                dateString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
+                dateString += "d";
+            }
+        } else {
+            dateString = calendar.get(Calendar.MONTH) - getIntMonth(date[1]) + "";
+            dateString += "m";
+        }
+
+        return dateString;
+    }
+
+    public static String getStringMonth(int intMonth) {
+        switch (intMonth) {
+            case 0:
+                return "Jan";
+            case 1:
+                return "Feb";
+            case 2:
+                return "Mar";
+            case 3:
+                return "Apr";
+            case 4:
+                return "May";
+            case 5:
+                return "Jun";
+            case 6:
+                return "Jul";
+            case 7:
+                return "Aug";
+            case 8:
+                return "Sept";
+            case 9:
+                return "Oct";
+            case 10:
+                return "Nov";
+            case 11:
+                return "Dec";
+        }
+        return "";
+    }
+
+    public static int getIntMonth(String stringMonth) {
+        switch (stringMonth) {
+            case "Jan":
+                return 1;
+            case "Feb":
+                return 2;
+            case "Mar":
+                return 3;
+            case "Apr":
+                return 4;
+            case "May":
+                return 5;
+            case "Jun":
+                return 6;
+            case "Jul":
+                return 7;
+            case "Aug":
+                return 8;
+            case "Sept":
+                return 9;
+            case "Oct":
+                return 10;
+            case "Nov":
+                return 11;
+            case "Dec":
+                return 12;
+        }
+        return 0;
+
+    }
+
     //returns millisecond of date
-    public static long getTimeFromString(String date){
+    public static long getTimeFromString(String date) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        try{
+        try {
             return dateFormat.parse(date).getTime();
         } catch (ParseException e) {
             e.printStackTrace();
-            return  0;
+            return 0;
         }
-    }
 
+    }
 }

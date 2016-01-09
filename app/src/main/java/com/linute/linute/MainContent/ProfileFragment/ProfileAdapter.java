@@ -3,16 +3,12 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Arman on 12/30/15.
@@ -20,7 +16,7 @@ import java.util.List;
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
-    private final Profile mProfile;
+    private Profile mProfile;
 
     private Context context;
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
@@ -33,13 +29,19 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mUser = user;
     }
 
+    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
+        this.context = context;
+        mUserActivityItems = userActivityItems;
+        mUser = user;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_ITEM) {
             //inflate your layout and pass it to view holder
             return new ProfileViewHolder(LayoutInflater.
                     from(parent.getContext()).
-                    inflate(R.layout.list_item_profile_frag, parent, false), context);
+                    inflate(R.layout.list_item_profile_frag2, parent, false), context);
         } else if (viewType == TYPE_HEADER) {
             //inflate your layout and pass it to view holder
             return new ProfileHeaderViewHolder(LayoutInflater

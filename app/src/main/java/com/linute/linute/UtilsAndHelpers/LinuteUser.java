@@ -2,6 +2,7 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.linute.linute.API.API_Methods;
 import com.squareup.okhttp.Call;
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class LinuteUser {
 
+    private static final String TAG = LinuteUser.class.getSimpleName();
     private String mUserID;
     private String mUserName;
     private String mRegistrationType;

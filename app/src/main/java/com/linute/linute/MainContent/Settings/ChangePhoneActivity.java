@@ -248,7 +248,7 @@ public class ChangePhoneActivity extends AppCompatActivity {
         }
 
         showProgress(true, mSecondViewButtons, mProgressBar2, mConfirmation);
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("phone", mTempSharedPref.getString("tempPhone", ""));
 
         mUser.updateUserInfo(userInfo, null, new Callback() {

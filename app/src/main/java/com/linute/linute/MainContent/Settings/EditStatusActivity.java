@@ -141,7 +141,7 @@ public class EditStatusActivity extends AppCompatActivity {
         LSDKUser user = new LSDKUser(this);
         showProgress(true); //show  progress bar
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("status", status);
 
         //query server

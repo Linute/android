@@ -51,12 +51,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:fab_colorNormal="@color/white"
+                android:src="@drawable/fab_camera"
                 app:fab_colorPressed="@color/white_pressed"/>
 
             <com.getbase.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fabText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:src="@drawable/fab_quote"
                 app:fab_colorNormal="@color/white"
                 app:fab_colorPressed="@color/white_pressed"/>
 
