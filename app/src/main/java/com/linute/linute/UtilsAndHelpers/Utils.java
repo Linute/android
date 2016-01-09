@@ -139,6 +139,7 @@ public class Utils {
         return toolbarHeight;
     }
 
+
     public static String getEventTime(Date myDate) {
         String dateString = "";
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
@@ -221,6 +222,18 @@ public class Utils {
                 return 12;
         }
         return 0;
+
     }
 
+    //returns millisecond of date
+    public static long getTimeFromString(String date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        try {
+            return dateFormat.parse(date).getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
+    }
 }

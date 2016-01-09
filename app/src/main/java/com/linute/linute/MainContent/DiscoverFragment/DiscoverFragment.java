@@ -153,8 +153,8 @@ public class DiscoverFragment extends Fragment {
     }
 
     public void getFeed() {
-        Map<String, String> events = new HashMap<String, String>();
-        events.put("college", "564a46ff8ac4a559174247af");
+        Map<String, String> events = new HashMap<>();
+        events.put("college", "564a46ff8ac4a559174248d9");
         events.put("skip", "0");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(events, new Callback() {

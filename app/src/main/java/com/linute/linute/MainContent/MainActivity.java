@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 
@@ -49,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mFragments = new Fragment[4];
         mFragments[0] = new DiscoverFragment();
         mFragments[1] = new PeopleFragment();
-        mFragments[2] = new DiscoverFragment();
+        mFragments[2] = new UpdatesFragment();
         mFragments[3] = new Profile();
 
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
