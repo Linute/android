@@ -13,6 +13,9 @@
     <dimen name="padding_s">4dp</dimen>
 
 
+    <dimen name="updatefragment_picture_size">60dp</dimen>
+    <dimen name="updatefragment_icon_size">25dp</dimen>
+    <dimen name="updatefragment_margins">12dp</dimen>
 
     <!-- Square Camera -->
     <dimen name="squarecam_edit_frag_default_height">60dp</dimen>

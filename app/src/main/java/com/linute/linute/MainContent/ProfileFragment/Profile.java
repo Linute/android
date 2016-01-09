@@ -63,7 +63,6 @@ public class Profile extends Fragment {
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
-    private String mProfileImagePath;
 
     public static final int IMAGE_CHANGED = 1234;
 
@@ -80,7 +79,7 @@ public class Profile extends Fragment {
             Utils.showBadConnectionToast(getContext());
         }
     };
-    private LinuteUser user = new LinuteUser();
+    private LinuteUser user;
     public boolean hasSetTitle;
 
 
@@ -109,6 +108,8 @@ public class Profile extends Fragment {
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
+        user = LinuteUser.getDefaultUser(getContext()); //get data from sharedpref
+
         mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
         recList.setAdapter(mProfileAdapter);
 
@@ -121,10 +122,6 @@ public class Profile extends Fragment {
 
             }
         });
-
-        user = LinuteUser.getDefaultUser(getContext());
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
-        recList.setAdapter(mProfileAdapter);
 
         if (!mHasUpdatedFromDB) {
             updateAndSetHeader(); //get information from server to update profile
@@ -184,7 +181,7 @@ public class Profile extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    user = new LinuteUser(jsonObject); //container for new information
+                    user.updateUserInformation(jsonObject); //container for new information
 
                     savePreferences(user);
                     Log.d(TAG, body);

@@ -127,7 +127,7 @@ public class PostContentPage extends DialogFragment {
 
                 Log.d("TAG", jsonObject.toString());
 
-                postData.put("college", "564a46ff8ac4a559174247af");
+                postData.put("college", "564a46ff8ac4a559174248d9");
                 postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
                 postData.put("title", textContent.getText().toString());
                 postData.put("geo", jsonObject);
