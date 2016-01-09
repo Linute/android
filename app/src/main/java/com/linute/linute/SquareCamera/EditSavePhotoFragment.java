@@ -269,7 +269,7 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         Map<String, Object> postData = new HashMap<>();
-        postData.put("college", "564a46ff8ac4a559174247af"); //TODO: FIX COLLEGE
+        postData.put("college", "564a46ff8ac4a559174248d9"); //TODO: FIX COLLEGE
         postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
         postData.put("images", images);
         postData.put("title", mText.getText().toString()); //TODO: What if empty?

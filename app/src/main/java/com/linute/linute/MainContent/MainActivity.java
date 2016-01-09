@@ -3,7 +3,6 @@ package com.linute.linute.MainContent;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.AppBarLayout;
@@ -22,19 +21,9 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         mFragments = new Fragment[4];
         mFragments[0] = new DiscoverFragment();
         mFragments[1] = new DiscoverFragment();
-        mFragments[2] = new DiscoverFragment();
+        mFragments[2] = new UpdatesFragment();
         mFragments[3] = new Profile();
 
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);

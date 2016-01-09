@@ -5,7 +5,7 @@
               android:orientation="vertical"
               tools:context=".MainContent.ProfileFragment.ProfileFragment">
 
-    <TextView android:id="@+id/updateFragment_title_text"
+    <TextView android:id="@+id/updateFragment_section_title"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginTop="18dp"

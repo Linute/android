@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:background="@android:color/holo_red_light"
+    >
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/updatesFragment_profile_picture"
+        android:layout_width="@dimen/updatefragment_picture_size"
+        android:layout_height="@dimen/updatefragment_picture_size"
+        android:layout_margin="@dimen/updatefragment_margins"
+        app:border="false"
+        tools:background="@android:color/darker_gray"
+        />
+
+    <ImageView
+        android:id="@+id/updatesFragment_icon_image"
+        android:layout_width="@dimen/updatefragment_icon_size"
+        android:layout_height="@dimen/updatefragment_icon_size"
+        tools:background="@android:color/holo_green_light"
+        android:layout_alignBottom="@id/updatesFragment_profile_picture"
+        android:layout_alignRight="@id/updatesFragment_profile_picture"
+        />
+
+
+    <ImageView
+        android:id="@+id/updatesFragment_update_picture"
+        android:layout_width="@dimen/updatefragment_picture_size"
+        android:layout_height="@dimen/updatefragment_picture_size"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/darker_gray"
+        android:layout_margin="@dimen/updatefragment_margins"/>
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginRight="15dp"
+                  android:layout_marginTop="20dp"
+                  android:layout_toLeftOf="@id/updatesFragment_update_picture"
+                  android:layout_toRightOf="@id/updatesFragment_profile_picture"
+                  android:orientation="vertical">
+
+        <TextView android:id="@+id/updatesFragment_name_text"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="5dp"
+                  android:singleLine="true"
+                  android:textColor="@android:color/holo_blue_dark"
+                  tools:text="FIRST LAST"/>
+
+        <TextView
+            android:id="@+id/updatesFragment_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="2"
+            android:textSize="12sp"
+            tools:text="Test text. This is what it will looking like test test test test tedfs "
+            />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

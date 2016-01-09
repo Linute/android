@@ -65,6 +65,36 @@ public class LinuteUser {
         return user;
     }
 
+    public void updateUserInformation(JSONObject userInfo){
+        mUserID = getStringFromJson("id", userInfo);
+        mUserName = getStringFromJson("userName", userInfo);
+        mRegistrationType = getStringFromJson("registrationType", userInfo);
+        mFirstName = getStringFromJson("firstName", userInfo);
+        mLastName = getStringFromJson("lastName", userInfo);
+        mEmail = getStringFromJson("email", userInfo);
+        mPhone = getStringFromJson("phone", userInfo);
+        mSocialFacebook = getStringFromJson("socialFaceBook", userInfo);
+        mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
+        mStatus = getStringFromJson("status", userInfo);
+        mSex = getIntFromJson("sex", userInfo);
+        mIsDeleted = getStringFromJson("isDeleted", userInfo);
+        mIsBanned = getStringFromJson("isBanned", userInfo);
+        mProfileImage = getStringFromJson("profileImage", userInfo);
+        mRegistrationDate = getStringFromJson("registrationDate", userInfo);
+        mDob = getStringFromJson("dob", userInfo);
+        // OLD
+        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
+        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
+        mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
+        // NEW start
+        mPosts = getIntFromJson("numberOfEvents", userInfo);
+        mFollowers = getIntFromJson("numberOfFollowers", userInfo);
+        mFollowing = getIntFromJson("numberOfFollowing", userInfo);
+        // NEW end
+        mCollege = getStringFromJson("college", userInfo);
+        mCampus = getStringFromJson("campus", userInfo);
+    }
+
     public LinuteUser(JSONObject userInfo){
 
         mUserID = getStringFromJson("id", userInfo);
