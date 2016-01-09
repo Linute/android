@@ -3,7 +3,6 @@ package com.linute.linute.MainContent;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.design.widget.AppBarLayout;
@@ -13,28 +12,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
+import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -60,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         mFragments = new Fragment[4];
         mFragments[0] = new DiscoverFragment();
-        mFragments[1] = new DiscoverFragment();
+        mFragments[1] = new PeopleFragment();
         mFragments[2] = new DiscoverFragment();
         mFragments[3] = new Profile();
 
@@ -83,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 resetToolbar();
-                Log.d("TAG", ((Profile) mFragments[3]).hasSetTitle + "");
                 switch (position) {
                     case 0:
                         setTitle("My Campus");
@@ -111,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        setTitle("My Campus");
+
         mViewPager.setAdapter(new LinuteFragmentAdapter(getSupportFragmentManager(),
                 MainActivity.this, mFragments));
 

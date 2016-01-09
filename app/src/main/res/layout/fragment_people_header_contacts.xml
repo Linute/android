@@ -3,6 +3,7 @@
               android:layout_width="match_parent"
               android:layout_height="60dp"
               android:background="#f1983b"
+              android:id="@+id/people_contacts"
               android:gravity="center_vertical"
               android:orientation="horizontal">
 
@@ -18,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cpntacts"
+        android:text="Contacts"
         android:textColor="@color/white"/>
 
 </LinearLayout>

@@ -17,14 +17,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.DiscoverFragment.CheckBoxQuestionAdapter;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.ChangeProfileImageActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -33,7 +27,6 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -46,7 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Profile extends Fragment {
-    public static final String TAG = "ProfileFragment";
+    public static final String TAG = Profile.class.getSimpleName();
 
     public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
     public static final String HAS_UPDATED_KEY = "profileFragmentHasUpdatedFromDB";
@@ -122,9 +115,10 @@ public class Profile extends Fragment {
             }
         });
 
+        // onCreateView isnt called so this only happens once
         user = LinuteUser.getDefaultUser(getContext());
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
-        recList.setAdapter(mProfileAdapter);
+//        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
+//        recList.setAdapter(mProfileAdapter);
 
         if (!mHasUpdatedFromDB) {
             updateAndSetHeader(); //get information from server to update profile
@@ -187,13 +181,13 @@ public class Profile extends Fragment {
                     user = new LinuteUser(jsonObject); //container for new information
 
                     savePreferences(user);
-                    Log.d(TAG, body);
+//                    Log.d(TAG, body);
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /* NOTE: I MOVED THIS TO ON CreateView
+                            // NOTE: I MOVED THIS TO ON CreateView
                             mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
-                            recList.setAdapter(mProfileAdapter);*/
+                            recList.setAdapter(mProfileAdapter);
                             mProfileAdapter.notifyDataSetChanged();
                             if (!hasSetTitle) {
                                 ((MainActivity) getActivity()).setTitle(user.getFirstName() + " " + user.getLastName());
@@ -210,15 +204,16 @@ public class Profile extends Fragment {
     }
 
     private void savePreferences(LinuteUser user) {
-            //save the new info
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.putString("firstName", user.getFirstName());
-            editor.putString("lastName", user.getLastName());
-            editor.putString("status", user.getStatus());
-            editor.putInt("posts", user.getPosts());
-            editor.putInt("followers", user.getFollowers());
-            editor.putInt("following", user.getFollowing());
-            editor.apply();
+        //save the new info
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString("firstName", user.getFirstName());
+        editor.putString("lastName", user.getLastName());
+        editor.putString("status", user.getStatus());
+        editor.putInt("posts", user.getPosts());
+        editor.putInt("followers", user.getFollowers());
+        editor.putInt("following", user.getFollowing());
+        editor.putString("id", user.getUserID());
+        editor.apply();
     }
 
     //set our views with the default or cached data
@@ -284,7 +279,7 @@ public class Profile extends Fragment {
                     try { //try to grab needed information from response
                         String body = response.body().string();
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-                        Log.d("TAG", body);
+//                        Log.d("TAG", body);
 
 
                         //i only update the list of activities if their are new values

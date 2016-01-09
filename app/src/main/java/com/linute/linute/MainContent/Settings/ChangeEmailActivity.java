@@ -151,7 +151,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
         LSDKUser user = new LSDKUser(this);
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("email", email);
 
         user.updateUserInfo(userInfo, null, new Callback() {

@@ -127,7 +127,7 @@ public class LSDKUser {
     //@param newUserInfo - new updated info
     //@param tempEmail - facebook email; e.g 1232313@facebook.com; or new email we want to change to
     //@param callback - handles responses
-    public Call updateUserInfo(Map<String, String> newUserInfo,
+    public Call updateUserInfo(Map<String, Object> newUserInfo,
                                String tempEmail,
                                Callback callback) {
 

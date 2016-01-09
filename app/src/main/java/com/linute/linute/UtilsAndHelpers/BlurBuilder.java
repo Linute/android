@@ -11,7 +11,7 @@ import android.renderscript.ScriptIntrinsicBlur;
  * Source https://futurestud.io/blog/how-to-blur-images-efficiently-with-androids-renderscript
  */
 public class BlurBuilder {
-    private static final float BITMAP_SCALE = 1.0f;
+    private static final float BITMAP_SCALE = 0.2f;
     private static final float BLUR_RADIUS = 25f;
 
     public static Bitmap blur(Context context, Bitmap image) {

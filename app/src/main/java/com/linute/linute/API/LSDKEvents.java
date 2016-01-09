@@ -9,7 +9,6 @@ import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by QiFeng on 12/12/15.
@@ -44,6 +43,25 @@ public class LSDKEvents {
                 mEncodedToken);
 
         return API_Methods.post("events", header, param, callback);
+    }
+
+    public Call postLike(Map<String, Object> param, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        return API_Methods.post("likes", header, param, callback);
+    }
+
+    public Call updateLike(Map<String, Object> param, String userLiked,
+                           Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        return API_Methods.put("likes/" + userLiked, header, param, callback);
     }
 
 }

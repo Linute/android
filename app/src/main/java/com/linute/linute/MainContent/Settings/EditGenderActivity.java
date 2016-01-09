@@ -129,7 +129,7 @@ public class EditGenderActivity extends AppCompatActivity {
 
         LSDKUser user = new LSDKUser(this);
 
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("sex", gender + "");
 
         showProgress(true);

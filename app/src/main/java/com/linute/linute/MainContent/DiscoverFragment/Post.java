@@ -12,10 +12,11 @@ public class Post {
     private int mNumLikes;
     private String mUserLiked;
     private String mPostTime;
+    private String mPostId;
 
     private boolean mPostLiked;
 
-    public Post(String userName, String userImage, String title, String image, int privacy, int numLike, String userLiked, String postTime) {
+    public Post(String userName, String userImage, String title, String image, int privacy, int numLike, String userLiked, String postTime, String postId) {
         mUserName = userName;
         mImage = "";
         mUserImage = userImage;
@@ -25,6 +26,7 @@ public class Post {
         mNumLikes = numLike;
         mUserLiked = userLiked;
         mPostTime = postTime;
+        mPostId = postId;
 
         mPostLiked = !mUserLiked.equals("");
     }
@@ -67,5 +69,13 @@ public class Post {
 
     public String getPostTime() {
         return mPostTime;
+    }
+
+    public String getPostId() {
+        return mPostId;
+    }
+
+    public String getUserLiked() {
+        return mUserLiked;
     }
 }

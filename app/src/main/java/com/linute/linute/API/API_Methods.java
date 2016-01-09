@@ -102,7 +102,7 @@ public class API_Methods {
     //API PUT
     public static Call put(String path,
                            Map<String, String> headers,
-                           Map<String, String> parameters,
+                           Map<String, Object> parameters,
                            Callback callback) {
 
         JSONObject json = new JSONObject(parameters);

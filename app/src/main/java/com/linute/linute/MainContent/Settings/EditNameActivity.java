@@ -127,7 +127,7 @@ public class EditNameActivity extends AppCompatActivity {
         if (areValidFields(firstName, lastName)) {
             LSDKUser user = new LSDKUser(this);
             showProgress(true);
-            Map<String, String> userInfo = new HashMap<>();
+            Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("firstName", firstName);
             userInfo.put("lastName", lastName);
             user.updateUserInfo(userInfo, null, new Callback() {
