@@ -272,6 +272,7 @@ public class EditSavePhotoFragment extends Fragment {
         postData.put("college", "564a46ff8ac4a559174248d9"); //TODO: FIX COLLEGE
         postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
         postData.put("images", images);
+        postData.put("type", "1");
         postData.put("title", mText.getText().toString()); //TODO: What if empty?
         postData.put("geo", jsonObject);
 
