@@ -27,6 +27,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by QiFeng on 1/6/16.
@@ -43,9 +45,10 @@ public class UpdatesFragment extends Fragment {
     private ArrayList<Update> mOldUpdates = new ArrayList<>();
 
     private SharedPreferences mSharedPreferences;
+    private Integer mSkip = 25;
+    private boolean mCanLoadMore = true;
 
-
-    public UpdatesFragment(){
+    public UpdatesFragment() {
 
     }
 
@@ -66,6 +69,23 @@ public class UpdatesFragment extends Fragment {
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
+        //NOTE: Code for load more
+        /*
+        mUpdatesAdapter.setOnLoadMoreListener(new UpdatesAdapter.onLoadMoreListener() {
+            @Override
+            public void loadMore() {
+                if (mCanLoadMore) {
+                    UpdatesFragment.this.loadMore();
+                } else {
+                    //remove the progress bar
+                    if (!mOldUpdates.isEmpty()) { //add progress bar to end
+                        mOldUpdates.remove(mOldUpdates.size() - 1);
+                    } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
+                        mRecentUpdates.remove(mRecentUpdates.size() - 1);
+                }
+            }
+        });*/
+
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -73,20 +93,51 @@ public class UpdatesFragment extends Fragment {
             }
         });
 
-        updateUpdatesInformation();
+        getUpdatesInformation();
         return rootView;
     }
 
-    private void updateUpdatesInformation(){
+    private void updateUpdatesInformation() {
+        JSONArray unread = new JSONArray();
+        for (Update update : mRecentUpdates) {
+            unread.put(update.getActionID());
+        }
 
-        new LSDKActivity(getContext()).getActivities(new Callback() {
+        if (unread.length() == 0) { //don't need to mark anything as read
+            getUpdatesInformation();
+            return;
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("activities", unread);
+
+        new LSDKActivity(getContext()).readActivities(params, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                showBadConnectiontToast();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    getUpdatesInformation();
+                } else {
+                    showServerErrorToast();
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                }
+            }
+        });
+    }
+
+    private void getUpdatesInformation() {
+
+        new LSDKActivity(getContext()).getActivities(0, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(getContext());
-                        Log.e(TAG, "onFailure: no connection");
+                        showBadConnectiontToast();
                     }
                 });
             }
@@ -94,11 +145,10 @@ public class UpdatesFragment extends Fragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
-//                    Log.i(TAG, "onResponse: "+response.body().string());
                     try {
                         JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(response.body().string()), "activities");
 
-                        if (activities == null){
+                        if (activities == null) {
                             Log.i(TAG, "onResponse: activities was null");
                             showServerErrorToast();
                             return;
@@ -107,12 +157,22 @@ public class UpdatesFragment extends Fragment {
                         mOldUpdates.clear();
                         mRecentUpdates.clear();
 
+                        //no more information to load
+                        if (activities.length() < 25) mCanLoadMore = false;
+
+                        mSkip = 25;
+
                         //iterate through array of activities
-                        for (int i = 0; i < activities.length(); i++){
+                        for (int i = 0; i < activities.length(); i++) {
                             Update update = new Update(activities.getJSONObject(i));
                             if (update.isRead()) mOldUpdates.add(update); //if read, it's old
                             else mRecentUpdates.add(update); //else recent
                         }
+
+                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
+                            mOldUpdates.add(null);
+                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
+                            mRecentUpdates.add(null);
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -128,6 +188,7 @@ public class UpdatesFragment extends Fragment {
                     }
                 } else {
                     showServerErrorToast();
+                    Log.e(TAG, "onResponse: " + response.body().string());
                 }
             }
         });
@@ -135,7 +196,84 @@ public class UpdatesFragment extends Fragment {
     }
 
 
-    private void showServerErrorToast(){
+    private void loadMore() {
+        new LSDKActivity(getContext()).getActivities(mSkip, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                showBadConnectiontToast();
+                mUpdatesAdapter.setAutoLoadMore(false);
+                notifyUpdate();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(response.body().string()), "activities");
+
+                        if (activities == null) {
+                            mUpdatesAdapter.setAutoLoadMore(false);
+                            showServerErrorToast();
+                            notifyUpdate();
+                            return;
+                        }
+
+                        mSkip += 25;
+
+                        Log.i(TAG, "onResponse:" + activities.length());
+
+                        //remove the progress bar
+                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
+                            mOldUpdates.remove(mOldUpdates.size() - 1);
+                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
+                            mRecentUpdates.remove(mRecentUpdates.size() - 1);
+
+                        //iterate through array of activities
+                        for (int i = 0; i < activities.length(); i++) {
+                            Update update = new Update(activities.getJSONObject(i));
+                            if (update.isRead()) { //TODO: use contains to check repeat?
+                                mOldUpdates.add(update); //if read, it's old
+                            } else {
+                                mRecentUpdates.add(update); //else recent
+                            }
+                        }
+
+                        mCanLoadMore = activities.length() == 25;
+
+                        if (mCanLoadMore) {
+                            if (!mOldUpdates.isEmpty()) { //add progress bar to end
+                                mOldUpdates.add(null);
+                            } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
+                                mRecentUpdates.add(null);
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        showServerErrorToast();
+                        mUpdatesAdapter.setAutoLoadMore(false);
+                    }
+                } else {
+                    showServerErrorToast();//TODO reloadbutton
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    mUpdatesAdapter.setAutoLoadMore(false);
+                }
+
+                notifyUpdate();
+            }
+        });
+    }
+
+    private void notifyUpdate() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mUpdatesAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+
+    private void showServerErrorToast() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -145,5 +283,14 @@ public class UpdatesFragment extends Fragment {
         });
     }
 
+    private void showBadConnectiontToast() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Utils.showBadConnectionToast(getContext());
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+    }
 
 }

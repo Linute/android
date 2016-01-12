@@ -127,9 +127,10 @@ public class PostContentPage extends DialogFragment {
 
                 Log.d("TAG", jsonObject.toString());
 
-                postData.put("college", "564a46ff8ac4a559174248d9");
+                postData.put("college", "564a46ff8ac4a559174248d9");//TODO: add college
                 postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
                 postData.put("title", textContent.getText().toString());
+                postData.put("type", "0");
                 postData.put("geo", jsonObject);
 
 
@@ -143,6 +144,8 @@ public class PostContentPage extends DialogFragment {
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("TAG", response.body().string());
+                        } else {
+                            Log.i("TAG", "onResponse: ");
                         }
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
