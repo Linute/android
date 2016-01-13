@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -127,7 +129,9 @@ public class PostContentPage extends DialogFragment {
 
                 Log.d("TAG", jsonObject.toString());
 
-                postData.put("college", "564a46ff8ac4a559174248d9");//TODO: add college
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+                postData.put("college", sharedPreferences.getString("collegeId", ""));
                 postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
                 postData.put("title", textContent.getText().toString());
                 postData.put("type", "0");

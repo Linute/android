@@ -3,6 +3,7 @@ package com.linute.linute.SquareCamera;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -32,6 +33,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -269,7 +271,9 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         Map<String, Object> postData = new HashMap<>();
-        postData.put("college", "564a46ff8ac4a559174248d9"); //TODO: FIX COLLEGE
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+        postData.put("college", sharedPreferences.getString("collegeId", "")); //TODO: FIX COLLEGE
         postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
         postData.put("images", images);
         postData.put("type", "1");

@@ -38,7 +38,8 @@ public class LinuteUser {
     private int mFriendsNumber;
     private int mAttendedNumber;
     private int mHostedNumber;
-    private String mCollege;
+    private String mCollegeName;
+    private String mCollegeId;
     private String mCampus;
 
     private int mPosts;
@@ -63,8 +64,21 @@ public class LinuteUser {
         user.setPosts(sharedPreferences.getInt("posts", 0));
         user.setFollowers(sharedPreferences.getInt("followers", 0));
         user.setFollowing(sharedPreferences.getInt("following", 0));
+        user.setCollegeName(sharedPreferences.getString("collegeName", ""));
+        user.setCollegeId(sharedPreferences.getString("collegeId", ""));
 
         return user;
+    }
+
+    public static CollegeNameAndID getCollegeFromJson(JSONObject userInfo){
+        JSONObject college = getJsonObjectFromJson("college", userInfo);
+        if (college == null) return null;
+
+        String collegeName = getStringFromJson("name", college);
+        String collegeId = getStringFromJson("id", college);
+        if (collegeName == null || collegeId == null) return null;
+
+        return new CollegeNameAndID(collegeName, collegeId);
     }
 
     public void updateUserInformation(JSONObject userInfo){
@@ -93,7 +107,13 @@ public class LinuteUser {
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
         // NEW end
-        mCollege = getStringFromJson("college", userInfo);
+
+        JSONObject college = getJsonObjectFromJson("college", userInfo);
+
+        if (college != null) {
+            mCollegeName = getStringFromJson("name", college);
+            mCollegeId = getStringFromJson("id", college);
+        }
         mCampus = getStringFromJson("campus", userInfo);
     }
 
@@ -124,8 +144,25 @@ public class LinuteUser {
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
         // NEW end
-        mCollege = getStringFromJson("college", userInfo);
+
+        JSONObject college = getJsonObjectFromJson("college", userInfo);
+
+        if (college != null) {
+            mCollegeName = getStringFromJson("name", college);
+            mCollegeId = getStringFromJson("id", college);
+        }
+
         mCampus = getStringFromJson("campus", userInfo);
+    }
+
+
+    private static JSONObject getJsonObjectFromJson(String key, JSONObject json){
+        try {
+            return json.getJSONObject(key);
+        }catch (JSONException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private static String getStringFromJson(String key, JSONObject userInfo){
@@ -325,8 +362,17 @@ public class LinuteUser {
         return mCampus;
     }
 
-    public String getCollege() {
-        return mCollege;
+    public String getCollegeName() {
+        return mCollegeName;
+    }
+    public void setCollegeName(String college) {
+        mCollegeName = college;
+    }
+
+    public String getCollegeId(){ return mCollegeId; }
+
+    public void setCollegeId(String id){
+        mCollegeId = id;
     }
 
     public int getPosts() {
@@ -373,4 +419,20 @@ public class LinuteUser {
         readActivities
      */
 
+    public static class CollegeNameAndID{
+        private String mCollegeName;
+        private String mCollegeId;
+
+        public CollegeNameAndID(String name, String id){
+            mCollegeId = id;
+            mCollegeName = name;
+        }
+
+        public String getCollegeName(){
+            return mCollegeName;
+        }
+        public String getCollegeId(){
+            return mCollegeId;
+        }
+    }
 }

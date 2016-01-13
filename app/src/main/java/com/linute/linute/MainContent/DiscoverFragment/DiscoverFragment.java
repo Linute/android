@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.animation.Animator;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +22,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -153,8 +156,10 @@ public class DiscoverFragment extends Fragment {
     }
 
     public void getFeed() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         Map<String, String> events = new HashMap<>();
-        events.put("college", "564a46ff8ac4a559174248d9");
+        events.put("college", sharedPreferences.getString("collegeId", ""));
         events.put("skip", "0");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(events, new Callback() {

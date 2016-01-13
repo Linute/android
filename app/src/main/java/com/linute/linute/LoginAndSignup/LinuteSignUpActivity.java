@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.os.PersistableBundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +42,6 @@ import java.util.Map;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -393,6 +393,8 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         sharedPreferences.putString("status", user.getStatus());
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
+        sharedPreferences.putString("collegeName", user.getCollegeName());
+        sharedPreferences.putString("collegeId", user.getCollegeId());
 
         if (user.getSocialFacebook() != null)
             sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
@@ -405,14 +407,10 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     }
 
 
-    //confirm email code activity?
     private void goToNextActivity() {
-
-        //FIXME: maybe confirm email first?
-
-        Intent i = new Intent(this, MainActivity.class);
+        Intent i = new Intent(this, CollegePickerActivity.class); //need to pick college
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
-        startActivity(i); //start new activty
+        startActivity(i); //start new activity
         finish();
     }
 
@@ -522,7 +520,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag

@@ -24,6 +24,7 @@ import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 public class MainActivity extends AppCompatActivity {
 

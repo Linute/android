@@ -17,6 +17,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
+import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -66,9 +67,13 @@ public class LaunchActivity extends Activity {
 
                     //if user is logged in
                     if (sharedPreferences.getBoolean("isLoggedIn", false) && !sharedPreferences.getString("email", "noAuth").equals("noAuth")) {
-                        //if email has been confirmed
-                        nextActivity = MainActivity.class; // go to MainActivty
-                        //nextActivity = PreLoginActivity.class;
+                        //college set, go to college
+                        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
+                            nextActivity = MainActivity.class;
+
+                        //college was not set. go to college picker
+                        else
+                            nextActivity = CollegePickerActivity.class;
                     }
 
                     //user not logged in

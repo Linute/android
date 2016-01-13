@@ -260,8 +260,7 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                //FIXME: maybe check email has been confirmed first
-                                goToMainActivity();
+                                goToNextActivity();
                             }
                         });
                     } catch (JSONException e) {
@@ -291,8 +290,19 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         });
     }
 
-    private void goToMainActivity() {
-        Intent i = new Intent(this, MainActivity.class);
+    private void goToNextActivity() {
+        Class nextActivity;
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        //college set, go to college
+        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
+            nextActivity = MainActivity.class;
+
+        //college picker is not set. go to college picker
+        else
+            nextActivity = CollegePickerActivity.class;
+
+        Intent i = new Intent(this, nextActivity);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
         startActivity(i); //start new activity
         finish();
@@ -332,7 +342,8 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
         sharedPreferences.putString("phone", user.getPhone());
-        sharedPreferences.putString("college", user.getCollege());
+        sharedPreferences.putString("collegeName", user.getCollegeName());
+        sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
 
         sharedPreferences.putBoolean("isLoggedIn", true);

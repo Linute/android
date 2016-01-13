@@ -71,7 +71,7 @@ public class Utils {
 
     public static void testLog(Context context, String TAG) {
         //Test
-        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Log.v(TAG, "image: " + sharedPreferences.getString("profileImage", "nothing"));
         Log.v(TAG, "uID: " + sharedPreferences.getString("userID", "nothing"));
         Log.v(TAG, "first name: " + sharedPreferences.getString("firstName", "nothing"));
@@ -80,6 +80,8 @@ public class Utils {
         Log.v(TAG, "status: " + sharedPreferences.getString("status", "nothing"));
         Log.v(TAG, "facebook: " + sharedPreferences.getString("socialFacebook", "nothing"));
         Log.v(TAG, "logged in: " + (sharedPreferences.getBoolean("isLoggedIn", false) ? "true" : "false"));
+        Log.v(TAG, "college name: " + sharedPreferences.getString("collegeName", "no college"));
+        Log.v(TAG, "college id: " + sharedPreferences.getString("collegeId", "no college"));
     }
 
     //clears user information
@@ -100,7 +102,8 @@ public class Utils {
         pref.putInt("posts", 0);
         pref.putInt("followers", 0);
         pref.putInt("following", 0);
-        pref.putString("college", "");
+        pref.putString("collegeName", "");
+        pref.putString("collegeId", "");
         pref.putString("campus", "");
         pref.commit();
     }

@@ -13,13 +13,14 @@
     </style>
 -->
 
-    <style name="squarecamera__CameraFullScreenTheme" parent="squarecamera__CameraFullScreenTheme.Base">
+    <style name="squarecamera__CameraFullScreenTheme"
+           parent="squarecamera__CameraFullScreenTheme.Base">
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     </style>
 
     <!--<style name="PostDialog" parent="android:Theme.Dialog" >-->
-        <!--<item name="android:windowNoTitle">false</item>-->
-        <!--<item name="android:windowFullscreen">true</item>-->
-        <!--<item name="android:windowIsFloating">false</item>-->
+    <!--<item name="android:windowNoTitle">false</item>-->
+    <!--<item name="android:windowFullscreen">true</item>-->
+    <!--<item name="android:windowIsFloating">false</item>-->
     <!--</style>-->
 </resources>
