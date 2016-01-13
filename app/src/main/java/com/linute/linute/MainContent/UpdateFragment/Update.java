@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,8 +16,10 @@ public class Update {
 
     public enum UpdateType {
         UNDEFINED,
-        LIKE,
-        COMMENT,
+        LIKE_STATUS,
+        LIKE_PHOTO,
+        COMMENT_STATUS,
+        COMMENT_PHOTO,
         FOLLOW,
         FACEBOOK_SHARE, //need icon
         MENTION, //need icon
@@ -30,6 +34,7 @@ public class Update {
 
 
     private boolean mIsRead;
+    private boolean mIsPicturePost;
 
     private String mActionID;
 
@@ -43,6 +48,10 @@ public class Update {
     private String mEventID;
     private String mEventTitle;
 
+    //will not be empty if you are following person
+    private String mFriendshipID;
+    private boolean mFollowedBack;
+
 
     public Update(JSONObject json) {
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json, "action"));
@@ -54,13 +63,16 @@ public class Update {
 
         mActionID = getStringFromJson(json, "id");
 
+        mIsPicturePost = getIntFromJson(json, "type") == 0 ? false : true;
+
         setUpUserInformation(json);
 
+        //only set up if we have friend info
+        if (hasFriendShipInformation())
+            setFriendshipIdAndFollowedBack(json);
+
         //only set up events if we have to
-        if (mUpdateType == UpdateType.MENTION ||
-                mUpdateType == UpdateType.LIKE ||
-                mUpdateType == UpdateType.COMMENT ||
-                mUpdateType == UpdateType.FACEBOOK_SHARE)
+        if (hasEventInformation())
             setUpEvent(json);
 
         setUpActionDescription();
@@ -68,10 +80,14 @@ public class Update {
 
     private static UpdateType getUpdateTypeFromString(String action) {
         switch (action) {
-            case "like":
-                return UpdateType.LIKE;
-            case "comment":
-                return UpdateType.COMMENT;
+            case "liked status":
+                return UpdateType.LIKE_STATUS;
+            case "liked photo":
+                return UpdateType.LIKE_PHOTO;
+            case "commented status":
+                return UpdateType.COMMENT_STATUS;
+            case "commented photo":
+                return UpdateType.COMMENT_PHOTO;
             case "follower":
                 return UpdateType.FOLLOW;
             case "facebook share":
@@ -83,6 +99,28 @@ public class Update {
             default:
                 return UpdateType.UNDEFINED;
         }
+    }
+
+    private void setFriendshipIdAndFollowedBack(JSONObject json) {
+
+        try {
+            JSONObject friend = json.getJSONObject("friend");
+            mFollowedBack = friend.getBoolean("followedBack");
+            mFriendshipID = json.getString("id");
+        } catch (JSONException e) {
+            mFollowedBack = true; //so buttons will be hidden and no crash will occur
+            mFriendshipID = "";
+        }
+    }
+
+    public final boolean hasEventInformation(){
+        //TODO: WILL IMPLEMENT MENTIONED AND FACEBOOK SHARED IN THE FURTURE
+        return mUpdateType == UpdateType.LIKE_PHOTO || mUpdateType == UpdateType.LIKE_STATUS ||
+                mUpdateType == UpdateType.COMMENT_PHOTO || mUpdateType == UpdateType.COMMENT_STATUS;
+    }
+
+    public final boolean hasFriendShipInformation(){
+        return mUpdateType == UpdateType.FOLLOW || mUpdateType == UpdateType.FRIEND_JOIN;
     }
 
 
@@ -98,7 +136,7 @@ public class Update {
         //if null, then it was a status post
         JSONArray images = getJsonArrayFromJson(event, "images");
 
-        if (images != null) {
+        if (images != null && images.length() > 0) {
             try {
                 // TODO: will cause JSONException, perhaps images.getString(0) != null <<!important>>
                 mEventImageName = images.getString(0);
@@ -117,24 +155,36 @@ public class Update {
         mUserProfileImageName = getStringFromJson(user, "profileImage");
     }
 
-    private void setUpActionDescription(){
-        if (mUpdateType == UpdateType.LIKE) {
-            if (mEventImageName == null || mEventImageName.equals(""))
-                mDescription = "Liked your status";
-            else mDescription = "Liked your photo";
-        }else if (mUpdateType == UpdateType.COMMENT){
-            if (mEventImageName == null || mEventImageName.equals(""))
+    private void setUpActionDescription() {
+        switch (mUpdateType){
+            case LIKE_STATUS:
+                mDescription = "Liked your photo";
+                break;
+            case LIKE_PHOTO:
+                mDescription = "Liked your photo";
+                break;
+            case COMMENT_PHOTO:
+                mDescription = "Commented on your photo";
+                break;
+            case COMMENT_STATUS:
                 mDescription = "Commented on your status";
-            else mDescription = "Commented on your photo";
-        }else if (mUpdateType == UpdateType.FOLLOW){
-            mDescription = "Started following you";
-        }else if (mUpdateType == UpdateType.MENTION){
-            mDescription = "Mentioned your post";
-        }else if (mUpdateType == UpdateType.FACEBOOK_SHARE) {
-            mDescription = "Shared your post on Facebook";
-        }else if (mUpdateType == UpdateType.FRIEND_JOIN) {
-            mDescription = "Has joined Tapt";
-        }else mDescription = "";
+                break;
+            case FOLLOW:
+                mDescription = "Started Following you";
+                break;
+            case FRIEND_JOIN:
+                mDescription = "Has joined Tapt";
+                break;
+            case MENTION:
+                mDescription = "Mentioned your post";
+                break;
+            case FACEBOOK_SHARE:
+                mDescription = "Shared your post on Facebook";
+                break;
+            default:
+                mDescription = "";
+                break;
+        }
     }
 
     public String getUserFullName() {
@@ -155,6 +205,10 @@ public class Update {
 
     public String getEventImageName() {
         return mEventImageName;
+    }
+
+    public boolean isPicturePost(){
+        return mIsPicturePost;
     }
 
     /*
@@ -187,7 +241,13 @@ public class Update {
         return mUserId;
     }
 
+    public String getFriendshipID() {
+        return mFriendshipID;
+    }
 
+    public boolean getFollowedBack(){
+        return mFollowedBack;
+    }
 
 
     /* JSON Helpers */
@@ -223,8 +283,36 @@ public class Update {
         try {
             return json.getJSONArray(key);
         } catch (JSONException e) {
-            e.printStackTrace();
             return null;
         }
+    }
+
+    public static int getIntFromJson(JSONObject json, String key){
+        try {
+            return json.getInt(key);
+        }catch (JSONException e){
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return mActionID.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean result = false;
+        if (o == null || o.getClass() != getClass()) {
+            result = false;
+        }
+
+        else {
+            if (mActionID == ((Update)o).mActionID) {
+                result = true;
+            }
+        }
+        return result;
     }
 }
