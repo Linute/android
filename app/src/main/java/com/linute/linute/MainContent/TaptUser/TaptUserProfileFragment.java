@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.R;
@@ -41,7 +42,6 @@ public class TaptUserProfileFragment extends DialogFragment {
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private ProfileAdapter mProfileAdapter;
-
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
@@ -50,17 +50,19 @@ public class TaptUserProfileFragment extends DialogFragment {
     private SharedPreferences mSharedPreferences;
 
     private LinuteUser user = new LinuteUser();
-    public boolean hasSetTitle;
+    private String mPrevTitle;
+    private String mTaptUserId;
 
 
     public TaptUserProfileFragment() {
         // Required empty public constructor
     }
 
-    public static TaptUserProfileFragment newInstance() {
+    public static TaptUserProfileFragment newInstance(String title, String taptUserId) {
         TaptUserProfileFragment fragment = new TaptUserProfileFragment();
         Bundle args = new Bundle();
-        args.putInt("DEMO", 10);
+        args.putString("TITLE", title);
+        args.putString("TAPT", taptUserId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,7 +71,8 @@ public class TaptUserProfileFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-//            mCurrentPage = getArguments().getInt(ARG_PARAM1);
+            mPrevTitle = getArguments().getString("TITLE");
+            mTaptUserId = getArguments().getString("TAPT");
         }
     }
 
@@ -79,8 +82,8 @@ public class TaptUserProfileFragment extends DialogFragment {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
-        mUser = new LSDKUser(getContext());
-        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUser = new LSDKUser(getActivity());
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
 //        ((MainActivity) getActivity()).resetToolbar();
 
@@ -91,26 +94,68 @@ public class TaptUserProfileFragment extends DialogFragment {
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext());
+        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getActivity());
         recList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-//                updateAndSetHeader();
+                updateAndSetHeader();
                 setActivities(); //get activities
 
             }
         });
 
+        updateAndSetHeader();
+        setActivities(); //get activities
 
         return rootView;
     }
 
+    //get user information from server
+    public void updateAndSetHeader() {
+        mUser.getProfileInfo(mTaptUserId, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) { //attempt to update view with response
+                    final String body = response.body().string();
+                    if (getActivity() == null) return;
+                    JSONObject jsonObject = null;
+                    try {
+                        jsonObject = new JSONObject(body);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    user.updateUserInformation(jsonObject); //container for new information
+
+//                    Log.d(TAG, body);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // NOTE: I MOVED THIS TO ON CreateView
+                            mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getActivity());
+                            recList.setAdapter(mProfileAdapter);
+                            mProfileAdapter.notifyDataSetChanged();
+
+                            ((MainActivity) getActivity()).setTitle(user.getFirstName() + " " + user.getLastName());
+                        }
+                    });
+                } else {//else something went
+                    Log.v(TAG, response.body().string());
+                }
+            }
+        });
+    }
+
     public void setActivities() {
         LSDKUser user = new LSDKUser(getActivity());
-        user.getUserActivities(new Callback() {
+        user.getUserActivities(mTaptUserId, "host", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
@@ -128,7 +173,7 @@ public class TaptUserProfileFragment extends DialogFragment {
                     try { //try to grab needed information from response
                         String body = response.body().string();
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-//                        Log.d("TAG", body);
+                        Log.d(TAG, body);
 
 
                         //i only update the list of activities if their are new values
@@ -178,11 +223,13 @@ public class TaptUserProfileFragment extends DialogFragment {
         // title by default, but your custom layout might not need it. So here you can
         // remove the dialog title, but you must call the superclass to get the Dialog.
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+        dialog.requestWindowFeature(Window.FEATURE_ACTION_BAR);
         return dialog;
     }
 
     public void onBackPressed() {
+        ((MainActivity) getActivity()).setTitle(mPrevTitle);
         this.dismiss();
     }
 }

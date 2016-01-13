@@ -4,6 +4,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
  * Created by Arman on 12/27/15.
  */
 public class Post {
+    private String mUserId;
     private String mUserName;
     private String mUserImage;
     private String mTitle;
@@ -16,7 +17,10 @@ public class Post {
 
     private boolean mPostLiked;
 
-    public Post(String userName, String userImage, String title, String image, int privacy, int numLike, String userLiked, String postTime, String postId) {
+    public Post(String userId, String userName, String userImage, String title,
+                String image, int privacy, int numLike, String userLiked,
+                String postTime, String postId) {
+        mUserId = userId;
         mUserName = userName;
         mImage = "";
         mUserImage = userImage;
@@ -77,5 +81,9 @@ public class Post {
 
     public String getUserLiked() {
         return mUserLiked;
+    }
+
+    public String getUserId() {
+        return mUserId;
     }
 }

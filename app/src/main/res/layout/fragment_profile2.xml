@@ -1,12 +1,21 @@
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/profilefrag2_swipe_refresh"
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:background="@color/white">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/prof_frag_rec"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/profilefrag2_swipe_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
 
-</android.support.v4.widget.SwipeRefreshLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/prof_frag_rec"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+</FrameLayout>

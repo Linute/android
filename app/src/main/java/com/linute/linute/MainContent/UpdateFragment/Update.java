@@ -100,6 +100,7 @@ public class Update {
 
         if (images != null) {
             try {
+                // TODO: will cause JSONException, perhaps images.getString(0) != null <<!important>>
                 mEventImageName = images.getString(0);
             } catch (JSONException e) {
                 e.printStackTrace();

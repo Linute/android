@@ -83,7 +83,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers.setText(String.valueOf(user.getFollowers()));
 
         if (mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
-            Log.d(TAG, "bindModel: " + mSharedPreferences.getString("userID", "") + " - " + user.getUserID());
+//            Log.d(TAG, "bindModel: " + mSharedPreferences.getString("userID", "") + " - " + user.getUserID());
             vFollowStatus.setVisibility(View.GONE);
         } else {
             Log.d(TAG, "bindModel: " + mSharedPreferences.getString("userID", "") + " - " + user.getUserID());
