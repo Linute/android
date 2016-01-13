@@ -7,7 +7,7 @@
     android:focusable="true"
     android:focusableInTouchMode="true"
     android:clickable="true"
-    tools:context="com.linute.linute.MainContent.PostContentPage">
+    tools:context=".MainContent.PostCreatePage">
 
     <LinearLayout
         android:layout_width="match_parent"

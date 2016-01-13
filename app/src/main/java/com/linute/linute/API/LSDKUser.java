@@ -88,15 +88,13 @@ public class LSDKUser {
     }
 
 
-    public Call getUserActivities(Callback callback) {
+    public Call getUserActivities(String userId, String action, Callback callback) {
 
         Map<String, String> params = new HashMap<>();
-        params.put("action[0]", "blasted");
-        params.put("action[1]", "host");
-        params.put("action[2]", "attend");
+        params.put("action[0]", action);
         params.put("skip", "0");
         params.put("limit", "25");
-        params.put("owner", mSharedPreferences.getString("userID", null));
+        params.put("owner", userId);
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),
@@ -115,6 +113,7 @@ public class LSDKUser {
     public Call getProfileInfo(String userID, Callback callback) {
         String[] url = {"users", userID};
 
+        // /users/id {1235rewt5y52u}
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),
                 mSharedPreferences.getString("password", null),

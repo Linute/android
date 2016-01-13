@@ -261,7 +261,7 @@ public class Profile extends Fragment {
 
     public void setActivities() {
         LSDKUser user = new LSDKUser(getContext());
-        user.getUserActivities(new Callback() {
+        user.getUserActivities(mSharedPreferences.getString("userID", null), "host", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
@@ -280,7 +280,7 @@ public class Profile extends Fragment {
                     try { //try to grab needed information from response
                         String body = response.body().string();
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-//                        Log.d("TAG", body);
+                        Log.d(TAG, body);
 
 
                         //i only update the list of activities if their are new values
@@ -329,7 +329,7 @@ public class Profile extends Fragment {
         });
     }
 
-    protected void editProfileImage() {
+    public void editProfileImage() {
         Intent i = new Intent(getContext(), ChangeProfileImageActivity.class);
         startActivityForResult(i, IMAGE_CHANGED);
     }

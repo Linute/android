@@ -1,9 +1,11 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
@@ -14,6 +16,7 @@ import java.util.List;
  * Created by Arman on 12/27/15.
  */
 public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuestionViewHolder> {
+    private static final String TAG = CheckBoxQuestionAdapter.class.getSimpleName();
     private List<Post> mPosts;
     private Context context;
 
@@ -33,6 +36,10 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     @Override
     public void onBindViewHolder(CheckBoxQuestionViewHolder holder, int position) {
         holder.bindModel(mPosts.get(position));
+        if (position + 1 == mPosts.size()) {
+            Log.d(TAG, position + "");
+            ((DiscoverFragment) ((MainActivity) context).getFragments()[0]).getFeed(1);
+        }
     }
 
     @Override

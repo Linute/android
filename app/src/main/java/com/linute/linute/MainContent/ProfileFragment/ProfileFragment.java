@@ -274,7 +274,7 @@ public class ProfileFragment extends ListFragment {
     //get activities from server
     private void setActivities(){
         LSDKUser user = new LSDKUser(getContext());
-        user.getUserActivities(new Callback() {
+        user.getUserActivities(mSharedPreferences.getString("userID", null), "host", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off

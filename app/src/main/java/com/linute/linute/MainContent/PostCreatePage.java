@@ -4,7 +4,6 @@ package com.linute.linute.MainContent;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -15,13 +14,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.Switch;
 
 import com.linute.linute.API.LSDKEvents;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.CameraActivity;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -34,14 +30,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import info.hoang8f.android.segmented.SegmentedGroup;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link PostContentPage#newInstance} factory method to
+ * Use the {@link PostCreatePage#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class PostContentPage extends DialogFragment {
+public class PostCreatePage extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -53,7 +47,7 @@ public class PostContentPage extends DialogFragment {
     private Switch anonymousSwitch;
 
 
-    public PostContentPage() {
+    public PostCreatePage() {
         // Required empty public constructor
     }
 
@@ -61,11 +55,11 @@ public class PostContentPage extends DialogFragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment PostContentPage.
+     * @return A new instance of fragment PostCreatePage.
      */
     // TODO: Rename and change types and number of parameters
-    public static PostContentPage newInstance(int currentPage) {
-        PostContentPage fragment = new PostContentPage();
+    public static PostCreatePage newInstance(int currentPage) {
+        PostCreatePage fragment = new PostCreatePage();
         Bundle args = new Bundle();
         args.putInt(ARG_PARAM1, currentPage);
         fragment.setArguments(args);
@@ -105,7 +99,7 @@ public class PostContentPage extends DialogFragment {
         rootView.findViewById(R.id.cancelPost).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PostContentPage.this.dismiss();
+                PostCreatePage.this.dismiss();
             }
         });
 
@@ -133,7 +127,6 @@ public class PostContentPage extends DialogFragment {
                 postData.put("type", "0");
                 postData.put("geo", jsonObject);
 
-
                 new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
                     @Override
                     public void onFailure(Request request, IOException e) {
@@ -150,7 +143,7 @@ public class PostContentPage extends DialogFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                PostContentPage.this.dismiss();
+                                PostCreatePage.this.dismiss();
                                 imm.hideSoftInputFromWindow(rootView.findViewById(R.id.postContentPageEditText).getWindowToken(), 0);
                             }
                         });
