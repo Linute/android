@@ -135,7 +135,7 @@ public class FeedDetailPage extends DialogFragment {
         event.put("event", mTaptPostId);
         event.put("skip", "0");
         LSDKEvents event1 = new LSDKEvents(getActivity());
-        event1.getEvent(event, new Callback() {
+        event1.getComments(event, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
 //                Toast.makeText(getActivity(), "Couldn't access server", Toast.LENGTH_SHORT).show();
