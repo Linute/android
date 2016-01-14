@@ -19,13 +19,20 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * Created by Arman on 1/11/16.
@@ -50,27 +57,11 @@ public class FeedDetailPage extends DialogFragment {
 
     public static FeedDetailPage newInstance(
             String prevFragmentTitle,
-            String taptUserPostId,
-            String taptUserPostImage,
-            String taptUserPostText,
-            String taptUserImage,
-            String taptUserName,
-            int taptUserPrivacy,
-            String taptUserPostTime,
-            boolean taptUserPostLiked,
-            String taptUserPostLikeNum) {
+            String taptUserPostId) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
         args.putString("TITLE", prevFragmentTitle);
         args.putString("TAPTPOST", taptUserPostId);
-        args.putString("TAPTIMAGE", taptUserPostImage);
-        args.putString("TAPTTEXT", taptUserPostText);
-        args.putString("TAPTUSERIMAGE", taptUserImage);
-        args.putString("TAPTUSERNAME", taptUserName);
-        args.putInt("TAPTUSERPRIVACY", taptUserPrivacy);
-        args.putString("TAPTUSERPOSTTIME", taptUserPostTime);
-        args.putBoolean("TAPTUSERPOSTLIKED", taptUserPostLiked);
-        args.putString("TAPTUSERNAMEPOSTLIKENUM", taptUserPostLikeNum);
         fragment.setArguments(args);
         return fragment;
     }
@@ -81,15 +72,7 @@ public class FeedDetailPage extends DialogFragment {
         if (getArguments() != null) {
             mPrevTitle = getArguments().getString("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
-            mFeedDetail = new FeedDetail(
-                    getArguments().getString("TAPTIMAGE"),
-                    getArguments().getString("TAPTTEXT"),
-                    getArguments().getString("TAPTUSERIMAGE"),
-                    getArguments().getString("TAPTUSERNAME"),
-                    getArguments().getInt("TAPTUSERPRIVACY"),
-                    getArguments().getString("TAPTUSERPOSTTIME"),
-                    getArguments().getBoolean("TAPTUSERPOSTLIKED"),
-                    getArguments().getString("TAPTUSERNAMEPOSTLIKENUM"));
+            mFeedDetail = new FeedDetail();
         }
     }
 
@@ -131,11 +114,8 @@ public class FeedDetailPage extends DialogFragment {
     }
 
     private void displayComments() {
-        Map<String, String> event = new HashMap<>();
-        event.put("event", mTaptPostId);
-        event.put("skip", "0");
-        LSDKEvents event1 = new LSDKEvents(getActivity());
-        event1.getComments(event, new Callback() {
+        LSDKEvents event = new LSDKEvents(getActivity());
+        event.getEventWithId(mTaptPostId, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
 //                Toast.makeText(getActivity(), "Couldn't access server", Toast.LENGTH_SHORT).show();
@@ -149,7 +129,36 @@ public class FeedDetailPage extends DialogFragment {
 //                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
 
                 }
-                Log.d(TAG, response.body().string());
+                JSONObject jsonObject = null;
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date myDate;
+                String postString;
+                try {
+                    jsonObject = new JSONObject(response.body().string());
+
+                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                    postString = Utils.getEventTime(myDate);
+
+                    mFeedDetail.setFeedDetail(
+                            jsonObject.getJSONArray("images").getString(0),
+                            jsonObject.getString("title"),
+                            jsonObject.getJSONObject("owner").getString("profileImage"),
+                            jsonObject.getJSONObject("ownder").getString("fullName"),
+                            Integer.parseInt(jsonObject.getString("privacy")),
+                            postString,
+                            !jsonObject.getString("likeID").equals(""),
+                            jsonObject.getString("numberOfLikes"));
+                } catch (JSONException | ParseException e) {
+                    e.printStackTrace();
+                }
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mFeedDetailAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
     }

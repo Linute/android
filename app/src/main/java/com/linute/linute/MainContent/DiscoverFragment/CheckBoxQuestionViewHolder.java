@@ -122,18 +122,10 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
                 }
             });
-            /*FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+            FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
             ((MainActivity) mContext).mFeedDetailPage =
                     FeedDetailPage.newInstance("Discover",
-                            mPosts.get(getAdapterPosition()).getPostId(),
-                            mPosts.get(getAdapterPosition()).getImage(),
-                            mPosts.get(getAdapterPosition()).getTitle(),
-                            mPosts.get(getAdapterPosition()).getUserImage(),
-                            mPosts.get(getAdapterPosition()).getUserName(),
-                            mPosts.get(getAdapterPosition()).getPrivacy(),
-                            mPosts.get(getAdapterPosition()).getPostTime(),
-                            mPosts.get(getAdapterPosition()).isPostLiked(),
-                            mPosts.get(getAdapterPosition()).getNumLike());
+                            mPosts.get(getAdapterPosition()).getPostId());
             // The device is smaller, so show the fragment fullscreen
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             // For a little polish, specify a transition animation
@@ -141,7 +133,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
             transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
-                    .addToBackStack(null).commit();*/
+                    .addToBackStack(null).commit();
         }
     }
 

@@ -18,7 +18,11 @@ public class FeedDetail {
 
     private List<Comment> mComments;
 
-    public FeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum) {
+    public FeedDetail() {
+        mComments = new ArrayList<>();
+    }
+
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -27,7 +31,6 @@ public class FeedDetail {
         mPostTime = postTime;
         isPostLiked = postLiked;
         mPostLikeNum = postLikeNum;
-        mComments = new ArrayList<>();
     }
 
     public String getPostImage() {
