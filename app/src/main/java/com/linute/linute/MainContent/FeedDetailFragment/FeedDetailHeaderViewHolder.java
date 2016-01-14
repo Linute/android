@@ -1,0 +1,192 @@
+package com.linute.linute.MainContent.FeedDetailFragment;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
+import com.mikhaellopez.circularimageview.CircularImageView;
+
+/**
+ * Created by Arman on 1/13/16.
+ */
+public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
+
+    private Context mContext;
+    private RecyclerView.Adapter mAdapater;
+    private SharedPreferences mSharedPreferences;
+
+    protected TextView vPostUserName;
+    protected TextView vPostText;
+    protected TextView vLikesText;
+    protected TextView vPostTime;
+    protected CheckBox vLikesHeart;
+    protected ImageView vPostImage;
+    protected CircularImageView vUserImage;
+
+    protected LinearLayout vPostImageLinear;
+    protected TextView vPostTimeImage;
+    protected TextView vLikesTextImage;
+    protected CheckBox vLikesHeartImage;
+
+    public FeedDetailHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context) {
+        super(itemView);
+
+        mContext = context;
+        mAdapater = adapter;
+
+        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+        vPostUserName = (TextView) itemView.findViewById(R.id.postUserNameDetail);
+        vPostText = (TextView) itemView.findViewById(R.id.postTextDetail);
+        vLikesText = (TextView) itemView.findViewById(R.id.postNumLikesDetail);
+        vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeartStatusDetail);
+        vPostImage = (ImageView) itemView.findViewById(R.id.postImageDetail);
+        vUserImage = (CircularImageView) itemView.findViewById(R.id.comment_head_post_user_image);
+        vPostTime = (TextView) itemView.findViewById(R.id.postTimeElapsedDetail);
+
+        vPostImageLinear = (LinearLayout) itemView.findViewById(R.id.post_image_linear_detail);
+        vPostTimeImage = (TextView) itemView.findViewById(R.id.postTimeElapsedImageViewDetail);
+        vLikesTextImage = (TextView) itemView.findViewById(R.id.postNumLikesImageDetail);
+        vLikesHeartImage = (CheckBox) itemView.findViewById(R.id.postHeartStatusImageDetail);
+
+        vLikesHeart.setOnCheckedChangeListener(this);
+        vLikesHeartImage.setOnCheckedChangeListener(this);
+        vUserImage.setOnClickListener(this);
+    }
+
+    void bindModel(FeedDetail feedDetail) {
+        // Set User Image
+        // Set User Name
+        if (feedDetail.getPostPrivacy() == 0) {
+            getImage(feedDetail, 1);
+            vPostUserName.setText(feedDetail.getUserName());
+        } else {
+            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
+            vPostUserName.setText("Anonymous");
+        }
+
+        if (!feedDetail.getPostImage().equals("")) {
+            // Set Post Image
+            getImage(feedDetail, 2);
+            vPostImage.setVisibility(View.VISIBLE);
+            vPostText.setVisibility(View.GONE);
+            vPostTimeImage.setText(feedDetail.getPostTime());
+            // Set Like/Number/Time
+            vPostTime.setVisibility(View.GONE);
+            vLikesText.setVisibility(View.GONE);
+            vLikesHeart.setVisibility(View.GONE);
+            vLikesHeartImage.setChecked(feedDetail.isPostLiked());
+            vLikesTextImage.setText(feedDetail.getPostLikeNum());
+            vPostTimeImage.setText(feedDetail.getPostTime());
+
+            vPostImageLinear.setVisibility(View.VISIBLE);
+            vPostTimeImage.setVisibility(View.VISIBLE);
+        } else {
+            // Set Post Text
+            vPostImage.setVisibility(View.GONE);
+            vPostText.setVisibility(View.VISIBLE);
+            vPostText.setText(feedDetail.getPostText());
+            // Set Like/Number/Time
+            vPostTime.setVisibility(View.VISIBLE);
+            vLikesText.setVisibility(View.VISIBLE);
+            vLikesHeart.setVisibility(View.VISIBLE);
+            vLikesHeart.setChecked(feedDetail.isPostLiked());
+            vLikesText.setText(feedDetail.getPostLikeNum());
+            vPostTime.setText(feedDetail.getPostTime());
+
+            vPostImageLinear.setVisibility(View.GONE);
+            vPostTimeImage.setVisibility(View.GONE);
+        }
+    }
+
+    private void getImage(FeedDetail feedDetail, int type) {
+        Glide.with(mContext)
+                .load(type == 1 ? Utils.getImageUrlOfUser(feedDetail.getUserImage()) : Utils.getEventImageURL(feedDetail.getPostImage()))
+                .asBitmap()
+                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .placeholder(R.drawable.profile_picture_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(type == 1 ? vUserImage : vPostImage);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//        if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked()) {
+//            mPosts.get(getAdapterPosition()).setPostLiked(true);
+//            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
+//
+//            Map<String, Object> postData = new HashMap<>();
+//            postData.put("owner", mSharedPreferences.getString("userID", ""));
+//            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
+//            new LSDKEvents(mContext).postLike(postData, new Callback() {
+//                @Override
+//                public void onFailure(Request request, IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                @Override
+//                public void onResponse(Response response) throws IOException {
+//                    if (!response.isSuccessful()) {
+//                        Log.d("TAG", response.body().string());
+//                    }
+//
+//                }
+//            });
+//
+//            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+//        } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {
+//            mPosts.get(getAdapterPosition()).setPostLiked(false);
+//            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
+//
+//            Map<String, Object> postData = new HashMap<>();
+//            postData.put("isDeleted", true);
+//            new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getUserLiked(), new Callback() {
+//                @Override
+//                public void onFailure(Request request, IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                @Override
+//                public void onResponse(Response response) throws IOException {
+//                    if (!response.isSuccessful()) {
+//                        Log.d("TAG", response.body().string());
+//                    }
+//                    Log.d(TAG, response.body().string());
+//                }
+//            });
+//
+//            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+//        }
+    }
+
+    @Override
+    public void onClick(View v) {
+//        if (v == vUserImage) {
+//            if (mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+//                FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+//                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", mPosts.get(getAdapterPosition()).getUserId());
+//                // The device is smaller, so show the fragment fullscreen
+//                FragmentTransaction transaction = fragmentManager.beginTransaction();
+//                // For a little polish, specify a transition animation
+//                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//                // To make it fullscreen, use the 'content' root view as the container
+//                // for the fragment, which is always the root view for the activity
+//                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+//                        .addToBackStack(null).commit();
+//            }
+//        }
+    }
+}

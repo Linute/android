@@ -36,6 +36,17 @@ public class LSDKEvents {
         return API_Methods.get(path, header, param, callback);
     }
 
+    public Call getEvent(Map<String, String> param, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        String[] path = {"comments"};
+
+        return API_Methods.get(path, header, param, callback);
+    }
+
     public Call postEvent(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),

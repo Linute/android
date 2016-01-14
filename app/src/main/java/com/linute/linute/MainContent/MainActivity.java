@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fab;
     private PostCreatePage mPostCreatePage;
     public TaptUserProfileFragment mTaptUserProfileFragment;
+    public FeedDetailPage mFeedDetailPage;
 
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
@@ -228,6 +230,8 @@ public class MainActivity extends AppCompatActivity {
             mPostCreatePage.onBackPressed();
         } else if (mTaptUserProfileFragment != null && mTaptUserProfileFragment.isVisible()) {
             mTaptUserProfileFragment.dismiss();
+        } else if (mFeedDetailPage != null && mFeedDetailPage.isVisible()) {
+            mFeedDetailPage.dismiss();
         } else {
             super.onBackPressed();
         }

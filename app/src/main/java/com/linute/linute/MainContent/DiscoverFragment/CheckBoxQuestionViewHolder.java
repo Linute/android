@@ -17,6 +17,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
@@ -57,12 +59,14 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
+    private LSDKUser mUser;
 
     public CheckBoxQuestionViewHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUser = new LSDKUser(mContext);
 
         mPosts = posts;
         mCheckBoxChoiceCapableAdapters = adapter;
@@ -83,23 +87,46 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         vLikesHeart.setOnCheckedChangeListener(this);
         vLikesHeartImage.setOnCheckedChangeListener(this);
         vPostText.setOnClickListener(this);
+        vPostImage.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
-        if (v == vUserImage && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+        Log.d(TAG, "onClick");
+        if (v == vUserImage) {
+            if (mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+                FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", mPosts.get(getAdapterPosition()).getUserId());
+                // The device is smaller, so show the fragment fullscreen
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                // For a little polish, specify a transition animation
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                // To make it fullscreen, use the 'content' root view as the container
+                // for the fragment, which is always the root view for the activity
+                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+                        .addToBackStack(null).commit();
+            }
+        } else if (v == vPostImage || v == vPostText) {
             FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//        FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Simple", mPosts.get(getAdapterPosition()).getUserId());
-//        newFragment.show(ft, "dialog");
+            ((MainActivity) mContext).mFeedDetailPage =
+                    FeedDetailPage.newInstance("Discover",
+                            mPosts.get(getAdapterPosition()).getPostId(),
+                            mPosts.get(getAdapterPosition()).getImage(),
+                            mPosts.get(getAdapterPosition()).getTitle(),
+                            mPosts.get(getAdapterPosition()).getUserImage(),
+                            mPosts.get(getAdapterPosition()).getUserName(),
+                            mPosts.get(getAdapterPosition()).getPrivacy(),
+                            mPosts.get(getAdapterPosition()).getPostTime(),
+                            mPosts.get(getAdapterPosition()).isPostLiked(),
+                            mPosts.get(getAdapterPosition()).getNumLike());
             // The device is smaller, so show the fragment fullscreen
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             // For a little polish, specify a transition animation
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
-            transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+            transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
                     .addToBackStack(null).commit();
         }
     }

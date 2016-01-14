@@ -257,7 +257,13 @@ public class DiscoverFragment extends Fragment {
     }
 
     private void cancelRefresh() {
-        if (refreshLayout.isRefreshing())
-            refreshLayout.setRefreshing(false);
+        if (refreshLayout.isRefreshing()) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(false);
+                }
+            });
+        }
     }
 }
