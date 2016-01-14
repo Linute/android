@@ -145,8 +145,6 @@ public class LSDKUser {
                 callback);
     }
 
-
-
     //get phone number confirmation code
     //@param phoneNumber - phone number; NOTE: make sure phone unique first
     //@param callback - what to do if success or failure
@@ -159,6 +157,17 @@ public class LSDKUser {
         param.put("phone", phoneNumber);
 
         return API_Methods.post("/users/confirm-phone", header, param, callback);
+    }
+
+
+
+    public Call getConfirmationCodeForEmail(String email, Callback callback){
+        //NOTE: HAS TO BE WITH AUTH?
+        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("email", email);
+        return API_Methods.post("/users/confirm-email", header, param, callback);
     }
 
     /*TODO: Still needs to be implemented :

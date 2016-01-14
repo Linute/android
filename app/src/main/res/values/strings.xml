@@ -130,4 +130,5 @@
     <string name="squarecamera__request_write_storage_permission_text">Approval is needed to save
         your photo on your device
     </string>
+    <string name="title_activity_college_picker">CollegePickerActivity</string>
 </resources>

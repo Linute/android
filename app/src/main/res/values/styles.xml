@@ -29,10 +29,10 @@
     </style>
 
 
-
     <!--Square Camera-->
     <!-- Base application theme. -->
-    <style name="squarecamera__CameraFullScreenTheme" parent="squarecamera__CameraFullScreenTheme.Base">
+    <style name="squarecamera__CameraFullScreenTheme"
+           parent="squarecamera__CameraFullScreenTheme.Base">
 
     </style>
 
@@ -45,15 +45,15 @@
     </style>
 
     <style name="squarecamera__CameraFullScreenTheme.AppBarOverlay"
-           parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+           parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     <style name="squarecamera__CameraFullScreenTheme.PopupOverlay"
-           parent="ThemeOverlay.AppCompat.Light" />
+           parent="ThemeOverlay.AppCompat.Light"/>
 
     <!--<style name="PostDialog" parent="android:Theme.Dialog" >-->
-        <!--<item name="android:windowNoTitle">false</item>-->
-        <!--<item name="android:windowFullscreen">false</item>-->
-        <!--<item name="android:windowIsFloating">false</item>-->
+    <!--<item name="android:windowNoTitle">false</item>-->
+    <!--<item name="android:windowFullscreen">false</item>-->
+    <!--<item name="android:windowIsFloating">false</item>-->
     <!--</style>-->
 
 </resources>

@@ -9,7 +9,7 @@
     <uses-permission android:name="com.linute.linute.permission.C2D_MESSAGE"/>
 
     <!-- Request permission to use a device camera -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
@@ -17,8 +17,6 @@
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
@@ -199,20 +197,25 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
         </activity>
-        <activity android:name=".MainContent.Settings.ChangePhoneActivity"
-                  android:parentActivityName=".MainContent.Settings.SettingActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"
-                  android:windowSoftInputMode="adjustResize">
+        <activity
+            android:name=".MainContent.Settings.ChangePhoneActivity"
+            android:parentActivityName=".MainContent.Settings.SettingActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.linute.linute.MainContent.Settings.SettingActivity"/>
         </activity>
-        <activity android:name=".SquareCamera.CameraActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/squarecamera__CameraFullScreenTheme"
-            >
-
+        <activity
+            android:name=".SquareCamera.CameraActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/squarecamera__CameraFullScreenTheme">
+        </activity>
+        <activity
+            android:name=".LoginAndSignup.CollegePickerActivity"
+            android:label="@string/title_activity_college_picker"
+            android:theme="@style/AppTheme">
         </activity>
     </application>
 
