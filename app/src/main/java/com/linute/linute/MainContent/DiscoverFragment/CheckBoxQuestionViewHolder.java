@@ -108,7 +108,21 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                         .addToBackStack(null).commit();
             }
         } else if (v == vPostImage || v == vPostText) {
-            FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+
+            new LSDKEvents(mContext).getEventWithId(mPosts.get(getAdapterPosition()).getPostId(), new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    Log.e(TAG, "onFailure: fucked up");
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+
+                    Log.i(TAG, "onResponse: " + response.body().string());
+
+                }
+            });
+            /*FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
             ((MainActivity) mContext).mFeedDetailPage =
                     FeedDetailPage.newInstance("Discover",
                             mPosts.get(getAdapterPosition()).getPostId(),
@@ -127,7 +141,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             // To make it fullscreen, use the 'content' root view as the container
             // for the fragment, which is always the root view for the activity
             transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
-                    .addToBackStack(null).commit();
+                    .addToBackStack(null).commit();*/
         }
     }
 

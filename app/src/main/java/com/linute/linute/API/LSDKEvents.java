@@ -8,6 +8,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,7 +37,18 @@ public class LSDKEvents {
         return API_Methods.get(path, header, param, callback);
     }
 
-    public Call getEvent(Map<String, String> param, Callback callback) {
+    public Call getEventWithId(String id, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        String[] path = {"events", id};
+
+        return API_Methods.get(path, header, null, callback);
+    }
+
+    public Call getComments(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),
                 mSharedPreferences.getString("password", null),
