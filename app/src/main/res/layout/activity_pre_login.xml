@@ -8,8 +8,7 @@
         android:id="@+id/background_image_switcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
         >
 
     </ImageSwitcher>
@@ -40,7 +39,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="78dp"
         android:text="@string/signUpText"
-        android:textColor="@android:color/white"
+        android:textColor="@android:color/black"
         android:textSize="20dp"
         tools:textColor="@android:color/black"/>
 

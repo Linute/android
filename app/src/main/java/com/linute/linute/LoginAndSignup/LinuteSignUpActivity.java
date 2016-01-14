@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -28,7 +27,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,7 @@ import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 /**
  * A login screen that offers login via email/password.
@@ -62,15 +64,25 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     // SDK
     private LSDKUser mLSDKUser;
+    private String mEmailString;
+    private String mPinCode;
+
+    //flipper
+    private ViewFlipper mViewFlipper;
+    private int mCurrentViewFlipperIndex = 0;
 
     // UI references.
     private EditText mEmailView;
     private EditText mPasswordView;
+    private EditText mPinCodeView;
     private ProgressBar mProgressBar;
     private EditText mFirstNameTextView;
     private EditText mLastNameTextView;
     private Button mEmailSignUpButton;
+    private Button mNextButton;
     private Bitmap mProfilePictureBitmap;
+
+    private TextView mEmailConfirmTextView;
 
     private CircularImageView mProfilePictureView;
 
@@ -87,6 +99,8 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         //create LSDKUser
         mLSDKUser = new LSDKUser(this);
 
+        setUpViewFlipper();
+
         bindViews();
         setUpOnClickListeners();
     }
@@ -95,26 +109,39 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //outState.putString("mCurrentPhotoPath", mCurrentPhotoPath);
+        //TODO: save email, pin, current flipper
+        outState.putString("mSavedEmail", mEmailString);
+        outState.putString("mSavedPin", mPinCode);
+        outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
 
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        /*if (savedInstanceState != null) {
-            mCurrentPhotoPath = savedInstanceState.getString("mCurrentPhotoPath", null);
-            if (mCurrentPhotoPath != null) {
-                File imgFile = new File(mCurrentPhotoPath);
-                if (imgFile.exists()) {
-                    mProfilePictureBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    if (mProfilePictureBitmap!=null)
-                        mProfilePictureBitmap = Bitmap.createScaledBitmap(mProfilePictureBitmap, 1080, 1080, true);
-                } else {
-                    Log.i(TAG, "onRestoreInstanceState: no such imagefile");
-                }
+        if (savedInstanceState != null) {
+            mPinCode = savedInstanceState.getString("mSavedPin");
+            mCurrentViewFlipperIndex = savedInstanceState.getInt("mCurrentFlipperIndex");
+            mEmailString = savedInstanceState.getString("mSavedEmail");
+            if (mEmailString != null) {
+                mEmailView.setText(mEmailString);
+                mEmailConfirmTextView.setText(mEmailString);
             }
-        }*/
+        }
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mViewFlipper.getDisplayedChild() != mCurrentViewFlipperIndex)
+            mViewFlipper.setDisplayedChild(mCurrentViewFlipperIndex);
+    }
+
+    private void setUpViewFlipper() {
+        mViewFlipper = (ViewFlipper) findViewById(R.id.signUp_view_flipper);
+        mViewFlipper.setInAnimation(this, R.anim.slide_in_right);
+        mViewFlipper.setOutAnimation(this, R.anim.slide_out_left);
     }
 
     private void bindViews() {
@@ -123,18 +150,30 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         mFirstNameTextView = (EditText) findViewById(R.id.signup_fname_text);
         mLastNameTextView = (EditText) findViewById(R.id.signup_lname_text);
         mProfilePictureView = (CircularImageView) findViewById(R.id.signup_profile_pic_view);
-        mProgressBar = (ProgressBar) findViewById(R.id.signup_progress_bar);
+        mProgressBar = (ProgressBar) findViewById(R.id.signUp_progress_bar);
         mEmailSignUpButton = (Button) findViewById(R.id.signup_submit_button);
+        mNextButton = (Button) findViewById(R.id.signUp_verify_email_button);
 
+        mPinCodeView = (EditText) findViewById(R.id.signUp_verify_code);
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
+
+        mEmailConfirmTextView = (TextView) findViewById(R.id.signUp_email_confirm_text_view);
     }
 
     private void setUpOnClickListeners() {
+
+        mNextButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkEmailAndGetPinCode();
+            }
+        });
+
         //attempt to sign up when button pressed
         mEmailSignUpButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptSignup();
+                signUp();
             }
         });
 
@@ -172,34 +211,17 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     };
 
 
-    /**
-     * Attempts to sign in or register the account specified by the login form.
-     * If there are form errors (invalid email, missing fields, etc.), the
-     * errors are presented and no actual login attempt is made.
-     */
-    private void attemptSignup() {
-        //if alreadying querying, return
-        if (mCredentialCheckInProgress) { //users can't press Sign Up button during the check
-            return;
-        }
+    private void checkEmailAndGetPinCode() {
+        if (mCredentialCheckInProgress) return;
 
-        if (!Utils.isNetworkAvailable(this)) { //if no network connection
-            Utils.showBadConnectionToast(this);
-            return;
-        }
+        final String email = mEmailView.getText().toString().trim();
 
-        // Store values at the time of the login attempt.
-        final String email = mEmailView.getText().toString();
-        final String password = mPasswordView.getText().toString();
-        final String fName = mFirstNameTextView.getText().toString();
-        final String lName = mLastNameTextView.getText().toString();
-
-        boolean areGoodCredentials = areGoodCredentials(email, password, fName, lName);
-
-        if (areGoodCredentials) {
-            //check email and sign up
+        if (checkEmail(email)) {
             showProgress(true);
-            //check if email unique
+
+            mEmailString = email;
+            mEmailConfirmTextView.setText(mEmailString);
+
             mLSDKUser.isUniqueEmail(email, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
@@ -208,8 +230,8 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Response response) throws IOException {
-                    if (response.code() == 200) {
-                        signUp(email, password, fName, lName);
+                    if (response.code() == 200) { //email was good
+                        getPinCode();
                     } else if (response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
                         runOnUiThread(rNotUniqueEmailAction);
@@ -221,15 +243,76 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         }
     }
 
+    private void getPinCode() {
+        mLSDKUser.getConfirmationCodeForEmail(mEmailString, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                runOnUiThread(rFailedConnectionAction);
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showProgress(false);
+                                mViewFlipper.showNext();
+                                mCurrentViewFlipperIndex++;
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(rServerErrorAction);
+                    }
+                } else {
+                    runOnUiThread(rServerErrorAction);
+                }
+            }
+        });
+    }
+
+
+    private boolean checkEmail(String emailString) {
+        //if empty return false
+        if (TextUtils.isEmpty(emailString)) {
+            mEmailView.setError(getString(R.string.error_field_required));
+            mEmailView.requestFocus();
+            return false;
+        }
+
+        //invalid email
+        else if (!emailString.contains("@") || emailString.startsWith("@") || emailString.contains("@.")) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
+            mEmailView.requestFocus();
+            return false;
+        }
+
+        /*TODO: reinsert
+        //not edu email
+        else if (!emailString.endsWith(".edu")){
+            mEmailView.setError("Must be a valid edu email");
+            mEmailView.requestFocus();
+            return false;
+        }*/
+
+        //good email
+        else {
+            return true;
+        }
+    }
+
     //checks if provided credentials are good
     //marks them if they are invalid credentials
-    private boolean areGoodCredentials(String email, String password, String fName, String lName) {
+    private boolean areGoodCredentials(String password, String fName, String lName) {
         boolean isGood = true;
 
         View mFocusView = null;
 
         // Reset errors.
-        mEmailView.setError(null);
         mPasswordView.setError(null);
         mFirstNameTextView.setError(null);
         mLastNameTextView.setError(null);
@@ -253,31 +336,10 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             isGood = false;
         }
 
-
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            mFocusView = mEmailView;
-            isGood = false;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            mFocusView = mEmailView;
-            isGood = false;
-        }
-
         if (!isGood)
             mFocusView.requestFocus();
 
         return isGood;
-    }
-
-    //TODO: ADD ERROR FOR NON EDU EMAIL
-    private boolean isEmailValid(String email) {
-        // no @                     //not edu email             //@cuny.edu
-        if (!email.contains("@") || !email.endsWith(".edu") || email.startsWith("@") ||
-                email.contains("@.") || email.contains(" "))
-            //me@.edu                   //whitespace
-            return false;
-        return true;
     }
 
     private boolean isPasswordValid(String password) {
@@ -306,77 +368,69 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             }
         });
 
-        setTextEditsFocus(!show); //when progess shown, don't focus this
         mCredentialCheckInProgress = show;
     }
 
-    //make edit text editable and uneditable
-    //don't want people changing values after hitting submit
-    private void setTextEditsFocus(boolean focus) {
-        //making content focusable uses different functions for some reason
-        if (focus) { //turn on
-            mEmailView.setFocusableInTouchMode(true);
-            mPasswordView.setFocusableInTouchMode(true);
-            mFirstNameTextView.setFocusableInTouchMode(true);
-            mLastNameTextView.setFocusableInTouchMode(true);
-        } else { //turn off
-            mEmailView.setFocusable(false);
-            mPasswordView.setFocusable(false);
-            mFirstNameTextView.setFocusable(false);
-            mLastNameTextView.setFocusable(false);
-        }
-        mProfilePictureView.setClickable(focus);
-    }
+    private void signUp() {
 
-    private void signUp(String email, final String password, String fName, String lName) {
+        //if alreadying querying, return
+        if (mCredentialCheckInProgress) return; //users can't press Sign Up button during the check
 
-        Map<String, Object> userInfo = new HashMap<>();
-        String encodedProfilePicture;
+        final String email = mEmailString;
+        final String password = mPasswordView.getText().toString();
+        final String fName = mFirstNameTextView.getText().toString();
+        final String lName = mLastNameTextView.getText().toString();
 
-        encodedProfilePicture = Utils.encodeImageBase64(
-                mProfilePictureBitmap != null ? mProfilePictureBitmap :
-                        BitmapFactory.decodeResource(getResources(), R.drawable.profile_picture_placeholder));
+        boolean areGoodCredentials = areGoodCredentials(password, fName, lName);
 
-        //add information
-        userInfo.put("email", email);
-        userInfo.put("password", password);
-        userInfo.put("firstName", fName);
-        userInfo.put("lastName", lName);
-        userInfo.put("profileImage", encodedProfilePicture);
-        userInfo.put("timeZone", Utils.getTimeZone());
+        if (areGoodCredentials) {
+            showProgress(true);
+            Map<String, Object> userInfo = new HashMap<>();
+            String encodedProfilePicture;
 
-        //try to create user
-        mLSDKUser.createUser(userInfo, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) { // no response
-                runOnUiThread(rFailedConnectionAction);
-            }
+            encodedProfilePicture = Utils.encodeImageBase64(
+                    mProfilePictureBitmap != null ? mProfilePictureBitmap :
+                            BitmapFactory.decodeResource(getResources(), R.drawable.profile_picture_placeholder));
 
-            @Override
-            public void onResponse(Response response) throws IOException { //get response
-                if (response.isSuccessful()) { //got response
+            //add information
+            userInfo.put("email", email);
+            userInfo.put("password", password);
+            userInfo.put("firstName", fName);
+            userInfo.put("lastName", lName);
+            userInfo.put("profileImage", encodedProfilePicture);
+            userInfo.put("timeZone", Utils.getTimeZone());
 
-                    try {
-                        saveSuccessInformation(response.body().string(), password);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                goToNextActivity();
-                            }
-                        });
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Log.e(TAG, "Counldn't save info");
+            //try to create user
+            mLSDKUser.createUser(userInfo, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) { // no response
+                    runOnUiThread(rFailedConnectionAction);
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException { //get response
+                    if (response.isSuccessful()) { //got response
+
+                        try {
+                            saveSuccessInformation(response.body().string(), password);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    goToNextActivity();
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.e(TAG, "Counldn't save info");
+                            runOnUiThread(rServerErrorAction);
+                        }
+
+                    } else { //couldn't get response
                         runOnUiThread(rServerErrorAction);
                     }
-
-                } else { //couldn't get response
-                    runOnUiThread(rServerErrorAction);
                 }
-            }
-        });
-
-        Log.v(TAG, "success");
+            });
+        }
     }
 
     private void saveSuccessInformation(String responseString, String password) throws JSONException {
@@ -457,7 +511,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                     Uri contentUri = Uri.fromFile(f);
                     galleryAddPic(contentUri); // add to gallery
                     beginCrop(contentUri); //crop image
-                }else {
+                } else {
                     showRationalizationDialog();
                 }
             } else { //no picture captured. delete the temp file created to hold image
@@ -611,6 +665,37 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     private boolean hasCameraPermissions() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+
+    }
+
+
+    public void enterNewEmail(View view) {
+        if (mCredentialCheckInProgress) return;
+        setToGoBackAnimation(true); //change animations
+        showProgress(true);
+        mPinCodeView.setText("");
+        mViewFlipper.showPrevious();
+        mCurrentViewFlipperIndex--;
+        mEmailString = null;
+        mPinCode = null;
+        showProgress(false);
+        setToGoBackAnimation(false);  //change animations
+    }
+
+    public void verifyCode(View view) {
+        if (mCredentialCheckInProgress) return;
+        if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
+            showProgress(true);
+            mViewFlipper.showNext();
+            mCurrentViewFlipperIndex++;
+            showProgress(false);
+        }
+    }
+
+    private void setToGoBackAnimation(boolean goBack) {
+
+        mViewFlipper.setInAnimation(this, goBack ? R.anim.slide_in_left : R.anim.slide_in_right);
+        mViewFlipper.setOutAnimation(this, goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
 
     }
 }

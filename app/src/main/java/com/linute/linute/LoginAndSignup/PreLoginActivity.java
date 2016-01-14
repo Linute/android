@@ -78,7 +78,6 @@ public class PreLoginActivity extends AppCompatActivity {
             public View makeView() {
                 ImageView imageView = new ImageView(getApplicationContext());
                 imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
                 mImageSwitcher.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
                 return imageView;
             }
@@ -90,16 +89,28 @@ public class PreLoginActivity extends AppCompatActivity {
         mImageSwitcher.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         mImageSwitcher.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out));
 
-        //set so it automatically switches every 1 sec
-        mImageSwitcher.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //cycle through the images
-                mImageSwitcher.setImageResource(mBackgroundImageResID[getNextBackgroundImageIndex()]);
-                mImageSwitcher.postDelayed(this, 6000);
-            }
-        }, 5000);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mImageSwitcher.postDelayed(rSwitchPicture, 6000);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mImageSwitcher.removeCallbacks(rSwitchPicture);
+    }
+
+    private Runnable rSwitchPicture = new Runnable() {
+        @Override
+        public void run() {
+            //cycle through the images
+            mImageSwitcher.setImageResource(mBackgroundImageResID[getNextBackgroundImageIndex()]);
+            mImageSwitcher.postDelayed(this, 6000);
+        }
+    };
 
     private int getNextBackgroundImageIndex(){
         //cycles to beginning image when at the end
