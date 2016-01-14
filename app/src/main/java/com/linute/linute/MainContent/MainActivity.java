@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -30,11 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
 
-    private ViewPager mViewPager;
+    public ViewPager mViewPager;
     private Toolbar mToolbar;
     private TextView mTitle;
     private FloatingActionButton fab;
-    private PostContentPage newFragment;
+    private PostCreatePage mPostCreatePage;
+    public TaptUserProfileFragment mTaptUserProfileFragment;
 
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
@@ -163,15 +165,15 @@ public class MainActivity extends AppCompatActivity {
     public void newPost() {
         FragmentManager fragmentManager = getFragmentManager();
 //        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        newFragment = PostContentPage.newInstance(mViewPager.getCurrentItem());
-//        newFragment.show(ft, "dialog");
+        mPostCreatePage = PostCreatePage.newInstance(mViewPager.getCurrentItem());
+//        mPostCreatePage.show(ft, "dialog");
         // The device is smaller, so show the fragment fullscreen
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         // For a little polish, specify a transition animation
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         // To make it fullscreen, use the 'content' root view as the container
         // for the fragment, which is always the root view for the activity
-        transaction.add(R.id.postContainer, newFragment)
+        transaction.add(R.id.postContainer, mPostCreatePage)
                 .addToBackStack(null).commit();
     }
 
@@ -222,10 +224,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (newFragment != null && newFragment.isVisible()) {
-            newFragment.onBackPressed();
+        if (mPostCreatePage != null && mPostCreatePage.isVisible()) {
+            mPostCreatePage.onBackPressed();
+        } else if (mTaptUserProfileFragment != null && mTaptUserProfileFragment.isVisible()) {
+            mTaptUserProfileFragment.dismiss();
         } else {
             super.onBackPressed();
         }
+    }
+
+    public Fragment[] getFragments() {
+        return mFragments;
     }
 }

@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
@@ -8,13 +10,15 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
@@ -32,7 +36,7 @@ import java.util.Map;
 /**
  * Created by Arman on 12/27/15.
  */
-public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener {
+public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
     private static final String TAG = CheckBoxQuestionViewHolder.class.getSimpleName();
     private ChoiceCapableAdapter mCheckBoxChoiceCapableAdapters;
 
@@ -43,6 +47,11 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     protected CheckBox vLikesHeart;
     protected ImageView vPostImage;
     protected CircularImageView vUserImage;
+
+    protected LinearLayout vPostImageLinear;
+    protected TextView vPostTimeImage;
+    protected TextView vLikesTextImage;
+    protected CheckBox vLikesHeartImage;
 
     protected List<Post> mPosts;
 
@@ -66,7 +75,33 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         vUserImage = (CircularImageView) itemView.findViewById(R.id.postUserImage);
         vPostTime = (TextView) itemView.findViewById(R.id.postTimeElapsed);
 
+        vPostImageLinear = (LinearLayout) itemView.findViewById(R.id.post_image_linear);
+        vPostTimeImage = (TextView) itemView.findViewById(R.id.postTimeElapsedImageView);
+        vLikesTextImage = (TextView) itemView.findViewById(R.id.postNumLikesImage);
+        vLikesHeartImage = (CheckBox) itemView.findViewById(R.id.postHeartStatusImage);
+
         vLikesHeart.setOnCheckedChangeListener(this);
+        vLikesHeartImage.setOnCheckedChangeListener(this);
+        vPostText.setOnClickListener(this);
+        vUserImage.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == vUserImage && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+            FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+//        FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Simple", mPosts.get(getAdapterPosition()).getUserId());
+//        newFragment.show(ft, "dialog");
+            // The device is smaller, so show the fragment fullscreen
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            // For a little polish, specify a transition animation
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            // To make it fullscreen, use the 'content' root view as the container
+            // for the fragment, which is always the root view for the activity
+            transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+                    .addToBackStack(null).commit();
+        }
     }
 
     @Override
@@ -121,27 +156,47 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
     void bindModel(Post post) {
         // Set User Image
-        if (post.getPrivacy() == 0)
-            getImage(post, 1);
-        else
-            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
         // Set User Name
-        vPostUserName.setText(post.getUserName());
+        if (post.getPrivacy() == 0) {
+            getImage(post, 1);
+            vPostUserName.setText(post.getUserName());
+        } else {
+            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
+            vPostUserName.setText("Anonymous");
+        }
+
         if (!post.getImage().equals("")) {
             // Set Post Image
             getImage(post, 2);
             vPostImage.setVisibility(View.VISIBLE);
             vPostText.setVisibility(View.GONE);
+            vPostTimeImage.setText(post.getPostTime());
+            // Set Like/Number/Time
+            vPostTime.setVisibility(View.GONE);
+            vLikesText.setVisibility(View.GONE);
+            vLikesHeart.setVisibility(View.GONE);
+            vLikesHeartImage.setChecked(post.isPostLiked());
+            vLikesTextImage.setText(post.getNumLike());
+            vPostTimeImage.setText(post.getPostTime());
+
+            vPostImageLinear.setVisibility(View.VISIBLE);
+            vPostTimeImage.setVisibility(View.VISIBLE);
         } else {
             // Set Post Text
-            vPostText.setVisibility(View.VISIBLE);
             vPostImage.setVisibility(View.GONE);
+            vPostText.setVisibility(View.VISIBLE);
             vPostText.setText(post.getTitle());
+            // Set Like/Number/Time
+            vPostTime.setVisibility(View.VISIBLE);
+            vLikesText.setVisibility(View.VISIBLE);
+            vLikesHeart.setVisibility(View.VISIBLE);
+            vLikesHeart.setChecked(post.isPostLiked());
+            vLikesText.setText(post.getNumLike());
+            vPostTime.setText(post.getPostTime());
+
+            vPostImageLinear.setVisibility(View.GONE);
+            vPostTimeImage.setVisibility(View.GONE);
         }
-        // Set Like/Number
-        vLikesText.setText(post.getNumLike());
-        vLikesHeart.setChecked(post.isPostLiked());
-        vPostTime.setText(post.getPostTime());
     }
 
     private void getImage(Post post, int type) {

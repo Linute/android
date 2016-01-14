@@ -14,9 +14,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.MainActivity;
@@ -57,6 +56,7 @@ public class DiscoverFragment extends Fragment {
 
     private List<Post> mPosts;
     private ChoiceCapableAdapter<?> mCheckBoxChoiceCapableAdapters = null;
+    private boolean feedDone;
 
     //called when fragment drawn the first time
     @Override
@@ -96,12 +96,14 @@ public class DiscoverFragment extends Fragment {
                     refreshLayout.setRefreshing(false);
                     return;
                 }
-                getFeed();
+                feedDone = false;
+                getFeed(0);
             }
         });
 
+
         refreshLayout.setRefreshing(true);
-        getFeed();
+        getFeed(0);
         if (!Utils.isNetworkAvailable(getActivity())) {
             ((MainActivity) getActivity()).noInternet();
             refreshLayout.setRefreshing(false);
@@ -155,24 +157,41 @@ public class DiscoverFragment extends Fragment {
         super.onResume();
     }
 
-    public void getFeed() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    public void getFeed(int type) {
+        if (feedDone) {
+            Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final int skip;
+        if (type == 1) {
+            skip = 25;
+        } else {
+            skip = 0;
+        }
 
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
         events.put("college", sharedPreferences.getString("collegeId", ""));
-        events.put("skip", "0");
+        events.put("skip", skip + "");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(events, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+//                Toast.makeText(getActivity(), "Couldn't access server", Toast.LENGTH_SHORT).show();
+                cancelRefresh();
             }
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful())
+                if (!response.isSuccessful()) {
                     Log.d("HEY", "STOP IT");
+//                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
+                    cancelRefresh();
+                }
 
-                mPosts.clear();
+                if (skip == 0) {
+                    mPosts.clear();
+                }
                 String json = response.body().string();
 //                Log.d(TAG, json);
                 JSONObject jsonObject = null;
@@ -180,6 +199,11 @@ public class DiscoverFragment extends Fragment {
                 try {
                     jsonObject = new JSONObject(json);
                     jsonArray = jsonObject.getJSONArray("events");
+
+                    if (!feedDone) {
+                        if (jsonArray.length() != 25)
+                            feedDone = true;
+                    }
                     Post post = null;
                     String postImage = "";
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
@@ -197,6 +221,7 @@ public class DiscoverFragment extends Fragment {
 
 //                        Log.d("-TAG-", myDate + " " + postString);
                         post = new Post(
+                                jsonObject.getJSONObject("owner").getString("id"),
                                 jsonObject.getJSONObject("owner").getString("fullName"),
                                 jsonObject.getJSONObject("owner").getString("profileImage"),
                                 jsonObject.getString("title"),
@@ -220,8 +245,7 @@ public class DiscoverFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (refreshLayout.isRefreshing())
-                            refreshLayout.setRefreshing(false);
+                        cancelRefresh();
 
 //                        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
 
@@ -232,53 +256,8 @@ public class DiscoverFragment extends Fragment {
         });
     }
 
-    private void hideViews() {
-        postBox.animate().translationY(-postBox.getHeight() - 50).setInterpolator(new AccelerateInterpolator(2)).start();
-        postBox.animate().setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                postBox.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
-    }
-
-    private void showViews() {
-        postBox.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
-        postBox.animate().setListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                postBox.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
+    private void cancelRefresh() {
+        if (refreshLayout.isRefreshing())
+            refreshLayout.setRefreshing(false);
     }
 }
