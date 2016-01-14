@@ -78,7 +78,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
             vPostUserName.setText("Anonymous");
         }
 
-        if (!feedDetail.getPostImage().equals("")) {
+        if (feedDetail.getPostImage() != null && !feedDetail.getPostImage().equals("")) {
             // Set Post Image
             getImage(feedDetail, 2);
             vPostImage.setVisibility(View.VISIBLE);
