@@ -114,6 +114,12 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
         return true;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSearchHandler.removeCallbacks(getColleges);
+    }
+
     private Runnable getColleges = new Runnable() {
         @Override
         public void run() {

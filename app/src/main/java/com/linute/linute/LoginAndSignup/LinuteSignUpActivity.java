@@ -107,12 +107,12 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
 
         //TODO: save email, pin, current flipper
         outState.putString("mSavedEmail", mEmailString);
         outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
+        super.onSaveInstanceState(outState);
 
     }
 
@@ -350,14 +350,14 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     private void showProgress(final boolean show) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
-                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-            }
-        });
+//        mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
+//        mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
+//                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
+//            }
+//        });
 
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         mProgressBar.animate().setDuration(shortAnimTime).alpha(

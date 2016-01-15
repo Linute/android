@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+    <ViewSwitcher android:id="@+id/fbSignUp_view_switcher"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+
+        <LinearLayout android:id="@+id/fbSignUp_info_form"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:layout_margin="32dp"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:id="@+id/fbSignUp_profile_pic_view"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="15dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/no_image_placeholder"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+
+                <EditText
+                    android:id="@+id/fbSignUp_fname_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:hint="@string/first_name_hint"
+                    android:maxLength="16"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textSize="14sp"/>
+
+
+                <EditText
+                    android:id="@+id/fbSignUp_lname_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:hint="@string/last_name_hint"
+                    android:maxLength="16"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textSize="14sp"/>
+
+
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/fbSignUp_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:hint="Edu Email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="14sp"/>
+
+            <Button
+                android:id="@+id/fbSignUp_Next_button"
+                style="?android:textAppearanceSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:paddingLeft="30dp"
+                android:paddingRight="30dp"
+                android:text="Next"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout android:id="@+id/fbSignUp_verify_form"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:gravity="center"
+                      android:orientation="vertical">
+
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="32dp"
+                      android:layout_marginRight="32dp"
+                      android:gravity="center"
+                      android:text="A verification code was sent to:"/>
+
+            <TextView android:id="@+id/fbSignUp_email_confirm_text_view"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="5dp"
+                      android:layout_marginLeft="32dp"
+                      android:layout_marginRight="32dp"
+                      android:layout_marginTop="5dp"
+                      android:gravity="center"
+                      android:textColor="@android:color/holo_blue_dark"
+                      android:textStyle="bold"
+                      tools:text="blahblah@cuny.edu"/>
+
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginLeft="32dp"
+                      android:layout_marginRight="32dp"
+                      android:gravity="center"
+                      android:text="Please enter the code below. (Note: The email might have been marked as spam)"/>
+
+            <EditText
+                android:id="@+id/signUp_verify_code"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="64dp"
+                android:layout_marginRight="64dp"
+                android:layout_marginTop="16dp"
+                android:hint="Verification Code"
+                android:inputType="number"
+                android:maxLength="16"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="14sp"/>
+
+            <LinearLayout android:id="@+id/fbSignUp_code_verify_buttons"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center_horizontal"
+                          android:layout_marginLeft="64dp"
+                          android:layout_marginRight="64dp"
+                          android:layout_marginTop="@dimen/activity_vertical_margin"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
+
+                <Button android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:onClick="enterNewEmail"
+                        android:text="new email"
+                    />
+
+                <Button android:id="@+id/fbSignUp_update_info_button"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Next"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+    </ViewSwitcher>
+
+
+    <ProgressBar
+        android:id="@+id/fbSignUp_progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="@dimen/activity_vertical_margin"
+        android:visibility="gone"
+        />
+
+</RelativeLayout>

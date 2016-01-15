@@ -89,7 +89,7 @@ public class LinuteUser {
         mLastName = getStringFromJson("lastName", userInfo);
         mEmail = getStringFromJson("email", userInfo);
         mPhone = getStringFromJson("phone", userInfo);
-        mSocialFacebook = getStringFromJson("socialFaceBook", userInfo);
+        mSocialFacebook = getStringFromJson("socialFacebook", userInfo);
         mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
         mStatus = getStringFromJson("status", userInfo);
         mSex = getIntFromJson("sex", userInfo);
@@ -126,7 +126,7 @@ public class LinuteUser {
         mLastName = getStringFromJson("lastName", userInfo);
         mEmail = getStringFromJson("email", userInfo);
         mPhone = getStringFromJson("phone", userInfo);
-        mSocialFacebook = getStringFromJson("socialFaceBook", userInfo);
+        mSocialFacebook = getStringFromJson("socialFacebook", userInfo);
         mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
         mStatus = getStringFromJson("status", userInfo);
         mSex = getIntFromJson("sex", userInfo);

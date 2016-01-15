@@ -325,8 +325,6 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
     }
 
     private void saveCredentials(String responseString, String password) throws JSONException {
-
-        Log.i(TAG, responseString);
         JSONObject response = new JSONObject(responseString);
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
@@ -348,8 +346,6 @@ public class LinuteLoginActivity extends AppCompatActivity implements LoaderCall
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
-
-        Utils.testLog(this, TAG);
     }
 
     @Override
