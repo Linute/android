@@ -120,7 +120,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        //TODO: save email, pin, current flipper
         outState.putString("mSavedEmail", mEmailString);
         outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);

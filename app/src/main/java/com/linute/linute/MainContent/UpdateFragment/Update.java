@@ -63,7 +63,7 @@ public class Update {
 
         mActionID = getStringFromJson(json, "id");
 
-        mIsPicturePost = getIntFromJson(json, "type") == 0 ? false : true;
+        mIsPicturePost = getIntFromJson(json, "type") != 0;
 
         setUpUserInformation(json);
 
@@ -142,6 +142,7 @@ public class Update {
                 mEventImageName = images.getString(0);
             } catch (JSONException e) {
                 e.printStackTrace();
+                mEventImageName = null;
             }
         }
     }

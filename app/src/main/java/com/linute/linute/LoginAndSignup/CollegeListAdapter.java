@@ -32,7 +32,18 @@ public class CollegeListAdapter extends RecyclerView.Adapter<CollegeListAdapter.
 
     @Override
     public void onBindViewHolder(CollegeViewHolder holder, int position) {
-        holder.bindView(mContext, mCollegeList.get(position));
+
+        final College college = mCollegeList.get(position);
+        holder.bindView(college);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((CollegePickerActivity) mContext)
+                        .showConfirmationDialog(college.getCollegeName(), college.getCollegeId());
+            }
+        });
+
     }
 
     @Override
@@ -44,25 +55,15 @@ public class CollegeListAdapter extends RecyclerView.Adapter<CollegeListAdapter.
 
     public static class CollegeViewHolder extends RecyclerView.ViewHolder{
         public TextView mCollegeName;
-        public View mAddButton;
 
         public CollegeViewHolder(View itemView) {
             super(itemView);
 
             mCollegeName = (TextView) itemView.findViewById(R.id.collegePicker_item_name_text);
-            mAddButton = itemView.findViewById(R.id.collegePicker_add_icon);
         }
 
-        public void bindView(final Context context, final College college){
+        public void bindView(final College college){
             mCollegeName.setText(college.getCollegeName());
-
-            mAddButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) { //show confirmation dialog
-                    ((CollegePickerActivity) context)
-                            .showConfirmationDialog(college.getCollegeName(), college.getCollegeId());
-                }
-            });
         }
     }
 }
