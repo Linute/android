@@ -4,14 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.linute.linute.API.API_Methods;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Map;
 
 /**
  * Created by QiFeng on 11/17/15.
@@ -35,7 +29,7 @@ public class LinuteUser {
     private String mProfileImage;
     private String mRegistrationDate;
     private String mDob;
-//    private int mFriendsNumber;
+    //    private int mFriendsNumber;
     //private int mAttendedNumber;
 //    private int mHostedNumber;
     private String mCollegeName;
@@ -45,15 +39,19 @@ public class LinuteUser {
     private int mPosts;
     private int mFollowers;
     private int mFollowing;
+    private String mFriend;
+    private String mFriendship;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
 
 
     public LinuteUser() {
+        mFriend = "";
+        mFriendship = "";
     }
 
 
-    public static LinuteUser getDefaultUser(Context context){
+    public static LinuteUser getDefaultUser(Context context) {
 
         LinuteUser user = new LinuteUser();
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -70,7 +68,7 @@ public class LinuteUser {
         return user;
     }
 
-    public static CollegeNameAndID getCollegeFromJson(JSONObject userInfo){
+    public static CollegeNameAndID getCollegeFromJson(JSONObject userInfo) {
         JSONObject college = getJsonObjectFromJson("college", userInfo);
         if (college == null) return null;
 
@@ -81,7 +79,7 @@ public class LinuteUser {
         return new CollegeNameAndID(collegeName, collegeId);
     }
 
-    public void updateUserInformation(JSONObject userInfo){
+    public void updateUserInformation(JSONObject userInfo) {
         mUserID = getStringFromJson("id", userInfo);
         mUserName = getStringFromJson("userName", userInfo);
         mRegistrationType = getStringFromJson("registrationType", userInfo);
@@ -89,7 +87,7 @@ public class LinuteUser {
         mLastName = getStringFromJson("lastName", userInfo);
         mEmail = getStringFromJson("email", userInfo);
         mPhone = getStringFromJson("phone", userInfo);
-        mSocialFacebook = getStringFromJson("socialFacebook", userInfo);
+        mSocialFacebook = getStringFromJson("socialFaceBook", userInfo);
         mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
         mStatus = getStringFromJson("status", userInfo);
         mSex = getIntFromJson("sex", userInfo);
@@ -106,6 +104,17 @@ public class LinuteUser {
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
+
+        mFriend = "";
+        mFriendship = "";
+        try {
+            if (!userInfo.getString("friend").equals("") && !userInfo.getJSONObject("friend").getString("status").equals("removed")) {
+                mFriend = userInfo.getJSONObject("friend").getString("user");
+                mFriendship = userInfo.getJSONObject("friend").getString("id");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         // NEW end
 
         JSONObject college = getJsonObjectFromJson("college", userInfo);
@@ -117,7 +126,7 @@ public class LinuteUser {
         mCampus = getStringFromJson("campus", userInfo);
     }
 
-    public LinuteUser(JSONObject userInfo){
+    public LinuteUser(JSONObject userInfo) {
 
         mUserID = getStringFromJson("id", userInfo);
         mUserName = getStringFromJson("userName", userInfo);
@@ -152,36 +161,48 @@ public class LinuteUser {
             mCollegeId = getStringFromJson("id", college);
         }
 
+        mFriend = "";
+        mFriendship = "";
+        try {
+            if (!userInfo.getString("friend").equals("") || !userInfo.getJSONObject("friend").getString("status").equals("removed")) {
+                mFriend = userInfo.getJSONObject("friend").getString("user");
+                mFriendship = userInfo.getJSONObject("friend").getString("id");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         mCampus = getStringFromJson("campus", userInfo);
     }
 
 
-    private static JSONObject getJsonObjectFromJson(String key, JSONObject json){
+    private static JSONObject getJsonObjectFromJson(String key, JSONObject json) {
         try {
             return json.getJSONObject(key);
-        }catch (JSONException e){
-            Log.i(TAG, "getJsonObjectFromJson: "+key );
+        } catch (JSONException e) {
+            Log.i(TAG, "getJsonObjectFromJson: " + key);
+            e.printStackTrace();
             return null;
         }
     }
 
-    private static String getStringFromJson(String key, JSONObject userInfo){
+    private static String getStringFromJson(String key, JSONObject userInfo) {
         String value;
         try {
             value = userInfo.getString(key);
         } catch (JSONException e) {
-            Log.i(TAG, "getStringFromJson: "+key );
+            Log.i(TAG, "getStringFromJson: " + key);
             value = null;
         }
         return value;
     }
 
-    private static int getIntFromJson(String key, JSONObject userInfo){
+    private static int getIntFromJson(String key, JSONObject userInfo) {
         int value;
         try {
             value = userInfo.getInt(key);
-        }catch (JSONException e){
-            Log.i(TAG, "getIntFromJson: "+key );
+        } catch (JSONException e) {
+            Log.i(TAG, "getIntFromJson: " + key);
             value = 0;
         }
         return value;
@@ -367,13 +388,16 @@ public class LinuteUser {
     public String getCollegeName() {
         return mCollegeName;
     }
+
     public void setCollegeName(String college) {
         mCollegeName = college;
     }
 
-    public String getCollegeId(){ return mCollegeId; }
+    public String getCollegeId() {
+        return mCollegeId;
+    }
 
-    public void setCollegeId(String id){
+    public void setCollegeId(String id) {
         mCollegeId = id;
     }
 
@@ -381,19 +405,25 @@ public class LinuteUser {
         return mPosts;
     }
 
-    public void setPosts(int posts) {mPosts = posts;}
+    public void setPosts(int posts) {
+        mPosts = posts;
+    }
 
     public int getFollowers() {
         return mFollowers;
     }
 
-    public void setFollowers(int followers){mFollowers = followers;}
+    public void setFollowers(int followers) {
+        mFollowers = followers;
+    }
 
     public int getFollowing() {
         return mFollowing;
     }
 
-    public void setFollowing(int following){ mFollowing =following;}
+    public void setFollowing(int following) {
+        mFollowing = following;
+    }
 
 
     /*TODO: SEARCH
@@ -421,20 +451,37 @@ public class LinuteUser {
         readActivities
      */
 
-    public static class CollegeNameAndID{
+    public static class CollegeNameAndID {
         private String mCollegeName;
         private String mCollegeId;
 
-        public CollegeNameAndID(String name, String id){
+        public CollegeNameAndID(String name, String id) {
             mCollegeId = id;
             mCollegeName = name;
         }
 
-        public String getCollegeName(){
+        public String getCollegeName() {
             return mCollegeName;
         }
-        public String getCollegeId(){
+
+        public String getCollegeId() {
             return mCollegeId;
         }
+    }
+
+    public String getFriend() {
+        return mFriend;
+    }
+
+    public void setFriend(String friend) {
+        mFriend = friend;
+    }
+
+    public String getFriendship() {
+        return mFriendship;
+    }
+
+    public void setFriendship(String friendship) {
+        mFriendship = friendship;
     }
 }

@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
@@ -47,5 +48,10 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder {
                 .into(vCommentUserImage);
         vCommentUserName.setText(comment.getCommentUserName());
         vCommentUserText.setText(comment.getCommentUserPostText());
+        if (comment.getCommentUserId().equals(mSharedPreferences.getString("userID", ""))) {
+            vCommentUserName.setTextColor(Color.parseColor("#56bb1d"));
+        } else {
+            vCommentUserName.setTextColor(mContext.getResources().getColor(R.color.colorAccent));
+        }
     }
 }

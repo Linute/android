@@ -66,10 +66,8 @@ public class UpdatesFragment extends Fragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mUpdatesRecyclerView.setLayoutManager(llm);
 
-        mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
-
-        //TODO: uncomment this
-        // mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
+//        mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
+//        mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
         //NOTE: Code for load more
         /*
@@ -95,7 +93,7 @@ public class UpdatesFragment extends Fragment {
             }
         });
 
-        getUpdatesInformation();
+//        getUpdatesInformation();
         return rootView;
     }
 
@@ -156,6 +154,7 @@ public class UpdatesFragment extends Fragment {
                             return;
                         }
 
+                        Log.d(TAG, "onResponse: " + activities.toString());
                         mOldUpdates.clear();
                         mRecentUpdates.clear();
 
@@ -169,6 +168,7 @@ public class UpdatesFragment extends Fragment {
                             Update update = new Update(activities.getJSONObject(i));
                             if (update.isRead()) mOldUpdates.add(update); //if read, it's old
                             else mRecentUpdates.add(update); //else recent
+                            Log.d(TAG, "onResponse: " + update.getDescription());
                         }
 
                         if (!mOldUpdates.isEmpty()) { //add progress bar to end

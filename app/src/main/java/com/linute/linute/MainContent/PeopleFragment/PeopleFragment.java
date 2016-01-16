@@ -40,6 +40,7 @@ import java.util.TimeZone;
  * A simple {@link Fragment} subclass.
  */
 public class PeopleFragment extends Fragment {
+    private static final String TAG = PeopleFragment.class.getSimpleName();
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -121,6 +122,7 @@ public class PeopleFragment extends Fragment {
 
                         myDate = simpleDateFormat.parse(jsonObject.getString("date"));
                         dateString = Utils.getEventTime(myDate);
+                        Log.d(TAG, "getPeople " + jsonObject);
 
                         jsonObject = jsonObject.getJSONObject("owner");
                         people = new People(

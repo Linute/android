@@ -14,6 +14,8 @@ import org.json.JSONObject;
 //TODO: implement mention
 public class Update {
 
+    private static final String TAG = Update.class.getSimpleName();
+
     public enum UpdateType {
         UNDEFINED,
         LIKE_STATUS,
@@ -60,6 +62,7 @@ public class Update {
 
         //uncomment if we decide to use it
         //mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
+        Log.d(TAG, "Update: " + json);
 
         mActionID = getStringFromJson(json, "id");
 

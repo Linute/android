@@ -42,4 +42,13 @@ public class LSDKPeople {
 
         return API_Methods.post("friends", header, param, callback);
     }
+
+    public Call putUnfollow(Map<String, Object> param, String friendshipID, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        return API_Methods.put("friends/" + friendshipID, header, param, callback);
+    }
 }

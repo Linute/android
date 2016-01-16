@@ -2,14 +2,11 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
-
-import org.json.JSONArray;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,10 +43,11 @@ public class LSDKActivity {
         params.put("action[1]", "commented status");
         params.put("action[2]", "liked status");
         params.put("action[3]", "liked photo");
-        params.put("action[4]", "facebook share");
         params.put("action[5]", "mentioned");
         params.put("action[6]", "follower");
         params.put("action[7]", "friend joined");
+        params.put("action[8]", "posted status");
+        params.put("action[9]", "posted photo");
 
         params.put("owner", mSharedPreferences.getString("userID", ""));
 

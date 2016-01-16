@@ -15,6 +15,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final int TYPE_ITEM = 1;
 
     private Context context;
+
     //    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private FeedDetail mFeedDetail;
 
@@ -63,5 +64,9 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     private boolean isPositionHeader(int position) {
         return position == 0;
+    }
+
+    public FeedDetail getFeedDetail() {
+        return mFeedDetail;
     }
 }

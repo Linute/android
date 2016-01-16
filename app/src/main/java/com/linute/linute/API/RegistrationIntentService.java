@@ -122,6 +122,7 @@ public class RegistrationIntentService extends IntentService {
                     Log.e(TAG, "ERROR REGISTERING TOKEN");
                 } else {
                     Log.v(TAG, response.body().string());
+                    Log.d(TAG, "sendRegistrationDevice");
                 }
             }
         });

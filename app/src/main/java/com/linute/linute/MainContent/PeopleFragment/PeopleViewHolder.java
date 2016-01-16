@@ -34,6 +34,7 @@ import java.util.Map;
  */
 public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+    private static final String TAG = PeopleViewHolder.class.getSimpleName();
     protected CircularImageView vProfilePicture;
     protected TextView vName;
     protected TextView vState;
@@ -75,9 +76,9 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     @Override
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d("TAGyy", response.body().string());
+                            Log.d(TAG, response.body().string());
                         }
-                        Log.d("TAGy", response.body().string());
+//                        Log.d(TAG, response.body().string());
                         ((MainActivity) vContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
