@@ -14,20 +14,20 @@
     </ImageSwitcher>
 
 
-    <Button
-        android:id="@+id/prelogin_facebook_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/prelogin_linute_login"
-        android:layout_centerHorizontal="true"
-        android:text="@string/prelogin_facebook_login"/>
+    <Button android:id="@+id/preLogin_facebook_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Facebook Login"
+        />
 
     <Button
         android:id="@+id/prelogin_linute_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/linute_signup"
+        android:layout_below="@id/preLogin_facebook_login"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:text="@string/prelogin_linute_login"/>
 
 

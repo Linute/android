@@ -75,11 +75,23 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     private EditText mEmailView;
     private EditText mPasswordView;
     private EditText mPinCodeView;
-    private ProgressBar mProgressBar;
+
+    private ProgressBar mProgressBar1;
+    private ProgressBar mProgressBar2;
+    private ProgressBar mProgressBar3;
+
     private EditText mFirstNameTextView;
     private EditText mLastNameTextView;
-    private Button mEmailSignUpButton;
+
+    //layer 1
     private Button mNextButton;
+
+    //layer 2
+    private View mLayerTwoButtons;
+
+    //layer 3
+    private Button mEmailSignUpButton;
+
     private Bitmap mProfilePictureBitmap;
 
     private TextView mEmailConfirmTextView;
@@ -107,12 +119,12 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
 
         //TODO: save email, pin, current flipper
         outState.putString("mSavedEmail", mEmailString);
         outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
+        super.onSaveInstanceState(outState);
 
     }
 
@@ -150,9 +162,14 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         mFirstNameTextView = (EditText) findViewById(R.id.signup_fname_text);
         mLastNameTextView = (EditText) findViewById(R.id.signup_lname_text);
         mProfilePictureView = (CircularImageView) findViewById(R.id.signup_profile_pic_view);
-        mProgressBar = (ProgressBar) findViewById(R.id.signUp_progress_bar);
+
+        mProgressBar1 = (ProgressBar) findViewById(R.id.signUp_progress_bar1);
+        mProgressBar2 = (ProgressBar) findViewById(R.id.signUp_progress_bar2);
+        mProgressBar3 = (ProgressBar) findViewById(R.id.signUp_progress_bar3);
+
         mEmailSignUpButton = (Button) findViewById(R.id.signup_submit_button);
         mNextButton = (Button) findViewById(R.id.signUp_verify_email_button);
+        mLayerTwoButtons = findViewById(R.id.signUp_code_verify_buttons);
 
         mPinCodeView = (EditText) findViewById(R.id.signUp_verify_code);
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
@@ -217,7 +234,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         final String email = mEmailView.getText().toString().trim();
 
         if (checkEmail(email)) {
-            showProgress(true);
+            showProgress(true, 0);
 
             mEmailString = email;
             mEmailConfirmTextView.setText(mEmailString);
@@ -225,7 +242,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             mLSDKUser.isUniqueEmail(email, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    runOnUiThread(rFailedConnectionAction);
+                    failedConnectionWithCurrentView(0);
                 }
 
                 @Override
@@ -234,9 +251,9 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         getPinCode();
                     } else if (response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
-                        runOnUiThread(rNotUniqueEmailAction);
+                        notUniqueEmail();
                     } else {
-                        runOnUiThread(rServerErrorAction);
+                        serverErrorCurrentView(0);
                     }
                 }
             });
@@ -247,7 +264,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         mLSDKUser.getConfirmationCodeForEmail(mEmailString, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                runOnUiThread(rFailedConnectionAction);
+                failedConnectionWithCurrentView(0);
             }
 
             @Override
@@ -258,7 +275,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showProgress(false);
+                                showProgress(false, 0);
                                 mViewFlipper.showNext();
                                 mCurrentViewFlipperIndex++;
                             }
@@ -266,10 +283,11 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        runOnUiThread(rServerErrorAction);
+                        serverErrorCurrentView(0);
                     }
                 } else {
-                    runOnUiThread(rServerErrorAction);
+                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    serverErrorCurrentView(0);
                 }
             }
         });
@@ -347,24 +365,45 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         return password.length() >= 6 && !password.contains(" ");
     }
 
-    private void showProgress(final boolean show) {
+    private void showProgress(final boolean show, final int currentViewIndex) {
+
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
+        final View progressBar;
+        final View button;
+
+        switch (currentViewIndex){
+            case 0:
+                progressBar = mProgressBar1;
+                button = mNextButton;
+                break;
+            case 1:
+                progressBar = mProgressBar2;
+                button = mLayerTwoButtons;
+                break;
+            case 2:
+                progressBar = mProgressBar3;
+                button = mEmailSignUpButton;
+                break;
+            default:
+                return;
+        }
+
+        button.setVisibility(show ? View.GONE : View.VISIBLE);
+        button.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
+                button.setVisibility(show ? View.GONE : View.VISIBLE);
             }
         });
 
-        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.animate().setDuration(shortAnimTime).alpha(
                 show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
 
@@ -384,7 +423,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         boolean areGoodCredentials = areGoodCredentials(password, fName, lName);
 
         if (areGoodCredentials) {
-            showProgress(true);
+            showProgress(true, 2);
             Map<String, Object> userInfo = new HashMap<>();
             String encodedProfilePicture;
 
@@ -404,7 +443,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             mLSDKUser.createUser(userInfo, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) { // no response
-                    runOnUiThread(rFailedConnectionAction);
+                    failedConnectionWithCurrentView(2);
                 }
 
                 @Override
@@ -422,11 +461,12 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e(TAG, "Counldn't save info");
-                            runOnUiThread(rServerErrorAction);
+                            serverErrorCurrentView(2);
                         }
 
                     } else { //couldn't get response
-                        runOnUiThread(rServerErrorAction);
+                        Log.e(TAG, "onResponse: "+response.body().string() );
+                        serverErrorCurrentView(2);
                     }
                 }
             });
@@ -450,6 +490,8 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         sharedPreferences.putString("collegeName", user.getCollegeName());
         sharedPreferences.putString("collegeId", user.getCollegeId());
 
+        sharedPreferences.putString("lastLoginEmail", user.getEmail());
+
         if (user.getSocialFacebook() != null)
             sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
 
@@ -468,32 +510,39 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         finish();
     }
 
-    private Runnable rServerErrorAction = new Runnable() {
-        @Override
-        public void run() {
-            showProgress(false);
-            Utils.showServerErrorToast(LinuteSignUpActivity.this);
-        }
-    };
+    private void serverErrorCurrentView(final int index){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showProgress(false, index);
+                Utils.showServerErrorToast(LinuteSignUpActivity.this);
+            }
+        });
 
-    //hides progress bar and shows a bad connection Toast
-    private Runnable rFailedConnectionAction = new Runnable() {
-        @Override
-        public void run() {
-            showProgress(false);
-            Utils.showBadConnectionToast(LinuteSignUpActivity.this);
-        }
-    };
 
-    //entered email was not unque. run action
-    private Runnable rNotUniqueEmailAction = new Runnable() {
-        @Override
-        public void run() {
-            mEmailView.setError(getString(R.string.signup_error_email_taken));
-            showProgress(false);
-            mEmailView.requestFocus();
-        }
-    };
+    }
+
+    private void failedConnectionWithCurrentView(final int index){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showProgress(false, index);
+                Utils.showBadConnectionToast(LinuteSignUpActivity.this);
+            }
+        });
+    }
+
+
+    private void notUniqueEmail(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mEmailView.setError(getString(R.string.signup_error_email_taken));
+                showProgress(false, 0);
+                mEmailView.requestFocus();
+            }
+        });
+    }
 
 
     static final int REQUEST_TAKE_PHOTO = 1;
@@ -672,24 +721,27 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     public void enterNewEmail(View view) {
         if (mCredentialCheckInProgress) return;
         setToGoBackAnimation(true); //change animations
-        showProgress(true);
         mPinCodeView.setText("");
         mViewFlipper.showPrevious();
         mCurrentViewFlipperIndex--;
         mEmailString = null;
         mPinCode = null;
-        showProgress(false);
         setToGoBackAnimation(false);  //change animations
     }
 
     public void verifyCode(View view) {
         if (mCredentialCheckInProgress) return;
+
+        showProgress(true, 1);
+
         if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
-            showProgress(true);
             mViewFlipper.showNext();
             mCurrentViewFlipperIndex++;
-            showProgress(false);
+        }else {
+            mPinCodeView.setError("Invalid code");
+            mPinCodeView.requestFocus();
         }
+        showProgress(false, 1);
     }
 
     private void setToGoBackAnimation(boolean goBack) {

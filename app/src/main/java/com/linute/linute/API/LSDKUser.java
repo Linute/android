@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
+import com.linute.linute.SquareCamera.CameraFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
@@ -156,24 +157,26 @@ public class LSDKUser {
         Map<String, Object> param = new HashMap<>();
         param.put("phone", phoneNumber);
 
-        return API_Methods.post("/users/confirm-phone", header, param, callback);
+        return API_Methods.post("users/confirm-phone", header, param, callback);
     }
 
 
 
     public Call getConfirmationCodeForEmail(String email, Callback callback){
-        //NOTE: HAS TO BE WITH AUTH?
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
         Map<String, Object> param = new HashMap<>();
         param.put("email", email);
-        return API_Methods.post("/users/confirm-email", header, param, callback);
+        return API_Methods.post("users/confirm-email", header, param, callback);
     }
 
-    /*TODO: Still needs to be implemented :
-        authFacebook
+    public Call authorizationFacebook(String fbToken, Callback callback ){
+        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
+        Map<String, Object> param = new HashMap<>();
+        param.put("token", fbToken);
 
-     */
+        return API_Methods.post("users/authorization-facebook", header, param, callback);
+    }
 
 }

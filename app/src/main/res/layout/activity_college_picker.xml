@@ -8,25 +8,25 @@
 
 
     <android.support.v7.widget.SearchView android:id="@+id/collegePicker_search_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/activity_horizontal_margin"/>
+                                          android:layout_width="match_parent"
+                                          android:layout_height="wrap_content"
+                                          android:layout_margin="@dimen/activity_horizontal_margin"/>
 
 
     <android.support.v7.widget.RecyclerView android:id="@+id/collegePicker_recycler_view"
-                                            android:layout_below="@id/collegePicker_search_view"
                                             android:layout_width="match_parent"
-                                            android:layout_height="match_parent"/>
+                                            android:layout_height="match_parent"
+                                            android:layout_below="@id/collegePicker_search_view"/>
 
     <TextView android:id="@+id/collegePicker_empty_results"
-        android:layout_width="wrap_content"
+              android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:textSize="20sp"
-              android:gravity="center"
-              android:layout_marginRight="40dp"
-              android:layout_marginLeft="40dp"
-              tools:text="No Colleges Found"
               android:layout_centerInParent="true"
+              android:layout_marginLeft="40dp"
+              android:layout_marginRight="40dp"
+              android:gravity="center"
+              android:textSize="20sp"
+              tools:text="No Colleges Found"
         />
 
     <ProgressBar

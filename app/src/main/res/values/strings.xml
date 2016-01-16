@@ -131,4 +131,5 @@
         your photo on your device
     </string>
     <string name="title_activity_college_picker">CollegePickerActivity</string>
+    <string name="facebook_app_id">900595913337243</string>
 </resources>

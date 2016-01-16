@@ -87,14 +87,17 @@ public class Utils {
     //clears user information
     //NOTE: RESET OTHER THINGS WHEN THEY COME UP
     public static void resetUserInformation(SharedPreferences.Editor pref) {
-        pref.putString("profileImage", "");
-        pref.putString("userID", "");
-        pref.putString("firstName", "");
-        pref.putString("lastName", "");
-        pref.putString("email", "");
-        pref.putString("status", "");
-        pref.putString("socialFacebook", "");
-        pref.putString("dob", "");
+        pref.putString("profileImage", null);
+        pref.putString("userID", null);
+        pref.putString("firstName", null);
+        pref.putString("lastName", null);
+        pref.putString("email", null);
+        pref.putString("status", null);
+        pref.putString("socialFacebook", null);
+        pref.putString("dob", null);
+
+        pref.putString("fbToken", null);
+
         pref.putInt("sex", 0);
 
         pref.putBoolean("isLoggedIn", false);
@@ -102,9 +105,9 @@ public class Utils {
         pref.putInt("posts", 0);
         pref.putInt("followers", 0);
         pref.putInt("following", 0);
-        pref.putString("collegeName", "");
-        pref.putString("collegeId", "");
-        pref.putString("campus", "");
+        pref.putString("collegeName", null);
+        pref.putString("collegeId", null);
+        pref.putString("campus", null);
         pref.commit();
     }
 
