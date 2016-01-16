@@ -47,8 +47,9 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
     private SharedPreferences mSharedPreferences;
 
-    private Button mUpdateInfoButton;
-    private Button mNextButton;
+    private Button mUpdateInfoButton; //Layer 2
+    private Button mNextButton; //Layer 1
+    private View mLayer2Buttons; //layer 2
 
     private TextView mEmailConfirmText;
 
@@ -59,9 +60,12 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
     private CircularImageView mProfileImage;
 
-    private ProgressBar mProgressBar;
+    private ProgressBar mProgressBar1;
+    private ProgressBar mProgressBar2;
 
     private ViewSwitcher mViewSwitcher;
+
+    private boolean mCheckInProgress = false;
 
 
     @Override
@@ -121,12 +125,17 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         mEmailConfirmText = (TextView) findViewById(R.id.fbSignUp_email_confirm_text_view);
 
         mFirstNameEditText = (EditText) findViewById(R.id.fbSignUp_fname_text);
+        mFirstNameEditText.setNextFocusDownId(R.id.fbSignUp_lname_text);
+
         mLastNameEditText = (EditText) findViewById(R.id.fbSignUp_lname_text);
         mVerificationCodeEditText = (EditText) findViewById(R.id.signUp_verify_code);
         mEmailEditText = (EditText) findViewById(R.id.fbSignUp_email);
 
         mProfileImage = (CircularImageView) findViewById(R.id.fbSignUp_profile_pic_view);
-        mProgressBar = (ProgressBar) findViewById(R.id.fbSignUp_progress_bar);
+        mProgressBar1 = (ProgressBar) findViewById(R.id.fbSignUp_progress_bar1);
+        mProgressBar2 = (ProgressBar) findViewById(R.id.fbSignUp_progress_bar2);
+
+        mLayer2Buttons = findViewById(R.id.fbSignUp_code_verify_buttons);
     }
 
     private void setOnClickListener() {
@@ -147,7 +156,8 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
 
     private void updateInformation() {
-        if (mProgressBar.getVisibility() == View.VISIBLE) return;
+
+        if (mCheckInProgress) return;
 
         if (!mPinCode.equals(mVerificationCodeEditText.getText().toString())) {
             mVerificationCodeEditText.setError("Invalid code");
@@ -162,12 +172,12 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         newInfo.put("email", mEmailEditText.getText().toString().trim());
         newInfo.put("password", mSharedPreferences.getString("password", ""));
 
-        showProgress(true);
+        showProgress(true, 1);
 
         new LSDKUser(this).updateUserInfo(newInfo, mSharedPreferences.getString("email", ""), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                failedInternetConnection();
+                failedInternetConnection(1);
             }
 
             @Override
@@ -182,12 +192,12 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        serverError();
+                        serverError(1);
                     }
 
 
                 } else {
-                    serverError();
+                    serverError(1);
                     Log.e(TAG, "onResponse: " + response.body().string());
                 }
             }
@@ -197,20 +207,21 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
 
     private void checkEmailAndGetPinCode() {
-        if (mProgressBar.getVisibility() == View.VISIBLE) return;
+
+        if (mCheckInProgress) return;
 
         if (!checkNames()) return;
 
         final String email = mEmailEditText.getText().toString().trim();
 
         if (checkEmail(email)) {
-            showProgress(true);
+            showProgress(true, 0);
             mEmailConfirmText.setText(email);
 
             new LSDKUser(this).isUniqueEmail(email, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    failedInternetConnection();
+                    failedInternetConnection(0);
                 }
 
                 @Override
@@ -221,7 +232,8 @@ public class FacebookSignUpActivity extends AppCompatActivity {
                         Log.e(TAG, response.body().string());
                         nonUniqueEmail();
                     } else {
-                        serverError();
+                        Log.e(TAG, "onResponse: " + response.body().string());
+                        serverError(0);
                     }
                 }
             });
@@ -251,7 +263,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         new LSDKUser(this).getConfirmationCodeForEmail(email, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                failedInternetConnection();
+                failedInternetConnection(0);
             }
 
             @Override
@@ -262,7 +274,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showProgress(false);
+                                showProgress(false, 0);
                                 mViewSwitcher.showNext();
                                 mInVerificationView = true;
                             }
@@ -270,10 +282,11 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        serverError();
+                        serverError(0);
                     }
                 } else {
-                    serverError();
+                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    serverError(0);
                 }
             }
         });
@@ -295,12 +308,13 @@ public class FacebookSignUpActivity extends AppCompatActivity {
             return false;
         }
 
-        //not edu email
-        else if (!emailString.endsWith(".edu")){
-            mEmailEditText.setError("Must be a valid edu email");
-            mEmailEditText.requestFocus();
-            return false;
-        }
+        //TODO: READD
+//        //not edu email
+//        else if (!emailString.endsWith(".edu")){
+//            mEmailEditText.setError("This must be an edu email");
+//            mEmailEditText.requestFocus();
+//            return false;
+//        }
 
         //good email
         else {
@@ -311,7 +325,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
     private void loadProfileImage() {
         Glide.with(this)
-                .load(mProfileImage)
+                .load(mProfilePath)
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
@@ -323,6 +337,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         goBackAnimation(true);
         mVerificationCodeEditText.setText("");
         mPinCode = null;
+        mViewSwitcher.showPrevious();
         goBackAnimation(false);
     }
 
@@ -331,44 +346,57 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         mViewSwitcher.setOutAnimation(this, goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
     }
 
-    private void showProgress(final boolean show) {
+    private void showProgress(final boolean show, final int viewIndex) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-//        mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-//        mEmailSignUpButton.animate().setDuration(shortAnimTime).alpha(
-//                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-//            @Override
-//            public void onAnimationEnd(Animator animation) {
-//                mEmailSignUpButton.setVisibility(show ? View.GONE : View.VISIBLE);
-//            }
-//        });
+        final View progressBar;
+        final View buttons;
 
-        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        mProgressBar.animate().setDuration(shortAnimTime).alpha(
+        if (viewIndex == 0){
+            progressBar = mProgressBar1;
+            buttons = mNextButton;
+        }else {
+            progressBar = mProgressBar2;
+            buttons = mLayer2Buttons;
+        }
+
+        buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+        buttons.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.animate().setDuration(shortAnimTime).alpha(
                 show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+                progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
             }
         });
+
+        mCheckInProgress = show;
     }
 
 
-    private void failedInternetConnection() {
+    private void failedInternetConnection(final int index) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showProgress(false);
+                showProgress(false, index);
                 Utils.showBadConnectionToast(FacebookSignUpActivity.this);
             }
         });
     }
 
-    private void serverError() {
+    private void serverError(final  int index) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showProgress(false);
+                showProgress(false, index);
                 Utils.showServerErrorToast(FacebookSignUpActivity.this);
             }
         });
@@ -378,7 +406,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showProgress(false);
+                showProgress(false, 0);
                 mEmailEditText.setError("Email already in use");
                 mEmailEditText.requestFocus();
             }

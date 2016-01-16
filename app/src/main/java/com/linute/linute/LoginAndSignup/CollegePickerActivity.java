@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -80,6 +81,8 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
 
     private void setupSearchView() {
         mSearchView.setOnQueryTextListener(this);
+        mSearchView.setIconifiedByDefault(false);
+        mSearchView.setInputType(InputType.TYPE_CLASS_TEXT);
         mSearchView.setIconified(false);
         mSearchView.setQueryHint("Search College");
     }
@@ -230,8 +233,6 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
                 })
                 .create()
                 .show();
-
-
     }
 
     private void updateCollege(String collegeId){

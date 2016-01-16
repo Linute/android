@@ -35,9 +35,9 @@ public class LinuteUser {
     private String mProfileImage;
     private String mRegistrationDate;
     private String mDob;
-    private int mFriendsNumber;
-    private int mAttendedNumber;
-    private int mHostedNumber;
+//    private int mFriendsNumber;
+    //private int mAttendedNumber;
+//    private int mHostedNumber;
     private String mCollegeName;
     private String mCollegeId;
     private String mCampus;
@@ -99,9 +99,9 @@ public class LinuteUser {
         mRegistrationDate = getStringFromJson("registrationDate", userInfo);
         mDob = getStringFromJson("dob", userInfo);
         // OLD
-        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
-        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
-        mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
+//        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
+//        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
+//        mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
         // NEW start
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
@@ -136,9 +136,9 @@ public class LinuteUser {
         mRegistrationDate = getStringFromJson("registrationDate", userInfo);
         mDob = getStringFromJson("dob", userInfo);
         // OLD
-        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
-        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
-        mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
+//        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
+//        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
+        //mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
         // NEW start
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
@@ -160,7 +160,7 @@ public class LinuteUser {
         try {
             return json.getJSONObject(key);
         }catch (JSONException e){
-            e.printStackTrace();
+            Log.i(TAG, "getJsonObjectFromJson: "+key );
             return null;
         }
     }
@@ -170,6 +170,7 @@ public class LinuteUser {
         try {
             value = userInfo.getString(key);
         } catch (JSONException e) {
+            Log.i(TAG, "getStringFromJson: "+key );
             value = null;
         }
         return value;
@@ -180,6 +181,7 @@ public class LinuteUser {
         try {
             value = userInfo.getInt(key);
         }catch (JSONException e){
+            Log.i(TAG, "getIntFromJson: "+key );
             value = 0;
         }
         return value;
@@ -261,29 +263,29 @@ public class LinuteUser {
     }
 
 
-    public int getFriendsNumber() {
-        return mFriendsNumber;
-    }
+//    public int getFriendsNumber() {
+//        return mFriendsNumber;
+//    }
 
-    public void setFriendsNumber(int friendsNumber) {
-        mFriendsNumber = friendsNumber;
-    }
+//    public void setFriendsNumber(int friendsNumber) {
+//        mFriendsNumber = friendsNumber;
+//    }
 
-    public int getAttendedNumber() {
-        return mAttendedNumber;
-    }
+//    public int getAttendedNumber() {
+//        return mAttendedNumber;
+//    }
+//
+//    public void setAttendedNumber(int attendedNumber) {
+//        mAttendedNumber = attendedNumber;
+//    }
 
-    public void setAttendedNumber(int attendedNumber) {
-        mAttendedNumber = attendedNumber;
-    }
+//    //public int getHostedNumber() {
+//        return mHostedNumber;
+//    }
 
-    public int getHostedNumber() {
-        return mHostedNumber;
-    }
-
-    public void setHostedNumber(int hostedNumber) {
-        mHostedNumber = hostedNumber;
-    }
+//    public void setHostedNumber(int hostedNumber) {
+//        mHostedNumber = hostedNumber;
+//    }
 
     /*
     public Map<String, String> getFriendships() {

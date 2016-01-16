@@ -1,7 +1,10 @@
 package com.linute.linute.LoginAndSignup;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v4.app.FragmentPagerAdapter;
@@ -19,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -41,6 +45,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PreLoginActivity extends AppCompatActivity {
@@ -59,7 +64,7 @@ public class PreLoginActivity extends AppCompatActivity {
     private String mFBToken;
 
     private Button mLinuteLoginButton;
-    private LoginButton mFacebookLoginButton;
+    private Button mFacebookloginButton;
     private TextView mSignupText;
 
     private CallbackManager mCallbackManager;
@@ -84,41 +89,65 @@ public class PreLoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_pre_login);
         mCallbackManager = CallbackManager.Factory.create();
 
-        //switches background images
-        mImageSwitcher = (ImageSwitcher) findViewById(R.id.background_image_switcher);
+        if (AccessToken.getCurrentAccessToken() != null) {
+            LoginManager.getInstance().logOut();
+        }
 
-        mLinuteLoginButton = (Button) findViewById(R.id.prelogin_linute_login);
-        mLinuteLoginButton.setOnClickListener(mLinuteOnClickListener);
+        bindViews();
+        setUpOnClickListeners();
 
-        mSignupText = (TextView) findViewById(R.id.linute_signup);
-        mSignupText.setOnClickListener(mLinuteSignUpClicked);
-
-
-        mFacebookLoginButton = (LoginButton) findViewById(R.id.preLogin_facebook_login);
-
-        setUpFacebookLoginButton();
+        setUpFacebookCallback();
 
         setUpImageSwitcher();
     }
 
-    private void setUpFacebookLoginButton() {
-        List<String> readPermissions = new ArrayList<>(3);
-        readPermissions.add("user_friends");
-        readPermissions.add("public_profile");
-        readPermissions.add("email");
-        readPermissions.add("user_relationships");
 
-        mFacebookLoginButton.setReadPermissions(readPermissions);
-        mFacebookLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+    private void bindViews() {
+        //switches background images
+        mImageSwitcher = (ImageSwitcher) findViewById(R.id.background_image_switcher);
+        mLinuteLoginButton = (Button) findViewById(R.id.prelogin_linute_login);
+        mFacebookloginButton = (Button) findViewById(R.id.preLogin_facebook_login);
+        mSignupText = (TextView) findViewById(R.id.linute_signup);
+    }
+
+    private void setUpOnClickListeners() {
+
+        mFacebookloginButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Arrays.asList("user_friends", "public_profile", "email"));
+            }
+        });
+
+        mLinuteLoginButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteLoginActivity.class);
+                startActivity(goToLinuteLogin);
+            }
+        });
+
+        mSignupText.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteSignUpActivity.class);
+                goToLinuteLogin.putExtra("CURR_BACKGROUND_INDEX", mCurrentImageIndex);
+                startActivity(goToLinuteLogin);
+            }
+        });
+    }
+
+    private void setUpFacebookCallback() {
+
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 if (!loginResult.getRecentlyDeniedPermissions().isEmpty()) {
-                    Log.i(TAG, "Missing permissions");
+                    showFacebookPermissionsRationale();
                     return;
                 }
 
                 mFBToken = loginResult.getAccessToken().getToken(); //NOTE : NEED IT>
-
                 loginOrSignUpWithFacebook(mFBToken);
 
             }
@@ -137,13 +166,17 @@ public class PreLoginActivity extends AppCompatActivity {
 
     }
 
-    private void loginOrSignUpWithFacebook(final String fbToken){
+    private void loginOrSignUpWithFacebook(final String fbToken) {
+
+        final ProgressDialog progress = ProgressDialog.show(this, null, "Retrieving information from Facebook",true);
+
         new LSDKUser(this).authorizationFacebook(fbToken, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        progress.dismiss();
                         Utils.showBadConnectionToast(PreLoginActivity.this);
                     }
                 });
@@ -162,14 +195,15 @@ public class PreLoginActivity extends AppCompatActivity {
 
                         //never signed up before or non edu email
                         if (isUnique || !isEduEmail(user.getEmail())) {
+                            Log.i(TAG, "onResponse: about to go to FB");
                             persistTempData(user);
-                            goToFBSignUpActivity();
+                            goToFBSignUpActivity(progress);
                         }
 
                         //has signed up already and using edu email
                         else {
+                            Log.i(TAG, "onResponse: going to college picker or logging in");
                             persistData(user); //save data
-
                             //if no college id or name, go to colleg picker activity
                             //else go to main
                             goToNextActivity((user.getCollegeName() == null || user.getCollegeId() == null)
@@ -178,12 +212,12 @@ public class PreLoginActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        showServerErrorToast();
+                        showServerErrorToast(progress);
                     }
 
                 } else {
                     Log.i(TAG, "onResponse: " + response.body().string());
-                    showServerErrorToast();
+                    showServerErrorToast(progress);
                 }
             }
         });
@@ -194,6 +228,26 @@ public class PreLoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    private void showFacebookPermissionsRationale() {
+        new AlertDialog.Builder(this)
+                .setTitle("Facebook Permissions")
+                .setMessage("Tapt needs access to your Facebook account's email and friends list to log in properly.")
+                .setPositiveButton("Continue", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Arrays.asList("user_friends", "public_profile", "email"));
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                })
+                .show();
     }
 
     private void setUpImageSwitcher() {
@@ -257,40 +311,22 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-    //go to SignIn Actvity
-    private OnClickListener mLinuteOnClickListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteLoginActivity.class);
-            startActivity(goToLinuteLogin);
-        }
-    };
-
-    //takes you to signup activity
-    private OnClickListener mLinuteSignUpClicked = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteSignUpActivity.class);
-            goToLinuteLogin.putExtra("CURR_BACKGROUND_INDEX", mCurrentImageIndex);
-            startActivity(goToLinuteLogin);
-        }
-    };
-
     private void showFacebookErrorToast() {
         Toast.makeText(this, R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
     }
 
-    private void showServerErrorToast(){
+    private void showServerErrorToast(final ProgressDialog dialog) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 Utils.showServerErrorToast(PreLoginActivity.this);
+                dialog.dismiss();
             }
         });
     }
 
-    private boolean isEduEmail(String email){
-        if (email != null && email.endsWith(".edu")){
+    private boolean isEduEmail(String email) {
+        if (email != null && email.endsWith(".edu")) {
             return true;
         }
 
@@ -298,7 +334,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-    private void persistData(LinuteUser user){
+    private void persistData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
         sharedPreferences.putString("password", mFBToken);
@@ -321,9 +357,10 @@ public class PreLoginActivity extends AppCompatActivity {
 
     }
 
-    private void persistTempData(LinuteUser user){
+    private void persistTempData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
+        sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("password", mFBToken);
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("firstName", user.getFirstName());
@@ -332,7 +369,6 @@ public class PreLoginActivity extends AppCompatActivity {
 
         sharedPreferences.apply();
     }
-
 
 
     private void goToNextActivity(final Class nextActivity) {
@@ -347,10 +383,11 @@ public class PreLoginActivity extends AppCompatActivity {
         });
     }
 
-    private void goToFBSignUpActivity(){
+    private void goToFBSignUpActivity(final ProgressDialog progressDialog) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                progressDialog.dismiss();
                 Intent i = new Intent(PreLoginActivity.this, FacebookSignUpActivity.class);
                 startActivity(i);
             }

@@ -3,10 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
+    android:orientation="vertical">
+
     <include android:id="@+id/changephone_toolbar"
              layout="@layout/tool_bar"/>
+
     <ViewSwitcher
         android:id="@+id/changePhone_viewSwitcher"
         android:layout_width="match_parent"

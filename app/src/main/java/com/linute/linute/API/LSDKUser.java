@@ -157,7 +157,7 @@ public class LSDKUser {
         Map<String, Object> param = new HashMap<>();
         param.put("phone", phoneNumber);
 
-        return API_Methods.post("/users/confirm-phone", header, param, callback);
+        return API_Methods.post("users/confirm-phone", header, param, callback);
     }
 
 
@@ -167,7 +167,7 @@ public class LSDKUser {
 
         Map<String, Object> param = new HashMap<>();
         param.put("email", email);
-        return API_Methods.post("/users/confirm-email", header, param, callback);
+        return API_Methods.post("users/confirm-email", header, param, callback);
     }
 
     public Call authorizationFacebook(String fbToken, Callback callback ){
@@ -176,7 +176,7 @@ public class LSDKUser {
         Map<String, Object> param = new HashMap<>();
         param.put("token", fbToken);
 
-        return API_Methods.post("/users/authorization-facebook", header, param, callback);
+        return API_Methods.post("users/authorization-facebook", header, param, callback);
     }
 
 }

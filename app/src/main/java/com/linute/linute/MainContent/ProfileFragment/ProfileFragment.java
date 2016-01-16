@@ -225,9 +225,9 @@ public class ProfileFragment extends ListFragment {
             LinuteUser user = new LinuteUser(body); //container for new information
 
             //update our views with new info
-            mNumOfFriends.setText(String.valueOf(user.getFriendsNumber()));
-            mNumOfAttendedEvents.setText(String.valueOf(user.getAttendedNumber()));
-            mNumOfHostedEvents.setText(String.valueOf(user.getHostedNumber()));
+//            mNumOfFriends.setText(String.valueOf(user.getFriendsNumber()));
+//            mNumOfAttendedEvents.setText(String.valueOf(user.getAttendedNumber()));
+//            mNumOfHostedEvents.setText(String.valueOf(user.getHostedNumber()));
             mFullNameText.setText(user.getFirstName() + " " + user.getLastName());
             mStatusText.setText(user.getStatus());
             mProfileImagePath = Utils.getImageUrlOfUser(user.getProfileImage());
@@ -239,9 +239,9 @@ public class ProfileFragment extends ListFragment {
             editor.putString("firstName", user.getFirstName());
             editor.putString("lastName", user.getLastName());
             editor.putString("status", user.getStatus());
-            editor.putInt("numOfFriends", user.getFriendsNumber());
-            editor.putInt("numOfAttendedEvents", user.getAttendedNumber());
-            editor.putInt("numOfHostedEvents", user.getHostedNumber());
+//            editor.putInt("numOfFriends", user.getFriendsNumber());
+//            editor.putInt("numOfAttendedEvents", user.getAttendedNumber());
+//            editor.putInt("numOfHostedEvents", user.getHostedNumber());
             editor.apply();
 
         } catch (JSONException e) { //apply saved or cached data

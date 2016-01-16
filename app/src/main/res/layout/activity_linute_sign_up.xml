@@ -17,28 +17,32 @@
                       android:gravity="center"
                       android:orientation="vertical">
 
-            <android.support.design.widget.TextInputLayout
+
+            <EditText
+                android:id="@+id/signup_email_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="32dp">
-
-                <EditText
-                    android:id="@+id/signup_email_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="@string/prompt_email"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textSize="14sp"/>
-            </android.support.design.widget.TextInputLayout>
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="14sp"/>
 
             <Button android:id="@+id/signUp_verify_email_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_vertical_margin"
                     android:text="Next"
+                />
+
+            <ProgressBar
+                android:id="@+id/signUp_progress_bar1"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
                 />
 
         </LinearLayout>
@@ -75,25 +79,20 @@
                       android:gravity="center"
                       android:text="Please enter the code below. (Note: The email might have been marked as spam)"/>
 
-            <android.support.design.widget.TextInputLayout
+            <EditText
+                android:id="@+id/signUp_verify_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:layout_marginLeft="64dp"
                 android:layout_marginRight="64dp"
-                android:layout_marginTop="32dp"
-                >
-                <EditText
-                    android:id="@+id/signUp_verify_code"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="Verification Code"
-                    android:inputType="number"
-                    android:maxLength="16"
-                    android:maxLines="1"
-                    android:singleLine="true"
-                    android:textSize="14sp"/>
-            </android.support.design.widget.TextInputLayout>
+                android:layout_marginTop="24dp"
+                android:hint="Verification Code"
+                android:inputType="number"
+                android:maxLength="16"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="14sp"/>
 
             <LinearLayout android:id="@+id/signUp_code_verify_buttons"
                           android:layout_width="match_parent"
@@ -101,7 +100,6 @@
                           android:layout_gravity="center_horizontal"
                           android:layout_marginLeft="64dp"
                           android:layout_marginRight="64dp"
-                          android:layout_marginTop="@dimen/activity_vertical_margin"
                           android:orientation="horizontal"
                           android:weightSum="2">
 
@@ -121,6 +119,14 @@
 
             </LinearLayout>
 
+            <ProgressBar
+                android:id="@+id/signUp_progress_bar2"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                />
+
         </LinearLayout>
 
 
@@ -129,9 +135,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
             android:layout_marginLeft="32dp"
             android:layout_marginRight="32dp"
+            android:gravity="center"
             android:orientation="vertical"
             android:paddingBottom="20dp">
 
@@ -150,63 +156,46 @@
                 android:orientation="horizontal"
                 android:weightSum="2">
 
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingRight="10dp">
-
-                    <EditText
-                        android:id="@+id/signup_fname_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:hint="@string/first_name_hint"
-                        android:maxLength="16"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:textSize="14sp"/>
-                </android.support.design.widget.TextInputLayout>
-
-
-                <android.support.design.widget.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingLeft="10dp">
-
-                    <EditText
-                        android:id="@+id/signup_lname_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:hint="@string/last_name_hint"
-                        android:maxLength="16"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:textSize="14sp"/>
-
-                </android.support.design.widget.TextInputLayout>
-
-            </LinearLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
                 <EditText
-                    android:id="@+id/signup_password"
+                    android:id="@+id/signup_fname_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:hint="@string/prompt_password"
-                    android:inputType="textPassword"
+                    android:layout_weight="1"
+                    android:hint="@string/first_name_hint"
+                    android:maxLength="16"
                     android:maxLines="1"
+                    android:paddingRight="8dp"
                     android:singleLine="true"
                     android:textSize="14sp"/>
 
 
-            </android.support.design.widget.TextInputLayout>
+                <EditText
+                    android:id="@+id/signup_lname_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/last_name_hint"
+                    android:maxLength="16"
+                    android:maxLines="1"
+                    android:paddingLeft="8dp"
+                    android:singleLine="true"
+                    android:textSize="14sp"/>
+
+
+            </LinearLayout>
+
+
+            <EditText
+                android:id="@+id/signup_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:hint="@string/prompt_password"
+                android:inputType="textPassword"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:textSize="14sp"/>
+
 
             <Button
                 android:id="@+id/signup_submit_button"
@@ -220,20 +209,16 @@
                 android:text="@string/action_sign_up_short"
                 android:textStyle="bold"/>
 
+            <ProgressBar
+                android:id="@+id/signUp_progress_bar3"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                />
+
         </LinearLayout>
 
     </ViewFlipper>
-
-    <ProgressBar
-        android:id="@+id/signUp_progress_bar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:padding="@dimen/activity_vertical_margin"
-        android:background="@android:color/darker_gray"
-        android:visibility="gone"
-        android:alpha="0.5"
-        />
 
 </RelativeLayout>

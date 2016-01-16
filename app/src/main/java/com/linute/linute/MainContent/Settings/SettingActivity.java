@@ -10,6 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -27,6 +30,7 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_settings);
 
@@ -113,6 +117,11 @@ public class SettingActivity extends AppCompatActivity {
                             .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit());
                     Utils.deleteTempSharedPreference(getActivity()
                             .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit());
+
+                    if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
+                        LoginManager.getInstance().logOut();
+
+
                     //start new
                     Intent i = new Intent(getActivity(), PreLoginActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back

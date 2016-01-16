@@ -67,7 +67,9 @@ public class UpdatesFragment extends Fragment {
         mUpdatesRecyclerView.setLayoutManager(llm);
 
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
-        mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
+
+        //TODO: uncomment this
+        // mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
         //NOTE: Code for load more
         /*
