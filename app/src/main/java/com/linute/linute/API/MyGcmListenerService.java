@@ -16,6 +16,7 @@ package com.linute.linute.API;
  * limitations under the License.
  */
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LaunchActivity;
+import com.linute.linute.R;
 
 public class MyGcmListenerService extends GcmListenerService {
 
@@ -81,6 +83,8 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
+        Log.d(TAG, "sendNotification: " + message);
+
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setContentTitle("GCM Message")
@@ -92,6 +96,15 @@ public class MyGcmListenerService extends GcmListenerService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        Notification notification = new android.support.v7.app.NotificationCompat.Builder(getApplicationContext())
+                .setContentTitle("Survey Available")
+                .setContentText(message)
+                .setSmallIcon(R.drawable.follow)
+                .setContentIntent(PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), LaunchActivity.class), 0))
+                .setSound(defaultSoundUri)
+                .setAutoCancel(true)
+                .build();
+
+        notificationManager.notify(0 /* ID of notification */, notification);
     }
 }

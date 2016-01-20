@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Switch;
 
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.squareup.okhttp.Callback;
@@ -41,6 +42,7 @@ public class PostCreatePage extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
+    private static final String TAG = PostCreatePage.class.getSimpleName();
 
     // TODO: Rename and change types of parameters
     private int mCurrentPage;
@@ -121,13 +123,14 @@ public class PostCreatePage extends DialogFragment {
                 }
 
 
-                Log.d("TAG", jsonObject.toString());
+//                Log.d(TAG, "" + jsonObject.toString());
 
                 SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
                 postData.put("college", sharedPreferences.getString("collegeId", ""));
                 postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
                 postData.put("title", textContent.getText().toString());
+                JSONArray emptyArray = new JSONArray();
+                postData.put("images", emptyArray);
                 postData.put("type", "0");
                 postData.put("geo", jsonObject);
 
@@ -140,9 +143,9 @@ public class PostCreatePage extends DialogFragment {
                     @Override
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d("TAG", response.body().string());
+                            Log.d(TAG, "onResponseNotSuccessful" + response.body().string());
                         } else {
-                            Log.i("TAG", "onResponse: ");
+                            Log.i(TAG, "onResponseSuccessful: ");
                         }
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

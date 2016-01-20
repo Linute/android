@@ -1,7 +1,5 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -44,9 +41,9 @@ public class UpdatesFragment extends Fragment {
     private ArrayList<Update> mRecentUpdates = new ArrayList<>();
     private ArrayList<Update> mOldUpdates = new ArrayList<>();
 
-    private SharedPreferences mSharedPreferences;
-    private Integer mSkip = 25;
-    private boolean mCanLoadMore = true;
+    //private SharedPreferences mSharedPreferences;
+    //private Integer mSkip = 25;
+    //private boolean mCanLoadMore = true;
 
     public UpdatesFragment() {
 
@@ -57,8 +54,6 @@ public class UpdatesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_updates, container, false);
 
-        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
         mUpdatesRecyclerView = (RecyclerView) rootView.findViewById(R.id.updatesFragment_recycler_view);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.updatesFragment_swipe_refresh);
 
@@ -67,9 +62,7 @@ public class UpdatesFragment extends Fragment {
         mUpdatesRecyclerView.setLayoutManager(llm);
 
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
-
-        //TODO: uncomment this
-        // mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
+        mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
         //NOTE: Code for load more
         /*
@@ -155,14 +148,13 @@ public class UpdatesFragment extends Fragment {
                             showServerErrorToast();
                             return;
                         }
-
                         mOldUpdates.clear();
                         mRecentUpdates.clear();
 
                         //no more information to load
-                        if (activities.length() < 25) mCanLoadMore = false;
+                        //if (activities.length() < 25) mCanLoadMore = false;
 
-                        mSkip = 25;
+                        //mSkip = 25;
 
                         //iterate through array of activities
                         for (int i = 0; i < activities.length(); i++) {
@@ -171,10 +163,11 @@ public class UpdatesFragment extends Fragment {
                             else mRecentUpdates.add(update); //else recent
                         }
 
-                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                            mOldUpdates.add(null);
-                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                            mRecentUpdates.add(null);
+                        //NOTE: LOAD MORE
+//                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
+//                            mOldUpdates.add(null);
+//                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
+//                            mRecentUpdates.add(null);
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -198,6 +191,7 @@ public class UpdatesFragment extends Fragment {
     }
 
 
+    /* NOTE: LOAD MORE
     private void loadMore() {
         new LSDKActivity(getContext()).getActivities(mSkip, new Callback() {
             @Override
@@ -263,8 +257,8 @@ public class UpdatesFragment extends Fragment {
                 notifyUpdate();
             }
         });
-    }
-
+    }*/
+/*
     private void notifyUpdate() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -272,7 +266,7 @@ public class UpdatesFragment extends Fragment {
                 mUpdatesAdapter.notifyDataSetChanged();
             }
         });
-    }
+    }*/
 
 
     private void showServerErrorToast() {

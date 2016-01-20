@@ -10,22 +10,18 @@
              layout="@layout/tool_bar"/>
 
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="85dp">
 
         <EditText
             android:id="@+id/editstatus_status_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="32dp"
+            android:layout_below="@id/editstatus_toolbar"
             android:gravity="center"
             android:hint="@string/bio_hint"
+            android:inputType="textCapSentences"
             android:lines="3"
             android:maxLength="60" android:maxLines="3" android:textSize="14sp"/>
-    </android.support.design.widget.TextInputLayout>
 
 
     <Button android:id="@+id/editstatus_save"

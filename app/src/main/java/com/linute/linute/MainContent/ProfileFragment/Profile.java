@@ -180,6 +180,7 @@ public class Profile extends Fragment {
                         e.printStackTrace();
                     }
                     user.updateUserInformation(jsonObject); //container for new information
+                    Log.d(TAG, "onResponse: " + jsonObject);
 
                     savePreferences(user);
 //                    Log.d(TAG, body);

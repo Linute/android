@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -13,17 +14,26 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Arman on 1/13/16.
  */
 public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
+    private static final String TAG = FeedDetailHeaderViewHolder.class.getSimpleName();
     private Context mContext;
     private RecyclerView.Adapter mAdapater;
     private SharedPreferences mSharedPreferences;
@@ -78,7 +88,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
             vPostUserName.setText("Anonymous");
         }
 
-        if (!feedDetail.getPostImage().equals("")) {
+        if (feedDetail.getPostImage() != null && !feedDetail.getPostImage().equals("")) {
             // Set Post Image
             getImage(feedDetail, 2);
             vPostImage.setVisibility(View.VISIBLE);
@@ -124,52 +134,52 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//        if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked()) {
-//            mPosts.get(getAdapterPosition()).setPostLiked(true);
-//            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
-//
-//            Map<String, Object> postData = new HashMap<>();
-//            postData.put("owner", mSharedPreferences.getString("userID", ""));
-//            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
-//            new LSDKEvents(mContext).postLike(postData, new Callback() {
-//                @Override
-//                public void onFailure(Request request, IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                @Override
-//                public void onResponse(Response response) throws IOException {
-//                    if (!response.isSuccessful()) {
-//                        Log.d("TAG", response.body().string());
-//                    }
-//
-//                }
-//            });
-//
-//            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
-//        } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {
-//            mPosts.get(getAdapterPosition()).setPostLiked(false);
-//            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
-//
-//            Map<String, Object> postData = new HashMap<>();
-//            postData.put("isDeleted", true);
-//            new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getUserLiked(), new Callback() {
-//                @Override
-//                public void onFailure(Request request, IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                @Override
-//                public void onResponse(Response response) throws IOException {
-//                    if (!response.isSuccessful()) {
-//                        Log.d("TAG", response.body().string());
-//                    }
-//                    Log.d(TAG, response.body().string());
-//                }
-//            });
-//
-//            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
-//        }
+        if (isChecked && !((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
+            ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(true);
+            ((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) + 1) + "");
+
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("owner", mSharedPreferences.getString("userID", ""));
+            postData.put("event",((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
+            new LSDKEvents(mContext).postLike(postData, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        Log.d("TAG", response.body().string());
+                    }
+
+                }
+            });
+
+            mAdapater.notifyDataSetChanged();
+        } else if (!isChecked && ((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
+            ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(false);
+            ((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) - 1) + "");
+
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("isDeleted", true);
+            new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getUserLiked(), new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        Log.d("TAG", response.body().string());
+                    }
+                    Log.d(TAG, response.body().string());
+                }
+            });
+
+            mAdapater.notifyDataSetChanged();
+        }
     }
 
     @Override

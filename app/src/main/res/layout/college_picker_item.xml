@@ -10,7 +10,7 @@
                android:layout_alignParentStart="true"
                android:layout_centerVertical="true"
                android:layout_margin="@dimen/activity_horizontal_margin"
-               android:src="@drawable/ic_action_action_search"/>
+               android:src="@drawable/ic_action_action_search_light"/>
 
     <TextView android:id="@+id/collegePicker_item_name_text"
               android:layout_width="match_parent"

@@ -133,6 +133,7 @@ public class TaptUserProfileFragment extends DialogFragment {
                         e.printStackTrace();
                     }
                     user.updateUserInformation(jsonObject); //container for new information
+                    Log.d(TAG, "onResponse: " + jsonObject);
 
 //                    Log.d(TAG, body);
                     getActivity().runOnUiThread(new Runnable() {

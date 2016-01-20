@@ -108,20 +108,6 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                         .addToBackStack(null).commit();
             }
         } else if (v == vPostImage || v == vPostText) {
-
-            new LSDKEvents(mContext).getEventWithId(mPosts.get(getAdapterPosition()).getPostId(), new Callback() {
-                @Override
-                public void onFailure(Request request, IOException e) {
-                    Log.e(TAG, "onFailure: fucked up");
-                }
-
-                @Override
-                public void onResponse(Response response) throws IOException {
-
-                    Log.i(TAG, "onResponse: " + response.body().string());
-
-                }
-            });
             FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
             ((MainActivity) mContext).mFeedDetailPage =
                     FeedDetailPage.newInstance("Discover",
@@ -179,6 +165,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                     }
+
                     Log.d(TAG, response.body().string());
                 }
             });

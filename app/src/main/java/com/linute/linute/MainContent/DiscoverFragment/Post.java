@@ -86,4 +86,9 @@ public class Post {
     public String getUserId() {
         return mUserId;
     }
+
+    @Override
+    public String toString() {
+        return getImage().equals("") ? getTitle() : "Conent: Image - " + getTitle();
+    }
 }

@@ -252,6 +252,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         Log.e(TAG, response.body().string());
                         notUniqueEmail();
                     } else {
+                        Log.e(TAG, "onResponse: "+response.body().string() );
                         serverErrorCurrentView(0);
                     }
                 }

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/postContainer"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.linute.linute.LoginAndSignup.CollegePickerActivity">
+
+    <com.linute.linute.UtilsAndHelpers.MaterialSearchView.MaterialSearchView
+        android:id="@+id/findFriends_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"/>
+
+    <TextView android:id="@+id/findFriends_text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_centerInParent="true"
+              android:layout_marginEnd="64dp"
+              android:layout_marginStart="64dp"
+              android:gravity="center"
+              android:textSize="18sp"
+              android:visibility="invisible"
+              tools:text="Enter your friends name in the search bar"
+        />
+
+    <RelativeLayout android:id="@+id/findFriends_rationale_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:visibility="gone">
+
+        <TextView android:id="@+id/findFriends_rat_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginEnd="32dp"
+                  android:layout_marginStart="32dp"
+                  android:gravity="center"
+                  android:text="To find friends, Tapt needs permission to view your contacts"/>
+
+        <TextView android:id="@+id/findFriends_turn_on"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/findFriends_rat_text"
+                  android:layout_centerHorizontal="true"
+                  android:padding="10dp"
+                  android:text="Turn on"
+                  android:textColor="@color/colorPrimary"
+                  android:textSize="15sp"
+                  android:textStyle="bold"/>
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/findFriends_progressbar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+    <Button android:id="@+id/findFriends_reload_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:onClick="reload"
+            android:visibility="gone"
+            android:text="Retry"
+        />
+
+
+    <android.support.v7.widget.RecyclerView android:id="@+id/findFriends_recycler_view"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:layout_below="@id/findFriends_search_view"
+        />
+
+</RelativeLayout>

@@ -7,6 +7,8 @@ import java.util.List;
  * Created by Arman on 1/13/16.
  */
 public class FeedDetail {
+    private static final String TAG = FeedDetail.class.getSimpleName();
+    private String mPostId;
     private String mPostImage;
     private String mPostText;
     private String mUserImage;
@@ -15,6 +17,7 @@ public class FeedDetail {
     private String mPostTime;
     private boolean isPostLiked;
     private String mPostLikeNum;
+    private String mUserLiked;
 
     private List<Comment> mComments;
 
@@ -22,7 +25,7 @@ public class FeedDetail {
         mComments = new ArrayList<>();
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum) {
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum, String userLiked) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -31,6 +34,7 @@ public class FeedDetail {
         mPostTime = postTime;
         isPostLiked = postLiked;
         mPostLikeNum = postLikeNum;
+        mUserLiked = userLiked;
     }
 
     public String getPostImage() {
@@ -61,11 +65,31 @@ public class FeedDetail {
         return isPostLiked;
     }
 
+    public void setIsPostLiked(boolean isPostLiked) {
+        this.isPostLiked = isPostLiked;
+    }
+
     public String getPostLikeNum() {
         return mPostLikeNum;
     }
 
+    public void setPostLikeNum(String postLikeNum) {
+        mPostLikeNum = postLikeNum;
+    }
+
     public List<Comment> getComments() {
         return mComments;
+    }
+
+    public String getUserLiked() {
+        return mUserLiked;
+    }
+
+    public String getPostId() {
+        return mPostId;
+    }
+
+    public void setPostId(String postId) {
+        mPostId = postId;
     }
 }

@@ -8,7 +8,6 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -66,6 +65,15 @@ public class LSDKEvents {
                 mEncodedToken);
 
         return API_Methods.post("events", header, param, callback);
+    }
+
+    public Call postComment(Map<String, Object> param, Callback callback) {
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+
+        return API_Methods.post("comments", header, param, callback);
     }
 
     public Call postLike(Map<String, Object> param, Callback callback) {

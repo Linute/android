@@ -73,8 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="25dp"
-                    android:id="@+id/follow_button"
-                    android:src="@drawable/follow"/>
+                    android:id="@+id/follow_button"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"

@@ -18,6 +18,7 @@ package com.linute.linute.API;
 
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
 
@@ -36,6 +37,7 @@ public class MyInstanceIDListenerService extends InstanceIDListenerService {
         // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
         Intent intent = new Intent(this, RegistrationIntentService.class);
         startService(intent);
+        Log.d(TAG, "onTokenRefresh");
     }
     // [END refresh_token]
 }

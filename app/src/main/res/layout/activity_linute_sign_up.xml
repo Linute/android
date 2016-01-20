@@ -160,11 +160,13 @@
                     android:id="@+id/signup_fname_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
                     android:layout_weight="1"
                     android:hint="@string/first_name_hint"
+                    android:inputType="textCapWords"
                     android:maxLength="16"
                     android:maxLines="1"
-                    android:paddingRight="8dp"
+
                     android:singleLine="true"
                     android:textSize="14sp"/>
 
@@ -173,11 +175,12 @@
                     android:id="@+id/signup_lname_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:inputType="textCapWords"
                     android:layout_weight="1"
                     android:hint="@string/last_name_hint"
                     android:maxLength="16"
                     android:maxLines="1"
-                    android:paddingLeft="8dp"
                     android:singleLine="true"
                     android:textSize="14sp"/>
 
