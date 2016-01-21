@@ -38,8 +38,7 @@
 
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_marginRight="15dp"
-                  android:layout_marginTop="20dp"
+                  android:layout_centerVertical="true"
                   android:layout_toLeftOf="@id/updatesFragment_update_picture"
                   android:layout_toRightOf="@id/updatesFragment_profile_picture"
                   android:orientation="vertical">
@@ -48,6 +47,7 @@
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_marginBottom="5dp"
+                  android:textSize="12sp"
                   android:singleLine="true"
                   android:textColor="@android:color/holo_blue_dark"
                   tools:text="FIRST LAST"/>
@@ -57,7 +57,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="2"
-            android:textSize="12sp"
+            android:textSize="10sp"
             tools:text="Test text. This is what it will looking like test test test test tedfs "
             />
 

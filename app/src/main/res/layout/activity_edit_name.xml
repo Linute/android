@@ -19,43 +19,37 @@
         android:orientation="horizontal"
         android:weightSum="2">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingRight="10dp">
+
 
             <EditText
                 android:id="@+id/prof_edit_fname_text"
-                android:layout_width="match_parent"
+                android:layout_width="0px"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:hint="@string/first_name_hint"
                 android:maxLines="1"
                 android:maxLength="16"
+                android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textSize="14sp"/>
-        </android.support.design.widget.TextInputLayout>
 
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingLeft="10dp">
+
 
             <EditText
                 android:id="@+id/prof_edit_lname_text"
-                android:layout_width="match_parent"
+                android:layout_width="0px"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:gravity="center"
                 android:hint="@string/last_name_hint"
                 android:maxLines="1"
                 android:maxLength="16"
+                android:inputType="textCapWords"
                 android:singleLine="true"
                 android:textSize="14sp"/>
 
-        </android.support.design.widget.TextInputLayout>
 
     </LinearLayout>
 

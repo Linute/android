@@ -19,6 +19,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
@@ -46,9 +47,12 @@ public class MainActivity extends AppCompatActivity {
 
     private Fragment[] mFragments;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_main);
 
         mFragments = new Fragment[4];
@@ -238,5 +242,12 @@ public class MainActivity extends AppCompatActivity {
 
     public Fragment[] getFragments() {
         return mFragments;
+    }
+
+    //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
+    public void startFindFriendsActivity(int type) {
+        Intent i = new Intent(this, FindFriendsActivity.class);
+        i.putExtra(FindFriendsActivity.SEARCH_TYPE_KEY, type);
+        startActivity(i);
     }
 }

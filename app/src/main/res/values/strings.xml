@@ -135,4 +135,6 @@
     <string name="title_activity_rooms">RoomsActivity</string>
 
     <string name="CHAT_SERVER_URL">https://campus.tapt.io/</string>
+
+    <string name="search_hint">Search</string>
 </resources>

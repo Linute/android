@@ -8,10 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.support.v4.content.LocalBroadcastManager;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -71,7 +70,7 @@ public class LaunchActivity extends Activity {
                         if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
                             nextActivity = MainActivity.class;
 
-                        //college was not set. go to college picker
+                            //college was not set. go to college picker
                         else
                             nextActivity = CollegePickerActivity.class;
                     }

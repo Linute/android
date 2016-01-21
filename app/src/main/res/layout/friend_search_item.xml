@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+    >
+
+    <ImageView
+        android:id="@+id/friendSearchItem_profile_image"
+        android:layout_width="@dimen/friend_search_profile_side"
+        android:layout_height="@dimen/friend_search_profile_side"/>
+
+    <ImageView android:id="@+id/friendSearchItem_add_button"
+               android:layout_width="@dimen/friend_search_button_side"
+               android:layout_height="@dimen/friend_search_button_side"
+               android:layout_alignParentEnd="true"
+               android:layout_centerVertical="true"
+               android:layout_marginEnd="@dimen/activity_horizontal_margin"
+               android:layout_marginStart="@dimen/activity_horizontal_margin"
+               tools:src="@drawable/add_friend"/>
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_centerVertical="true"
+                  android:layout_marginStart="16dp"
+                  android:orientation="vertical"
+                  android:layout_toEndOf="@id/friendSearchItem_profile_image"
+                  android:layout_toStartOf="@id/friendSearchItem_add_button">
+
+        <TextView android:id="@+id/friendSearchItem_full_name"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:singleLine="true"
+                  android:textColor="@android:color/darker_gray"
+                  android:textSize="16sp"
+                  tools:text="Fullname lastname"
+            />
+
+
+    </LinearLayout>
+</RelativeLayout>
