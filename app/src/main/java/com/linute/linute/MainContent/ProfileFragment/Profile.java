@@ -180,7 +180,7 @@ public class Profile extends Fragment {
                         e.printStackTrace();
                     }
                     user.updateUserInformation(jsonObject); //container for new information
-                    Log.d(TAG, "onResponse: " + jsonObject);
+//                    Log.d(TAG, "onResponse: " + jsonObject);
 
                     savePreferences(user);
 //                    Log.d(TAG, body);
@@ -262,7 +262,7 @@ public class Profile extends Fragment {
 
     public void setActivities() {
         LSDKUser user = new LSDKUser(getContext());
-        user.getUserActivities(mSharedPreferences.getString("userID", null), "host", new Callback() {
+        user.getUserActivities(mSharedPreferences.getString("userID", null), "posted status", "posted photo", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
@@ -281,7 +281,7 @@ public class Profile extends Fragment {
                     try { //try to grab needed information from response
                         String body = response.body().string();
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-                        Log.d(TAG, body);
+//                        Log.d(TAG, "onResponse getActivities" + body);
 
 
                         //i only update the list of activities if their are new values
@@ -366,4 +366,6 @@ public class Profile extends Fragment {
 
         return super.onOptionsItemSelected(item);
     }
+
+
 }

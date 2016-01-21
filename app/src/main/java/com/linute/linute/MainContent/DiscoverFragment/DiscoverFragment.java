@@ -149,6 +149,7 @@ public class DiscoverFragment extends Fragment {
             }
         });
 
+
         return rootView;
     }
 

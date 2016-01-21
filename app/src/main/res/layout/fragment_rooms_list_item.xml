@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/rooms_list_linear"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:orientation="horizontal">
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/rooms_user_image"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/icon_user"
+        card_view:border="false"
+        card_view:border_color="#EEEEEE"
+        card_view:border_width="0dp"
+        card_view:shadow="false"
+        card_view:shadow_color="#8BC34A"
+        card_view:shadow_radius="10"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rooms_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Naomi Doll"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorAccent"/>
+
+        <TextView
+            android:id="@+id/rooms_user_last_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hey there Job"/>
+    </LinearLayout>
+
+</LinearLayout>

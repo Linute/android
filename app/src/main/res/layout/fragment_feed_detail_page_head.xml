@@ -15,7 +15,6 @@
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/college_walk1"
         card_view:border="false"
         card_view:border_color="#EEEEEE"
         card_view:border_width="0dp"

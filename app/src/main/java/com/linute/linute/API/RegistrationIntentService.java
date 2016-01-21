@@ -20,17 +20,17 @@ package com.linute.linute.API;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
-
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmPubSub;
-
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -96,7 +96,7 @@ public class RegistrationIntentService extends IntentService {
 
     /**
      * Persist registration to third-party servers.
-     *
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      *
@@ -106,9 +106,21 @@ public class RegistrationIntentService extends IntentService {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
+        String versionName = "";
+        String versionCode = "";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = pInfo.versionName;
+            versionCode = pInfo.versionCode + "";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
         Map<String, Object> device = new HashMap<>();
         device.put("token", token);
-        device.put("os", "android");
+        device.put("version", versionName);
+        device.put("build", versionCode);
+        device.put("os", Build.VERSION.SDK_INT + "");
+        device.put("type", "android");
         Device.createDevice(headers, device, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {

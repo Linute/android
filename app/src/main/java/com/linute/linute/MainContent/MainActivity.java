@@ -2,8 +2,6 @@ package com.linute.linute.MainContent;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -11,16 +9,11 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.KeyEventCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telecom.Call;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -34,10 +27,6 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.UtilsAndHelpers.Utils;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton fabText;
 
     private Fragment[] mFragments;
-
 
 
     @Override
@@ -257,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
-    public void startFindFriendsActivity(int type){
+    public void startFindFriendsActivity(int type) {
         Intent i = new Intent(this, FindFriendsActivity.class);
         i.putExtra(FindFriendsActivity.SEARCH_TYPE_KEY, type);
         startActivity(i);

@@ -111,7 +111,8 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
             ((MainActivity) mContext).mFeedDetailPage =
                     FeedDetailPage.newInstance("Discover",
-                            mPosts.get(getAdapterPosition()).getPostId());
+                            mPosts.get(getAdapterPosition()).getPostId(),
+                            mPosts.get(getAdapterPosition()).getUserId());
             // The device is smaller, so show the fragment fullscreen
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             // For a little polish, specify a transition animation

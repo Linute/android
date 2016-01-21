@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:card_view="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/chat_owner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/chat_owner_image"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/icon_user"
+            card_view:border="false"
+            card_view:border_color="#EEEEEE"
+            card_view:border_width="0dp"
+            card_view:shadow="false"
+            card_view:shadow_color="#8BC34A"
+            card_view:shadow_radius="10"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chat_owner_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Naomi Doll"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="#8BC34A"/>
+
+            <TextView
+                android:id="@+id/chat_owner_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hey there Job"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/chat_owner_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="end"
+            android:text="4d"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/chat_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/chat_user_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="4d"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/chat_user_image"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/chat_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="Naomi Doll"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@color/colorPrimary"/>
+
+            <TextView
+                android:id="@+id/chat_user_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:text="Hey there Job"/>
+        </LinearLayout>
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/chat_user_image"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentEnd="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/icon_user"
+            card_view:border="false"
+            card_view:border_color="#EEEEEE"
+            card_view:border_width="0dp"
+            card_view:shadow="false"
+            card_view:shadow_color="#8BC34A"
+            card_view:shadow_radius="10"/>
+
+    </RelativeLayout>
+
+</LinearLayout>
