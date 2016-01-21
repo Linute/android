@@ -156,7 +156,7 @@ public class TaptUserProfileFragment extends DialogFragment {
 
     public void setActivities() {
         LSDKUser user = new LSDKUser(getActivity());
-        user.getUserActivities(mTaptUserId, "host", new Callback() {
+        user.getUserActivities(mTaptUserId, "posted status", "posted photo", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off

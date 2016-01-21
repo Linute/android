@@ -89,10 +89,11 @@ public class LSDKUser {
     }
 
 
-    public Call getUserActivities(String userId, String action, Callback callback) {
+    public Call getUserActivities(String userId, String status, String photo, Callback callback) {
 
         Map<String, String> params = new HashMap<>();
-        params.put("action[0]", action);
+        params.put("action[0]", status);
+        params.put("action[1]", photo);
         params.put("skip", "0");
         params.put("limit", "25");
         params.put("owner", userId);

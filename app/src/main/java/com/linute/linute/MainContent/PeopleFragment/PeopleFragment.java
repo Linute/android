@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -122,7 +124,6 @@ public class PeopleFragment extends Fragment {
 
                         myDate = simpleDateFormat.parse(jsonObject.getString("date"));
                         dateString = Utils.getEventTime(myDate);
-                        Log.d(TAG, "getPeople " + jsonObject);
 
                         jsonObject = jsonObject.getJSONObject("owner");
                         people = new People(
@@ -168,7 +169,9 @@ public class PeopleFragment extends Fragment {
         int id = item.getItemId();
 
         if (R.id.people_fragment_menu_chat == id) {
-            Toast.makeText(getActivity(), "Chat Coming Soon! WOOHOO", Toast.LENGTH_SHORT).show();
+            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+            enterRooms.putExtra("CHATICON", true);
+            startActivity(enterRooms);
             return true;
         }
 

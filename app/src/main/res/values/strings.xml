@@ -132,4 +132,7 @@
     </string>
     <string name="title_activity_college_picker">CollegePickerActivity</string>
     <string name="facebook_app_id">900595913337243</string>
+    <string name="title_activity_rooms">RoomsActivity</string>
+
+    <string name="CHAT_SERVER_URL">https://campus.tapt.io/</string>
 </resources>

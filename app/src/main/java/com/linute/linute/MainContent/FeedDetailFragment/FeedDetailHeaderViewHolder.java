@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +16,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
-import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -50,6 +52,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
     protected TextView vPostTimeImage;
     protected TextView vLikesTextImage;
     protected CheckBox vLikesHeartImage;
+    private FeedDetail vFeedDetail;
 
     public FeedDetailHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context) {
         super(itemView);
@@ -80,6 +83,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
     void bindModel(FeedDetail feedDetail) {
         // Set User Image
         // Set User Name
+        vFeedDetail = feedDetail;
         if (feedDetail.getPostPrivacy() == 0) {
             getImage(feedDetail, 1);
             vPostUserName.setText(feedDetail.getUserName());
@@ -140,7 +144,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
             Map<String, Object> postData = new HashMap<>();
             postData.put("owner", mSharedPreferences.getString("userID", ""));
-            postData.put("event",((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
+            postData.put("event", ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
             new LSDKEvents(mContext).postLike(postData, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
@@ -184,19 +188,19 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
     @Override
     public void onClick(View v) {
-//        if (v == vUserImage) {
-//            if (mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-//                FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", mPosts.get(getAdapterPosition()).getUserId());
-//                // The device is smaller, so show the fragment fullscreen
-//                FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                // For a little polish, specify a transition animation
-//                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                // To make it fullscreen, use the 'content' root view as the container
-//                // for the fragment, which is always the root view for the activity
-//                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
-//                        .addToBackStack(null).commit();
-//            }
-//        }
+        if (v == vUserImage) {
+            if (vFeedDetail.getPostPrivacy() == 0) {
+                android.app.FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", vFeedDetail.getPostUserId());
+                // The device is smaller, so show the fragment fullscreen
+                android.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
+                // For a little polish, specify a transition animation
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                // To make it fullscreen, use the 'content' root view as the container
+                // for the fragment, which is always the root view for the activity
+                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+                        .addToBackStack(null).commit();
+            }
+        }
     }
 }
