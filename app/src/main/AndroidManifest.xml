@@ -241,6 +241,11 @@
                 android:value="com.linute.linute.LoginAndSignup.PreLoginActivity"/>
         </activity>
 
+        <activity android:name=".MainContent.FindFriends.FindFriendsActivity"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/AppTheme"/>
+
     </application>
 
 </manifest>

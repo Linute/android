@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -20,6 +22,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
@@ -50,10 +55,15 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     private boolean mAutoLoad = true;
 
+
+    //image width / radius
+    private int mImageSize;
+
     public UpdatesAdapter(Context context, List<Update> recentItems, List<Update> olderItems) {
         mRecentItems = recentItems;
         mOlderItems = olderItems;
         mContext = context;
+        mImageSize = mContext.getResources().getDimensionPixelSize(R.dimen.updatefragment_picture_size);
     }
 
     //private onLoadMoreListener mLoadMore;
@@ -137,7 +147,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    private static int VIEW_FOOTER = 1;
+    //private static int VIEW_FOOTER = 1;
 
     @Override
     public int getItemViewType(int section, int relativePosition, int absolutePosition) {
@@ -165,7 +175,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             .inflate(R.layout.fragment_updates_section_header, parent, false)
             );
         } else if (viewType == VIEW_TYPE_ITEM) { //use item holder
-            return new UpdateItemViewHolder(mContext,
+            return new UpdateItemViewHolder(
                     LayoutInflater
                             .from(parent.getContext())
                             .inflate(R.layout.fragment_updates_item_cells, parent, false)
@@ -205,7 +215,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    public static class UpdateItemViewHolder extends RecyclerView.ViewHolder {
+    public class UpdateItemViewHolder extends RecyclerView.ViewHolder {
 
         private CircularImageView mProfileImage;
         private ImageView mIconImage;
@@ -213,12 +223,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         private TextView mNameText;
         private TextView mDescriptionText;
 
-        private Context mContext;
 
 
-        public UpdateItemViewHolder(Context context, View itemView) {
+        public UpdateItemViewHolder( View itemView) {
             super(itemView);
-            mContext = context;
 
             mProfileImage = (CircularImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
             mEventPicture = (ImageView) itemView.findViewById(R.id.updatesFragment_update_picture);
@@ -240,8 +248,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
 
         private void setUpPictures(Update update) {
-            //image width / radius
-            int imageSize = mContext.getResources().getDimensionPixelSize(R.dimen.updatefragment_picture_size);
 
             SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -249,7 +255,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             Glide.with(mContext)
                     .load(Utils.getImageUrlOfUser(update.getUserProfileImageName()))
                     .asBitmap()
-                    .override(imageSize, imageSize)
+                    .override(mImageSize, mImageSize)
                     .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
@@ -264,7 +270,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 if (!update.isPicturePost()) { //not a picture post; status post
                     Glide.with(mContext)
                             .load(R.drawable.quotation2)
-                            .override(imageSize, imageSize)
+                            .override(mImageSize, mImageSize)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(mEventPicture);
                 } else { //picture post
@@ -272,7 +278,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     Glide.with(mContext)
                             .load(Utils.getEventImageURL(update.getEventImageName()))
                             .asBitmap()
-                            .override(imageSize, imageSize)
+                            .override(mImageSize, mImageSize)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(mEventPicture);
                 }
@@ -294,12 +300,21 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
 
         private void setUpOnClickListeners(final Update update) {
-
             View.OnClickListener goToProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: go to profile page
-                    Toast.makeText(mContext, "go to profile: " + update.getUserId(), Toast.LENGTH_SHORT).show();
+                    FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+                    ((MainActivity) mContext).mTaptUserProfileFragment =
+                            TaptUserProfileFragment.newInstance("Update",
+                                    update.getUserId());
+                    // The device is smaller, so show the fragment fullscreen
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    // For a little polish, specify a transition animation
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    // To make it fullscreen, use the 'content' root view as the container
+                    // for the fragment, which is always the root view for the activity
+                    transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
+                            .addToBackStack(null).commit();
                 }
             };
 
@@ -320,13 +335,21 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 mEventPicture.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO: go to event
-                        Toast.makeText(mContext, "Go to event " + update.getEventID(), Toast.LENGTH_SHORT).show();
+                        FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
+                        ((MainActivity) mContext).mFeedDetailPage =
+                                FeedDetailPage.newInstance("Updates",
+                                        update.getEventID());
+                        // The device is smaller, so show the fragment fullscreen
+                        FragmentTransaction transaction = fragmentManager.beginTransaction();
+                        // For a little polish, specify a transition animation
+                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                        // To make it fullscreen, use the 'content' root view as the container
+                        // for the fragment, which is always the root view for the activity
+                        transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
+                                .addToBackStack(null).commit();
                     }
                 });
             }
-
-            //TODO: MENTION -- go to mentioned post
         }
 
 
@@ -398,28 +421,25 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         public Drawable getUpdateTypeIconDrawable(Update.UpdateType updateType) {
             int drawable;
             switch (updateType) {
-                case LIKE_PHOTO:
+                case LIKED_PHOTO:
                     drawable = R.drawable.icon_like;
                     break;
-                case LIKE_STATUS:
+                case LIKED_STATUS:
                     drawable = R.drawable.icon_like;
                     break;
-                case COMMENT_PHOTO:
+                case COMMENTED_PHOTO:
                     drawable = R.drawable.icon_comment;
                     break;
-                case COMMENT_STATUS:
+                case COMMENTED_STATUS:
                     drawable = R.drawable.icon_comment;
                     break;
-                case FOLLOW:
+                case FOLLOWER:
                     drawable = R.drawable.icon_user;
                     break;
-                case MENTION:
+                case MENTIONED:
                     drawable = R.drawable.icon_user; //TODO: NEED ICON
                     break;
-                case FRIEND_JOIN:
-                    drawable = R.drawable.icon_user; //TODO: NEED ICON
-                    break;
-                case FACEBOOK_SHARE:
+                case FRIEND_JOINED:
                     drawable = R.drawable.icon_user; //TODO: NEED ICON
                     break;
                 default:
@@ -431,30 +451,30 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    public static class UpdatesViewHolderFooter extends RecyclerView.ViewHolder {
-
-        private Button mRetryButton;
-        private ProgressBar mProgressBar;
-
-        public UpdatesViewHolderFooter(View itemView) {
-            super(itemView);
-            mRetryButton =  (Button) itemView.findViewById(R.id.updatesFragment_reload_button);
-            mProgressBar = (ProgressBar) itemView.findViewById(R.id.updateFragment_progress_bar);
-        }
-
-        public void showButton(boolean show){
-            mRetryButton.setVisibility(show? View.VISIBLE : View.GONE);
-            mProgressBar.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-
-        public void setButtonListener(View.OnClickListener lis){
-            mRetryButton.setOnClickListener(lis);
-        }
-
-    }
-
-    public interface onLoadMoreListener{
-        public void loadMore();
-    }
+//    public static class UpdatesViewHolderFooter extends RecyclerView.ViewHolder {
+//
+//        private Button mRetryButton;
+//        private ProgressBar mProgressBar;
+//
+//        public UpdatesViewHolderFooter(View itemView) {
+//            super(itemView);
+//            mRetryButton =  (Button) itemView.findViewById(R.id.updatesFragment_reload_button);
+//            mProgressBar = (ProgressBar) itemView.findViewById(R.id.updateFragment_progress_bar);
+//        }
+//
+//        public void showButton(boolean show){
+//            mRetryButton.setVisibility(show? View.VISIBLE : View.GONE);
+//            mProgressBar.setVisibility(show ? View.GONE : View.VISIBLE);
+//        }
+//
+//        public void setButtonListener(View.OnClickListener lis){
+//            mRetryButton.setOnClickListener(lis);
+//        }
+//
+//    }
+//
+//    public interface onLoadMoreListener{
+//        public void loadMore();
+//    }
 
 }

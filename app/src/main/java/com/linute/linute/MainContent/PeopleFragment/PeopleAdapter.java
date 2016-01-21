@@ -1,12 +1,15 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileHeaderViewHolder;
 import com.linute.linute.MainContent.ProfileFragment.ProfileViewHolder;
 import com.linute.linute.R;
@@ -98,7 +101,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    ((MainActivity) aContext).startFindFriendsActivity(0);
                 }
             });
         }
@@ -114,7 +117,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    ((MainActivity) aContext).startFindFriendsActivity(2);
                 }
             });
         }
@@ -130,7 +133,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    ((MainActivity) aContext).startFindFriendsActivity(1);
                 }
             });
         }

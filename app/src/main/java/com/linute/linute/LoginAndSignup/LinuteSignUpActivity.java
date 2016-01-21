@@ -120,7 +120,6 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
 
-        //TODO: save email, pin, current flipper
         outState.putString("mSavedEmail", mEmailString);
         outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
@@ -253,6 +252,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         Log.e(TAG, response.body().string());
                         notUniqueEmail();
                     } else {
+                        Log.e(TAG, "onResponse: "+response.body().string() );
                         serverErrorCurrentView(0);
                     }
                 }

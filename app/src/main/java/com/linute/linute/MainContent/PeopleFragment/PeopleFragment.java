@@ -98,12 +98,16 @@ public class PeopleFragment extends Fragment {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful())
-                    Log.d("TAG", response.body().string());
+
+                String responsString = response.body().string();
+                if (!response.isSuccessful()) {
+                    Log.d("TAG", responsString);
+                    return;
+                }
                 JSONObject jsonObject = null;
                 JSONArray jsonArray = null;
                 try {
-                    jsonObject = new JSONObject(response.body().string());
+                    jsonObject = new JSONObject(responsString);
                     jsonArray = jsonObject.getJSONArray("people");
 
 

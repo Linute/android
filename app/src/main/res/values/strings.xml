@@ -132,4 +132,6 @@
     </string>
     <string name="title_activity_college_picker">CollegePickerActivity</string>
     <string name="facebook_app_id">900595913337243</string>
+
+    <string name="search_hint">Search</string>
 </resources>
