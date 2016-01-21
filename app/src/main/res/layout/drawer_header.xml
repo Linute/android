@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/mainActivity_nav_drawer_header"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:background="@color/colorPrimary"
+                android:orientation="vertical">
+
+
+    <com.mikhaellopez.circularimageview.CircularImageView
+        android:id="@+id/navigation_header_profile_image"
+        android:layout_width="@dimen/nav_header_profile_side"
+        android:layout_height="@dimen/nav_header_profile_side"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="55dp"
+        app:border_color="@color/colorPrimary"
+        app:border_width="1px"/>
+
+    <TextView android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_below="@id/navigation_header_profile_image"
+              android:layout_centerHorizontal="true"
+              android:text="Profile"
+              android:textColor="@color/white"
+        />
+
+</RelativeLayout>

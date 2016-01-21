@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/navigation_item_feed"
+            android:checked="true"
+            android:icon="@drawable/ic_action_social_people"
+            android:title="Feed"
+            android:actionLayout="@layout/main_activity_nav_action_counter"
+            />
+        <item
+            android:id="@+id/navigation_item_people"
+            android:icon="@drawable/ic_action_content_add"
+            android:title="People"
+            android:actionLayout="@layout/main_activity_nav_action_counter"/>
+        <item
+            android:id="@+id/navigation_item_activity"
+            android:icon="@drawable/ic_action_navigation_close"
+            android:title="Activity"
+            android:actionLayout="@layout/main_activity_nav_action_counter"/>
+
+    </group>
+
+    <item android:id="@+id/navigation_item_settings"
+          android:icon="@drawable/ic_action_action_settings"
+          android:title="Settings"
+          />
+
+
+</menu>

@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.animation.Animator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -55,13 +54,37 @@ public class DiscoverFragment extends Fragment {
     private SwipeRefreshLayout refreshLayout;
 
     private List<Post> mPosts;
-    private ChoiceCapableAdapter<?> mCheckBoxChoiceCapableAdapters = null;
+    private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters = null;
     private boolean feedDone;
+
+    private boolean mFriendsOnly = false;
+
+
+    public static DiscoverFragment newInstance(boolean friendsOnly) {
+        DiscoverFragment fragment = new DiscoverFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("friendsOnly", friendsOnly);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null){
+            mFriendsOnly = getArguments().getBoolean("friendsOnly");
+        }
+    }
 
     //called when fragment drawn the first time
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_discover_feed, container, false); //setContent
+        //mFriendOnly determines which layout we're using
+        //they are identical, but we need to differentiate them for things like setting background
+
+        final View rootView = inflater.inflate(
+                R.layout.fragment_discover_feed,
+                container, false); //setContent
 
         mPosts = new ArrayList<>();
 
@@ -76,8 +99,16 @@ public class DiscoverFragment extends Fragment {
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+        mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
+            @Override
+            public void getMoreFeed() {
+                getFeed(1);
+            }
+        });
+
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
 
+        //if floating button expanded, collapse it
         recList.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -91,11 +122,6 @@ public class DiscoverFragment extends Fragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (!Utils.isNetworkAvailable(getActivity())) {
-                    ((MainActivity) getActivity()).noInternet();
-                    refreshLayout.setRefreshing(false);
-                    return;
-                }
                 feedDone = false;
                 getFeed(0);
             }
@@ -104,34 +130,9 @@ public class DiscoverFragment extends Fragment {
 
         refreshLayout.setRefreshing(true);
         getFeed(0);
-        if (!Utils.isNetworkAvailable(getActivity())) {
-            ((MainActivity) getActivity()).noInternet();
-            refreshLayout.setRefreshing(false);
 
-        }
-
-//        postBox = (EditText) rootView.findViewById(R.id.postBox);
-//        postBox.setFocusable(false);
-//        postBox.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                ((MainActivity) getActivity()).newPost();
-//            }
-//        });
-
-
-//        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-//        recList.setOnScrollListener(new HidingScrollListener() {
-//            @Override
-//            public void onHide() {
-//                hideViews();
-//            }
-//
-//            @Override
-//            public void onShow() {
-//                showViews();
-//            }
-//
+        //NOTE: don't remember what it does. uncomment if somethings happens
+//        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
 //            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
 //                super.onScrolled(recyclerView, dx, dy);
@@ -139,15 +140,6 @@ public class DiscoverFragment extends Fragment {
 //                refreshLayout.setEnabled(firstVisibleItem == 0);
 //            }
 //        });
-
-        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-                refreshLayout.setEnabled(firstVisibleItem == 0);
-            }
-        });
 
         return rootView;
     }
@@ -157,28 +149,30 @@ public class DiscoverFragment extends Fragment {
         super.onResume();
     }
 
+    private int mSkip = 0;
+
     public void getFeed(int type) {
         if (feedDone) {
             Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
             return;
         }
-        final int skip;
         if (type == 1) {
-            skip = 25;
+            mSkip += 25;
         } else {
-            skip = 0;
+            mSkip = 0;
         }
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        final int skip = mSkip;
+
+        SharedPreferences sharedPreferences = getParentFragment().getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
         events.put("college", sharedPreferences.getString("collegeId", ""));
         events.put("skip", skip + "");
         LSDKEvents events1 = new LSDKEvents(getActivity());
-        events1.getEvents(events, new Callback() {
+        events1.getEvents(mFriendsOnly, events, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-//                Toast.makeText(getActivity(), "Couldn't access server", Toast.LENGTH_SHORT).show();
-                cancelRefresh();
+                noInternet();
             }
 
             @Override
@@ -187,6 +181,7 @@ public class DiscoverFragment extends Fragment {
                     Log.d("HEY", "STOP IT");
 //                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
                     cancelRefresh();
+                    return;
                 }
 
                 if (skip == 0) {
@@ -242,16 +237,25 @@ public class DiscoverFragment extends Fragment {
 
                 if (getActivity() == null)
                     return;
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         cancelRefresh();
 
-//                        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
-
                         mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
                     }
                 });
+            }
+        });
+    }
+
+    private void noInternet() {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((MainActivity) getActivity()).noInternet();
+                refreshLayout.setRefreshing(false);
             }
         });
     }
@@ -266,4 +270,5 @@ public class DiscoverFragment extends Fragment {
             });
         }
     }
+
 }

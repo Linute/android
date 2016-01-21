@@ -33,4 +33,8 @@
     <dimen name="search_icon_padding">12dp</dimen>
     <dimen name="search_view_text_padding">65dp</dimen>
 
+    <dimen name="main_app_bar_elevation">4dp</dimen>
+
+    <dimen name="nav_header_profile_side">85dp</dimen>
+
 </resources>

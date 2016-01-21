@@ -19,11 +19,16 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     private static final String TAG = CheckBoxQuestionAdapter.class.getSimpleName();
     private List<Post> mPosts;
     private Context context;
+    private GetMoreFeed mGetMoreFeed; //interface that gets more feed
 
     public CheckBoxQuestionAdapter(List<Post> posts, Context context) {
         super(new MultiChoiceMode());
         mPosts = posts;
         this.context = context;
+    }
+
+    public void setGetMoreFeed(GetMoreFeed moreFeed){
+        mGetMoreFeed = moreFeed;
     }
 
     @Override
@@ -38,7 +43,9 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
         holder.bindModel(mPosts.get(position));
         if (position + 1 == mPosts.size()) {
             Log.d(TAG, position + "");
-            ((DiscoverFragment) ((MainActivity) context).getFragments()[0]).getFeed(1);
+//            ((DiscoverFragment) ((MainActivity) context).getFragments()[0]).getFeed(1);
+            //NOTE: Changed refresh to interface
+            mGetMoreFeed.getMoreFeed();
         }
     }
 
@@ -55,4 +62,11 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     private boolean isPositionHeader(int position) {
         return position == 0;
     }
+
+
+
+    public interface GetMoreFeed {
+        void getMoreFeed();
+    }
+
 }
