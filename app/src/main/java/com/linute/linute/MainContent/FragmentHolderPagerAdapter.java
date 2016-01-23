@@ -5,7 +5,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
-import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 
 /**
  * Created by QiFeng on 1/20/16.

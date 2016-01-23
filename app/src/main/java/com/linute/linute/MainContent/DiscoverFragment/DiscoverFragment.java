@@ -21,7 +21,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -45,7 +45,7 @@ import java.util.TimeZone;
 /**
  * Created by QiFeng on 11/17/15.
  */
-public class DiscoverFragment extends Fragment {
+public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
     private LinearLayoutManager llm;
@@ -127,10 +127,7 @@ public class DiscoverFragment extends Fragment {
             }
         });
 
-
-        refreshLayout.setRefreshing(true);
-        getFeed(0);
-
+        Log.i(TAG, "onCreateView: fragment created");
         //NOTE: don't remember what it does. uncomment if somethings happens
 //        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
@@ -147,6 +144,12 @@ public class DiscoverFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (fragmentNeedsUpdating()){
+            Log.i(TAG, "onResume: ");
+            refreshLayout.setRefreshing(true);
+            getFeed(0);
+            setFragmentNeedUpdating(false);
+        }
     }
 
     private int mSkip = 0;

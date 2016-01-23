@@ -110,7 +110,7 @@
     <string name="changephone_number_in_use">Number already being used.</string>
     <string name="change_phone_invalid_code">Incorrect code</string>
     <string name="data_saved">Saved</string>
-    <string name="describe_event">Describe your event...</string>
+    <string name="describe_event">Enter your status here...</string>
 
 
     <!--Square Camera-->

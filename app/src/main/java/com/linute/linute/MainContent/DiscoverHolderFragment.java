@@ -5,6 +5,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,27 @@ import android.widget.TableLayout;
 
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 
 /**
  * Created by QiFeng on 1/20/16.
  */
-public class DiscoverHolderFragment extends Fragment {
+public class DiscoverHolderFragment extends UpdatableFragment {
+
+    public static final String TAG = DiscoverHolderFragment.class.getSimpleName();
+
+    private ViewPager mViewPager;
+
+    private FragmentHolderPagerAdapter mFragmentHolderPagerAdapter;
 
     public DiscoverHolderFragment() {
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager());
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,11 +41,9 @@ public class DiscoverHolderFragment extends Fragment {
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
-        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
-
-        viewPager.setAdapter(new FragmentHolderPagerAdapter(getChildFragmentManager()));
-
-        tabLayout.setupWithViewPager(viewPager);
+        mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
+        mViewPager.setAdapter(mFragmentHolderPagerAdapter);
+        tabLayout.setupWithViewPager(mViewPager);
 
         return rootView;
     }
@@ -44,9 +56,16 @@ public class DiscoverHolderFragment extends Fragment {
 
         if (mainActivity!=null){
             mainActivity.setTitle("FEED");
-            mainActivity.lowerAppBarElevation();
-            mainActivity.showFAB(true);
+            mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
+            mainActivity.showFAB(true); //show the floating button
         }
+
+//        //this fragment will need updating if user posted something
+//        //set current item to Campus discover fragment
+//        //Discover fragment will do the rest
+//        if (fragmentNeedsUpdating()){
+//            mViewPager.setCurrentItem(0, true);
+//        }
     }
 
     @Override

@@ -80,6 +80,7 @@ public class CameraActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = Crop.getOutput(data);
+                Log.i(TAG, "onActivityResult: recieved");
                 launchEditAndSaveFragment(imageUri);
 
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
@@ -167,6 +168,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void launchEditAndSaveFragment(Uri uri) {
+        Log.i(TAG, "launchEditAndSaveFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -184,6 +186,7 @@ public class CameraActivity extends AppCompatActivity {
     public static final String EDIT_AND_GALLERY_STACK_NAME = "edit_and_gallery_stack_name";
 
     public void launchGalleryFragment() {
+        Log.i(TAG, "launchGalleryFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(

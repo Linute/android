@@ -303,19 +303,11 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             View.OnClickListener goToProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //TODO: FIX
-//                    FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//                    ((MainActivity) mContext).mTaptUserProfileFragment =
-//                            TaptUserProfileFragment.newInstance("Update",
-//                                    update.getUserId());
-//                    // The device is smaller, so show the fragment fullscreen
-//                    FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                    // For a little polish, specify a transition animation
-//                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                    // To make it fullscreen, use the 'content' root view as the container
-//                    // for the fragment, which is always the root view for the activity
-//                    transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
-//                            .addToBackStack(null).commit();
+                    //show profile fragment
+                    ((MainActivity)mContext)
+                            .addFragmentToContainer(
+                                    TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId())
+                            );
                 }
             };
 
@@ -443,6 +435,12 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     break;
                 case FRIEND_JOINED:
                     drawable = R.drawable.icon_user; //TODO: NEED ICON
+                    break;
+                case POSTED_PHOTO:
+                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
+                    break;
+                case POSTED_STATUS:
+                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
                     break;
                 default:
                     drawable = R.drawable.icon_user;

@@ -12,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKActivity;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -30,7 +32,7 @@ import java.util.Map;
 /**
  * Created by QiFeng on 1/6/16.
  */
-public class UpdatesFragment extends Fragment {
+public class UpdatesFragment extends UpdatableFragment {
 
     public static final String TAG = UpdatesFragment.class.getSimpleName();
     private RecyclerView mUpdatesRecyclerView;
@@ -88,9 +90,26 @@ public class UpdatesFragment extends Fragment {
             }
         });
 
-        getUpdatesInformation();
         return rootView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null)
+            mainActivity.setTitle("Activities");
+
+        if (fragmentNeedsUpdating()) {
+            Log.i(TAG, "onResume: running");
+            getUpdatesInformation();
+            setFragmentNeedUpdating(false);
+        }
+    }
+
+
+
 
     private void updateUpdatesInformation() {
         JSONArray unread = new JSONArray();
@@ -141,7 +160,10 @@ public class UpdatesFragment extends Fragment {
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(response.body().string()), "activities");
+                        String resString = response.body().string();
+                        Log.i(TAG, "onResponse: "+resString);
+
+                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(resString), "activities");
 
                         if (activities == null) {
                             Log.i(TAG, "onResponse: activities was null");

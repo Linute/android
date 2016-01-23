@@ -1,11 +1,7 @@
 package com.linute.linute.MainContent;
 
+import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -17,17 +13,15 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.KeyEventCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
-import android.telecom.Call;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -45,12 +39,16 @@ import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import org.w3c.dom.Text;
 
 import java.security.GuardedObject;
 import java.util.Arrays;
@@ -64,17 +62,17 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
 
-    public ViewPager mViewPager;
     private FloatingActionButton fab;
-    private PostCreatePage mPostCreatePage;
     //public TaptUserProfileFragment mTaptUserProfileFragment;
     //public FeedDetailPage mFeedDetailPage;
 
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
 
-    private Fragment[] mFragments; //holds our fragments
+    private UpdatableFragment[] mFragments; //holds our fragments
     public static final int PROFILE_FRAGMENT_INDEX = 0;
+
+    public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
     public static class FRAGMENT_INDEXES {
         public static final int PROFILE = 0;
@@ -96,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
 
-        mFragments = new Fragment[4];
+        mFragments = new UpdatableFragment[4];
 
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
 
@@ -108,10 +106,19 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         mActionBar = getSupportActionBar();
 
-        if (mActionBar != null) {
-            mActionBar.setHomeAsUpIndicator(R.drawable.ic_action_navigation_menu);
-            mActionBar.setDisplayHomeAsUpEnabled(true);
-        }
+
+        //this arrow changes from navigation to back arrow
+        final DrawerArrowDrawable arrowDrawable = new DrawerArrowDrawable(this);
+        arrowDrawable.setColor(ContextCompat.getColor(this, R.color.white));
+        mToolbar.setNavigationIcon(arrowDrawable);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
+                ObjectAnimator.ofFloat(arrowDrawable, "progress", drawer ? 0 : 1).start();
+            }
+        });
 
 
         //only loads one feed for now
@@ -138,13 +145,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 fam.toggle();
-                newPost();
+                Intent i = new Intent(MainActivity.this, PostCreatePage.class);
+                startActivity(i);
             }
         });
 
 
         //profile image and header setup
-        loadProfileImage();
+        loadDrawerHeader();
 
         mNavigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,37 +170,105 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(MenuItem item) {
                 item.setChecked(true);
                 mDrawerLayout.closeDrawers();
-                Toast.makeText(MainActivity.this, "Will link to " + item.getTitle(), Toast.LENGTH_LONG).show();
-                return true;
+
+                //if there are a lot of other user profile/ events in mainActivity, clear them
+                clearBackStack();
+
+                switch (item.getItemId()){
+                    case R.id.navigation_item_feed:
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
+                        return true;
+                    case R.id.navigation_item_activity:
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                        return true;
+                    default:
+                        return true;
+                }
             }
         });
     }
 
 
+    private Fragment getFragment(int index){
+
+        if (mFragments[index] == null){ //if fragment haven't been created yet, create it
+            UpdatableFragment fragment;
+
+            switch (index){
+                case FRAGMENT_INDEXES.FEED:
+                    fragment = new DiscoverHolderFragment();
+                    break;
+                case FRAGMENT_INDEXES.ACTIVITY:
+                    fragment = new UpdatesFragment();
+                    break;
+                //TODO: ADD OTHER FRAGMENTS
+                default:
+                    fragment = null;
+                    break;
+            }
+
+            mFragments[index] = fragment;
+        }
+
+        return mFragments[index];
+    }
+
+    public void replaceContainerWithFragment(Fragment fragment){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainActivity_fragment_holder, fragment)
+                .commit();
+    }
+
+    //use this when you need to add another users profile view
+    //or load image or status
+    public void addFragmentToContainer(Fragment fragment){
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainActivity_fragment_holder, fragment)
+                .addToBackStack(PROFILE_OR_EVENT_NAME)
+                .commit();
+    }
+
+    public void clearBackStack(){
+        //if there are a lot of other user profile/ events in mainActivity, clear them
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+            getSupportFragmentManager().popBackStackImmediate(PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
 
-        //Keep track of which tab currently on
-        outState.putInt(getString(R.string.current_tab), mViewPager.getCurrentItem());
+        //TODO: track which fragment we're in
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        //Restore tab user was on
-        mViewPager.setCurrentItem(savedInstanceState.getInt(getString(R.string.current_tab)));
+        //TODO: save state
     }
+
+
 
     public void setTitle(String title) {
         mActionBar.setTitle(title);
     }
 
-    private void loadProfileImage(){
-        //profile image on the left
+    //loads the header of our drawer
+    private void loadDrawerHeader() {
+        //profile image
         SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-        int size = getResources().getDimensionPixelSize(R.dimen.nav_header_profile_side);
+        int size = getResources().getDimensionPixelSize(R.dimen.nav_header_profile_side); //radius
+
+        View header = mNavigationView.getHeaderView(0);
+
+        //set name text
+        String name = sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", "");
+        ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
+
+        ((TextView) header.findViewById(R.id.drawerHeader_college_name)).setText(sharedPreferences.getString("collegeName", ""));
 
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
@@ -201,26 +277,11 @@ public class MainActivity extends AppCompatActivity {
                 .override(size, size) //change image to the size we want
                 .placeholder(R.drawable.profile_picture_placeholder)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into((CircularImageView)mNavigationView.getHeaderView(0).findViewById(R.id.navigation_header_profile_image));
+                .into((CircularImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
 
     public void showFAB(boolean show) {
         fam.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-    public void newPost() {
-        FragmentManager fragmentManager = getFragmentManager();
-//        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        mPostCreatePage = PostCreatePage.newInstance(mViewPager.getCurrentItem());
-//        mPostCreatePage.show(ft, "dialog");
-        // The device is smaller, so show the fragment fullscreen
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction.add(R.id.postContainer, mPostCreatePage)
-                .addToBackStack(null).commit();
     }
 
     //pops back toolbar back out
@@ -253,27 +314,13 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
 
-
     /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (R.id.mainactivity_action_settings == id){
-            Intent i = new Intent(MainActivity.this, LinuteSettingsActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }*/
+*/
 
 
     @Override
@@ -285,7 +332,11 @@ public class MainActivity extends AppCompatActivity {
 
         switch (id) {
             case android.R.id.home:
-                mDrawerLayout.openDrawer(GravityCompat.START);
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                    getSupportFragmentManager().popBackStack();
+
+
+                else mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
         }
 
@@ -294,32 +345,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        //NOTE: uncomment if using post as fragment
-//        if (mPostCreatePage != null && mPostCreatePage.isVisible()) {
-//            mPostCreatePage.onBackPressed();
-//        }
 
         //if there is a profile view or feedDetailView
-       if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
             getSupportFragmentManager().popBackStack();
-        }
 
-//        else if (mTaptUserProfileFragment != null && mTaptUserProfileFragment.isVisible()) {
-//            mTaptUserProfileFragment.dismiss();
-//        } else if (mFeedDetailPage != null && mFeedDetailPage.isVisible()) {
-//            mFeedDetailPage.dismiss();
-//        }
-
-        else if(mDrawerLayout.isDrawerOpen(mNavigationView)){
-           mDrawerLayout.closeDrawers();
-        }
-        else {
+        else if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
+            mDrawerLayout.closeDrawers();
+        } else {
             super.onBackPressed();
         }
-    }
-
-    public Fragment[] getFragments() {
-        return mFragments;
     }
 
     //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
@@ -329,25 +364,19 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+
     public void toggleFam() {
         if (fam.isExpanded())
             fam.toggle();
     }
 
-    //turn on notification
-    private void setNavItemNotification(@IdRes int itemId, int count) {
+    //the items in navigation view
+    //this sets the number to the right of it
+    public void setNavItemNotification(@IdRes int itemId, int count) {
         TextView view = (TextView) mNavigationView.getMenu().findItem(itemId).getActionView();
-
-        //show notification
-        if (count > 0){
-            view.setText(count);
-            if (view.getVisibility() == View.GONE){
-                view.setVisibility(View.VISIBLE);
-            }
-        }
-        //hide notification if less 0 or less
-        else if (view.getVisibility() == View.VISIBLE){
-            view.setVisibility(View.GONE);
-        }
+        view.setText(count > 0 ? String.valueOf(count) : null);
     }
+
+
+
 }

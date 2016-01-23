@@ -24,15 +24,22 @@
                 android:layout_height="wrap_content"
                 >
 
-                <include
-                    android:id="@+id/mainactivity_toolbar"
-                    layout="@layout/tool_bar"
-                    app:layout_scrollFlags="scroll|enterAlways|snap"/>
+                <android.support.v7.widget.Toolbar android:id="@+id/mainactivity_toolbar"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorPrimary"
+                    android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                    />
 
             </android.support.design.widget.AppBarLayout>
 
-            <include android:id="@+id/mainActivity_fragment_holder"
-                     layout="@layout/content_main"/>
+            <LinearLayout android:id="@+id/mainActivity_fragment_holder"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:orientation="vertical"
+                          app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 
             <com.getbase.floatingactionbutton.FloatingActionsMenu android:id="@+id/fabmenu"
@@ -68,17 +75,17 @@
     <android.support.design.widget.NavigationView android:id="@+id/mainActivity_navigation_view"
                                                   android:layout_width="wrap_content"
                                                   android:layout_height="match_parent"
-                                                  android:layout_gravity = "start"
+                                                  android:layout_gravity="start"
                                                   android:background="@color/colorPrimary"
-                                                  app:itemTextColor="@color/white"
-                                                  app:itemIconTint="@color/white"
                                                   app:headerLayout="@layout/drawer_header"
+                                                  app:itemIconTint="@color/white"
+                                                  app:itemTextColor="@color/white"
                                                   app:menu="@menu/main_activity_drawer">
 
         <ImageView android:id="@+id/mainActivity_nav_logout_button"
-                   android:layout_gravity="bottom|fill_horizontal"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content"
+                   android:layout_gravity="bottom|fill_horizontal"
                    android:layout_margin="@dimen/activity_vertical_margin"
                    android:src="@drawable/unfollowing"
 

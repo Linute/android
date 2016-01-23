@@ -178,7 +178,8 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
             View.OnClickListener goToProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((FindFriendsActivity)mContext).addFragment(TaptUserProfileFragment.newInstance("", userId));
+                    //TODO: fix
+                    //((FindFriendsActivity)mContext).addFragment(TaptUserProfileFragment.newInstance("", userId));
                 }
             };
 
