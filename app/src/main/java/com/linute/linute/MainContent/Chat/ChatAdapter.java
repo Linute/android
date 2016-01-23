@@ -36,9 +36,19 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        int layout = -1;
+        switch (viewType) {
+            case Chat.TYPE_MESSAGE:
+                layout = R.layout.fragment_chat_list_item;
+                break;
+            case Chat.TYPE_ACTION:
+                layout = R.layout.item_action;
+                break;
+        }
+
         return new ChatViewHolder(
                 LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.fragment_chat_list_item, parent, false));
+                        .inflate(layout, parent, false));
     }
 
     @Override
@@ -49,6 +59,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public int getItemCount() {
         return aChatList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return aChatList.get(position).getType();
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -63,6 +78,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         protected TextView vOwnerTime;
         protected TextView vUserTime;
 
+        protected TextView vUsernameView;
+        protected TextView vMessageView;
+
         public ChatViewHolder(View itemView) {
             super(itemView);
 
@@ -76,39 +94,46 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             vUserMessage = (TextView) itemView.findViewById(R.id.chat_user_message);
             vOwnerTime = (TextView) itemView.findViewById(R.id.chat_owner_time);
             vUserTime = (TextView) itemView.findViewById(R.id.chat_user_time);
+
+            vUsernameView = (TextView) itemView.findViewById(R.id.username);
+            vMessageView = (TextView) itemView.findViewById(R.id.action);
         }
 
         void bindModel(Chat chat) {
-            if (aChatList.get(getAdapterPosition()).getOwnerId().equals(aSharedPreferences.getString("userID", null))) {
-                vOwnerLinear.setVisibility(View.VISIBLE);
-                vUserRelative.setVisibility(View.GONE);
-
-                Glide.with(aContext)
-                        .load(Utils.getImageUrlOfUser(chat.getUserImage()))
-                        .asBitmap()
-                        .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                        .placeholder(R.drawable.profile_picture_placeholder)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                        .into(vOwnerImage);
-
-                vOwnerName.setText(chat.getUserName());
-                vOwnerMessage.setText(chat.getMessage());
-                vOwnerTime.setText(chat.getShortDate());
+            if (null != vUsernameView && null != vMessageView) {
+                vUsernameView.setText(chat.getUserName());
             } else {
-                vOwnerLinear.setVisibility(View.GONE);
-                vUserRelative.setVisibility(View.VISIBLE);
+                if (aChatList.get(getAdapterPosition()).getOwnerId().equals(aSharedPreferences.getString("userID", null))) {
+                    vOwnerLinear.setVisibility(View.VISIBLE);
+                    vUserRelative.setVisibility(View.GONE);
 
-                Glide.with(aContext)
-                        .load(Utils.getImageUrlOfUser(chat.getUserImage()))
-                        .asBitmap()
-                        .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                        .placeholder(R.drawable.profile_picture_placeholder)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                        .into(vUserImage);
+                    Glide.with(aContext)
+                            .load(Utils.getImageUrlOfUser(chat.getUserImage()))
+                            .asBitmap()
+                            .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
+                            .placeholder(R.drawable.profile_picture_placeholder)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                            .into(vOwnerImage);
 
-                vUserName.setText(chat.getUserName());
-                vUserMessage.setText(chat.getMessage());
-                vUserTime.setText(chat.getShortDate());
+                    vOwnerName.setText(chat.getUserName());
+                    vOwnerMessage.setText(chat.getMessage());
+                    vOwnerTime.setText(chat.getShortDate());
+                } else {
+                    vOwnerLinear.setVisibility(View.GONE);
+                    vUserRelative.setVisibility(View.VISIBLE);
+
+                    Glide.with(aContext)
+                            .load(Utils.getImageUrlOfUser(chat.getUserImage()))
+                            .asBitmap()
+                            .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
+                            .placeholder(R.drawable.profile_picture_placeholder)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                            .into(vUserImage);
+
+                    vUserName.setText(chat.getUserName());
+                    vUserMessage.setText(chat.getMessage());
+                    vUserTime.setText(chat.getShortDate());
+                }
             }
         }
     }

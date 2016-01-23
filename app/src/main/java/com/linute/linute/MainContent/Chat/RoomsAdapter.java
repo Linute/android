@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -74,7 +73,9 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 @Override
                 public void onClick(View v) {
 //                    Toast.makeText(aContext, mRoomsList.get(getAdapterPosition()).getLastMessageUserName(), Toast.LENGTH_SHORT).show();
-                    ChatFragment newFragment = ChatFragment.newInstance(mRoomsList.get(getAdapterPosition()).getRoomId(), "Hello");
+                    Log.d(TAG, "onClick: " + mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "") + " fsfsfsf");
+                    ChatFragment newFragment = ChatFragment.newInstance(mRoomsList.get(getAdapterPosition()).getRoomId(), mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""), mSharedPreferences.getString("userID", ""));
+                    Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
                     FragmentTransaction transaction = ((RoomsActivity) aContext).getSupportFragmentManager().beginTransaction();
                     // Replace whatever is in the fragment_container view with this fragment,
                     // and add the transaction to the back stack so the user can navigate back
@@ -88,7 +89,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
 
         void bindModel(Rooms room) {
-            Log.d(TAG, "bindModel: " + room.getLastMessageUserImage());
+//            Log.d(TAG, "bindModel: " + room.getLastMessageUserImage());
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(room.getLastMessageUserImage()))
                     .asBitmap()
