@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.PeopleFragment;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -91,7 +93,10 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     }
                 });
             } else {
-                Toast.makeText(vContext, "I already told you; chat coming soon!!! TAPT THAT", Toast.LENGTH_SHORT).show();
+                Intent enterRooms = new Intent(vContext, RoomsActivity.class);
+                enterRooms.putExtra("CHATICON", false);
+                enterRooms.putExtra("USERID", vPeopleList.get(getAdapterPosition() - 4).getID());
+                vContext.startActivity(enterRooms);
             }
         }
     }

@@ -108,7 +108,7 @@ public class LinuteUser {
         mFriend = "";
         mFriendship = "";
         try {
-            if (!userInfo.getString("friend").equals("") && !userInfo.getJSONObject("friend").getString("status").equals("removed")) {
+            if (!userInfo.isNull("friend") && !userInfo.getJSONObject("friend").getString("status").equals("removed")) {
                 mFriend = userInfo.getJSONObject("friend").getString("user");
                 mFriendship = userInfo.getJSONObject("friend").getString("id");
             }

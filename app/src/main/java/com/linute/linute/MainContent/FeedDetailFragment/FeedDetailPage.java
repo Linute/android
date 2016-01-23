@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,7 +18,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
@@ -61,6 +59,7 @@ public class FeedDetailPage extends DialogFragment {
     private LinuteUser user = new LinuteUser();
     private String mPrevTitle;
     private String mTaptPostId;
+    private String mTaptPostUserId;
     private FeedDetailAdapter mFeedDetailAdapter;
     private String mCommentText;
     private EditText mCommentEditText;
@@ -70,11 +69,13 @@ public class FeedDetailPage extends DialogFragment {
 
     public static FeedDetailPage newInstance(
             String prevFragmentTitle,
-            String taptUserPostId) {
+            String taptUserPostId,
+            String taptPostUserId) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
         args.putString("TITLE", prevFragmentTitle);
         args.putString("TAPTPOST", taptUserPostId);
+        args.putString("TAPTPOSTUSERID", taptPostUserId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -85,8 +86,10 @@ public class FeedDetailPage extends DialogFragment {
         if (getArguments() != null) {
             mPrevTitle = getArguments().getString("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
+            mTaptPostUserId = getArguments().getString("TAPTPOSTUSERID");
             mFeedDetail = new FeedDetail();
             mFeedDetail.setPostId(mTaptPostId);
+            mFeedDetail.setPostUserId(mTaptPostUserId);
         }
     }
 
@@ -120,14 +123,6 @@ public class FeedDetailPage extends DialogFragment {
         });
 
         rootView.findViewById(R.id.feed_detail_send_comment).setEnabled(false);
-        rootView.findViewById(R.id.comment_field).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().getWindow().setSoftInputMode(
-                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
-
-            }
-        });
 
         mCommentEditText = (EditText) rootView.findViewById(R.id.comment_field);
         mCommentEditText.addTextChangedListener(new TextWatcher() {
@@ -150,6 +145,15 @@ public class FeedDetailPage extends DialogFragment {
                 } else {
                     rootView.findViewById(R.id.feed_detail_send_comment).setEnabled(false);
                 }
+            }
+        });
+
+        mCommentEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                getActivity().getWindow().setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
             }
         });
 
@@ -311,7 +315,6 @@ public class FeedDetailPage extends DialogFragment {
                     @Override
                     public void run() {
                         mFeedDetailAdapter.notifyDataSetChanged();
-                        recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                     }
                 });
             }

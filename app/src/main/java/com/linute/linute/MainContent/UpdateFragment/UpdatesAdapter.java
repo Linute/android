@@ -12,11 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -89,7 +86,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    public void setAutoLoadMore(boolean autoLoad){
+    public void setAutoLoadMore(boolean autoLoad) {
         mAutoLoad = autoLoad;
     }
 
@@ -224,8 +221,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         private TextView mDescriptionText;
 
 
-
-        public UpdateItemViewHolder( View itemView) {
+        public UpdateItemViewHolder(View itemView) {
             super(itemView);
 
             mProfileImage = (CircularImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
@@ -325,6 +321,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             //if it was LIKE or COMMENT, it was either a status or photo
             //take them to the post
             if (update.hasEventInformation()) {
+
                 //TODO FIX
 //                mEventPicture.setOnClickListener(new View.OnClickListener() {
 //                    @Override
@@ -343,6 +340,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 //                                .addToBackStack(null).commit();
 //                    }
 //                });
+
             }
         }
 

@@ -9,6 +9,7 @@ import java.util.List;
 public class FeedDetail {
     private static final String TAG = FeedDetail.class.getSimpleName();
     private String mPostId;
+    private String mPostUserId;
     private String mPostImage;
     private String mPostText;
     private String mUserImage;
@@ -91,5 +92,13 @@ public class FeedDetail {
 
     public void setPostId(String postId) {
         mPostId = postId;
+    }
+
+    public String getPostUserId() {
+        return mPostUserId;
+    }
+
+    public void setPostUserId(String postUserId) {
+        mPostUserId = postUserId;
     }
 }

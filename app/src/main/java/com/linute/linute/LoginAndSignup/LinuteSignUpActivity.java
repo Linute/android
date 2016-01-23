@@ -10,16 +10,14 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-
-import android.net.Uri;
-
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -31,19 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.soundcloud.android.crop.Crop;
@@ -53,7 +42,15 @@ import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A login screen that offers login via email/password.
@@ -252,7 +249,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         Log.e(TAG, response.body().string());
                         notUniqueEmail();
                     } else {
-                        Log.e(TAG, "onResponse: "+response.body().string() );
+                        Log.e(TAG, "onResponse: " + response.body().string());
                         serverErrorCurrentView(0);
                     }
                 }
@@ -271,7 +268,10 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
+                        String stringResp = response.body().string();
+                        mPinCode = (new JSONObject(stringResp).getString("pinCode"));
+//                        Log.i(TAG, "onResponse: " + stringResp);
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -286,7 +286,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         serverErrorCurrentView(0);
                     }
                 } else {
-                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    Log.e(TAG, "onResponse: " + response.body().string());
                     serverErrorCurrentView(0);
                 }
             }
@@ -372,7 +372,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         final View progressBar;
         final View button;
 
-        switch (currentViewIndex){
+        switch (currentViewIndex) {
             case 0:
                 progressBar = mProgressBar1;
                 button = mNextButton;
@@ -465,7 +465,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                         }
 
                     } else { //couldn't get response
-                        Log.e(TAG, "onResponse: "+response.body().string() );
+                        Log.e(TAG, "onResponse: " + response.body().string());
                         serverErrorCurrentView(2);
                     }
                 }
@@ -510,7 +510,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         finish();
     }
 
-    private void serverErrorCurrentView(final int index){
+    private void serverErrorCurrentView(final int index) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -522,7 +522,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
     }
 
-    private void failedConnectionWithCurrentView(final int index){
+    private void failedConnectionWithCurrentView(final int index) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -533,7 +533,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
     }
 
 
-    private void notUniqueEmail(){
+    private void notUniqueEmail() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -737,7 +737,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
             mViewFlipper.showNext();
             mCurrentViewFlipperIndex++;
-        }else {
+        } else {
             mPinCodeView.setError("Invalid code");
             mPinCodeView.requestFocus();
         }
