@@ -57,9 +57,9 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.changeemail_toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setTitle("Email");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Email");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -178,6 +178,8 @@ public class ChangeEmailActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 Utils.showSavedToast(ChangeEmailActivity.this);
+                                showProgress(false);
+                                finish();
                             }
                         });
                     } catch (JSONException e) {
@@ -186,6 +188,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(ChangeEmailActivity.this);
+                                showProgress(false);
                             }
                         });
                     }
@@ -195,15 +198,11 @@ public class ChangeEmailActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Utils.showServerErrorToast(ChangeEmailActivity.this);
+                            showProgress(false);
                         }
                     });
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showProgress(false);
-                    }
-                });
+
             }
         });
     }

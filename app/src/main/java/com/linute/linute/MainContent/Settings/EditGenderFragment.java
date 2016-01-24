@@ -2,14 +2,18 @@ package com.linute.linute.MainContent.Settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -31,9 +35,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditGenderActivity extends AppCompatActivity {
+public class EditGenderFragment extends Fragment {
 
-    private static final String TAG = "EditGenderActivity";
+    private static final String TAG = "EditGenderFragment";
     private Spinner mSpinner;
 
     private Button mSaveButton;
@@ -48,57 +52,35 @@ public class EditGenderActivity extends AppCompatActivity {
     private String[] mGenders = {"Not Specified", "Male", "Female"};
 
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_gender);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_edit_gender, container, false);
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-
-        bindViews();
-        setupToolbar();
+        ((EditProfileInfoActivity)getActivity()).setTitle("Sex");
+        bindViews(rootView);
         setUpSpinner();
         setDefaultValues();
-        setUpOnClickLisenters();
-    }
+        setUpOnClickListeners();
 
-    private void setupToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.editgender_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Sex");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return(true);
-        }
-        return(super.onOptionsItemSelected(item));
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mProgressBar.getVisibility() == View.GONE) {
-            super.onBackPressed();
-        }
+        return rootView;
     }
 
 
-    private void bindViews() {
-        mSpinner = (Spinner) findViewById(R.id.editgender_spinner);
-        mSaveButton = (Button) findViewById(R.id.editgender_save_button);
 
-        mProgressBar = (ProgressBar) findViewById(R.id.editgender_progressbar);
+    private void bindViews(View rootView) {
+        mSpinner = (Spinner) rootView.findViewById(R.id.editgender_spinner);
+        mSaveButton = (Button) rootView.findViewById(R.id.editgender_save_button);
+
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.editgender_progressbar);
     }
 
     private void setUpSpinner() {
 
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
-                        this,
+                        getActivity(),
                         android.R.layout.simple_spinner_item,
                         mGenders);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -110,7 +92,7 @@ public class EditGenderActivity extends AppCompatActivity {
         mSpinner.setSelection(mSavedGender);
     }
 
-    private void setUpOnClickLisenters() {
+    private void setUpOnClickListeners() {
 
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +109,7 @@ public class EditGenderActivity extends AppCompatActivity {
         if (!genderEditted(gender))
             return;
 
-        LSDKUser user = new LSDKUser(this);
+        LSDKUser user = new LSDKUser(getActivity());
 
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("sex", gender + "");
@@ -137,10 +119,11 @@ public class EditGenderActivity extends AppCompatActivity {
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                runOnUiThread(new Runnable() {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(EditGenderActivity.this);
+                        Utils.showBadConnectionToast(getActivity());
                         showProgress(false);
                     }
                 });
@@ -154,37 +137,40 @@ public class EditGenderActivity extends AppCompatActivity {
                         persistData(user);
                         mSavedGender = gender;
 
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showSavedToast(EditGenderActivity.this);
+                                Utils.showSavedToast(getActivity());
+                                showProgress(false);
+
+                                getFragmentManager().popBackStack();
                             }
                         });
                     } catch (JSONException e) { //caught error
                         e.printStackTrace();
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditGenderActivity.this);
+                                Utils.showServerErrorToast(getActivity());
+                                showProgress(false);
                             }
                         });
                     }
 
                 } else { //log error and show server error
                     Log.e(TAG, response.body().string());
-                    runOnUiThread(new Runnable() {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showServerErrorToast(EditGenderActivity.this);
+                            Utils.showServerErrorToast(getActivity());
+                            showProgress(false);
                         }
                     });
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showProgress(false);
-                    }
-                });
             }
         });
 

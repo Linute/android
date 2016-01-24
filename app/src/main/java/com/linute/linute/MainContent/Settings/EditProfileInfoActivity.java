@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Settings;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.Preference;
@@ -7,33 +8,30 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
+import android.view.MenuItem;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
-import java.util.TimeZone;
 
 
 public class EditProfileInfoActivity extends AppCompatActivity {
 
     public static final String TAG = "EditProfileInfoActivity";
 
+
     private Toolbar mToolbar;
+
+    private boolean mMainActivityNeedsToUpdate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-
         setUpToolBar();
 
         LinuteEditProfileFragment profileEditor = new LinuteEditProfileFragment();
-        profileEditor.setDefault(sharedPreferences);
 
         getFragmentManager().beginTransaction().replace(R.id.setting_fragment, profileEditor).commit();
     }
@@ -41,12 +39,62 @@ public class EditProfileInfoActivity extends AppCompatActivity {
     private void setUpToolBar() {
 
         mToolbar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
-        mToolbar.setTitle("Edit Profile");
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         setSupportActionBar(mToolbar);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
+    public void setTitle(String title){
+        mToolbar.setTitle(title);
+    }
+
+
+    private static final String NEED_UPDATE_KEY = "need_update";
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(NEED_UPDATE_KEY, mMainActivityNeedsToUpdate);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mMainActivityNeedsToUpdate = savedInstanceState.getBoolean(NEED_UPDATE_KEY);
+    }
+
+    //override up button to go back
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getFragmentManager().getBackStackEntryCount() > 0){
+            getFragmentManager().popBackStack();
+        }
+        else {
+            setResult(mMainActivityNeedsToUpdate ? RESULT_OK : RESULT_CANCELED);
+            super.onBackPressed();
+        }
+    }
+
+    public void addFragmentToStack(Fragment fragment){
+        getFragmentManager()
+                .beginTransaction()
+                .replace(R.id.setting_fragment, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void setMainActivityNeedsToUpdate(boolean needsToUpdate){
+        mMainActivityNeedsToUpdate = needsToUpdate;
     }
 
     //fragment with our settings layout
@@ -56,6 +104,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         private Preference mEditStatus;
         private Preference mDob;
         private Preference mEditGender;
+        private Preference mPhoto;
         private SharedPreferences mSharedPreferences;
 
         @Override
@@ -63,6 +112,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_edit_profile);
 
+            mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
             bindPreferences();
             setOnClickListeners();
@@ -71,17 +121,24 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             setUpPrefChangeListeners();
         }
 
-        public void setDefault(SharedPreferences sharedPreferences){
-            mSharedPreferences = sharedPreferences;
+        @Override
+        public void onResume() {
+            super.onResume();
+            ((EditProfileInfoActivity)getActivity()).setTitle("Edit Profile");
         }
 
 
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
 
         private void bindPreferences(){
             mEditName =  findPreference("edit_name_pref");
             mEditStatus = findPreference("edit_status_pref");
             mDob =  findPreference("edit_birthday_pref");
             mEditGender = findPreference("edit_sex_pref");
+            mPhoto = findPreference("edit_photo_pref");
         }
 
         //checks if preferences where changed
@@ -96,21 +153,22 @@ public class EditProfileInfoActivity extends AppCompatActivity {
                     else if (key.equals("dob"))
                         mDob.setSummary(Utils.formatDateToReadableString(sharedPreferences.getString("dob", "")));
                     else if (key.equals("sex"))
-                        mEditGender.setSummary(EditGenderActivity.getGenderFromIndex(sharedPreferences.getInt("sex",0)));
+                        mEditGender.setSummary(EditGenderFragment.getGenderFromIndex(sharedPreferences.getInt("sex", 0)));
                 }
             });
         }
 
 
+        //TODO: FIX
         private void setOnClickListeners(){
+            final EditProfileInfoActivity activity = (EditProfileInfoActivity) getActivity();
+
+            if(activity == null) return;
 
             mEditName.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), EditNameActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
+                    activity.addFragmentToStack(new EditNameFragment());
                     return true;
                 }
             });
@@ -118,10 +176,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             mEditStatus.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), EditStatusActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
+                    activity.addFragmentToStack(new EditStatusFragment());
                     return true;
                 }
             });
@@ -129,10 +184,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             mDob.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), EditBirthdayActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
+                    activity.addFragmentToStack(new EditBirthdayFragment());
                     return true;
                 }
             });
@@ -140,10 +192,15 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             mEditGender.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), EditGenderActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    getActivity().overridePendingTransition(0, 0); //NOTE: FIX
+                    activity.addFragmentToStack(new EditGenderFragment());
+                    return true;
+                }
+            });
+
+            mPhoto.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    activity.addFragmentToStack(new ChangeProfileImageFragment());
                     return true;
                 }
             });
@@ -159,13 +216,15 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             mEditStatus.setSummary(status.equals("") ? "Tell us about yourself" : status);
 
 
+            mPhoto.setSummary("Change your profile picture");
+
             String dob = mSharedPreferences.getString("dob", "");
             if (!dob.isEmpty() && !dob.equals("null"))
                 dob = Utils.formatDateToReadableString(dob);
             else dob = "Tell us your birthday";
             mDob.setSummary(dob);
 
-            mEditGender.setSummary(EditGenderActivity.getGenderFromIndex(mSharedPreferences.getInt("sex", 0)));
+            mEditGender.setSummary(EditGenderFragment.getGenderFromIndex(mSharedPreferences.getInt("sex", 0)));
         }
     }
 

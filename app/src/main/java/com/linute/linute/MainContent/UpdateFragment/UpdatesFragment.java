@@ -98,11 +98,11 @@ public class UpdatesFragment extends UpdatableFragment {
         super.onResume();
 
         MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null)
+        if (mainActivity != null) {
             mainActivity.setTitle("Activities");
-
+            mainActivity.resetToolbar();
+        }
         if (fragmentNeedsUpdating()) {
-            Log.i(TAG, "onResume: running");
             getUpdatesInformation();
             setFragmentNeedUpdating(false);
         }
@@ -190,6 +190,8 @@ public class UpdatesFragment extends UpdatableFragment {
 //                            mOldUpdates.add(null);
 //                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
 //                            mRecentUpdates.add(null);
+
+                        if (getActivity() == null) return;
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

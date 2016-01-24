@@ -4,8 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/changeemail_toolbar"
-             layout="@layout/tool_bar"/>
+    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+                                                android:layout_height="wrap_content">
+        <include android:id="@+id/changeemail_toolbar"
+                 layout="@layout/tool_bar"/>
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
@@ -29,8 +32,8 @@
     <Button android:id="@+id/changeemail_save_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Changes"
             android:layout_alignParentBottom="true"
+            android:text="Save Changes"
         />
 
     <ProgressBar

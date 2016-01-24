@@ -31,8 +31,8 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private Context aContext;
 
-    public PeopleAdapter(List<People> peopleList, Context aContext) {
-        this.aContext = aContext;
+    public PeopleAdapter(List<People> peopleList, Context context) {
+        this.aContext = context;
         mPeopleList = peopleList;
     }
 

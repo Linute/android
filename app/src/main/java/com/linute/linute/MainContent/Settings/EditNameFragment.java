@@ -2,13 +2,15 @@ package com.linute.linute.MainContent.Settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.support.annotation.Nullable;
+import android.text.InputFilter;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -29,53 +31,33 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditNameActivity extends AppCompatActivity {
+public class EditNameFragment extends Fragment {
 
-    public static final String TAG = "EditNameAcivity";
+    public static final String TAG = EditNameFragment.class.getSimpleName();
 
     private EditText mFirstName;
     private EditText mLastName;
     private SharedPreferences mSharedPreferences;
     private Button mSaveButton;
     private ProgressBar mProgressBar;
-    private Toolbar mToolBar;
 
+    public EditNameFragment(){
+
+    }
+
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_name);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_edit_name, container, false);
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-
-        bindView();
-        setUpToolbar();
+        ((EditProfileInfoActivity)getActivity()).setTitle("Name");
+        bindView(rootView);
         setDefaultValues();
         setUpOnClickListeners();
-    }
 
-    private void setUpToolbar() {
-        mToolBar = (Toolbar) findViewById(R.id.editname_toolbar);
-        setSupportActionBar(mToolBar);
-
-        getSupportActionBar().setTitle("Name");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return(true);
-        }
-        return(super.onOptionsItemSelected(item));
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mProgressBar.getVisibility() == View.GONE) {
-            super.onBackPressed();
-        }
+        return rootView;
     }
 
     private void setDefaultValues() {
@@ -83,11 +65,16 @@ public class EditNameActivity extends AppCompatActivity {
         mLastName.append(mSharedPreferences.getString("lastName", ""));
     }
 
-    private void bindView() {
-        mFirstName = (EditText) findViewById(R.id.prof_edit_fname_text);
-        mLastName = (EditText) findViewById(R.id.prof_edit_lname_text);
-        mSaveButton = (Button) findViewById(R.id.editname_save_button);
-        mProgressBar = (ProgressBar) findViewById(R.id.prof_edit_name_progressbar);
+    private void bindView(View rootView) {
+        mFirstName = (EditText) rootView.findViewById(R.id.prof_edit_fname_text);
+        mLastName = (EditText) rootView.findViewById(R.id.prof_edit_lname_text);
+        InputFilter[] inputFilters = {new InputFilter.LengthFilter(16)};
+
+        mFirstName.setFilters(inputFilters); //set char limit to 16
+        mLastName.setFilters(inputFilters);
+
+        mSaveButton = (Button) rootView.findViewById(R.id.editname_save_button);
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.prof_edit_name_progressbar);
     }
 
     private void setUpOnClickListeners() {
@@ -125,7 +112,7 @@ public class EditNameActivity extends AppCompatActivity {
         String firstName = mFirstName.getText().toString();
 
         if (areValidFields(firstName, lastName)) {
-            LSDKUser user = new LSDKUser(this);
+            LSDKUser user = new LSDKUser(getActivity());
             showProgress(true);
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("firstName", firstName);
@@ -133,10 +120,11 @@ public class EditNameActivity extends AppCompatActivity {
             user.updateUserInfo(userInfo, null, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    runOnUiThread(new Runnable() {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showBadConnectionToast(EditNameActivity.this);
+                            Utils.showBadConnectionToast(getActivity());
                             showProgress(false);
                         }
                     });
@@ -148,38 +136,48 @@ public class EditNameActivity extends AppCompatActivity {
                         try {
                             LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                             saveInfo(user);
-                            runOnUiThread(new Runnable() {
+
+                            final EditProfileInfoActivity activity = (EditProfileInfoActivity) getActivity();
+                            if (activity == null) return;
+
+                            activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Utils.showSavedToast(EditNameActivity.this);
+                                    Utils.showSavedToast(getActivity());
+                                    showProgress(false);
+
+                                    //we changed name, we will need to update things in MainActivity
+                                    activity.setMainActivityNeedsToUpdate(true);
+
+                                    getFragmentManager().popBackStack(); //pop this fragment
                                 }
                             });
 
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            runOnUiThread(new Runnable() {
+                            if (getActivity() == null) return;
+
+                            getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Utils.showServerErrorToast(EditNameActivity.this);
+                                    Utils.showServerErrorToast(getActivity());
+                                    showProgress(false);
                                 }
                             });
                         }
 
 
                     } else {
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditNameActivity.this);
+                                Utils.showServerErrorToast(getActivity());
+                                showProgress(false);
                             }
                         });
                     }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showProgress(false);
-                        }
-                    });
+
                 }
             });
         }

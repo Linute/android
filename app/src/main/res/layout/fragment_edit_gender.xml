@@ -4,35 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/editbirthday_toolbar"
-             layout="@layout/tool_bar"/>
 
-    <DatePicker
-        android:id="@+id/editbirthday_datepicker"
+    <Spinner
+        android:id="@+id/editgender_spinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editbirthday_toolbar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"
-        android:spinnersShown="true"/>
+        android:layout_margin="32dp"
+        android:gravity="center"/>
 
 
-    <Button android:id="@+id/editbirthday_save_button"
+    <Button android:id="@+id/editgender_save_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:text="Save Changes"/>
 
     <ProgressBar
-        android:id="@+id/editbirthday_progressbar"
+        android:id="@+id/editgender_progressbar"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editbirthday_datepicker"
+        android:layout_below="@id/editgender_spinner"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="35dp"
+        android:layout_alignParentBottom="true"
         android:visibility="gone"/>
 
 </RelativeLayout>

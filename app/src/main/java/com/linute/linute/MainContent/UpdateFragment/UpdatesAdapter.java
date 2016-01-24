@@ -321,25 +321,17 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             //if it was LIKE or COMMENT, it was either a status or photo
             //take them to the post
             if (update.hasEventInformation()) {
-
-                //TODO FIX
-//                mEventPicture.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//                        ((MainActivity) mContext).mFeedDetailPage =
-//                                FeedDetailPage.newInstance("Updates",
-//                                        update.getEventID());
-//                        // The device is smaller, so show the fragment fullscreen
-//                        FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                        // For a little polish, specify a transition animation
-//                        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                        // To make it fullscreen, use the 'content' root view as the container
-//                        // for the fragment, which is always the root view for the activity
-//                        transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
-//                                .addToBackStack(null).commit();
-//                    }
-//                });
+                mEventPicture.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ((MainActivity)mContext).addFragmentToContainer(
+                                FeedDetailPage.newInstance(
+                                        update.isPicturePost()
+                                        ,update.getEventID()
+                                        ,update.getUserId()
+                                ));
+                    }
+                });
 
             }
         }

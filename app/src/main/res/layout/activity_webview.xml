@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+                                                android:layout_height="wrap_content">
+        <include android:id="@+id/webviewactivity_toolbar"
+                 layout="@layout/tool_bar"/>
+    </android.support.design.widget.AppBarLayout>
 
-    <include android:id="@+id/webviewactivity_toolbar"
-             layout="@layout/tool_bar"/>
     <WebView
+        android:id="@+id/webviewactivity_webview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/webviewactivity_webview"/>
+        android:layout_height="match_parent"/>
 
 
 </LinearLayout>

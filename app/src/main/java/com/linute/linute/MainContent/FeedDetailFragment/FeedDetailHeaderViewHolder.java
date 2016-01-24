@@ -188,18 +188,16 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
     @Override
     public void onClick(View v) {
+        Log.i(TAG, "onClick: outside");
         if (v == vUserImage) {
+            Log.i(TAG, "onClick: inside");
             if (vFeedDetail.getPostPrivacy() == 0) {
-                android.app.FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", vFeedDetail.getPostUserId());
-                // The device is smaller, so show the fragment fullscreen
-                android.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
-                // For a little polish, specify a transition animation
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                // To make it fullscreen, use the 'content' root view as the container
-                // for the fragment, which is always the root view for the activity
-                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
-                        .addToBackStack(null).commit();
+                Log.i(TAG, "onClick: privacy 0");
+                ((MainActivity)mContext).addFragmentToContainer(
+                        TaptUserProfileFragment.newInstance(
+                                vFeedDetail.getUserName()
+                                , vFeedDetail.getPostUserId()
+                        ));
             }
         }
     }

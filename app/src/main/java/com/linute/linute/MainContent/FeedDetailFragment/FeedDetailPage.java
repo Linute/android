@@ -25,6 +25,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -46,7 +47,7 @@ import java.util.TimeZone;
 /**
  * Created by Arman on 1/11/16.
  */
-public class FeedDetailPage extends DialogFragment {
+public class FeedDetailPage extends UpdatableFragment {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -57,7 +58,7 @@ public class FeedDetailPage extends DialogFragment {
     private FeedDetail mFeedDetail;
 
     private LinuteUser user = new LinuteUser();
-    private String mPrevTitle;
+    private boolean mIsImage;
     private String mTaptPostId;
     private String mTaptPostUserId;
     private FeedDetailAdapter mFeedDetailAdapter;
@@ -68,12 +69,12 @@ public class FeedDetailPage extends DialogFragment {
     }
 
     public static FeedDetailPage newInstance(
-            String prevFragmentTitle,
+            boolean isImage,
             String taptUserPostId,
             String taptPostUserId) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
-        args.putString("TITLE", prevFragmentTitle);
+        args.putBoolean("TITLE", isImage);
         args.putString("TAPTPOST", taptUserPostId);
         args.putString("TAPTPOSTUSERID", taptPostUserId);
         fragment.setArguments(args);
@@ -84,9 +85,10 @@ public class FeedDetailPage extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mPrevTitle = getArguments().getString("TITLE");
+            mIsImage = getArguments().getBoolean("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
             mTaptPostUserId = getArguments().getString("TAPTPOSTUSERID");
+
             mFeedDetail = new FeedDetail();
             mFeedDetail.setPostId(mTaptPostId);
             mFeedDetail.setPostUserId(mTaptPostUserId);
@@ -193,6 +195,9 @@ public class FeedDetailPage extends DialogFragment {
                             Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                         } else {
                             Log.d(TAG, "onResponseSuccessful: " + response.body().string());
+
+                            if (getActivity() == null) return;
+
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -217,12 +222,26 @@ public class FeedDetailPage extends DialogFragment {
 //            }
 //        });
 
-//        updateAndSetHeader();
-//        setActivities(); //get activities
 
-        displayCommentsAndPost();
 
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainActivity activity = (MainActivity)getActivity();
+        if (activity != null){
+            activity.setTitle(mIsImage ? "Image" : "Status");
+            activity.resetToolbar();
+        }
+
+        //only updates first time it is created
+        if (fragmentNeedsUpdating()){
+            displayCommentsAndPost();
+            setFragmentNeedUpdating(false);
+        }
+
     }
 
     private void displayCommentsAndPost() {
@@ -268,6 +287,8 @@ public class FeedDetailPage extends DialogFragment {
                     e.printStackTrace();
                 }
 
+                if ( getActivity() == null) return;
+
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -311,6 +332,7 @@ public class FeedDetailPage extends DialogFragment {
                     e.printStackTrace();
                 }
 
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -321,21 +343,8 @@ public class FeedDetailPage extends DialogFragment {
         });
     }
 
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // The only reason you might override this method when using onCreateView() is
-        // to modify any dialog characteristics. For example, the dialog includes a
-        // title by default, but your custom layout might not need it. So here you can
-        // remove the dialog title, but you must call the superclass to get the Dialog.
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
-    }
 
-    public void onBackPressed() {
-        ((MainActivity) getActivity()).setTitle(mPrevTitle);
-        this.dismiss();
-    }
+
 
 
 }

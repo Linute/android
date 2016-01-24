@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
@@ -12,20 +13,14 @@
         android:layout_height="45dp"
         android:layout_gravity="center"
         android:scaleType="centerCrop"
-        android:src="@drawable/college_walk1"
         app:border="false"
-        app:border_color="#EEEEEE"
-        app:border_width="0dp"
-        app:shadow="false"
-        app:shadow_color="#8BC34A"
-        app:shadow_radius="10"/>
+        app:shadow="false"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_toEndOf="@+id/people_user_image"
-        android:layout_toRightOf="@+id/people_user_image"
         android:orientation="vertical">
 
         <TextView
@@ -47,8 +42,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_centerInParent="true"
-        android:src="@drawable/add_friend"/>
+        tools:src="@drawable/add_friend"/>
 
 </RelativeLayout>

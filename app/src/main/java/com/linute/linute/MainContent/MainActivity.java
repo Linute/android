@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
@@ -36,14 +37,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
-import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
-import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
-import com.linute.linute.MainContent.UpdateFragment.Update;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -53,18 +50,13 @@ import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
-import org.w3c.dom.Text;
-
-import java.security.GuardedObject;
-import java.util.Arrays;
-import java.util.Collections;
-
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
     private AppBarLayout mAppBarLayout;
     private ActionBar mActionBar;
     private DrawerLayout mDrawerLayout;
+    private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
 
     private FloatingActionButton fab;
@@ -75,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionsMenu fam;
 
     private UpdatableFragment[] mFragments; //holds our fragments
-    public static final int PROFILE_FRAGMENT_INDEX = 0;
+    private int mCurrentlyCheckedItem;
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
@@ -104,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
+        mMainDrawerListener = new MainDrawerListener();
+        mDrawerLayout.setDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
@@ -126,12 +120,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        //only loads one feed for now
+        //only loads one fragment
         mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
-
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
                 .commit();
+        mCurrentlyCheckedItem = R.id.navigation_item_feed;
 
 
         //floating action button setup
@@ -159,13 +153,20 @@ public class MainActivity extends AppCompatActivity {
         //profile image and header setup
         loadDrawerHeader();
 
+        //set click listener for header - taken to profile
         mNavigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: link to profile fragment
-                Log.i(TAG, "onClick: connect to profile");
-                Toast.makeText(MainActivity.this, "Will link to Profile", Toast.LENGTH_LONG).show();
+                mDrawerLayout.closeDrawers();
 
+                clearBackStack();
+
+                if (mCurrentlyCheckedItem != FRAGMENT_INDEXES.PROFILE) {
+                    mNavigationView.getMenu().findItem(mCurrentlyCheckedItem).setChecked(false);
+                    mCurrentlyCheckedItem = FRAGMENT_INDEXES.PROFILE;
+                }
+
+                replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
             }
         });
 
@@ -173,40 +174,59 @@ public class MainActivity extends AppCompatActivity {
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
-                item.setChecked(true);
-                mDrawerLayout.closeDrawers();
-
                 //if there are a lot of other user profile/ events in mainActivity, clear them
                 clearBackStack();
 
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case R.id.navigation_item_feed:
+                        mCurrentlyCheckedItem = R.id.navigation_item_feed;
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
-                        return true;
+                        item.setChecked(true);
+                        break;
                     case R.id.navigation_item_activity:
+                        mCurrentlyCheckedItem = R.id.navigation_item_activity;
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
-                        return true;
+                        item.setChecked(true);
+                        break;
+                    case R.id.navigation_item_people:
+                        mCurrentlyCheckedItem = R.id.navigation_item_people;
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PEOPLE));
+                        item.setChecked(true);
+                        break;
+                    case R.id.navigation_item_settings:
+                        startNewActivityForResult(SettingActivity.class);
+                        break;
                     default:
-                        return true;
+                        break;
                 }
+
+                mDrawerLayout.closeDrawers();
+                return true;
             }
         });
     }
 
 
-    private Fragment getFragment(int index){
 
-        if (mFragments[index] == null){ //if fragment haven't been created yet, create it
+
+    private Fragment getFragment(int index) {
+
+        if (mFragments[index] == null) { //if fragment haven't been created yet, create it
             UpdatableFragment fragment;
 
-            switch (index){
+            switch (index) {
                 case FRAGMENT_INDEXES.FEED:
                     fragment = new DiscoverHolderFragment();
                     break;
                 case FRAGMENT_INDEXES.ACTIVITY:
                     fragment = new UpdatesFragment();
                     break;
-                //TODO: ADD OTHER FRAGMENTS
+                case FRAGMENT_INDEXES.PROFILE:
+                    fragment = new Profile();
+                    break;
+                case FRAGMENT_INDEXES.PEOPLE:
+                    fragment = new PeopleFragment();
+                    break;
                 default:
                     fragment = null;
                     break;
@@ -218,16 +238,24 @@ public class MainActivity extends AppCompatActivity {
         return mFragments[index];
     }
 
-    public void replaceContainerWithFragment(Fragment fragment){
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.mainActivity_fragment_holder, fragment)
-                .commit();
+    public void replaceContainerWithFragment(final Fragment fragment) {
+        //this will only run after drawer is fully closed
+        //lags if we don't do this
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .commit();
+            }
+        });
     }
+
 
     //use this when you need to add another users profile view
     //or load image or status
-    public void addFragmentToContainer(Fragment fragment){
+    public void addFragmentToContainer(final Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment)
@@ -235,11 +263,38 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public void clearBackStack(){
+    public void clearBackStack() {
         //if there are a lot of other user profile/ events in mainActivity, clear them
         if (getSupportFragmentManager().getBackStackEntryCount() > 0)
             getSupportFragmentManager().popBackStackImmediate(PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
+    }
+
+    public static final int REQUEST_EDIT_PROFILE = 3;
+    public void startNewActivityForResult(final Class activity){
+        //will run when drawer if fully closed
+        //lags if we don't do this
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(MainActivity.this, activity);
+                startActivityForResult(i, REQUEST_EDIT_PROFILE);
+            }
+        });
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "onActivityResult: main");
+        if (requestCode == REQUEST_EDIT_PROFILE && resultCode == RESULT_OK){
+            Log.i(TAG, "onActivityResult: okay");
+            loadDrawerHeader(); //reload drawer header with updated info
+            //we need to update this fragments info if not null
+            if (mFragments[FRAGMENT_INDEXES.PROFILE] != null){
+                mFragments[FRAGMENT_INDEXES.PROFILE].setFragmentNeedUpdating(true);
+            }
+        }
     }
 
     @Override
@@ -254,7 +309,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         //TODO: save state
     }
-
 
 
     public void setTitle(String title) {
@@ -382,6 +436,25 @@ public class MainActivity extends AppCompatActivity {
         view.setText(count > 0 ? String.valueOf(count) : null);
     }
 
+
+    //So we change fragments or activities only after the drawer closes
+    private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener{
+
+        private Runnable mChangeFragmentOrActivityAction;
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            if (mChangeFragmentOrActivityAction != null) {
+                mChangeFragmentOrActivityAction.run();
+                mChangeFragmentOrActivityAction = null;
+            }
+        }
+
+        public void setChangeFragmentOrActivityAction(Runnable action){
+            mChangeFragmentOrActivityAction = action;
+        }
+
+    }
 
 
 }

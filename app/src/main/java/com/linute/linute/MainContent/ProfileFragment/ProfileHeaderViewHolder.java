@@ -192,7 +192,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
-                .centerCrop()
+                //.centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override

@@ -4,24 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.linute.linute.MainContent.Settings.EditNameActivity">
-
-    <include android:id="@+id/editstatus_toolbar"
-             layout="@layout/tool_bar"/>
+    tools:context=".MainContent.Settings.EditNameFragment">
 
 
-
-        <EditText
-            android:id="@+id/editstatus_status_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="32dp"
-            android:layout_below="@id/editstatus_toolbar"
-            android:gravity="center"
-            android:hint="@string/bio_hint"
-            android:inputType="textCapSentences"
-            android:lines="3"
-            android:maxLength="60" android:maxLines="3" android:textSize="14sp"/>
+    <EditText
+        android:id="@+id/editstatus_status_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_vertical_margin"
+        android:hint="@string/bio_hint"
+        android:inputType="textCapSentences"
+        android:lines="3"
+        android:maxLength="60"
+        android:maxLines="3"
+        android:textSize="14sp"/>
 
 
     <Button android:id="@+id/editstatus_save"

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -27,6 +28,10 @@ public class SettingActivity extends AppCompatActivity {
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
     public static String TAG = "SettingActivity";
 
+    public static final int NEED_UPDATE_REQUEST = 7;
+
+    private boolean mMainActivityNeedsToUpdate = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,14 +45,33 @@ public class SettingActivity extends AppCompatActivity {
         getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
     }
 
-    private void setUpToolbar(){
+    private void setUpToolbar() {
         mToolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
-        setSupportActionBar(mToolBar);
+        mToolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolBar.setTitle("Settings");
 
-        getSupportActionBar().setTitle("Settings");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(mToolBar);
     }
 
+    private static final String NEED_UPDATE_KEY = "need_updating";
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(NEED_UPDATE_KEY, mMainActivityNeedsToUpdate);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mMainActivityNeedsToUpdate = savedInstanceState.getBoolean(NEED_UPDATE_KEY);
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(mMainActivityNeedsToUpdate ? RESULT_OK : RESULT_CANCELED);
+        super.onBackPressed();
+    }
 
     //override up button to go back
     @Override
@@ -59,10 +83,17 @@ public class SettingActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "onActivityResult: got something");
+        if (requestCode == NEED_UPDATE_REQUEST && resultCode == RESULT_OK) {
+            Log.i(TAG, "onActivityResult: settings good");
+            mMainActivityNeedsToUpdate = true;
+        }
+    }
 
-    //fragment with our settings layout
-    public static class LinutePreferenceFragment extends PreferenceFragment
-    {
+    //fragment with our settings layout/ main options
+    public static class LinutePreferenceFragment extends PreferenceFragment {
         Preference mFindFriendsFacebook;
         Preference mFindFriendsContacts;
         Preference mEditProfileInfo;
@@ -75,8 +106,7 @@ public class SettingActivity extends AppCompatActivity {
         Preference mLogOut;
 
         @Override
-        public void onCreate(final Bundle savedInstanceState)
-        {
+        public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_profile_frag_main);
 
@@ -84,10 +114,10 @@ public class SettingActivity extends AppCompatActivity {
             setOnClickListeners();
         }
 
-        private void bindPreferences(){
+        private void bindPreferences() {
             mFindFriendsFacebook = findPreference("find_friends_facebook_pref");
             mFindFriendsContacts = findPreference("find_friends_contacts_pref");
-            mEditProfileInfo =  findPreference("edit_profile");
+            mEditProfileInfo = findPreference("edit_profile");
             mChangeEmail = findPreference("change_email");
             mChangePhoneNumber = findPreference("change_phone_number");
             mTalkToUs = findPreference("talk_to_us");
@@ -104,11 +134,10 @@ public class SettingActivity extends AppCompatActivity {
 
                 mFindFriendFacebook
                 mFindFriendsContacts
-                mTalkToUs
          */
 
-        private void setOnClickListeners(){
-            //logout
+        private void setOnClickListeners() {
+            //logout //TODO: unregister phone
             mLogOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -135,7 +164,7 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), EditProfileInfoActivity.class);
-                    startActivity(i);
+                    getActivity().startActivityForResult(i, NEED_UPDATE_REQUEST);
                     return true;
                 }
             });
@@ -185,7 +214,7 @@ public class SettingActivity extends AppCompatActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String [] {"info@linute.com"});
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"info@linute.com"});
                     intent.putExtra(Intent.EXTRA_SUBJECT, "Linute Feedback");
                     intent.putExtra(android.content.Intent.EXTRA_TEXT, "Replace this text with any feedback you'd like to give us!");
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -194,7 +223,6 @@ public class SettingActivity extends AppCompatActivity {
                     return true;
                 }
             });
-
         }
     }
 }

@@ -114,38 +114,18 @@
             android:name=".MainContent.Settings.EditProfileInfoActivity"
             android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize"/>
+
         <activity
             android:name=".MainContent.Settings.TermsOfServiceActivity"
             android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
+
         <activity
             android:name=".MainContent.Settings.PrivacyPolicyActivity"
             android:parentActivityName=".MainContent.Settings.SettingActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-        <activity
-            android:name=".MainContent.Settings.EditNameActivity"
-            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity
-            android:name=".MainContent.Settings.EditStatusActivity"
-            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
-        <activity
-            android:name=".MainContent.Settings.EditBirthdayActivity"
-            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
-        <activity
-            android:name=".MainContent.Settings.EditGenderActivity"
-            android:parentActivityName=".MainContent.Settings.EditProfileInfoActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
@@ -155,12 +135,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
-
-        <activity
-            android:name=".MainContent.Settings.ChangeProfileImageActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.BlackBackground"/>
 
         <activity
             android:name=".MainContent.Settings.ChangePhoneActivity"

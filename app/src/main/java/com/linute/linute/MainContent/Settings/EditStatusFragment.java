@@ -2,17 +2,17 @@ package com.linute.linute.MainContent.Settings;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -33,44 +33,37 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EditStatusActivity extends AppCompatActivity {
+public class EditStatusFragment extends Fragment {
 
-    private static final String TAG = "EditStatusActivity";
+    private static final String TAG = "EditStatusFragment";
     private SharedPreferences mSharedPreferences;
-    private Toolbar mToolBar;
 
     private ProgressBar mProgressBar;
     private EditText mStatusText;
     private Button mSaveButton;
 
 
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_status);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_edit_status, container, false);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        bindView();
-        setUpToolbar();
+        ((EditProfileInfoActivity)getActivity()).setTitle("Status");
+        bindView(rootView);
         setDefaultValues();
         setUpOnClickListeners();
         setUpEditTextMaxLines();
+
+        return rootView;
     }
 
-
-    private void bindView() {
-        mProgressBar = (ProgressBar) findViewById(R.id.editstatus_progressbar);
-        mSaveButton = (Button) findViewById(R.id.editstatus_save);
-        mStatusText = (EditText) findViewById(R.id.editstatus_status_text);
-    }
-
-    private void setUpToolbar() {
-        mToolBar = (Toolbar) findViewById(R.id.editstatus_toolbar);
-        setSupportActionBar(mToolBar);
-
-        getSupportActionBar().setTitle("Status");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    private void bindView(View rootView) {
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.editstatus_progressbar);
+        mSaveButton = (Button) rootView.findViewById(R.id.editstatus_save);
+        mStatusText = (EditText) rootView.findViewById(R.id.editstatus_status_text);
     }
 
     private void setDefaultValues() {
@@ -89,23 +82,6 @@ public class EditStatusActivity extends AppCompatActivity {
         });
     }
 
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return(true);
-        }
-        return(super.onOptionsItemSelected(item));
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mProgressBar.getVisibility() == View.GONE) {
-            super.onBackPressed();
-        }
-    }
 
     //sets max line number to 3
     private void setUpEditTextMaxLines() {
@@ -138,7 +114,7 @@ public class EditStatusActivity extends AppCompatActivity {
         //if no changes made, do nothing
         if (!changesMadeToStatus(status)) return;
 
-        LSDKUser user = new LSDKUser(this);
+        LSDKUser user = new LSDKUser(getActivity());
         showProgress(true); //show  progress bar
 
         Map<String, Object> userInfo = new HashMap<>();
@@ -148,10 +124,11 @@ public class EditStatusActivity extends AppCompatActivity {
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                runOnUiThread(new Runnable() {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(EditStatusActivity.this);
+                        Utils.showBadConnectionToast(getActivity());
                         showProgress(false);
                     }
                 });
@@ -163,40 +140,45 @@ public class EditStatusActivity extends AppCompatActivity {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string())); //create container
                         persistData(user); //save data
-                        runOnUiThread(new Runnable() {
+
+                        final EditProfileInfoActivity activity = (EditProfileInfoActivity) getActivity();
+                        if (activity == null) return;
+
+                        activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showSavedToast(EditStatusActivity.this);
+                                Utils.showSavedToast(activity);
+                                showProgress(false);
+
+                                activity.setMainActivityNeedsToUpdate(true); //let's us know we need to update MainActivity
+                                getFragmentManager().popBackStack();
                             }
                         });
 
                     } catch (JSONException e) { //error parsing data
                         e.printStackTrace();
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(EditStatusActivity.this);
+                                Utils.showServerErrorToast(getActivity());
+                                showProgress(false);
                             }
                         });
                     }
 
                 } else {
                     Log.e(TAG, response.body().string());
-                    runOnUiThread(new Runnable() {
+                    if(getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showServerErrorToast(EditStatusActivity.this);
+                            Utils.showServerErrorToast(getActivity());
+                            showProgress(false);
                         }
                     });
                 }
 
-                //hide progressbar
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showProgress(false);
-                    }
-                });
             }
         });
     }
@@ -204,10 +186,8 @@ public class EditStatusActivity extends AppCompatActivity {
     //checks if any changes were made to status
     //if no changes were made, we won't query server
     private boolean changesMadeToStatus(String status) {
-        if (mSharedPreferences.getString("status", "").equals(status))
-            return false;
+        return !mSharedPreferences.getString("status", "").equals(status);
 
-        return true;
     }
 
 
@@ -237,14 +217,14 @@ public class EditStatusActivity extends AppCompatActivity {
 
     private void setFocusable(boolean focusable) {
         if (focusable) { //turn on
-            mStatusText.setFocusableInTouchMode(focusable);
+            mStatusText.setFocusableInTouchMode(true);
         } else {
-            mStatusText.setFocusable(focusable);
+            mStatusText.setFocusable(false);
         }
     }
 
     //save status to Shared Prefs
     private void persistData(LinuteUser user) {
-        mSharedPreferences.edit().putString("status", user.getStatus()).commit();
+        mSharedPreferences.edit().putString("status", user.getStatus()).apply();
     }
 }

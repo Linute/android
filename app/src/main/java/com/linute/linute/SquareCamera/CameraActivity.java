@@ -54,6 +54,7 @@ public class CameraActivity extends AppCompatActivity {
             clearBackStack(); //clears gallery or camera fragment
             if (mHasWriteAndCameraPermission) launchCameraFragment();
             else launchPermissionNeededFragment();
+            mRecievedRequestPermissionResults = false;
         }
     }
 
@@ -66,10 +67,9 @@ public class CameraActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (!hasCameraAndWritePermission()) return;
-
         if (resultCode == RESULT_CANCELED) { //cancelled gallery pick or crop
             clearBackStack(); //remove gallery fragment
+            Log.i(TAG, "onActivityResult: cancelled");
         }
 
         else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
@@ -77,6 +77,7 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+            Log.i(TAG, "onActivityResult: okay");
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = Crop.getOutput(data);
@@ -197,6 +198,12 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
 
         goToGalleryAndCrop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        clearBackStack();
     }
 
     private void goToGalleryAndCrop() {

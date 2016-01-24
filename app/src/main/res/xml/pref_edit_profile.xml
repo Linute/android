@@ -6,6 +6,9 @@
                     android:title="Name"/>
         <Preference android:key="edit_status_pref"
                     android:title="Bio"/>
+        <Preference android:key="edit_photo_pref"
+                    android:title="Photo"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Private Info">

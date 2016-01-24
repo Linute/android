@@ -6,7 +6,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
 
-    <dimen name="profilefragment_main_profile_image_radius">75dp</dimen>
+    <dimen name="profilefragment_main_profile_image_radius">85dp</dimen>
     <dimen name="profilefragment_list_item_profile_radius">50dp</dimen>
     <dimen name="profilefragment_list_item_event_side">100dp</dimen>
     <!--<dimen name="changeprofile_image_dimen">180dp</dimen> -->

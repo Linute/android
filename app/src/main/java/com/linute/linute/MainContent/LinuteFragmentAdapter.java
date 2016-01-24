@@ -3,13 +3,8 @@ package com.linute.linute.MainContent;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.widget.Toast;
 
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
-import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.ProfileFragment.ProfileFragment;
 import com.linute.linute.R;
 
 /**
