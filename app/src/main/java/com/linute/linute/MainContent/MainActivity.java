@@ -196,6 +196,21 @@ public class MainActivity extends AppCompatActivity {
                         replaceContainerWithFragment(new MainSettingsFragment());
                         item.setChecked(true);
                         break;
+                    case R.id.nav_find_by_name:
+                        mCurrentlyCheckedItem = R.id.nav_find_by_name;
+                        replaceContainerWithFragment(FindFriendsFragment.newInstance(0));
+                        item.setChecked(true);
+                        break;
+                    case R.id.nav_find_facebook:
+                        mCurrentlyCheckedItem = R.id.nav_find_facebook;
+                        replaceContainerWithFragment(FindFriendsFragment.newInstance(1));
+                        item.setChecked(true);
+                        break;
+                    case R.id.nav_find_contacts:
+                        mCurrentlyCheckedItem = R.id.nav_find_contacts;
+                        replaceContainerWithFragment(FindFriendsFragment.newInstance(2));
+                        item.setChecked(true);
+                        break;
                     default:
                         break;
                 }
