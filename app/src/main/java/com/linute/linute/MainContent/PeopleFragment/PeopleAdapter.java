@@ -1,19 +1,14 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.ProfileFragment.ProfileHeaderViewHolder;
-import com.linute.linute.MainContent.ProfileFragment.ProfileViewHolder;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.LinuteUser;
 
 import java.util.List;
 

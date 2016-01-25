@@ -267,18 +267,4 @@ public class Profile extends UpdatableFragment {
         });
     }
 
-    public void editProfileImage() {
-        Intent i = new Intent(getActivity(), ChangeProfileImageFragment.class);
-        startActivityForResult(i, IMAGE_CHANGED);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == IMAGE_CHANGED && resultCode == Activity.RESULT_OK) { //profile image changed
-            //tell our items to update
-            mUserActivityItems.clear();
-        }
-    }
-
 }

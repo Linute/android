@@ -158,7 +158,6 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             });
         }
 
-
         //TODO: FIX
         private void setOnClickListeners(){
             final EditProfileInfoActivity activity = (EditProfileInfoActivity) getActivity();

@@ -94,54 +94,28 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     @Override
     public void onClick(View v) {
 
-        //TODO : ADD TOUCHES
+        //create a base activity to support this?
+        MainActivity activity = (MainActivity) mContext;
 
-//        Log.d(TAG, "onClick");
-//        if (v == vUserImage) {
-//            if (mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-//                FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//
-//                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", mPosts.get(getAdapterPosition()).getUserId());
-//                // The device is smaller, so show the fragment fullscreen
-//                FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                // For a little polish, specify a transition animation
-//                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                // To make it fullscreen, use the 'content' root view as the container
-//                // for the fragment, which is always the root view for the activity
-//                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
-//                        .addToBackStack(null).commit();
-//            }
-//        } else if (v == vPostImage || v == vPostText) {
-//            FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//            ((MainActivity) mContext).mFeedDetailPage =
-//                    FeedDetailPage.newInstance("Discover",
-//                            mPosts.get(getAdapterPosition()).getPostId());
-//            // The device is smaller, so show the fragment fullscreen
-//            FragmentTransaction transaction = fragmentManager.beginTransaction();
-//            // For a little polish, specify a transition animation
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            // To make it fullscreen, use the 'content' root view as the container
-//            // for the fragment, which is always the root view for the activity
-//            transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
-//                    .addToBackStack(null).commit();
-//        }
+        if(activity == null) return;
 
-        //NOTE: NEW
-//        else if (v == vPostImage || v == vPostText) {
-//            FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-//            ((MainActivity) mContext).mFeedDetailPage =
-//                    FeedDetailPage.newInstance("Discover",
-//                            mPosts.get(getAdapterPosition()).getPostId(),
-//                            mPosts.get(getAdapterPosition()).getUserId());
-//            // The device is smaller, so show the fragment fullscreen
-//            FragmentTransaction transaction = fragmentManager.beginTransaction();
-//            // For a little polish, specify a transition animation
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            // To make it fullscreen, use the 'content' root view as the container
-//            // for the fragment, which is always the root view for the activity
-//            transaction.add(R.id.postContainer, ((MainActivity) mContext).mFeedDetailPage)
-//                    .addToBackStack(null).commit();
-//        }
+        //tap image or name
+        if (v == vUserImage || v == vPostUserName){
+            activity.addFragmentToContainer(
+                    TaptUserProfileFragment.newInstance(
+                            mPosts.get(getAdapterPosition()).getUserName()
+                            ,mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
+
+        //status or image tapped
+        else if (v == vPostImage || v == vPostText){
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(v == vPostImage
+                            , mPosts.get(getAdapterPosition()).getPostId()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
 
     }
 

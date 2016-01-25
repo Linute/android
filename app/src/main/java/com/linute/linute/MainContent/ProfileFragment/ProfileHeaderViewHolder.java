@@ -79,7 +79,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View v) {
                 if (mSharedPreferences.getString("userID", "").equals(mUser.getUserID())) {
-                    mProfile.editProfileImage();
+                    //TODO: VIEW IMAGE
                 }
             }
         });

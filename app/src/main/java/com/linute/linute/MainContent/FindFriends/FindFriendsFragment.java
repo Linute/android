@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FindFriends;
 import android.Manifest;
 import android.app.DialogFragment;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -10,14 +11,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,10 +36,10 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKFriendSearch;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
-import com.linute.linute.UtilsAndHelpers.MaterialSearchView.MaterialSearchView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -44,12 +50,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by QiFeng on 1/16/16.
@@ -58,9 +61,9 @@ import java.util.Map;
 
 //TODO: ADD RELOAD BUTTON
 
-public class FindFriendsActivity extends AppCompatActivity {
+public class FindFriendsFragment extends Fragment {
 
-    public static final String TAG = FindFriendsActivity.class.getSimpleName();
+    public static final String TAG = FindFriendsFragment.class.getSimpleName();
 
     public static final String SEARCH_TYPE_KEY = "search_type";
 
@@ -69,7 +72,7 @@ public class FindFriendsActivity extends AppCompatActivity {
     private int mSearchType = 0; // 0 for search, 1 for facebook, 2 for contacts
 
     private RecyclerView mRecyclerView;
-    private MaterialSearchView mSearchView;
+    private SearchView mSearchView;
     private FriendSearchAdapter mFriendSearchAdapter;
     private String mQueryString; //what's in the search view
     private TextView mDescriptionText;
@@ -83,34 +86,104 @@ public class FindFriendsActivity extends AppCompatActivity {
 
     private ProgressBar mProgressBar;
 
+    private View mFindFriendsRationale;
+
+    private Button mReloadButton;
+
 
     private GetContactsInBackground mGetContactsInBackground;
 
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//
+////        setContentView(R.layout.activity_find_friends);
+////
+////        if (getIntent() != null) {
+////            mSearchType = getIntent().getIntExtra(SEARCH_TYPE_KEY, 0);
+////        }
+////
+////        mDescriptionText = (TextView) findViewById(R.id.findFriends_text);
+////        mRecyclerView = (RecyclerView) findViewById(R.id.findFriends_recycler_view);
+////        mSearchView = (MaterialSearchView) findViewById(R.id.findFriends_search_view);
+////        mProgressBar = (ProgressBar) findViewById(R.id.findFriends_progressbar);
+////        mSearchView.showSearch(false);
+////
+////
+//        LinearLayoutManager llm = new LinearLayoutManager(this);
+//        llm.setOrientation(LinearLayoutManager.VERTICAL);
+//        mRecyclerView.setLayoutManager(llm);
+//
+//        mFriendSearchAdapter = new FriendSearchAdapter(this, mFriendFoundList, false);
+//
+//        mRecyclerView.setAdapter(mFriendSearchAdapter);
+//        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
+//
+//
+//        setupSearchViewHandler();
+//
+//        if (mSearchType == 0) { //if search by name, we need init text
+//            mDescriptionText.setText("Enter your friends name in the search bar");
+//            mDescriptionText.setVisibility(View.VISIBLE);
+//        } else if (mSearchType == 1) { //facebook
+//            FacebookSdk.sdkInitialize(getApplicationContext());
+//
+//            //facebook
+//            mCallbackManager = CallbackManager.Factory.create();
+//
+//            setUpFacebookCallback();
+//
+//            loginFacebook();
+//        } else { //contacts. This process takes forever to get emails. We will use async task
+//            mGetContactsInBackground = new GetContactsInBackground();
+//            setUpContactsList();
+//        }
+//    }
+
+    public static FindFriendsFragment newInstance(int searchType) {
+        FindFriendsFragment fragment = new FindFriendsFragment();
+        Bundle args = new Bundle();
+        args.putInt(SEARCH_TYPE_KEY, searchType);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_find_friends);
-
-        if (getIntent() != null) {
-            mSearchType = getIntent().getIntExtra(SEARCH_TYPE_KEY, 0);
+        if (getArguments() != null) {
+            mSearchType = getArguments().getInt(SEARCH_TYPE_KEY);
         }
-
-        mDescriptionText = (TextView) findViewById(R.id.findFriends_text);
-        mRecyclerView = (RecyclerView) findViewById(R.id.findFriends_recycler_view);
-        mSearchView = (MaterialSearchView) findViewById(R.id.findFriends_search_view);
-        mProgressBar = (ProgressBar) findViewById(R.id.findFriends_progressbar);
-        mSearchView.showSearch(false);
+    }
 
 
-        LinearLayoutManager llm = new LinearLayoutManager(this);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.activity_find_friends, container, false);
+
+        mDescriptionText = (TextView) rootView.findViewById(R.id.findFriends_text);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
+        mSearchView = (SearchView) rootView.findViewById(R.id.findFriends_search_view);
+        mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
+        mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
+        mReloadButton = (Button) rootView.findViewById(R.id.findFriends_reload_button);
+
+        mReloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reload();
+            }
+        });
+
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(this, mFriendFoundList, false);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList, false);
 
         mRecyclerView.setAdapter(mFriendSearchAdapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
 
         setupSearchViewHandler();
@@ -119,7 +192,7 @@ public class FindFriendsActivity extends AppCompatActivity {
             mDescriptionText.setText("Enter your friends name in the search bar");
             mDescriptionText.setVisibility(View.VISIBLE);
         } else if (mSearchType == 1) { //facebook
-            FacebookSdk.sdkInitialize(getApplicationContext());
+            FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
 
             //facebook
             mCallbackManager = CallbackManager.Factory.create();
@@ -127,45 +200,37 @@ public class FindFriendsActivity extends AppCompatActivity {
             setUpFacebookCallback();
 
             loginFacebook();
+
         } else { //contacts. This process takes forever to get emails. We will use async task
             mGetContactsInBackground = new GetContactsInBackground();
             setUpContactsList();
+        }
+
+        return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.setTitle("Find Friends");
+            activity.lowerAppBarElevation();
         }
     }
 
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(SEARCH_TYPE_KEY, mSearchType);
-
-        //TODO: add parcelable
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mSearchType = savedInstanceState.getInt(SEARCH_TYPE_KEY);
-
-        //TODO: get parcelable
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //remove callbacks? flaw: won't load then
-    }
-
-    @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
-        if (mGetContactsInBackground != null){ //cancel task
+        if (mGetContactsInBackground != null) { //cancel task
             mGetContactsInBackground.cancel(true);
+        }
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.raiseAppBarLayoutElevation();
         }
     }
 
@@ -176,13 +241,14 @@ public class FindFriendsActivity extends AppCompatActivity {
         @Override
         public void run() {
 
-            new LSDKFriendSearch(FindFriendsActivity.this).searchFriendByName(mQueryString, new Callback() {
+            new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    runOnUiThread(new Runnable() {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            Utils.showBadConnectionToast(FindFriendsActivity.this);
+                            Utils.showBadConnectionToast(getActivity());
                         }
                     });
                 }
@@ -204,7 +270,9 @@ public class FindFriendsActivity extends AppCompatActivity {
                                 }
                             }
 
-                            runOnUiThread(new Runnable() {
+                            if (getActivity() == null) return;
+
+                            getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     if (mFriendFoundList.isEmpty()) { //show no results found if empty
@@ -217,11 +285,13 @@ public class FindFriendsActivity extends AppCompatActivity {
 
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            if (getActivity() == null) return;
                             showServerError();
 
                         }
                     } else {
                         Log.e(TAG, "onResponse: " + resString);
+                        if (getActivity() == null) return;
                         showServerError();
                     }
                 }
@@ -255,7 +325,7 @@ public class FindFriendsActivity extends AppCompatActivity {
     };
 
     //searching by name
-    private MaterialSearchView.OnQueryTextListener mSearchListener = new MaterialSearchView.OnQueryTextListener() {
+    private SearchView.OnQueryTextListener mSearchListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
             return false;
@@ -289,7 +359,7 @@ public class FindFriendsActivity extends AppCompatActivity {
     };
 
     //Filter or search TextChangeListners
-    private MaterialSearchView.OnQueryTextListener mFilterListener = new MaterialSearchView.OnQueryTextListener() {
+    private SearchView.OnQueryTextListener mFilterListener = new SearchView.OnQueryTextListener() {
         @Override
         public boolean onQueryTextSubmit(String query) {
             return false;
@@ -307,15 +377,7 @@ public class FindFriendsActivity extends AppCompatActivity {
     };
 
 
-
     private void setupSearchViewHandler() {
-        //quits activity
-        mSearchView.setOnBackPressedListener(new MaterialSearchView.OnBackPressedListener() {
-            @Override
-            public void onBackPressed() {
-                FindFriendsActivity.this.onBackPressed();
-            }
-        });
 
         mSearchHandler = new Handler(); //searchs or filters as you type
 
@@ -326,41 +388,28 @@ public class FindFriendsActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    public void addFragment(DialogFragment frag) {
-        getFragmentManager().beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .add(R.id.postContainer, frag)
-                .addToBackStack(null)
-                .commit();
-    }
-
     public void showServerError() {
-        runOnUiThread(new Runnable() {
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Utils.showServerErrorToast(FindFriendsActivity.this);
+                Utils.showServerErrorToast(getActivity());
             }
         });
     }
 
 
     private void setUpFacebookList(String token) {
-        new LSDKFriendSearch(this).searchFriendByFacebook(token, new Callback() {
+
+        mProgressBar.setVisibility(View.VISIBLE);
+
+        new LSDKFriendSearch(getActivity()).searchFriendByFacebook(token, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                runOnUiThread(new Runnable() {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(FindFriendsActivity.this);
+                        Utils.showBadConnectionToast(getActivity());
                         showRetryButton(true);
                     }
                 });
@@ -382,11 +431,12 @@ public class FindFriendsActivity extends AppCompatActivity {
                             }
                         }
 
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 showRetryButton(false);
-
+                                mProgressBar.setVisibility(View.GONE);
                                 if (mFriendFoundList.isEmpty()) {
                                     mDescriptionText.setText("No results found");
                                     mDescriptionText.setVisibility(View.VISIBLE);
@@ -397,11 +447,13 @@ public class FindFriendsActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        if (getActivity() == null) return;
                         showServerErrorWithRetryButton();
 
                     }
                 } else {
                     Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() == null) return;
                     showServerErrorWithRetryButton();
                 }
             }
@@ -413,16 +465,16 @@ public class FindFriendsActivity extends AppCompatActivity {
     private void setUpContactsList() {
         //check for contact permissions
         //no permissions: ask for them
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, READ_CONTACTS_PERMISSION);
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, READ_CONTACTS_PERMISSION);
         }
         //have permissions
         else {
             if (mInRationalText) {
-                findViewById(R.id.findFriends_rationale_text).setVisibility(View.GONE);
+                mFindFriendsRationale.setVisibility(View.GONE);
             }
 
-            mInRationalText = true;
+            mInRationalText = true; //still need to load contacts
             mProgressBar.setVisibility(View.VISIBLE);
             mGetContactsInBackground.execute();
         }
@@ -434,7 +486,7 @@ public class FindFriendsActivity extends AppCompatActivity {
         if (requestCode == READ_CONTACTS_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (mInRationalText) {
-                    findViewById(R.id.findFriends_rationale_text).setVisibility(View.GONE);
+                     mFindFriendsRationale.setVisibility(View.GONE);
                 }
                 mInRationalText = true;
                 mProgressBar.setVisibility(View.VISIBLE);
@@ -453,8 +505,8 @@ public class FindFriendsActivity extends AppCompatActivity {
         if (mInRationalText) return; //already in rationale text
 
         mInRationalText = true;
-        findViewById(R.id.findFriends_rationale_text).setVisibility(View.VISIBLE);
-        findViewById(R.id.findFriends_turn_on).setOnClickListener(new View.OnClickListener() {
+        mFindFriendsRationale.setVisibility(View.VISIBLE);
+        mFindFriendsRationale.findViewById(R.id.findFriends_turn_on).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 setUpContactsList();
@@ -465,14 +517,16 @@ public class FindFriendsActivity extends AppCompatActivity {
     private void loadContacts() {
         JSONArray phoneNumbers = new JSONArray();
         JSONArray emails = new JSONArray();
-        
-        ContentResolver cr = getContentResolver();
-        
+
+        if (getActivity() == null) return;
+
+        ContentResolver cr = getActivity().getContentResolver();
+
         if (cr == null) return;
-        
+
         Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
                 null, null, null, null);
-        
+
         if (cur == null) return;
 
         if (cur.getCount() > 0) {
@@ -484,9 +538,9 @@ public class FindFriendsActivity extends AppCompatActivity {
                     Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
                             new String[]{id}, null);
-                    
+
                     if (pCur == null) continue;
-                    
+
                     while (pCur.moveToNext()) {
                         if (mGetContactsInBackground.isCancelled()) break;
                         phoneNumbers.put(pCur.getString(
@@ -502,14 +556,14 @@ public class FindFriendsActivity extends AppCompatActivity {
                             null,
                             ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
                             new String[]{id}, null);
-                    
+
                     if (emailCur == null) continue;
-                    
+
                     while (emailCur.moveToNext()) {
                         if (mGetContactsInBackground.isCancelled()) break;
                         // This would allow you get several email addresses
                         // if the email addresses were stored in an array
-                        
+
                         emails.put(emailCur.getString(
                                 emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)));
                     }
@@ -517,17 +571,18 @@ public class FindFriendsActivity extends AppCompatActivity {
                 }
             }
         }
-        
+
         cur.close();
 
         //send info to backend
-        new LSDKFriendSearch(this).searchFriendByContacts(phoneNumbers, emails, new Callback() {
+        new LSDKFriendSearch(getActivity()).searchFriendByContacts(phoneNumbers, emails, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                runOnUiThread(new Runnable() {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Utils.showBadConnectionToast(FindFriendsActivity.this);
+                        Utils.showBadConnectionToast(getActivity());
                         mProgressBar.setVisibility(View.GONE);
                         showRetryButton(true);
                     }
@@ -543,7 +598,7 @@ public class FindFriendsActivity extends AppCompatActivity {
                         JSONObject json = new JSONObject(response.body().string());
                         JSONArray friends = json.getJSONArray("friends");
 
-                        if (friends != null && friends.length() > 0){
+                        if (friends != null && friends.length() > 0) {
                             for (int i = 0; i < friends.length(); i++) {
                                 FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
                                 mFriendFoundList.add(user);
@@ -551,7 +606,8 @@ public class FindFriendsActivity extends AppCompatActivity {
                             }
                         }
 
-                        runOnUiThread(new Runnable() {
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 showRetryButton(false);
@@ -569,11 +625,13 @@ public class FindFriendsActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        if (getActivity() == null) return;
                         showServerErrorWithRetryButton();
                     }
 
                 } else {
-                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() == null) return;
                     showServerErrorWithRetryButton();
                 }
             }
@@ -594,7 +652,7 @@ public class FindFriendsActivity extends AppCompatActivity {
                 }
                 if (mInRationalText) {
                     mInRationalText = false;
-                    findViewById(R.id.findFriends_rationale_text).setVisibility(View.GONE);
+                    mFindFriendsRationale.setVisibility(View.GONE);
                 }
                 setUpFacebookList(loginResult.getAccessToken().getToken());
             }
@@ -621,12 +679,11 @@ public class FindFriendsActivity extends AppCompatActivity {
         if (mInRationalText) return; //already in rationale text
 
         mInRationalText = true;
-        findViewById(R.id.findFriends_rationale_text).setVisibility(View.VISIBLE);
+        mFindFriendsRationale.setVisibility(View.VISIBLE);
 
-        ((TextView) findViewById(R.id.findFriends_text)).setText("Tapt needs access to you're facebook friends to find friends.");
+        ((TextView) mFindFriendsRationale.findViewById(R.id.findFriends_rat_text)).setText(R.string.facebook_rationale);
 
-        TextView mLogin = (TextView) findViewById(R.id.findFriends_turn_on);
-        mLogin.setText("Log In");
+        TextView mLogin = (TextView) mFindFriendsRationale.findViewById(R.id.findFriends_turn_on);
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -636,13 +693,13 @@ public class FindFriendsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     private void showFacebookErrorToast() {
-        Toast.makeText(this, R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -653,11 +710,11 @@ public class FindFriendsActivity extends AppCompatActivity {
             setUpFacebookList(token.getToken());
 
         else
-            LoginManager.getInstance().logInWithReadPermissions(FindFriendsActivity.this, Collections.singletonList("user_friends"));
+            LoginManager.getInstance().logInWithReadPermissions(FindFriendsFragment.this, Collections.singletonList("user_friends"));
     }
 
 
-    public class GetContactsInBackground extends AsyncTask<Void, Void ,Void>{
+    public class GetContactsInBackground extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             loadContacts();
@@ -665,25 +722,26 @@ public class FindFriendsActivity extends AppCompatActivity {
         }
     }
 
-    public void reload(View v){
-        if(mSearchType == 0){
+    public void reload() {
+        if (mSearchType == 0) {
             mSearchByNameRunnable.run();
-        }else if(mSearchType == 1){
+        } else if (mSearchType == 1) {
             loginFacebook();
-        }else {
+        } else {
             mGetContactsInBackground.execute();
         }
     }
 
-    public void showRetryButton(boolean show){
-        findViewById(R.id.findFriends_reload_button).setVisibility(show? View.VISIBLE : View.GONE);
+    public void showRetryButton(boolean show) {
+        mReloadButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    private void showServerErrorWithRetryButton(){
-        runOnUiThread(new Runnable() {
+    private void showServerErrorWithRetryButton() {
+        mProgressBar.setVisibility(View.GONE);
+        getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Utils.showServerErrorToast(FindFriendsActivity.this);
+                Utils.showServerErrorToast(getActivity());
                 showRetryButton(true);
             }
         });

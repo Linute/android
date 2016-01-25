@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.PersistableBundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
@@ -26,21 +25,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.Settings.MainSettingsFragment;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -72,10 +69,12 @@ public class MainActivity extends AppCompatActivity {
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
     public static class FRAGMENT_INDEXES {
-        public static final int PROFILE = 0;
-        public static final int FEED = 1;
-        public static final int PEOPLE = 2;
-        public static final int ACTIVITY = 3;
+        public static final short PROFILE = 0;
+        public static final short FEED = 1;
+        public static final short PEOPLE = 2;
+        public static final short ACTIVITY = 3;
+
+        public static final short SETTINGS = 5;
     }
 
 
@@ -84,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         setContentView(R.layout.activity_main);
 
@@ -161,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
                 clearBackStack();
 
-                if (mCurrentlyCheckedItem != FRAGMENT_INDEXES.PROFILE) {
+                if (mCurrentlyCheckedItem != FRAGMENT_INDEXES.PROFILE) { //profile doesn't get checked
                     mNavigationView.getMenu().findItem(mCurrentlyCheckedItem).setChecked(false);
                     mCurrentlyCheckedItem = FRAGMENT_INDEXES.PROFILE;
                 }
@@ -194,7 +192,9 @@ public class MainActivity extends AppCompatActivity {
                         item.setChecked(true);
                         break;
                     case R.id.navigation_item_settings:
-                        startNewActivityForResult(SettingActivity.class);
+                        mCurrentlyCheckedItem = R.id.navigation_item_settings;
+                        replaceContainerWithFragment(new MainSettingsFragment());
+                        item.setChecked(true);
                         break;
                     default:
                         break;
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    private Fragment getFragment(int index) {
+    private Fragment getFragment(short index) {
 
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
             UpdatableFragment fragment;
@@ -270,30 +270,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public static final int REQUEST_EDIT_PROFILE = 3;
-    public void startNewActivityForResult(final Class activity){
-        //will run when drawer if fully closed
-        //lags if we don't do this
-        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
-            @Override
-            public void run() {
-                Intent i = new Intent(MainActivity.this, activity);
-                startActivityForResult(i, REQUEST_EDIT_PROFILE);
-            }
-        });
-    }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i(TAG, "onActivityResult: main");
-        if (requestCode == REQUEST_EDIT_PROFILE && resultCode == RESULT_OK){
-            Log.i(TAG, "onActivityResult: okay");
-            loadDrawerHeader(); //reload drawer header with updated info
-            //we need to update this fragments info if not null
-            if (mFragments[FRAGMENT_INDEXES.PROFILE] != null){
-                mFragments[FRAGMENT_INDEXES.PROFILE].setFragmentNeedUpdating(true);
-            }
+    //sets needsUpdating for fragment at index
+    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
+        if (mFragments[index] != null){
+            mFragments[index].setFragmentNeedUpdating(needsUpdating);
         }
     }
 
@@ -316,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //loads the header of our drawer
-    private void loadDrawerHeader() {
+    public void loadDrawerHeader() {
         //profile image
         SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
         int size = getResources().getDimensionPixelSize(R.dimen.nav_header_profile_side); //radius
@@ -418,8 +399,8 @@ public class MainActivity extends AppCompatActivity {
 
     //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
     public void startFindFriendsActivity(int type) {
-        Intent i = new Intent(this, FindFriendsActivity.class);
-        i.putExtra(FindFriendsActivity.SEARCH_TYPE_KEY, type);
+        Intent i = new Intent(this, FindFriendsFragment.class);
+        i.putExtra(FindFriendsFragment.SEARCH_TYPE_KEY, type);
         startActivity(i);
     }
 

@@ -105,40 +105,29 @@
         <activity android:name="com.soundcloud.android.crop.CropImageActivity"/>
 
         <activity
-            android:name=".MainContent.Settings.SettingActivity"
-            android:configChanges="orientation"
-            android:parentActivityName=".MainContent.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-        <activity
             android:name=".MainContent.Settings.EditProfileInfoActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".MainContent.Settings.TermsOfServiceActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
         <activity
             android:name=".MainContent.Settings.PrivacyPolicyActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
         <activity
             android:name=".MainContent.Settings.ChangeEmailActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".MainContent.Settings.ChangePhoneActivity"
-            android:parentActivityName=".MainContent.Settings.SettingActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
@@ -190,7 +179,7 @@
         </receiver>
 
         <activity
-            android:name=".MainContent.FindFriends.FindFriendsActivity"
+            android:name=".MainContent.FindFriends.FindFriendsFragment"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
