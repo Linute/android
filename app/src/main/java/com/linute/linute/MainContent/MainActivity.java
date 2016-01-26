@@ -21,7 +21,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 
@@ -34,8 +33,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -410,13 +409,13 @@ public class MainActivity extends BaseTaptActivity {
                 }).show();
     }
 
-    /*
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-*/
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
+//        return true;
+//    }
+
 
 
     @Override
@@ -468,7 +467,7 @@ public class MainActivity extends BaseTaptActivity {
 
 
     //So we change fragments or activities only after the drawer closes
-    private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener{
+    private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
 
         private Runnable mChangeFragmentOrActivityAction;
 
@@ -480,7 +479,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         }
 
-        public void setChangeFragmentOrActivityAction(Runnable action){
+        public void setChangeFragmentOrActivityAction(Runnable action) {
             mChangeFragmentOrActivityAction = action;
         }
 

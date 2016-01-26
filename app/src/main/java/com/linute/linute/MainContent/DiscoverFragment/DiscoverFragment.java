@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
@@ -30,6 +31,7 @@ import com.squareup.okhttp.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -50,6 +52,8 @@ public class DiscoverFragment extends UpdatableFragment {
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private EditText postBox;
+
+    private TextView mEmptyText;
 
     private SwipeRefreshLayout refreshLayout;
 
@@ -87,6 +91,8 @@ public class DiscoverFragment extends UpdatableFragment {
                 container, false); //setContent
 
         mPosts = new ArrayList<>();
+
+        mEmptyText = (TextView) rootView.findViewById(R.id.discoverFragment_no_found);
 
 //        ((MainActivity) getActivity()).setTitle("My Campus");
 //        ((MainActivity) getActivity()).resetToolbar();
@@ -138,18 +144,21 @@ public class DiscoverFragment extends UpdatableFragment {
 //            }
 //        });
 
+        refreshLayout.setRefreshing(true);
+        getFeed(0);
+
         return rootView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (fragmentNeedsUpdating()){
-            Log.i(TAG, "onResume: ");
-            refreshLayout.setRefreshing(true);
-            getFeed(0);
-            setFragmentNeedUpdating(false);
-        }
+//        if (fragmentNeedsUpdating() && getActivity() != null){
+//            Log.i(TAG, "onResume: ");
+//            refreshLayout.setRefreshing(true);
+//            getFeed(0);
+//            //setFragmentNeedUpdating(false);
+//        }
     }
 
     private int mSkip = 0;
@@ -204,8 +213,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     }
                     Post post = null;
                     String postImage = "";
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     Date myDate;
                     String postString;
                     for (int i = 0; i < jsonArray.length(); i++) {
@@ -215,7 +223,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
                         myDate = simpleDateFormat.parse(jsonObject.getString("date"));
 
-                        postString = Utils.getEventTime(myDate);
+                        postString = Utils.getTimeAgoString(myDate.getTime());
 
 //                        Log.d("-TAG-", myDate + " " + postString);
                         post = new Post(
@@ -243,6 +251,13 @@ public class DiscoverFragment extends UpdatableFragment {
                     @Override
                     public void run() {
                         cancelRefresh();
+
+                        if (mPosts.isEmpty()) {
+                            mEmptyText.setText(mFriendsOnly ? getActivity().getString(R.string.no_friends_posts) : getActivity().getString(R.string.no_campus_post));
+                            mEmptyText.setVisibility(View.VISIBLE);
+                        }else if (mEmptyText.getVisibility() == View.VISIBLE){
+                            mEmptyText.setVisibility(View.GONE);
+                        }
 
                         mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
                     }

@@ -65,6 +65,7 @@ public class LinuteUser {
         user.setFollowing(sharedPreferences.getInt("following", 0));
         user.setCollegeName(sharedPreferences.getString("collegeName", ""));
         user.setCollegeId(sharedPreferences.getString("collegeId", ""));
+        user.setUserID(sharedPreferences.getString("userID", ""));
 
         return user;
     }

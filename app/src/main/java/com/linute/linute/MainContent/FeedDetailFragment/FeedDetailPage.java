@@ -261,15 +261,14 @@ public class FeedDetailPage extends UpdatableFragment {
 
                 }
                 JSONObject jsonObject = null;
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
-                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 Date myDate;
                 String postString;
                 try {
                     jsonObject = new JSONObject(response.body().string());
 
                     myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                    postString = Utils.getEventTime(myDate);
+                    postString = Utils.getTimeAgoString(myDate.getTime());
 
                     String imageName = jsonObject.getJSONArray("images").length() != 0 ? jsonObject.getJSONArray("images").getString(0) : "";
 

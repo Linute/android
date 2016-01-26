@@ -144,4 +144,6 @@
     <string name="facebook_rationale">Tapt needs access to you\'re facebook friends to find
         friends.
     </string>
+    <string name="no_friends_posts">Your friends haven\'t posted anything yet.</string>
+    <string name="no_campus_post">Your school hasn\'t posted anything yet</string>
 </resources>

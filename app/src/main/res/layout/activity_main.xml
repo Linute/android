@@ -35,10 +35,9 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <LinearLayout android:id="@+id/mainActivity_fragment_holder"
+            <FrameLayout android:id="@+id/mainActivity_fragment_holder"
                           android:layout_width="match_parent"
                           android:layout_height="match_parent"
-                          android:orientation="vertical"
                           app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 

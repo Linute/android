@@ -83,7 +83,7 @@ public class LaunchActivity extends Activity {
                     Intent i = new Intent(LaunchActivity.this, nextActivity);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(i);
-                    overridePendingTransition(0, 0); //no transition effects
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out); //no transition effects
                     LaunchActivity.this.finish();
 
                 }

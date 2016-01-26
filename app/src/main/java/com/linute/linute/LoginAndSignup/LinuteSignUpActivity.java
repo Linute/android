@@ -31,6 +31,7 @@ import android.widget.ViewFlipper;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -573,6 +574,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             if (resultCode == RESULT_OK) {
                 Uri imageUri = Crop.getOutput(data);
+                ImageUtils.normalizeImageForUri(this, imageUri);
                 try {
                     //release old pictures resources
                     if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();

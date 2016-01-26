@@ -92,6 +92,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
+        mLinuteUser.setUserID(mTaptUserId);
         mProfileAdapter = new ProfileAdapter(mUserActivityItems, mLinuteUser, getActivity());
         recList.setAdapter(mProfileAdapter);
 

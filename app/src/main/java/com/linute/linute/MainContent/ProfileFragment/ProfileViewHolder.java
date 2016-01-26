@@ -12,6 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
  * Created by Arman on 12/30/15.
@@ -47,7 +48,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
         }
 
         vDescriptionLabel.setText(userActivityItem.getDescription());
-        vTimeLabel.setText(userActivityItem.getPostDate());
+        vTimeLabel.setText(Utils.getTimeAgoString(userActivityItem.getPostDate()));
 
         //profile image on the right
         Glide.with(mContext)

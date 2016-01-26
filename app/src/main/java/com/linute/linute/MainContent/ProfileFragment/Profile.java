@@ -222,6 +222,7 @@ public class Profile extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
+                        Log.i(TAG, "onResponse: "+body);
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
 //                        Log.d(TAG, "onResponse getActivities" + body);
 

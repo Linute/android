@@ -20,6 +20,7 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.BlurBuilder;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -31,7 +32,6 @@ import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -114,7 +114,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                                ((MainActivity) mContext).runOnUiThread(new Runnable() {
+                                ((BaseTaptActivity) mContext).runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         vFollowStatus.setImageResource(R.drawable.unfollowing);
@@ -173,9 +173,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers.setText(String.valueOf(user.getFollowers()));
         vCollegeName.setText(user.getCollegeName());
 
-        if (mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
-            vFollowStatus.setVisibility(View.GONE);
-        } else {
+        if (!mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
                 vFollowStatus.setImageResource(R.drawable.follow);
             } else {

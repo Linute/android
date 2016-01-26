@@ -4,45 +4,49 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:orientation="horizontal">
+               >
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/people_user_image"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:layout_gravity="center"
         android:scaleType="centerCrop"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         app:border="false"
         app:shadow="false"/>
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/list_people_image_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:layout_alignParentEnd="true"
+        tools:src="@drawable/add_friend"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_toEndOf="@+id/people_user_image"
+        android:layout_toStartOf="@id/list_people_image_state"
+        android:layout_centerVertical="true"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/list_people_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:text="NAME"/>
 
         <TextView
             android:id="@+id/list_people_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:text="Last online"/>
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/list_people_image_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerInParent="true"
-        tools:src="@drawable/add_friend"/>
 
 </RelativeLayout>

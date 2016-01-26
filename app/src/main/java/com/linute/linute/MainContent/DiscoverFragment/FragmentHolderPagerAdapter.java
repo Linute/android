@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent;
+package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

@@ -9,9 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -53,6 +50,7 @@ public class PeopleFragment extends UpdatableFragment {
     private List<People> mPeopleList = new ArrayList<>();
 
     public PeopleFragment() {
+        Log.i(TAG, "PeopleFragment: created");
         // Required empty public constructor
     }
 
@@ -128,8 +126,7 @@ public class PeopleFragment extends UpdatableFragment {
 
                     People people;
                     String friend = "";
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     Date myDate;
                     String dateString;
 
@@ -140,7 +137,7 @@ public class PeopleFragment extends UpdatableFragment {
 
 
                         myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                        dateString = Utils.getEventTime(myDate);
+                        dateString = Utils.getTimeAgoString(myDate.getTime());
 
                         jsonObject = jsonObject.getJSONObject("owner");
                         people = new People(

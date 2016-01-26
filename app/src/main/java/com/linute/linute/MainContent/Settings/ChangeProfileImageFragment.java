@@ -34,6 +34,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -256,6 +257,7 @@ public class ChangeProfileImageFragment extends Fragment {
         } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             if (resultCode == Activity.RESULT_OK) {
                 Uri imageUri = Crop.getOutput(data);
+                ImageUtils.normalizeImageForUri(getActivity(), imageUri);
                 try {
                     //release old pictures resources
                     if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();

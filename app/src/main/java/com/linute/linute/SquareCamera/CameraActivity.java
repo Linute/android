@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
@@ -81,7 +82,7 @@ public class CameraActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = Crop.getOutput(data);
-                Log.i(TAG, "onActivityResult: recieved");
+                ImageUtils.normalizeImageForUri(this, imageUri);
                 launchEditAndSaveFragment(imageUri);
 
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
