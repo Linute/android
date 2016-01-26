@@ -232,9 +232,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         mPosts.add(post);
                         postImage = "";
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
+                } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                 }
 

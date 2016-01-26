@@ -58,6 +58,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.setTitle("FEED");
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.showFAB(true); //show the floating button
+            mainActivity.resetToolbar();
         }
 
 //        //this fragment will need updating if user posted something

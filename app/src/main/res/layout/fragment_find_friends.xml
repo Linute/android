@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/postContainer"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.linute.linute.LoginAndSignup.CollegePickerActivity">
+
+    <LinearLayout android:id="@+id/findFriends_search_parent"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:background="@color/colorPrimary"
+                  android:elevation="4dp">
+
+        <android.support.v7.widget.SearchView android:id="@+id/findFriends_search_view"
+                                              android:layout_width="match_parent"
+                                              android:layout_height="wrap_content"
+                                              android:layout_margin="8dp"
+                                              android:background="@drawable/search_view_background"
+                                              android:inputType="textPersonName"
+                                              android:queryHint="Search"/>
+    </LinearLayout>
+
+
+    <TextView android:id="@+id/findFriends_text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="150dp"
+              android:layout_marginEnd="64dp"
+              android:layout_marginStart="64dp"
+              android:gravity="center"
+              android:textSize="18sp"
+              android:visibility="invisible"
+              tools:text="Enter your friends name in the search bar"
+        />
+
+    <RelativeLayout android:id="@+id/findFriends_rationale_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"
+                    android:visibility="gone">
+
+        <TextView android:id="@+id/findFriends_rat_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginEnd="32dp"
+                  android:layout_marginStart="32dp"
+                  android:gravity="center"
+                  android:text="@string/need_contant_permission"/>
+
+        <TextView android:id="@+id/findFriends_turn_on"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/findFriends_rat_text"
+                  android:layout_centerHorizontal="true"
+                  android:padding="10dp"
+                  android:text="Allow"
+                  android:textColor="@color/colorPrimary"
+                  android:textSize="15sp"
+                  android:textStyle="bold"/>
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/findFriends_progressbar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+    <Button android:id="@+id/findFriends_reload_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="150dp"
+            android:layout_centerHorizontal="true"
+            android:text="Retry"
+            android:visibility="gone"
+        />
+
+
+    <android.support.v7.widget.RecyclerView android:id="@+id/findFriends_recycler_view"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:layout_below="@id/findFriends_search_parent"
+        />
+
+</RelativeLayout>

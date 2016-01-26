@@ -185,6 +185,7 @@ public class PreLoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
+
                     try {
                         String responseString = response.body().string();
                         Log.i(TAG, "onResponse: " + responseString);
@@ -193,9 +194,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
                         LinuteUser user = new LinuteUser(object);
 
-                        //never signed up before or non edu email
-                        if (isUnique || !isEduEmail(user.getEmail())) {
-                            Log.i(TAG, "onResponse: about to go to FB");
+                        if (isUnique) {
                             persistTempData(user);
                             goToFBSignUpActivity(progress);
                         }
@@ -358,13 +357,18 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     private void persistTempData(LinuteUser user) {
-        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
+        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
 
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("password", mFBToken);
+        sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+        sharedPreferences.putInt("sex", user.getSex());
+        sharedPreferences.putString("dob", user.getDob());
+        sharedPreferences.putString("registrationType", user.getRegistrationType());
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("firstName", user.getFirstName());
         sharedPreferences.putString("lastName", user.getLastName());
+        sharedPreferences.putString("passwordFacebook", user.getPasswordFacebook());
         sharedPreferences.putString("email", user.getEmail());
 
         sharedPreferences.apply();

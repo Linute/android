@@ -35,6 +35,7 @@ public class LinuteUser {
     private String mCollegeName;
     private String mCollegeId;
     private String mCampus;
+    private String mPasswordFacebook;
 
     private int mPosts;
     private int mFollowers;
@@ -153,6 +154,7 @@ public class LinuteUser {
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
         // NEW end
+        mPasswordFacebook = getStringFromJson("passwordFacebook", userInfo);
 
         JSONObject college = getJsonObjectFromJson("college", userInfo);
 
@@ -213,6 +215,10 @@ public class LinuteUser {
 
     public String getFirstName() {
         return mFirstName;
+    }
+
+    public String getPasswordFacebook(){
+        return mPasswordFacebook;
     }
 
     public void setFirstName(String firstName) {

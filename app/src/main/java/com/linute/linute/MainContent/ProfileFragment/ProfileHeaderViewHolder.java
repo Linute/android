@@ -31,6 +31,7 @@ import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView vPosts;
     protected TextView vFollowing;
     protected TextView vFollowers;
+    protected TextView vCollegeName;
     protected ImageView vBlurBack;
     protected FrameLayout vBlurFrame;
     protected ImageView vFollowStatus;
@@ -74,6 +76,8 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vBlurBack = (ImageView) itemView.findViewById(R.id.profile_blur_back);
         vBlurFrame = (FrameLayout) itemView.findViewById(R.id.profile_blur_frame);
         vFollowStatus = (ImageView) itemView.findViewById(R.id.follow_button);
+
+        vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
 
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -167,6 +171,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vPosts.setText(String.valueOf(user.getPosts()));
         vFollowing.setText(String.valueOf(user.getFollowing()));
         vFollowers.setText(String.valueOf(user.getFollowers()));
+        vCollegeName.setText(user.getCollegeName());
 
         if (mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
             vFollowStatus.setVisibility(View.GONE);

@@ -14,10 +14,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -113,11 +113,11 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        MainActivity mainActivity = (MainActivity)getActivity();
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
 
-        if (mainActivity != null){ //changes app bar title to user's name
-            mainActivity.setTitle(mUserName);
-            mainActivity.resetToolbar();
+        if (activity != null){ //changes app bar title to user's name
+            activity.setTitle(mUserName);
+            activity.resetToolbar();
         }
 
         //if first time creating this fragment

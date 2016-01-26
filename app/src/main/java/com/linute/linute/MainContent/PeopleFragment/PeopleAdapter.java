@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 
 import java.util.List;
@@ -96,7 +95,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((MainActivity) aContext).startFindFriendsActivity(0);
+                    //TODO:
                 }
             });
         }
@@ -112,7 +111,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((MainActivity) aContext).startFindFriendsActivity(2);
+                    //TODO:
                 }
             });
         }
@@ -128,7 +127,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vLinearLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((MainActivity) aContext).startFindFriendsActivity(1);
+                    //TODO:
                 }
             });
         }

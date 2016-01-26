@@ -25,12 +25,12 @@
                 >
 
                 <android.support.v7.widget.Toolbar android:id="@+id/mainactivity_toolbar"
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/colorPrimary"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark"
-                    app:layout_scrollFlags="scroll|enterAlways|snap"
+                                                   xmlns:android="http://schemas.android.com/apk/res/android"
+                                                   android:layout_width="match_parent"
+                                                   android:layout_height="wrap_content"
+                                                   android:background="@color/colorPrimary"
+                                                   android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                                                   app:layout_scrollFlags="scroll|enterAlways|snap"
                     />
 
             </android.support.design.widget.AppBarLayout>
@@ -82,12 +82,13 @@
                                                   app:itemTextColor="@color/white"
                                                   app:menu="@menu/main_activity_drawer">
 
-        <ImageView android:id="@+id/mainActivity_nav_logout_button"
-                   android:layout_width="match_parent"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="bottom|fill_horizontal"
-                   android:layout_margin="@dimen/activity_vertical_margin"
-                   android:src="@drawable/unfollowing"
+        <Button android:id="@+id/mainActivity_nav_logout_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|fill_horizontal"
+                android:layout_margin="@dimen/activity_vertical_margin"
+                android:background="@drawable/unfollowing"
+                android:src="@drawable/unfollowing"
 
 
             />

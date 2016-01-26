@@ -3,51 +3,36 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <group android:checkableBehavior="single">
+    <group>
         <item
             android:id="@+id/navigation_item_feed"
-            android:checked="true"
             android:icon="@drawable/ic_action_social_people"
             android:title="Feed"
+            android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"
             />
         <item
             android:id="@+id/navigation_item_people"
             android:icon="@drawable/ic_action_content_add"
             android:title="People"
+            android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
         <item
             android:id="@+id/navigation_item_activity"
             android:icon="@drawable/ic_action_navigation_close"
             android:title="Activity"
+            android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
+
+        <item android:id="@+id/navigation_item_find_friends"
+              android:icon="@drawable/ic_action_social_group_add"
+              android:title="Find Friends"
+              />
 
         <item android:id="@+id/navigation_item_settings"
               android:icon="@drawable/ic_action_action_settings"
               android:title="Settings"
             />
-
-        <item android:id="@+id/navigation_item_find_friends_group"
-              android:title="Find Friends"
-              >
-            <menu>
-                <item android:id="@+id/nav_find_by_name"
-                      android:icon="@drawable/search_name"
-                      android:title="Name"/>
-
-                <item android:id="@+id/nav_find_facebook"
-                      android:icon="@drawable/icon_facebook"
-                      android:title="Facebook"
-                      />
-
-                <item android:id="@+id/nav_find_contacts"
-                      android:icon="@drawable/contacts"
-                      android:title="Contacts"/>
-
-            </menu>
-        </item>
-
-
     </group>
 
 

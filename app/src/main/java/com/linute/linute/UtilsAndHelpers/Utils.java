@@ -108,12 +108,30 @@ public class Utils {
         pref.putString("collegeName", null);
         pref.putString("collegeId", null);
         pref.putString("campus", null);
+        pref.putString("passwordFacebook", null);
         pref.commit();
     }
 
     public static void deleteTempSharedPreference(SharedPreferences.Editor temp) {
-        temp.putString("tempCode", "").apply();
-        temp.putString("tempPhone", "").apply();
+        temp.putString("tempCode", null);
+        temp.putString("tempPhone", null);
+
+
+
+        temp.putString("userID", null);
+        temp.putString("password", null);
+        temp.putString("socialFacebook", null);
+        temp.putInt("sex", 0);
+        temp.putString("dob", null);
+        temp.putString("registrationType", null);
+        temp.putString("profileImage", null);
+        temp.putString("firstName", null);
+        temp.putString("lastName", null);
+        temp.putString("passwordFacebook", null);
+        temp.putString("email", null);
+
+
+        temp.apply();
     }
 
     public static String getEventImageURL(String jpegName) {

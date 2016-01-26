@@ -16,12 +16,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -183,7 +182,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                 @Override
                 public void onClick(View v) {
                     //TODO: fix
-                    MainActivity activity = (MainActivity) mContext;
+                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
                     if (activity != null){
                         activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(name, userId));
                     }

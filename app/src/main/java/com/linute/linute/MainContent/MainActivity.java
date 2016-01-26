@@ -34,20 +34,22 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.Settings.MainSettingsFragment;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseTaptActivity {
 
     public static String TAG = "MainActivity";
     private AppBarLayout mAppBarLayout;
@@ -64,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionsMenu fam;
 
     private UpdatableFragment[] mFragments; //holds our fragments
-    private int mCurrentlyCheckedItem;
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private int mAppBarElevation;
+    private MenuItem mPreviousItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +125,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
                 .commit();
-        mCurrentlyCheckedItem = R.id.navigation_item_feed;
+        mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+        mPreviousItem.setChecked(true);
 
 
         //floating action button setup
@@ -159,9 +162,9 @@ public class MainActivity extends AppCompatActivity {
 
                 clearBackStack();
 
-                if (mCurrentlyCheckedItem != FRAGMENT_INDEXES.PROFILE) { //profile doesn't get checked
-                    mNavigationView.getMenu().findItem(mCurrentlyCheckedItem).setChecked(false);
-                    mCurrentlyCheckedItem = FRAGMENT_INDEXES.PROFILE;
+                if (mPreviousItem != null ) { //profile doesn't get checked
+                    mPreviousItem.setChecked(false);
+                    mPreviousItem = null;
                 }
 
                 replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
@@ -175,41 +178,38 @@ public class MainActivity extends AppCompatActivity {
                 //if there are a lot of other user profile/ events in mainActivity, clear them
                 clearBackStack();
 
+
+
                 switch (item.getItemId()) {
                     case R.id.navigation_item_feed:
-                        mCurrentlyCheckedItem = R.id.navigation_item_feed;
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
                         item.setChecked(true);
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
+                        mPreviousItem = item;
                         break;
                     case R.id.navigation_item_activity:
-                        mCurrentlyCheckedItem = R.id.navigation_item_activity;
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                         item.setChecked(true);
+                        mPreviousItem = item;
                         break;
                     case R.id.navigation_item_people:
-                        mCurrentlyCheckedItem = R.id.navigation_item_people;
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PEOPLE));
                         item.setChecked(true);
+                        mPreviousItem = item;
                         break;
                     case R.id.navigation_item_settings:
-                        mCurrentlyCheckedItem = R.id.navigation_item_settings;
-                        replaceContainerWithFragment(new MainSettingsFragment());
-                        item.setChecked(true);
+                        startActivityForResults(SettingActivity.class, SETTINGS_REQUEST_CODE);
                         break;
-                    case R.id.nav_find_by_name:
-                        mCurrentlyCheckedItem = R.id.nav_find_by_name;
-                        replaceContainerWithFragment(FindFriendsFragment.newInstance(0));
-                        item.setChecked(true);
-                        break;
-                    case R.id.nav_find_facebook:
-                        mCurrentlyCheckedItem = R.id.nav_find_facebook;
-                        replaceContainerWithFragment(FindFriendsFragment.newInstance(1));
-                        item.setChecked(true);
-                        break;
-                    case R.id.nav_find_contacts:
-                        mCurrentlyCheckedItem = R.id.nav_find_contacts;
-                        replaceContainerWithFragment(FindFriendsFragment.newInstance(2));
-                        item.setChecked(true);
+                    case R.id.navigation_item_find_friends:
+                        startNewActivity(FindFriendsActivity.class);
                         break;
                     default:
                         break;
@@ -253,6 +253,7 @@ public class MainActivity extends AppCompatActivity {
         return mFragments[index];
     }
 
+    @Override
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
@@ -267,9 +268,43 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private static final int SETTINGS_REQUEST_CODE = 13;
+    public void startActivityForResults(Class activity, final int requestCode){
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                startActivityForResult(i, requestCode);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK){
+
+            //NOTE: need to reload others?
+            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
+            loadDrawerHeader(); //reload drawer header
+        }
+    }
+
+    public void startNewActivity(final Class activity){
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(MainActivity.this, activity);
+
+                startActivity(i);
+            }
+        });
+    }
+
+
 
     //use this when you need to add another users profile view
     //or load image or status
+    @Override
     public void addFragmentToContainer(final Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
@@ -306,7 +341,7 @@ public class MainActivity extends AppCompatActivity {
         //TODO: save state
     }
 
-
+    @Override
     public void setTitle(String title) {
         mActionBar.setTitle(title);
     }
@@ -340,9 +375,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //pops back toolbar back out
+    @Override
     public void resetToolbar() {
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
         AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+
+        if (behavior == null) return;
+
         mAppBarLayout.setExpanded(true, true);
         behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
     }
@@ -350,11 +389,13 @@ public class MainActivity extends AppCompatActivity {
     //raise and lower appBar
     //we have to lower appBar in fragments that have tablayouts or there will be a shadow above the tabs
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
     public void raiseAppBarLayoutElevation() {
         mAppBarLayout.setElevation(mAppBarElevation);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
     public void lowerAppBarElevation() {
         mAppBarLayout.setElevation(0);
     }
@@ -410,13 +451,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
-    }
-
-    //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
-    public void startFindFriendsActivity(int type) {
-        Intent i = new Intent(this, FindFriendsFragment.class);
-        i.putExtra(FindFriendsFragment.SEARCH_TYPE_KEY, type);
-        startActivity(i);
     }
 
 

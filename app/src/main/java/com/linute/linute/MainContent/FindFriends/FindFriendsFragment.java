@@ -1,9 +1,7 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
-import android.app.DialogFragment;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,9 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,8 +32,8 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKFriendSearch;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -97,7 +93,7 @@ public class FindFriendsFragment extends Fragment {
 //    protected void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
 //
-////        setContentView(R.layout.activity_find_friends);
+////        setContentView(R.layout.fragment_find_friends);
 ////
 ////        if (getIntent() != null) {
 ////            mSearchType = getIntent().getIntExtra(SEARCH_TYPE_KEY, 0);
@@ -160,7 +156,7 @@ public class FindFriendsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.activity_find_friends, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_find_friends, container, false);
 
         mDescriptionText = (TextView) rootView.findViewById(R.id.findFriends_text);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
@@ -168,6 +164,9 @@ public class FindFriendsFragment extends Fragment {
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
         mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
         mReloadButton = (Button) rootView.findViewById(R.id.findFriends_reload_button);
+
+        mSearchView.setIconified(false);
+        mSearchView.setIconifiedByDefault(false);
 
         mReloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,10 +212,11 @@ public class FindFriendsFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        MainActivity activity = (MainActivity) getActivity();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.setTitle("Find Friends");
             activity.lowerAppBarElevation();
+            activity.resetToolbar();
         }
     }
 
@@ -228,7 +228,7 @@ public class FindFriendsFragment extends Fragment {
             mGetContactsInBackground.cancel(true);
         }
 
-        MainActivity activity = (MainActivity) getActivity();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.raiseAppBarLayoutElevation();
         }
@@ -424,6 +424,7 @@ public class FindFriendsFragment extends Fragment {
                         JSONArray friends = json.getJSONArray("friends");
 
                         if (friends != null) {
+                            mUnfilteredList.clear();
                             for (int i = 0; i < friends.length(); i++) {
                                 FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
                                 mFriendFoundList.add(user);
@@ -598,7 +599,8 @@ public class FindFriendsFragment extends Fragment {
                         JSONObject json = new JSONObject(response.body().string());
                         JSONArray friends = json.getJSONArray("friends");
 
-                        if (friends != null && friends.length() > 0) {
+                        if (friends != null) {
+                            mUnfilteredList.clear();
                             for (int i = 0; i < friends.length(); i++) {
                                 FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
                                 mFriendFoundList.add(user);

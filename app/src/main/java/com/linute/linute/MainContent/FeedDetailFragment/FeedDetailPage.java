@@ -21,8 +21,8 @@ import android.widget.EditText;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -230,7 +230,7 @@ public class FeedDetailPage extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-        MainActivity activity = (MainActivity)getActivity();
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
         if (activity != null){
             activity.setTitle(mIsImage ? "Image" : "Status");
             activity.resetToolbar();

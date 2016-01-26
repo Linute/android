@@ -16,9 +16,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -193,7 +193,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
             Log.i(TAG, "onClick: inside");
             if (vFeedDetail.getPostPrivacy() == 0) {
                 Log.i(TAG, "onClick: privacy 0");
-                ((MainActivity)mContext).addFragmentToContainer(
+                ((BaseTaptActivity)mContext).addFragmentToContainer(
                         TaptUserProfileFragment.newInstance(
                                 vFeedDetail.getUserName()
                                 , vFeedDetail.getPostUserId()
