@@ -36,9 +36,9 @@
             </android.support.design.widget.AppBarLayout>
 
             <FrameLayout android:id="@+id/mainActivity_fragment_holder"
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+                         android:layout_width="match_parent"
+                         android:layout_height="match_parent"
+                         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 
             <com.getbase.floatingactionbutton.FloatingActionsMenu android:id="@+id/fabmenu"
@@ -88,8 +88,7 @@
                 android:layout_margin="@dimen/activity_vertical_margin"
                 android:background="@drawable/unfollowing"
                 android:src="@drawable/unfollowing"
-
-
+                android:visibility="gone"
             />
 
     </android.support.design.widget.NavigationView>

@@ -144,8 +144,8 @@ public class DiscoverFragment extends UpdatableFragment {
 //            }
 //        });
 
-        refreshLayout.setRefreshing(true);
-        getFeed(0);
+//        refreshLayout.setRefreshing(true);
+//        getFeed(0);
 
         return rootView;
     }
@@ -153,12 +153,11 @@ public class DiscoverFragment extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        if (fragmentNeedsUpdating() && getActivity() != null){
-//            Log.i(TAG, "onResume: ");
-//            refreshLayout.setRefreshing(true);
-//            getFeed(0);
-//            //setFragmentNeedUpdating(false);
-//        }
+
+        if (fragmentNeedsUpdating() && getActivity() != null){
+            Log.i(TAG, "onResume: ");
+            getFeed(0);
+        }
     }
 
     private int mSkip = 0;

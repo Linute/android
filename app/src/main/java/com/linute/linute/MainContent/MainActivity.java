@@ -24,6 +24,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
@@ -410,11 +412,11 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
-//        return true;
-//    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
+        return true;
+    }
 
 
 
@@ -429,9 +431,13 @@ public class MainActivity extends BaseTaptActivity {
             case android.R.id.home:
                 if (getSupportFragmentManager().getBackStackEntryCount() > 0)
                     getSupportFragmentManager().popBackStack();
-
-
                 else mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
+            case R.id.people_fragment_menu_chat:
+                Intent enterRooms = new Intent(this, RoomsActivity.class);
+                enterRooms.putExtra("CHATICON", true);
+                startActivity(enterRooms);
                 return true;
         }
 

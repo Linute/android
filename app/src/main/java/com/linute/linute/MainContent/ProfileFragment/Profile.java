@@ -198,6 +198,7 @@ public class Profile extends UpdatableFragment {
         editor.putInt("followers", user.getFollowers());
         editor.putInt("following", user.getFollowing());
         editor.putString("id", user.getUserID());
+        editor.putString("userImage", user.getProfileImage());
         editor.apply();
     }
 

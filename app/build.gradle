@@ -9,8 +9,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 10
-        versionName "1.7.1"
+        versionCode 12
+        versionName "1.7.3"
     }
     buildTypes {
         release {
@@ -40,5 +40,4 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.6.1'
     compile 'com.facebook.android:facebook-android-sdk:4.9.0'
     compile 'de.greenrobot:eventbus:3.0.0-beta1'
-    compile 'com.android.support:preference-v7:23.1.1'
 }

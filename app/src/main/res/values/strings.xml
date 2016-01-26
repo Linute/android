@@ -146,4 +146,9 @@
     </string>
     <string name="no_friends_posts">Your friends haven\'t posted anything yet.</string>
     <string name="no_campus_post">Your school hasn\'t posted anything yet</string>
+
+    <string name="action_send">Send</string>
+    <string name="prompt_message">Message</string>
+    <string name="error_connect">Failed to connect</string>
+    <string name="user_action_typing">is typing</string>
 </resources>

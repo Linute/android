@@ -100,7 +100,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         if(activity == null) return;
 
         //tap image or name
-        if (v == vUserImage || v == vPostUserName){
+        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0){
             activity.addFragmentToContainer(
                     TaptUserProfileFragment.newInstance(
                             mPosts.get(getAdapterPosition()).getUserName()
@@ -116,7 +116,6 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                             , mPosts.get(getAdapterPosition()).getUserId())
             );
         }
-
     }
 
     @Override

@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +44,7 @@ public class NewChatDialog extends DialogFragment {
     private static final String TAG = NewChatDialog.class.getSimpleName();
     private SearchUser mSearchUser;
     private SharedPreferences mSharedPreferences;
+    private String mRoomIsEmpty = "";
 
     public NewChatDialog() {
         // Required empty public constructor
@@ -113,19 +113,20 @@ public class NewChatDialog extends DialogFragment {
                 newChat.checkUserConvo(user, new Callback() {
                     @Override
                     public void onFailure(Request request, IOException e) {
-                        Log.d(TAG, "onFailure: " + request.body().toString());
+                        Log.d(TAG, "onFailureCheckChat: " + request.body().toString());
                         e.printStackTrace();
                     }
 
                     @Override
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d(TAG, "onResponse: " + response.body().string());
+                            Log.d(TAG, "onResponseCheckChat: " + response.body().string());
                         } else {
                             JSONObject jsonObject = null;
                             try {
                                 jsonObject = new JSONObject(response.body().string());
-                                Log.d(TAG, "onResponse: " + jsonObject);
+                                Log.d(TAG, "onResponseCheckChat: " + jsonObject.toString(4));
+
                                 if (jsonObject.getJSONArray("rooms").length() == 0) {
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
@@ -141,19 +142,26 @@ public class NewChatDialog extends DialogFragment {
                                                 @Override
                                                 public void onFailure(Request request, IOException e) {
                                                     e.printStackTrace();
-                                                    Log.d(TAG, "onFailure: " + request.body().toString());
+                                                    Log.d(TAG, "onFailureNewChat: " + request.body().toString());
                                                 }
 
                                                 @Override
                                                 public void onResponse(Response response) throws IOException {
                                                     if (!response.isSuccessful()) {
-                                                        Log.d(TAG, "onResponse: " + response.body().string());
+                                                        JSONObject jsonObject = null;
+                                                        try {
+                                                            jsonObject = new JSONObject(response.body().string());
+                                                            Log.d(TAG, "onResponseNewChat: " + jsonObject.toString(4));
+                                                        } catch (JSONException e) {
+                                                            e.printStackTrace();
+                                                        }
                                                     } else {
 //                                                        Log.d(TAG, "onResponse: " + response.body().string());
                                                         JSONObject jsonObject = null;
                                                         String roomId = "";
                                                         try {
                                                             jsonObject = new JSONObject(response.body().string());
+                                                            Log.d(TAG, "onResponseSuccesfullNewChat: ");
 //                                                            roomId = jsonObject.getJSONObject("filters")
                                                         } catch (JSONException e) {
                                                             e.printStackTrace();
