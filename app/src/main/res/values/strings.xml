@@ -137,4 +137,8 @@
     <string name="CHAT_SERVER_URL">https://campus.tapt.io/</string>
 
     <string name="search_hint">Search</string>
+    <string name="action_send">Send</string>
+    <string name="prompt_message">Message</string>
+    <string name="error_connect">Failed to connect</string>
+    <string name="user_action_typing">is typing</string>
 </resources>

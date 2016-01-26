@@ -4,6 +4,9 @@ package com.linute.linute.MainContent.Chat;
  * Created by Arman on 1/16/16.
  */
 public class Chat {
+    public static final int TYPE_MESSAGE = 0;
+    public static final int TYPE_ACTION = 1;
+
     private String mRoomId;
     private String mUserImage;
     private String mUserName;
@@ -11,6 +14,8 @@ public class Chat {
     private String mOwnerId;
     private String mMessageId;
     private String mMessage;
+    private int mType;
+    private boolean mIsRead;
 
     public Chat() {
         mRoomId = "";
@@ -20,6 +25,7 @@ public class Chat {
         mOwnerId = "";
         mMessageId = "";
         mMessage = "";
+        mIsRead = false;
     }
 
     public Chat(String roomId, String userImage, String userName, String shortDate, String ownerId, String messageId, String message) {
@@ -30,6 +36,7 @@ public class Chat {
         mOwnerId = ownerId;
         mMessageId = messageId;
         mMessage = message;
+        mIsRead = false;
     }
 
     public String getRoomId() {
@@ -58,5 +65,21 @@ public class Chat {
 
     public String getMessage() {
         return mMessage;
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+    public void setType(int type) {
+        mType = type;
+    }
+
+    public boolean isRead() {
+        return mIsRead;
+    }
+
+    public void setIsRead(boolean isRead) {
+        mIsRead = isRead;
     }
 }
