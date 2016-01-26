@@ -9,16 +9,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -41,16 +40,17 @@ import java.util.TimeZone;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PeopleFragment extends Fragment {
+public class PeopleFragment extends UpdatableFragment {
     private static final String TAG = PeopleFragment.class.getSimpleName();
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private PeopleAdapter mPeopleAdapter;
 
-    private List<People> mPeopleList;
+    private List<People> mPeopleList = new ArrayList<>();
 
     public PeopleFragment() {
+        Log.i(TAG, "PeopleFragment: created");
         // Required empty public constructor
     }
 
@@ -60,9 +60,7 @@ public class PeopleFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_people, container, false);
-        setHasOptionsMenu(true);
 
-        mPeopleList = new ArrayList<>();
 
         recList = (RecyclerView) rootView.findViewById(R.id.people_frag_rec);
         recList.setHasFixedSize(true);
@@ -81,13 +79,26 @@ public class PeopleFragment extends Fragment {
             }
         });
 
-        mPeopleAdapter = new PeopleAdapter(mPeopleList, getContext());
+        mPeopleAdapter = new PeopleAdapter(mPeopleList, getActivity());
         recList.setAdapter(mPeopleAdapter);
 
-        getPeople();
-
-
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null){
+            mSwipeRefreshLayout.setRefreshing(true);
+            mainActivity.setTitle("People");
+            mainActivity.resetToolbar();
+        }
+
+        if (fragmentNeedsUpdating()){
+            getPeople();
+            setFragmentNeedUpdating(false);
+        }
     }
 
     private void getPeople() {
@@ -115,8 +126,7 @@ public class PeopleFragment extends Fragment {
 
                     People people;
                     String friend = "";
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
-                    simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     Date myDate;
                     String dateString;
 
@@ -127,7 +137,7 @@ public class PeopleFragment extends Fragment {
 
 
                         myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                        dateString = Utils.getEventTime(myDate);
+                        dateString = Utils.getTimeAgoString(myDate.getTime());
 
                         jsonObject = jsonObject.getJSONObject("owner");
                         people = new People(
@@ -160,26 +170,5 @@ public class PeopleFragment extends Fragment {
         });
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        //menu.clear();
-        inflater.inflate(R.menu.people_fragment_menu, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        int id = item.getItemId();
-
-        if (R.id.people_fragment_menu_chat == id) {
-            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-            enterRooms.putExtra("CHATICON", true);
-            startActivity(enterRooms);
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
 }

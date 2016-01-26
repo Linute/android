@@ -16,9 +16,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -188,18 +188,16 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
     @Override
     public void onClick(View v) {
+        Log.i(TAG, "onClick: outside");
         if (v == vUserImage) {
+            Log.i(TAG, "onClick: inside");
             if (vFeedDetail.getPostPrivacy() == 0) {
-                android.app.FragmentManager fragmentManager = ((MainActivity) mContext).getFragmentManager();
-                ((MainActivity) mContext).mTaptUserProfileFragment = TaptUserProfileFragment.newInstance("Discover", vFeedDetail.getPostUserId());
-                // The device is smaller, so show the fragment fullscreen
-                android.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
-                // For a little polish, specify a transition animation
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                // To make it fullscreen, use the 'content' root view as the container
-                // for the fragment, which is always the root view for the activity
-                transaction.add(R.id.postContainer, ((MainActivity) mContext).mTaptUserProfileFragment)
-                        .addToBackStack(null).commit();
+                Log.i(TAG, "onClick: privacy 0");
+                ((BaseTaptActivity)mContext).addFragmentToContainer(
+                        TaptUserProfileFragment.newInstance(
+                                vFeedDetail.getUserName()
+                                , vFeedDetail.getPostUserId()
+                        ));
             }
         }
     }

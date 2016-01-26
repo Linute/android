@@ -73,9 +73,9 @@ public class ChangePhoneActivity extends AppCompatActivity {
 
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.changephone_toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setTitle("Phone");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Phone");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -268,9 +268,8 @@ public class ChangePhoneActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 showProgress(false, mSecondViewButtons, mProgressBar2, mConfirmation);
-                                mViewSwitcher.showPrevious();
-                                mPhoneNumber.setText(mSharedPreferences.getString("phone", ""));
                                 Utils.showSavedToast(ChangePhoneActivity.this);
+                                finish();
                             }
                         });
                     } catch (JSONException e) {

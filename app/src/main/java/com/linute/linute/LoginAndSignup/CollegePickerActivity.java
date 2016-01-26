@@ -77,6 +77,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
 
         setupSearchView();
+        Utils.testLog(this, TAG);
     }
 
     private void setupSearchView() {

@@ -25,13 +25,14 @@ public class LSDKEvents {
         mEncodedToken = Utils.encode_base64(mSharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null));
     }
 
-    public Call getEvents(Map<String, String> param, Callback callback) {
+    public Call getEvents(boolean friendsOnly,Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
                 mSharedPreferences.getString("email", null),
                 mSharedPreferences.getString("password", null),
                 mEncodedToken);
 
-        String[] path = {"events", "discover"};
+        String[] path = {"events", friendsOnly ? "friends" : "discover"};
+
 
         return API_Methods.get(path, header, param, callback);
     }

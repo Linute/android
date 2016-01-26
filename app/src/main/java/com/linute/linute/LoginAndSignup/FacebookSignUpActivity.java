@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -17,6 +19,8 @@ import android.widget.ViewSwitcher;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -34,6 +38,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by QiFeng on 1/14/16.
@@ -67,19 +72,31 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
     private boolean mCheckInProgress = false;
 
+    private boolean mImageIsFBLink;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_facebook_signup);
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE);
 
         setUpViewSwitcher();
         bindViews();
 
         mFirstNameEditText.append(mSharedPreferences.getString("firstName", ""));
         mLastNameEditText.append(mSharedPreferences.getString("lastName", ""));
-        mProfilePath = Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", ""));
+        String image = mSharedPreferences.getString("profileImage", "");
+
+        if (image.contains("facebook.com")) {
+            mProfilePath = image;
+            mImageIsFBLink = true;
+        } else {
+            mProfilePath = Utils.getImageUrlOfUser(image);
+            mImageIsFBLink = false;
+        }
+
+
         loadProfileImage();
         setOnClickListener();
     }
@@ -94,6 +111,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
         outState.putString("pinCode", mPinCode);
         outState.putBoolean("inVerify", mInVerificationView);
+        outState.putBoolean("isFBImage", mImageIsFBLink);
 
         super.onSaveInstanceState(outState);
     }
@@ -109,6 +127,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
             mProfilePath = savedInstanceState.getString("profileImage");
             mPinCode = savedInstanceState.getString("pinCode");
             mInVerificationView = savedInstanceState.getBoolean("inVerify");
+            mImageIsFBLink = savedInstanceState.getBoolean("isFBImage");
 
             loadProfileImage();
         }
@@ -166,15 +185,73 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         }
 
 
-        Map<String, Object> newInfo = new HashMap<>();
+        final Map<String, Object> newInfo = new HashMap<>();
         newInfo.put("firstName", mFirstNameEditText.getText().toString());
         newInfo.put("lastName", mLastNameEditText.getText().toString());
         newInfo.put("email", mEmailEditText.getText().toString().trim());
-        newInfo.put("password", mSharedPreferences.getString("password", ""));
+        newInfo.put("socialFacebook", mSharedPreferences.getString("socialFacebook", ""));
+        newInfo.put("sex", mSharedPreferences.getInt("sex", 0));
+
+        String dob = mSharedPreferences.getString("dob", "");
+        if (!dob.equals("") && !dob.equals("null")){
+            newInfo.put("dob", dob);
+        }
+        newInfo.put("registrationType", "facebook");
+        newInfo.put("passwordFacebook", mSharedPreferences.getString("passwordFacebook", ""));
+        newInfo.put("password", mSharedPreferences.getString("passwordFacebook", ""));
+
 
         showProgress(true, 1);
 
-        new LSDKUser(this).updateUserInfo(newInfo, mSharedPreferences.getString("email", ""), new Callback() {
+        if (mImageIsFBLink) {
+
+            Glide.with(getApplicationContext())
+                    .load(mProfilePath)
+                    .asBitmap()
+                    .into(new SimpleTarget<Bitmap>(1080, 1080) {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
+                            newInfo.put("profileImage", Utils.encodeImageBase64(resource));
+                            update(newInfo);
+                        }
+                    });
+        } else {
+            update(newInfo);
+        }
+
+//        new LSDKUser(this).updateUserInfo(newInfo, mSharedPreferences.getString("email", ""), new Callback() {
+//            @Override
+//            public void onFailure(Request request, IOException e) {
+//                failedInternetConnection(1);
+//            }
+//
+//            @Override
+//            public void onResponse(Response response) throws IOException {
+//                if (response.isSuccessful()) {
+//                    try {
+//                        String responseString = response.body().string();
+//                        Log.i(TAG, "onResponse: " + responseString);
+//                        persistData(new LinuteUser(new JSONObject(responseString))); //save data
+//
+//                        goToCollegePicker();
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                        serverError(1);
+//                    }
+//
+//
+//                } else {
+//                    serverError(1);
+//                    Log.e(TAG, "onResponse: " + response.body().string());
+//                }
+//            }
+//        });
+
+    }
+
+    private void update(Map<String, Object> params) {
+        new LSDKUser(this).createUser(params, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 failedInternetConnection(1);
@@ -202,7 +279,6 @@ public class FacebookSignUpActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
 
@@ -285,7 +361,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
                         serverError(0);
                     }
                 } else {
-                    Log.e(TAG, "onResponse: "+response.body().string() );
+                    Log.e(TAG, "onResponse: " + response.body().string());
                     serverError(0);
                 }
             }
@@ -352,10 +428,10 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         final View progressBar;
         final View buttons;
 
-        if (viewIndex == 0){
+        if (viewIndex == 0) {
             progressBar = mProgressBar1;
             buttons = mNextButton;
-        }else {
+        } else {
             progressBar = mProgressBar2;
             buttons = mLayer2Buttons;
         }
@@ -392,7 +468,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         });
     }
 
-    private void serverError(final  int index) {
+    private void serverError(final int index) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -428,13 +504,16 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+        sharedPreferences.putString("password", mSharedPreferences.getString("passwordFacebook", ""));
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
 
+        Utils.deleteTempSharedPreference(mSharedPreferences.edit());
+
     }
 
-    private void goToCollegePicker(){
+    private void goToCollegePicker() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

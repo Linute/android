@@ -36,9 +36,8 @@ public class RoomsActivity extends AppCompatActivity {
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
+        toolbar.setTitle("Rooms");
         setSupportActionBar(toolbar);
-        mTitle = (TextView) toolbar.findViewById(R.id.toolbar_title);
-        mTitle.setText("Rooms");
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setImageResource(R.drawable.add_friend);

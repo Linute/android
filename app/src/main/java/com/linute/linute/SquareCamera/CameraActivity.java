@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
@@ -54,6 +55,7 @@ public class CameraActivity extends AppCompatActivity {
             clearBackStack(); //clears gallery or camera fragment
             if (mHasWriteAndCameraPermission) launchCameraFragment();
             else launchPermissionNeededFragment();
+            mRecievedRequestPermissionResults = false;
         }
     }
 
@@ -66,10 +68,9 @@ public class CameraActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (!hasCameraAndWritePermission()) return;
-
         if (resultCode == RESULT_CANCELED) { //cancelled gallery pick or crop
             clearBackStack(); //remove gallery fragment
+            Log.i(TAG, "onActivityResult: cancelled");
         }
 
         else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
@@ -77,9 +78,11 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+            Log.i(TAG, "onActivityResult: okay");
             if (resultCode == RESULT_OK) {
 
                 Uri imageUri = Crop.getOutput(data);
+                ImageUtils.normalizeImageForUri(this, imageUri);
                 launchEditAndSaveFragment(imageUri);
 
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
@@ -167,6 +170,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void launchEditAndSaveFragment(Uri uri) {
+        Log.i(TAG, "launchEditAndSaveFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -184,6 +188,7 @@ public class CameraActivity extends AppCompatActivity {
     public static final String EDIT_AND_GALLERY_STACK_NAME = "edit_and_gallery_stack_name";
 
     public void launchGalleryFragment() {
+        Log.i(TAG, "launchGalleryFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -194,6 +199,12 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
 
         goToGalleryAndCrop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        clearBackStack();
     }
 
     private void goToGalleryAndCrop() {

@@ -1,133 +1,138 @@
 package com.linute.linute.MainContent;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+
+import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
+
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
-import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.SlidingTab.SlidingTabLayout;
-import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 
-public class MainActivity extends AppCompatActivity {
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.Utils;
+import com.mikhaellopez.circularimageview.CircularImageView;
+
+public class MainActivity extends BaseTaptActivity {
 
     public static String TAG = "MainActivity";
+    private AppBarLayout mAppBarLayout;
+    private ActionBar mActionBar;
+    private DrawerLayout mDrawerLayout;
+    private MainDrawerListener mMainDrawerListener;
+    private NavigationView mNavigationView;
 
-    public ViewPager mViewPager;
-    private Toolbar mToolbar;
-    private TextView mTitle;
     private FloatingActionButton fab;
-    private PostCreatePage mPostCreatePage;
-    public TaptUserProfileFragment mTaptUserProfileFragment;
-    public FeedDetailPage mFeedDetailPage;
+    //public TaptUserProfileFragment mTaptUserProfileFragment;
+    //public FeedDetailPage mFeedDetailPage;
 
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
-    private FloatingActionButton fabImage;
-    private FloatingActionButton fabText;
 
-    private Fragment[] mFragments;
+    private UpdatableFragment[] mFragments; //holds our fragments
 
+    public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
+
+    public static class FRAGMENT_INDEXES {
+        public static final short PROFILE = 0;
+        public static final short FEED = 1;
+        public static final short PEOPLE = 2;
+        public static final short ACTIVITY = 3;
+
+        public static final short SETTINGS = 5;
+    }
+
+
+    private int mAppBarElevation;
+    private MenuItem mPreviousItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setContentView(R.layout.activity_main);
 
-        mFragments = new Fragment[4];
-        mFragments[0] = new DiscoverFragment();
-        mFragments[1] = new PeopleFragment();
-        mFragments[2] = new UpdatesFragment();
-        mFragments[3] = new Profile();
+        mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
+
+        mFragments = new UpdatableFragment[4];
 
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
 
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
+        mMainDrawerListener = new MainDrawerListener();
+        mDrawerLayout.setDrawerListener(mMainDrawerListener);
+        mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
+
         //get toolbar
-        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
-        mTitle = (TextView) mToolbar.findViewById(R.id.toolbar_title);
-        try {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        } catch (NullPointerException ne) {
-            ne.printStackTrace();
-        }
+        mActionBar = getSupportActionBar();
 
-        // Get the ViewPager and set it's PagerAdapter so that it can display items
-        mViewPager = (ViewPager) findViewById(R.id.mainactivity_viewpager);
-        mViewPager.setOffscreenPageLimit(3);
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+        //this arrow changes from navigation to back arrow
+        final DrawerArrowDrawable arrowDrawable = new DrawerArrowDrawable(this);
+        arrowDrawable.setColor(ContextCompat.getColor(this, R.color.white));
+        mToolbar.setNavigationIcon(arrowDrawable);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                resetToolbar();
-                switch (position) {
-                    case 0:
-                        setTitle("My Campus");
-                        break;
-                    case 1:
-                        setTitle("People");
-                        break;
-                    case 2:
-                        setTitle("Updates");
-                        break;
-                    case 3:
-                        ((Profile) mFragments[3]).hasSetTitle = false;
-                        ((Profile) mFragments[3]).updateAndSetHeader();
-                        break;
-                }
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
+            public void onBackStackChanged() {
+                boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
+                ObjectAnimator.ofFloat(arrowDrawable, "progress", drawer ? 0 : 1).start();
             }
         });
 
-        setTitle("My Campus");
 
-        mViewPager.setAdapter(new LinuteFragmentAdapter(getSupportFragmentManager(),
-                MainActivity.this, mFragments));
+        //only loads one fragment
+        mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
+                .commit();
+        mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+        mPreviousItem.setChecked(true);
 
-        // Give the TabLayout the ViewPager
-        SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.mainactivity_tabbar);
-        tabLayout.setSelectedIndicatorColors(R.color.white);
-        tabLayout.setViewPager(mViewPager);
 
-//        fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                newPost();
-//            }
-//        });
-
+        //floating action button setup
         fam = (FloatingActionsMenu) findViewById(R.id.fabmenu);
-        fabImage = (FloatingActionButton) findViewById(R.id.fabImage);
+        FloatingActionButton fabImage = (FloatingActionButton) findViewById(R.id.fabImage);
         fabImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,59 +141,264 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
-        fabText = (FloatingActionButton) findViewById(R.id.fabText);
+        FloatingActionButton fabText = (FloatingActionButton) findViewById(R.id.fabText);
         fabText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 fam.toggle();
-                newPost();
+                Intent i = new Intent(MainActivity.this, PostCreatePage.class);
+                startActivity(i);
+            }
+        });
+
+
+        //profile image and header setup
+        loadDrawerHeader();
+
+        //set click listener for header - taken to profile
+        mNavigationView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawerLayout.closeDrawers();
+
+                clearBackStack();
+
+                if (mPreviousItem != null ) { //profile doesn't get checked
+                    mPreviousItem.setChecked(false);
+                    mPreviousItem = null;
+                }
+
+                replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+            }
+        });
+
+        //setNavigationView action
+        mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                //if there are a lot of other user profile/ events in mainActivity, clear them
+                clearBackStack();
+
+
+
+                switch (item.getItemId()) {
+                    case R.id.navigation_item_feed:
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
+                        item.setChecked(true);
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
+                        mPreviousItem = item;
+                        break;
+                    case R.id.navigation_item_activity:
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                        item.setChecked(true);
+                        mPreviousItem = item;
+                        break;
+                    case R.id.navigation_item_people:
+                        if (mPreviousItem != null && mPreviousItem != item){
+                            mPreviousItem.setChecked(false);
+                        }
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PEOPLE));
+                        item.setChecked(true);
+                        mPreviousItem = item;
+                        break;
+                    case R.id.navigation_item_settings:
+                        startActivityForResults(SettingActivity.class, SETTINGS_REQUEST_CODE);
+                        break;
+                    case R.id.navigation_item_find_friends:
+                        startNewActivity(FindFriendsActivity.class);
+                        break;
+                    default:
+                        break;
+                }
+
+                mDrawerLayout.closeDrawers();
+                return true;
             }
         });
     }
 
 
+
+
+    private Fragment getFragment(short index) {
+
+        if (mFragments[index] == null) { //if fragment haven't been created yet, create it
+            UpdatableFragment fragment;
+
+            switch (index) {
+                case FRAGMENT_INDEXES.FEED:
+                    fragment = new DiscoverHolderFragment();
+                    break;
+                case FRAGMENT_INDEXES.ACTIVITY:
+                    fragment = new UpdatesFragment();
+                    break;
+                case FRAGMENT_INDEXES.PROFILE:
+                    fragment = new Profile();
+                    break;
+                case FRAGMENT_INDEXES.PEOPLE:
+                    fragment = new PeopleFragment();
+                    break;
+                default:
+                    fragment = null;
+                    break;
+            }
+
+            mFragments[index] = fragment;
+        }
+
+        return mFragments[index];
+    }
+
+    @Override
+    public void replaceContainerWithFragment(final Fragment fragment) {
+        //this will only run after drawer is fully closed
+        //lags if we don't do this
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .commit();
+            }
+        });
+    }
+
+    private static final int SETTINGS_REQUEST_CODE = 13;
+    public void startActivityForResults(Class activity, final int requestCode){
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                startActivityForResult(i, requestCode);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK){
+
+            //NOTE: need to reload others?
+            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
+            loadDrawerHeader(); //reload drawer header
+        }
+    }
+
+    public void startNewActivity(final Class activity){
+        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            @Override
+            public void run() {
+                Intent i = new Intent(MainActivity.this, activity);
+
+                startActivity(i);
+            }
+        });
+    }
+
+
+
+    //use this when you need to add another users profile view
+    //or load image or status
+    @Override
+    public void addFragmentToContainer(final Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainActivity_fragment_holder, fragment)
+                .addToBackStack(PROFILE_OR_EVENT_NAME)
+                .commit();
+    }
+
+    public void clearBackStack() {
+        //if there are a lot of other user profile/ events in mainActivity, clear them
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+            getSupportFragmentManager().popBackStackImmediate(PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+    }
+
+
+    //sets needsUpdating for fragment at index
+    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
+        if (mFragments[index] != null){
+            mFragments[index].setFragmentNeedUpdating(needsUpdating);
+        }
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
 
-        //Keep track of which tab currently on
-        outState.putInt(getString(R.string.current_tab), mViewPager.getCurrentItem());
+        //TODO: track which fragment we're in
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
-        //Restore tab user was on
-        mViewPager.setCurrentItem(savedInstanceState.getInt(getString(R.string.current_tab)));
+        //TODO: save state
     }
 
+    @Override
     public void setTitle(String title) {
-        mTitle.setText(title);
+        mActionBar.setTitle(title);
     }
 
-    public void newPost() {
-        FragmentManager fragmentManager = getFragmentManager();
-//        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        mPostCreatePage = PostCreatePage.newInstance(mViewPager.getCurrentItem());
-//        mPostCreatePage.show(ft, "dialog");
-        // The device is smaller, so show the fragment fullscreen
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        // For a little polish, specify a transition animation
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        // To make it fullscreen, use the 'content' root view as the container
-        // for the fragment, which is always the root view for the activity
-        transaction.add(R.id.postContainer, mPostCreatePage)
-                .addToBackStack(null).commit();
+    //loads the header of our drawer
+    public void loadDrawerHeader() {
+        //profile image
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        int size = getResources().getDimensionPixelSize(R.dimen.nav_header_profile_side); //radius
+
+        View header = mNavigationView.getHeaderView(0);
+
+        //set name text
+        String name = sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", "");
+        ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
+
+        ((TextView) header.findViewById(R.id.drawerHeader_college_name)).setText(sharedPreferences.getString("collegeName", ""));
+
+        Glide.with(this)
+                .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
+                .asBitmap()
+                .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000")))
+                .override(size, size) //change image to the size we want
+                .placeholder(R.drawable.profile_picture_placeholder)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into((CircularImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
 
+    public void showFAB(boolean show) {
+        fam.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    //pops back toolbar back out
+    @Override
     public void resetToolbar() {
-//        CoordinatorLayout coordinator = (CoordinatorLayout) findViewById(R.id.coordinator);
-        AppBarLayout appbar = (AppBarLayout) findViewById(R.id.appbar);
-//        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) appbar.getLayoutParams();
-//        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
-        appbar.setExpanded(true, true);
-//        behavior.onNestedFling(coordinator, appbar, null, 0, -1000, true);
+        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+
+        if (behavior == null) return;
+
+        mAppBarLayout.setExpanded(true, true);
+        behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
+    }
+
+    //raise and lower appBar
+    //we have to lower appBar in fragments that have tablayouts or there will be a shadow above the tabs
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void raiseAppBarLayoutElevation() {
+        mAppBarLayout.setElevation(mAppBarElevation);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void lowerAppBarElevation() {
+        mAppBarLayout.setElevation(0);
     }
 
     public void noInternet() {
@@ -201,53 +411,85 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
 
-    public void toggleFam() {
-        if (fam.isExpanded())
-            fam.toggle();
-    }
 
-    /*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (R.id.mainactivity_action_settings == id){
-            Intent i = new Intent(MainActivity.this, LinuteSettingsActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            return true;
+        switch (id) {
+            case android.R.id.home:
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                    getSupportFragmentManager().popBackStack();
+                else mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
+            case R.id.people_fragment_menu_chat:
+                Intent enterRooms = new Intent(this, RoomsActivity.class);
+                enterRooms.putExtra("CHATICON", true);
+                startActivity(enterRooms);
+                return true;
         }
+
         return super.onOptionsItemSelected(item);
-    }*/
+    }
 
     @Override
     public void onBackPressed() {
-        if (mPostCreatePage != null && mPostCreatePage.isVisible()) {
-            mPostCreatePage.onBackPressed();
-        } else if (mTaptUserProfileFragment != null && mTaptUserProfileFragment.isVisible()) {
-            mTaptUserProfileFragment.dismiss();
-        } else if (mFeedDetailPage != null && mFeedDetailPage.isVisible()) {
-            mFeedDetailPage.dismiss();
+
+        //if there is a profile view or feedDetailView
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+            getSupportFragmentManager().popBackStack();
+
+        else if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
+            mDrawerLayout.closeDrawers();
         } else {
             super.onBackPressed();
         }
     }
 
-    public Fragment[] getFragments() {
-        return mFragments;
+
+    public void toggleFam() {
+        if (fam.isExpanded())
+            fam.toggle();
     }
 
-    //@param type - 0 search by name ; 1 search facebook ; 2 search contacts
-    public void startFindFriendsActivity(int type) {
-        Intent i = new Intent(this, FindFriendsActivity.class);
-        i.putExtra(FindFriendsActivity.SEARCH_TYPE_KEY, type);
-        startActivity(i);
+    //the items in navigation view
+    //this sets the number to the right of it
+    public void setNavItemNotification(@IdRes int itemId, int count) {
+        TextView view = (TextView) mNavigationView.getMenu().findItem(itemId).getActionView();
+        view.setText(count > 0 ? String.valueOf(count) : null);
     }
+
+
+    //So we change fragments or activities only after the drawer closes
+    private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
+
+        private Runnable mChangeFragmentOrActivityAction;
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            if (mChangeFragmentOrActivityAction != null) {
+                mChangeFragmentOrActivityAction.run();
+                mChangeFragmentOrActivityAction = null;
+            }
+        }
+
+        public void setChangeFragmentOrActivityAction(Runnable action) {
+            mChangeFragmentOrActivityAction = action;
+        }
+
+    }
+
+
 }

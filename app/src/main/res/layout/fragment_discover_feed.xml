@@ -5,9 +5,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/eventList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    <RelativeLayout android:id="@+id/discover_fragment_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/eventList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView android:id="@+id/discoverFragment_no_found"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:gravity="center"
+                  android:visibility="gone"
+                  android:layout_centerHorizontal="true"
+                  android:layout_margin="64dp"
+                  android:textSize="16sp"
+                  android:layout_marginTop="175dp"/>
+    </RelativeLayout>
+
 
 </android.support.v4.widget.SwipeRefreshLayout>

@@ -37,7 +37,9 @@ public class Update {
         COMMENTED_PHOTO,
         FOLLOWER,
         MENTIONED, //need icon
-        FRIEND_JOINED //need icon
+        FRIEND_JOINED, //need icon
+        POSTED_STATUS,
+        POSTED_PHOTO
     }
 
     private String mDescription;
@@ -106,6 +108,10 @@ public class Update {
                 return UpdateType.MENTIONED;
             case "friend joined":
                 return UpdateType.FRIEND_JOINED;
+            case "posted status":
+                return UpdateType.POSTED_STATUS;
+            case "posted photo":
+                return UpdateType.POSTED_PHOTO;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -123,9 +129,9 @@ public class Update {
     }
 
     public final boolean hasEventInformation(){
-        //TODO: Mentioned?
         return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
-                mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS;
+                mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
+                ||mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -158,6 +164,11 @@ public class Update {
 
     private void setUpUserInformation(JSONObject json) {
         JSONObject user = getJsonObjectFromJson(json, "user");
+
+        //no user info, try getting owner info
+        if (user == null) user = getJsonObjectFromJson(json, "owner");
+
+        //still null, just return
         if (user == null) return;
 
         mUserFullName = getStringFromJson(user, "fullName");
@@ -182,6 +193,10 @@ public class Update {
                 return  "Has joined Tapt";
             case MENTIONED:
                 return "Mentioned your post";
+            case POSTED_PHOTO:
+                return "Posted a photo";
+            case POSTED_STATUS:
+                return "Posted a status";
             default:
                 return  "";
         }

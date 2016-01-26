@@ -4,34 +4,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include android:id="@+id/editgender_toolbar"
-             layout="@layout/tool_bar"/>
-
-
-    <Spinner
-        android:id="@+id/editgender_spinner"
+    <DatePicker
+        android:id="@+id/editbirthday_datepicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editgender_toolbar"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="35dp"
-        android:layout_marginRight="35dp"
-        android:layout_marginTop="75dp"
-        android:gravity="center"/>
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:spinnersShown="true"/>
 
 
-    <Button android:id="@+id/editgender_save_button"
+    <Button android:id="@+id/editbirthday_save_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:text="Save Changes"/>
 
     <ProgressBar
-        android:id="@+id/editgender_progressbar"
+        android:id="@+id/editbirthday_progressbar"
         style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/editgender_spinner"
+        android:layout_below="@id/editbirthday_datepicker"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="35dp"
         android:visibility="gone"/>

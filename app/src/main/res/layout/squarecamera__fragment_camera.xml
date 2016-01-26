@@ -3,21 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/darker_gray"
+    android:background="@color/colorPrimary"
     tools:context="com.desmond.squarecamera.CameraFragment">
 
     <com.linute.linute.SquareCamera.SquareCameraPreview
         android:id="@+id/camera_preview_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/grey_color"/>
+        android:background="@android:color/black"/>
 
     <LinearLayout
         android:id="@+id/cover_top_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/squarecamera__cover_start_height"
         android:layout_alignTop="@id/camera_preview_view"
-        android:background="@android:color/black"
+        android:background="@color/colorPrimary"
         android:orientation="horizontal"
         android:weightSum="4">
 
@@ -28,7 +28,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:src="@drawable/squarecamera__cancel_drawable"/>
+            android:src="@drawable/ic_action_navigation_close_inverted"/>
 
         <View android:layout_width="0px"
               android:layout_height="1dp"
@@ -42,7 +42,7 @@
                      android:layout_width="0px"
                      android:layout_height="wrap_content"
                      android:background="@android:color/transparent"
-                     android:src="@drawable/ic_profile"
+                     android:src="@drawable/ic_action_image_photo_library"
                      android:layout_gravity="center"
                      android:layout_weight="1"/>
 
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/squarecamera__cover_start_height"
         android:layout_alignBottom="@id/camera_preview_view"
-        android:background="@android:color/black"/>
+        android:background="@color/colorPrimary"/>
 
 
     <!--<LinearLayout android:id="@+id/square_camera_ask_permission_layer"-->
@@ -99,7 +99,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_below="@id/camera_preview_view"
-        android:background="@android:color/black"
+        android:background="@color/colorPrimary"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="10dp">

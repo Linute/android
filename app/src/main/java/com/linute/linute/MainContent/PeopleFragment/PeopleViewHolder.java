@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,9 +66,9 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
     @Override
     public void onClick(final View v) {
         if (v == vStateImage) {
-            if (!vPeopleList.get(getAdapterPosition() - 4).isFriend()) {
+            if (!vPeopleList.get(getAdapterPosition() /*- 4*/).isFriend()) {
                 Map<String, Object> postData = new HashMap<>();
-                postData.put("user", vPeopleList.get(getAdapterPosition() - 4).getID());
+                postData.put("user", vPeopleList.get(getAdapterPosition() /*- 4*/).getID());
 
                 new LSDKPeople(vContext).postFollow(postData, new Callback() {
                     @Override
@@ -81,12 +82,12 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                             Log.d(TAG, response.body().string());
                         }
 //                        Log.d(TAG, response.body().string());
-                        ((MainActivity) vContext).runOnUiThread(new Runnable() {
+                        ((Activity) vContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 vStateImage.setImageResource(R.drawable.message_friend);
                                 Toast.makeText(vContext, "You got a new friend!", Toast.LENGTH_SHORT).show();
-                                vPeopleList.get(getAdapterPosition() - 4).setFriend(true);
+                                vPeopleList.get(getAdapterPosition() /*- 4*/).setFriend(true);
                             }
                         });
 
@@ -95,7 +96,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
             } else {
                 Intent enterRooms = new Intent(vContext, RoomsActivity.class);
                 enterRooms.putExtra("CHATICON", false);
-                enterRooms.putExtra("USERID", vPeopleList.get(getAdapterPosition() - 4).getID());
+                enterRooms.putExtra("USERID", vPeopleList.get(getAdapterPosition() /*- 4*/).getID());
                 vContext.startActivity(enterRooms);
             }
         }
@@ -105,7 +106,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
         Glide.with(vContext)
                 .load(Utils.getImageUrlOfUser(peeps.getProfileImage()))
                 .asBitmap()
-                .animate(animationObject)
+                //.animate(animationObject)
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
@@ -118,17 +119,17 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
             vStateImage.setImageResource(R.drawable.add_friend);
     }
 
-    ViewPropertyAnimation.Animator animationObject = new ViewPropertyAnimation.Animator() {
-        @Override
-        public void animate(View view) {
-            // if it's a custom view class, cast it here
-            // then find subviews and do the animations
-            // here, we just use the entire view for the fade animation
-            view.setAlpha(0f);
-
-            ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
-            fadeAnim.setDuration(2500);
-            fadeAnim.start();
-        }
-    };
+//    ViewPropertyAnimation.Animator animationObject = new ViewPropertyAnimation.Animator() {
+//        @Override
+//        public void animate(View view) {
+//            // if it's a custom view class, cast it here
+//            // then find subviews and do the animations
+//            // here, we just use the entire view for the fade animation
+//            view.setAlpha(0f);
+//
+//            ObjectAnimator fadeAnim = ObjectAnimator.ofFloat(view, "alpha", 0f, 1f);
+//            fadeAnim.setDuration(2500);
+//            fadeAnim.start();
+//        }
+//    };
 }

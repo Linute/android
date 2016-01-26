@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -17,9 +18,9 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -98,7 +99,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     .into(mProfileImage);
 
             setUpFollowButton(user.isFollowing(), user.getUserId());
-            setUpOnClickListeners(user.isFollowing(), user.getUserId());
+            setUpOnClickListeners(user.getFullName(), user.getUserId());
         }
 
 
@@ -117,6 +118,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
                         if (mFollowed){
                             //TODO: GO TO MESSANGER
+                            Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
                         }
 
                         mFollowed = true;
@@ -169,16 +171,21 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     @Override
                     public void onClick(View v) {
                         //TODO: Go to message
+                        Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         }
 
-        private void setUpOnClickListeners(boolean areFriends, final String userId){
+        private void setUpOnClickListeners(final String name, final String userId){
             View.OnClickListener goToProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ((FindFriendsActivity)mContext).addFragment(TaptUserProfileFragment.newInstance("", userId));
+                    //TODO: fix
+                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                    if (activity != null){
+                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(name, userId));
+                    }
                 }
             };
 

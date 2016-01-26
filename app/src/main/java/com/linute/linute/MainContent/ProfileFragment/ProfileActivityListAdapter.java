@@ -97,7 +97,7 @@ public class ProfileActivityListAdapter extends BaseAdapter {
 
             mUsernameLabel.setText(item.getUserName());
             mDescriptionLabel.setText(item.getDescription());
-            mTimeLabel.setText(item.getTimeString());
+            //mTimeLabel.setText(item.getTimeString());
 
             //profile image on the left
             Glide.with(mContext)

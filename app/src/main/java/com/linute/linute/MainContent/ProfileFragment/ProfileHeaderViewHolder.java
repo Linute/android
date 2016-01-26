@@ -20,6 +20,7 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.BlurBuilder;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -48,6 +49,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView vPosts;
     protected TextView vFollowing;
     protected TextView vFollowers;
+    protected TextView vCollegeName;
     protected ImageView vBlurBack;
     protected FrameLayout vBlurFrame;
     protected ImageView vFollowStatus;
@@ -75,11 +77,13 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vBlurFrame = (FrameLayout) itemView.findViewById(R.id.profile_blur_frame);
         vFollowStatus = (ImageView) itemView.findViewById(R.id.follow_button);
 
+        vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
+
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mSharedPreferences.getString("userID", "").equals(mUser.getUserID())) {
-                    mProfile.editProfileImage();
+                    //TODO: VIEW IMAGE
                 }
             }
         });
@@ -110,7 +114,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
-                                ((MainActivity) mContext).runOnUiThread(new Runnable() {
+                                ((BaseTaptActivity) mContext).runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         vFollowStatus.setImageResource(R.drawable.unfollowing);
@@ -167,10 +171,9 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vPosts.setText(String.valueOf(user.getPosts()));
         vFollowing.setText(String.valueOf(user.getFollowing()));
         vFollowers.setText(String.valueOf(user.getFollowers()));
+        vCollegeName.setText(user.getCollegeName());
 
-        if (mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
-            vFollowStatus.setVisibility(View.GONE);
-        } else {
+        if (!mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
                 vFollowStatus.setImageResource(R.drawable.follow);
             } else {
@@ -192,7 +195,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
-                .centerCrop()
+                //.centerCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
+import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import com.linute.linute.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -108,12 +110,30 @@ public class Utils {
         pref.putString("collegeName", null);
         pref.putString("collegeId", null);
         pref.putString("campus", null);
+        pref.putString("passwordFacebook", null);
         pref.commit();
     }
 
     public static void deleteTempSharedPreference(SharedPreferences.Editor temp) {
-        temp.putString("tempCode", "").apply();
-        temp.putString("tempPhone", "").apply();
+        temp.putString("tempCode", null);
+        temp.putString("tempPhone", null);
+
+
+
+        temp.putString("userID", null);
+        temp.putString("password", null);
+        temp.putString("socialFacebook", null);
+        temp.putInt("sex", 0);
+        temp.putString("dob", null);
+        temp.putString("registrationType", null);
+        temp.putString("profileImage", null);
+        temp.putString("firstName", null);
+        temp.putString("lastName", null);
+        temp.putString("passwordFacebook", null);
+        temp.putString("email", null);
+
+
+        temp.apply();
     }
 
     public static String getEventImageURL(String jpegName) {
@@ -145,91 +165,51 @@ public class Utils {
         return toolbarHeight;
     }
 
+    //returns a nicely formated string about when event occurred
+    public static String getTimeAgoString(long beforeTime) {
+        if (beforeTime == 0) return "";
+        DateFormat df = DateFormat.getTimeInstance();
+        df.setTimeZone(TimeZone.getTimeZone("gmt"));
 
-    public static String getEventTime(Date myDate) {
-        String dateString = "";
-        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
-        String[] date = myDate.toString().split(" ");
 
-        if (date[1].equals(getStringMonth(calendar.get(Calendar.MONTH)))) {
-            if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) == 0) {
-                dateString = (Calendar.HOUR - (Integer.parseInt(date[3].substring(0, 2)) - 12)) + "";
-                dateString += "h";
-            } else if (calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) > 7) {
-                dateString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
-                dateString += "w";
-            } else {
-                dateString = calendar.get(Calendar.DATE) - Integer.parseInt(date[2]) + "";
-                dateString += "d";
-            }
-        } else {
-            dateString = calendar.get(Calendar.MONTH) - getIntMonth(date[1]) + "";
-            dateString += "m";
-        }
-
-        return dateString;
+        String date = DateUtils.getRelativeTimeSpanString(beforeTime , getUTCdatetimeAsDate().getTime(), DateUtils.SECOND_IN_MILLIS).toString();
+        String abrev = getAbrev(date);
+        return date.replaceAll("\\D+","") + abrev;
     }
 
-    public static String getStringMonth(int intMonth) {
-        switch (intMonth) {
-            case 0:
-                return "Jan";
-            case 1:
-                return "Feb";
-            case 2:
-                return "Mar";
-            case 3:
-                return "Apr";
-            case 4:
-                return "May";
-            case 5:
-                return "Jun";
-            case 6:
-                return "Jul";
-            case 7:
-                return "Aug";
-            case 8:
-                return "Sept";
-            case 9:
-                return "Oct";
-            case 10:
-                return "Nov";
-            case 11:
-                return "Dec";
+    private static String getAbrev(String date){
+        if (date.contains("second")){
+            return "s";
         }
-        return "";
+
+        if (date.contains("min")){
+            return "m";
+        }
+
+        if (date.contains("hour")){
+            return "h";
+        }
+
+        if (date.contains("day")){
+            return "d";
+        }
+        if (date.contains("week")){
+            return "w";
+        }
+        if (date.contains("month")){
+            return "mon";
+        }
+
+        if (date.contains("year")){
+            return "y";
+        }
+
+        return "-";
     }
 
-    public static int getIntMonth(String stringMonth) {
-        switch (stringMonth) {
-            case "Jan":
-                return 1;
-            case "Feb":
-                return 2;
-            case "Mar":
-                return 3;
-            case "Apr":
-                return 4;
-            case "May":
-                return 5;
-            case "Jun":
-                return 6;
-            case "Jul":
-                return 7;
-            case "Aug":
-                return 8;
-            case "Sept":
-                return 9;
-            case "Oct":
-                return 10;
-            case "Nov":
-                return 11;
-            case "Dec":
-                return 12;
-        }
-        return 0;
 
-    }
+
+
 
     //returns millisecond of date
     public static long getTimeFromString(String date) {
@@ -241,5 +221,38 @@ public class Utils {
             return 0;
         }
 
+    }
+
+
+    static final String DATEFORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    public static Date getUTCdatetimeAsDate()
+    {
+        return StringDateToDate(GetUTCdatetimeAsString());
+    }
+
+    public static String GetUTCdatetimeAsString()
+    {
+        final SimpleDateFormat sdf = new SimpleDateFormat(DATEFORMAT);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        return sdf.format(new Date());
+    }
+
+    public static Date StringDateToDate(String StrDate)
+    {
+        Date dateToReturn = null;
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+
+        try
+        {
+            dateToReturn = (Date)dateFormat.parse(StrDate);
+        }
+        catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+
+        return dateToReturn;
     }
 }

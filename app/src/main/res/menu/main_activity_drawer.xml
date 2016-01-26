@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <group>
+        <item
+            android:id="@+id/navigation_item_feed"
+            android:icon="@drawable/ic_action_social_people"
+            android:title="Feed"
+            android:checkable="true"
+            app:actionLayout="@layout/main_activity_nav_action_counter"
+            />
+        <item
+            android:id="@+id/navigation_item_people"
+            android:icon="@drawable/ic_action_content_add"
+            android:title="People"
+            android:checkable="true"
+            app:actionLayout="@layout/main_activity_nav_action_counter"/>
+        <item
+            android:id="@+id/navigation_item_activity"
+            android:icon="@drawable/ic_action_navigation_close"
+            android:title="Activity"
+            android:checkable="true"
+            app:actionLayout="@layout/main_activity_nav_action_counter"/>
+
+        <item android:id="@+id/navigation_item_find_friends"
+              android:icon="@drawable/ic_action_social_group_add"
+              android:title="Find Friends"
+              />
+
+        <item android:id="@+id/navigation_item_settings"
+              android:icon="@drawable/ic_action_action_settings"
+              android:title="Settings"
+            />
+    </group>
+
+
+</menu>

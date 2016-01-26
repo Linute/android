@@ -17,7 +17,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
-            android:src="@drawable/crop__ic_cancel"/>
+            android:src="@drawable/crop__ic_cancel"
+            />
 
         <ImageView
             android:id="@+id/new_chat_check_submit"
@@ -25,7 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerInParent="true"
-            android:src="@drawable/submit"/>
+            android:src="@drawable/submit"
+            android:tint="@color/colorPrimary"/>
 
     </RelativeLayout>
 

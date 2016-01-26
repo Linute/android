@@ -25,11 +25,9 @@ public class UserActivityItem implements Parcelable {
     private String mProfileImagePath;   //exact url to image
     private String mUserName;           //first name and last
     private String mDescription;        //user hosted or attended event
-    private long mStartTime;            //when event starts
-    private long mEndTime;              //when event ends
     private String mEventImagePath;     //exact url to image of event
     private boolean isImagePost;
-    private String mPostDate;
+    private long mPostDate;
 
     public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
         mProfileImagePath = profileImagePath;
@@ -38,28 +36,25 @@ public class UserActivityItem implements Parcelable {
 //        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
 
         mDescription = "";
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+
+        try {
+            mPostDate = dateFormat.parse(getStringValue(activityInfo, "date")).getTime();
+        } catch (ParseException e) {
+            mPostDate = 0;
+            e.printStackTrace();
+        }
+
         JSONObject event = getObject(activityInfo, "event");
 
         if (event != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            //try to get time
-            try {
-                mStartTime = dateFormat.parse(getStringValue(event, "timeStart")).getTime();
-                mEndTime = 0; //dateFormat.parse(getStringValue(event, "timeEnd")).getTime();
 
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.US);
-                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                Date myDate;
-                myDate = simpleDateFormat.parse(getStringValue(event, "timeStart"));
-                mPostDate = Utils.getEventTime(myDate);
 
                 mDescription = getStringValue(event, "title");
 
-            } catch (ParseException e) {
-                e.printStackTrace();
-                mStartTime = 0;
-                mEndTime = 0;
-            }
+
 
             //try to get event image
             try {
@@ -77,8 +72,6 @@ public class UserActivityItem implements Parcelable {
             }
 
         } else {
-            mStartTime = 0;
-            mEndTime = 0;
             mEventImagePath = "";
         }
     }
@@ -134,19 +127,6 @@ public class UserActivityItem implements Parcelable {
     }
 
 
-    //returns a nicely formated string about when event occurred
-    public String getTimeString() {
-        if (mStartTime == 0 || mEndTime == 0) return "";
-
-        long nowTime = new Date().getTime();
-
-        if (nowTime >= mStartTime && nowTime <= mEndTime) { //going on
-            return "going on right now";
-        } else { //in the future or past
-            return DateUtils.getRelativeTimeSpanString(mEndTime, nowTime, DateUtils.SECOND_IN_MILLIS).toString();
-        }
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -157,8 +137,7 @@ public class UserActivityItem implements Parcelable {
         dest.writeString(mProfileImagePath);
         dest.writeString(mUserName);
         dest.writeString(mDescription);
-        dest.writeLong(mStartTime);
-        dest.writeLong(mEndTime);
+        dest.writeLong(mPostDate);
         dest.writeString(mEventImagePath);
     }
 
@@ -166,8 +145,7 @@ public class UserActivityItem implements Parcelable {
         mProfileImagePath = in.readString();
         mUserName = in.readString();
         mDescription = in.readString();
-        mStartTime = in.readLong();
-        mEndTime = in.readLong();
+        mPostDate = in.readLong();
         mEventImagePath = in.readString();
     }
 
@@ -187,7 +165,7 @@ public class UserActivityItem implements Parcelable {
         return isImagePost;
     }
 
-    public String getPostDate() {
+    public long getPostDate() {
         return mPostDate;
     }
 }
