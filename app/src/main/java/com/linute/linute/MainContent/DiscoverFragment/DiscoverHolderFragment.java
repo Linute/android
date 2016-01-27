@@ -39,9 +39,33 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
         mViewPager.setAdapter(mFragmentHolderPagerAdapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         tabLayout.setupWithViewPager(mViewPager);
 
         return rootView;
+    }
+
+    private boolean mCampusFeedNeedsUpdating = true;
+    private boolean m
+
+    @Override
+    public void setFragmentNeedUpdating(boolean needsUpdating){
+
     }
 
     @Override

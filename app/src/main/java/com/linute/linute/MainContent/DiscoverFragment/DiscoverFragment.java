@@ -108,7 +108,7 @@ public class DiscoverFragment extends UpdatableFragment {
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
-                getFeed(1);
+                loadMoreFeed();
             }
         });
 
@@ -154,19 +154,24 @@ public class DiscoverFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        if (fragmentNeedsUpdating() && getActivity() != null){
-            Log.i(TAG, "onResume: ");
+        if (fragmentNeedsUpdating()){
             getFeed(0);
+            setFragmentNeedUpdating(false);
         }
     }
 
     private int mSkip = 0;
 
-    public void getFeed(int type) {
+    public void loadMoreFeed(){
         if (feedDone) {
             Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
-            return;
         }
+        else {
+            getFeed(1);
+        }
+    }
+
+    public void getFeed(int type) {
         if (type == 1) {
             mSkip += 25;
         } else {

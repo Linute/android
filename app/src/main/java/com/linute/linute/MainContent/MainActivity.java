@@ -392,13 +392,15 @@ public class MainActivity extends BaseTaptActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void raiseAppBarLayoutElevation() {
-        mAppBarLayout.setElevation(mAppBarElevation);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            mAppBarLayout.setElevation(mAppBarElevation);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void lowerAppBarElevation() {
-        mAppBarLayout.setElevation(0);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            mAppBarLayout.setElevation(0);
     }
 
     public void noInternet() {

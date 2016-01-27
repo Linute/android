@@ -43,7 +43,7 @@ public class FindFriendsActivity extends BaseTaptActivity {
 
         mActionBar = getSupportActionBar();
 
-        if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.findFriends_fragment_holder, new FindFriendsChoiceFragment())
@@ -82,13 +82,15 @@ public class FindFriendsActivity extends BaseTaptActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void raiseAppBarLayoutElevation() {
-        mAppBarLayout.setElevation(mAppBarElevation);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            mAppBarLayout.setElevation(mAppBarElevation);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void lowerAppBarElevation() {
-        mAppBarLayout.setElevation(0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            mAppBarLayout.setElevation(0);
     }
 
     @Override
@@ -101,6 +103,7 @@ public class FindFriendsActivity extends BaseTaptActivity {
 
 
     public static final String PROFILE_OR_EVENT_NAME = "Prof_or_event";
+
     @Override
     public void addFragmentToContainer(final Fragment fragment) {
         getSupportFragmentManager()

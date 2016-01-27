@@ -8,9 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 /**
  * Created by QiFeng on 1/25/16.
  */
-public  class BaseTaptActivity extends AppCompatActivity {
-
-
+public class BaseTaptActivity extends AppCompatActivity {
 
 
     public void resetToolbar() {
@@ -18,11 +16,11 @@ public  class BaseTaptActivity extends AppCompatActivity {
     }
 
 
-    public void setTitle(String title){
+    public void setTitle(String title) {
 
     }
 
-    public void addFragmentToContainer(final Fragment fragment){
+    public void addFragmentToContainer(final Fragment fragment) {
 
     }
 
@@ -33,12 +31,14 @@ public  class BaseTaptActivity extends AppCompatActivity {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void raiseAppBarLayoutElevation() {
-
+        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
+        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void lowerAppBarElevation() {
-
+        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
+        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
     }
 
 }
