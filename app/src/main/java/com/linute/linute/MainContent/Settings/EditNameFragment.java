@@ -168,6 +168,7 @@ public class EditNameFragment extends Fragment {
 
 
                     } else {
+                        response.body().close();
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

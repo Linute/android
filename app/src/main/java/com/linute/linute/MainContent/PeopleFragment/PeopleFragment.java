@@ -47,6 +47,8 @@ public class PeopleFragment extends UpdatableFragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private PeopleAdapter mPeopleAdapter;
 
+    private boolean mNearMe = false;
+
     private List<People> mPeopleList = new ArrayList<>();
 
     public PeopleFragment() {
@@ -54,6 +56,21 @@ public class PeopleFragment extends UpdatableFragment {
         // Required empty public constructor
     }
 
+    public static PeopleFragment newInstance(boolean nearMe){
+        PeopleFragment people = new PeopleFragment();
+        Bundle args = new Bundle();
+        args.putBoolean("NEAR_ME", nearMe);
+        people.setArguments(args);
+        return people;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null){
+            mNearMe = getArguments().getBoolean("NEAR_ME");
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,7 +107,6 @@ public class PeopleFragment extends UpdatableFragment {
         super.onResume();
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null){
-            mSwipeRefreshLayout.setRefreshing(true);
             mainActivity.setTitle("People");
             mainActivity.resetToolbar();
         }

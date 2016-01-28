@@ -145,16 +145,18 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                             public void onResponse(Response response) throws IOException {
                                 if (!response.isSuccessful()) {
                                     Log.d(TAG, response.body().string());
+                                }else {
+                                    response.body().close();
+                                    ((MainActivity) mContext).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            vFollowStatus.setImageResource(R.drawable.follow);
+                                            Toast.makeText(mContext, "You've lost friend!", Toast.LENGTH_SHORT).show();
+                                            mUser.setFriend("");
+                                        }
+                                    });
                                 }
-                                Log.d(TAG, "onResponse: " + response.body().string());
-                                ((MainActivity) mContext).runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        vFollowStatus.setImageResource(R.drawable.follow);
-                                        Toast.makeText(mContext, "You've lost friend!", Toast.LENGTH_SHORT).show();
-                                        mUser.setFriend("");
-                                    }
-                                });
+
 
                             }
                         });

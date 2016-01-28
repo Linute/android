@@ -19,7 +19,9 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -65,6 +67,15 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
 
     @Override
     public void onClick(final View v) {
+
+        if (v == vProfilePicture || v == vName){
+            BaseTaptActivity activity = (BaseTaptActivity) vContext;
+            if (activity != null)
+                activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(
+                        vPeopleList.get(getAdapterPosition()).getName(),
+                        vPeopleList.get(getAdapterPosition()).getID()));
+        }
+
         if (v == vStateImage) {
             if (!vPeopleList.get(getAdapterPosition() /*- 4*/).isFriend()) {
                 Map<String, Object> postData = new HashMap<>();
@@ -81,6 +92,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                         if (!response.isSuccessful()) {
                             Log.d(TAG, response.body().string());
                         }
+                        response.body().close();
 //                        Log.d(TAG, response.body().string());
                         ((Activity) vContext).runOnUiThread(new Runnable() {
                             @Override

@@ -155,8 +155,9 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
                 public void onResponse(Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
+                    }else {
+                        response.body().close();
                     }
-
                 }
             });
 
@@ -177,8 +178,9 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
                 public void onResponse(Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
+                    } else {
+                        response.body().close();
                     }
-                    Log.d(TAG, response.body().string());
                 }
             });
 

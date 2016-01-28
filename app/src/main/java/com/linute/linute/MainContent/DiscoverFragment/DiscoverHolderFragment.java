@@ -71,7 +71,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
         outState.putBoolean("friendsNeedUpdate", mFriendsFeedNeedsUpdating);
         outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
-
     }
 
     @Override
@@ -93,6 +92,11 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     public void setFragmentNeedUpdating(boolean needsUpdating) {
         mCampusFeedNeedsUpdating = needsUpdating;
         mFriendsFeedNeedsUpdating = needsUpdating;
+    }
+
+    @Override
+    public boolean fragmentNeedsUpdating(){
+        return mCampusFeedNeedsUpdating && mFriendsFeedNeedsUpdating;
     }
 
     public boolean getCampusFeedNeedsUpdating() {
@@ -152,5 +156,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.raiseAppBarLayoutElevation();
             mainActivity.showFAB(false);
         }
+
+        setFragmentNeedUpdating(true);
     }
 }

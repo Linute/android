@@ -132,6 +132,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {//unique email
+                    response.body().close();
                     saveEmail(email);
                 } else {//not unique
                     Log.v(TAG, response.body().string());

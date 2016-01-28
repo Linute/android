@@ -28,6 +28,8 @@ public class UserActivityItem implements Parcelable {
     private String mEventImagePath;     //exact url to image of event
     private boolean isImagePost;
     private long mPostDate;
+    private String mEventID;
+    private String mOwnerID;
 
     public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
         mProfileImagePath = profileImagePath;
@@ -52,9 +54,15 @@ public class UserActivityItem implements Parcelable {
         if (event != null) {
 
 
-                mDescription = getStringValue(event, "title");
+            mDescription = getStringValue(event, "title");
+            mEventID = getStringValue(event, "id");
 
 
+            JSONObject owner = getObject(activityInfo, "owner");
+
+            if (owner!=null){
+                mOwnerID = getStringValue(owner, "id");
+            }
 
             //try to get event image
             try {
@@ -74,6 +82,8 @@ public class UserActivityItem implements Parcelable {
         } else {
             mEventImagePath = "";
         }
+
+
     }
 
 
@@ -126,6 +136,13 @@ public class UserActivityItem implements Parcelable {
         mEventImagePath = eventImagePath;
     }
 
+    public String getEventID(){
+        return mEventID;
+    }
+
+    public String getOwnerID(){
+        return mOwnerID;
+    }
 
     @Override
     public int describeContents() {

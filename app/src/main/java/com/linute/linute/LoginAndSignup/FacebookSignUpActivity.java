@@ -302,13 +302,14 @@ public class FacebookSignUpActivity extends AppCompatActivity {
 
                 @Override
                 public void onResponse(Response response) throws IOException {
+                    String reponseString = response.body().string();
                     if (response.code() == 200) { //email was good
                         getPinCode(email);
                     } else if (response.code() == 404) { //another error
-                        Log.e(TAG, response.body().string());
+                        Log.e(TAG, reponseString);
                         nonUniqueEmail();
                     } else {
-                        Log.e(TAG, "onResponse: " + response.body().string());
+                        Log.e(TAG, "onResponse: " + reponseString);
                         serverError(0);
                     }
                 }

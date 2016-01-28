@@ -180,6 +180,7 @@ public class ChangePhoneActivity extends AppCompatActivity {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    response.body().close();
                     getConfirmationCode(phone); //is unqiue so try to get confirmation code
                 } else if (response.code() == 404){//not unique so tell user
                     Log.v(TAG, response.body().string());
@@ -192,6 +193,7 @@ public class ChangePhoneActivity extends AppCompatActivity {
                         }
                     });
                 }else {
+                    response.body().close();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

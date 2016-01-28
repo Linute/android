@@ -245,6 +245,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Response response) throws IOException {
                     if (response.code() == 200) { //email was good
+                        response.body().close();
                         getPinCode();
                     } else if (response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
