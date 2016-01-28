@@ -168,7 +168,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
 
             Map<String, Object> postData = new HashMap<>();
             postData.put("isDeleted", true);
-            new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getUserLiked(), new Callback() {
+            new LSDKEvents(mContext).updateLike(postData,((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
                     e.printStackTrace();

@@ -56,7 +56,7 @@ public class PeopleFragment extends UpdatableFragment {
         // Required empty public constructor
     }
 
-    public static PeopleFragment newInstance(boolean nearMe){
+    public static PeopleFragment newInstance(boolean nearMe) {
         PeopleFragment people = new PeopleFragment();
         Bundle args = new Bundle();
         args.putBoolean("NEAR_ME", nearMe);
@@ -67,7 +67,7 @@ public class PeopleFragment extends UpdatableFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null){
+        if (getArguments() != null) {
             mNearMe = getArguments().getBoolean("NEAR_ME");
         }
     }
@@ -106,12 +106,14 @@ public class PeopleFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
         MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null){
+        if (mainActivity != null) {
             mainActivity.setTitle("People");
             mainActivity.resetToolbar();
         }
 
-        if (fragmentNeedsUpdating()){
+        Log.i(TAG, "onResume: ");
+        if (fragmentNeedsUpdating()) {
+            Log.i(TAG, "onResume: 4");
             getPeople();
             setFragmentNeedUpdating(false);
         }
@@ -137,6 +139,7 @@ public class PeopleFragment extends UpdatableFragment {
                 JSONArray jsonArray = null;
                 try {
                     jsonObject = new JSONObject(responsString);
+                    Log.i(TAG, "onResponse: 1");
                     jsonArray = jsonObject.getJSONArray("people");
 
 
@@ -177,9 +180,10 @@ public class PeopleFragment extends UpdatableFragment {
                     public void run() {
                         if (mSwipeRefreshLayout.isRefreshing()) {
                             mSwipeRefreshLayout.setRefreshing(false);
-
-                            mPeopleAdapter.notifyDataSetChanged();
                         }
+
+                        mPeopleAdapter.notifyDataSetChanged();
+
                     }
                 });
             }

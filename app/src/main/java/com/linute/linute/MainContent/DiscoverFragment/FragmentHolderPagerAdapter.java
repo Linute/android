@@ -18,15 +18,17 @@ public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
 
     public FragmentHolderPagerAdapter(FragmentManager fm) {
         super(fm);
+        mCampusFeed = DiscoverFragment.newInstance(false);
+        mFriendsFeed = DiscoverFragment.newInstance(true);
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return DiscoverFragment.newInstance(false);
+                return mCampusFeed;
             case 1:
-                return DiscoverFragment.newInstance(true);
+                return mFriendsFeed;
         }
         return null;
     }

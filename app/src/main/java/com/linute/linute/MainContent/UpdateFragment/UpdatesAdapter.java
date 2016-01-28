@@ -344,6 +344,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                 mEventPicture.setImageResource(R.drawable.follow_back); //plus icon
 
+                if (mEventPicture.getVisibility() == View.GONE){
+                    mEventPicture.setVisibility(View.VISIBLE);
+                }
+
                 mEventPicture.setOnClickListener(new View.OnClickListener() { //when pressed
 
                     boolean mFollowed = false; //if we are following other person

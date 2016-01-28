@@ -268,7 +268,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                 postImage,
                                 jsonObject.getInt("privacy"),
                                 jsonObject.getInt("numberOfLikes"),
-                                jsonObject.getString("likeID"),
+                                jsonObject.getBoolean("isLiked"),
                                 postString,
                                 jsonObject.getString("id"));
                         mPosts.add(post);

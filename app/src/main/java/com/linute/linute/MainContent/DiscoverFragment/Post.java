@@ -14,14 +14,14 @@ public class Post implements Parcelable {
     private String mImage;
     private int mPrivacy;
     private int mNumLikes;
-    private String mUserLiked;
+    private boolean mUserLiked;
     private String mPostTime;
     private String mPostId;
 
     private boolean mPostLiked;
 
     public Post(String userId, String userName, String userImage, String title,
-                String image, int privacy, int numLike, String userLiked,
+                String image, int privacy, int numLike, boolean userLiked,
                 String postTime, String postId) {
         mUserId = userId;
         mUserName = userName;
@@ -35,7 +35,7 @@ public class Post implements Parcelable {
         mPostTime = postTime;
         mPostId = postId;
 
-        mPostLiked = !mUserLiked.equals("");
+        mPostLiked = mUserLiked;
     }
 
     public String getNumLike() {
@@ -82,7 +82,7 @@ public class Post implements Parcelable {
         return mPostId;
     }
 
-    public String getUserLiked() {
+    public boolean getUserLiked() {
         return mUserLiked;
     }
 
@@ -110,7 +110,7 @@ public class Post implements Parcelable {
         dest.writeString(mImage);
         dest.writeInt(mPrivacy);
         dest.writeInt(mNumLikes);
-        dest.writeString(mUserLiked);
+        dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
         dest.writeString(mPostTime);
         dest.writeString(mPostId);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
@@ -124,7 +124,7 @@ public class Post implements Parcelable {
         mImage = in.readString();
         mPrivacy = in.readInt();
         mNumLikes = in.readInt();
-        mUserLiked = in.readString();
+        mUserLiked = in.readByte() != 0; //true if byte != 0
         mPostTime = in.readString();
         mPostId = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0

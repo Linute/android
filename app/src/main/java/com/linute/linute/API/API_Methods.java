@@ -125,12 +125,15 @@ public class API_Methods {
     //API DELETE
     public static Call delete(String path,
                               Map<String, String> headers,
+                              Map<String, Object> params,
                               Callback callback) {
 
         OkHttpClient client = new OkHttpClient();
 
         Headers requestHeaders = Headers.of(headers); //add headers
-        RequestBody body = RequestBody.create(EMPTY, ""); //empty request body
+
+        JSONObject json = new JSONObject(params);
+        RequestBody body = RequestBody.create(JSON, json.toString()); //create json
 
         String url = getURL(path);
 
