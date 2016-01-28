@@ -51,18 +51,16 @@ public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
     private LinearLayoutManager llm;
-    private EditText postBox;
 
     private TextView mEmptyText;
 
     private SwipeRefreshLayout refreshLayout;
 
-    private List<Post> mPosts;
+    private List<Post> mPosts = new ArrayList<>();
     private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters = null;
     private boolean feedDone;
 
     private boolean mFriendsOnly = false;
-
 
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
@@ -90,7 +88,6 @@ public class DiscoverFragment extends UpdatableFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-        mPosts = new ArrayList<>();
 
         mEmptyText = (TextView) rootView.findViewById(R.id.discoverFragment_no_found);
 
@@ -154,9 +151,25 @@ public class DiscoverFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        if (fragmentNeedsUpdating()){
+        DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
+
+        if (fragment == null) return;
+
+        //initially presented fragment by discoverHolderFragment doesn't get loaded by discoverholderfragment
+        //do it in on resume
+        //if initial fragment was campus feed, we are in campus feed, and it needs to be updated
+        if (fragment.getInitiallyPresentedFragmentWasCampus()
+                && !mFriendsOnly
+                && fragment.getCampusFeedNeedsUpdating()) {
             getFeed(0);
-            setFragmentNeedUpdating(false);
+            fragment.setCampusFeedNeedsUpdating(false);
+        }
+
+        else if (!fragment.getInitiallyPresentedFragmentWasCampus()
+                && mFriendsOnly
+                && fragment.getFriendsFeedNeedsUpdating()) {
+            getFeed(0);
+            fragment.setFriendsFeedNeedsUpdating(false);
         }
     }
 
@@ -180,7 +193,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
         final int skip = mSkip;
 
-        SharedPreferences sharedPreferences = getParentFragment().getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
         events.put("college", sharedPreferences.getString("collegeId", ""));
         events.put("skip", skip + "");

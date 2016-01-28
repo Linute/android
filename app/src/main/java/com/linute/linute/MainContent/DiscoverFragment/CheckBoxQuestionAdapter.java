@@ -42,8 +42,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<CheckBoxQuesti
     public void onBindViewHolder(CheckBoxQuestionViewHolder holder, int position) {
         holder.bindModel(mPosts.get(position));
         if (position + 1 == mPosts.size()) {
-            Log.d(TAG, position + "");
-//            ((DiscoverFragment) ((MainActivity) context).getFragments()[0]).getFeed(1);
             //NOTE: Changed refresh to interface
             mGetMoreFeed.getMoreFeed();
         }
