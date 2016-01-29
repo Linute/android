@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -55,6 +56,10 @@ public class RoomsActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         getRooms();
+        if (getActivity().getIntent().getStringExtra("ROOM") != null) {
+            // start chat fragment
+            // use same procedure unless found better
+        }
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
 
@@ -73,7 +78,7 @@ public class RoomsActivityFragment extends Fragment {
     }
 
     private void getRooms() {
-        LSDKChat chat = new LSDKChat(getActivity());
+        final LSDKChat chat = new LSDKChat(getActivity());
         chat.getRooms(null, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -93,23 +98,34 @@ public class RoomsActivityFragment extends Fragment {
                     JSONObject room = null;
                     try {
                         jsonObject = new JSONObject(response.body().string());
+                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
                         rooms = jsonObject.getJSONArray("rooms");
+                        ArrayList<ChatHead> chatHeads = new ArrayList<ChatHead>();
                         for (int i = 0; i < rooms.length(); i++) {
                             room = (JSONObject) rooms.get(i);
+                            for (int j = 0; j < room.getJSONArray("users").length(); j++) {
+                                chatHeads.add(new ChatHead(
+                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("fullName"),
+                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage")));
+                            }
                             mRoomsList.add(new Rooms(
                                     room.getString("owner"),
                                     room.getString("id"),
                                     ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("id"),
                                     ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("fullName"),
                                     ((JSONObject) room.getJSONArray("messages").get(0)).getString("text"),
-                                    ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("profileImage")));
+                                    ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("profileImage"),
+                                    room.getJSONArray("users").length() + 1 /* + 1 is for yourself*/,
+                                    chatHeads));
                         }
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mRoomsAdapter.notifyDataSetChanged();
-                            }
-                        });
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

@@ -1,11 +1,15 @@
 package com.linute.linute.MainContent.Chat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Arman on 1/16/16.
  */
 public class Chat {
     public static final int TYPE_MESSAGE = 0;
     public static final int TYPE_ACTION = 1;
+    public static final int TYPE_CHAT_HEAD = 2;
 
     private String mRoomId;
     private String mUserImage;
