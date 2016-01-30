@@ -18,11 +18,18 @@ package com.linute.linute.API;
 
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -31,9 +38,14 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -47,6 +59,12 @@ public class RegistrationIntentService extends IntentService {
     public RegistrationIntentService() {
         super(TAG);
     }
+
+    private LocationManager mLocationManager;
+
+    private String mToken;
+
+
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -64,18 +82,24 @@ public class RegistrationIntentService extends IntentService {
 
             /*FIXME: REMOVE BEFORE RELEASE*/
             InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
+            mToken = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
             //String token = "1234";
-            Log.v(TAG, "GCM Registration Token: " + token);
+//            Log.v(TAG, "GCM Registration Token: " + token);
 
-            sendRegistrationDevice(token);
+            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+            requestServices();
+
+//            sendRegistrationDevice(token);
+
 
             // Subscribe to topic channels
             //subscribeTopics(token);
 
-            sharedPreferences.edit().putString(QuickstartPreferences.OUR_TOKEN, token).apply();
+            sharedPreferences.edit().putString(QuickstartPreferences.OUR_TOKEN, mToken).apply();
 
             // You should store a boolean that indicates whether the generated token has been
             // sent to your server. If the boolean is false, send the token to your server,
@@ -100,9 +124,9 @@ public class RegistrationIntentService extends IntentService {
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      *
-     * @param token The new token.
      */
-    private void sendRegistrationDevice(String token) {
+    private void sendRegistrationDevice( JSONObject coord) {
+        final String token = mToken;
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
@@ -121,6 +145,10 @@ public class RegistrationIntentService extends IntentService {
         device.put("build", versionCode);
         device.put("os", Build.VERSION.SDK_INT + "");
         device.put("type", "android");
+
+        if (coord != null)
+            device.put("coordinates", coord);
+
         Device.createDevice(headers, device, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -155,5 +183,95 @@ public class RegistrationIntentService extends IntentService {
         }
     }
     // [END subscribe_topics]
+
+
+    private Handler mStopGettingLocationHandler;
+
+    private Runnable mStopGettingLocation = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mLocationManager.removeUpdates(mLocationListener);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+            Log.i(TAG, "Took too long to get location");
+            sendRegistrationDevice(null);
+        }
+    };
+
+
+    public void requestServices() {
+        if (!Utils.isNetworkAvailable(this)) {
+            sendRegistrationDevice(null);
+        }
+
+        else {
+            if (ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                requestLocation();
+            } else {
+                sendRegistrationDevice(null);
+            }
+        }
+    }
+
+    private void requestLocation() throws SecurityException {
+        mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
+        mStopGettingLocationHandler = new Handler();
+        mStopGettingLocationHandler.postDelayed(mStopGettingLocation, 2000); //if taking longer than 1.5 seconds to get location, stop it
+    }
+
+
+    LocationListener mLocationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.i(TAG, "onLocationChanged: " + location.toString());
+            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+
+            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+            sharedPreferences.edit()
+                    .putString("geoLongitude", location.getLongitude() + "") //will be saved as String. Cant store double
+                    .putString("geoLatitude", location.getLatitude() + "")
+                    .apply();
+
+
+            if (sharedPreferences.getBoolean("isLoggedIn", false)) {
+                JSONArray coord = new JSONArray();
+                try {
+                    coord.put(location.getLatitude());
+                    coord.put(location.getLongitude());
+
+                    JSONObject coordinates = new JSONObject();
+                    coordinates.put("geo", coord);
+
+                    sendRegistrationDevice(coordinates);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    sendRegistrationDevice(null);
+                }
+            } else {
+                sendRegistrationDevice(null);
+            }
+
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+            sendRegistrationDevice(null);
+        }
+    };
 
 }

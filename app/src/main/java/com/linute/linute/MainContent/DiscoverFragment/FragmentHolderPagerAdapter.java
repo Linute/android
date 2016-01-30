@@ -12,23 +12,18 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
  */
 public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
 
-    public DiscoverFragment mCampusFeed;
-    public DiscoverFragment mFriendsFeed;
-
 
     public FragmentHolderPagerAdapter(FragmentManager fm) {
         super(fm);
-        mCampusFeed = DiscoverFragment.newInstance(false);
-        mFriendsFeed = DiscoverFragment.newInstance(true);
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position){
             case 0:
-                return mCampusFeed;
+                return DiscoverFragment.newInstance(false);
             case 1:
-                return mFriendsFeed;
+                return DiscoverFragment.newInstance(true);
         }
         return null;
     }

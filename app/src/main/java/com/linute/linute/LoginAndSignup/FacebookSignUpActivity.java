@@ -196,9 +196,9 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         if (!dob.equals("") && !dob.equals("null")){
             newInfo.put("dob", dob);
         }
-        newInfo.put("registrationType", "facebook");
+        newInfo.put("registrationType", mSharedPreferences.getString("registrationType", ""));
         newInfo.put("passwordFacebook", mSharedPreferences.getString("passwordFacebook", ""));
-        newInfo.put("password", mSharedPreferences.getString("passwordFacebook", ""));
+        newInfo.put("password", mSharedPreferences.getString("password", ""));
 
 
         showProgress(true, 1);
@@ -254,6 +254,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         new LSDKUser(this).createUser(params, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+
                 failedInternetConnection(1);
             }
 

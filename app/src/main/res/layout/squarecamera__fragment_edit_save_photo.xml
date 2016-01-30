@@ -35,12 +35,13 @@
               android:gravity="center"
               android:imeOptions="actionDone"
               android:inputType="textPhonetic"
-              android:maxLength="20"
+              android:textSize="12sp"
               android:paddingBottom="5dp"
               android:paddingTop="5dp"
               android:singleLine="true"
               android:textColor="@android:color/white"
               android:visibility="gone"
+
             />
 
     </RelativeLayout>

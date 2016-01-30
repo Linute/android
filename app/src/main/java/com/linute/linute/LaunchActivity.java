@@ -21,7 +21,6 @@ import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
 import java.util.Random;
 
 
@@ -47,6 +46,8 @@ public class LaunchActivity extends Activity {
 
         generateNewSigniture();
 
+//        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
         //set broadcast receiver
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -61,32 +62,10 @@ public class LaunchActivity extends Activity {
                 //token was sent or we already have token
                 //we need a token for this app to work. Will stop app if there is no token available
                 if (sentToken || token != null) {
-
-                    Class nextActivity; //the next activity we go to
-
-                    //if user is logged in
-                    if (sharedPreferences.getBoolean("isLoggedIn", false) && !sharedPreferences.getString("email", "noAuth").equals("noAuth")) {
-                        //college set, go to college
-                        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
-                            nextActivity = MainActivity.class;
-
-                            //college was not set. go to college picker
-                        else
-                            nextActivity = CollegePickerActivity.class;
-                    }
-
-                    //user not logged in
-                    else {
-                        nextActivity = PreLoginActivity.class;
-                    }
-
-                    Intent i = new Intent(LaunchActivity.this, nextActivity);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(i);
-                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out); //no transition effects
-                    LaunchActivity.this.finish();
-
+//                    requestServices();
+                    goToNextActivity();
                 }
+
                 //No token and unsuccessful registration
                 else {
                     new AlertDialog.Builder(LaunchActivity.this)
@@ -134,7 +113,6 @@ public class LaunchActivity extends Activity {
                 new IntentFilter(QuickstartPreferences.REGISTRATION_COMPLETE));
 
         //register gcm token
-        //FIXME: take out comment when running on actual device
         if (checkPlayServices()) {
             runRegistrationIntentService();
         }
@@ -165,5 +143,148 @@ public class LaunchActivity extends Activity {
             return false;
         }
         return true;
+    }
+
+
+//    public void requestServices() {
+//        if (!Utils.isNetworkAvailable(this)) {
+//            goToNextActivity();
+//        }
+//
+//        else {
+//            if (ContextCompat.checkSelfPermission(this,
+//                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                    == PackageManager.PERMISSION_GRANTED) {
+//                requestLocation();
+//            } else {
+//                goToNextActivity();
+//            }
+//        }
+//    }
+
+
+//    private Handler mStopGettingLocationHandler;
+//    private Runnable mStopGettingLocation = new Runnable() {
+//        @Override
+//        public void run() {
+//            try {
+//                mLocationManager.removeUpdates(mLocationListener);
+//            } catch (SecurityException e) {
+//                e.printStackTrace();
+//            }
+//            Log.i(TAG, "run: ");
+//            goToNextActivity();
+//        }
+//    };
+
+//    private void requestLocation() throws SecurityException {
+//
+//        mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
+//
+//        mStopGettingLocationHandler = new Handler();
+//        //mStopGettingLocationHandler.postDelayed(mStopGettingLocation, 2000); //if taking longer than 1.5 seconds to get location, stop it
+//    }
+
+//    LocationListener mLocationListener = new LocationListener() {
+//        @Override
+//        public void onLocationChanged(Location location) {
+//            Log.i(TAG, "onLocationChanged: " + location.toString());
+//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+//
+//            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+//
+//            sharedPreferences.edit()
+//                    .putString("geoLongitude", location.getLongitude() + "") //will be saved as String. Cant store double
+//                    .putString("geoLatitude", location.getLatitude() + "")
+//                    .apply();
+//
+//
+//            if (sharedPreferences.getBoolean("isLoggedIn", false)) {
+//                JSONArray coord = new JSONArray();
+//                try {
+//                    coord.put(location.getLatitude());
+//                    coord.put(location.getLongitude());
+//
+//                    JSONObject coordinates = new JSONObject();
+//                    coordinates.put("geo", coord);
+//
+//                    Map<String, Object> params = new HashMap<>();
+//                    params.put("coordinates", coordinates);
+//
+//                    new LSDKUser(LaunchActivity.this).updateLocation(params, new Callback() {
+//                        @Override
+//                        public void onFailure(Request request, IOException e) {
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    goToNextActivity();
+//                                }
+//                            });
+//                        }
+//
+//                        @Override
+//                        public void onResponse(Response response) throws IOException {
+//                            Log.i(TAG, "onResponse: " + response.code() + response.body().string());
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    goToNextActivity();
+//                                }
+//                            });
+//                        }
+//                    });
+//
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    goToNextActivity();
+//                }
+//            } else {
+//                goToNextActivity();
+//            }
+//
+//        }
+//
+//        @Override
+//        public void onStatusChanged(String provider, int status, Bundle extras) {
+//        }
+//
+//        @Override
+//        public void onProviderEnabled(String provider) {
+//        }
+//
+//        @Override
+//        public void onProviderDisabled(String provider) {
+//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+//            goToNextActivity();
+//        }
+//    };
+
+    private void goToNextActivity() {
+
+        Class nextActivity; //the next activity we go to
+
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        //if user is logged in
+        if (sharedPreferences.getBoolean("isLoggedIn", false) && !sharedPreferences.getString("email", "noAuth").equals("noAuth")) {
+            //college set, go to college
+            if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
+                nextActivity = MainActivity.class;
+
+                //college was not set. go to college picker
+            else
+                nextActivity = CollegePickerActivity.class;
+        }
+
+        //user not logged in
+        else {
+            nextActivity = PreLoginActivity.class;
+        }
+
+        Intent i = new Intent(LaunchActivity.this, nextActivity);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out); //no transition effects FIXME
+        LaunchActivity.this.finish();
     }
 }

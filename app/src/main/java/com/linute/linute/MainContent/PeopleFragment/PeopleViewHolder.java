@@ -85,13 +85,31 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     @Override
                     public void onFailure(Request request, IOException e) {
                         e.printStackTrace();
+                        Activity activity = (Activity) vContext;
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(vContext);
+                            }
+                        });
                     }
 
                     @Override
                     public void onResponse(Response response) throws IOException {
+                        Activity activity = (Activity) vContext;
+
+
                         if (!response.isSuccessful()) {
                             Log.d(TAG, response.body().string());
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(vContext);
+                                }
+                            });
+                            return;
                         }
+
                         response.body().close();
 //                        Log.d(TAG, response.body().string());
                         ((Activity) vContext).runOnUiThread(new Runnable() {

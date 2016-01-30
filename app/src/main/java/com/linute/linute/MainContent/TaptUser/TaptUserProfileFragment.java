@@ -151,7 +151,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         e.printStackTrace();
                     }
                     mLinuteUser.updateUserInformation(jsonObject); //container for new information
-                    Log.d(TAG, "onResponse: " + jsonObject);
+                    Log.d(TAG, "onResponse: setting header -- " + jsonObject);
 
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
@@ -163,7 +163,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         }
                     });
                 } else {//else something went
-                    Log.v(TAG, response.body().string());
+                    Log.v(TAG, response.code()+response.body().string());
                 }
             }
         });

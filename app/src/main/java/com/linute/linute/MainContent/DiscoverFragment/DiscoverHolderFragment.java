@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -34,6 +35,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager());
     }
 
+    @Nullable
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
 
@@ -44,15 +47,14 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                //we will only load the other fragment if it is needed
+                //ex. we start on the campus tab. we won't load the friends tab until we swipe left
+                loadFragmentAtPositionIfNeeded(position);
             }
 
             @Override
             public void onPageSelected(int position) {
                 Log.i(TAG, "onPageSelected: " + position);
-                //we will only load the other fragment if it is needed
-                //ex. we start on the campus tab. we won't load the friends tab until we swipe left
-                loadFragmentAtPositionIfNeeded(position);
             }
 
             @Override
@@ -69,18 +71,18 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
-        outState.putBoolean("friendsNeedUpdate", mFriendsFeedNeedsUpdating);
+        outState.putBoolean("friendsNeedsUpdate", mFriendsFeedNeedsUpdating);
         outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             int index = savedInstanceState.getInt("viewPagerIndex");
             mInitiallyPresentedFragmentWasCampus = index == 0;
             mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate");
-            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedUpdate");
+            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate");
             mViewPager.setCurrentItem(index);
         }
     }
@@ -95,7 +97,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     }
 
     @Override
-    public boolean fragmentNeedsUpdating(){
+    public boolean fragmentNeedsUpdating() {
         return mCampusFeedNeedsUpdating && mFriendsFeedNeedsUpdating;
     }
 
@@ -115,13 +117,13 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         mCampusFeedNeedsUpdating = needsUpdating;
     }
 
-    public boolean getInitiallyPresentedFragmentWasCampus(){
+    public boolean getInitiallyPresentedFragmentWasCampus() {
         return mInitiallyPresentedFragmentWasCampus;
     }
 
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
-    private void loadFragmentAtPositionIfNeeded(int position){
+    private void loadFragmentAtPositionIfNeeded(int position) {
         DiscoverFragment fragment = (DiscoverFragment) mFragmentHolderPagerAdapter.instantiateItem(mViewPager, position);
         //only load when fragment comes into view
         if (fragment != null) {
@@ -140,7 +142,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         MainActivity mainActivity = (MainActivity) getActivity();
 
         if (mainActivity != null) {
-            mainActivity.setTitle("FEED");
+            mainActivity.setTitle("Feed");
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.showFAB(true); //show the floating button
             mainActivity.resetToolbar();

@@ -101,6 +101,7 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
+        Log.i(TAG, "onCreateView: "+mPosts.size());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
 
         //if floating button expanded, collapse it
@@ -211,6 +212,7 @@ public class DiscoverFragment extends UpdatableFragment {
         }
 
         final int skip = mSkip;
+        if (getActivity() == null) return;
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
@@ -235,6 +237,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     mPosts.clear();
                 }
                 String json = response.body().string();
+                Log.i(TAG, "onResponse: "+json);
                 JSONObject jsonObject = null;
                 JSONArray jsonArray = null;
                 try {

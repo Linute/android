@@ -10,6 +10,9 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -180,4 +183,12 @@ public class LSDKUser {
         return API_Methods.post("users/authorization-facebook", header, param, callback);
     }
 
+
+    public Call updateLocation(Map<String, Object> params, Callback callback){
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", null),
+                mSharedPreferences.getString("password", null),
+                mEncodedToken);
+        return API_Methods.post("geo", header, params, callback);
+    }
 }

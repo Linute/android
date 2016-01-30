@@ -1,11 +1,10 @@
-<RelativeLayout
-
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent">
-<android.support.v4.widget.SwipeRefreshLayout android:id="@+id/peoplefrag_swipe_refresh"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+
+    <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/peoplefrag_swipe_refresh"
+                                                  android:layout_width="match_parent"
+                                                  android:layout_height="match_parent">
 
 
         <android.support.v7.widget.RecyclerView
@@ -14,5 +13,43 @@
             android:layout_height="wrap_content"/>
 
 
-</android.support.v4.widget.SwipeRefreshLayout>
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <RelativeLayout android:id="@+id/peopleFragment_rationale_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="100dp"
+                    android:visibility="gone">
+
+        <TextView android:id="@+id/rationale_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginBottom="32dp"
+                  android:layout_marginEnd="64dp"
+                  android:layout_marginStart="64dp"
+                  android:gravity="center"
+                  android:text="@string/need_location"
+            />
+
+        <Button android:id="@+id/peopleFragment_get_location_permissions_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rationale_text"
+                android:layout_centerHorizontal="true"
+                android:text="Turn on"
+            />
+    </RelativeLayout>
+
+
+
+    <ProgressBar
+        android:id="@+id/peopleFragment_progressbar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:visibility="gone"/>
+
+
 </RelativeLayout>

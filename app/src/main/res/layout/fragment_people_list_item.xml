@@ -8,17 +8,18 @@
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/people_user_image"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="@dimen/profilefragment_list_item_profile_radius"
+        android:layout_height="@dimen/profilefragment_list_item_profile_radius"
         android:scaleType="centerCrop"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        app:border="false"
-        app:shadow="false"/>
+        app:border_width="1dp"
+        app:border_color="@color/light_grey"
+        />
 
     <ImageView
         android:id="@+id/list_people_image_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/profilefragment_list_item_profile_radius"
+        android:layout_height="@dimen/profilefragment_list_item_profile_radius"
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:layout_alignParentEnd="true"
@@ -37,14 +38,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:text="NAME"/>
+            android:textColor="@android:color/holo_blue_dark"
+            android:textStyle="bold"
+            tools:text="NAME"/>
 
         <TextView
             android:id="@+id/list_people_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:textSize="12sp"
             android:singleLine="true"
-            android:text="Last online"/>
+            tools:text="Last online"/>
 
     </LinearLayout>
 

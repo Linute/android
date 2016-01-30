@@ -38,6 +38,7 @@ import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
+import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
@@ -163,7 +164,7 @@ public class MainActivity extends BaseTaptActivity {
 
                 clearBackStack();
 
-                if (mPreviousItem != null ) { //profile doesn't get checked
+                if (mPreviousItem != null) { //profile doesn't get checked
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                 }
@@ -179,11 +180,9 @@ public class MainActivity extends BaseTaptActivity {
                 //if there are a lot of other user profile/ events in mainActivity, clear them
                 clearBackStack();
 
-
-
                 switch (item.getItemId()) {
                     case R.id.navigation_item_feed:
-                        if (mPreviousItem != null && mPreviousItem != item){
+                        if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
                         }
                         item.setChecked(true);
@@ -191,7 +190,7 @@ public class MainActivity extends BaseTaptActivity {
                         mPreviousItem = item;
                         break;
                     case R.id.navigation_item_activity:
-                        if (mPreviousItem != null && mPreviousItem != item){
+                        if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
                         }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
@@ -199,7 +198,7 @@ public class MainActivity extends BaseTaptActivity {
                         mPreviousItem = item;
                         break;
                     case R.id.navigation_item_people:
-                        if (mPreviousItem != null && mPreviousItem != item){
+                        if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
                         }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PEOPLE));
@@ -223,8 +222,6 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-
-
     private Fragment getFragment(short index) {
 
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
@@ -241,7 +238,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new Profile();
                     break;
                 case FRAGMENT_INDEXES.PEOPLE:
-                    fragment = new PeopleFragment();
+                    fragment = new PeopleFragmentsHolder();
                     break;
                 default:
                     fragment = null;
@@ -270,7 +267,8 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private static final int SETTINGS_REQUEST_CODE = 13;
-    public void startActivityForResults(Class activity, final int requestCode){
+
+    public void startActivityForResults(Class activity, final int requestCode) {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
             @Override
             public void run() {
@@ -282,15 +280,16 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK){
+        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
 
             //NOTE: need to reload others?
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void startNewActivity(final Class activity){
+    public void startNewActivity(final Class activity) {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
             @Override
             public void run() {
@@ -300,7 +299,6 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
     }
-
 
 
     //use this when you need to add another users profile view
@@ -323,8 +321,8 @@ public class MainActivity extends BaseTaptActivity {
 
 
     //sets needsUpdating for fragment at index
-    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
-        if (mFragments[index] != null){
+    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index) {
+        if (mFragments[index] != null) {
             mFragments[index].setFragmentNeedUpdating(needsUpdating);
         }
     }
@@ -392,14 +390,14 @@ public class MainActivity extends BaseTaptActivity {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void raiseAppBarLayoutElevation() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             mAppBarLayout.setElevation(mAppBarElevation);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void lowerAppBarElevation() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             mAppBarLayout.setElevation(0);
     }
 
@@ -419,7 +417,6 @@ public class MainActivity extends BaseTaptActivity {
         getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
         return true;
     }
-
 
 
     @Override

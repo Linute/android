@@ -67,6 +67,8 @@ public class API_Methods {
             }
         }
 
+        //Log.i(TAG, "get: "+url.toString());
+
         HttpUrl request = url.build();
 
         Call call = client.newCall(new Request.Builder().url(request).headers(requestHeaders).build());
