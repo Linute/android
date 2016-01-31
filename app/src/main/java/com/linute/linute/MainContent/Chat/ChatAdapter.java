@@ -44,6 +44,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             case Chat.TYPE_ACTION:
                 layout = R.layout.item_action;
                 break;
+            case Chat.TYPE_CHAT_HEAD:
+                break;
         }
 
         return new ChatViewHolder(
@@ -81,6 +83,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         protected TextView vUsernameView;
         protected TextView vMessageView;
 
+        protected CircularImageView vChatHeadImageView;
+
         public ChatViewHolder(View itemView) {
             super(itemView);
 
@@ -97,11 +101,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
             vUsernameView = (TextView) itemView.findViewById(R.id.username);
             vMessageView = (TextView) itemView.findViewById(R.id.action);
+
+
         }
 
         void bindModel(Chat chat) {
             if (null != vUsernameView && null != vMessageView) {
                 vUsernameView.setText(chat.getUserName());
+            } else if (null != vChatHeadImageView) {
+
             } else {
                 if (aChatList.get(getAdapterPosition()).getOwnerId().equals(aSharedPreferences.getString("userID", null))) {
                     vOwnerLinear.setVisibility(View.VISIBLE);
