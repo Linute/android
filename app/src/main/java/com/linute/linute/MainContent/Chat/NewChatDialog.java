@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -33,6 +35,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -151,7 +154,7 @@ public class NewChatDialog extends DialogFragment {
                                                         JSONObject jsonObject = null;
                                                         try {
                                                             jsonObject = new JSONObject(response.body().string());
-                                                            Log.d(TAG, "onResponseNewChat: " + jsonObject.toString(4));
+                                                            Log.d(TAG, "onResponseNotSuccessfulNewChat: " + jsonObject.toString(4));
                                                         } catch (JSONException e) {
                                                             e.printStackTrace();
                                                         }
@@ -159,25 +162,44 @@ public class NewChatDialog extends DialogFragment {
 //                                                        Log.d(TAG, "onResponse: " + response.body().string());
                                                         JSONObject jsonObject = null;
                                                         String roomId = "";
+                                                        String ownerName = "";
+                                                        String ownerId = "";
+                                                        int usersCount = 1;
                                                         try {
                                                             jsonObject = new JSONObject(response.body().string());
-                                                            Log.d(TAG, "onResponseSuccesfullNewChat: ");
-//                                                            roomId = jsonObject.getJSONObject("filters")
+//                                                            Log.d(TAG, "onResponseSuccesfullNewChat: " + jsonObject.toString(4));
+                                                            roomId = jsonObject.getString("room");
+                                                            ownerName = jsonObject.getJSONObject("owner").getString("fullName");
+                                                            ownerId = jsonObject.getJSONObject("owner").getString("id");
+//                                                            usersCount = jsonObject.getJSONArray("users").length();
+                                                            // uncomment above when server adds user and delete below line
+                                                            usersCount = 2;
                                                         } catch (JSONException e) {
                                                             e.printStackTrace();
                                                         }
-//                                                        // startChat Frag
-//                                                        ChatFragment newFragment = ChatFragment.newInstance(mRoomsList.get(getAdapterPosition()).getRoomId(), "Hello");
-//                                                        FragmentTransaction transaction = ((RoomsActivity) getActivity()).getSupportFragmentManager().beginTransaction();
-//                                                        // Replace whatever is in the fragment_container view with this fragment,
-//                                                        // and add the transaction to the back stack so the user can navigate back
-//                                                        transaction.replace(R.id.chat_container, newFragment);
-//                                                        transaction.addToBackStack(null);
-//                                                        // Commit the transaction
-//                                                        getActivity().getFragmentManager().popBackStack();
-//                                                        dismiss();
-//                                                        ((RoomsActivity) getActivity()).toggleFab(false);
-//                                                        transaction.commit();
+                                                        // startChat Frag
+                                                        final String finalRoomId = roomId;
+                                                        final String finalOwnerName = ownerName;
+                                                        final String finalOwnerId = ownerId;
+                                                        final int finalUsersCount = usersCount;
+                                                        getActivity().runOnUiThread(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                ChatFragment newFragment = ChatFragment.newInstance(
+                                                                        finalRoomId, finalOwnerName, finalOwnerId,
+                                                                        finalUsersCount, new ArrayList<ChatHead>());
+                                                                FragmentTransaction transaction = ((RoomsActivity) getActivity()).getSupportFragmentManager().beginTransaction();
+                                                                // Replace whatever is in the fragment_container view with this fragment,
+                                                                // and add the transaction to the back stack so the user can navigate back
+                                                                transaction.replace(R.id.chat_container, newFragment);
+                                                                transaction.addToBackStack(null);
+                                                                // Commit the transaction
+                                                                ((RoomsActivity) getActivity()).getSupportFragmentManager().popBackStack();
+                                                                dismiss();
+                                                                ((RoomsActivity) getActivity()).toggleFab(false);
+                                                                transaction.commit();
+                                                            }
+                                                        });
                                                     }
                                                 }
                                             });

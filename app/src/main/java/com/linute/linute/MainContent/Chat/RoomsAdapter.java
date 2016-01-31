@@ -19,6 +19,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,7 +75,12 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 public void onClick(View v) {
 //                    Toast.makeText(aContext, mRoomsList.get(getAdapterPosition()).getLastMessageUserName(), Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "onClick: " + mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "") + " fsfsfsf");
-                    ChatFragment newFragment = ChatFragment.newInstance(mRoomsList.get(getAdapterPosition()).getRoomId(), mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""), mSharedPreferences.getString("userID", ""));
+                    ChatFragment newFragment = ChatFragment.newInstance(
+                            mRoomsList.get(getAdapterPosition()).getRoomId(),
+                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
+                            mSharedPreferences.getString("userID", ""),
+                            mRoomsList.get(getAdapterPosition()).getUsersCount(),
+                            mRoomsList.get(getAdapterPosition()).getChatHeadList());
                     Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
                     FragmentTransaction transaction = ((RoomsActivity) aContext).getSupportFragmentManager().beginTransaction();
                     // Replace whatever is in the fragment_container view with this fragment,

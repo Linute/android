@@ -61,12 +61,18 @@ public class ChatFragment extends Fragment {
     private static final String ROOM_ID = "room";
     private static final String USERNAME = "username";
     private static final String USERID = "userid";
+    private static final String USER_COUNT = "usercount";
+    private static final String CHAT_HEADS = "chatheads";
     private static final int TYPING_TIMER_LENGTH = 600;
 
     // TODO: Rename and change types of parameters
     private String mRoomId;
     private String mUserId;
+    private int mRoomUsersCnt;
     private JSONObject newMessage;
+    private JSONObject typingJson;
+    private JSONObject joinLeft;
+    private JSONObject delivered;
 
     private RecyclerView recList;
     private LinearLayoutManager llm;
@@ -80,6 +86,9 @@ public class ChatFragment extends Fragment {
 
     private List<Chat> mChatList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
+    private int mLastRead;
+    private List<ChatHead> mChatHeadList;
+    private List<ChatHead> mChatHeadAddedList;
 
 
     public ChatFragment() {
@@ -90,40 +99,29 @@ public class ChatFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mChatAdapter = new ChatAdapter(context, mChatList);
-        {
-            try {
-                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("new message", onNewMessage);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
-        mSocket.on("read", onRead);
-        mSocket.connect();
-        mIsReadMessageJSONArray = new JSONArray();
+        mChatAdapter = new ChatAdapter(getActivity(), mChatList);
+        mChatHeadList = new ArrayList<>();
+        mChatHeadList = new ArrayList<>();
+        Log.d(TAG, "onAttach: ");
     }
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param roomId    Parameter 1.
+     * @param ownerName Parameter 2.
      * @return A new instance of fragment ChatFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ChatFragment newInstance(String param1, String param2, String param3) {
+    public static ChatFragment newInstance(String roomId, String ownerName, String ownerId, int roomUsersCnt, ArrayList<ChatHead> chatHeadList) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
-        args.putString(ROOM_ID, param1);
-        args.putString(USERNAME, param2);
-        args.putString(USERID, param3);
+        args.putString(ROOM_ID, roomId);
+        args.putString(USERNAME, ownerName);
+        args.putString(USERID, ownerId);
+        args.putInt(USER_COUNT, roomUsersCnt);
+        args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -135,7 +133,8 @@ public class ChatFragment extends Fragment {
             mRoomId = getArguments().getString(ROOM_ID);
             mUsername = getArguments().getString(USERNAME);
             mUserId = getArguments().getString(USERID);
-            mSocket.emit("add user", mUsername);
+            mRoomUsersCnt = getArguments().getInt(USER_COUNT);
+            mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
         }
 
         setHasOptionsMenu(true);
@@ -152,8 +151,58 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        {
+            try {
+                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on("new message", onNewMessage);
+        mSocket.on("typing", onTyping);
+        mSocket.on("stop typing", onStopTyping);
+        mSocket.on("read", onRead);
+        mSocket.on("joined", onJoin);
+        mSocket.on("left", onLeave);
+        mSocket.on("error", onError);
+        mSocket.on("delivered", onDelivered);
+        mSocket.connect();
+        mIsReadMessageJSONArray = new JSONArray();
+        typingJson = new JSONObject();
+        joinLeft = new JSONObject();
+        delivered = new JSONObject();
+
+        try {
+            typingJson.put("room", mRoomId);
+
+            joinLeft.put("room", mRoomId);
+            joinLeft.put("user", mUserId);
+
+            delivered.put("user", mUserId);
+            delivered.put("room", mRoomId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mSocket.emit("joined", joinLeft);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        mSocket.emit("left", joinLeft);
 
         mSocket.disconnect();
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -162,6 +211,10 @@ public class ChatFragment extends Fragment {
         mSocket.off("typing", onTyping);
         mSocket.off("stop typing", onStopTyping);
         mSocket.off("read", onRead);
+        mSocket.off("joined", onJoin);
+        mSocket.off("left", onLeave);
+        mSocket.off("error", onError);
+        mSocket.off("delivered", onDelivered);
     }
 
     @Override
@@ -200,7 +253,7 @@ public class ChatFragment extends Fragment {
 
                 if (!mTyping) {
                     mTyping = true;
-                    mSocket.emit("typing");
+                    mSocket.emit("typing", typingJson);
                 }
 
                 mTypingHandler.removeCallbacks(onTypingTimeout);
@@ -269,6 +322,7 @@ public class ChatFragment extends Fragment {
 
                     try {
                         jsonObject = new JSONObject(response.body().string());
+//                        Log.d(TAG, "onResponse: " + jsonObject.keys());
                         messages = jsonObject.getJSONArray("messages");
                         for (int i = 0; i < messages.length(); i++) {
                             message = (JSONObject) messages.get(i);
@@ -281,8 +335,36 @@ public class ChatFragment extends Fragment {
                                     message.getString("id"),
                                     message.getString("text"));
 //                            Log.d(TAG, "onResponse: " + message.toString(4));
-                            checkRead(mUserId, message);
-//                            chat.setIsRead(message.getJSONObject(""));
+//                            if (mLastRead == -1) {
+//                                if (checkRead(mUserId, message)) {
+//                                    mLastRead = i;
+//                                }
+//                            }
+
+                            // change logic to chataddedlist != 0
+//                            if (mChatHeadList.size() != mChatHeadAddedList.size()) {
+//                                if (checkChatHead(message)) {
+//                                    if (mLastRead != -1 && mRoomUsersCnt - 1 == message.getJSONArray("isRead").length()) {
+//                                        // do nothing
+//                                    } else {
+//                                        boolean found = false;
+//                                        for (int j = 0; j < mChatHeadList.size(); j++) {
+//                                            for (int k = 0; k < message.getJSONArray("isRead").length(); k++) {
+//                                                if (mChatHeadList.get(j).getUsername().equals(
+//                                                        ((JSONObject) message.getJSONArray("isRead").get(k)).getString("fullName"))) {
+//                                                    found = true;
+//                                                }
+//                                            }
+//                                            if (!found) {
+//                                                // add chathead to queue; if chathead in chataddedlist skip
+//                                            }
+//                                            found = false;
+//                                        }
+//                                        // add queue to layout; add chatheads to addedchatheadlist
+//                                    }
+//                                }
+//                            }
+////                            chat.setIsRead(message.getJSONObject(""));
                             chat.setType(Chat.TYPE_MESSAGE);
                             mChatList.add(chat);
                         }
@@ -292,7 +374,11 @@ public class ChatFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     mChatAdapter.notifyDataSetChanged();
-                                    scrollToBottom();
+                                    if (mLastRead != -1) {
+                                        recList.scrollToPosition(mLastRead);
+                                    } else {
+                                        scrollToBottom();
+                                    }
                                 }
                             });
                         }
@@ -304,20 +390,29 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private boolean checkChatHead(JSONObject message) throws JSONException {
+        return message.getJSONArray("isRead").length() != mRoomUsersCnt;
+    }
+
     private boolean checkRead(String userId, JSONObject message) throws JSONException {
         String id = "";
+        boolean read = false;
         for (int i = 0; i < message.getJSONArray("isRead").length(); i++) {
             id = ((JSONObject) message.getJSONArray("isRead").get(i)).getString("id");
             if (userId.equals(id)) {
+                read = true;
+            } else {
                 mIsReadMessageJSONArray.put(message.getString("id"));
-                return true;
             }
         }
-        return false;
+        return read;
     }
 
     private void addMessage(String username, String message) {
-        Chat chat = new Chat(mRoomId, mSharedPreferences.getString("userImage", ""), username, "", mUserId, "", message);
+        Chat chat = new Chat(
+                mRoomId,
+                mSharedPreferences.getString("userImage", ""),
+                username, "", mUserId, "", message);
         chat.setType(Chat.TYPE_MESSAGE);
         mChatList.add(chat);
         mChatAdapter.notifyItemInserted(mChatList.size() - 1);
@@ -344,6 +439,7 @@ public class ChatFragment extends Fragment {
         JSONArray readArray = new JSONArray();
         readArray.put(data.getString("id"));
         read.put("read", readArray);
+        read.put("room", mRoomId);
 
         if (!checkRead(mUserId, data))
             mSocket.emit("read", read);
@@ -364,6 +460,22 @@ public class ChatFragment extends Fragment {
                 mChatList.remove(i);
                 mChatAdapter.notifyItemRemoved(i);
             }
+        }
+    }
+
+    private void removeChatHead(String username) {
+        for (int i = mChatList.size() - 1; i >= 0; i--) {
+            Chat message = mChatList.get(i);
+            // chat type head ; message get list size == 0 get list 0 element username
+            if (message.getType() == Chat.TYPE_ACTION && message.getUserName().equals(username)) {
+                mChatList.remove(i);
+                mChatAdapter.notifyItemRemoved(i);
+            }
+            // else if
+            // chat type head ; message get list size > 0
+            // for -> if uesrname = username
+            // list remove username
+            // update adapter
         }
     }
 
@@ -431,6 +543,7 @@ public class ChatFragment extends Fragment {
 //                    String message;
                     try {
                         username = data.getJSONObject("owner").getString("fullName");
+//                        if (owner and id same keep id as mLastId)
                         Log.d(TAG, "run: " + data.toString(4));
 //                        message = data.getString("message");
                     } catch (JSONException e) {
@@ -440,9 +553,9 @@ public class ChatFragment extends Fragment {
 //                    addMessage(username, message);
 
                     try {
-                        Log.d(TAG, "runbefore: ");
                         addMessage(data);
-                        Log.d(TAG, "runafter: ");
+                        delivered.put("id", data.getString("id"));
+                        mSocket.emit("delivered", delivered);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -458,17 +571,9 @@ public class ChatFragment extends Fragment {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
-
                     try {
                         Log.d(TAG, "run: " + data.toString(4));
-                        for (int i = mChatList.size() - 1; i >= 0; i--) {
-                            Log.d(TAG, "runids: " + data.getJSONArray("read").get(0) + " " + mChatList.get(i).getMessageId());
-                            if (mChatList.get(i).getMessageId().equals(data.getJSONArray("read").get(0))) {
-                                Toast.makeText(getActivity(), "FOUND " + mChatList.get(i).getMessageId(), Toast.LENGTH_SHORT).show();
-                                Log.d(TAG, "run: got it");
-                                break;
-                            }
-                        }
+//                        removeChatHead(data.getOwner)
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -486,6 +591,7 @@ public class ChatFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     String username;
                     try {
+                        Log.d(TAG, "run: " + data.toString(4));
                         username = data.getString("username");
                     } catch (JSONException e) {
                         return;
@@ -505,6 +611,7 @@ public class ChatFragment extends Fragment {
                     JSONObject data = (JSONObject) args[0];
                     String username;
                     try {
+                        Log.d(TAG, "run: " + data.toString(4));
                         username = data.getString("username");
                     } catch (JSONException e) {
                         return;
@@ -521,7 +628,80 @@ public class ChatFragment extends Fragment {
             if (!mTyping) return;
 
             mTyping = false;
-            mSocket.emit("stop typing");
+            mSocket.emit("stop typing", typingJson);
+        }
+    };
+
+    private Emitter.Listener onLeave = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (args.length != 0) {
+                        try {
+                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onJoin = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (args.length != 0) {
+                        try {
+                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onError = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (args.length != 0) {
+//                        try {
+//                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+                    }
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onDelivered = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (args.length != 0) {
+                        try {
+                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+//                            if(mLastid == id setcheck message)
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
         }
     };
 }
