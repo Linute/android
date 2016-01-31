@@ -134,6 +134,7 @@ public class UpdatesFragment extends UpdatableFragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    //TODO: close
                     getUpdatesInformation();
                 } else {
                     showServerErrorToast();

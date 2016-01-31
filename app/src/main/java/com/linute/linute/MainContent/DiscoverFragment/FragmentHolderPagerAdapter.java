@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 
@@ -10,6 +11,8 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
  * Created by QiFeng on 1/20/16.
  */
 public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
+
+
     public FragmentHolderPagerAdapter(FragmentManager fm) {
         super(fm);
     }

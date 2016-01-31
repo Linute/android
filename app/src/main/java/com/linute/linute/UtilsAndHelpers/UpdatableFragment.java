@@ -1,5 +1,6 @@
 package com.linute.linute.UtilsAndHelpers;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
@@ -22,6 +23,19 @@ public class UpdatableFragment extends Fragment {
 
     public UpdatableFragment() {
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("NEEDS_UPDATING", mFragmentNeedsUpdating);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null)
+            mFragmentNeedsUpdating = savedInstanceState.getBoolean("NEEDS_UPDATING");
     }
 
     public void setFragmentNeedUpdating(boolean needsUpdating){

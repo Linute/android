@@ -14,28 +14,6 @@
         android:scaleType="fitCenter"
         android:src="@drawable/quotation2"/>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_toRightOf="@+id/profilelistitem_event_text"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/activities_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:maxLines="2"
-            android:text="old mcdonald had a sheep,\nmeow meow.."/>
-
-        <TextView
-            android:id="@+id/activities_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="yesterday"/>
-    </LinearLayout>
-
     <ImageView
         android:id="@+id/profilelistitem_event_image"
         android:layout_width="50dp"
@@ -44,6 +22,34 @@
         android:layout_centerVertical="true"
         android:scaleType="fitCenter"
         android:src="@drawable/no_image_placeholder"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_toEndOf="@+id/profilelistitem_event_text"
+        android:layout_toStartOf="@+id/profilelistitem_event_image"
+        android:orientation="vertical">
+
+
+
+        <TextView
+            android:id="@+id/activities_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:maxLines="2"
+            android:text="old mcdonald had a sheep, meow meow.."/>
+
+        <TextView
+            android:id="@+id/activities_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="yesterday"/>
+
+    </LinearLayout>
+
 
 
 </RelativeLayout>

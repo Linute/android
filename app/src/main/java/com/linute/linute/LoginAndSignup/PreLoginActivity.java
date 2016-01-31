@@ -69,18 +69,6 @@ public class PreLoginActivity extends AppCompatActivity {
 
     private CallbackManager mCallbackManager;
 
-    private ImageSwitcher mImageSwitcher;
-
-    //list of images we will use
-    private int[] mBackgroundImageResID = {
-            R.drawable.college_walk1,
-            R.drawable.college_walk2,
-            R.drawable.college_walk3
-    };
-
-    private int mImageCount = mBackgroundImageResID.length;
-    private int mCurrentImageIndex = 0;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,13 +86,11 @@ public class PreLoginActivity extends AppCompatActivity {
 
         setUpFacebookCallback();
 
-        setUpImageSwitcher();
     }
 
 
     private void bindViews() {
         //switches background images
-        mImageSwitcher = (ImageSwitcher) findViewById(R.id.background_image_switcher);
         mLinuteLoginButton = (Button) findViewById(R.id.prelogin_linute_login);
         mFacebookloginButton = (Button) findViewById(R.id.preLogin_facebook_login);
         mSignupText = (TextView) findViewById(R.id.linute_signup);
@@ -131,7 +117,6 @@ public class PreLoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteSignUpActivity.class);
-                goToLinuteLogin.putExtra("CURR_BACKGROUND_INDEX", mCurrentImageIndex);
                 startActivity(goToLinuteLogin);
             }
         });
@@ -249,26 +234,6 @@ public class PreLoginActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void setUpImageSwitcher() {
-
-        mImageSwitcher.setFactory(new ViewSwitcher.ViewFactory() {
-            @Override
-            public View makeView() {
-                ImageView imageView = new ImageView(getApplicationContext());
-                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                mImageSwitcher.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT));
-                return imageView;
-            }
-        });
-
-        mImageSwitcher.setImageResource(mBackgroundImageResID[0]); //set first image
-
-        //set in and out animations
-        mImageSwitcher.setInAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
-        mImageSwitcher.setOutAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_out));
-
-    }
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString("FBToken", mFBToken);
@@ -281,32 +246,6 @@ public class PreLoginActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             mFBToken = savedInstanceState.getString("FBToken");
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mImageSwitcher.postDelayed(rSwitchPicture, 6000);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mImageSwitcher.removeCallbacks(rSwitchPicture);
-    }
-
-    private Runnable rSwitchPicture = new Runnable() {
-        @Override
-        public void run() {
-            //cycle through the images
-            mImageSwitcher.setImageResource(mBackgroundImageResID[getNextBackgroundImageIndex()]);
-            mImageSwitcher.postDelayed(this, 6000);
-        }
-    };
-
-    private int getNextBackgroundImageIndex() {
-        //cycles to beginning image when at the end
-        return ++mCurrentImageIndex == mImageCount ? mCurrentImageIndex = 0 : mCurrentImageIndex;
     }
 
 

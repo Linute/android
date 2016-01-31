@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
+import org.json.JSONObject;
+
 /**
  * Created by Arman on 1/8/16.
  */
@@ -7,7 +9,7 @@ public class People {
     private String mProfileImage;
     private String mName;
     private String mID;
-    private String mDate;
+    private String mDate; //will we used as distance as well
 
     private boolean mFriend;
 

@@ -29,8 +29,8 @@ public class API_Methods {
 
     // API ENPOINT URL
     private static String SCHEME = "https";
-    private static String HOST = "api.linute.com";
-    //private static String HOST = "devapi.linute.com";
+    //private static String HOST = "api.linute.com";
+    private static String HOST = "devapi.linute.com";
     private static String VERSION = "v1.3";
 
     //JSON TYPE
@@ -66,6 +66,8 @@ public class API_Methods {
                 url.addQueryParameter(parameter.getKey(), parameter.getValue());
             }
         }
+
+        //Log.i(TAG, "get: "+url.toString());
 
         HttpUrl request = url.build();
 
@@ -125,12 +127,15 @@ public class API_Methods {
     //API DELETE
     public static Call delete(String path,
                               Map<String, String> headers,
+                              Map<String, Object> params,
                               Callback callback) {
 
         OkHttpClient client = new OkHttpClient();
 
         Headers requestHeaders = Headers.of(headers); //add headers
-        RequestBody body = RequestBody.create(EMPTY, ""); //empty request body
+
+        JSONObject json = new JSONObject(params);
+        RequestBody body = RequestBody.create(JSON, json.toString()); //create json
 
         String url = getURL(path);
 

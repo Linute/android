@@ -344,6 +344,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                 mEventPicture.setImageResource(R.drawable.follow_back); //plus icon
 
+                if (mEventPicture.getVisibility() == View.GONE){
+                    mEventPicture.setVisibility(View.VISIBLE);
+                }
+
                 mEventPicture.setOnClickListener(new View.OnClickListener() { //when pressed
 
                     boolean mFollowed = false; //if we are following other person
@@ -364,7 +368,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             @Override
                             public void onFailure(Request request, IOException e) {
                                 Log.e("UpdatesAdapter", "No internet connection");
-
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -378,7 +381,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                             @Override
                             public void onResponse(Response response) throws IOException {
-                                Log.i("Update Adapter", "onResponse: " + response.body().string());
+                                response.body().close();
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     activity.runOnUiThread(new Runnable() {
                                         @Override

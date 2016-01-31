@@ -230,6 +230,7 @@ public class LinuteLoginActivity extends AppCompatActivity {
                     }
 
                 } else if (response.code() == 404) { //bad credentials
+                    response.body().string();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -237,7 +238,7 @@ public class LinuteLoginActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Log.v(TAG, response.toString());
+                    Log.v(TAG, response.body().string());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

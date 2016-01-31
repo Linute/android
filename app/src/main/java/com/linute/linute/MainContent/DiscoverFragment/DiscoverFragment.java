@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +30,6 @@ import com.squareup.okhttp.Response;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -39,10 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Created by QiFeng on 11/17/15.
@@ -51,18 +46,16 @@ public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
     private LinearLayoutManager llm;
-    private EditText postBox;
 
     private TextView mEmptyText;
 
     private SwipeRefreshLayout refreshLayout;
 
-    private List<Post> mPosts;
+    private ArrayList<Post> mPosts = new ArrayList<>();
     private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters = null;
     private boolean feedDone;
 
     private boolean mFriendsOnly = false;
-
 
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
@@ -90,12 +83,8 @@ public class DiscoverFragment extends UpdatableFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-        mPosts = new ArrayList<>();
 
         mEmptyText = (TextView) rootView.findViewById(R.id.discoverFragment_no_found);
-
-//        ((MainActivity) getActivity()).setTitle("My Campus");
-//        ((MainActivity) getActivity()).resetToolbar();
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
@@ -108,10 +97,11 @@ public class DiscoverFragment extends UpdatableFragment {
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
-                getFeed(1);
+                loadMoreFeed();
             }
         });
 
+        Log.i(TAG, "onCreateView: "+mPosts.size());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
 
         //if floating button expanded, collapse it
@@ -144,29 +134,77 @@ public class DiscoverFragment extends UpdatableFragment {
 //            }
 //        });
 
-//        refreshLayout.setRefreshing(true);
-//        getFeed(0);
-
         return rootView;
     }
+
+
+    public static final String POST_PARCEL_KEY = "post_parcel_items";
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
+        outState.putBoolean("friendsOnly", mFriendsOnly);
+        outState.putBoolean("feedDone", feedDone);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null){
+            mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
+            feedDone = savedInstanceState.getBoolean("feedDone");
+            mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
+
+            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+            mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
+                @Override
+                public void getMoreFeed() {
+                    loadMoreFeed();
+                }
+            });
+
+            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+        }
+    }
+
 
     @Override
     public void onResume() {
         super.onResume();
 
-        if (fragmentNeedsUpdating() && getActivity() != null){
-            Log.i(TAG, "onResume: ");
+        DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
+
+        if (fragment == null) return;
+
+        //initially presented fragment by discoverHolderFragment doesn't get loaded by discoverholderfragment
+        //do it in on resume
+        //if initial fragment was campus feed, we are in campus feed, and it needs to be updated
+        if (fragment.getInitiallyPresentedFragmentWasCampus()
+                && !mFriendsOnly
+                && fragment.getCampusFeedNeedsUpdating()) {
             getFeed(0);
+            fragment.setCampusFeedNeedsUpdating(false);
+        }
+
+        else if (!fragment.getInitiallyPresentedFragmentWasCampus()
+                && mFriendsOnly
+                && fragment.getFriendsFeedNeedsUpdating()) {
+            getFeed(0);
+            fragment.setFriendsFeedNeedsUpdating(false);
         }
     }
 
     private int mSkip = 0;
 
-    public void getFeed(int type) {
+    public void loadMoreFeed() {
         if (feedDone) {
             Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
-            return;
+        } else {
+            getFeed(1);
         }
+    }
+
+    public void getFeed(int type) {
         if (type == 1) {
             mSkip += 25;
         } else {
@@ -174,8 +212,9 @@ public class DiscoverFragment extends UpdatableFragment {
         }
 
         final int skip = mSkip;
+        if (getActivity() == null) return;
 
-        SharedPreferences sharedPreferences = getParentFragment().getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
         events.put("college", sharedPreferences.getString("collegeId", ""));
         events.put("skip", skip + "");
@@ -189,8 +228,7 @@ public class DiscoverFragment extends UpdatableFragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    Log.d("HEY", "STOP IT");
-//                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
+                    Log.d("HEY", response.body().string());
                     cancelRefresh();
                     return;
                 }
@@ -199,7 +237,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     mPosts.clear();
                 }
                 String json = response.body().string();
-//                Log.d(TAG, json);
+                Log.i(TAG, "onResponse: "+json);
                 JSONObject jsonObject = null;
                 JSONArray jsonArray = null;
                 try {
@@ -233,7 +271,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                 postImage,
                                 jsonObject.getInt("privacy"),
                                 jsonObject.getInt("numberOfLikes"),
-                                jsonObject.getString("likeID"),
+                                jsonObject.getBoolean("isLiked"),
                                 postString,
                                 jsonObject.getString("id"));
                         mPosts.add(post);
@@ -286,4 +324,9 @@ public class DiscoverFragment extends UpdatableFragment {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, "onDestroy: ");
+    }
 }

@@ -4,31 +4,37 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-    <ImageSwitcher
-        android:id="@+id/background_image_switcher"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        >
+    <ImageView android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:scaleType="centerCrop"
+               android:src="@drawable/background"/>
 
-    </ImageSwitcher>
+    <View android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:alpha="0.75"
+          android:background="@color/colorPrimary"/>
 
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentBottom="true"
+                  android:weightSum="2">
 
-    <Button android:id="@+id/preLogin_facebook_login"
-            android:layout_width="wrap_content"
+        <Button android:id="@+id/preLogin_facebook_login"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Facebook Login"
+            />
+
+        <Button
+            android:id="@+id/prelogin_linute_login"
+            android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Facebook Login"
-        />
+            android:layout_below="@id/preLogin_facebook_login"
+            android:layout_weight="1"
+            android:text="@string/prelogin_linute_login"/>
 
-    <Button
-        android:id="@+id/prelogin_linute_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/preLogin_facebook_login"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="@string/prelogin_linute_login"/>
+    </LinearLayout>
 
 
     <TextView
@@ -41,7 +47,7 @@
         android:text="@string/signUpText"
         android:textColor="@android:color/black"
         android:textSize="20dp"
-        tools:textColor="@android:color/black"/>
+        tools:textColor="@color/white"/>
 
 
 </RelativeLayout>

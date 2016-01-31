@@ -10,14 +10,17 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetail;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
  * Created by Arman on 12/30/15.
  */
-public class ProfileViewHolder extends RecyclerView.ViewHolder {
+public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     protected ImageView vTextIcon;
     protected TextView vDescriptionLabel;
     protected TextView vTimeLabel;
@@ -25,6 +28,11 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
+
+    private boolean mIsImagePost;
+    private String mPostId;
+    private String mUserId;
+
 
     public ProfileViewHolder(View itemView, Context context) {
         super(itemView);
@@ -36,6 +44,8 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
         vDescriptionLabel = (TextView) itemView.findViewById(R.id.activities_text);
         vTimeLabel = (TextView) itemView.findViewById(R.id.activities_date);
         vEventImage = (ImageView) itemView.findViewById(R.id.profilelistitem_event_image);
+
+        itemView.setOnClickListener(this);
     }
 
     void bindModel(UserActivityItem userActivityItem) {
@@ -58,5 +68,19 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder {
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
+
+        mIsImagePost = userActivityItem.isImagePost();
+        mPostId = userActivityItem.getEventID();
+        mUserId = userActivityItem.getOwnerID();
+
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+        if (activity != null){
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(mIsImagePost, mPostId, mUserId ));
+        }
     }
 }

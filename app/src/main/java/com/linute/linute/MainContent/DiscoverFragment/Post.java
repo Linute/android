@@ -1,9 +1,12 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Arman on 12/27/15.
  */
-public class Post {
+public class Post implements Parcelable {
     private String mUserId;
     private String mUserName;
     private String mUserImage;
@@ -11,14 +14,14 @@ public class Post {
     private String mImage;
     private int mPrivacy;
     private int mNumLikes;
-    private String mUserLiked;
+    private boolean mUserLiked;
     private String mPostTime;
     private String mPostId;
 
     private boolean mPostLiked;
 
     public Post(String userId, String userName, String userImage, String title,
-                String image, int privacy, int numLike, String userLiked,
+                String image, int privacy, int numLike, boolean userLiked,
                 String postTime, String postId) {
         mUserId = userId;
         mUserName = userName;
@@ -32,7 +35,7 @@ public class Post {
         mPostTime = postTime;
         mPostId = postId;
 
-        mPostLiked = !mUserLiked.equals("");
+        mPostLiked = mUserLiked;
     }
 
     public String getNumLike() {
@@ -79,7 +82,7 @@ public class Post {
         return mPostId;
     }
 
-    public String getUserLiked() {
+    public boolean getUserLiked() {
         return mUserLiked;
     }
 
@@ -91,4 +94,51 @@ public class Post {
     public String toString() {
         return getImage().equals("") ? getTitle() : "Conent: Image - " + getTitle();
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mUserId);
+        dest.writeString(mUserName);
+        dest.writeString(mUserImage);
+        dest.writeString(mTitle);
+        dest.writeString(mImage);
+        dest.writeInt(mPrivacy);
+        dest.writeInt(mNumLikes);
+        dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
+        dest.writeString(mPostTime);
+        dest.writeString(mPostId);
+        dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
+    }
+
+    private Post(Parcel in){
+        mUserId = in.readString();
+        mUserName = in.readString();
+        mUserImage = in.readString();
+        mTitle = in.readString();
+        mImage = in.readString();
+        mPrivacy = in.readInt();
+        mNumLikes = in.readInt();
+        mUserLiked = in.readByte() != 0; //true if byte != 0
+        mPostTime = in.readString();
+        mPostId = in.readString();
+        mPostLiked = in.readByte() != 0; //true if byte != 0
+    }
+
+    public static final Creator<Post> CREATOR = new Creator<Post>() {
+        @Override
+        public Post createFromParcel(Parcel source) {
+            return new Post(source);
+        }
+
+        @Override
+        public Post[] newArray(int size) {
+            return new Post[size];
+        }
+    };
 }

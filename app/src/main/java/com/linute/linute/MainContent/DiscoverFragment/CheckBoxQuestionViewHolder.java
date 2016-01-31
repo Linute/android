@@ -137,6 +137,8 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                 public void onResponse(Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
+                    }else{
+                        response.body().close();
                     }
 
                 }
@@ -148,8 +150,8 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
 
             Map<String, Object> postData = new HashMap<>();
-            postData.put("isDeleted", true);
-            new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getUserLiked(), new Callback() {
+            postData.put("event" ,mPosts.get(getAdapterPosition()).getPostId());
+            new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getPostId(),new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
                     e.printStackTrace();
@@ -160,8 +162,9 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                     }
-
-                    Log.d(TAG, response.body().string());
+                    else {
+                        response.body().close();
+                    }
                 }
             });
 

@@ -279,9 +279,8 @@ public class FeedDetailPage extends UpdatableFragment {
                             jsonObject.getJSONObject("owner").getString("fullName"),
                             Integer.parseInt(jsonObject.getString("privacy")),
                             postString,
-                            !jsonObject.getString("likeID").equals(""),
-                            jsonObject.getString("numberOfLikes"),
-                            jsonObject.getString("likeID"));
+                            jsonObject.getBoolean("isLiked"),
+                            jsonObject.getString("numberOfLikes"));
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                 }
