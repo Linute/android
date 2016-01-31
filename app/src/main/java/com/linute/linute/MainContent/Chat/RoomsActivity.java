@@ -31,9 +31,6 @@ public class RoomsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rooms);
-        if (!mEventBus.isRegistered(this)) {
-            mEventBus.register(this);
-        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
         setSupportActionBar(toolbar);
@@ -71,9 +68,6 @@ public class RoomsActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (mEventBus.isRegistered(this)) {
-            mEventBus.unregister(this);
-        }
         super.onDestroy();
     }
 

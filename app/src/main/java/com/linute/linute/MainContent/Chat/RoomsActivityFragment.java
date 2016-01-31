@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,7 +27,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -56,9 +56,26 @@ public class RoomsActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         getRooms();
-        if (getActivity().getIntent().getStringExtra("ROOM") != null) {
+        Log.d(TAG, "onCreateView: " + "sfsfsf");
+        if (getActivity().getIntent().getStringExtra("ROOMS") != null) {
+            Log.d(TAG, "onCreateView: " + "FSFSFsf");
             // start chat fragment
             // use same procedure unless found better
+            ArrayList<ChatHead> chatHeads = getActivity().getIntent().getParcelableArrayListExtra("chatHeads");
+            ChatFragment newFragment = ChatFragment.newInstance(
+                    getActivity().getIntent().getStringExtra("roomId"),
+                    getActivity().getIntent().getStringExtra("ownerName"),
+                    getActivity().getIntent().getStringExtra("ownerId"),
+                    Integer.parseInt(getActivity().getIntent().getStringExtra("roomCnt")),
+                    chatHeads);
+            Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            // Replace whatever is in the fragment_container view with this fragment,
+            // and add the transaction to the back stack so the user can navigate back
+            transaction.replace(R.id.chat_container, newFragment);
+            transaction.addToBackStack(null);
+            // Commit the transaction
+            transaction.commit();
         }
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
@@ -74,6 +91,7 @@ public class RoomsActivityFragment extends Fragment {
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mRoomsAdapter);
+
 
     }
 
