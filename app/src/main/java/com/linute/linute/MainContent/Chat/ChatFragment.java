@@ -102,7 +102,6 @@ public class ChatFragment extends Fragment {
         mChatAdapter = new ChatAdapter(getActivity(), mChatList);
         mChatHeadList = new ArrayList<>();
         mChatHeadList = new ArrayList<>();
-        Log.d(TAG, "onAttach: ");
     }
 
     /**
@@ -180,6 +179,7 @@ public class ChatFragment extends Fragment {
 
         try {
             typingJson.put("room", mRoomId);
+            typingJson.put("user", mUserId);
 
             joinLeft.put("room", mRoomId);
             joinLeft.put("user", mUserId);
@@ -391,14 +391,14 @@ public class ChatFragment extends Fragment {
     }
 
     private boolean checkChatHead(JSONObject message) throws JSONException {
-        return message.getJSONArray("isRead").length() != mRoomUsersCnt;
+        return message.getJSONArray("read").length() != mRoomUsersCnt;
     }
 
     private boolean checkRead(String userId, JSONObject message) throws JSONException {
         String id = "";
         boolean read = false;
-        for (int i = 0; i < message.getJSONArray("isRead").length(); i++) {
-            id = ((JSONObject) message.getJSONArray("isRead").get(i)).getString("id");
+        for (int i = 0; i < message.getJSONArray("read").length(); i++) {
+            id = ((JSONObject) message.getJSONArray("read").get(i)).getString("id");
             if (userId.equals(id)) {
                 read = true;
             } else {
@@ -420,7 +420,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void addMessage(JSONObject data) throws JSONException {
-        Log.d(TAG, "addMessage: " + data.toString(4));
+//        Log.d(TAG, "addMessage: " + data.toString(4));
         Chat chat = new Chat(
                 mRoomId,
                 data.getJSONObject("owner").getString("profileImage"),
@@ -544,7 +544,7 @@ public class ChatFragment extends Fragment {
                     try {
                         username = data.getJSONObject("owner").getString("fullName");
 //                        if (owner and id same keep id as mLastId)
-                        Log.d(TAG, "run: " + data.toString(4));
+//                        Log.d(TAG, "run: " + data.toString(4));
 //                        message = data.getString("message");
                     } catch (JSONException e) {
                         return;
@@ -564,24 +564,6 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    private Emitter.Listener onRead = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    try {
-                        Log.d(TAG, "run: " + data.toString(4));
-//                        removeChatHead(data.getOwner)
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
-
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -592,7 +574,7 @@ public class ChatFragment extends Fragment {
                     String username;
                     try {
                         Log.d(TAG, "run: " + data.toString(4));
-                        username = data.getString("username");
+                        username = data.getJSONObject("user").getString("fullName");
                     } catch (JSONException e) {
                         return;
                     }
@@ -612,7 +594,7 @@ public class ChatFragment extends Fragment {
                     String username;
                     try {
                         Log.d(TAG, "run: " + data.toString(4));
-                        username = data.getString("username");
+                        username = data.getJSONObject("user").getString("fullName");
                     } catch (JSONException e) {
                         return;
                     }
@@ -686,6 +668,24 @@ public class ChatFragment extends Fragment {
         }
     };
 
+    private Emitter.Listener onRead = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    try {
+                        Log.d(TAG, "runRead: " + data.toString(4));
+//                        removeChatHead(data.getOwner)
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
+
     private Emitter.Listener onDelivered = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -694,7 +694,7 @@ public class ChatFragment extends Fragment {
                 public void run() {
                     if (args.length != 0) {
                         try {
-                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+                            Log.d(TAG, "runDelivered: " + ((JSONObject) args[0]).toString(4));
 //                            if(mLastid == id setcheck message)
                         } catch (JSONException e) {
                             e.printStackTrace();
