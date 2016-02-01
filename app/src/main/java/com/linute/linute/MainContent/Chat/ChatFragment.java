@@ -322,7 +322,7 @@ public class ChatFragment extends Fragment {
 
                     try {
                         jsonObject = new JSONObject(response.body().string());
-//                        Log.d(TAG, "onResponse: " + jsonObject.keys());
+                        Log.d(TAG, "onResponse: " + jsonObject.keys());
                         messages = jsonObject.getJSONArray("messages");
                         for (int i = 0; i < messages.length(); i++) {
                             message = (JSONObject) messages.get(i);
