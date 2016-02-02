@@ -28,9 +28,15 @@ public class TermsOfServiceActivity extends AppCompatActivity {
     private void setUpToolBar() {
         mToolbar = (Toolbar) findViewById(R.id.webviewactivity_toolbar);
         mToolbar.setTitle("Terms of Services");
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void setUpWebView(){

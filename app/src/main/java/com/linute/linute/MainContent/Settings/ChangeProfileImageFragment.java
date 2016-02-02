@@ -143,8 +143,9 @@ public class ChangeProfileImageFragment extends Fragment {
 
 
     private void setDefaultValues() {
+        mCurrentPhotoPath = Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", ""));
         Glide.with(this)
-                .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
+                .load(mCurrentPhotoPath)
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
@@ -230,7 +231,7 @@ public class ChangeProfileImageFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (mCurrentPhotoPath == null) return;
+        //if (mCurrentPhotoPath == null) return;
 
         if (!hasWritePermission() && !hasCameraPermissions()){
             if (mCurrentPhotoPath != null){
@@ -241,6 +242,9 @@ public class ChangeProfileImageFragment extends Fragment {
         }
 
         if (requestCode == REQUEST_TAKE_PHOTO) { //got response from camera
+
+            if (mCurrentPhotoPath == null) return; //NOTE: added this
+
             if (resultCode == Activity.RESULT_OK) {  //was able to get picture
                 File f = new File(mCurrentPhotoPath);
                 Uri contentUri = Uri.fromFile(f);

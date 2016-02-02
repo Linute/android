@@ -50,8 +50,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView vFollowing;
     protected TextView vFollowers;
     protected TextView vCollegeName;
-    protected ImageView vBlurBack;
-    protected FrameLayout vBlurFrame;
     protected ImageView vFollowStatus;
 
     private Context mContext;
@@ -73,8 +71,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vPosts = (TextView) itemView.findViewById(R.id.profilefrag_num_posts);
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
         vFollowing = (TextView) itemView.findViewById(R.id.profilefrag_num_following);
-        vBlurBack = (ImageView) itemView.findViewById(R.id.profile_blur_back);
-        vBlurFrame = (FrameLayout) itemView.findViewById(R.id.profile_blur_frame);
         vFollowStatus = (ImageView) itemView.findViewById(R.id.follow_button);
 
         vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
@@ -192,19 +188,5 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
 
-        Glide.with(mContext)
-                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
-                //.centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                        Bitmap blurredBitmap = BlurBuilder.blur(mContext, bitmap.copy(Bitmap.Config.ARGB_8888, true));
-                        vBlurBack.setBackground(new BitmapDrawable(mContext.getResources(), blurredBitmap));
-                    }
-                });
     }
 }

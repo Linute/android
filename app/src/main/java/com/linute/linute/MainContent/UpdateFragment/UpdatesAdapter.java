@@ -234,12 +234,13 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
         //sets up view
         public void bindView(Update update) {
-            mNameText.setText(update.getUserFullName());
-            mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
+            mNameText.setText(update.isAnon() ? "Anonymous" : update.getUserFullName());
+                    mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
+
             mDescriptionText.setText(update.getDescription());
 
-            setUpPictures(update);
-            setUpOnClickListeners(update);
+            setUpPictures(update); //profile and event image
+            setUpOnClickListeners(update); //set onclick listeners
         }
 
 
@@ -249,7 +250,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //set profile image
             Glide.with(mContext)
-                    .load(Utils.getImageUrlOfUser(update.getUserProfileImageName()))
+                    .load( update.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
                     .asBitmap()
                     .override(mImageSize, mImageSize)
                     .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
@@ -296,24 +297,28 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
 
         private void setUpOnClickListeners(final Update update) {
-            View.OnClickListener goToProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //show profile fragment
-                    ((MainActivity)mContext)
-                            .addFragmentToContainer(
-                                    TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId())
-                            );
-                }
-            };
 
-            //clicking name or profile image takes person to user's profile
-            mProfileImage.setOnClickListener(goToProfile);
-            mNameText.setOnClickListener(goToProfile);
+            if (!update.isAnon()) { //is not anon
+                View.OnClickListener goToProfile = new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //show profile fragment
+                        ((MainActivity) mContext)
+                                .addFragmentToContainer(
+                                        TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId())
+                                );
+                    }
+                };
+
+                //clicking name or profile image takes person to user's profile
+                mProfileImage.setOnClickListener(goToProfile);
+                mNameText.setOnClickListener(goToProfile);
+            }
 
 
             setUpEventPictureTouchListener(update);
         }
+
 
 
         private void setUpEventPictureTouchListener(final Update update) {

@@ -158,7 +158,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.raiseAppBarLayoutElevation();
             mainActivity.showFAB(false);
         }
-
-        setFragmentNeedUpdating(true);
+//        setFragmentNeedUpdating(true);
     }
 }

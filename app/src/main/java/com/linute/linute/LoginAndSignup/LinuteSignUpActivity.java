@@ -311,13 +311,12 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             return false;
         }
 
-        /*TODO: reinsert
         //not edu email
         else if (!emailString.endsWith(".edu")){
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
-        }*/
+        }
 
         //good email
         else {

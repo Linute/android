@@ -56,6 +56,7 @@ public class Profile extends UpdatableFragment {
         @Override
         public void run() {
             Utils.showServerErrorToast(getContext());
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     };
 
@@ -63,6 +64,7 @@ public class Profile extends UpdatableFragment {
         @Override
         public void run() {
             Utils.showBadConnectionToast(getContext());
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     };
     private LinuteUser user;
@@ -126,7 +128,12 @@ public class Profile extends UpdatableFragment {
 
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
-            mSwipeRefreshLayout.setRefreshing(true);
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
             updateAndSetHeader(); //get information from server to update profile
             setActivities();
             setFragmentNeedUpdating(false);

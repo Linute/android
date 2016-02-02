@@ -29,14 +29,4 @@
               tools:text="FirstName LastName"
         />
 
-    <TextView android:id="@+id/drawerHeader_college_name"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_below="@id/drawerHeader_name"
-              android:layout_centerHorizontal="true"
-              android:textColor="@color/white"
-              android:layout_marginTop="2dp"
-              tools:text="City College"
-        />
-
 </RelativeLayout>

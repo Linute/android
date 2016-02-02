@@ -31,9 +31,9 @@ public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position){
             case 0:
-                return "Active";
+                return "Top Players";
             case 1:
-                return "Near Me";
+                return "Nearby";
             default:
                 return super.getPageTitle(position);
         }

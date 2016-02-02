@@ -2,7 +2,7 @@ package com.linute.linute.MainContent;
 
 import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
-
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -14,20 +14,19 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-
 import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
-
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -37,19 +36,26 @@ import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
-import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class MainActivity extends BaseTaptActivity {
 
@@ -70,6 +76,7 @@ public class MainActivity extends BaseTaptActivity {
     private UpdatableFragment[] mFragments; //holds our fragments
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
+    private SharedPreferences mSharedPreferences;
 
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
@@ -84,10 +91,11 @@ public class MainActivity extends BaseTaptActivity {
     private int mAppBarElevation;
     private MenuItem mPreviousItem;
 
+    private Socket mSocket;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
@@ -357,8 +365,6 @@ public class MainActivity extends BaseTaptActivity {
         String name = sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
 
-        ((TextView) header.findViewById(R.id.drawerHeader_college_name)).setText(sharedPreferences.getString("collegeName", ""));
-
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .asBitmap()
@@ -490,5 +496,68 @@ public class MainActivity extends BaseTaptActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        {
+            try {
+                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on("authorization", authorization);
+        mSocket.connect();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("user", mSharedPreferences.getString("userID", ""));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        mSocket.emit("authorization", jsonObject);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mSocket.disconnect();
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off("new message", authorization);
+    }
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(),
+                            R.string.error_connect, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener authorization = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Log.d(TAG, "runAuthorization: " + ((JSONObject) args[0]).toString(4));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
 }

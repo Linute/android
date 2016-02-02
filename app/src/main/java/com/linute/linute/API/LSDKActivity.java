@@ -37,7 +37,7 @@ public class LSDKActivity {
 
         Map<String, String> params = new HashMap<>();
         params.put("skip", skip.toString());
-        params.put("limit", "25");
+        params.put("limit", "50");
 
         params.put("action[0]", "commented photo");
         params.put("action[1]", "commented status");

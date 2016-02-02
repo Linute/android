@@ -99,10 +99,18 @@ public class UpdatesFragment extends UpdatableFragment {
 
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
-            mainActivity.setTitle("Activities");
+            mainActivity.setTitle("Updates");
             mainActivity.resetToolbar();
         }
         if (fragmentNeedsUpdating()) {
+
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+
             getUpdatesInformation();
             setFragmentNeedUpdating(false);
         }
@@ -134,7 +142,7 @@ public class UpdatesFragment extends UpdatableFragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    //TODO: close
+                    response.body().close();
                     getUpdatesInformation();
                 } else {
                     showServerErrorToast();
@@ -171,6 +179,7 @@ public class UpdatesFragment extends UpdatableFragment {
                             showServerErrorToast();
                             return;
                         }
+
                         mOldUpdates.clear();
                         mRecentUpdates.clear();
 

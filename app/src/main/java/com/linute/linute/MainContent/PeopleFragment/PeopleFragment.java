@@ -21,7 +21,9 @@ import android.widget.Button;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -110,14 +112,14 @@ public class PeopleFragment extends UpdatableFragment {
         llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-//        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.peoplefrag_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mSwipeRefreshLayout.setRefreshing(true);
+                //mSwipeRefreshLayout.setRefreshing(true);
                 if (!mNearMe)
                     getPeople();
                 else {
@@ -154,7 +156,6 @@ public class PeopleFragment extends UpdatableFragment {
         if (fragment.getInitiallyPresentedFragmentWasActive()
                 && !mNearMe
                 && fragment.activeNeedsUpdating()) {
-            mSwipeRefreshLayout.setRefreshing(true);
             getPeople();
             fragment.setActiveNeedsUpdating(false);
         } else if (!fragment.getInitiallyPresentedFragmentWasActive()
@@ -163,7 +164,6 @@ public class PeopleFragment extends UpdatableFragment {
             getPeopleNearMe();
             fragment.setNearMeNeedsUpdating(false);
         }
-
     }
 
 
@@ -175,7 +175,13 @@ public class PeopleFragment extends UpdatableFragment {
             showRationalLayer();
         } else {
             if (Utils.isNetworkAvailable(getActivity())) {
-                mSwipeRefreshLayout.setRefreshing(true);
+
+                mSwipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                    }
+                });
 
                 //get last known location
                 Location loca = mLocationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -210,15 +216,25 @@ public class PeopleFragment extends UpdatableFragment {
     }
 
     public void getPeople() {
+
+        if (!mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
+
         LSDKPeople people = new LSDKPeople(getActivity());
         people.getPeople(new HashMap<String, String>(), new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                Log.d("TAG", "FAILED " + request.body());
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        mSwipeRefreshLayout.setRefreshing(false);
                         Utils.showBadConnectionToast(getActivity());
                     }
                 });
@@ -228,6 +244,7 @@ public class PeopleFragment extends UpdatableFragment {
             public void onResponse(Response response) throws IOException {
 
                 String responsString = response.body().string();
+
                 if (!response.isSuccessful()) {
                     Log.d("TAG", responsString);
                     return;
@@ -350,10 +367,10 @@ public class PeopleFragment extends UpdatableFragment {
             coord.put(location.getLongitude());
 
             JSONObject coordinates = new JSONObject();
-            coordinates.put("geo", coord);
+            coordinates.put("coordinates", coord);
 
             Map<String, Object> params = new HashMap<>();
-            params.put("coordinates", coordinates);
+            params.put("geo", coordinates);
 
             if (getActivity() == null) return;
 
@@ -386,7 +403,6 @@ public class PeopleFragment extends UpdatableFragment {
                             }
                         });
                     }
-
                 }
             });
 //
@@ -424,7 +440,6 @@ public class PeopleFragment extends UpdatableFragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 String responseString = response.body().string();
-                Log.i(TAG, "onResponse: " + responseString);
                 try {
                     JSONObject obj = new JSONObject(responseString);
                     JSONArray jsonArray = obj.getJSONArray("geo");
@@ -530,7 +545,12 @@ public class PeopleFragment extends UpdatableFragment {
         try {
             if (Utils.isNetworkAvailable(getActivity())) {
                 mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
-                mSwipeRefreshLayout.setRefreshing(true);
+                mSwipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeRefreshLayout.setRefreshing(true);
+                    }
+                });
                 mRationaleLayer.setVisibility(View.GONE);
             } else {
                 Utils.showBadConnectionToast(getActivity());
@@ -538,5 +558,13 @@ public class PeopleFragment extends UpdatableFragment {
         } catch (SecurityException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
+        if (holderFragment != null)
+            holderFragment.setFragmentNeedUpdating(true);
     }
 }

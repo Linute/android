@@ -134,6 +134,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
     private void retrieveColleges(){
         Map<String, String> params = new HashMap<>();
         params.put("name", mSearchView.getQuery().toString());
+        params.put("limit", "40"); //40 is enough ?
 
         new LSDKCollege(this).getColleges(params, new Callback() {
             @Override

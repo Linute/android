@@ -13,7 +13,8 @@
         android:scaleType="centerCrop"
         android:layout_margin="@dimen/activity_horizontal_margin"
         app:border_width="1dp"
-        app:border_color="@color/light_grey"
+        app:border_color="@android:color/black"
+        android:alpha="0.5"
         />
 
     <ImageView
@@ -38,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:textColor="@android:color/holo_blue_dark"
+            android:textColor="@color/user_name_color"
             android:textStyle="bold"
             tools:text="NAME"/>
 

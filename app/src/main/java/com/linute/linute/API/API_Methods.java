@@ -29,9 +29,10 @@ public class API_Methods {
 
     // API ENPOINT URL
     private static String SCHEME = "https";
-    //private static String HOST = "api.linute.com";
-    private static String HOST = "devapi.linute.com";
-    private static String VERSION = "v1.3.1";
+
+    private static String HOST = "api.linute.com";
+    //private static String HOST = "devapi.linute.com";
+    private static String VERSION = "v1.3";
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");

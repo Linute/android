@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">Linute</string>
+    <string name="app_name">Tapt</string>
     <string name="current_tab">currentTab</string>
     <string name="title_activity_pre_login">PreLoginActivity</string>
     <string name="action_settings">Settings</string>
@@ -134,7 +134,7 @@
     <string name="facebook_app_id">900595913337243</string>
     <string name="title_activity_rooms">RoomsActivity</string>
 
-    <string name="CHAT_SERVER_URL">https://campus.tapt.io/</string>
+    <string name="CHAT_SERVER_URL">https://api.tapt.io/</string>
 
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>

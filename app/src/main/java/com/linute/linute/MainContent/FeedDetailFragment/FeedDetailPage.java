@@ -256,7 +256,8 @@ public class FeedDetailPage extends UpdatableFragment {
             @Override
             public void onResponse(Response response) throws IOException {
                 if (!response.isSuccessful()) {
-                    Log.d(TAG, "STOP IT - !onResponse");
+                    Log.d(TAG, response.body().string());
+                    return;
 //                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
 
                 }

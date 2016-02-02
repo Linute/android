@@ -60,10 +60,9 @@ public class RegistrationIntentService extends IntentService {
         super(TAG);
     }
 
-    private LocationManager mLocationManager;
+    //private LocationManager mLocationManager;
 
     private String mToken;
-
 
 
     @Override
@@ -88,12 +87,12 @@ public class RegistrationIntentService extends IntentService {
             //String token = "1234";
 //            Log.v(TAG, "GCM Registration Token: " + token);
 
-            mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            //mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 
-            requestServices();
+            //requestServices();
 
-//            sendRegistrationDevice(token);
+           sendRegistrationDevice(mToken);
 
 
             // Subscribe to topic channels
@@ -124,9 +123,10 @@ public class RegistrationIntentService extends IntentService {
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      *
+     *
      */
-    private void sendRegistrationDevice( JSONObject coord) {
-        final String token = mToken;
+
+    private void sendRegistrationDevice(String token) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
@@ -145,9 +145,6 @@ public class RegistrationIntentService extends IntentService {
         device.put("build", versionCode);
         device.put("os", Build.VERSION.SDK_INT + "");
         device.put("type", "android");
-
-        if (coord != null)
-            device.put("coordinates", coord);
 
         Device.createDevice(headers, device, new Callback() {
             @Override
@@ -168,6 +165,49 @@ public class RegistrationIntentService extends IntentService {
         });
 
     }
+//    private void sendRegistrationDevice( JSONObject coord) {
+//        final String token = mToken;
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        try {
+//            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        if (coord != null)
+//            device.put("coordinates", coord);
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Request request, IOException e) {
+//                Log.e(TAG, "failed registration");
+//            }
+//
+//            @Override
+//            public void onResponse(Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    Log.e(TAG, "ERROR REGISTERING TOKEN");
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    Log.d(TAG, "sendRegistrationDevice");
+//                }
+//            }
+//        });
+//
+//    }
 
     /**
      * Subscribe to any GCM topics of interest, as defined by the TOPICS constant.
@@ -185,93 +225,93 @@ public class RegistrationIntentService extends IntentService {
     // [END subscribe_topics]
 
 
-    private Handler mStopGettingLocationHandler;
-
-    private Runnable mStopGettingLocation = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                mLocationManager.removeUpdates(mLocationListener);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            }
-            Log.i(TAG, "Took too long to get location");
-            sendRegistrationDevice(null);
-        }
-    };
-
-
-    public void requestServices() {
-        if (!Utils.isNetworkAvailable(this)) {
-            sendRegistrationDevice(null);
-        }
-
-        else {
-            if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
-                requestLocation();
-            } else {
-                sendRegistrationDevice(null);
-            }
-        }
-    }
-
-    private void requestLocation() throws SecurityException {
-        mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
-        mStopGettingLocationHandler = new Handler();
-        mStopGettingLocationHandler.postDelayed(mStopGettingLocation, 2000); //if taking longer than 1.5 seconds to get location, stop it
-    }
+//    private Handler mStopGettingLocationHandler;
+//
+//    private Runnable mStopGettingLocation = new Runnable() {
+//        @Override
+//        public void run() {
+//            try {
+//                mLocationManager.removeUpdates(mLocationListener);
+//            } catch (SecurityException e) {
+//                e.printStackTrace();
+//            }
+//            Log.i(TAG, "Took too long to get location");
+//            sendRegistrationDevice(null);
+//        }
+//    };
 
 
-    LocationListener mLocationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.i(TAG, "onLocationChanged: " + location.toString());
-            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+//    public void requestServices() {
+//        if (!Utils.isNetworkAvailable(this)) {
+//            sendRegistrationDevice(null);
+//        }
+//
+//        else {
+//            if (ContextCompat.checkSelfPermission(this,
+//                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                    == PackageManager.PERMISSION_GRANTED) {
+//                requestLocation();
+//            } else {
+//                sendRegistrationDevice(null);
+//            }
+//        }
+//    }
 
-            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+//    private void requestLocation() throws SecurityException {
+//        mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
+//        mStopGettingLocationHandler = new Handler();
+//        mStopGettingLocationHandler.postDelayed(mStopGettingLocation, 2000); //if taking longer than 1.5 seconds to get location, stop it
+//    }
 
-            sharedPreferences.edit()
-                    .putString("geoLongitude", location.getLongitude() + "") //will be saved as String. Cant store double
-                    .putString("geoLatitude", location.getLatitude() + "")
-                    .apply();
 
-
-            if (sharedPreferences.getBoolean("isLoggedIn", false)) {
-                JSONArray coord = new JSONArray();
-                try {
-                    coord.put(location.getLatitude());
-                    coord.put(location.getLongitude());
-
-                    JSONObject coordinates = new JSONObject();
-                    coordinates.put("geo", coord);
-
-                    sendRegistrationDevice(coordinates);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    sendRegistrationDevice(null);
-                }
-            } else {
-                sendRegistrationDevice(null);
-            }
-
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
-            sendRegistrationDevice(null);
-        }
-    };
+//    LocationListener mLocationListener = new LocationListener() {
+//        @Override
+//        public void onLocationChanged(Location location) {
+//            Log.i(TAG, "onLocationChanged: " + location.toString());
+//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+//
+//            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+//
+//            sharedPreferences.edit()
+//                    .putString("geoLongitude", location.getLongitude() + "") //will be saved as String. Cant store double
+//                    .putString("geoLatitude", location.getLatitude() + "")
+//                    .apply();
+//
+//
+//            if (sharedPreferences.getBoolean("isLoggedIn", false)) {
+//                JSONArray coord = new JSONArray();
+//                try {
+//                    coord.put(location.getLatitude());
+//                    coord.put(location.getLongitude());
+//
+//                    JSONObject coordinates = new JSONObject();
+//                    coordinates.put("geo", coord);
+//
+//                    sendRegistrationDevice(coordinates);
+//
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    sendRegistrationDevice(null);
+//                }
+//            } else {
+//                sendRegistrationDevice(null);
+//            }
+//
+//        }
+//
+//        @Override
+//        public void onStatusChanged(String provider, int status, Bundle extras) {
+//        }
+//
+//        @Override
+//        public void onProviderEnabled(String provider) {
+//        }
+//
+//        @Override
+//        public void onProviderDisabled(String provider) {
+//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
+//            sendRegistrationDevice(null);
+//        }
+//    };
 
 }

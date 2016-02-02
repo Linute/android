@@ -13,8 +13,7 @@
 
     <color name="primary_material_light">#b2aead</color>
     <color name="background_material_light">#d7a5a5</color>
-
-
+    <color name="user_name_color">#17607d</color>
 
     <!-- square camera attributes-->
     <color name="squarecamera__red">#F0001D</color>

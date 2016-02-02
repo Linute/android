@@ -386,13 +386,12 @@ public class FacebookSignUpActivity extends AppCompatActivity {
             return false;
         }
 
-        //TODO: READD
-//        //not edu email
-//        else if (!emailString.endsWith(".edu")){
-//            mEmailEditText.setError("This must be an edu email");
-//            mEmailEditText.requestFocus();
-//            return false;
-//        }
+        //not edu email
+        else if (!emailString.endsWith(".edu")){
+            mEmailEditText.setError("This must be an edu email");
+            mEmailEditText.requestFocus();
+            return false;
+        }
 
         //good email
         else {
@@ -506,7 +505,7 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
-        sharedPreferences.putString("password", mSharedPreferences.getString("passwordFacebook", ""));
+        sharedPreferences.putString("password", mSharedPreferences.getString("password", ""));
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
