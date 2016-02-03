@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
@@ -176,6 +178,12 @@ public class PeopleFragment extends UpdatableFragment {
         } else {
             if (Utils.isNetworkAvailable(getActivity())) {
 
+                if (!checkLocationOn()){ //location service not enabled
+                    return;
+                }
+
+                if (mRationaleLayer.getVisibility() == View.VISIBLE) mRationaleLayer.setVisibility(View.GONE);
+
                 mSwipeRefreshLayout.post(new Runnable() {
                     @Override
                     public void run() {
@@ -204,8 +212,46 @@ public class PeopleFragment extends UpdatableFragment {
         }
     }
 
+    private boolean checkLocationOn(){
+        if (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            mRationaleLayer.setVisibility(View.VISIBLE);
+
+            mPeopleList.clear();
+
+            mPeopleAdapter.notifyDataSetChanged();
+
+            if (mSwipeRefreshLayout.isRefreshing()){
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+
+            Button b = (Button) mRationaleLayer.findViewById(R.id.peopleFragment_get_location_permissions_button);
+            b.setText("Search now");
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getPeopleNearMe();
+                }
+            });
+
+            if (getActivity() == null) return false;
+
+            Toast.makeText(getActivity(), "Please make sure your location service is turned on", Toast.LENGTH_SHORT).show();
+
+            return false;
+
+        }
+        return true;
+    }
+
     private void showRationalLayer() {
         mRationaleLayer.setVisibility(View.VISIBLE);
+        mPeopleList.clear();
+        mPeopleAdapter.notifyDataSetChanged();
+
+        if (mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+
         Button getPermissions = (Button) mRationaleLayer.findViewById(R.id.peopleFragment_get_location_permissions_button);
         getPermissions.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,6 +259,7 @@ public class PeopleFragment extends UpdatableFragment {
                 requestLocation();
             }
         });
+        getPermissions.setText("Turn on");
     }
 
     public void getPeople() {

@@ -93,7 +93,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         //TODO: CAUSING CRASH
 
-        if (message != null &&  action.equals("messages")) { //<---
+        if (action != null &&  action.equals("messages")) { //<---
             intent = new Intent(this, RoomsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("ROOMS", "SOMEMESSAGE");
@@ -122,7 +122,7 @@ public class MyGcmListenerService extends GcmListenerService {
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
-        Log.d(TAG, "sendNotification: " + message == null ? "Null message" : message);
+        Log.d(TAG, message);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
