@@ -7,13 +7,16 @@
     <color name="tabsScrollColor">#8a140e</color>
     <color name="light_grey">#d3d3d3</color>
 
+    <color name="fifty_black">#80000000</color>
+    <color name="eighty_black">#CC000000</color>
+    <color name="user_name_blue">#17607d</color>
+
 
 
 
 
     <color name="primary_material_light">#b2aead</color>
     <color name="background_material_light">#d7a5a5</color>
-    <color name="user_name_color">#17607d</color>
 
     <!-- square camera attributes-->
     <color name="squarecamera__red">#F0001D</color>

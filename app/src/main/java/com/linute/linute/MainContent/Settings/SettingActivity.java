@@ -39,7 +39,9 @@ public class SettingActivity extends AppCompatActivity {
         //get toolbar
         setUpToolbar();
 
-        getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
+        if (savedInstanceState == null)
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
+
     }
 
     private void setUpToolbar() {

@@ -143,9 +143,8 @@ public class ChangeProfileImageFragment extends Fragment {
 
 
     private void setDefaultValues() {
-        mCurrentPhotoPath = Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", ""));
         Glide.with(this)
-                .load(mCurrentPhotoPath)
+                .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .placeholder(R.drawable.profile_picture_placeholder)
@@ -230,20 +229,18 @@ public class ChangeProfileImageFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        //if (mCurrentPhotoPath == null) return;
-
-        if (!hasWritePermission() && !hasCameraPermissions()){
-            if (mCurrentPhotoPath != null){
-                new File(mCurrentPhotoPath).delete();
-                mCurrentPhotoPath = null;
-            }
-            return;
-        }
+        if (mCurrentPhotoPath == null) Log.i(TAG, "onActivityResult: 123"); //return;
 
         if (requestCode == REQUEST_TAKE_PHOTO) { //got response from camera
-
             if (mCurrentPhotoPath == null) return; //NOTE: added this
+
+            if (!hasWritePermission() && !hasCameraPermissions()){
+                if (mCurrentPhotoPath != null){
+                    new File(mCurrentPhotoPath).delete();
+                    mCurrentPhotoPath = null;
+                }
+                return;
+            }
 
             if (resultCode == Activity.RESULT_OK) {  //was able to get picture
                 File f = new File(mCurrentPhotoPath);
@@ -256,8 +253,9 @@ public class ChangeProfileImageFragment extends Fragment {
                     Log.v(TAG, "could not delete temp file");
                 mCurrentPhotoPath = null;
             }
-        } else if (requestCode == Crop.REQUEST_PICK && resultCode == Activity.RESULT_OK) { //got image from gallery
-            beginCrop(data.getData()); //crop image
+        } else if (requestCode == Crop.REQUEST_PICK) { //got image from gallery
+            if (resultCode == Activity.RESULT_OK)
+                beginCrop(data.getData()); //crop image
         } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             if (resultCode == Activity.RESULT_OK) {
                 Uri imageUri = Crop.getOutput(data);

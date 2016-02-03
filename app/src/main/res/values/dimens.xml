@@ -13,6 +13,9 @@
     <dimen name="padding_s">4dp</dimen>
 
 
+    <dimen name="feed_profile_image_radius">60dp</dimen>
+
+
     <dimen name="updatefragment_picture_size">45dp</dimen>
     <dimen name="updatefragment_icon_size">17dp</dimen>
     <dimen name="updatefragment_margins">12dp</dimen>
@@ -39,5 +42,9 @@
     <dimen name="nav_header_profile_side">85dp</dimen>
 
     <dimen name="spacing">8dp</dimen>
+
+
+    <dimen name="body_font_size">14sp</dimen>
+    <dimen name="header_font_size">16sp</dimen>
 
 </resources>

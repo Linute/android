@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
@@ -30,7 +33,9 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -46,7 +51,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PreLoginActivity extends AppCompatActivity {
 
@@ -133,7 +140,11 @@ public class PreLoginActivity extends AppCompatActivity {
                 }
 
                 mFBToken = loginResult.getAccessToken().getToken(); //NOTE : NEED IT>
-                loginOrSignUpWithFacebook(mFBToken);
+
+                final ProgressDialog progress = ProgressDialog.show(PreLoginActivity.this, null, "Retrieving information from Facebook", true);
+
+                //loginOrSignUpWithFacebook(mFBToken);
+                checkDeviceRegistered(mFBToken, progress);
 
             }
 
@@ -151,9 +162,18 @@ public class PreLoginActivity extends AppCompatActivity {
 
     }
 
-    private void loginOrSignUpWithFacebook(final String fbToken) {
 
-        final ProgressDialog progress = ProgressDialog.show(this, null, "Retrieving information from Facebook",true);
+    private void checkDeviceRegistered(final String fbToken, ProgressDialog progressDialog){
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        if (sharedPreferences.getBoolean("deviceRegistered", false)){
+            loginOrSignUpWithFacebook(fbToken, progressDialog);
+        }else {
+            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), fbToken, progressDialog);
+        }
+
+    }
+
+    private void loginOrSignUpWithFacebook(final String fbToken, final ProgressDialog progress) {
 
         new LSDKUser(this).authorizationFacebook(fbToken, new Callback() {
             @Override
@@ -264,11 +284,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     private boolean isEduEmail(String email) {
-        if (email != null && email.endsWith(".edu")) {
-            return true;
-        }
-
-        return false;
+        return email != null && email.endsWith(".edu");
     }
 
 
@@ -333,6 +349,58 @@ public class PreLoginActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 Intent i = new Intent(PreLoginActivity.this, FacebookSignUpActivity.class);
                 startActivity(i);
+            }
+        });
+    }
+
+
+    //used to registere device if somehow device wasn't registered
+    private void sendRegistrationDevice(String token, final String fbToken,final ProgressDialog progress) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        String versionName = "";
+        String versionCode = "";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = pInfo.versionName;
+            versionCode = pInfo.versionCode + "";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        Map<String, Object> device = new HashMap<>();
+        device.put("token", token);
+        device.put("version", versionName);
+        device.put("build", versionCode);
+        device.put("os", Build.VERSION.SDK_INT + "");
+        device.put("type", "android");
+
+        Device.createDevice(headers, device, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.dismiss();
+                        Utils.showBadConnectionToast(PreLoginActivity.this);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, response.body().string());
+                    showServerErrorToast(progress);
+                } else {
+                    Log.v(TAG, response.body().string());
+                    getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
+                            .edit()
+                            .putBoolean("deviceRegistered", true)
+                            .apply();
+                    loginOrSignUpWithFacebook(fbToken, progress);
+
+                }
             }
         });
 

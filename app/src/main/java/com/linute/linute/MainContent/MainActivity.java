@@ -130,14 +130,15 @@ public class MainActivity extends BaseTaptActivity {
         });
 
 
-        //only loads one fragment
-        mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
-                .commit();
-        mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
-        mPreviousItem.setChecked(true);
-
+        if (savedInstanceState == null) {
+            //only loads one fragment
+            mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
+                    .commit();
+            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+            mPreviousItem.setChecked(true);
+        }
 
         //floating action button setup
         fam = (FloatingActionsMenu) findViewById(R.id.fabmenu);

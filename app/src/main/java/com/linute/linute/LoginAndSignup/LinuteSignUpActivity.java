@@ -7,10 +7,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -29,7 +31,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -179,7 +183,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         mNextButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkEmailAndGetPinCode();
+                checkDeviceRegistered();
             }
         });
 
@@ -224,14 +228,27 @@ public class LinuteSignUpActivity extends AppCompatActivity {
         }
     };
 
+    //this is just to double check if the device was registered properly
+    private void checkDeviceRegistered() {
+        if (mCredentialCheckInProgress) return;
+
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        showProgress(true, 0);
+
+        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
+            checkEmailAndGetPinCode();
+        } else {
+            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""));
+        }
+    }
+
 
     private void checkEmailAndGetPinCode() {
-        if (mCredentialCheckInProgress) return;
 
         final String email = mEmailView.getText().toString().trim();
 
         if (checkEmail(email)) {
-            showProgress(true, 0);
 
             mEmailString = email;
             mEmailConfirmTextView.setText(mEmailString);
@@ -245,7 +262,7 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Response response) throws IOException {
                     if (response.code() == 200) { //email was good
-                        response.body().close();
+                        response.body().string();
                         getPinCode();
                     } else if (response.code() == 404) { //another error
                         Log.e(TAG, response.body().string());
@@ -256,6 +273,8 @@ public class LinuteSignUpActivity extends AppCompatActivity {
                     }
                 }
             });
+        } else {
+            showProgress(false, 0);
         }
     }
 
@@ -311,12 +330,14 @@ public class LinuteSignUpActivity extends AppCompatActivity {
             return false;
         }
 
+        /*TODO: uncomment this
         //not edu email
         else if (!emailString.endsWith(".edu")){
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
         }
+        */
 
         //good email
         else {
@@ -750,6 +771,53 @@ public class LinuteSignUpActivity extends AppCompatActivity {
 
         mViewFlipper.setInAnimation(this, goBack ? R.anim.slide_in_left : R.anim.slide_in_right);
         mViewFlipper.setOutAnimation(this, goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
+
+    }
+
+
+    //used to registere device if somehow device wasn't registered
+    private void sendRegistrationDevice(String token) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        String versionName = "";
+        String versionCode = "";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = pInfo.versionName;
+            versionCode = pInfo.versionCode + "";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        Map<String, Object> device = new HashMap<>();
+        device.put("token", token);
+        device.put("version", versionName);
+        device.put("build", versionCode);
+        device.put("os", Build.VERSION.SDK_INT + "");
+        device.put("type", "android");
+
+        Device.createDevice(headers, device, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.e(TAG, "failed registration");
+                failedConnectionWithCurrentView(0);
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, response.body().string());
+                    serverErrorCurrentView(0);
+                } else {
+                    Log.v(TAG, response.body().string());
+                    getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
+                            .edit()
+                            .putBoolean("deviceRegistered", true)
+                            .apply();
+                    checkEmailAndGetPinCode();
+                }
+            }
+        });
 
     }
 }

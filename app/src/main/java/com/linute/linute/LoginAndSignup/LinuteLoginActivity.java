@@ -2,38 +2,30 @@ package com.linute.linute.LoginAndSignup;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
 
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.MainContent.MainActivity;
@@ -46,7 +38,6 @@ import com.squareup.okhttp.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -145,8 +136,19 @@ public class LinuteLoginActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            checkCredentialsWithDB(email, password);
+            checkRegisteredDevice(email, password);
 
+
+        }
+    }
+
+    private void checkRegisteredDevice(String email, String password){
+        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        if (sharedPreferences.getBoolean("deviceRegistered", false)){
+            checkCredentialsWithDB(email, password);
+        }else {
+            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
         }
     }
 
@@ -313,6 +315,58 @@ public class LinuteLoginActivity extends AppCompatActivity {
         sharedPreferences.apply();
     }
 
+
+    //used to registere device if somehow device wasn't registered
+    private void sendRegistrationDevice(String token, final String email, final String password) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        String versionName = "";
+        String versionCode = "";
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionName = pInfo.versionName;
+            versionCode = pInfo.versionCode + "";
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        Map<String, Object> device = new HashMap<>();
+        device.put("token", token);
+        device.put("version", versionName);
+        device.put("build", versionCode);
+        device.put("os", Build.VERSION.SDK_INT + "");
+        device.put("type", "android");
+
+        Device.createDevice(headers, device, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                Log.e(TAG, "failed registration");
+                runOnUiThread(rFailedConnectionAction);
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG, response.body().string());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(LinuteLoginActivity.this);
+                            showProgress(false);
+                        }
+                    });
+                } else {
+                    Log.v(TAG, response.body().string());
+                    getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
+                            .edit()
+                            .putBoolean("deviceRegistered", true)
+                            .apply();
+                    checkCredentialsWithDB(email, password);
+                }
+            }
+        });
+
+    }
 
 }
 

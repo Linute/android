@@ -390,7 +390,7 @@ public class PeopleFragment extends UpdatableFragment {
 
                 @Override
                 public void onResponse(Response response) throws IOException {
-                    response.body().close();
+                    response.body().string();
                     if (response.isSuccessful()) {
                         getPeopleAfterCoordSent();
                     } else {

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              tools:background="@android:color/holo_red_light">
+
+    <include layout="@layout/feed_detail_header"/>
+
+    <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
+                                                    android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                                                    android:scaleType="centerCrop"
+                                                    tools:src="@drawable/no_image_placeholder"/>
+
+    <include layout="@layout/feed_detail_action_bar"/>
+
+</LinearLayout>

@@ -59,14 +59,12 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
-    private LSDKUser mUser;
 
     public CheckBoxQuestionViewHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mUser = new LSDKUser(mContext);
 
         mPosts = posts;
         mCheckBoxChoiceCapableAdapters = adapter;

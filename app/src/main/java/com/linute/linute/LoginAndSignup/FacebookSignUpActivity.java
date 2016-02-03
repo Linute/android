@@ -387,11 +387,12 @@ public class FacebookSignUpActivity extends AppCompatActivity {
         }
 
         //not edu email
+        /* TODO: uncmoment this
         else if (!emailString.endsWith(".edu")){
             mEmailEditText.setError("This must be an edu email");
             mEmailEditText.requestFocus();
             return false;
-        }
+        }*/
 
         //good email
         else {

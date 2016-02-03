@@ -84,6 +84,7 @@ public class Utils {
         Log.v(TAG, "first name: " + sharedPreferences.getString("firstName", "nothing"));
         Log.v(TAG, "last name: " + sharedPreferences.getString("lastName", "nothing"));
         Log.v(TAG, "email: " + sharedPreferences.getString("email", "nothing"));
+        Log.i(TAG, "password: "+sharedPreferences.getString("password", "nothing"));
         Log.v(TAG, "status: " + sharedPreferences.getString("status", "nothing"));
         Log.v(TAG, "facebook: " + sharedPreferences.getString("socialFacebook", "nothing"));
         Log.v(TAG, "logged in: " + (sharedPreferences.getBoolean("isLoggedIn", false) ? "true" : "false"));

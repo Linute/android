@@ -311,6 +311,7 @@ public class FeedDetailPage extends UpdatableFragment {
             public void onResponse(Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponse: " + response.body().string());
+                    return;
                 }
                 JSONObject jsonObject;
                 JSONArray comments;
@@ -325,7 +326,10 @@ public class FeedDetailPage extends UpdatableFragment {
                                         ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
                                         ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
                                         ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                        ((JSONObject) comments.get(i)).getString("text"), ((JSONObject) comments.get(i)).getString("id")));
+                                        ((JSONObject) comments.get(i)).getString("text"),
+                                        ((JSONObject) comments.get(i)).getString("id"),
+                                        ((JSONObject) comments.get(i)).getInt("privacy") == 1
+                                ));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
