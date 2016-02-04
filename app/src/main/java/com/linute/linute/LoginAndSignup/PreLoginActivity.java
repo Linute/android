@@ -134,6 +134,7 @@ public class PreLoginActivity extends AppCompatActivity {
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+
                 if (!loginResult.getRecentlyDeniedPermissions().isEmpty()) {
                     showFacebookPermissionsRationale();
                     return;
@@ -145,7 +146,6 @@ public class PreLoginActivity extends AppCompatActivity {
 
                 //loginOrSignUpWithFacebook(mFBToken);
                 checkDeviceRegistered(mFBToken, progress);
-
             }
 
             @Override

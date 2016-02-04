@@ -4,6 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="vertical"
+              android:background="@color/white"
               tools:background="@android:color/holo_red_light">
 
     <include layout="@layout/feed_detail_header"/>

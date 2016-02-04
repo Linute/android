@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainContent.Settings.EditNameFragment">
 
-
     <LinearLayout
         android:id="@+id/editprofile_name"
         android:layout_width="match_parent"
@@ -26,7 +25,7 @@
             android:maxLength="16"
             android:maxLines="1"
             android:singleLine="true"
-            android:textSize="14sp"/>
+            android:textSize="@dimen/header_font_size"/>
 
 
         <EditText
@@ -39,9 +38,7 @@
             android:maxLength="16"
             android:maxLines="1"
             android:singleLine="true"
-            android:textSize="14sp"/>
-
-
+            android:textSize="@dimen/header_font_size"/>
     </LinearLayout>
 
 

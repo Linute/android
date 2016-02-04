@@ -17,7 +17,8 @@ public class FeedDetail {
     private int mPostPrivacy;
     private String mPostTime;
     private boolean isPostLiked;
-    private String mPostLikeNum;
+    private String mPostLikeNum = "0";
+    private String mNumOfComments = "0";
     //private String mUserLiked;
 
     private List<Comment> mComments;
@@ -26,7 +27,7 @@ public class FeedDetail {
         mComments = new ArrayList<>();
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum) {
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum, String numComments) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -35,6 +36,7 @@ public class FeedDetail {
         mPostTime = postTime;
         isPostLiked = postLiked;
         mPostLikeNum = postLikeNum;
+        mNumOfComments = numComments;
         //mUserLiked = userLiked;
     }
 
@@ -96,6 +98,10 @@ public class FeedDetail {
 
     public String getPostUserId() {
         return mPostUserId;
+    }
+
+    public String getNumOfComments(){
+        return mNumOfComments;
     }
 
     public void setPostUserId(String postUserId) {

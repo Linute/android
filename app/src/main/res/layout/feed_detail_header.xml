@@ -8,14 +8,17 @@
 
     <RelativeLayout android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/activity_horizontal_margin">
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
 
         <com.mikhaellopez.circularimageview.CircularImageView
             android:id="@+id/feedDetail_profile_image"
             android:layout_width="@dimen/feed_profile_image_radius"
             android:layout_height="@dimen/feed_profile_image_radius"
             android:layout_centerHorizontal="true"
-            app:border_color="@color/fifty_black"
+            app:border_color="@color/seperator_color"
             app:border_width="1dp"/>
 
         <TextView android:id="@+id/feedDetail_time_stamp"
@@ -23,9 +26,9 @@
                   android:layout_height="wrap_content"
                   android:layout_alignParentEnd="true"
                   android:layout_alignParentTop="true"
-                  android:textColor="@color/fifty_black"
                   android:singleLine="true"
-                  android:textSize="@dimen/body_font_size"
+                  android:textColor="@color/twentyfive_black"
+                  android:textSize="@dimen/sub_font_size"
                   tools:text="1m"
             />
     </RelativeLayout>
@@ -36,8 +39,10 @@
               android:layout_gravity="center_horizontal"
               android:layout_marginEnd="32dp"
               android:layout_marginStart="32dp"
+              android:textStyle="bold"
               android:singleLine="true"
               android:textColor="@color/user_name_blue"
               android:textSize="@dimen/header_font_size"
               tools:text="John Snow"/>
+
 </LinearLayout>

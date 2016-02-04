@@ -25,6 +25,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +65,7 @@ public class MainActivity extends BaseTaptActivity {
     public static String TAG = "MainActivity";
     private AppBarLayout mAppBarLayout;
     private ActionBar mActionBar;
+    private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
@@ -111,7 +115,7 @@ public class MainActivity extends BaseTaptActivity {
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
         mActionBar = getSupportActionBar();
 
@@ -561,4 +565,24 @@ public class MainActivity extends BaseTaptActivity {
             });
         }
     };
+
+    @Override
+    public void enableBarScrolling(boolean enabled) {
+
+        if (enabled) {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        } else {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(null);
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(0);
+
+        }
+    }
+
 }

@@ -155,4 +155,5 @@
         that are near you.
     </string>
     <string name="need_location">Tapt needs your location to find friends near you</string>
+    <string name="no_comment">This post is wack. Be the first to comment on this post!</string>
 </resources>

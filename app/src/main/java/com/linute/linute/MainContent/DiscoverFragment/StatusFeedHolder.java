@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,7 +15,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -36,11 +34,13 @@ import java.util.Map;
 /**
  * Created by QiFeng on 2/3/16.
  */
-public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
+public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
-    public static final String TAG = ImageFeedHolder.class.getSimpleName();
+
+    public static final String TAG = StatusFeedHolder.class.getSimpleName();
 
     private ChoiceCapableAdapter mCheckBoxChoiceCapableAdapters;
+
 
     protected View vLikeButton;
     protected View vCommentButton;
@@ -51,8 +51,10 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
 
-    protected ImageView vPostImage;
     protected CircularImageView vUserImage;
+
+    protected TextView vStatus;
+    protected View vStatusContainer; //so status is easier to press
 
     protected List<Post> mPosts;
 
@@ -60,9 +62,8 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     private SharedPreferences mSharedPreferences;
 
 
-    public ImageFeedHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
+    public StatusFeedHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
         super(itemView);
-
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -78,17 +79,19 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
 
-        //vLikesHeart.setClickable(false);
-        vLikesHeart.setOnCheckedChangeListener(this);
+        vStatus = (TextView) itemView.findViewById(R.id.feedDetail_status_post);
 
-        vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
+        vStatusContainer = itemView.findViewById(R.id.feedDetail_status_container);
+
         vUserImage = (CircularImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+
+        vLikesHeart.setOnCheckedChangeListener(this);
 
         vLikeButton.setOnClickListener(this);
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        vPostImage.setOnClickListener(this);
+        vStatusContainer.setOnClickListener(this);
     }
 
     @Override
@@ -146,7 +149,6 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
 
     @Override
     public void onClick(View v) {
-
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
         if (activity == null) return;
@@ -161,9 +163,9 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         }
 
         //status or image tapped
-        else if (v == vPostImage) {
+        else if (v == vStatusContainer) {
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(true
+                    FeedDetailPage.newInstance(false
                             , mPosts.get(getAdapterPosition()).getPostId()
                             , mPosts.get(getAdapterPosition()).getUserId())
             );
@@ -172,7 +174,9 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         //like button pressed
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
-        } else if (v == vCommentButton) {
+        }
+
+        else if (v == vCommentButton) {
             Toast.makeText(mContext, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
     }
@@ -187,14 +191,13 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
             vPostUserName.setText("Anonymous");
         }
 
-        // Set Post Image
-        getEventImage(post.getImage());
         vPostTime.setText(post.getPostTime());
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText("Like ("+post.getNumLike()+")");
         vCommentText.setText("Comment ("+post.getNumOfComments()+")");
-    }
 
+        vStatus.setText(post.getTitle());
+    }
 
     private void getProfileImage(String image) {
         Glide.with(mContext)
@@ -205,15 +208,4 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);
     }
-
-    private void getEventImage(String image) {
-        Glide.with(mContext)
-                .load(Utils.getEventImageURL(image))
-                .asBitmap()
-                .placeholder(R.drawable.no_image_placeholder)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into(vPostImage);
-    }
-
-
 }

@@ -1,39 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Really big hack by setting margin top.. find better way
+    android:layout_marginTop="?android:attr/actionBarSize"-->
+
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:clickable="true">
+    android:layout_marginTop="?android:attr/actionBarSize"
+    android:background="@color/white">
 
-    <LinearLayout
-        android:id="@+id/comments_entry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+    <LinearLayout android:id="@+id/comment_container"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp"
+                  android:layout_alignParentBottom="true"
+                  android:orientation="vertical"
+                  android:background="#FFFFFF"
+        >
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_layout_comment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="9">
+        <View android:layout_width="match_parent"
+              android:layout_height="1dp"
+              android:background="@color/fifty_black"/>
+
+        <LinearLayout
+            android:id="@+id/comments_entry"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/comment_field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter you message... "/>
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_weight="14"
+                android:background="#FFFFFF"
+                android:hint="Enter your comment... "/>
 
-        </android.support.design.widget.TextInputLayout>
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:id="@+id/feed_detail_send_comment"
-            android:src="@drawable/icon_send"/>
+            <ImageView
+                android:id="@+id/feed_detail_send_comment"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="2"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_send"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -41,5 +57,6 @@
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/comments_entry"/>
+        android:layout_above="@id/comment_container"/>
+
 </RelativeLayout>

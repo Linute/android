@@ -17,7 +17,7 @@
         android:lines="3"
         android:maxLength="60"
         android:maxLines="3"
-        android:textSize="14sp"/>
+        android:textSize="@dimen/header_font_size"/>
 
 
     <Button android:id="@+id/editstatus_save"

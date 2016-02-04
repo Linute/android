@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -91,7 +92,9 @@ public class DiscoverFragment extends UpdatableFragment {
         llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
+        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
+        //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
@@ -284,7 +287,8 @@ public class DiscoverFragment extends UpdatableFragment {
                                 jsonObject.getInt("numberOfLikes"),
                                 jsonObject.getBoolean("isLiked"),
                                 postString,
-                                jsonObject.getString("id"));
+                                jsonObject.getString("id"),
+                                jsonObject.getInt("numberOfComments"));
                         mPosts.add(post);
                         postImage = "";
                     }

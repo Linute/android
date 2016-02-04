@@ -110,19 +110,17 @@ public class FeedDetailPage extends UpdatableFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
         recList.setAdapter(mFeedDetailAdapter);
 
-        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        recList.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                rootView.findViewById(R.id.comment_field).clearFocus();
-                imm.hideSoftInputFromWindow(rootView.findViewById(R.id.comment_field).getWindowToken(), 0);
-                return false;
-            }
-        });
+//        recList.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                rootView.findViewById(R.id.comment_field).clearFocus();
+//                imm.hideSoftInputFromWindow(rootView.findViewById(R.id.comment_field).getWindowToken(), 0);
+//                return false;
+//            }
+//        });
 
         rootView.findViewById(R.id.feed_detail_send_comment).setEnabled(false);
 
@@ -150,12 +148,30 @@ public class FeedDetailPage extends UpdatableFragment {
             }
         });
 
-        mCommentEditText.setOnClickListener(new View.OnClickListener() {
+//        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//
+//            @Override
+//            public void onFocusChange(View v, boolean hasFocus) {
+//                recList.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        recList.scrollToPosition(mFeedDetailAdapter.getItemCount()-1);
+//                    }
+//                }, 150);
+//            }
+//        });
+
+        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-                getActivity().getWindow().setSoftInputMode(
-                        WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEvent.ACTION_UP == event.getAction())
+                    recList.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recList.scrollToPosition(mFeedDetailAdapter.getItemCount()-1);
+                    }
+                }, 150);
+                return false;
             }
         });
 
@@ -182,6 +198,7 @@ public class FeedDetailPage extends UpdatableFragment {
                 comment.put("image", jsonArray);
                 comment.put("text", mCommentText);
                 comment.put("event", mTaptPostId);
+                recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                 lsdkEvents.postComment(comment, new Callback() {
                     @Override
                     public void onFailure(Request request, IOException e) {
@@ -193,6 +210,7 @@ public class FeedDetailPage extends UpdatableFragment {
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
+                            return;
                         } else {
                             Log.d(TAG, "onResponseSuccessful: " + response.body().string());
 
@@ -208,21 +226,8 @@ public class FeedDetailPage extends UpdatableFragment {
                         }
                     }
                 });
-
             }
         });
-
-//        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
-//        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-//            @Override
-//            public void onRefresh() {
-//                updateAndSetHeader();
-//                setActivities(); //get activities
-//
-//            }
-//        });
-
-
 
         return rootView;
     }
@@ -234,6 +239,7 @@ public class FeedDetailPage extends UpdatableFragment {
         if (activity != null){
             activity.setTitle(mIsImage ? "Image" : "Status");
             activity.resetToolbar();
+            activity.enableBarScrolling(false);
         }
 
         //only updates first time it is created
@@ -241,7 +247,19 @@ public class FeedDetailPage extends UpdatableFragment {
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
         }
+    }
 
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
+
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        if (activity != null){
+            activity.enableBarScrolling(true);
+        }
     }
 
     private void displayCommentsAndPost() {
@@ -265,8 +283,10 @@ public class FeedDetailPage extends UpdatableFragment {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 Date myDate;
                 String postString;
+                String res = response.body().string();
+                Log.i(TAG, "onResponse: "+res);
                 try {
-                    jsonObject = new JSONObject(response.body().string());
+                    jsonObject = new JSONObject(res);
 
                     myDate = simpleDateFormat.parse(jsonObject.getString("date"));
                     postString = Utils.getTimeAgoString(myDate.getTime());
@@ -281,7 +301,8 @@ public class FeedDetailPage extends UpdatableFragment {
                             Integer.parseInt(jsonObject.getString("privacy")),
                             postString,
                             jsonObject.getBoolean("isLiked"),
-                            jsonObject.getString("numberOfLikes"));
+                            jsonObject.getString("numberOfLikes"),
+                            jsonObject.getString("numberOfComments"));
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                 }
@@ -331,6 +352,11 @@ public class FeedDetailPage extends UpdatableFragment {
                                         ((JSONObject) comments.get(i)).getInt("privacy") == 1
                                 ));
                     }
+
+                    if (comments.length() == 0){
+                        mFeedDetail.getComments().add(null);
+                    }
+
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -340,14 +366,17 @@ public class FeedDetailPage extends UpdatableFragment {
                     @Override
                     public void run() {
                         mFeedDetailAdapter.notifyDataSetChanged();
+                        if (mCommentEditText.isFocused()) {
+                            recList.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                                }
+                            }, 150);
+                        }
                     }
                 });
             }
         });
     }
-
-
-
-
-
 }

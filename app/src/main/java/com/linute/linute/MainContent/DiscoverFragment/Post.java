@@ -17,12 +17,13 @@ public class Post implements Parcelable {
     private boolean mUserLiked;
     private String mPostTime;
     private String mPostId;
+    private int mNumOfComments;
 
     private boolean mPostLiked;
 
     public Post(String userId, String userName, String userImage, String title,
                 String image, int privacy, int numLike, boolean userLiked,
-                String postTime, String postId) {
+                String postTime, String postId, int numComments) {
         mUserId = userId;
         mUserName = userName;
         mImage = "";
@@ -34,6 +35,7 @@ public class Post implements Parcelable {
         mUserLiked = userLiked;
         mPostTime = postTime;
         mPostId = postId;
+        mNumOfComments = numComments;
 
         mPostLiked = mUserLiked;
     }
@@ -90,9 +92,17 @@ public class Post implements Parcelable {
         return mUserId;
     }
 
+    public boolean isImagePost(){
+        return !mImage.equals("");
+    }
+
+    public int getNumOfComments() {
+        return mNumOfComments;
+    }
+
     @Override
     public String toString() {
-        return getImage().equals("") ? getTitle() : "Conent: Image - " + getTitle();
+        return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
     }
 
 
