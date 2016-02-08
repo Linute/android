@@ -63,6 +63,9 @@ import io.socket.emitter.Emitter;
 public class MainActivity extends BaseTaptActivity {
 
     public static String TAG = "MainActivity";
+
+    public static final int PHOTO_STATUS_POSTED = 19;
+
     private AppBarLayout mAppBarLayout;
     private ActionBar mActionBar;
     private Toolbar mToolbar;
@@ -96,7 +99,6 @@ public class MainActivity extends BaseTaptActivity {
     private MenuItem mPreviousItem;
 
     private Socket mSocket;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,7 +154,7 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 fam.toggle();
                 Intent i = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(i);
+                startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
         FloatingActionButton fabText = (FloatingActionButton) findViewById(R.id.fabText);
@@ -161,7 +163,7 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 fam.toggle();
                 Intent i = new Intent(MainActivity.this, PostCreatePage.class);
-                startActivity(i);
+                startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
 
@@ -298,6 +300,8 @@ public class MainActivity extends BaseTaptActivity {
             //NOTE: need to reload others?
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
+        }else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK){
+            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -375,7 +379,7 @@ public class MainActivity extends BaseTaptActivity {
                 .asBitmap()
                 .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000")))
                 .override(size, size) //change image to the size we want
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into((CircularImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
@@ -507,34 +511,37 @@ public class MainActivity extends BaseTaptActivity {
 
         {
             try {
-                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
+                mSocket = IO.socket(getString(R.string.DEV_CHAT_SERVER_URL));
             } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("authorization", authorization);
-        mSocket.connect();
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (mSocket != null) {
+            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on("authorization", authorization);
+            mSocket.connect();
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mSocket.emit("authorization", jsonObject);
         }
-        mSocket.emit("authorization", jsonObject);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        mSocket.disconnect();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("new message", authorization);
+        if (mSocket != null) {
+            mSocket.disconnect();
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off("new message", authorization);
+        }
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {

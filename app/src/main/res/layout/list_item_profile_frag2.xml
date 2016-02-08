@@ -12,8 +12,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:scaleType="fitCenter"
-        android:src="@drawable/no_image_placeholder"/>
+        android:scaleType="fitCenter"/>
 
 
     <LinearLayout android:layout_width="match_parent"
@@ -44,6 +43,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:maxLines="2"
+                android:textColor="@color/eighty_black"
+                android:textSize="@dimen/sub_font_size"
                 android:text="old mcdonald had a sheep, meow meow.."/>
 
             <LinearLayout android:layout_width="match_parent"
@@ -53,13 +54,15 @@
                     android:id="@+id/activities_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:alpha="0.8"
+                    android:textSize="@dimen/sub_font_size"
+                    android:textColor="@color/twentyfive_black"
                     android:text="yesterday"/>
 
                 <ImageView android:id="@+id/profile_frag_anon_icon"
-                           android:layout_width="20dp"
-                           android:layout_height="10dp"
+                           android:layout_width="25dp"
+                           android:layout_height="12dp"
                            android:layout_gravity="center_vertical"
+                           android:scaleType="center"
                            android:layout_marginStart="6dp"
                            android:src="@drawable/ic_anon"
                            android:visibility="gone"

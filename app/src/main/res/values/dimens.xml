@@ -5,20 +5,20 @@
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <dimen name="title_margin">64dp</dimen>
+
 
     <dimen name="profilefragment_main_profile_image_radius">85dp</dimen>
-    <dimen name="profilefragment_list_item_profile_radius">50dp</dimen>
     <dimen name="profilefragment_list_item_event_side">100dp</dimen>
     <!--<dimen name="changeprofile_image_dimen">180dp</dimen> -->
     <dimen name="padding_s">4dp</dimen>
 
 
-    <dimen name="feed_profile_image_radius">52dp</dimen>
+    <dimen name="profile_image_radius">52dp</dimen>
 
 
-    <dimen name="updatefragment_picture_size">45dp</dimen>
+    <dimen name="action_picture_size">40dp</dimen>
     <dimen name="updatefragment_icon_size">17dp</dimen>
-    <dimen name="updatefragment_margins">12dp</dimen>
 
     <!-- Square Camera -->
     <dimen name="squarecam_edit_frag_default_height">60dp</dimen>
@@ -30,7 +30,6 @@
 
     <dimen name="post_side_padding">15dp</dimen>
 
-    <dimen name="friend_search_button_side">35dp</dimen>
     <dimen name="friend_search_profile_side">60dp</dimen>
 
     <dimen name="search_icon_padding">12dp</dimen>

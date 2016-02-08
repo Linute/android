@@ -150,6 +150,15 @@ public class LSDKUser {
                 callback);
     }
 
+    public Call changePassword(String tempPass, String email, String userId, String newPass, Callback callback){
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(email, tempPass, mEncodedToken);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("password", newPass);
+
+        return API_Methods.put("users/"+userId, header, params, callback);
+    }
+
     //get phone number confirmation code
     //@param phoneNumber - phone number; NOTE: make sure phone unique first
     //@param callback - what to do if success or failure
@@ -190,5 +199,14 @@ public class LSDKUser {
                 mSharedPreferences.getString("password", null),
                 mEncodedToken);
         return API_Methods.post("geo", header, params, callback);
+    }
+
+    public Call resetPassword(String email, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("email",email);
+
+        return API_Methods.post("users/reset-password-email", header, params, callback);
     }
 }

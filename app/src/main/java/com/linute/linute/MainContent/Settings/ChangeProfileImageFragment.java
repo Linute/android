@@ -147,7 +147,7 @@ public class ChangeProfileImageFragment extends Fragment {
                 .load(Utils.getImageUrlOfUser(mSharedPreferences.getString("profileImage", "")))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(mImageView);
     }

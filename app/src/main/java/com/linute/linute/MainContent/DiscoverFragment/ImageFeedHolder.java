@@ -20,6 +20,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -88,7 +89,16 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        vPostImage.setOnClickListener(this);
+        vPostImage.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+            }
+
+            @Override
+            public void onDoubleClick(View v) {
+                vLikesHeart.toggle();
+            }
+        });
     }
 
     @Override
@@ -160,20 +170,15 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
             );
         }
 
-        //status or image tapped
-        else if (v == vPostImage) {
-            activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(true
-                            , mPosts.get(getAdapterPosition()).getPostId()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-
         //like button pressed
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
         } else if (v == vCommentButton) {
-            Toast.makeText(mContext, "Coming Soon", Toast.LENGTH_SHORT).show();
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(true,true
+                            , mPosts.get(getAdapterPosition()).getPostId()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
         }
     }
 
@@ -191,8 +196,8 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         getEventImage(post.getImage());
         vPostTime.setText(post.getPostTime());
         vLikesHeart.setChecked(post.isPostLiked());
-        vLikesText.setText("Like ("+post.getNumLike()+")");
-        vCommentText.setText("Comment ("+post.getNumOfComments()+")");
+        vLikesText.setText("Like (" + post.getNumLike() + ")");
+        vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
     }
 
 
@@ -201,7 +206,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);
     }
@@ -210,7 +215,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         Glide.with(mContext)
                 .load(Utils.getEventImageURL(image))
                 .asBitmap()
-                .placeholder(R.drawable.no_image_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vPostImage);
     }

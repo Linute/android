@@ -40,9 +40,9 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         //image post
         else if (viewType == TYPE_IMAGE_HEADER) { //TODO: FIX ME
             //inflate your layout and pass it to view holder
-            return new FeedDetailHeaderViewHolder(this, LayoutInflater
+            return new FeedDetailHeaderImageViewHolder(this, LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_feed_detail_page_head, parent, false), context);
+                    .inflate(R.layout.feed_detail_header_image, parent, false), context);
         } else if (viewType == TYPE_STATUS_HEADER) { //was a status post
             return new FeedDetailHeaderStatusViewHolder(this,
                     LayoutInflater.from(parent.getContext())
@@ -56,8 +56,8 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof FeedDetailViewHolder) {
             ((FeedDetailViewHolder) holder).bindModel(mFeedDetail.getComments().get(position - 1));
-        } else if (holder instanceof FeedDetailHeaderViewHolder) { //// TODO: 2/4/16 fix
-            ((FeedDetailHeaderViewHolder) holder).bindModel(mFeedDetail);
+        } else if (holder instanceof FeedDetailHeaderImageViewHolder) { //// TODO: 2/4/16 fix
+            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail);
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
             ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail);
         }

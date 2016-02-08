@@ -8,10 +8,11 @@
     <TextView android:id="@+id/updateFragment_section_title"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="18dp"
-              android:layout_marginLeft="20dp"
-              android:textSize="16dp"
-              android:textColor="@android:color/darker_gray"
+              android:layout_marginTop="@dimen/activity_vertical_margin"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:layout_marginEnd="@dimen/activity_horizontal_margin"
+              android:textSize="16sp"
+              android:textColor="@color/fifty_black"
               tools:text="RECENT"/>
 
     <View android:layout_width="match_parent"
@@ -19,8 +20,7 @@
           android:layout_marginLeft="15dp"
           android:layout_marginRight="15dp"
           android:layout_marginTop="5dp"
-          android:alpha="0.5"
-          android:background="@android:color/darker_gray"
+          android:background="@color/fifty_black"
           android:layout_marginBottom="16dp"
         />
 

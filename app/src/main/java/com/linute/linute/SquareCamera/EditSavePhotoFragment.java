@@ -2,6 +2,7 @@ package com.linute.linute.SquareCamera;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -103,7 +104,7 @@ public class EditSavePhotoFragment extends Fragment {
         //setup ImageView
         Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
-        
+
         photoImageView.setImageURI(imageUri);
 
         imageParameters.mIsPortrait =
@@ -113,7 +114,7 @@ public class EditSavePhotoFragment extends Fragment {
         photoImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mText.getVisibility() == View.GONE){
+                if (mText.getVisibility() == View.GONE) {
                     mText.setVisibility(View.VISIBLE);
                     mText.requestFocus();
                     showKeyboard();
@@ -147,7 +148,7 @@ public class EditSavePhotoFragment extends Fragment {
         view.findViewById((R.id.cancel)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity)getActivity()).clearBackStack();
+                ((CameraActivity) getActivity()).clearBackStack();
             }
         });
 
@@ -158,7 +159,7 @@ public class EditSavePhotoFragment extends Fragment {
     //can't move during edit
     private boolean mCanMove = true;
 
-    private void setUpEditText(){
+    private void setUpEditText() {
 
         //when back is pressed
         mText.setBackAction(new BackButtonAction() {
@@ -198,7 +199,6 @@ public class EditSavePhotoFragment extends Fragment {
             float totalMovement;
 
 
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -235,14 +235,12 @@ public class EditSavePhotoFragment extends Fragment {
                             if (newTop < 0) { //over the top edge
                                 newTop = 0;
                                 stopped = true;
-                            }
-
-                            else if (newTop >  mFrame.getHeight() - v.getHeight()){ //under the bottom edge
+                            } else if (newTop > mFrame.getHeight() - v.getHeight()) { //under the bottom edge
                                 newTop = mFrame.getHeight() - v.getHeight();
                                 stopped = true;
                             }
 
-                            params.setMargins(0, newTop,0,0); //set new margin
+                            params.setMargins(0, newTop, 0, 0); //set new margin
                             v.setLayoutParams(params);
                         }
                         break;
@@ -285,6 +283,7 @@ public class EditSavePhotoFragment extends Fragment {
         new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -296,29 +295,34 @@ public class EditSavePhotoFragment extends Fragment {
 
             @Override
             public void onResponse(final Response response) throws IOException {
-                if (response.isSuccessful()){
-                    getActivity().finish();
+                if (response.isSuccessful()) {
+                    if (getActivity() == null) return;
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(getActivity(), "Picture Posted", Toast.LENGTH_SHORT).show();
                             try {
-                                Log.i(TAG, "run: "+response.body().string());
+                                Log.i(TAG, "run: " + response.body().string());
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                            getActivity().setResult(Activity.RESULT_OK);
+                            getActivity().finish();
                         }
                     });
-                }else {
+
+                } else {
                     showServerError();
-                    Log.e(TAG, "onResponse: "+response.code()+" : "+response.body().string() );
+                    Log.e(TAG, "onResponse: " + response.code() + " : " + response.body().string());
                 }
             }
         });
 
     }
 
-    private void showServerError(){
+    private void showServerError() {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -328,12 +332,12 @@ public class EditSavePhotoFragment extends Fragment {
         });
     }
 
-    private void showKeyboard(){ //show keyboard for EditText
+    private void showKeyboard() { //show keyboard for EditText
         InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(mText, 0);
     }
 
-    private void hideKeyboard(){
+    private void hideKeyboard() {
         mText.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
@@ -341,10 +345,10 @@ public class EditSavePhotoFragment extends Fragment {
 
     //cuts a bitmap from our RelativeLayout
     public static Bitmap getBitmapFromView(View view) {
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),Bitmap.Config.ARGB_8888);
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable =view.getBackground();
-        if (bgDrawable!=null)
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null)
             bgDrawable.draw(canvas);
         else
             canvas.drawColor(Color.WHITE);
@@ -376,7 +380,7 @@ public class EditSavePhotoFragment extends Fragment {
     }
 
 
-    public static class EditSaveEditText extends EditText{
+    public static class EditSaveEditText extends EditText {
 
         BackButtonAction mBackAction;
 

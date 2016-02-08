@@ -9,12 +9,12 @@
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/comment_user_image"
-        android:layout_width="@dimen/feed_profile_image_radius"
-        android:layout_height="@dimen/feed_profile_image_radius"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
         android:scaleType="centerCrop"
         app:border_width="1dp"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        app:border_color="@color/fifty_black"
+        app:border_color="@color/seperator_color"
         />
 
     <LinearLayout
@@ -29,7 +29,7 @@
             android:id="@+id/comment_user_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/header_font_size"
+            android:textSize="@dimen/body_font_size"
             android:textColor="@color/user_name_blue"
             android:textStyle="bold"
             tools:text = "Name Name"/>
@@ -38,7 +38,7 @@
             android:id="@+id/comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="@dimen/body_font_size"
+            android:textSize="@dimen/sub_font_size"
             android:textColor="@color/eighty_black"
             tools:text = "test test test testtest test test testtest test test testtest test test testtest test test test "/>
 

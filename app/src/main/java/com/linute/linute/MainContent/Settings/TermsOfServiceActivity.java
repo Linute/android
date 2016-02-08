@@ -47,7 +47,7 @@ public class TermsOfServiceActivity extends AppCompatActivity {
         mTermsWebView = (WebView) findViewById(R.id.webviewactivity_webview);
         mTermsWebView.setWebViewClient(new LinuteBrowser());
         if (Utils.isNetworkAvailable(this)) {
-            mTermsWebView.loadUrl("http://www.linute.com/terms-of-service/");
+            mTermsWebView.loadUrl("https://www.tapt.io/terms-of-service");
         }else {
             Utils.showBadConnectionToast(this);
         }

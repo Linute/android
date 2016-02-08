@@ -131,7 +131,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
                 .load(type == 1 ? Utils.getImageUrlOfUser(feedDetail.getUserImage()) : Utils.getEventImageURL(feedDetail.getPostImage()))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(type == 1 ? vUserImage : vPostImage);
     }

@@ -72,7 +72,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:adjustViewBounds="true"
-            android:background="@drawable/college_walk1"
             android:scaleType="fitCenter"/>
 
         <LinearLayout

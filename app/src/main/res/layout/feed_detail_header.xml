@@ -15,9 +15,10 @@
 
         <com.mikhaellopez.circularimageview.CircularImageView
             android:id="@+id/feedDetail_profile_image"
-            android:layout_width="@dimen/feed_profile_image_radius"
-            android:layout_height="@dimen/feed_profile_image_radius"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
             android:layout_centerHorizontal="true"
+            android:src="@drawable/image_loading_background"
             app:border_color="@color/seperator_color"
             app:border_width="1dp"/>
 

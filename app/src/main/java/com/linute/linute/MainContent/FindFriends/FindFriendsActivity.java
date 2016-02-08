@@ -6,11 +6,9 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -24,6 +22,7 @@ public class FindFriendsActivity extends BaseTaptActivity {
     private CoordinatorLayout parentView;
     private AppBarLayout mAppBarLayout;
     private int mAppBarElevation;
+    private Toolbar mToolbar;
 
 
     @Override
@@ -36,7 +35,7 @@ public class FindFriendsActivity extends BaseTaptActivity {
 
         parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.findFriends_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.findFriends_toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         setSupportActionBar(mToolbar);
@@ -128,5 +127,24 @@ public class FindFriendsActivity extends BaseTaptActivity {
 
         mAppBarLayout.setExpanded(true, true);
         behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
+    }
+
+    @Override
+    public void enableBarScrolling(boolean enabled) {
+
+        if (enabled) {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.findFriends_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        } else {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.findFriends_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(null);
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(0);
+
+        }
     }
 }

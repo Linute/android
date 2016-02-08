@@ -49,7 +49,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder  implements Vi
                 .load(comment.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(comment.getCommentUserProfileImage()))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vCommentUserImage);
 

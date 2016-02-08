@@ -18,6 +18,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -91,7 +92,16 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        vStatusContainer.setOnClickListener(this);
+        vStatusContainer.setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+            }
+
+            @Override
+            public void onDoubleClick(View v) {
+                vLikesHeart.toggle();
+            }
+        });
     }
 
     @Override
@@ -162,22 +172,17 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
             );
         }
 
-        //status or image tapped
-        else if (v == vStatusContainer) {
-            activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(false
-                            , mPosts.get(getAdapterPosition()).getPostId()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-
         //like button pressed
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
         }
 
         else if (v == vCommentButton) {
-            Toast.makeText(mContext, "Coming Soon", Toast.LENGTH_SHORT).show();
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(true,false
+                            , mPosts.get(getAdapterPosition()).getPostId()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
         }
     }
 
@@ -204,7 +209,7 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);
     }

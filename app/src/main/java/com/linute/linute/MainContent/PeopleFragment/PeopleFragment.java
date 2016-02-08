@@ -295,12 +295,13 @@ public class PeopleFragment extends UpdatableFragment {
                 if (!response.isSuccessful()) {
                     Log.d("TAG", responsString);
                     return;
+                } else {
+                    Log.d("TAG", responsString);
                 }
                 JSONObject jsonObject;
                 JSONArray jsonArray;
                 try {
                     jsonObject = new JSONObject(responsString);
-                    Log.i(TAG, "onResponse: 1");
                     jsonArray = jsonObject.getJSONArray("people");
 
 

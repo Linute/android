@@ -47,7 +47,7 @@ public class PrivacyPolicyActivity extends AppCompatActivity {
         mTermsWebView = (WebView) findViewById(R.id.webviewactivity_webview);
         mTermsWebView.setWebViewClient(new LinuteBrowser());
         if (Utils.isNetworkAvailable(this)) {
-            mTermsWebView.loadUrl("http://www.linute.com/privacy-policy");
+            mTermsWebView.loadUrl("https://www.tapt.io/privacy-policy");
         }else {
             Utils.showBadConnectionToast(this);
         }

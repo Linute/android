@@ -30,7 +30,7 @@ public class ProfileActivityListAdapter extends BaseAdapter {
     public ProfileActivityListAdapter(Context context, List<UserActivityItem> userActivityItems){
         mContext = context;
         mUserActivityItems = userActivityItems;
-        mActivityProfilePictureRadius = mContext.getResources().getDimensionPixelSize(R.dimen.profilefragment_list_item_profile_radius);
+        mActivityProfilePictureRadius = mContext.getResources().getDimensionPixelSize(R.dimen.profile_image_radius);
         mEventPictureSide = mContext.getResources().getDimensionPixelSize(R.dimen.profilefragment_list_item_event_side);
     }
 
@@ -104,7 +104,7 @@ public class ProfileActivityListAdapter extends BaseAdapter {
                     .load(item.getProfileImagePath())
                     .asBitmap()
                     .override(mActivityProfilePictureRadius, mActivityProfilePictureRadius) //change image to the size we want
-                    .placeholder(R.drawable.profile_picture_placeholder)
+                    .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
 
@@ -114,7 +114,7 @@ public class ProfileActivityListAdapter extends BaseAdapter {
                     .asBitmap()
                     .signature(new StringSignature(mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .override(mEventPictureSide, mEventPictureSide)
-                    .placeholder(R.drawable.no_image_placeholder)
+                    .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .into(mEventImage);
 

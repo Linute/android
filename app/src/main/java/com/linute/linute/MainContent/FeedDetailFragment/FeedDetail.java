@@ -14,7 +14,7 @@ public class FeedDetail {
     private String mPostText;
     private String mUserImage;
     private String mUserName;
-    private int mPostPrivacy;
+    private int mPostPrivacy = 2;
     private String mPostTime;
     private boolean isPostLiked;
     private String mPostLikeNum = "0";
@@ -106,5 +106,9 @@ public class FeedDetail {
 
     public void setPostUserId(String postUserId) {
         mPostUserId = postUserId;
+    }
+
+    public void setPostPrivacy(int privacy){
+        mPostPrivacy = privacy;
     }
 }

@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -60,7 +58,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         mRecentItems = recentItems;
         mOlderItems = olderItems;
         mContext = context;
-        mImageSize = mContext.getResources().getDimensionPixelSize(R.dimen.updatefragment_picture_size);
+        mImageSize = mContext.getResources().getDimensionPixelSize(R.dimen.action_picture_size);
     }
 
     //private onLoadMoreListener mLoadMore;
@@ -186,7 +184,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             return new UpdatesViewHolderFooter(
                     LayoutInflater
                             .from(parent.getContext())
-                            .inflate(R.layout.fragment_updates_footer, parent, false)
+                            .inflate(R.layout.load_more_footer, parent, false)
             );
         }*/
         return null;
@@ -253,6 +251,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     .load( update.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
                     .asBitmap()
                     .override(mImageSize, mImageSize)
+                    .placeholder(R.drawable.image_loading_background)
                     .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
@@ -330,7 +329,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     @Override
                     public void onClick(View v) {
                         ((MainActivity)mContext).addFragmentToContainer(
-                                FeedDetailPage.newInstance(
+                                FeedDetailPage.newInstance(false,
                                         update.isPicturePost()
                                         ,update.getEventID()
                                         ,update.getUserId()

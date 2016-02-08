@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -66,7 +67,7 @@ public class PostCreatePage extends AppCompatActivity {
         });
 
         textContent = (EditText) findViewById(R.id.postContentPageEditText);
-        textContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(200)}); //set char limit
+        textContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(240)}); //set char limit
         textContent.addTextChangedListener(new TextWatcher() {
             TextView textView = (TextView) PostCreatePage.this.findViewById(R.id.postContent_character_counter);
 
@@ -80,7 +81,7 @@ public class PostCreatePage extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                textView.setText(200 - s.length() + "");
+                textView.setText(240 - s.length() + "");
             }
         });
 
@@ -117,7 +118,12 @@ public class PostCreatePage extends AppCompatActivity {
         new LSDKEvents(this).postEvent(postData, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                e.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(PostCreatePage.this);
+                    }
+                });
             }
 
             @Override
@@ -131,6 +137,7 @@ public class PostCreatePage extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(PostCreatePage.this, "Posted status", Toast.LENGTH_SHORT).show();
+                        setResult(RESULT_OK);
                         finish();
                     }
                 });
@@ -152,6 +159,7 @@ public class PostCreatePage extends AppCompatActivity {
                 postStatus();
                 return true;
             case android.R.id.home:
+                setResult(RESULT_CANCELED);
                 finish();
                 return true;
             default:

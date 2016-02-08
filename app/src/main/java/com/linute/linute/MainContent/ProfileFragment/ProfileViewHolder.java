@@ -70,7 +70,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         Glide.with(mContext)
                 .load(userActivityItem.getEventImagePath())
                 .asBitmap()
-                .placeholder(R.drawable.no_image_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
@@ -86,7 +86,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity != null){
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(mIsImagePost, mPostId, mUserId ));
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(false,mIsImagePost, mPostId, mUserId ));
         }
     }
 }

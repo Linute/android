@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
@@ -40,7 +42,6 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
     private SharedPreferences mSharedPreferences;
 
     private View vLikeContainer;
-
 
     protected TextView vPostUserName;
     protected TextView vPostText;
@@ -74,16 +75,27 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
         vUserImage.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vLikeContainer.setOnClickListener(this);
+
+        itemView.findViewById(R.id.feedDetail_status_container).setOnClickListener(new DoubleClickListener() {
+            @Override
+            public void onSingleClick(View v) {
+            }
+
+            @Override
+            public void onDoubleClick(View v) {
+                vLikesHeart.toggle();
+            }
+        });
     }
 
     void bindModel(FeedDetail feedDetail) {
         // Set User Image
-        // Set User Name
         vFeedDetail = feedDetail;
         if (feedDetail.getPostPrivacy() == 0) {
-            getProfileImage(feedDetail.getUserImage());
+            if (feedDetail.getUserImage() != null)
+                getProfileImage(feedDetail.getUserImage());
             vPostUserName.setText(feedDetail.getUserName());
-        } else {
+        } else if (feedDetail.getPostPrivacy() == 1){
             vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
             vPostUserName.setText("Anonymous");
         }
@@ -92,7 +104,7 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
         vLikesHeart.setChecked(feedDetail.isPostLiked());
         vLikesText.setText("Like (" + feedDetail.getPostLikeNum() + ")");
 
-        vCommentsText.setText("Comment (0)"); //TODO: fix
+        vCommentsText.setText("Comment (" + feedDetail.getNumOfComments() + ")");
 
         vPostTime.setText(feedDetail.getPostTime());
     }
@@ -100,8 +112,12 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked && !((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
-            ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(true);
-            ((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) + 1) + "");
+            //((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(true);
+            //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) + 1) + "");
+
+            vFeedDetail.setIsPostLiked(true);
+            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
+            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
 
             Map<String, Object> postData = new HashMap<>();
             postData.put("owner", mSharedPreferences.getString("userID", ""));
@@ -109,7 +125,7 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
             new LSDKEvents(mContext).postLike(postData, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    e.printStackTrace();
+                    Log.i(TAG, "onFailure: ");
                 }
 
                 @Override
@@ -124,17 +140,20 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
 
             mAdapater.notifyDataSetChanged();
         } else if (!isChecked && ((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
-            ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(false);
-            ((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) - 1) + "");
+            //((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(false);
+            //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) - 1) + "");
+
+            vFeedDetail.setIsPostLiked(false);
+            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
+            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
 
             Map<String, Object> postData = new HashMap<>();
             postData.put("isDeleted", true);
             new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) {
-                    e.printStackTrace();
+                    Log.i(TAG, "onFailure: ");
                 }
-
                 @Override
                 public void onResponse(Response response) throws IOException {
                     if (!response.isSuccessful()) {
@@ -144,7 +163,6 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
                     }
                 }
             });
-
             mAdapater.notifyDataSetChanged();
         }
     }
@@ -157,7 +175,7 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
                             vFeedDetail.getUserName()
                             , vFeedDetail.getPostUserId()
                     ));
-        }else if (v == vLikeContainer){
+        } else if (v == vLikeContainer) {
             vLikesHeart.toggle();
         }
     }
@@ -167,8 +185,9 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);
     }
+
 }

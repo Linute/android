@@ -52,6 +52,7 @@
                                                                        android:layout_width="wrap_content"
                                                                        android:layout_height="wrap_content"
                                                                        android:src="@drawable/fab_camera"
+                                                                       app:fab_title="Photo"
                                                                        app:fab_colorNormal="@color/white"
                                                                        app:fab_colorPressed="@color/white_pressed"/>
 
@@ -59,6 +60,7 @@
                                                                        android:layout_width="wrap_content"
                                                                        android:layout_height="wrap_content"
                                                                        android:src="@drawable/fab_quote"
+                                                                       app:fab_title="Status"
                                                                        app:fab_colorNormal="@color/white"
                                                                        app:fab_colorPressed="@color/white_pressed"/>
 
@@ -76,7 +78,7 @@
                                                   android:background="@color/colorPrimary"
                                                   app:headerLayout="@layout/drawer_header"
                                                   app:itemIconTint="@color/white"
-                                                  app:itemTextColor="@color/white"
+                                                  app:itemTextAppearance="@style/NavDrawerTextStyle"
                                                   app:menu="@menu/main_activity_drawer">
 
         <Button android:id="@+id/mainActivity_nav_logout_button"
