@@ -485,17 +485,16 @@ public class LinuteSignUpFragment extends Fragment {
         if (areGoodCredentials) {
             Map<String, Object> userInfo = new HashMap<>();
             String encodedProfilePicture;
-
-            encodedProfilePicture = Utils.encodeImageBase64(
-                    mProfilePictureBitmap != null ? mProfilePictureBitmap :
-                            BitmapFactory.decodeResource(getResources(), R.drawable.profile_picture_placeholder));
-
             //add information
             userInfo.put("email", email);
             userInfo.put("password", password);
             userInfo.put("firstName", fName);
             userInfo.put("lastName", lName);
-            userInfo.put("profileImage", encodedProfilePicture);
+
+            if (mProfilePictureBitmap != null)
+                userInfo.put("profileImage", Utils.encodeImageBase64(mProfilePictureBitmap));
+
+
             userInfo.put("timeZone", Utils.getTimeZone());
 
             //try to create user

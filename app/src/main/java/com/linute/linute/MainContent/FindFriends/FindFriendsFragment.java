@@ -362,6 +362,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     mSearchHandler.postDelayed(mSearchByNameRunnable, 400);
                 }
             }
+
             return false;
         }
     };
