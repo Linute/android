@@ -1,9 +1,6 @@
 package com.linute.linute.API;
 
 
-
-import android.util.Log;
-
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -29,7 +26,6 @@ public class API_Methods {
 
     // API ENPOINT URL
     private static String SCHEME = "https";
-
     //private static String HOST = "api.linute.com";
     private static String HOST = "devapi.linute.com";
     private static String VERSION = "v1.3";
@@ -58,7 +54,7 @@ public class API_Methods {
                 .host(HOST)
                 .addPathSegment(VERSION);
 
-        for (String p : path){
+        for (String p : path) {
             url.addPathSegment(p);
         }
 
@@ -151,7 +147,7 @@ public class API_Methods {
     }
 
 
-    public static Map<String, String> getHeaderWithAuthUser(String email, String password, String authDeviceToken){
+    public static Map<String, String> getHeaderWithAuthUser(String email, String password, String authDeviceToken) {
         Map<String, String> header = getMainHeader(authDeviceToken);
 
         String encodedUserInfo = Utils.encode_base64(email + ":" +
@@ -163,7 +159,7 @@ public class API_Methods {
     }
 
     // returns main header containing: Content-Type and authorizationDevice
-    public static Map<String,String> getMainHeader(String authDeviceToken){
+    public static Map<String, String> getMainHeader(String authDeviceToken) {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorizationDevice", "Basic " + authDeviceToken);

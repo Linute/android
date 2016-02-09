@@ -74,7 +74,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 @Override
                 public void onClick(View v) {
 //                    Toast.makeText(aContext, mRoomsList.get(getAdapterPosition()).getLastMessageUserName(), Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "onClick: " + mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "") + " fsfsfsf");
                     ChatFragment newFragment = ChatFragment.newInstance(
                             mRoomsList.get(getAdapterPosition()).getRoomId(),
                             mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),

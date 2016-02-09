@@ -87,8 +87,10 @@ public class ChatFragment extends Fragment {
     private List<Chat> mChatList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
     private int mLastRead;
+    private String mLastReadId;
     private List<ChatHead> mChatHeadList;
     private List<ChatHead> mChatHeadAddedList;
+    private Map<String, Integer> mChatHeadPos = new HashMap<String, Integer>();
 
 
     public ChatFragment() {
@@ -101,7 +103,7 @@ public class ChatFragment extends Fragment {
         super.onAttach(context);
         mChatAdapter = new ChatAdapter(getActivity(), mChatList);
         mChatHeadList = new ArrayList<>();
-        mChatHeadList = new ArrayList<>();
+        mChatHeadAddedList = new ArrayList<>();
     }
 
     /**
@@ -153,44 +155,46 @@ public class ChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        {
-            try {
-                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
+        if (mSocket == null || !mSocket.connected()) {
+            {
+                try {
+                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
             }
+
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on("new message", onNewMessage);
+            mSocket.on("typing", onTyping);
+            mSocket.on("stop typing", onStopTyping);
+            mSocket.on("read", onRead);
+            mSocket.on("joined", onJoin);
+            mSocket.on("left", onLeave);
+            mSocket.on("error", onError);
+            mSocket.on("delivered", onDelivered);
+            mSocket.connect();
+            mIsReadMessageJSONArray = new JSONArray();
+            typingJson = new JSONObject();
+            joinLeft = new JSONObject();
+            delivered = new JSONObject();
+
+            try {
+                typingJson.put("room", mRoomId);
+                typingJson.put("user", mUserId);
+
+                joinLeft.put("room", mRoomId);
+                joinLeft.put("user", mUserId);
+
+                delivered.put("user", mUserId);
+                delivered.put("room", mRoomId);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            mSocket.emit("joined", joinLeft);
         }
-
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("new message", onNewMessage);
-        mSocket.on("typing", onTyping);
-        mSocket.on("stop typing", onStopTyping);
-        mSocket.on("read", onRead);
-        mSocket.on("joined", onJoin);
-        mSocket.on("left", onLeave);
-        mSocket.on("error", onError);
-        mSocket.on("delivered", onDelivered);
-        mSocket.connect();
-        mIsReadMessageJSONArray = new JSONArray();
-        typingJson = new JSONObject();
-        joinLeft = new JSONObject();
-        delivered = new JSONObject();
-
-        try {
-            typingJson.put("room", mRoomId);
-            typingJson.put("user", mUserId);
-
-            joinLeft.put("room", mRoomId);
-            joinLeft.put("user", mUserId);
-
-            delivered.put("user", mUserId);
-            delivered.put("room", mRoomId);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        mSocket.emit("joined", joinLeft);
     }
 
     @Override
@@ -322,7 +326,7 @@ public class ChatFragment extends Fragment {
 
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        Log.d(TAG, "onResponse: " + jsonObject.keys());
+                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
                         messages = jsonObject.getJSONArray("messages");
                         for (int i = 0; i < messages.length(); i++) {
                             message = (JSONObject) messages.get(i);
@@ -335,35 +339,34 @@ public class ChatFragment extends Fragment {
                                     message.getString("id"),
                                     message.getString("text"));
 //                            Log.d(TAG, "onResponse: " + message.toString(4));
-//                            if (mLastRead == -1) {
-//                                if (checkRead(mUserId, message)) {
-//                                    mLastRead = i;
-//                                }
-//                            }
+                            if (mLastRead == -1) {
+                                if (checkRead(mUserId, message)) {
+                                    mLastRead = i;
+                                    mLastReadId = message.getString("id");
+                                }
+                            }
 
-                            // change logic to chataddedlist != 0
-//                            if (mChatHeadList.size() != mChatHeadAddedList.size()) {
-//                                if (checkChatHead(message)) {
-//                                    if (mLastRead != -1 && mRoomUsersCnt - 1 == message.getJSONArray("isRead").length()) {
+                            if (checkChatHead(message)) {
+                                if (mLastRead != -1 && mRoomUsersCnt - 1 == message.getJSONArray("read").length()) {
 //                                        // do nothing
-//                                    } else {
-//                                        boolean found = false;
-//                                        for (int j = 0; j < mChatHeadList.size(); j++) {
-//                                            for (int k = 0; k < message.getJSONArray("isRead").length(); k++) {
-//                                                if (mChatHeadList.get(j).getUsername().equals(
-//                                                        ((JSONObject) message.getJSONArray("isRead").get(k)).getString("fullName"))) {
-//                                                    found = true;
-//                                                }
-//                                            }
-//                                            if (!found) {
-//                                                // add chathead to queue; if chathead in chataddedlist skip
-//                                            }
-//                                            found = false;
-//                                        }
+                                } else {
+                                    boolean found = false;
+                                    for (int j = 0; j < mChatHeadList.size(); j++) {
+                                        for (int k = 0; k < message.getJSONArray("read").length(); k++) {
+                                            if (mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadList.get(j).getUserId().equals(((JSONObject) message.getJSONArray("read").get(k)).getString("id"))) {
+                                                found = true;
+                                            }
+                                        }
+                                        if (!found) {
+                                            if (!mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadPos.containsKey(mChatHeadList.get(j).getUserId())) {
+                                                mChatHeadPos.put(mChatHeadList.get(j).getUserId(), j);
+                                            }
+                                        }
+                                        found = false;
+                                    }
 //                                        // add queue to layout; add chatheads to addedchatheadlist
-//                                    }
-//                                }
-//                            }
+                                }
+                            }
 ////                            chat.setIsRead(message.getJSONObject(""));
                             chat.setType(Chat.TYPE_MESSAGE);
                             mChatList.add(chat);

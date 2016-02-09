@@ -18,6 +18,8 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -26,11 +28,12 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
     private Context aContext;
     private List<Chat> aChatList;
+    private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
     private SharedPreferences aSharedPreferences;
 
-    public ChatAdapter(Context aContext, List<Chat> chatList) {
+    public ChatAdapter(Context aContext, List<Chat> aChatList) {
         this.aContext = aContext;
-        aChatList = chatList;
+        this.aChatList = aChatList;
         aSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
@@ -83,7 +86,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         protected TextView vUsernameView;
         protected TextView vMessageView;
 
-        protected CircularImageView vChatHeadImageView;
+        protected LinearLayout vChatHeadLinear;
+
+        private ArrayList<ChatHead> tempList;
 
         public ChatViewHolder(View itemView) {
             super(itemView);
@@ -102,14 +107,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             vUsernameView = (TextView) itemView.findViewById(R.id.username);
             vMessageView = (TextView) itemView.findViewById(R.id.action);
 
-
+            vChatHeadLinear = (LinearLayout) itemView.findViewById(R.id.chat_head_container);
         }
 
         void bindModel(Chat chat) {
             if (null != vUsernameView && null != vMessageView) {
                 vUsernameView.setText(chat.getUserName());
-            } else if (null != vChatHeadImageView) {
-
+            } else if (null != vChatHeadLinear) {
+                tempList = aChatHeadsMap.get(getAdapterPosition());
+                for (int i = 0; i < tempList.size(); i++) {
+                }
             } else {
                 if (aChatList.get(getAdapterPosition()).getOwnerId().equals(aSharedPreferences.getString("userID", null))) {
                     vOwnerLinear.setVisibility(View.VISIBLE);

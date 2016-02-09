@@ -112,7 +112,8 @@ public class MyGcmListenerService extends GcmListenerService {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     chatHeadList.add(new ChatHead(
                             ((JSONObject) jsonArray.get(i)).getString("fullName"),
-                            ((JSONObject) jsonArray.get(i)).getString("profileImage")));
+                            ((JSONObject) jsonArray.get(i)).getString("profileImage"),
+                            ((JSONObject) jsonArray.get(i)).getString("id")));
                 }
                 intent.putParcelableArrayListExtra("chatHeads", chatHeadList);
             } catch (JSONException e) {

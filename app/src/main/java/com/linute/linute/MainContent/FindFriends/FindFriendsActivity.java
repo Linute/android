@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -8,21 +10,37 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 /**
  * Created by QiFeng on 1/25/16.
  */
 public class FindFriendsActivity extends BaseTaptActivity {
 
+    private static final String TAG = FindFriendsActivity.class.getSimpleName();
     private ActionBar mActionBar;
     private CoordinatorLayout parentView;
     private AppBarLayout mAppBarLayout;
     private int mAppBarElevation;
     private Toolbar mToolbar;
+    private Socket mSocket;
+    private SharedPreferences mSharedPreferences;
+    private boolean mConnecting;
 
 
     @Override
@@ -147,4 +165,73 @@ public class FindFriendsActivity extends BaseTaptActivity {
 
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+            mConnecting = true;
+            {
+                try {
+                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on("authorization", authorization);
+            mSocket.connect();
+            mConnecting = false;
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mSocket.emit("authorization", jsonObject);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSocket.disconnect();
+
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.off("authorization", authorization);
+    }
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(),
+                            R.string.error_connect, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener authorization = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Log.d(TAG, "runAuthorization: " + ((JSONObject) args[0]).toString(4));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    };
 }

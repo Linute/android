@@ -124,7 +124,8 @@ public class RoomsActivityFragment extends Fragment {
                             for (int j = 0; j < room.getJSONArray("users").length(); j++) {
                                 chatHeads.add(new ChatHead(
                                         ((JSONObject) room.getJSONArray("users").get(j)).getString("fullName"),
-                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage")));
+                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage"),
+                                        ((JSONObject) room.getJSONArray("users").get(i)).getString("id")));
                             }
                             mRoomsList.add(new Rooms(
                                     room.getString("owner"),
