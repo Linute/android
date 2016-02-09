@@ -12,15 +12,13 @@
     <!-- Request permission to use a device camera -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
@@ -151,11 +149,11 @@
             android:label="Chat Service">
         </service>
 
-        <receiver android:name=".UtilsAndHelpers.BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-            </intent-filter>
-        </receiver>
+        <!--<receiver android:name=".UtilsAndHelpers.BootReceiver">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <activity
             android:name=".MainContent.FindFriends.FindFriendsActivity"
@@ -170,6 +168,9 @@
                   android:theme="@style/AppTheme"/>
 
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="90e83e6f6353d1c449a0b3e3e30dff28fe01a3ae" />
     </application>
 
 </manifest>

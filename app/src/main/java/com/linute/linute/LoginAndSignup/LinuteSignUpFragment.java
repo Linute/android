@@ -28,6 +28,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -83,19 +84,12 @@ public class LinuteSignUpFragment extends Fragment {
 
     private ProgressBar mProgressBar1;
     private ProgressBar mProgressBar2;
-    private ProgressBar mProgressBar3;
 
     private EditText mFirstNameTextView;
     private EditText mLastNameTextView;
 
-    //layer 1
-    private Button mNextButton;
-
-    //layer 2
-    private View mLayerTwoButtons;
-
-    //layer 3
-    private Button mEmailSignUpButton;
+    private View mSubmitLayer;
+    private View mVerifyLayer;
 
     private Bitmap mProfilePictureBitmap;
 
@@ -122,6 +116,20 @@ public class LinuteSignUpFragment extends Fragment {
 
         setUpOnClickListeners();
 
+        rootView.findViewById(R.id.signUp_back_button).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mViewFlipper.getDisplayedChild() == 1) {
+                    setToGoBackAnimation(true);
+                    mViewFlipper.showPrevious();
+                    mCurrentViewFlipperIndex--;
+                    setToGoBackAnimation(false);  //change animations
+                } else {
+                    getFragmentManager().popBackStack();
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -146,6 +154,10 @@ public class LinuteSignUpFragment extends Fragment {
                 mEmailView.setText(mEmailString);
                 mEmailConfirmTextView.setText(mEmailString);
             }
+        }
+
+        if (mProfilePictureBitmap != null){
+            mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
         }
     }
 
@@ -173,37 +185,22 @@ public class LinuteSignUpFragment extends Fragment {
 
         mProgressBar1 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar1);
         mProgressBar2 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar2);
-        mProgressBar3 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar3);
 
-        mEmailSignUpButton = (Button) root.findViewById(R.id.signup_submit_button);
-        mNextButton = (Button) root.findViewById(R.id.signUp_verify_email_button);
-        mLayerTwoButtons = root.findViewById(R.id.signUp_code_verify_buttons);
+//        mEmailSignUpButton = root.findViewById(R.id.signup_get_verify_code_button);
+//        mGetPinCodeButton = root.findViewById(R.id.signUp_submit_butt);
 
         mPinCodeView = (EditText) root.findViewById(R.id.signUp_verify_code);
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
 
+        mSubmitLayer = root.findViewById(R.id.signUp_submit_layer);
+        mVerifyLayer = root.findViewById(R.id.signup_verify_layer);
+
         mEmailConfirmTextView = (TextView) root.findViewById(R.id.signUp_email_confirm_text_view);
-
-
-        root.findViewById(R.id.signup_enter_new_email).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                enterNewEmail();
-            }
-        });
-
-
-        root.findViewById(R.id.signUp_verify_code_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                verifyCode();
-            }
-        });
     }
 
     private void setUpOnClickListeners() {
 
-        mNextButton.setOnClickListener(new OnClickListener() {
+        mVerifyLayer.findViewById(R.id.signup_get_verify_code_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkDeviceRegistered();
@@ -211,10 +208,10 @@ public class LinuteSignUpFragment extends Fragment {
         });
 
         //attempt to sign up when button pressed
-        mEmailSignUpButton.setOnClickListener(new OnClickListener() {
+        mSubmitLayer.findViewById(R.id.signUp_submit_butt).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                signUp();
+                verifyCode();
             }
         });
 
@@ -274,7 +271,11 @@ public class LinuteSignUpFragment extends Fragment {
 
         final String email = mEmailView.getText().toString().trim().toLowerCase();
 
-        if (checkEmail(email)) {
+        final String password = mPasswordView.getText().toString();
+        final String fName = mFirstNameTextView.getText().toString();
+        final String lName = mLastNameTextView.getText().toString();
+
+        if (checkEmail(email) && areGoodCredentials(password, fName, lName)) {
 
             mEmailString = email;
             mEmailConfirmTextView.setText(mEmailString);
@@ -380,35 +381,32 @@ public class LinuteSignUpFragment extends Fragment {
     private boolean areGoodCredentials(String password, String fName, String lName) {
         boolean isGood = true;
 
-        View mFocusView = null;
-
         // Reset errors.
         mPasswordView.setError(null);
         mFirstNameTextView.setError(null);
         mLastNameTextView.setError(null);
+        View need = null;
 
         // Check for a valid password, if the user entered one.
         if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
-            mFocusView = mPasswordView;
+            need = mPasswordView;
             isGood = false;
         }
 
         if (TextUtils.isEmpty(lName)) {
             mLastNameTextView.setError(getString(R.string.error_field_required));
-            mFocusView = mLastNameTextView;
+            need = mLastNameTextView;
             isGood = false;
         }
 
         if (TextUtils.isEmpty(fName)) {
             mFirstNameTextView.setError(getString(R.string.error_field_required));
-            mFocusView = mFirstNameTextView;
+            need = mFirstNameTextView;
             isGood = false;
         }
 
-        if (!isGood)
-            mFocusView.requestFocus();
-
+        if(need != null) need.requestFocus();
         return isGood;
     }
 
@@ -427,15 +425,11 @@ public class LinuteSignUpFragment extends Fragment {
         switch (currentViewIndex) {
             case 0:
                 progressBar = mProgressBar1;
-                button = mNextButton;
+                button = mVerifyLayer;
                 break;
             case 1:
                 progressBar = mProgressBar2;
-                button = mLayerTwoButtons;
-                break;
-            case 2:
-                progressBar = mProgressBar3;
-                button = mEmailSignUpButton;
+                button = mSubmitLayer;
                 break;
             default:
                 return;
@@ -462,10 +456,24 @@ public class LinuteSignUpFragment extends Fragment {
         mCredentialCheckInProgress = show;
     }
 
+
+
+    public void verifyCode() {
+        if (mCredentialCheckInProgress) return;
+        showProgress(true, 1);
+
+        if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
+            signUp();
+        } else {
+            mPinCodeView.setError("Invalid code");
+            showProgress(false, 1);
+        }
+    }
+
+
     private void signUp() {
 
         //if alreadying querying, return
-        if (mCredentialCheckInProgress) return; //users can't press Sign Up button during the check
 
         final String email = mEmailString;
         final String password = mPasswordView.getText().toString();
@@ -475,7 +483,6 @@ public class LinuteSignUpFragment extends Fragment {
         boolean areGoodCredentials = areGoodCredentials(password, fName, lName);
 
         if (areGoodCredentials) {
-            showProgress(true, 2);
             Map<String, Object> userInfo = new HashMap<>();
             String encodedProfilePicture;
 
@@ -496,7 +503,7 @@ public class LinuteSignUpFragment extends Fragment {
             new LSDKUser(getActivity()).createUser(userInfo, new Callback() {
                 @Override
                 public void onFailure(Request request, IOException e) { // no response
-                    failedConnectionWithCurrentView(2);
+                    failedConnectionWithCurrentView(1);
                 }
 
                 @Override
@@ -518,15 +525,19 @@ public class LinuteSignUpFragment extends Fragment {
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Log.e(TAG, "Counldn't save info");
-                            serverErrorCurrentView(2);
+                            serverErrorCurrentView(1);
                         }
 
                     } else { //couldn't get response
                         Log.e(TAG, "onResponse: " + response.body().string());
-                        serverErrorCurrentView(2);
+                        serverErrorCurrentView(1);
                     }
                 }
             });
+        }else {
+            showProgress(false, 1);
+            mViewFlipper.showPrevious();
+            mCurrentViewFlipperIndex--;
         }
     }
 
@@ -560,15 +571,8 @@ public class LinuteSignUpFragment extends Fragment {
 
     }
 
-//// TODO: 2/6/16 add
-//    private void goToNextActivity() {
-//        Intent i = new Intent(this, CollegePickerActivity.class); //need to pick college
-//        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
-//        startActivity(i); //start new activity
-//        finish();
-//    }
-
     private void serverErrorCurrentView(final int index) {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -581,6 +585,7 @@ public class LinuteSignUpFragment extends Fragment {
     }
 
     private void failedConnectionWithCurrentView(final int index) {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -592,12 +597,12 @@ public class LinuteSignUpFragment extends Fragment {
 
 
     private void notUniqueEmail() {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mEmailView.setError(getString(R.string.signup_error_email_taken));
                 showProgress(false, 0);
-                mEmailView.requestFocus();
             }
         });
     }
@@ -783,33 +788,6 @@ public class LinuteSignUpFragment extends Fragment {
 
     }
 
-
-    public void enterNewEmail() {
-        if (mCredentialCheckInProgress) return;
-        setToGoBackAnimation(true); //change animations
-        mPinCodeView.setText("");
-        mViewFlipper.showPrevious();
-        mCurrentViewFlipperIndex--;
-        mEmailString = null;
-        mPinCode = null;
-        setToGoBackAnimation(false);  //change animations
-    }
-
-    public void verifyCode() {
-        if (mCredentialCheckInProgress) return;
-
-        showProgress(true, 1);
-
-        if (mPinCode != null && mPinCodeView.getText().toString().equals(mPinCode)) {
-            mViewFlipper.showNext();
-            mCurrentViewFlipperIndex++;
-        } else {
-            mPinCodeView.setError("Invalid code");
-            mPinCodeView.requestFocus();
-        }
-        showProgress(false, 1);
-    }
-
     private void setToGoBackAnimation(boolean goBack) {
 
         if (getActivity() == null) return;
@@ -817,7 +795,6 @@ public class LinuteSignUpFragment extends Fragment {
         mViewFlipper.setOutAnimation(getActivity(), goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
 
     }
-
 
     //used to registere device if somehow device wasn't registered
     private void sendRegistrationDevice(String token) {
@@ -864,7 +841,24 @@ public class LinuteSignUpFragment extends Fragment {
                 }
             }
         });
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mFirstNameTextView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);
+        }else if (mLastNameTextView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mLastNameTextView.getWindowToken(), 0);
+        }else if (mEmailView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+        }else if (mPasswordView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+        }
     }
 }
 

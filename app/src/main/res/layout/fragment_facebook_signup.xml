@@ -4,7 +4,8 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                tools:background="@color/grey_color">
 
     <ViewSwitcher android:id="@+id/fbSignUp_view_switcher"
                   android:layout_width="match_parent"
@@ -13,20 +14,36 @@
         <LinearLayout android:id="@+id/fbSignUp_info_form"
                       android:layout_width="match_parent"
                       android:layout_height="match_parent"
-                      android:layout_margin="32dp"
-                      android:gravity="center"
+                      android:layout_marginEnd="32dp"
+                      android:layout_marginStart="32dp"
+                      android:layout_marginTop="130dp"
+                      android:gravity="center_horizontal"
                       android:orientation="vertical">
 
-            <com.mikhaellopez.circularimageview.CircularImageView
-                android:id="@+id/fbSignUp_profile_pic_view"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_marginBottom="15dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/no_image_placeholder"
-                app:border_color="@color/seperator_color"
-                app:border_width="1dp"/>
 
+            <RelativeLayout android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:layout_marginTop="16dp">
+
+                <ImageView android:layout_width="132dp"
+                           android:layout_height="132dp"
+                           android:layout_centerInParent="true"
+                           android:src="@drawable/photo_rad"
+                    />
+
+                <com.mikhaellopez.circularimageview.CircularImageView
+                    android:id="@+id/fbSignUp_profile_pic_view"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
+                    android:layout_centerInParent="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/image_loading_background"
+                    android:alpha="0.5"
+                    app:border_color="@color/seperator_color"
+                    app:border_width="1dp"/>
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,7 +58,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
-                    android:theme="@style/MyEditTextTheme"
                     android:hint="@string/first_name_hint"
                     android:inputType="textCapWords"
                     android:maxLength="16"
@@ -49,7 +65,8 @@
                     android:singleLine="true"
                     android:textColor="@color/fifty_white"
                     android:textColorHint="@color/thirtyfive_white"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:theme="@style/MyEditTextTheme"/>
 
 
                 <EditText
@@ -60,13 +77,13 @@
                     android:layout_weight="1"
                     android:hint="@string/last_name_hint"
                     android:inputType="textCapWords"
-                    android:theme="@style/MyEditTextTheme"
                     android:maxLength="16"
                     android:maxLines="1"
                     android:singleLine="true"
                     android:textColor="@color/fifty_white"
                     android:textColorHint="@color/thirtyfive_white"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:theme="@style/MyEditTextTheme"/>
 
 
             </LinearLayout>
@@ -77,24 +94,36 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:theme="@style/MyEditTextTheme"
                 android:hint="Edu Email"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
                 android:textColor="@color/fifty_white"
                 android:textColorHint="@color/thirtyfive_white"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                android:theme="@style/MyEditTextTheme"/>
 
-            <Button
-                android:id="@+id/fbSignUp_Next_button"
-                style="?android:textAppearanceSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:paddingLeft="30dp"
-                android:paddingRight="30dp"
-                android:text="Next"/>
+
+            <LinearLayout android:id="@+id/fb_signup_button_layer"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
+
+                <View android:layout_width="0px"
+                      android:layout_height="0px"
+                      android:layout_weight="2"/>
+
+                <ImageView android:id="@+id/fbSignUp_next_button"
+                           android:layout_width="0px"
+                           android:layout_height="wrap_content"
+                           android:layout_weight="3"
+                           android:src="@drawable/create_sign_up_button"/>
+
+                <View android:layout_width="0px"
+                      android:layout_height="0px"
+                      android:layout_weight="2"/>
+            </LinearLayout>
+
 
             <ProgressBar
                 android:id="@+id/fbSignUp_progress_bar1"
@@ -149,7 +178,6 @@
                 android:layout_marginLeft="64dp"
                 android:layout_marginRight="64dp"
                 android:layout_marginTop="16dp"
-                android:theme="@style/MyEditTextTheme"
                 android:hint="Verification Code"
                 android:inputType="number"
                 android:maxLength="16"
@@ -157,31 +185,27 @@
                 android:singleLine="true"
                 android:textColor="@color/fifty_white"
                 android:textColorHint="@color/thirtyfive_white"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+                android:theme="@style/MyEditTextTheme"/>
 
             <LinearLayout android:id="@+id/fbSignUp_code_verify_buttons"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
-                          android:layout_gravity="center_horizontal"
-                          android:layout_marginLeft="64dp"
-                          android:layout_marginRight="64dp"
-                          android:layout_marginTop="@dimen/activity_vertical_margin"
-                          android:orientation="horizontal"
-                          android:weightSum="2">
+                          android:orientation="horizontal">
 
-                <Button android:id="@+id/fbSignUp_new_email"
-                        android:layout_width="0px"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="new email"
-                    />
+                <View android:layout_width="0px"
+                      android:layout_height="0px"
+                      android:layout_weight="2"/>
 
-                <Button android:id="@+id/fbSignUp_update_info_button"
-                        android:layout_width="0px"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Next"
+                <ImageView android:id="@+id/fbSignUp_update_info_button"
+                           android:layout_width="0px"
+                           android:layout_height="wrap_content"
+                           android:layout_weight="3"
+                           android:src="@drawable/verify_button"
                     />
+                <View android:layout_width="0px"
+                      android:layout_height="0px"
+                      android:layout_weight="2"/>
 
             </LinearLayout>
 
@@ -195,8 +219,14 @@
 
         </LinearLayout>
 
-
     </ViewSwitcher>
+
+    <ImageView android:id="@+id/fbSignUp_back_button"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:alpha="0.35"
+               android:padding="@dimen/activity_horizontal_margin"
+               android:src="@drawable/ic_action_navigation_arrow_back_inverted"/>
 
 
 </RelativeLayout>

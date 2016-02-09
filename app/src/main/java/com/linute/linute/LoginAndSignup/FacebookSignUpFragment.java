@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -53,8 +54,7 @@ public class FacebookSignUpFragment extends Fragment {
 
     private SharedPreferences mSharedPreferences;
 
-    private Button mUpdateInfoButton; //Layer 2
-    private Button mNextButton; //Layer 1
+    private View mLayer1Buttons;
     private View mLayer2Buttons; //layer 2
 
     private TextView mEmailConfirmText;
@@ -99,6 +99,19 @@ public class FacebookSignUpFragment extends Fragment {
                 mImageIsFBLink = false;
             }
         }
+
+        rootView.findViewById(R.id.fbSignUp_back_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mViewSwitcher.getDisplayedChild() != 0){
+                    goBackAnimation(true);
+                    mViewSwitcher.showPrevious();
+                    goBackAnimation(false);
+                }else {
+                    getFragmentManager().popBackStack();
+                }
+            }
+        });
 
         loadProfileImage();
         setOnClickListener();
@@ -146,8 +159,10 @@ public class FacebookSignUpFragment extends Fragment {
     }
 
     private void bindViews(View root) {
-        mUpdateInfoButton = (Button) root.findViewById(R.id.fbSignUp_update_info_button);
-        mNextButton = (Button) root.findViewById(R.id.fbSignUp_Next_button);
+
+        mLayer1Buttons = root.findViewById(R.id.fb_signup_button_layer);
+        mLayer2Buttons = root.findViewById(R.id.fbSignUp_code_verify_buttons);
+
         mEmailConfirmText = (TextView) root.findViewById(R.id.fbSignUp_email_confirm_text_view);
 
         mFirstNameEditText = (EditText) root.findViewById(R.id.fbSignUp_fname_text);
@@ -162,24 +177,17 @@ public class FacebookSignUpFragment extends Fragment {
         mProgressBar2 = (ProgressBar) root.findViewById(R.id.fbSignUp_progress_bar2);
 
         mLayer2Buttons = root.findViewById(R.id.fbSignUp_code_verify_buttons);
-
-        root.findViewById(R.id.fbSignUp_new_email).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                enterNewEmail();
-            }
-        });
     }
 
     private void setOnClickListener() {
-        mUpdateInfoButton.setOnClickListener(new View.OnClickListener() {
+        mLayer2Buttons.findViewById(R.id.fbSignUp_update_info_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateInformation();
             }
         });
 
-        mNextButton.setOnClickListener(new View.OnClickListener() {
+        mLayer1Buttons.findViewById(R.id.fbSignUp_next_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkEmailAndGetPinCode();
@@ -431,14 +439,6 @@ public class FacebookSignUpFragment extends Fragment {
                 .into(mProfileImage);
     }
 
-    public void enterNewEmail() {
-        goBackAnimation(true);
-        mVerificationCodeEditText.setText("");
-        mPinCode = null;
-        mViewSwitcher.showPrevious();
-        goBackAnimation(false);
-    }
-
     private void goBackAnimation(boolean goBack) {
         if (getActivity() == null) return;
         mViewSwitcher.setInAnimation(getActivity(), goBack ? R.anim.slide_in_left : R.anim.slide_in_right);
@@ -453,7 +453,7 @@ public class FacebookSignUpFragment extends Fragment {
 
         if (viewIndex == 0) {
             progressBar = mProgressBar1;
-            buttons = mNextButton;
+            buttons = mLayer1Buttons;
         } else {
             progressBar = mProgressBar2;
             buttons = mLayer2Buttons;
@@ -537,6 +537,22 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.apply();
 
         Utils.deleteTempSharedPreference(mSharedPreferences.edit());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mFirstNameEditText.isFocused()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mFirstNameEditText.getWindowToken(), 0);
+        }else if (mLastNameEditText.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mLastNameEditText.getWindowToken(), 0);
+        }else if (mEmailEditText.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mEmailEditText.getWindowToken(), 0);
+        }
 
     }
 }

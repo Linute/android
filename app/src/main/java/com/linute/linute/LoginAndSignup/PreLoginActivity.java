@@ -16,6 +16,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.util.Log;
 
+import android.view.View;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -78,9 +79,6 @@ public class PreLoginActivity extends AppCompatActivity {
         if (AccessToken.getCurrentAccessToken() != null) {
             LoginManager.getInstance().logOut();
         }
-//
-//        bindViews();
-//        setUpOnClickListeners();
 
         setUpFacebookCallback();
 
@@ -90,38 +88,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-//    private void bindViews() {
-//        //switches background images
-//        mLinuteLoginButton = (Button) findViewById(R.id.prelogin_linute_login);
-//        mFacebookloginButton = (Button) findViewById(R.id.preLogin_facebook_login);
-//        mSignupText = (TextView) findViewById(R.id.linute_signup);
-//    }
 
-    private void setUpOnClickListeners() {
-
-//        mFacebookloginButton.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Arrays.asList("user_friends", "public_profile", "email"));
-//            }
-//        });
-
-//        mLinuteLoginButton.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteLoginFragment.class);
-//                startActivity(goToLinuteLogin);
-//            }
-//        });
-
-//        mSignupText.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent goToLinuteLogin = new Intent(getApplicationContext(), LinuteSignUpFragment.class);
-//                startActivity(goToLinuteLogin);
-//            }
-//        });
-    }
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -447,5 +414,7 @@ public class PreLoginActivity extends AppCompatActivity {
         startActivity(i); //start new activity
         finish();
     }
+
+
 }
 
