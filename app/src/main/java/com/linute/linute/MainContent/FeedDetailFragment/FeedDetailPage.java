@@ -165,7 +165,7 @@ public class FeedDetailPage extends UpdatableFragment {
                         public void run() {
                             recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                         }
-                    }, 150);
+                    }, 500);
                 return false;
             }
         });
@@ -287,12 +287,6 @@ public class FeedDetailPage extends UpdatableFragment {
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
             displayCommentsAndPost();
-
-            if (mOpenKeyBoard) {
-                mCommentEditText.requestFocus();
-                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            }
             setFragmentNeedUpdating(false);
         }
     }
@@ -425,7 +419,7 @@ public class FeedDetailPage extends UpdatableFragment {
                     jsonObject = new JSONObject(response.body().string());
                     comments = jsonObject.getJSONArray("comments");
                     for (int i = 0; i < comments.length(); i++) {
-                        Log.d(TAG, "onResponse: " + comments.get(i).toString());
+                        Log.d(TAG, "comment: " + comments.get(i).toString());
                         mFeedDetail.getComments()
                                 .add(new Comment(
                                         ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
@@ -459,13 +453,17 @@ public class FeedDetailPage extends UpdatableFragment {
                     public void run() {
                         mFeedDetailAdapter.notifyDataSetChanged();
                         if (mOpenKeyBoard) { //if open keyboard
+                            mCommentEditText.requestFocus();
+                            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
                             recList.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
                                     recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                                 }
-                            }, 300);
-                        }else {
+                            }, 500);
+                        } else {
                             mOpenKeyBoard = true; //don't open first time, but open other times
                         }
                     }
