@@ -21,6 +21,10 @@ public class Post implements Parcelable {
 
     private boolean mPostLiked;
 
+    public Post(){
+
+    }
+
     public Post(String userId, String userName, String userImage, String title,
                 String image, int privacy, int numLike, boolean userLiked,
                 String postTime, String postId, int numComments) {

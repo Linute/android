@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,7 +49,7 @@ public class DiscoverFragment extends UpdatableFragment {
     private RecyclerView recList;
     private LinearLayoutManager llm;
 
-    private TextView mEmptyText;
+    private ImageView mEmptyView;
 
     private SwipeRefreshLayout refreshLayout;
 
@@ -69,7 +70,7 @@ public class DiscoverFragment extends UpdatableFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null){
+        if (getArguments() != null) {
             mFriendsOnly = getArguments().getBoolean("friendsOnly");
         }
     }
@@ -85,7 +86,7 @@ public class DiscoverFragment extends UpdatableFragment {
                 container, false); //setContent
 
 
-        mEmptyText = (TextView) rootView.findViewById(R.id.discoverFragment_no_found);
+        mEmptyView = (ImageView) rootView.findViewById(R.id.discover_no_posts);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
@@ -104,7 +105,7 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        Log.i(TAG, "onCreateView: "+mPosts.size());
+        Log.i(TAG, "onCreateView: " + mPosts.size());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
 
         //if floating button expanded, collapse it
@@ -142,6 +143,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
 
     public static final String POST_PARCEL_KEY = "post_parcel_items";
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
@@ -153,7 +155,7 @@ public class DiscoverFragment extends UpdatableFragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
             feedDone = savedInstanceState.getBoolean("feedDone");
             mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
@@ -187,9 +189,7 @@ public class DiscoverFragment extends UpdatableFragment {
                 && fragment.getCampusFeedNeedsUpdating()) {
             getFeed(0);
             fragment.setCampusFeedNeedsUpdating(false);
-        }
-
-        else if (!fragment.getInitiallyPresentedFragmentWasCampus()
+        } else if (!fragment.getInitiallyPresentedFragmentWasCampus()
                 && mFriendsOnly
                 && fragment.getFriendsFeedNeedsUpdating()) {
             getFeed(0);
@@ -217,7 +217,7 @@ public class DiscoverFragment extends UpdatableFragment {
         final int skip = mSkip;
         if (getActivity() == null) return;
 
-        if (!refreshLayout.isRefreshing()){
+        if (!refreshLayout.isRefreshing()) {
             refreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -234,88 +234,95 @@ public class DiscoverFragment extends UpdatableFragment {
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(mFriendsOnly, events, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                noInternet();
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d("HEY", response.body().string());
-                    cancelRefresh();
-                    return;
-                }
-
-                if (skip == 0) {
-                    mPosts.clear();
-                }
-                String json = response.body().string();
-                Log.i(TAG, "onResponse: "+json);
-                JSONObject jsonObject = null;
-                JSONArray jsonArray = null;
-                try {
-                    jsonObject = new JSONObject(json);
-                    jsonArray = jsonObject.getJSONArray("events");
-
-                    if (!feedDone) {
-                        if (jsonArray.length() != 25)
-                            feedDone = true;
-                    }
-                    Post post = null;
-                    String postImage = "";
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                    Date myDate;
-                    String postString;
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        jsonObject = (JSONObject) jsonArray.get(i);
-                        if (jsonObject.getJSONArray("images").length() > 0)
-                            postImage = (String) jsonObject.getJSONArray("images").get(0);
-
-                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-
-                        postString = Utils.getTimeAgoString(myDate.getTime());
-
-//                        Log.d("-TAG-", myDate + " " + postString);
-                        post = new Post(
-                                jsonObject.getJSONObject("owner").getString("id"),
-                                jsonObject.getJSONObject("owner").getString("fullName"),
-                                jsonObject.getJSONObject("owner").getString("profileImage"),
-                                jsonObject.getString("title"),
-                                postImage,
-                                jsonObject.getInt("privacy"),
-                                jsonObject.getInt("numberOfLikes"),
-                                jsonObject.getBoolean("isLiked"),
-                                postString,
-                                jsonObject.getString("id"),
-                                jsonObject.getInt("numberOfComments"));
-                        mPosts.add(post);
-                        postImage = "";
-                    }
-                } catch (JSONException | ParseException e) {
-                    e.printStackTrace();
-                }
-
-                if (getActivity() == null)
-                    return;
-
-                getActivity().runOnUiThread(new Runnable() {
                     @Override
-                    public void run() {
-                        cancelRefresh();
+                    public void onFailure(Request request, IOException e) {
+                        noInternet();
+                    }
 
-                        if (mPosts.isEmpty()) {
-                            mEmptyText.setText(mFriendsOnly ? getActivity().getString(R.string.no_friends_posts) : getActivity().getString(R.string.no_campus_post));
-                            mEmptyText.setVisibility(View.VISIBLE);
-                        }else if (mEmptyText.getVisibility() == View.VISIBLE){
-                            mEmptyText.setVisibility(View.GONE);
+                    @Override
+                    public void onResponse(Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            Log.d("HEY", response.body().string());
+                            cancelRefresh();
+                            return;
                         }
 
-                        mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                        if (skip == 0) {
+                            mPosts.clear();
+                        }
+                        String json = response.body().string();
+                        Log.i(TAG, "onResponse: " + json);
+                        JSONObject jsonObject = null;
+                        JSONArray jsonArray = null;
+                        try {
+                            jsonObject = new JSONObject(json);
+                            jsonArray = jsonObject.getJSONArray("events");
+
+                            if (!feedDone) {
+                                if (jsonArray.length() != 25)
+                                    feedDone = true;
+                            }
+                            Post post = null;
+                            String postImage = "";
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            Date myDate;
+                            String postString;
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                jsonObject = (JSONObject) jsonArray.get(i);
+                                if (jsonObject.getJSONArray("images").length() > 0)
+                                    postImage = (String) jsonObject.getJSONArray("images").get(0);
+
+                                myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+
+                                postString = Utils.getTimeAgoString(myDate.getTime());
+
+//                        Log.d("-TAG-", myDate + " " + postString);
+                                post = new Post(
+                                        jsonObject.getJSONObject("owner").getString("id"),
+                                        jsonObject.getJSONObject("owner").getString("fullName"),
+                                        jsonObject.getJSONObject("owner").getString("profileImage"),
+                                        jsonObject.getString("title"),
+                                        postImage,
+                                        jsonObject.getInt("privacy"),
+                                        jsonObject.getInt("numberOfLikes"),
+                                        jsonObject.getBoolean("isLiked"),
+                                        postString,
+                                        jsonObject.getString("id"),
+                                        jsonObject.getInt("numberOfComments"));
+                                mPosts.add(post);
+                                postImage = "";
+                            }
+
+                        } catch (JSONException | ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        if (getActivity() == null)
+                            return;
+
+                        getActivity().runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        cancelRefresh();
+
+                                        if (mPosts.isEmpty()) {
+                                            if (mEmptyView.getVisibility() == View.GONE) {
+                                                mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                mEmptyView.setVisibility(View.VISIBLE);
+                                            }
+                                        } else if (mEmptyView.getVisibility() == View.VISIBLE) {
+                                            mEmptyView.setVisibility(View.GONE);
+                                        }
+                                        mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                    }
+                                }
+
+                        );
                     }
-                });
-            }
-        });
+                }
+
+        );
     }
 
     private void noInternet() {

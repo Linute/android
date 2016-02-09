@@ -79,6 +79,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     @Override
     public int getItemViewType(int position) {
+
         return  mPosts.get(position).isImagePost() ? IMAGE_POST : STATUS_POST;
     }
 

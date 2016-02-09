@@ -203,10 +203,14 @@ public class UpdatesFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (mOldUpdates.isEmpty() && mRecentUpdates.isEmpty())
-                                    if (mEmptyView.getVisibility() == View.GONE) mEmptyView.setVisibility(View.VISIBLE);
-                                else
-                                    if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+                                if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0 ) {
+                                    if (mEmptyView.getVisibility() == View.GONE)
+                                        mEmptyView.setVisibility(View.VISIBLE);
+                                }
+                                else {
+                                    if (mEmptyView.getVisibility() == View.VISIBLE)
+                                        mEmptyView.setVisibility(View.GONE);
+                                }
 
                                 mUpdatesAdapter.notifyDataSetChanged();
                                 mSwipeRefreshLayout.setRefreshing(false);
