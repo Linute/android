@@ -133,8 +133,8 @@ public class RoomsActivityFragment extends Fragment {
                                         ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage"),
                                         ((JSONObject) room.getJSONArray("users").get(j)).getString("id")));
                             }
-                            Log.d(TAG, "onResponse: " + room.toString(4));
-                            if (((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", ""))) {
+                            //Log.d(TAG, "onResponse: " + room.toString(4)); //TODO: CAN't figure this out
+                            if (room.getJSONArray("messages").getJSONObject(0).getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", ""))) {
                                 lastMessage = "You: " + ((JSONObject) room.getJSONArray("messages").get(0)).getString("text");
                             } else {
                                 lastMessage = ((JSONObject) room.getJSONArray("messages").get(0)).getString("text");

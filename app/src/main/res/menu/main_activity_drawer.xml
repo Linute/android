@@ -9,6 +9,7 @@
             android:icon="@drawable/ic_action_college"
             android:title="Feed"
             android:checkable="true"
+            android:checked="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"
             />
         <item

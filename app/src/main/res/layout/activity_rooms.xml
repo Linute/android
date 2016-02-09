@@ -19,9 +19,12 @@
             android:layout_height="wrap_content"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-            <include
-                android:id="@+id/rooms_toolbar"
-                layout="@layout/tool_bar"/>
+            <android.support.v7.widget.Toolbar android:id="@+id/rooms_toolbar"
+                                               android:layout_width="match_parent"
+                                               android:layout_height="wrap_content"
+                                               android:background="@color/colorPrimary"
+                                               android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
 
         </android.support.design.widget.AppBarLayout>
 
