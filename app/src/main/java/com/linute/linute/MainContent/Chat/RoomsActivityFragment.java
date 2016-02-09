@@ -33,13 +33,15 @@ import java.util.List;
  */
 public class RoomsActivityFragment extends Fragment {
 
+    //make sure this always gets called: getRoom
+
     private static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
     private RecyclerView recList;
     private LinearLayoutManager llm;
     private RoomsAdapter mRoomsAdapter;
 
-    private List<Rooms> mRoomsList = new ArrayList<>();
+    private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
     private SharedPreferences mSharedPreferences;
 
     public RoomsActivityFragment() {
@@ -57,7 +59,7 @@ public class RoomsActivityFragment extends Fragment {
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         getRooms();
         Log.d(TAG, "onCreateView: " + "sfsfsf");
-        if (getActivity().getIntent().getStringExtra("ROOMS") != null) {
+        if (getActivity().getIntent().getStringExtra("ROOMS") != null) { //make sure not null
             Log.d(TAG, "onCreateView: " + "FSFSFsf");
             // start chat fragment
             // use same procedure unless found better
@@ -66,7 +68,7 @@ public class RoomsActivityFragment extends Fragment {
                     getActivity().getIntent().getStringExtra("roomId"),
                     getActivity().getIntent().getStringExtra("ownerName"),
                     getActivity().getIntent().getStringExtra("ownerId"),
-                    Integer.parseInt(getActivity().getIntent().getStringExtra("roomCnt")),
+                    Integer.parseInt(getActivity().getIntent().getStringExtra("roomCnt")), //2
                     chatHeads);
             Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();

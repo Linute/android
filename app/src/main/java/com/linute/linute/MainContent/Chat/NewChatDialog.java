@@ -130,6 +130,7 @@ public class NewChatDialog extends DialogFragment {
                                 jsonObject = new JSONObject(response.body().string());
                                 Log.d(TAG, "onResponseCheckChat: " + jsonObject.toString(4));
 
+                                //roomID already in there, open it else to below
                                 if (jsonObject.getJSONArray("rooms").length() == 0) {
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override

@@ -91,7 +91,6 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = null;
         String message = data.getString("message");
 
-        //TODO: CAUSING CRASH
 
         if (action != null &&  action.equals("messages")) { //<---
             intent = new Intent(this, RoomsActivity.class);
