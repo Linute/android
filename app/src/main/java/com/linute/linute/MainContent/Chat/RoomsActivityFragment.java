@@ -61,6 +61,7 @@ public class RoomsActivityFragment extends Fragment {
         Log.d(TAG, "onCreateView: " + "sfsfsf");
         if (getActivity().getIntent().getStringExtra("ROOMS") != null) { //make sure not null
             Log.d(TAG, "onCreateView: " + "FSFSFsf");
+
             // start chat fragment
             // use same procedure unless found better
             ArrayList<ChatHead> chatHeads = getActivity().getIntent().getParcelableArrayListExtra("chatHeads");
@@ -79,6 +80,8 @@ public class RoomsActivityFragment extends Fragment {
             // Commit the transaction
             transaction.commit();
         }
+
+
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
 
@@ -118,23 +121,31 @@ public class RoomsActivityFragment extends Fragment {
                     JSONObject room = null;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
+//                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
                         rooms = jsonObject.getJSONArray("rooms");
                         ArrayList<ChatHead> chatHeads = new ArrayList<ChatHead>();
+                        String lastMessage = "";
                         for (int i = 0; i < rooms.length(); i++) {
                             room = (JSONObject) rooms.get(i);
                             for (int j = 0; j < room.getJSONArray("users").length(); j++) {
                                 chatHeads.add(new ChatHead(
                                         ((JSONObject) room.getJSONArray("users").get(j)).getString("fullName"),
-                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage")));
+                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("profileImage"),
+                                        ((JSONObject) room.getJSONArray("users").get(j)).getString("id")));
+                            }
+                            Log.d(TAG, "onResponse: " + room.toString(4));
+                            if (((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", ""))) {
+                                lastMessage = "You: " + ((JSONObject) room.getJSONArray("messages").get(0)).getString("text");
+                            } else {
+                                lastMessage = ((JSONObject) room.getJSONArray("messages").get(0)).getString("text");
                             }
                             mRoomsList.add(new Rooms(
                                     room.getString("owner"),
                                     room.getString("id"),
-                                    ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("id"),
-                                    ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("fullName"),
-                                    ((JSONObject) room.getJSONArray("messages").get(0)).getString("text"),
-                                    ((JSONObject) room.getJSONArray("messages").get(0)).getJSONObject("owner").getString("profileImage"),
+                                    ((JSONObject) room.getJSONArray("users").get(0)).getString("id"),
+                                    ((JSONObject) room.getJSONArray("users").get(0)).getString("fullName"),
+                                    lastMessage,
+                                    ((JSONObject) room.getJSONArray("users").get(0)).getString("profileImage"),
                                     room.getJSONArray("users").length() + 1 /* + 1 is for yourself*/,
                                     chatHeads));
                         }

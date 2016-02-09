@@ -25,9 +25,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,6 +81,7 @@ public class MainActivity extends BaseTaptActivity {
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
     private SharedPreferences mSharedPreferences;
+    private boolean mConnecting;
 
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
@@ -99,6 +97,7 @@ public class MainActivity extends BaseTaptActivity {
     private MenuItem mPreviousItem;
 
     private Socket mSocket;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -300,7 +299,7 @@ public class MainActivity extends BaseTaptActivity {
             //NOTE: need to reload others?
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
-        }else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK){
+        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -509,20 +508,24 @@ public class MainActivity extends BaseTaptActivity {
     protected void onResume() {
         super.onResume();
 
-        {
-            try {
-                mSocket = IO.socket(getString(R.string.DEV_CHAT_SERVER_URL));
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
-        }
+        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+            mConnecting = true;
 
-        if (mSocket != null) {
+            {
+                try {
+                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
             mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.on("authorization", authorization);
             mSocket.connect();
+            mConnecting = false;
+
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("user", mSharedPreferences.getString("userID", ""));
@@ -536,11 +539,12 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
         if (mSocket != null) {
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off("new message", authorization);
+            mSocket.off("authorization", authorization);
         }
     }
 

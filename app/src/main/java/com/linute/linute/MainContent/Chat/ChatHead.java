@@ -9,10 +9,12 @@ import android.os.Parcelable;
 public class ChatHead implements Parcelable {
     private String mUsername;
     private String mUserImage;
+    private String mUserId;
 
-    public ChatHead(String username, String userImage) {
+    public ChatHead(String username, String userImage, String userId) {
         mUsername = username;
         mUserImage = userImage;
+        mUserId = userId;
     }
 
     public String getUsername() {
@@ -23,9 +25,14 @@ public class ChatHead implements Parcelable {
         return mUserImage;
     }
 
+    public String getUserId() {
+        return mUserId;
+    }
+
     protected ChatHead(Parcel in) {
         mUsername = in.readString();
         mUserImage = in.readString();
+        mUserId = in.readString();
     }
 
     @Override
@@ -37,6 +44,7 @@ public class ChatHead implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mUsername);
         dest.writeString(mUserImage);
+        dest.writeString(mUserId);
     }
 
     @SuppressWarnings("unused")

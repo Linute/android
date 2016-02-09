@@ -170,12 +170,14 @@ public class SearchUsers extends Fragment {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSearchAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mSearchAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
                 }
             }
         });

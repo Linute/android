@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
+import com.mikhaellopez.circularimageview.CircularImageView;
+
 import java.util.ArrayList;
 import java.util.List;
 
