@@ -175,11 +175,13 @@ public class LSDKUser {
 
 
 
-    public Call getConfirmationCodeForEmail(String email, Callback callback){
+    public Call getConfirmationCodeForEmail(String email, String fName, String lName, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
 
         Map<String, Object> param = new HashMap<>();
         param.put("email", email);
+        param.put("firstName", fName);
+        param.put("lastName", lName);
         return API_Methods.post("users/confirm-email", header, param, callback);
     }
 

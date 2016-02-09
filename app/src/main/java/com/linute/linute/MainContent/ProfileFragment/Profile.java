@@ -246,6 +246,11 @@ public class Profile extends UpdatableFragment {
                                     )); //create activity objects and add to array
 
                         }
+
+                        if (mUserActivityItems.isEmpty()){
+                            mUserActivityItems.add(new EmptyUserActivityItem());
+                        }
+
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
                         getActivity().runOnUiThread(rServerErrorAction);
@@ -264,6 +269,7 @@ public class Profile extends UpdatableFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() { //update view
+
                         if (mSwipeRefreshLayout.isRefreshing())
                             mSwipeRefreshLayout.setRefreshing(false);
 

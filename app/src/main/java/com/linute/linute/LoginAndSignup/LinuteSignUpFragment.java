@@ -309,7 +309,10 @@ public class LinuteSignUpFragment extends Fragment {
 
     private void getPinCode() {
         if (getActivity() == null) return;
-        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, new Callback() {
+
+        final String fName = mFirstNameTextView.getText().toString();
+        final String lName = mLastNameTextView.getText().toString();
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 failedConnectionWithCurrentView(0);

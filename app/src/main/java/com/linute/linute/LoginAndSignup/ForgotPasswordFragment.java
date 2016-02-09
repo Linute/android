@@ -419,7 +419,7 @@ public class ForgotPasswordFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     showProgress(false, 2);
-                                    Toast.makeText(getActivity(), "Password changed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "Password changed", Toast.LENGTH_LONG).show();
                                     getFragmentManager().popBackStack();
                                 }
                             });

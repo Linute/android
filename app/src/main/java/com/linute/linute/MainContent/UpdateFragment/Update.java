@@ -70,6 +70,10 @@ public class Update {
 
     private boolean mIsAnon;
 
+    public Update(){
+
+    }
+
 
     public Update(JSONObject json) {
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json, "action"));
@@ -318,4 +322,5 @@ public class Update {
     public boolean isAnon() {
         return mIsAnon;
     }
+
 }

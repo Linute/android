@@ -365,7 +365,10 @@ public class FacebookSignUpFragment extends Fragment {
 
     private void getPinCode(String email) {
         if(getActivity() == null) return;
-        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, new Callback() {
+        final String fName = mFirstNameEditText.getText().toString();
+        final String lName = mLastNameEditText.getText().toString();
+
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName,new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 failedInternetConnection(0);

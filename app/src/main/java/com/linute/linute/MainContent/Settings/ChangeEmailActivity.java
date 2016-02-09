@@ -23,6 +23,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -84,7 +85,6 @@ public class ChangeEmailActivity extends AppCompatActivity {
         }
         return (super.onOptionsItemSelected(item));
     }
-
 
 
     private void bindViews() {
@@ -170,8 +170,12 @@ public class ChangeEmailActivity extends AppCompatActivity {
     }
 
 
-    private void getPinCode(final String email){
-        new LSDKUser(this).getConfirmationCodeForEmail(email, new Callback() {
+    private void getPinCode(final String email) {
+
+        String fName = mSharedPreferences.getString("firstName", "");
+        String lName = mSharedPreferences.getString("lastName", "");
+
+        new LSDKUser(this).getConfirmationCodeForEmail(email, fName, lName, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 runOnUiThread(new Runnable() {
@@ -226,10 +230,10 @@ public class ChangeEmailActivity extends AppCompatActivity {
     }
 
 
-    private void checkVerifyCode(){
-        if (mPincode.equals(mPinCodeText.getText().toString())){
+    private void checkVerifyCode() {
+        if (mPincode.equals(mPinCodeText.getText().toString())) {
             saveEmail();
-        }else {
+        } else {
             mPinCodeText.setError("Invalid pin");
             mPinCodeText.requestFocus();
         }
@@ -358,8 +362,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
         if (focusable) {  //turn on
             mEmailText.setFocusableInTouchMode(true);
             mPinCodeText.setFocusableInTouchMode(true);
-        }
-        else {
+        } else {
             mEmailText.setFocusable(false);
             mPinCodeText.setFocusable(false);
         }

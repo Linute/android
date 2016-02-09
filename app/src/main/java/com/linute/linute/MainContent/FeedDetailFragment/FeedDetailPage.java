@@ -62,6 +62,7 @@ public class FeedDetailPage extends UpdatableFragment {
 
     private boolean mOpenKeyBoard = false;
 
+
     public FeedDetailPage() {
     }
 
@@ -453,9 +454,13 @@ public class FeedDetailPage extends UpdatableFragment {
                     public void run() {
                         mFeedDetailAdapter.notifyDataSetChanged();
                         if (mOpenKeyBoard) { //if open keyboard
-                            mCommentEditText.requestFocus();
-                            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+
+                            if (mReopenKeyboard) {
+                                mCommentEditText.requestFocus();
+                                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                                mReopenKeyboard = false;
+                            }
 
                             recList.postDelayed(new Runnable() {
                                 @Override
@@ -471,6 +476,8 @@ public class FeedDetailPage extends UpdatableFragment {
             }
         });
     }
+
+    private boolean mReopenKeyboard = true;
 
 
     private void setCommentViewEditable(boolean editable) {
