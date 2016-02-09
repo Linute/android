@@ -4,7 +4,6 @@
       tools:context=".MainActivity">
     <item
         android:id="@+id/profile_fragment_menu_settings"
-        android:icon="@drawable/settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="always"/>

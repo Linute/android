@@ -94,7 +94,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             int index = savedInstanceState.getInt("viewPagerIndex");
             mInitiallyPresentedFragmentWasActive = index == 0;
             mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate");
@@ -110,33 +110,33 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     }
 
     @Override
-    public boolean fragmentNeedsUpdating(){
+    public boolean fragmentNeedsUpdating() {
         return mActiveNeedsUpdating && mNearMeNeedsUpdating;
     }
 
-    public boolean nearMeFragmentNeedsUpdating(){
+    public boolean nearMeFragmentNeedsUpdating() {
         return mNearMeNeedsUpdating;
     }
 
-    public boolean activeNeedsUpdating(){
+    public boolean activeNeedsUpdating() {
         return mActiveNeedsUpdating;
     }
 
-    public void setNearMeNeedsUpdating(boolean needsUpdating){
+    public void setNearMeNeedsUpdating(boolean needsUpdating) {
         mNearMeNeedsUpdating = needsUpdating;
     }
 
-    public void setActiveNeedsUpdating(boolean needsUpdating){
+    public void setActiveNeedsUpdating(boolean needsUpdating) {
         mActiveNeedsUpdating = needsUpdating;
     }
 
-    public boolean getInitiallyPresentedFragmentWasActive(){
+    public boolean getInitiallyPresentedFragmentWasActive() {
         return mInitiallyPresentedFragmentWasActive;
     }
 
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
-    private void loadFragmentAtPositionIfNeeded(int position){
+    private void loadFragmentAtPositionIfNeeded(int position) {
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
         //only load when fragment comes into view
         if (fragment != null) {
@@ -144,8 +144,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 if (position == 0) {
                     mActiveNeedsUpdating = false;
                     fragment.getPeople();
-                }
-                else{
+                } else {
                     mNearMeNeedsUpdating = false;
                     fragment.getPeopleNearMe();
                 }
@@ -167,33 +166,35 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     }
 
 
-
     public void onStop() {
         super.onStop();
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.raiseAppBarLayoutElevation();
         }
-        setFragmentNeedUpdating(true);
+        //setFragmentNeedUpdating(true);
     }
 
     //there's problems with nested fragments
-    public boolean hasLocationPermissions(){
+    public boolean hasLocationPermissions() {
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED){
-            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PeopleFragment.LOCATION_REQUEST);
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PeopleFragment.LOCATION_REQUEST);
             return false;
-        }else {
-           return true;
+        } else {
+            return true;
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 1);
-        fragment.gotPermissionResults();
+        if (requestCode == PeopleFragment.LOCATION_REQUEST) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 1);
+                fragment.gotPermissionResults();
+            }
+        }
     }
 }

@@ -36,6 +36,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
@@ -57,7 +58,7 @@ import java.util.List;
 
 //TODO: ADD RELOAD BUTTON
 
-public class FindFriendsFragment extends Fragment {
+public class FindFriendsFragment extends UpdatableFragment {
 
     public static final String TAG = FindFriendsFragment.class.getSimpleName();
 
@@ -187,23 +188,28 @@ public class FindFriendsFragment extends Fragment {
 
         setupSearchViewHandler();
 
-        if (mSearchType == 0) { //if search by name, we need init text
-            mDescriptionText.setText("Enter your friends name in the search bar");
-            mDescriptionText.setVisibility(View.VISIBLE);
-        } else if (mSearchType == 1) { //facebook
-            FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
+        if (fragmentNeedsUpdating()){
+            if (mSearchType == 0) { //if search by name, we need init text
+                mDescriptionText.setText("Enter your friends name in the search bar");
+                mDescriptionText.setVisibility(View.VISIBLE);
+            } else if (mSearchType == 1) { //facebook
+                FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
 
-            //facebook
-            mCallbackManager = CallbackManager.Factory.create();
+                //facebook
+                mCallbackManager = CallbackManager.Factory.create();
 
-            setUpFacebookCallback();
+                setUpFacebookCallback();
 
-            loginFacebook();
+                loginFacebook();
 
-        } else { //contacts. This process takes forever to get emails. We will use async task
-            mGetContactsInBackground = new GetContactsInBackground();
-            setUpContactsList();
+            } else { //contacts. This process takes forever to get emails. We will use async task
+                mGetContactsInBackground = new GetContactsInBackground();
+                setUpContactsList();
+            }
+
+            setFragmentNeedUpdating(false);
         }
+
 
         return rootView;
     }
@@ -240,6 +246,8 @@ public class FindFriendsFragment extends Fragment {
     private Runnable mSearchByNameRunnable = new Runnable() {
         @Override
         public void run() {
+
+            if (getActivity() == null) return;
 
             new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
                 @Override
@@ -401,6 +409,7 @@ public class FindFriendsFragment extends Fragment {
     private void setUpFacebookList(String token) {
 
         mProgressBar.setVisibility(View.VISIBLE);
+        if (getActivity() == null) return;
 
         new LSDKFriendSearch(getActivity()).searchFriendByFacebook(token, new Callback() {
             @Override

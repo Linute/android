@@ -11,43 +11,48 @@
 
     <View android:layout_width="match_parent"
           android:layout_height="match_parent"
-          android:alpha="0.75"
+          android:alpha="0.8"
           android:background="@color/colorPrimary"/>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_alignParentBottom="true"
-                  android:weightSum="2">
+    <!--<LinearLayout android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:weightSum="2">-->
 
-        <Button android:id="@+id/preLogin_facebook_login"
-                android:layout_width="0px"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Facebook Login"
-            />
+    <!--<Button android:id="@+id/preLogin_facebook_login"-->
+    <!--android:layout_width="0px"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_weight="1"-->
+    <!--android:text="Facebook Login"-->
+    <!--/>-->
 
-        <Button
-            android:id="@+id/prelogin_linute_login"
-            android:layout_width="0px"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/preLogin_facebook_login"
-            android:layout_weight="1"
-            android:text="@string/prelogin_linute_login"/>
+    <!--<Button-->
+    <!--android:id="@+id/prelogin_linute_login"-->
+    <!--android:layout_width="0px"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_below="@id/preLogin_facebook_login"-->
+    <!--android:layout_weight="1"-->
+    <!--android:text="@string/prelogin_linute_login"/>-->
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
 
-    <TextView
-        android:id="@+id/linute_signup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="78dp"
-        android:text="@string/signUpText"
-        android:textColor="@android:color/black"
-        android:textSize="20dp"
-        tools:textColor="@color/white"/>
+    <!--<TextView-->
+    <!--android:id="@+id/linute_signup"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
+    <!--android:layout_centerHorizontal="true"-->
+    <!--android:layout_marginBottom="78dp"-->
+    <!--android:text="@string/signUpText"-->
+    <!--android:textColor="@android:color/black"-->
+    <!--android:textSize="20dp"-->
+    <!--tools:textColor="@color/white"/>-->
+
+
+    <FrameLayout android:id="@+id/login_activity_fragment_frame"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"/>
 
 
 </RelativeLayout>

@@ -23,6 +23,7 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.okhttp.Callback;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Arman on 1/8/16.
@@ -49,6 +51,8 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
     private SharedPreferences mSharedPreferences;
     private List<People> vPeopleList;
 
+    private TextView mStatus;
+
     public PeopleViewHolder(View itemView, Context context, List<People> peopleList) {
         super(itemView);
 
@@ -60,8 +64,10 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
         vName = (TextView) itemView.findViewById(R.id.list_people_name);
         vState = (TextView) itemView.findViewById(R.id.list_people_state);
         vStateImage = (ImageView) itemView.findViewById(R.id.list_people_image_state);
+        mStatus = (TextView) itemView.findViewById(R.id.people_status);
 
         vProfilePicture.setOnClickListener(this);
+        vName.setOnClickListener(this);
         vStateImage.setOnClickListener(this);
     }
 
@@ -137,12 +143,16 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                 .load(Utils.getImageUrlOfUser(peeps.getProfileImage()))
                 .asBitmap()
                 //.animate(animationObject)
+                .placeholder(R.drawable.image_loading_background)
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
 
         vName.setText(peeps.getName());
         vState.setText(peeps.getDate());
+
+        mStatus.setText(vContext.getString(PlaceholderStatuses.getRandomStringRes(new Random().nextInt(41))));
+
         if (peeps.isFriend())
             vStateImage.setImageResource(R.drawable.message_friend);
         else

@@ -13,14 +13,13 @@
 
         <com.mikhaellopez.circularimageview.CircularImageView
             android:id="@+id/profilelistitem_prof_image"
-            android:layout_width="@dimen/profilefragment_list_item_profile_radius"
-            android:layout_height="@dimen/profilefragment_list_item_profile_radius"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
             android:layout_marginBottom="15dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginTop="15dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/profile_picture_placeholder"
             app:border_color="@android:color/darker_gray"
             app:border_width="1dp"/>
 

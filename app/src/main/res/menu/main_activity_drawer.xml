@@ -6,27 +6,27 @@
     <group>
         <item
             android:id="@+id/navigation_item_feed"
-            android:icon="@drawable/ic_action_social_people"
+            android:icon="@drawable/ic_action_college"
             android:title="Feed"
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"
             />
         <item
             android:id="@+id/navigation_item_people"
-            android:icon="@drawable/ic_action_content_add"
+            android:icon="@drawable/ic_action_people"
             android:title="People"
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
         <item
             android:id="@+id/navigation_item_activity"
-            android:icon="@drawable/ic_action_navigation_close"
-            android:title="Activity"
+            android:icon="@drawable/ic_action_turn20"
+            android:title="Updates"
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
         <item android:id="@+id/navigation_item_find_friends"
-              android:icon="@drawable/ic_action_social_group_add"
-              android:title="Find Friends"
+              android:icon="@drawable/ic_action_add99"
+              android:title="Add Friends"
               />
 
         <item android:id="@+id/navigation_item_settings"

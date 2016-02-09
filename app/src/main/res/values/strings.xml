@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">Linute</string>
+    <string name="app_name">Tapt</string>
     <string name="current_tab">currentTab</string>
     <string name="title_activity_pre_login">PreLoginActivity</string>
     <string name="action_settings">Settings</string>
@@ -8,12 +8,12 @@
     <string name="title_activity_linute_login">Sign in</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
+    <string name="prompt_email">Edu Email</string>
     <string name="prompt_password">Password</string>
     <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_sign_up_short">Sign up</string>
-    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_email">Invalid edu email</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_nonmatching_passwords">This password is incorrect</string>
@@ -135,6 +135,7 @@
     <string name="title_activity_rooms">RoomsActivity</string>
 
     <string name="CHAT_SERVER_URL">https://api.tapt.io/</string>
+    <string name="DEV_CHAT_SERVER_URL">https://devapi.tapt.io/</string>
 
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
@@ -155,4 +156,53 @@
         that are near you.
     </string>
     <string name="need_location">Tapt needs your location to find friends near you</string>
+    <string name="no_comment">This post is wack. Be the first to comment on this post!</string>
+
+
+
+    <string name="placeholder_bio0">I\’m a big fat poopy face who didn\’t write a bio</string>
+    <string name="placeholder_bio1">I keep things boring by writing nothing</string>
+    <string name="placeholder_bio2">Sometimes I like to act like I\’m a piece of furniture and just be.</string>
+    <string name="placeholder_bio3">I once pooped my pants to get out of an exam</string>
+    <string name="placeholder_bio4">Hate dogs, hate cats, love sharks and whales. Never owned any of them</string>
+    <string name="placeholder_bio5">I own a DSLR, therefore am a professional photographer/douche</string>
+    <string name="placeholder_bio6">I cheat on all my exams and lie that i\’ve never done it</string>
+    <string name="placeholder_bio7">Studying a bullshit major because I plan on selling protein shakes on instagram after i graduate</string>
+    <string name="placeholder_bio8">trying to make friends so my phone doesn\’t stay dry as fuck</string>
+    <string name="placeholder_bio9">hoping Hillary doesn\’t hack my emails so ppl dont see how empty it is.</string>
+    <string name="placeholder_bio10">the only kind of mail I get is spam #foreveralone</string>
+    <string name="placeholder_bio11">I once gave my cat : dog food because it wasn\’t really my cat. or my dog food</string>
+    <string name="placeholder_bio12">waiting for the future to arrive so we can all live like \“Game of Thrones\” :)</string>
+    <string name="placeholder_bio13">I promise to go to bed early every night but then netflix happens.</string>
+    <string name="placeholder_bio14">some of my special powers included : Finishing 2 seasons of breaking bad day before a final.</string>
+    <string name="placeholder_bio15">i post really really emotional statuses and then end them with \“dont talk to me\” just because…</string>
+    <string name="placeholder_bio16">Currently working towards an MBA with an emphasis in fantasy football. jk about the MBA</string>
+    <string name="placeholder_bio17">god bless this hot mess</string>
+    <string name="placeholder_bio18">putting the Hot in psychotic since 2005. not when i was born, when i learnd the word</string>
+    <string name="placeholder_bio19">i sit in the back of all my classes. no one can see me eat my boogers then</string>
+    <string name="placeholder_bio20">don\’t ask me what im doing with life. No one knows, not even me.</string>
+    <string name="placeholder_bio21">sometimes when class is boring i go to bathroom stalls to read graffiti</string>
+    <string name="placeholder_bio22">i once stuck gum underneath a chair to eat it next class. flavors changed somehow</string>
+    <string name="placeholder_bio23">i hate instagram and anything else related to hashtags. #realtalk</string>
+    <string name="placeholder_bio24">quit world of warcraft. 4.0 gpa this semester.</string>
+    <string name="placeholder_bio25">some people bake cookies, some bake cakes, some even bake chicken. Not me i just get baked</string>
+
+    <string name="placeholder_bio26">waiting for my crush to realize that i\’m the bae of his dreams</string>
+    <string name="placeholder_bio27">was so tired after an exam once, that i took the A train downtown after falling asleep. </string>
+    <string name="placeholder_bio28">ghost-writer for drizzy #6godfolife</string>
+    <string name="placeholder_bio29">woke up for an 8am class once… at noon. </string>
+    <string name="placeholder_bio30">hard working student always looking for brand new ways to reach the word count</string>
+    <string name="placeholder_bio31">waiting to be drafted, hardcore bballer in 2k16</string>
+    <string name="placeholder_bio32">became a bed bug after being bitten by one</string>
+    <string name="placeholder_bio33">hey there! like me page??? gimme a call at 1–800-GTFOmyPROFILE</string>
+    <string name="placeholder_bio34">buying all the caffeine ivy drips for my exams starting now</string>
+    <string name="placeholder_bio35">are you a banker? because i\’d like you to leave me a loan</string>
+    <string name="placeholder_bio36">love wearing “Nirvana” shirts even though i don’t listen to them</string>
+    <string name="placeholder_bio37">*placeholder* until my creativity kicks in</string>
+    <string name="placeholder_bio38">i can bite down on jolly ranchers and then say the alphabet</string>
+    <string name="placeholder_bio39">if you walk slow enough to block the street with your squad. i will throw my feces at you</string>
+    <string name="placeholder_bio40">Normal people do tea cleanses. I do the chipotle cleanse.</string>
+    <string name="no_results">No results found.</string>
+
+
 </resources>

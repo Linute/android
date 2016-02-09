@@ -33,6 +33,8 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private String mPostId;
     private String mUserId;
 
+    private View vAnonIcon;
+
 
     public ProfileViewHolder(View itemView, Context context) {
         super(itemView);
@@ -44,6 +46,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         vDescriptionLabel = (TextView) itemView.findViewById(R.id.activities_text);
         vTimeLabel = (TextView) itemView.findViewById(R.id.activities_date);
         vEventImage = (ImageView) itemView.findViewById(R.id.profilelistitem_event_image);
+        vAnonIcon = itemView.findViewById(R.id.profile_frag_anon_icon);
 
         itemView.setOnClickListener(this);
     }
@@ -57,14 +60,17 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
             vEventImage.setVisibility(View.GONE);
         }
 
-        vDescriptionLabel.setText(userActivityItem.getDescription());
+        if (userActivityItem.isAnon()) vAnonIcon.setVisibility(View.VISIBLE);
+
+        String text = userActivityItem.getDescription();
+        vDescriptionLabel.setText(text.equals("") ? "Image post..." : text);
         vTimeLabel.setText(Utils.getTimeAgoString(userActivityItem.getPostDate()));
 
         //profile image on the right
         Glide.with(mContext)
                 .load(userActivityItem.getEventImagePath())
                 .asBitmap()
-                .placeholder(R.drawable.no_image_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
@@ -80,7 +86,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity != null){
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(mIsImagePost, mPostId, mUserId ));
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(false,mIsImagePost, mPostId, mUserId ));
         }
     }
 }

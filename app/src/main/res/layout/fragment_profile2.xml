@@ -5,7 +5,7 @@
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    android:background="@color/white">
+    android:background="#ECF0F2">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/profilefrag2_swipe_refresh"

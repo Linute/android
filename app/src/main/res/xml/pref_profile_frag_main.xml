@@ -2,16 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="FIND FRIENDS">
-
-        <Preference android:key="find_friends_facebook_pref"
-                    android:title="Facebook"/>
-        <Preference android:key="find_friends_contacts_pref"
-                    android:title="Contacts"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="ACCOUNT">
         <Preference android:key="edit_profile"
                     android:title="Edit Profile"/>

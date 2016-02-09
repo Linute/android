@@ -12,19 +12,14 @@ import android.widget.Toast;
 
 import com.linute.linute.R;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import io.socket.emitter.Emitter;
 
 /**
  * Created by QiFeng on 11/28/15.
@@ -84,6 +79,7 @@ public class Utils {
         Log.v(TAG, "first name: " + sharedPreferences.getString("firstName", "nothing"));
         Log.v(TAG, "last name: " + sharedPreferences.getString("lastName", "nothing"));
         Log.v(TAG, "email: " + sharedPreferences.getString("email", "nothing"));
+        Log.i(TAG, "password: " + sharedPreferences.getString("password", "nothing"));
         Log.v(TAG, "status: " + sharedPreferences.getString("status", "nothing"));
         Log.v(TAG, "facebook: " + sharedPreferences.getString("socialFacebook", "nothing"));
         Log.v(TAG, "logged in: " + (sharedPreferences.getBoolean("isLoggedIn", false) ? "true" : "false"));
@@ -172,49 +168,29 @@ public class Utils {
 
     //returns a nicely formated string about when event occurred
     public static String getTimeAgoString(long beforeTime) {
-        if (beforeTime == 0) return "";
-        DateFormat df = DateFormat.getTimeInstance();
-        df.setTimeZone(TimeZone.getTimeZone("gmt"));
+        if (beforeTime == 0) return "n/a";
+        //DateFormat df = DateFormat.getTimeInstance();
+        //df.setTimeZone(TimeZone.getTimeZone("gmt"));
 
+        long timeDifference = getUTCdatetimeAsDate().getTime() - beforeTime;
 
-        String date = DateUtils.getRelativeTimeSpanString(beforeTime , getUTCdatetimeAsDate().getTime(), DateUtils.SECOND_IN_MILLIS).toString();
-        String abrev = getAbrev(date);
-        return date.replaceAll("\\D+","") + abrev;
+        if (timeDifference > DateUtils.YEAR_IN_MILLIS) //years
+            return ((int)(timeDifference / DateUtils.YEAR_IN_MILLIS))+"y";
+
+        //NOTE: skipped months - number of milli in a month changes
+
+        else if (timeDifference > DateUtils.WEEK_IN_MILLIS)
+            return ((int) (timeDifference / DateUtils.WEEK_IN_MILLIS))+"w";
+        else if (timeDifference > DateUtils.DAY_IN_MILLIS)
+            return ((int) (timeDifference / DateUtils.DAY_IN_MILLIS))+"d";
+        else if (timeDifference > DateUtils.HOUR_IN_MILLIS)
+            return ((int) (timeDifference / DateUtils.HOUR_IN_MILLIS))+"h";
+        else if (timeDifference > DateUtils.MINUTE_IN_MILLIS)
+            return ((int) (timeDifference / DateUtils.MINUTE_IN_MILLIS)) + "m";
+        else
+            return ((int) (timeDifference / DateUtils.SECOND_IN_MILLIS))+"s";
+
     }
-
-    private static String getAbrev(String date){
-        if (date.contains("second")){
-            return "s";
-        }
-
-        if (date.contains("min")){
-            return "m";
-        }
-
-        if (date.contains("hour")){
-            return "h";
-        }
-
-        if (date.contains("day")){
-            return "d";
-        }
-        if (date.contains("week")){
-            return "w";
-        }
-        if (date.contains("month")){
-            return "mon";
-        }
-
-        if (date.contains("year")){
-            return "y";
-        }
-
-        return "-";
-    }
-
-
-
-
 
     //returns millisecond of date
     public static long getTimeFromString(String date) {
@@ -251,7 +227,7 @@ public class Utils {
 
         try
         {
-            dateToReturn = (Date)dateFormat.parse(StrDate);
+            dateToReturn = dateFormat.parse(StrDate);
         }
         catch (ParseException e)
         {

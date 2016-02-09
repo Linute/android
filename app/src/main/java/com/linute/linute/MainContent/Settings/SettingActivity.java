@@ -39,7 +39,9 @@ public class SettingActivity extends AppCompatActivity {
         //get toolbar
         setUpToolbar();
 
-        getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
+        if (savedInstanceState == null)
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, new LinutePreferenceFragment()).commit();
+
     }
 
     private void setUpToolbar() {
@@ -82,8 +84,6 @@ public class SettingActivity extends AppCompatActivity {
 
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment {
-        Preference mFindFriendsFacebook;
-        Preference mFindFriendsContacts;
         Preference mEditProfileInfo;
         Preference mChangeEmail;
         Preference mChangePhoneNumber;
@@ -102,8 +102,6 @@ public class SettingActivity extends AppCompatActivity {
         }
 
         private void bindPreferences() {
-            mFindFriendsFacebook = findPreference("find_friends_facebook_pref");
-            mFindFriendsContacts = findPreference("find_friends_contacts_pref");
             mEditProfileInfo = findPreference("edit_profile");
             mChangeEmail = findPreference("change_email");
             mChangePhoneNumber = findPreference("change_phone_number");

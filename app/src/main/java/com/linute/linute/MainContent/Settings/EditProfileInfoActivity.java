@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.Preference;
@@ -8,6 +9,7 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.linute.linute.R;
@@ -31,9 +33,10 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
         setUpToolBar();
 
-        LinuteEditProfileFragment profileEditor = new LinuteEditProfileFragment();
-
-        getFragmentManager().beginTransaction().replace(R.id.setting_fragment, profileEditor).commit();
+        if (savedInstanceState == null) {
+            LinuteEditProfileFragment profileEditor = new LinuteEditProfileFragment();
+            getFragmentManager().beginTransaction().replace(R.id.setting_fragment, profileEditor).commit();
+        }
     }
 
     private void setUpToolBar() {
@@ -60,7 +63,6 @@ public class EditProfileInfoActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         mMainActivityNeedsToUpdate = savedInstanceState.getBoolean(NEED_UPDATE_KEY);
     }
 
@@ -89,7 +91,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         getFragmentManager()
                 .beginTransaction()
                 .replace(R.id.setting_fragment, fragment)
-                .addToBackStack(null)
+                .addToBackStack("setting")
                 .commit();
     }
 

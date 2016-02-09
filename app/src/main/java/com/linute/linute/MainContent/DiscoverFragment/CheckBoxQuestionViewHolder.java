@@ -59,14 +59,12 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
-    private LSDKUser mUser;
 
     public CheckBoxQuestionViewHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mUser = new LSDKUser(mContext);
 
         mPosts = posts;
         mCheckBoxChoiceCapableAdapters = adapter;
@@ -111,7 +109,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         //status or image tapped
         else if (v == vPostImage || v == vPostText){
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(v == vPostImage
+                    FeedDetailPage.newInstance(true,v == vPostImage
                             , mPosts.get(getAdapterPosition()).getPostId()
                             , mPosts.get(getAdapterPosition()).getUserId())
             );
@@ -222,7 +220,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
                 .load(type == 1 ? Utils.getImageUrlOfUser(post.getUserImage()) : Utils.getEventImageURL(post.getImage()))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(type == 1 ? vUserImage : vPostImage);
     }

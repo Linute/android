@@ -46,7 +46,7 @@
             android:gravity="center"
             android:text="TEXT"
             android:textAppearance="@android:style/TextAppearance.Large"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/user_name_blue"
             android:textSize="20sp"/>
     </RelativeLayout>
 
@@ -74,7 +74,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:adjustViewBounds="true"
-            android:background="@drawable/college_walk1"
             android:scaleType="fitCenter"/>
 
         <LinearLayout

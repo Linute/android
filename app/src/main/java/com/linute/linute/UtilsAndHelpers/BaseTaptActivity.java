@@ -41,4 +41,9 @@ public class BaseTaptActivity extends AppCompatActivity {
         //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
     }
 
+
+    public void enableBarScrolling(boolean enabled){
+
+    }
+
 }

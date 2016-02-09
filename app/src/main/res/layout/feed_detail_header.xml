@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/feedDetail_profile_image"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/image_loading_background"
+            app:border_color="@color/seperator_color"
+            app:border_width="1dp"/>
+
+        <TextView android:id="@+id/feedDetail_time_stamp"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentEnd="true"
+                  android:layout_alignParentTop="true"
+                  android:singleLine="true"
+                  android:textColor="@color/twentyfive_black"
+                  android:textSize="@dimen/sub_font_size"
+                  tools:text="1m"
+            />
+    </RelativeLayout>
+
+    <TextView android:id="@+id/feedDetail_user_name"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_horizontal"
+              android:layout_marginEnd="32dp"
+              android:layout_marginStart="32dp"
+              android:textStyle="bold"
+              android:singleLine="true"
+              android:textColor="@color/user_name_blue"
+              android:textSize="@dimen/header_font_size"
+              tools:text="John Snow"/>
+
+</LinearLayout>

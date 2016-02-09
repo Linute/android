@@ -25,13 +25,13 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"/>
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:layout_below="@+id/question"
-            android:layout_marginTop="2dp"
-            android:background="@drawable/college_walk1"
-            android:scaleType="centerCrop"/>
+        <!--<ImageView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="250dp"-->
+            <!--android:layout_below="@+id/question"-->
+            <!--android:layout_marginTop="2dp"-->
+            <!--android:background="@drawable/college_walk1"-->
+            <!--android:scaleType="centerCrop"/>-->
     </RelativeLayout>
 
     <LinearLayout
@@ -44,7 +44,6 @@
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/college_walk1"
             card_view:border="false"
             card_view:border_color="#EEEEEE"
             card_view:border_width="0dp"

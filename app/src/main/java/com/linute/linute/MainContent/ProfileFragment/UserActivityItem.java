@@ -30,6 +30,7 @@ public class UserActivityItem implements Parcelable {
     private long mPostDate;
     private String mEventID;
     private String mOwnerID;
+    private boolean mIsAnon;
 
     public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
         mProfileImagePath = profileImagePath;
@@ -37,6 +38,7 @@ public class UserActivityItem implements Parcelable {
 
 //        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
 
+        mIsAnon = (getIntFromJson(activityInfo, "privacy") == 1);
         mDescription = "";
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
@@ -101,6 +103,15 @@ public class UserActivityItem implements Parcelable {
             return obj.getString(key);
         } catch (JSONException e) {
             return "";
+        }
+    }
+
+    public int getIntFromJson(JSONObject json, String key){
+        try {
+            return json.getInt(key);
+        }catch (JSONException e) {
+            e.printStackTrace();
+            return 0;
         }
     }
 
@@ -184,5 +195,9 @@ public class UserActivityItem implements Parcelable {
 
     public long getPostDate() {
         return mPostDate;
+    }
+
+    public boolean isAnon() {
+        return mIsAnon;
     }
 }

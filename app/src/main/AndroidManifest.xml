@@ -67,28 +67,12 @@
             android:name=".MainContent.MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan|adjustResize"/>
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".LoginAndSignup.PreLoginActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_pre_login"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
-        <activity
-            android:name=".LoginAndSignup.LinuteLoginActivity"
-            android:configChanges="orientation"
-            android:label="@string/title_activity_linute_login"
-            android:parentActivityName=".LoginAndSignup.PreLoginActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
-        <activity
-            android:name=".LoginAndSignup.LinuteSignUpActivity"
-            android:configChanges="orientation"
-            android:label="@string/title_activity_linute_sign_up"
-            android:parentActivityName=".LoginAndSignup.PreLoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
@@ -150,12 +134,6 @@
                   android:screenOrientation="portrait"/>
 
 
-        <activity android:name=".LoginAndSignup.FacebookSignUpActivity"
-                  android:configChanges="orientation"
-                  android:parentActivityName=".LoginAndSignup.PreLoginActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"/>
-
 
         <activity android:name=".MainContent.PostCreatePage"
                   android:configChanges="orientation"
@@ -181,10 +159,10 @@
 
         <activity
             android:name=".MainContent.FindFriends.FindFriendsActivity"
-            android:configChanges="orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustPan|adjustResize"/>
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity android:name=".MainContent.Settings.SettingActivity"
                   android:configChanges="orientation"

@@ -20,10 +20,10 @@ public class LinuteFragmentAdapter extends FragmentStatePagerAdapter {
     //icons we will use
     //these are currently 30 pxl
     private int[] TAB_ICON_IDS = {
-            R.drawable.ic_time_line,
-            R.drawable.ic_friends,
-            R.drawable.ic_notification,
-            R.drawable.ic_profile
+//            R.drawable.ic_time_line,
+//            R.drawable.ic_friends,
+//            R.drawable.ic_notification,
+//            R.drawable.ic_profile
     };
 
 

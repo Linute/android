@@ -2,7 +2,7 @@
 <LinearLayout
     android:id="@+id/feed_discover"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#ffffff"
@@ -15,13 +15,9 @@
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/college_walk1"
-        card_view:border="false"
-        card_view:border_color="#EEEEEE"
-        card_view:border_width="0dp"
-        card_view:shadow="false"
-        card_view:shadow_color="#8BC34A"
-        card_view:shadow_radius="10"/>
+        app:border_width="1dp"
+        app:border_color="@color/light_grey"
+        />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -36,7 +32,8 @@
             android:layout_centerVertical="true"
             android:text="1m"
             android:textAppearance="@android:style/TextAppearance.Small"
-            android:textColor="@color/colorAccent"/>
+            android:textColor="@android:color/black"
+            android:alpha="0.8"/>
 
         <TextView
             android:id="@+id/postUserName"
@@ -47,7 +44,7 @@
             android:gravity="center"
             android:text="TEXT"
             android:textAppearance="@android:style/TextAppearance.Large"
-            android:textColor="@color/colorAccent"
+            android:textColor="@color/user_name_blue"
             android:textSize="20sp"/>
     </RelativeLayout>
 
@@ -75,7 +72,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:adjustViewBounds="true"
-            android:background="@drawable/college_walk1"
             android:scaleType="fitCenter"/>
 
         <LinearLayout

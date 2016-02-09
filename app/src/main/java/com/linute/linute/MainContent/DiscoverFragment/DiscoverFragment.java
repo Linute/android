@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -91,7 +92,9 @@ public class DiscoverFragment extends UpdatableFragment {
         llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
+        //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
@@ -214,10 +217,21 @@ public class DiscoverFragment extends UpdatableFragment {
         final int skip = mSkip;
         if (getActivity() == null) return;
 
+        if (!refreshLayout.isRefreshing()){
+            refreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(true);
+                }
+            });
+        }
+        Log.i(TAG, "getFeed: jjj");
+
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
         events.put("college", sharedPreferences.getString("collegeId", ""));
         events.put("skip", skip + "");
+        events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(mFriendsOnly, events, new Callback() {
             @Override
@@ -273,7 +287,8 @@ public class DiscoverFragment extends UpdatableFragment {
                                 jsonObject.getInt("numberOfLikes"),
                                 jsonObject.getBoolean("isLiked"),
                                 postString,
-                                jsonObject.getString("id"));
+                                jsonObject.getString("id"),
+                                jsonObject.getInt("numberOfComments"));
                         mPosts.add(post);
                         postImage = "";
                     }
@@ -327,6 +342,8 @@ public class DiscoverFragment extends UpdatableFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "onDestroy: ");
+        DiscoverHolderFragment holderFragment = (DiscoverHolderFragment) getParentFragment();
+        if (holderFragment != null)
+            holderFragment.setFragmentNeedUpdating(true);
     }
 }

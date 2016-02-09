@@ -29,6 +29,7 @@
                   android:gravity="center"
                   android:padding="16dp"
                   android:layout_centerHorizontal="true"
+                  android:textSize="@dimen/header_font_size"
                   android:text="Change"/>
 
         <TextView android:id="@+id/changeprofileimage_save_button"
@@ -38,6 +39,7 @@
                   android:layout_centerHorizontal="true"
                   android:layout_below="@id/changeprofileimage_change_button"
                   android:padding="16dp"
+                  android:textSize="@dimen/header_font_size"
                   android:text="Save"/>
     </RelativeLayout>
 

@@ -34,14 +34,13 @@
               android:background="@android:color/black"
               android:gravity="center"
               android:imeOptions="actionDone"
-              android:inputType="textPhonetic"
+              android:inputType="textPhonetic|textCapSentences"
               android:textSize="12sp"
               android:paddingBottom="5dp"
               android:paddingTop="5dp"
               android:singleLine="true"
               android:textColor="@android:color/white"
               android:visibility="gone"
-
             />
 
     </RelativeLayout>

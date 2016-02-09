@@ -1,39 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- Really big hack by setting margin top.. find better way
+    android:layout_marginTop="?android:attr/actionBarSize"-->
+
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:clickable="true">
+    android:layout_marginTop="?android:attr/actionBarSize"
+    android:background="@color/white">
 
-    <LinearLayout
-        android:id="@+id/comments_entry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+    <LinearLayout android:id="@+id/comment_container"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp"
+                  android:layout_alignParentBottom="true"
+                  android:background="#FFFFFF"
+                  android:orientation="vertical"
+        >
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/input_layout_comment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="9">
+        <View android:layout_width="match_parent"
+              android:layout_height="1dp"
+              android:background="@color/seperator_color"/>
+
+        <LinearLayout
+            android:id="@+id/comments_entry"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <RelativeLayout android:id="@+id/comment_checkbox_container"
+                            android:layout_width="0px"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                <CheckBox android:id="@+id/comment_anon_checkbox"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_centerHorizontal="true"
+                          android:button="@drawable/anon_checkbox"
+                          android:clickable="false"/>
+
+                <TextView android:id="@+id/comment_anon_checkbox_text"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_alignParentBottom="true"
+                          android:layout_centerHorizontal="true"
+                          android:layout_marginBottom="8dp"
+                          android:text="OFF"
+                          android:textColor="@color/twentyfive_black"
+                          android:textStyle="bold"/>
+
+
+            </RelativeLayout>
 
             <EditText
                 android:id="@+id/comment_field"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Enter you message... "/>
+                android:layout_width="0px"
+                android:layout_height="match_parent"
+                android:layout_weight="4"
+                android:background="#FFFFFF"
+                android:hint="Enter your comment... "
+                android:inputType="textCapSentences|textMultiLine"
+                android:textSize="@dimen/sub_font_size"
+                android:textColor="@color/eighty_black"
+                android:singleLine="false"
+                tools:text="Hello there eat my ass. I love cock. fight me. swing first. don't dwing first. i need more text to test this comment box out"/>
 
-        </android.support.design.widget.TextInputLayout>
 
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_weight="1"
-            android:id="@+id/feed_detail_send_comment"
-            android:src="@drawable/icon_send"/>
+            <RelativeLayout android:id="@+id/comment_send_button_container"
+                            android:layout_width="0px"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/feed_detail_send_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="12dp"
+                    android:scaleType="fitCenter"
+                    android:alpha="0.5"
+                    android:src="@drawable/icon_send"/>
+
+                <ProgressBar android:id="@+id/comment_progressbar"
+                             style="?android:attr/progressBarStyleSmall"
+                             android:layout_width="match_parent"
+                             android:layout_height="match_parent"
+                             android:layout_centerInParent="true"
+                             android:layout_margin="10dp"
+                             android:visibility="gone"
+                    />
+
+            </RelativeLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -41,5 +102,6 @@
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/comments_entry"/>
+        android:layout_above="@id/comment_container"/>
+
 </RelativeLayout>

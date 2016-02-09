@@ -16,20 +16,21 @@
         <android.support.v7.widget.SearchView android:id="@+id/findFriends_search_view"
                                               android:layout_width="match_parent"
                                               android:layout_height="wrap_content"
-                                              android:layout_margin="8dp"
+                                              android:layout_margin="4dp"
                                               android:background="@drawable/search_view_background"
-                                              android:inputType="textPersonName"
+                                              android:inputType="textPersonName|textCapWords"
                                               android:queryHint="Search"/>
+
     </LinearLayout>
 
 
     <TextView android:id="@+id/findFriends_text"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="150dp"
+              android:layout_centerHorizontal="true"
               android:layout_marginEnd="64dp"
               android:layout_marginStart="64dp"
-              android:layout_centerHorizontal="true"
+              android:layout_marginTop="150dp"
               android:gravity="center"
               android:textSize="18sp"
               android:visibility="invisible"
@@ -67,15 +68,15 @@
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="150dp"
         android:visibility="gone"/>
 
     <Button android:id="@+id/findFriends_reload_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="150dp"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="150dp"
             android:text="Retry"
             android:visibility="gone"
         />
@@ -83,8 +84,7 @@
 
     <android.support.v7.widget.RecyclerView android:id="@+id/findFriends_recycler_view"
                                             android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:layout_below="@id/findFriends_search_parent"
-        />
+                                            android:layout_height="wrap_content"
+                                            android:layout_below="@id/findFriends_search_parent"/>
 
 </RelativeLayout>

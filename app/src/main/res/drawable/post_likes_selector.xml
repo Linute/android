@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/heart" android:state_checked="false"/>
-    <item android:drawable="@drawable/heart_red" android:state_checked="true"/>
-    <item android:drawable="@drawable/heart"/>
+
+    <item android:drawable="@drawable/inactive_heart" android:state_checked="false"/>
+    <item android:drawable="@drawable/ic_icon_like_copy" android:state_checked="true"/>
+    <item android:drawable="@drawable/inactive_heart"/>
+
     <!-- default state -->
 </selector>

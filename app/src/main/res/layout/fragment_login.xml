@@ -1,0 +1,100 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:background="@color/fifty_black"
+                tools:context=".LoginAndSignup.LinuteLoginFragment">
+
+    <LinearLayout
+        android:id="@+id/signin_email_login_form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:layout_marginTop="150dp"
+        android:orientation="vertical">
+
+
+        <EditText
+            android:id="@+id/signin_email_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/prompt_email"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColor="@color/fifty_white"
+            android:textColorHint="@color/thirtyfive_white"
+            android:theme="@style/MyEditTextTheme"/>
+
+
+        <EditText
+            android:id="@+id/signin_email_password_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:hint="@string/prompt_password"
+            android:inputType="textPassword"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColor="@color/fifty_white"
+            android:textColorHint="@color/thirtyfive_white"
+            android:theme="@style/MyEditTextTheme"/>
+
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/login_buttons_layer"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@+id/signin_email_login_form"
+                  android:layout_marginEnd="46dp"
+                  android:layout_marginStart="46dp">
+
+        <ImageView
+            android:id="@+id/signin_create_button"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:scaleType="fitCenter"
+            android:src="@drawable/create_button"/>
+
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/signin_signin_button"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:scaleType="fitCenter"
+            android:src="@drawable/login_button"
+            />
+
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/signin_progress_bar"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/signin_email_login_form"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+    <TextView android:id="@+id/login_forgot_pass"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_alignParentBottom="true"
+              android:layout_alignParentEnd="true"
+              android:layout_margin="@dimen/activity_horizontal_margin"
+              android:text="Forgot password"
+              android:textColor="@color/thirtyfive_white"
+
+        />
+
+
+</RelativeLayout>

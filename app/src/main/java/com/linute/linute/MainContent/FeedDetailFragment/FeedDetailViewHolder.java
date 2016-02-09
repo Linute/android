@@ -42,20 +42,20 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder  implements Vi
         vCommentUserName = (TextView) itemView.findViewById(R.id.comment_user_name);
         vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
 
-        vCommentUserName.setOnClickListener(this);
-        vCommentUserImage.setOnClickListener(this);
     }
 
     void bindModel(Comment comment) {
         Glide.with(mContext)
-                .load(Utils.getImageUrlOfUser(comment.getCommentUserProfileImage()))
+                .load(comment.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(comment.getCommentUserProfileImage()))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vCommentUserImage);
-        vCommentUserName.setText(comment.getCommentUserName());
+
+        vCommentUserName.setText(comment.isAnon() ? "Anonymous": comment.getCommentUserName());
         vCommentUserText.setText(comment.getCommentUserPostText());
+
         if (comment.getCommentUserId().equals(mSharedPreferences.getString("userID", ""))) {
             vCommentUserName.setTextColor(Color.parseColor("#56bb1d"));
         } else {
@@ -64,6 +64,11 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder  implements Vi
 
         mCommenterUserId = comment.getCommentUserId();
         mUserName = comment.getCommentUserName();
+
+        if (!comment.isAnon()){
+            vCommentUserName.setOnClickListener(this);
+            vCommentUserImage.setOnClickListener(this);
+        }
     }
 
     @Override

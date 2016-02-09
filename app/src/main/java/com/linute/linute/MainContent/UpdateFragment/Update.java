@@ -68,6 +68,8 @@ public class Update {
     private String mFriendshipID;
     private boolean mFollowedBack;
 
+    private boolean mIsAnon;
+
 
     public Update(JSONObject json) {
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json, "action"));
@@ -78,6 +80,8 @@ public class Update {
         //mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
 
         mActionID = getStringFromJson(json, "id");
+
+        mIsAnon = getIntFromJson(json, "privacy") == 1;
 
         setUpUserInformation(json);
 
@@ -309,5 +313,9 @@ public class Update {
             e.printStackTrace();
             return 0;
         }
+    }
+
+    public boolean isAnon() {
+        return mIsAnon;
     }
 }

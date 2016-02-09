@@ -8,9 +8,6 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 

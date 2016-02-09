@@ -203,8 +203,11 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        clearBackStack();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) clearBackStack();
+        else {
+            setResult(RESULT_CANCELED);
+            super.onBackPressed();
+        }
     }
 
     private void goToGalleryAndCrop() {

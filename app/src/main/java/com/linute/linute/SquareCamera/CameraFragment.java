@@ -43,8 +43,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     public static final String CAMERA_FLASH_KEY = "flash_mode";
     public static final String IMAGE_INFO = "image_info";
 
-    private static final int PICTURE_SIZE_MAX_WIDTH = 1280;
-    private static final int PREVIEW_SIZE_MAX_WIDTH = 640;
+    private static final int PICTURE_SIZE_MAX_WIDTH = 2560;
+    private static final int PREVIEW_SIZE_MAX_WIDTH = 1280;
 
     private int mCameraID;
     private String mFlashMode;
@@ -108,17 +108,17 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         bindViews(view);
 
-        ((ImageButton) view.findViewById(R.id.camera_cancel)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.camera_cancel).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 cancelPressed();
             }
         });
 
-        ((ImageButton) view.findViewById(R.id.cameraFragment_galleryButton)).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.cameraFragment_galleryButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity)getActivity()).launchGalleryFragment();
+                ((CameraActivity) getActivity()).launchGalleryFragment();
             }
         });
 
@@ -156,7 +156,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                     //save image parameters ; top cover and lower cover
                     //we need this for EditAndSaveFragment
                     if (getActivity() != null)
-                        ((CameraActivity)getActivity()).setImageParameters(mImageParameters.createCopy());
+                        ((CameraActivity) getActivity()).setImageParameters(mImageParameters.createCopy());
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                         mPreviewView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -170,7 +170,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
             //save image parameters ; top cover and lower cover
             //we need this for EditAndSaveFragment
-            ((CameraActivity)getActivity()).setImageParameters(mImageParameters.createCopy());
+            ((CameraActivity) getActivity()).setImageParameters(mImageParameters.createCopy());
         }
     }
 
@@ -295,6 +295,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             mCamera.startPreview();
             setSafeToTakePhoto(true);
             setCameraFocusReady(true);
+            Log.i(TAG, "startCameraPreview: called");
         } catch (IOException e) {
             Log.d(TAG, "Can't start camera preview due to IOException " + e);
             e.printStackTrace();
@@ -383,8 +384,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         Size bestPreviewSize = determineBestPreviewSize(parameters);
         Size bestPictureSize = determineBestPictureSize(parameters);
 
+
         parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
         parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
+
+        Log.i(TAG, "setupCamera: "+bestPictureSize.width + " "+bestPictureSize.height);
 
 
         // Set continuous picture focus, if it's supported
@@ -414,18 +418,31 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     }
 
     private Size determineBestSize(List<Size> sizes, int widthThreshold) {
+
         Size bestSize = null;
         Size size;
         int numOfSizes = sizes.size();
+//        for (int i = 0; i < numOfSizes; i++) {
+//            size = sizes.get(i);
+//            boolean isDesireRatio = (size.width / 4) == (size.height / 3);
+//            boolean isBetterSize = (bestSize == null) || size.width > bestSize.width;
+//
+//            if (isDesireRatio && isBetterSize) {
+//                bestSize = size;
+//            }
+//        }
+
         for (int i = 0; i < numOfSizes; i++) {
             size = sizes.get(i);
-            boolean isDesireRatio = (size.width / 4) == (size.height / 3);
+
+            boolean isDesireRatio = (size.width / 4) == (size.height / 3) || (size.height / 4) == (size.width / 3);
             boolean isBetterSize = (bestSize == null) || size.width > bestSize.width;
 
             if (isDesireRatio && isBetterSize) {
                 bestSize = size;
             }
         }
+
 
         if (bestSize == null) {
             Log.d(TAG, "cannot find the best camera size");
@@ -458,19 +475,24 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
             mOrientationListener.rememberOrientation();
 
-            // Shutter callback occurs after the image is captured. This can
-            // be used to trigger a sound to let the user know that image is taken
-            Camera.ShutterCallback shutterCallback = null;
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    // Shutter callback occurs after the image is captured. This can
+                    // be used to trigger a sound to let the user know that image is taken
+                    Camera.ShutterCallback shutterCallback = null;
 
-            // Raw callback occurs when the raw image data is available
-            Camera.PictureCallback raw = null;
+                    // Raw callback occurs when the raw image data is available
+                    Camera.PictureCallback raw = null;
 
-            // postView callback occurs when a scaled, fully processed
-            // postView image is available.
-            Camera.PictureCallback postView = null;
+                    // postView callback occurs when a scaled, fully processed
+                    // postView image is available.
+                    Camera.PictureCallback postView = null;
 
-            // jpeg callback occurs when the compressed image is available
-            mCamera.takePicture(shutterCallback, raw, postView, this);
+                    // jpeg callback occurs when the compressed image is available
+                    mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+                }
+            });
         }
     }
 
@@ -502,6 +524,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public void onPause() {
         super.onPause();
+        mCamera.cancelAutoFocus();
         mOrientationListener.disable();
         mShowCameraHandler.removeCallbacks(mShowPreview);
         // stop the preview
@@ -587,7 +610,28 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             oldBitmap.recycle();
         }
 
+        if (usingFrontFaceCamera()) {
+            Bitmap oldBitmap = bitmap;
+
+            Matrix matrix = new Matrix();
+            matrix.setScale(-1, 1);
+            matrix.postTranslate(bitmap.getWidth(), 0);
+
+            bitmap = Bitmap.createBitmap(
+                    oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
+            );
+
+            oldBitmap.recycle();
+        }
+
         return bitmap;
+    }
+
+    private boolean usingFrontFaceCamera() {
+        CameraInfo info = new CameraInfo();
+        Camera.getCameraInfo(mCameraID, info);
+
+        return (info.facing == CameraInfo.CAMERA_FACING_FRONT);
     }
 
     private int getPhotoRotation() {
@@ -669,7 +713,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean hasCameraAndWritePermission(){
+    private boolean hasCameraAndWritePermission() {
         return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 && hasPermission(Manifest.permission.CAMERA);
     }

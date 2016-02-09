@@ -18,6 +18,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -50,8 +51,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView vFollowing;
     protected TextView vFollowers;
     protected TextView vCollegeName;
-    protected ImageView vBlurBack;
-    protected FrameLayout vBlurFrame;
     protected ImageView vFollowStatus;
 
     private Context mContext;
@@ -73,8 +72,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vPosts = (TextView) itemView.findViewById(R.id.profilefrag_num_posts);
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
         vFollowing = (TextView) itemView.findViewById(R.id.profilefrag_num_following);
-        vBlurBack = (ImageView) itemView.findViewById(R.id.profile_blur_back);
-        vBlurFrame = (FrameLayout) itemView.findViewById(R.id.profile_blur_frame);
         vFollowStatus = (ImageView) itemView.findViewById(R.id.follow_button);
 
         vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
@@ -82,8 +79,27 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSharedPreferences.getString("userID", "").equals(mUser.getUserID())) {
-                    //TODO: VIEW IMAGE
+                //TODO: VIEW IMAGE
+            }
+        });
+
+
+        final BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+        itemView.findViewById(R.id.prof_header_following_container).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activity != null){
+                    activity.addFragmentToContainer(FriendsListFragment.newInstance(true, mUser.getUserID()));
+                }
+            }
+        });
+
+        itemView.findViewById(R.id.prof_header_followers_container).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activity != null){
+                    activity.addFragmentToContainer(FriendsListFragment.newInstance(false, mUser.getUserID()));
                 }
             }
         });
@@ -188,23 +204,9 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
 
-        Glide.with(mContext)
-                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.profile_picture_placeholder)
-                //.centerCrop()
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
-                        Bitmap blurredBitmap = BlurBuilder.blur(mContext, bitmap.copy(Bitmap.Config.ARGB_8888, true));
-                        vBlurBack.setBackground(new BitmapDrawable(mContext.getResources(), blurredBitmap));
-                    }
-                });
     }
 }

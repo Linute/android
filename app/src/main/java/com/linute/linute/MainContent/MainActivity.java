@@ -25,6 +25,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,8 +63,12 @@ import io.socket.emitter.Emitter;
 public class MainActivity extends BaseTaptActivity {
 
     public static String TAG = "MainActivity";
+
+    public static final int PHOTO_STATUS_POSTED = 19;
+
     private AppBarLayout mAppBarLayout;
     private ActionBar mActionBar;
+    private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
@@ -92,7 +99,6 @@ public class MainActivity extends BaseTaptActivity {
     private MenuItem mPreviousItem;
 
     private Socket mSocket;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +117,7 @@ public class MainActivity extends BaseTaptActivity {
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
         setSupportActionBar(mToolbar);
         mActionBar = getSupportActionBar();
 
@@ -130,14 +136,15 @@ public class MainActivity extends BaseTaptActivity {
         });
 
 
-        //only loads one fragment
-        mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
-                .commit();
-        mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
-        mPreviousItem.setChecked(true);
-
+        if (savedInstanceState == null) {
+            //only loads one fragment
+            mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
+                    .commit();
+            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+            mPreviousItem.setChecked(true);
+        }
 
         //floating action button setup
         fam = (FloatingActionsMenu) findViewById(R.id.fabmenu);
@@ -147,7 +154,7 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 fam.toggle();
                 Intent i = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(i);
+                startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
         FloatingActionButton fabText = (FloatingActionButton) findViewById(R.id.fabText);
@@ -156,7 +163,7 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 fam.toggle();
                 Intent i = new Intent(MainActivity.this, PostCreatePage.class);
-                startActivity(i);
+                startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
 
@@ -293,6 +300,8 @@ public class MainActivity extends BaseTaptActivity {
             //NOTE: need to reload others?
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
+        }else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK){
+            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -365,14 +374,12 @@ public class MainActivity extends BaseTaptActivity {
         String name = sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
 
-        ((TextView) header.findViewById(R.id.drawerHeader_college_name)).setText(sharedPreferences.getString("collegeName", ""));
-
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .asBitmap()
                 .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000")))
                 .override(size, size) //change image to the size we want
-                .placeholder(R.drawable.profile_picture_placeholder)
+                .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into((CircularImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
@@ -504,34 +511,37 @@ public class MainActivity extends BaseTaptActivity {
 
         {
             try {
-                mSocket = IO.socket(getString(R.string.CHAT_SERVER_URL));
+                mSocket = IO.socket(getString(R.string.DEV_CHAT_SERVER_URL));
             } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.on("authorization", authorization);
-        mSocket.connect();
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (mSocket != null) {
+            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on("authorization", authorization);
+            mSocket.connect();
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mSocket.emit("authorization", jsonObject);
         }
-        mSocket.emit("authorization", jsonObject);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        mSocket.disconnect();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("new message", authorization);
+        if (mSocket != null) {
+            mSocket.disconnect();
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off("new message", authorization);
+        }
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -562,4 +572,24 @@ public class MainActivity extends BaseTaptActivity {
             });
         }
     };
+
+    @Override
+    public void enableBarScrolling(boolean enabled) {
+
+        if (enabled) {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        } else {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(null);
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(0);
+
+        }
+    }
+
 }

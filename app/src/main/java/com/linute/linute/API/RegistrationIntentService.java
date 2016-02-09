@@ -18,18 +18,11 @@ package com.linute.linute.API;
 
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -38,14 +31,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -63,14 +51,14 @@ public class RegistrationIntentService extends IntentService {
     //private LocationManager mLocationManager;
 
     private String mToken;
-
-
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onHandleIntent(Intent intent) {
         //SharedPreferences sharedPreferences = new SecurePreferences(getApplicationContext(), "BtE3eRHzZq", LinuteConstants.SharedPrefName);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
         try {
             // [START register_for_gcm]
             // Initially this call goes out to the network to retrieve the token, subsequent calls
@@ -113,9 +101,9 @@ public class RegistrationIntentService extends IntentService {
             // on a third-party server, this ensures that we'll attempt the update at a later time.
             sharedPreferences.edit().putBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false).apply();
         }
-        // Notify UI that registration has completed, so the progress indicator can be hidden.
+
         Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
+        LocalBroadcastManager.getInstance(RegistrationIntentService.this).sendBroadcast(registrationComplete);
     }
 
     /**
@@ -161,6 +149,10 @@ public class RegistrationIntentService extends IntentService {
                 } else {
                     Log.v(TAG, response.body().string());
                     Log.d(TAG, "sendRegistrationDevice");
+                    sharedPreferences.edit().putBoolean("deviceRegistered", true).apply();
+//                    // Notify UI that registration has completed, so the progress indicator can be hidden.
+//                    Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
+//                    LocalBroadcastManager.getInstance(RegistrationIntentService.this).sendBroadcast(registrationComplete);
                 }
             }
         });
