@@ -2,6 +2,7 @@ package com.linute.linute.LoginAndSignup;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -18,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -25,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.lang.reflect.AccessibleObject;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -118,6 +121,16 @@ public class LinuteLoginFragment extends Fragment {
             }
         });
 
+        rootView.findViewById(android.R.id.home).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = getActivity();
+                if (activity != null){
+                    activity.onBackPressed();
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -140,7 +153,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        String email = mEmailView.getText().toString().toLowerCase();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -420,8 +433,19 @@ public class LinuteLoginFragment extends Fragment {
                 }
             }
         });
-
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mEmailView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
+        }else if (mPasswordView.hasFocus()){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+        }
+
+    }
 }
 
