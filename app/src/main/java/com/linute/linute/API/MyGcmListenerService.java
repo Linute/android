@@ -76,6 +76,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * In some cases it may be useful to show a notification indicating to the user
          * that a message was received.
          */
+
         sendNotification(data, action);
         // [END_EXCLUDE]
     }
@@ -93,7 +94,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         //TODO: CAUSING CRASH
 
-        if (action != null &&  action.equals("messages")) { //<---
+        if (action != null && action.equals("messages")) { //<---
             intent = new Intent(this, RoomsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("ROOMS", "SOMEMESSAGE");

@@ -28,7 +28,7 @@ public class API_Methods {
     private static String SCHEME = "https";
     //private static String HOST = "api.linute.com";
     private static String HOST = "devapi.linute.com";
-    private static String VERSION = "v1.3";
+    private static String VERSION = "v1.3.1";
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");

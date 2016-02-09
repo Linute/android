@@ -15,12 +15,10 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -130,89 +128,89 @@ public class NewChatDialog extends DialogFragment {
                                 jsonObject = new JSONObject(response.body().string());
                                 Log.d(TAG, "onResponseCheckChat: " + jsonObject.toString(4));
 
-                                if (jsonObject.getJSONArray("rooms").length() == 0) {
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            LSDKChat newChat = new LSDKChat(getActivity());
-                                            Map<String, Object> users = new HashMap<String, Object>();
-                                            JSONArray usersArray = new JSONArray();
-                                            usersArray.put(mSharedPreferences.getString("userID", null));
-                                            usersArray.put(mSearchUser.getUserId());
-                                            users.put("users", usersArray);
-                                            users.put("text", userText);
-                                            newChat.newChat(users, new Callback() {
-                                                @Override
-                                                public void onFailure(Request request, IOException e) {
-                                                    e.printStackTrace();
-                                                    Log.d(TAG, "onFailureNewChat: " + request.body().toString());
-                                                }
+//                                if (jsonObject.getJSONArray("rooms").length() == 0) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        LSDKChat newChat = new LSDKChat(getActivity());
+                                        Map<String, Object> users = new HashMap<String, Object>();
+                                        JSONArray usersArray = new JSONArray();
+                                        usersArray.put(mSharedPreferences.getString("userID", null));
+                                        usersArray.put(mSearchUser.getUserId());
+                                        users.put("users", usersArray);
+                                        users.put("text", userText);
+                                        newChat.newChat(users, new Callback() {
+                                            @Override
+                                            public void onFailure(Request request, IOException e) {
+                                                e.printStackTrace();
+                                                Log.d(TAG, "onFailureNewChat: " + request.body().toString());
+                                            }
 
-                                                @Override
-                                                public void onResponse(Response response) throws IOException {
-                                                    if (!response.isSuccessful()) {
-                                                        JSONObject jsonObject = null;
-                                                        try {
-                                                            jsonObject = new JSONObject(response.body().string());
-                                                            Log.d(TAG, "onResponseNotSuccessfulNewChat: " + jsonObject.toString(4));
-                                                        } catch (JSONException e) {
-                                                            e.printStackTrace();
-                                                        }
-                                                    } else {
-//                                                        Log.d(TAG, "onResponse: " + response.body().string());
-                                                        JSONObject jsonObject = null;
-                                                        String roomId = "";
-                                                        String ownerName = "";
-                                                        String ownerId = "";
-                                                        int usersCount = 1;
-                                                        try {
-                                                            jsonObject = new JSONObject(response.body().string());
-//                                                            Log.d(TAG, "onResponseSuccesfullNewChat: " + jsonObject.toString(4));
-                                                            roomId = jsonObject.getString("room");
-                                                            ownerName = jsonObject.getJSONObject("owner").getString("fullName");
-                                                            ownerId = jsonObject.getJSONObject("owner").getString("id");
-//                                                            usersCount = jsonObject.getJSONArray("users").length();
-                                                            // uncomment above when server adds user and delete below line
-                                                            usersCount = 2;
-                                                        } catch (JSONException e) {
-                                                            e.printStackTrace();
-                                                        }
-                                                        // startChat Frag
-                                                        final String finalRoomId = roomId;
-                                                        final String finalOwnerName = ownerName;
-                                                        final String finalOwnerId = ownerId;
-                                                        final int finalUsersCount = usersCount;
-                                                        getActivity().runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                ChatFragment newFragment = ChatFragment.newInstance(
-                                                                        finalRoomId, finalOwnerName, finalOwnerId,
-                                                                        finalUsersCount, new ArrayList<ChatHead>());
-                                                                FragmentTransaction transaction = ((RoomsActivity) getActivity()).getSupportFragmentManager().beginTransaction();
-                                                                // Replace whatever is in the fragment_container view with this fragment,
-                                                                // and add the transaction to the back stack so the user can navigate back
-                                                                transaction.replace(R.id.chat_container, newFragment);
-                                                                transaction.addToBackStack(null);
-                                                                // Commit the transaction
-                                                                ((RoomsActivity) getActivity()).getSupportFragmentManager().popBackStack();
-                                                                dismiss();
-                                                                ((RoomsActivity) getActivity()).toggleFab(false);
-                                                                transaction.commit();
-                                                            }
-                                                        });
+                                            @Override
+                                            public void onResponse(Response response) throws IOException {
+                                                if (!response.isSuccessful()) {
+                                                    JSONObject jsonObject = null;
+                                                    try {
+                                                        jsonObject = new JSONObject(response.body().string());
+                                                        Log.d(TAG, "onResponseNotSuccessfulNewChat: " + jsonObject.toString(4));
+                                                    } catch (JSONException e) {
+                                                        e.printStackTrace();
                                                     }
+                                                } else {
+//                                                        Log.d(TAG, "onResponse: " + response.body().string());
+                                                    JSONObject jsonObject = null;
+                                                    String roomId = "";
+                                                    String ownerName = "";
+                                                    String ownerId = "";
+                                                    int usersCount = 1;
+                                                    try {
+                                                        jsonObject = new JSONObject(response.body().string());
+//                                                            Log.d(TAG, "onResponseSuccesfullNewChat: " + jsonObject.toString(4));
+                                                        roomId = jsonObject.getString("room");
+                                                        ownerName = jsonObject.getJSONObject("owner").getString("fullName");
+                                                        ownerId = jsonObject.getJSONObject("owner").getString("id");
+//                                                            usersCount = jsonObject.getJSONArray("users").length();
+                                                        // uncomment above when server adds user and delete below line
+                                                        usersCount = 2;
+                                                    } catch (JSONException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                    // startChat Frag
+                                                    final String finalRoomId = roomId;
+                                                    final String finalOwnerName = ownerName;
+                                                    final String finalOwnerId = ownerId;
+                                                    final int finalUsersCount = usersCount;
+                                                    getActivity().runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            ChatFragment newFragment = ChatFragment.newInstance(
+                                                                    finalRoomId, finalOwnerName, finalOwnerId,
+                                                                    finalUsersCount, new ArrayList<ChatHead>());
+                                                            FragmentTransaction transaction = ((RoomsActivity) getActivity()).getSupportFragmentManager().beginTransaction();
+                                                            // Replace whatever is in the fragment_container view with this fragment,
+                                                            // and add the transaction to the back stack so the user can navigate back
+                                                            transaction.replace(R.id.chat_container, newFragment);
+                                                            transaction.addToBackStack(null);
+                                                            // Commit the transaction
+                                                            ((RoomsActivity) getActivity()).getSupportFragmentManager().popBackStack();
+                                                            dismiss();
+                                                            ((RoomsActivity) getActivity()).toggleFab(false);
+                                                            transaction.commit();
+                                                        }
+                                                    });
                                                 }
-                                            });
-                                        }
-                                    });
-                                } else {
-                                    getActivity().runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            Toast.makeText(getActivity(), "Looks like you've already got this chat going!", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-                                }
+                                            }
+                                        });
+                                    }
+                                });
+//                                } else {
+//                                    getActivity().runOnUiThread(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            Toast.makeText(getActivity(), "Looks like you've already got this chat going!", Toast.LENGTH_SHORT).show();
+//                                        }
+//                                    });
+//                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
