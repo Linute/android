@@ -189,7 +189,7 @@ public class PreLoginActivity extends AppCompatActivity {
                         JSONObject object = new JSONObject(responseString);
                         boolean isUnique = object.getBoolean("isUnique");
 
-                        LinuteUser user = new LinuteUser(object);
+                        final LinuteUser user = new LinuteUser(object);
 
                         if (isUnique) {
                             persistTempData(user);
@@ -202,8 +202,15 @@ public class PreLoginActivity extends AppCompatActivity {
                             persistData(user); //save data
                             //if no college id or name, go to colleg picker activity
                             //else go to main
-                            goToNextActivity((user.getCollegeName() == null || user.getCollegeId() == null)
-                                    ? CollegePickerActivity.class : MainActivity.class);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progress.dismiss();
+                                    goToNextActivity((user.getCollegeName() == null || user.getCollegeId() == null)
+                                            ? CollegePickerActivity.class : MainActivity.class);
+                                }
+                            });
+
                         }
 
                     } catch (JSONException e) {
@@ -283,6 +290,9 @@ public class PreLoginActivity extends AppCompatActivity {
     private void persistData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
+        Log.i(TAG, "persistData: "+mFBToken);
+        Log.i(TAG, "persistData: "+user.getPasswordFacebook());
+        //sharedPreferences.putString("password", user.getPasswordFacebook());
         sharedPreferences.putString("password", mFBToken);
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());

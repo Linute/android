@@ -218,6 +218,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         private TextView mNameText;
         private TextView mDescriptionText;
 
+        private Update mUpdate;
+
 
         public UpdateItemViewHolder(View itemView) {
             super(itemView);
@@ -232,6 +234,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
         //sets up view
         public void bindView(Update update) {
+
+            mUpdate = update;
+
             mNameText.setText(update.isAnon() ? "Anonymous" : update.getUserFullName());
                     mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
 
@@ -378,6 +383,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                                         mFollowed = false;
                                         Utils.showBadConnectionToast(activity);
                                         mEventPicture.setImageResource(R.drawable.follow_back);
+                                        mUpdate.setFollowedBack(false);
+
                                     }
                                 });
 
@@ -393,8 +400,11 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                                             mFollowed = false;
                                             Utils.showServerErrorToast(activity);
                                             mEventPicture.setImageResource(R.drawable.follow_back);
+                                            mUpdate.setFollowedBack(false);
                                         }
                                     });
+                                }else {
+                                    mUpdate.setFollowedBack(true);
                                 }
                             }
                         });
@@ -428,7 +438,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     drawable = R.drawable.icon_user;
                     break;
                 case MENTIONED:
-                    drawable = R.drawable.icon_user; //TODO: NEED ICON
+                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
                     break;
                 case FRIEND_JOINED:
                     drawable = R.drawable.icon_user; //TODO: NEED ICON

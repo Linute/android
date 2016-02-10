@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.linute.linute.API.LSDKChat;
@@ -55,6 +56,7 @@ public class SearchUsers extends Fragment {
     private List<SearchUser> mSearchUserList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
 
+    private EditText editText;
 
     public SearchUsers() {
         // Required empty public constructor
@@ -115,7 +117,7 @@ public class SearchUsers extends Fragment {
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mSearchAdapter);
 
-        EditText editText = (EditText) view.findViewById(R.id.search_users_entry);
+        editText = (EditText) view.findViewById(R.id.search_users_entry);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -132,6 +134,16 @@ public class SearchUsers extends Fragment {
 
             }
         });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (editText.hasFocus() && getActivity() != null){
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        }
     }
 
     private void getUsers(String searchWord) {

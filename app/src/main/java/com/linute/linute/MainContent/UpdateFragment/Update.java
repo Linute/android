@@ -139,7 +139,7 @@ public class Update {
     public final boolean hasEventInformation(){
         return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
                 mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
-                ||mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS;
+                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -200,7 +200,7 @@ public class Update {
             case FRIEND_JOINED:
                 return  "Has joined Tapt";
             case MENTIONED:
-                return "Mentioned your post";
+                return "Mentioned you in a post";
             case POSTED_PHOTO:
                 return "Posted a photo";
             case POSTED_STATUS:
@@ -270,6 +270,10 @@ public class Update {
 
     public boolean getFollowedBack(){
         return mFollowedBack;
+    }
+
+    public void setFollowedBack(boolean follow){
+        mFollowedBack = follow;
     }
 
 

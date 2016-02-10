@@ -1,10 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,11 +15,21 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -59,6 +69,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         protected LinearLayout vSearchItemLinear;
         protected CircularImageView vUserImage;
         protected TextView vUserName;
+        protected String mUserId;
 
         public SearchViewHolder(View itemView) {
             super(itemView);
@@ -76,15 +87,98 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 //            ((RoomsActivity) aContext).getFragmentManager().popBackStack();
 
             Toast.makeText(aContext, mSearchUserList.get(getAdapterPosition()).getUserName(), Toast.LENGTH_SHORT).show();
-            FragmentManager fragmentManager = ((RoomsActivity) aContext).getFragmentManager();
-            NewChatDialog newChatDialog = NewChatDialog.newInstance(mSearchUserList.get(getAdapterPosition()));
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            // For a little polish, specify a transition animation
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            // To make it fullscreen, use the 'content' root view as the container
-            // for the fragment, which is always the root view for the activity
-            transaction.add(R.id.fragment, newChatDialog)
-                    .addToBackStack(null).commit();
+
+
+            JSONArray users = new JSONArray();
+            users.put(mSharedPreferences.getString("userID", ""));
+            users.put(mUserId);
+
+
+            new LSDKChat(aContext).getPastMessages(users, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    Log.e(TAG, "onFailure: " + "NO INTERNET CONNECTION");
+
+                    final Activity activity = (Activity) aContext;
+                    if (activity != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(activity);
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    final String resString = response.body().string();
+                    if (response.isSuccessful()) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(resString);
+
+                            final String roomId = jsonObject.getString("id");
+                            final JSONArray users = jsonObject.getJSONArray("users");
+
+
+                            final RoomsActivity activity = (RoomsActivity) aContext;
+                            if (activity == null) return;
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    activity.getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(R.id.chat_container,
+                                                    ChatFragment.newInstance(roomId,
+                                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
+                                                            mSharedPreferences.getString("userID", ""),
+                                                            users.length(),
+                                                            new ArrayList<ChatHead>()))
+                                            .addToBackStack(null)
+                                            .commit();
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            final Activity activity = (Activity) aContext;
+                            if (activity != null) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(activity);
+                                    }
+                                });
+                            }
+                        }
+
+
+                    } else {
+                        Log.e(TAG, "run: " + resString);
+                        final Activity activity = (Activity) aContext;
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(activity);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+
+
+//            FragmentManager fragmentManager = ((RoomsActivity) aContext).getFragmentManager();
+//            NewChatDialog newChatDialog = NewChatDialog.newInstance(mSearchUserList.get(getAdapterPosition()));
+//            FragmentTransaction transaction = fragmentManager.beginTransaction();
+//            // For a little polish, specify a transition animation
+//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//            // To make it fullscreen, use the 'content' root view as the container
+//            // for the fragment, which is always the root view for the activity
+//            transaction.add(R.id.fragment, newChatDialog)
+//                    .addToBackStack(null).commit();
         }
 
         void bindModel(SearchUser user) {
@@ -92,9 +186,11 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .load(Utils.getImageUrlOfUser(user.getUserImage()))
                     .asBitmap()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                    .placeholder(R.drawable.profile_picture_placeholder)
+                    .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
+
+            mUserId = user.getUserId();
 
             vUserName.setText(user.getUserName());
         }

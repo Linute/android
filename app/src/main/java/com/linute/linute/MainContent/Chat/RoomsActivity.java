@@ -48,9 +48,16 @@ public class RoomsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rooms);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
-        toolbar.setTitle("Rooms");
+        toolbar.setTitle("Messages");
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         setSupportActionBar(toolbar);
+
+        if (savedInstanceState == null){
+           getSupportFragmentManager()
+                   .beginTransaction()
+                   .replace(R.id.fragment, new RoomsActivityFragment())
+                   .commit();
+        }
 
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
@@ -132,7 +139,7 @@ public class RoomsActivity extends AppCompatActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL));/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }

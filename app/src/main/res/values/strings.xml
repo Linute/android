@@ -134,7 +134,7 @@
     <string name="facebook_app_id">900595913337243</string>
     <string name="title_activity_rooms">RoomsActivity</string>
 
-    <string name="DEV_SOCKET_URL">https://devapi.tapt.io/</string>
+    <!--<string name="DEV_SOCKET_URL">https://devapi.tapt.io/</string>-->
     <string name="SOCKET_URL">https://api.tapt.io/</string>
 
     <string name="search_hint">Search</string>

@@ -126,7 +126,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                             .load(Utils.getImageUrlOfUser(chat.getUserImage()))
                             .asBitmap()
                             .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                            .placeholder(R.drawable.profile_picture_placeholder)
+                            .placeholder(R.drawable.image_loading_background)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(vOwnerImage);
 
@@ -141,7 +141,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                             .load(Utils.getImageUrlOfUser(chat.getUserImage()))
                             .asBitmap()
                             .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                            .placeholder(R.drawable.profile_picture_placeholder)
+                            .placeholder(R.drawable.image_loading_background)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(vUserImage);
 

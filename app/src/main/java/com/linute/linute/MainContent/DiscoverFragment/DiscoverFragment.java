@@ -105,7 +105,6 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        Log.i(TAG, "onCreateView: " + mPosts.size());
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
 
         //if floating button expanded, collapse it
@@ -127,7 +126,6 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        Log.i(TAG, "onCreateView: fragment created");
         //NOTE: don't remember what it does. uncomment if somethings happens
 //        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
@@ -225,7 +223,6 @@ public class DiscoverFragment extends UpdatableFragment {
                 }
             });
         }
-        Log.i(TAG, "getFeed: jjj");
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         Map<String, String> events = new HashMap<>();
@@ -243,7 +240,17 @@ public class DiscoverFragment extends UpdatableFragment {
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("HEY", response.body().string());
-                            cancelRefresh();
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (refreshLayout.isRefreshing()){
+                                            refreshLayout.setRefreshing(false);
+                                        }
+                                        Utils.showServerErrorToast(getActivity());
+                                    }
+                                });
+                            }
                             return;
                         }
 
@@ -326,6 +333,7 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
     private void noInternet() {
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -336,6 +344,7 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
     private void cancelRefresh() {
+        if (getActivity() == null) return;
         if (refreshLayout.isRefreshing()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override

@@ -519,6 +519,8 @@ public class FacebookSignUpFragment extends Fragment {
 
     private void persistData(LinuteUser user) {
         if (getActivity() == null) return;
+
+
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
