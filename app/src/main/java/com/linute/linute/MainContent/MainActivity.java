@@ -544,13 +544,7 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.error_connect, Toast.LENGTH_LONG).show();
-                }
-            });
+            Log.i(TAG, "call: failed socket connection");
         }
     };
 

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.R;
@@ -22,6 +23,7 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -114,16 +116,16 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity != null){ //changes app bar title to user's name
+        if (activity != null) { //changes app bar title to user's name
             activity.setTitle(mUserName);
             activity.resetToolbar();
         }
 
         //if first time creating this fragment
         //won't be loaded again is user gets here using onBack
-        if (fragmentNeedsUpdating()){
+        if (fragmentNeedsUpdating()) {
             mSwipeRefreshLayout.setRefreshing(true);
             updateAndSetHeader();
             setActivities(); //get activities
@@ -163,7 +165,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         }
                     });
                 } else {//else something went
-                    Log.v(TAG, response.code()+response.body().string());
+                    Log.v(TAG, response.code() + response.body().string());
                 }
             }
         });
@@ -174,9 +176,11 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         user.getUserActivities(mTaptUserId, "posted status", "posted photo", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
                     public void run() {
+                        Utils.showBadConnectionToast(getActivity());
                         if (mSwipeRefreshLayout.isRefreshing())
                             mSwipeRefreshLayout.setRefreshing(false);
                     }
@@ -189,47 +193,59 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                     try { //try to grab needed information from response
                         String body = response.body().string();
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-                        Log.d(TAG, body);
+//                        Log.d(TAG, body);
 
+                        if (activities == null || getActivity() == null) return;
 
-                        //i only update the list of activities if their are new values
-                        //array has problems if I continuously update with new values too quickly
-                        if (activities.length() != mUserActivityItems.size()) { //we have an updated set of info
-
-                            mUserActivityItems.clear(); //clear so we don't have duplicates
-                            for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                                mUserActivityItems.add(
-                                        new UserActivityItem(
-                                                activities.getJSONObject(i),
-                                                activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                                mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
-                                        )); //create activity objects and add to array
-                            }
+                        mUserActivityItems.clear(); //clear so we don't have duplicates
+                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                            mUserActivityItems.add(
+                                    new UserActivityItem(
+                                            activities.getJSONObject(i),
+                                            activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
+                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
+                                    )); //create activity objects and add to array
                         }
+
+                        if (mUserActivityItems.isEmpty()) {
+                            mUserActivityItems.add(new EmptyUserActivityItem());
+                        }
+
+                        if (getActivity() == null) return;
+
+                        //turn refresh off if it's on and notify ListView we might have updated information
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() { //update view
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mProfileAdapter.notifyDataSetChanged();
+                            }
+                        });
+
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
                     }
                 } else { //unable to connect with DB
                     Log.v(TAG, response.body().string());
-
-                }
-
-                if (getActivity() == null) return;
-
-                //turn refresh off if it's on and notify ListView we might have updated information
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() { //update view
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
-
-                        //NOTE: maybe move this inside try.
-                        //      should we update date text if no connection?
-                        mProfileAdapter.notifyDataSetChanged();
-
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
                     }
-                });
-
+                }
             }
         });
     }

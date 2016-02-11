@@ -2,9 +2,11 @@ package com.linute.linute.MainContent.ProfileFragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +21,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -49,10 +52,15 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected CircularImageView vProfilePicture;
     protected TextView vStatusText;
     protected TextView vPosts;
-    protected TextView vFollowing;
+    //protected TextView vFollowing;
     protected TextView vFollowers;
     protected TextView vCollegeName;
-    protected ImageView vFollowStatus;
+
+    protected View mFollowButton;
+    protected View mChatButton;
+    protected View mActionBarContainer;
+
+    protected TextView mFollowingButtonText;
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
@@ -60,7 +68,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private JSONObject jsonObject;
 
 
-    public ProfileHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context, Profile profile) {
+    public ProfileHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context, final Profile profile) {
         super(itemView);
 
         mContext = context;
@@ -72,8 +80,12 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
         vPosts = (TextView) itemView.findViewById(R.id.profilefrag_num_posts);
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
-        vFollowing = (TextView) itemView.findViewById(R.id.profilefrag_num_following);
-        vFollowStatus = (ImageView) itemView.findViewById(R.id.follow_button);
+
+        mFollowButton = itemView.findViewById(R.id.prof_header_follow_button);
+        mChatButton = itemView.findViewById(R.id.prof_header_chat_button);
+        mActionBarContainer = itemView.findViewById(R.id.prof_header_action_bar);
+        mFollowingButtonText = (TextView) itemView.findViewById(R.id.prof_header_follow_button_text);
+
 
         vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
 
@@ -84,30 +96,24 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
-
-        final BaseTaptActivity activity = (BaseTaptActivity) mContext;
-
-        itemView.findViewById(R.id.prof_header_following_container).setOnClickListener(new View.OnClickListener() {
+        mChatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity != null) {
-                    activity.addFragmentToContainer(FriendsListFragment.newInstance(true, mUser.getUserID()));
-                }
+                if (mUser.getUserID() == null) return;
+
+                Intent enterRooms = new Intent(mContext, RoomsActivity.class);
+                enterRooms.putExtra("CHATICON", false);
+                enterRooms.putExtra("USERID", mUser.getUserID());
+                mContext.startActivity(enterRooms);
             }
         });
 
-        itemView.findViewById(R.id.prof_header_followers_container).setOnClickListener(new View.OnClickListener() {
+        mFollowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity != null) {
-                    activity.addFragmentToContainer(FriendsListFragment.newInstance(false, mUser.getUserID()));
-                }
-            }
-        });
 
-        vFollowStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                if (mUser.getUserID() == null) return;
+
                 if (!mSharedPreferences.getString("userID", "").equals(mUser.getUserID())) {
                     if (mUser.getFriend().equals("")) {
                         Map<String, Object> postData = new HashMap<>();
@@ -143,7 +149,8 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                 ((BaseTaptActivity) mContext).runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        vFollowStatus.setImageResource(R.drawable.unfollowing);
+                                        mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.secondaryColor));
+                                        mFollowingButtonText.setText("following");
                                         Toast.makeText(mContext, "You got a new friend!", Toast.LENGTH_SHORT).show();
                                         try {
                                             mUser.setFriendship(jsonObject.getString("id"));
@@ -182,11 +189,13 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                 } else {
                                     response.body().close();
                                     BaseTaptActivity activity1 = (BaseTaptActivity) mContext;
-                                    if (activity == null) return;
+
+                                    if (activity1 == null) return;
                                     activity1.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            vFollowStatus.setImageResource(R.drawable.follow);
+                                            mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.follow_grey));
+                                            mFollowingButtonText.setText("follow");
                                             Toast.makeText(mContext, "You've lost friend!", Toast.LENGTH_SHORT).show();
                                             mUser.setFriend("");
                                         }
@@ -200,25 +209,42 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
+
+
+        final BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+        itemView.findViewById(R.id.prof_header_followers_container).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activity != null) {
+                    activity.addFragmentToContainer(FriendsListFragment.newInstance(false, mUser.getUserID()));
+                }
+            }
+        });
     }
 
-    void bindModel(LinuteUser user) {
+    void bindModel(final LinuteUser user) {
         if (mUser == null)
             mUser = user;
-        vStatusText.setText(user.getStatus());
+
+        if (user.getStatus() != null ) {
+            vStatusText.setText(user.getStatus().equals("") ? "No bio... :|" : user.getStatus());
+        }
         vPosts.setText(String.valueOf(user.getPosts()));
-        vFollowing.setText(String.valueOf(user.getFollowing()));
         vFollowers.setText(String.valueOf(user.getFollowers()));
         vCollegeName.setText(user.getCollegeName());
 
         if (!mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
-                vFollowStatus.setImageResource(R.drawable.follow);
+                mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.follow_grey));
+                mFollowingButtonText.setText("follow");
             } else {
-                vFollowStatus.setImageResource(R.drawable.unfollowing);
+                mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.secondaryColor));
+                mFollowingButtonText.setText("following");
             }
-            vFollowStatus.setVisibility(View.VISIBLE);
+            mActionBarContainer.setVisibility(View.VISIBLE);
         }
+
 
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(user.getProfileImage()))
@@ -229,4 +255,5 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .into(vProfilePicture);
 
     }
+
 }

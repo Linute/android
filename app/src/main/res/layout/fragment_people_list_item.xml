@@ -71,6 +71,7 @@
               android:layout_marginEnd="@dimen/activity_horizontal_margin"
               android:lines="3"
               android:textSize="@dimen/sub_font_size"
+              android:visibility="gone"
               tools:text = "TEST TESTT TEST ETSTE TWETSDG GF DGDF GFDG FDG DG FD GDF"
         />
 

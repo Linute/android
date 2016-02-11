@@ -164,7 +164,7 @@ public class FeedDetailPage extends UpdatableFragment {
                     recList.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                         }
                     }, 500);
                 return false;
@@ -465,7 +465,7 @@ public class FeedDetailPage extends UpdatableFragment {
                             recList.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                                 }
                             }, 500);
                         } else {

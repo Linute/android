@@ -92,6 +92,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     public void onFailure(Request request, IOException e) {
                         e.printStackTrace();
                         Activity activity = (Activity) vContext;
+                        if (activity == null) return;
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -104,6 +105,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     public void onResponse(Response response) throws IOException {
                         Activity activity = (Activity) vContext;
 
+                        if (activity == null) return;
 
                         if (!response.isSuccessful()) {
                             Log.d(TAG, response.body().string());

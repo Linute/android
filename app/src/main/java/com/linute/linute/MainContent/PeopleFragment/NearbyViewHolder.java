@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.PeopleFragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -91,8 +93,10 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder {
             public void onClick(View v) {
 
                 if (people.isFriend()) {
-                    //GO TO MESSANGER
-                    Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
+                    Intent enterRooms = new Intent(mContext, RoomsActivity.class);
+                    enterRooms.putExtra("CHATICON", false);
+                    enterRooms.putExtra("USERID", people.getID());
+                    mContext.startActivity(enterRooms);
                 } else {
 
                     final Map<String, Object> postData = new HashMap<>();
