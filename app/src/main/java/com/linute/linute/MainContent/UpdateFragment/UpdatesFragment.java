@@ -43,6 +43,8 @@ public class UpdatesFragment extends UpdatableFragment {
     private ArrayList<Update> mRecentUpdates = new ArrayList<>();
     private ArrayList<Update> mOldUpdates = new ArrayList<>();
 
+    private View mEmptyView;
+
     //private SharedPreferences mSharedPreferences;
     //private Integer mSkip = 25;
     //private boolean mCanLoadMore = true;
@@ -66,6 +68,7 @@ public class UpdatesFragment extends UpdatableFragment {
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
+        mEmptyView = rootView.findViewById(R.id.updateFragment_empty);
         //NOTE: Code for load more
         /*
         mUpdatesAdapter.setOnLoadMoreListener(new UpdatesAdapter.onLoadMoreListener() {
@@ -195,17 +198,20 @@ public class UpdatesFragment extends UpdatableFragment {
                             else mRecentUpdates.add(update); //else recent
                         }
 
-                        //NOTE: LOAD MORE
-//                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
-//                            mOldUpdates.add(null);
-//                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-//                            mRecentUpdates.add(null);
-
                         if (getActivity() == null) return;
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0 ) {
+                                    if (mEmptyView.getVisibility() == View.GONE)
+                                        mEmptyView.setVisibility(View.VISIBLE);
+                                }
+                                else {
+                                    if (mEmptyView.getVisibility() == View.VISIBLE)
+                                        mEmptyView.setVisibility(View.GONE);
+                                }
+
                                 mUpdatesAdapter.notifyDataSetChanged();
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }

@@ -9,8 +9,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -42,6 +40,10 @@ public class PostCreatePage extends AppCompatActivity {
     private EditText textContent;
     private Switch anonymousSwitch;
 
+    private View mPostButton;
+    private View mProgressbar;
+
+    private boolean mPostInProgress = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,16 @@ public class PostCreatePage extends AppCompatActivity {
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setTitle("Post Status");
         setSupportActionBar(toolbar);
+
+        mPostButton = toolbar.findViewById(R.id.create_page_post_button);
+        mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
+
+        mPostButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                postStatus();
+            }
+        });
 
 
         findViewById(R.id.postContent_edit_text_parent).setOnClickListener(new View.OnClickListener() {
@@ -91,6 +103,13 @@ public class PostCreatePage extends AppCompatActivity {
 
 
     private void postStatus(){
+        if (mPostInProgress) return;
+
+        mPostInProgress = true;
+
+        mProgressbar.setVisibility(View.VISIBLE);
+        mPostButton.setVisibility(View.GONE);
+
         Map<String, Object> postData = new HashMap<>();
 
         JSONArray coord = new JSONArray();
@@ -122,6 +141,9 @@ public class PostCreatePage extends AppCompatActivity {
                     @Override
                     public void run() {
                         Utils.showBadConnectionToast(PostCreatePage.this);
+                        mPostButton.setVisibility(View.VISIBLE);
+                        mProgressbar.setVisibility(View.GONE);
+                        mPostInProgress = false;
                     }
                 });
             }
@@ -130,34 +152,35 @@ public class PostCreatePage extends AppCompatActivity {
             public void onResponse(Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful" + response.body().string());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(PostCreatePage.this);
+                            mPostButton.setVisibility(View.VISIBLE);
+                            mProgressbar.setVisibility(View.GONE);
+                            mPostInProgress = false;
+                        }
+                    });
                 } else {
-                    Log.i(TAG, "onResponseSuccessful: ");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mPostInProgress = false;
+                            Toast.makeText(PostCreatePage.this, "Posted status", Toast.LENGTH_SHORT).show();
+                            setResult(RESULT_OK);
+                            finish();
+                        }
+                    });
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(PostCreatePage.this, "Posted status", Toast.LENGTH_SHORT).show();
-                        setResult(RESULT_OK);
-                        finish();
-                    }
-                });
             }
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.post_create_activity_menu, menu);
-        return true;
-    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case R.id.postContent_post_status:
-                postStatus();
-                return true;
             case android.R.id.home:
                 setResult(RESULT_CANCELED);
                 finish();

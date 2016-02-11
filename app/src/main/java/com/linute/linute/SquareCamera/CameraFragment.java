@@ -388,7 +388,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
         parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
 
-        Log.i(TAG, "setupCamera: "+bestPictureSize.width + " "+bestPictureSize.height);
+        Log.i(TAG, "setupCamera: " + bestPictureSize.width + " " + bestPictureSize.height);
 
 
         // Set continuous picture focus, if it's supported
@@ -475,25 +475,46 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
             mOrientationListener.rememberOrientation();
 
-            mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                @Override
-                public void onAutoFocus(boolean success, Camera camera) {
-                    // Shutter callback occurs after the image is captured. This can
-                    // be used to trigger a sound to let the user know that image is taken
-                    Camera.ShutterCallback shutterCallback = null;
+//            List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+//            boolean hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
+//
+//            String flashNotOn = mCamera.getParameters().getFlashMode();
+//            if (hasAutoFocus && flashNotOn != null && flashNotOn ==  ) {
+//                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+//                    @Override
+//                    public void onAutoFocus(boolean success, Camera camera) {
+                        // Shutter callback occurs after the image is captured. This can
+                        // be used to trigger a sound to let the user know that image is taken
+                        Camera.ShutterCallback shutterCallback = null;
 
-                    // Raw callback occurs when the raw image data is available
-                    Camera.PictureCallback raw = null;
+                        // Raw callback occurs when the raw image data is available
+                        Camera.PictureCallback raw = null;
 
-                    // postView callback occurs when a scaled, fully processed
-                    // postView image is available.
-                    Camera.PictureCallback postView = null;
+                        // postView callback occurs when a scaled, fully processed
+                        // postView image is available.
+                        Camera.PictureCallback postView = null;
 
-                    // jpeg callback occurs when the compressed image is available
-                    mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
-                }
-            });
-        }
+                        // jpeg callback occurs when the compressed image is available
+                        mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+                    }
+//                });
+//            } else {
+//
+//                // Shutter callback occurs after the image is captured. This can
+//                // be used to trigger a sound to let the user know that image is taken
+//                Camera.ShutterCallback shutterCallback = null;
+//
+//                // Raw callback occurs when the raw image data is available
+//                Camera.PictureCallback raw = null;
+//
+//                // postView callback occurs when a scaled, fully processed
+//                // postView image is available.
+//                Camera.PictureCallback postView = null;
+//
+//                // jpeg callback occurs when the compressed image is available
+//                mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+//            }
+//        }
     }
 
     @Override
@@ -700,6 +721,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             rememberOrientation();
             return mRememberedNormalOrientation;
         }
+
     }
 
     private void cancelPressed() {

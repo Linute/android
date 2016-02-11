@@ -309,7 +309,10 @@ public class LinuteSignUpFragment extends Fragment {
 
     private void getPinCode() {
         if (getActivity() == null) return;
-        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, new Callback() {
+
+        final String fName = mFirstNameTextView.getText().toString();
+        final String lName = mLastNameTextView.getText().toString();
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 failedConnectionWithCurrentView(0);
@@ -361,14 +364,12 @@ public class LinuteSignUpFragment extends Fragment {
             return false;
         }
 
-        /*TODO: uncomment this
-        //not edu email
+
         else if (!emailString.endsWith(".edu")){
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
         }
-        */
 
         //good email
         else {
@@ -485,17 +486,16 @@ public class LinuteSignUpFragment extends Fragment {
         if (areGoodCredentials) {
             Map<String, Object> userInfo = new HashMap<>();
             String encodedProfilePicture;
-
-            encodedProfilePicture = Utils.encodeImageBase64(
-                    mProfilePictureBitmap != null ? mProfilePictureBitmap :
-                            BitmapFactory.decodeResource(getResources(), R.drawable.profile_picture_placeholder));
-
             //add information
             userInfo.put("email", email);
             userInfo.put("password", password);
             userInfo.put("firstName", fName);
             userInfo.put("lastName", lName);
-            userInfo.put("profileImage", encodedProfilePicture);
+
+            if (mProfilePictureBitmap != null)
+                userInfo.put("profileImage", Utils.encodeImageBase64(mProfilePictureBitmap));
+
+
             userInfo.put("timeZone", Utils.getTimeZone());
 
             //try to create user

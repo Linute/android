@@ -24,12 +24,14 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 15
-        versionName "1.7.3.3"
+        versionCode 18
+        versionName "1.7.3.6"
     }
     buildTypes {
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard-rules.pro'
         }
     }
 }

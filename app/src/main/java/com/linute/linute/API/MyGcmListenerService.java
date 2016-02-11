@@ -19,6 +19,7 @@ package com.linute.linute.API;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -92,7 +93,6 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = null;
         String message = data.getString("message");
 
-        //TODO: CAUSING CRASH
 
         if (action != null && action.equals("messages")) { //<---
             intent = new Intent(this, RoomsActivity.class);
@@ -128,8 +128,9 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_profile)
-                .setContentTitle("GCM Message")
+                .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
+                .setColor(Color.BLACK)
+                .setContentTitle("Tapt")
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)

@@ -365,7 +365,10 @@ public class FacebookSignUpFragment extends Fragment {
 
     private void getPinCode(String email) {
         if(getActivity() == null) return;
-        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, new Callback() {
+        final String fName = mFirstNameEditText.getText().toString();
+        final String lName = mLastNameEditText.getText().toString();
+
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName,new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 failedInternetConnection(0);
@@ -414,13 +417,12 @@ public class FacebookSignUpFragment extends Fragment {
             return false;
         }
 
-        //not edu email
-        /* TODO: uncmoment this
+
         else if (!emailString.endsWith(".edu")){
             mEmailEditText.setError("This must be an edu email");
             mEmailEditText.requestFocus();
             return false;
-        }*/
+        }
 
         //good email
         else {
@@ -517,6 +519,8 @@ public class FacebookSignUpFragment extends Fragment {
 
     private void persistData(LinuteUser user) {
         if (getActivity() == null) return;
+
+
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());

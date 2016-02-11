@@ -11,9 +11,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ViewFlipper;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -39,7 +39,13 @@ public class ChangeEmailActivity extends AppCompatActivity {
     private EditText mEmailText;
     private String mSavedEmail;
 
-    private Button mSaveButton;
+    private String mPincode;
+    private EditText mPinCodeText;
+
+    private View mSaveButton;
+    private View mVerifyButton;
+
+    private ViewFlipper mViewFlipper;
 
     private ProgressBar mProgressBar;
 
@@ -48,6 +54,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_email);
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
 
         setupToolbar();
         bindViews();
@@ -66,24 +73,32 @@ public class ChangeEmailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                onBackPressed();
-                return(true);
+                if (mProgressBar.getVisibility() != View.GONE) return true;
+                if (mViewFlipper.getDisplayedChild() != 0) {
+                    setToGoBackAnimation(true);
+                    mViewFlipper.showPrevious();
+                    setToGoBackAnimation(false);
+                } else {
+                    onBackPressed();
+                }
+                return (true);
         }
-        return(super.onOptionsItemSelected(item));
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mProgressBar.getVisibility() == View.GONE) {
-            super.onBackPressed();
-        }
+        return (super.onOptionsItemSelected(item));
     }
 
 
     private void bindViews() {
         mEmailText = (EditText) findViewById(R.id.changeemail_text);
-        mSaveButton = (Button) findViewById(R.id.changeemail_save_button);
         mProgressBar = (ProgressBar) findViewById(R.id.changeemail_progressbar);
+        mViewFlipper = (ViewFlipper) findViewById(R.id.changeemail_view_flipper);
+
+        mPinCodeText = (EditText) findViewById(R.id.changeemail_pin_code);
+
+        setToGoBackAnimation(false);
+
+        mSaveButton = findViewById(R.id.changeemail_save_button);
+        mVerifyButton = findViewById(R.id.changeemail_check_verify);
+
     }
 
     private void setDefaultValues() {
@@ -99,16 +114,22 @@ public class ChangeEmailActivity extends AppCompatActivity {
                 checkEmailUniquenessAndSave();
             }
         });
+
+        mVerifyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkVerifyCode();
+            }
+        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        overridePendingTransition(0, 0);
     }
 
     private void checkEmailUniquenessAndSave() {
-        final String email = mEmailText.getText().toString();
+        final String email = mEmailText.getText().toString().toLowerCase();
 
         //not valid email or user hasn't eddited email
         if (!edittedEmail(email) || !isEmailValid(email)) return;
@@ -133,7 +154,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
             public void onResponse(Response response) throws IOException {
                 if (response.isSuccessful()) {//unique email
                     response.body().close();
-                    saveEmail(email);
+                    getPinCode(email);
                 } else {//not unique
                     Log.v(TAG, response.body().string());
                     runOnUiThread(new Runnable() { //show error
@@ -148,12 +169,84 @@ public class ChangeEmailActivity extends AppCompatActivity {
         });
     }
 
-    private void saveEmail(final String email) {
+
+    private void getPinCode(final String email) {
+
+        String fName = mSharedPreferences.getString("firstName", "");
+        String lName = mSharedPreferences.getString("lastName", "");
+
+        new LSDKUser(this).getConfirmationCodeForEmail(email, fName, lName, new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(ChangeEmailActivity.this);
+                        showProgress(false);
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+
+                        JSONObject json = new JSONObject(response.body().string());
+
+                        mPincode = json.getString("pinCode");
+                        mSavedEmail = email;
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showProgress(false);
+                                mViewFlipper.showNext();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(ChangeEmailActivity.this);
+                                showProgress(false);
+                            }
+                        });
+                    }
+                } else {
+                    Log.v(TAG, response.body().string());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(ChangeEmailActivity.this);
+                            showProgress(false);
+                        }
+                    });
+                }
+            }
+        });
+
+    }
+
+
+    private void checkVerifyCode() {
+        if (mPincode.equals(mPinCodeText.getText().toString())) {
+            saveEmail();
+        } else {
+            mPinCodeText.setError("Invalid pin");
+            mPinCodeText.requestFocus();
+        }
+    }
+
+    private void saveEmail() {
 
         LSDKUser user = new LSDKUser(this);
 
+        showProgress(true);
+
         Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("email", email);
+        userInfo.put("email", mSavedEmail);
 
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
@@ -173,8 +266,6 @@ public class ChangeEmailActivity extends AppCompatActivity {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
                         persistData(user);
-                        mSavedEmail = email;
-
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -243,12 +334,14 @@ public class ChangeEmailActivity extends AppCompatActivity {
     private void showProgress(final boolean show) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
-        mSaveButton.animate().setDuration(shortAnimTime).alpha(
+        final View button = mViewFlipper.getDisplayedChild() == 0 ? mSaveButton : mVerifyButton;
+
+        button.setVisibility(show ? View.GONE : View.VISIBLE);
+        button.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mSaveButton.setVisibility(show ? View.GONE : View.VISIBLE);
+                button.setVisibility(show ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -266,9 +359,18 @@ public class ChangeEmailActivity extends AppCompatActivity {
     }
 
     private void setFocusable(boolean focusable) {
-        if (focusable)  //turn on
+        if (focusable) {  //turn on
             mEmailText.setFocusableInTouchMode(true);
+            mPinCodeText.setFocusableInTouchMode(true);
+        } else {
+            mEmailText.setFocusable(false);
+            mPinCodeText.setFocusable(false);
+        }
+    }
 
-        else mEmailText.setFocusable(false);
+    private void setToGoBackAnimation(boolean goBack) {
+        mViewFlipper.setInAnimation(this, goBack ? R.anim.slide_in_left : R.anim.slide_in_right);
+        mViewFlipper.setOutAnimation(this, goBack ? R.anim.slide_out_right : R.anim.slide_out_left);
+
     }
 }

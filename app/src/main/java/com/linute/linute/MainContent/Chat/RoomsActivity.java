@@ -1,15 +1,18 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,11 +48,20 @@ public class RoomsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_rooms);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
-        toolbar.setTitle("Rooms");
+        toolbar.setTitle("Messages");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         setSupportActionBar(toolbar);
 
+        if (savedInstanceState == null){
+           getSupportFragmentManager()
+                   .beginTransaction()
+                   .replace(R.id.fragment, new RoomsActivityFragment())
+                   .commit();
+        }
+
+
         mFab = (FloatingActionButton) findViewById(R.id.fab);
-        mFab.setImageResource(R.drawable.add_friend);
+        mFab.setImageResource(R.drawable.ic_action_new_message);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,14 +79,6 @@ public class RoomsActivity extends AppCompatActivity {
                 toggleFab(false);
             }
         });
-
-        try {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        } catch (NullPointerException ne) {
-            ne.printStackTrace();
-        }
-
     }
 
     @Subscribe
@@ -101,13 +105,30 @@ public class RoomsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        int count = getFragmentManager().getBackStackEntryCount();
+        int count = getSupportFragmentManager().getBackStackEntryCount();
         if (count == 0) {
-            toggleFab(true);
-            super.onBackPressed();
+            finish();
         } else {
-            getFragmentManager().popBackStack();
+            if (count == 1){
+                toggleFab(true);
+            }
+            getSupportFragmentManager().popBackStack();
         }
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -118,7 +139,7 @@ public class RoomsActivity extends AppCompatActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL));/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }

@@ -158,7 +158,7 @@ public class ChatFragment extends Fragment {
         if (mSocket == null || !mSocket.connected()) {
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }

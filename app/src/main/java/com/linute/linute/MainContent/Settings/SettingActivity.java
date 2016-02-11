@@ -234,7 +234,7 @@ public class SettingActivity extends AppCompatActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.DEV_SOCKET_URL));
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -269,13 +269,7 @@ public class SettingActivity extends AppCompatActivity {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getApplicationContext(),
-                            R.string.error_connect, Toast.LENGTH_LONG).show();
-                }
-            });
+            Log.i(TAG, "call: failed socket connection");
         }
     };
 

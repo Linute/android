@@ -32,6 +32,10 @@ public class UserActivityItem implements Parcelable {
     private String mOwnerID;
     private boolean mIsAnon;
 
+    public UserActivityItem(){
+
+    }
+
     public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
         mProfileImagePath = profileImagePath;
         mUserName = userName;

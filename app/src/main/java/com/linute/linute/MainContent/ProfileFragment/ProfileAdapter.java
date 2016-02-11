@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
+    private static final int TYPE_EMPTY = 2;
     private Profile mProfile;
 
     private Context context;
@@ -46,7 +47,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             //inflate your layout and pass it to view holder
             return new ProfileHeaderViewHolder(this, LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header2, parent, false), context, mProfile);
+                    .inflate(R.layout.fragment_profile_header3, parent, false), context, mProfile);
+        } else if (viewType == TYPE_EMPTY) {
+            return new EmptyProfileHolder(LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(R.layout.empty_cell_holders, parent, false)
+            );
         }
         return null;
     }
@@ -70,6 +76,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public int getItemViewType(int position) {
         if (isPositionHeader(position))
             return TYPE_HEADER;
+        else if (mUserActivityItems.get(position-1) instanceof EmptyUserActivityItem)
+            return TYPE_EMPTY;
 
         return TYPE_ITEM;
     }

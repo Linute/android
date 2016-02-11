@@ -57,8 +57,6 @@ public class PreLoginFragment extends Fragment {
             }
         });
 
-        Log.i("YUU", "onCreateView: ");
-
         return rootView;
     }
 }

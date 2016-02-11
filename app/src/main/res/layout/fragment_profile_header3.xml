@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/colorPrimary"
+              android:orientation="vertical">
+
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_horizontal_margin"
+                    android:orientation="horizontal"
+    >
+
+        <RelativeLayout android:id="@+id/profHeader_images"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        >
+
+            <ImageView android:layout_width="85dp"
+                       android:layout_height="85dp"
+                       android:src="@drawable/circle"
+            />
+
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:id="@+id/profilefrag_prof_image"
+                android:layout_width="85dp"
+                android:layout_height="85dp"
+                android:layout_centerInParent="true"
+                android:scaleType="fitCenter"
+                app:border_color="@color/colorPrimary"
+                app:border_width="1dp"/>
+        </RelativeLayout>
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_centerVertical="true"
+                      android:layout_marginStart="@dimen/activity_horizontal_margin"
+                      android:layout_toStartOf="@id/profHeader_images"
+                      android:gravity="center_vertical"
+                      android:orientation="vertical">
+
+            <TextView android:id="@+id/profilefrag_num_posts"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="2dp"
+                      android:gravity="center_horizontal"
+                      android:lines="1"
+                      android:textColor="#FFFFFF"
+                      android:textSize="@dimen/header_font_size"
+                      tools:text="123"
+            />
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_horizontal"
+                      android:lines="1"
+                      android:text="Posts"
+                      android:textColor="@color/fifty_white"
+                      android:textSize="@dimen/body_font_size"
+            />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/prof_header_followers_container"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_centerVertical="true"
+                      android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                      android:layout_toEndOf="@id/profHeader_images"
+                      android:gravity="center_vertical"
+                      android:orientation="vertical">
+
+            <TextView android:id="@+id/profilefrag_num_followers"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="2dp"
+                      android:gravity="center_horizontal"
+                      android:lines="1"
+                      android:textColor="#FFFFFF"
+                      android:textSize="@dimen/header_font_size"
+                      tools:text="123"
+            />
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_horizontal"
+                      android:lines="1"
+                      android:text="Followers"
+                      android:textColor="@color/fifty_white"
+                      android:textSize="@dimen/body_font_size"
+            />
+        </LinearLayout>
+    </RelativeLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                  android:layout_marginStart="@dimen/activity_horizontal_margin"
+                  android:orientation="vertical">
+
+        <ImageView android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_horizontal"
+                   android:src="@drawable/ic_action_college3_l"
+        />
+
+        <TextView android:id="@+id/college_name"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:gravity="center_horizontal"
+                  android:lines="1"
+                  android:textColor="@color/secondaryColor"
+                  android:textSize="@dimen/header_font_size"
+                  android:textStyle="bold"
+                  tools:text="City College of New York"
+        />
+
+        <View android:layout_width="70dp"
+              android:layout_height="2dp"
+              android:layout_gravity="center_horizontal"
+              android:layout_marginBottom="8dp"
+              android:layout_marginTop="10dp"
+              android:background="@color/secondaryColor"
+        />
+    </LinearLayout>
+
+    <TextView android:id="@+id/profilefrag_status"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="@dimen/activity_horizontal_margin"
+              android:layout_marginEnd="32dp"
+              android:layout_marginStart="32dp"
+              android:layout_marginTop="8dp"
+              android:gravity="center"
+              android:lines="2"
+              android:textColor="#FFFFFF"
+              tools:text="TEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TESTTEST TEST TEST TEST "
+    />
+
+    <LinearLayout android:id="@+id/prof_header_action_bar"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp"
+                  android:visibility="gone"
+                  android:orientation="horizontal">
+
+        <LinearLayout android:id="@+id/prof_header_follow_button"
+                      android:layout_width="0px"
+                      android:layout_height="match_parent"
+                      android:layout_weight="1"
+                      android:background="@color/follow_grey"
+                      android:gravity="center"
+                      android:orientation="horizontal">
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:src="@drawable/ic_action_add_light"
+            />
+
+            <TextView android:id="@+id/prof_header_follow_button_text"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:layout_marginStart="4dp"
+                      android:text="follow"
+                      android:textColor="#FFFFFF"
+                      android:textSize="@dimen/body_font_size"
+            />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/prof_header_chat_button"
+                      android:layout_width="0px"
+                      android:layout_height="match_parent"
+                      android:layout_weight="1"
+                      android:background="#FECB45"
+                      android:gravity="center">
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:src="@drawable/ic_action_oval19_light"
+            />
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_vertical"
+                      android:layout_marginStart="4dp"
+                      android:text="chat"
+                      android:textColor="#FFFFFF"
+                      android:textSize="@dimen/body_font_size"
+            />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -99,7 +99,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .load(Utils.getImageUrlOfUser(room.getLastMessageUserImage()))
                     .asBitmap()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                    .placeholder(R.drawable.profile_picture_placeholder)
+                    .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 

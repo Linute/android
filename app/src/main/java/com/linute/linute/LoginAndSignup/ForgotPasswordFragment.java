@@ -344,14 +344,12 @@ public class ForgotPasswordFragment extends Fragment {
             return false;
         }
 
-        /*TODO: uncomment this
-        //not edu email
+
         else if (!emailString.endsWith(".edu")){
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
         }
-        */
 
         //good email
         else {
@@ -419,7 +417,7 @@ public class ForgotPasswordFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     showProgress(false, 2);
-                                    Toast.makeText(getActivity(), "Password changed", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), "Password changed", Toast.LENGTH_LONG).show();
                                     getFragmentManager().popBackStack();
                                 }
                             });

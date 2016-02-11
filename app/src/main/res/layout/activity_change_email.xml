@@ -4,37 +4,63 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+    <android.support.design.widget.AppBarLayout android:id="@+id/changeemail_appBar"
+                                                android:layout_width="match_parent"
                                                 android:layout_height="wrap_content">
         <include android:id="@+id/changeemail_toolbar"
                  layout="@layout/tool_bar"/>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="85dp">
+    <ViewFlipper android:id="@+id/changeemail_view_flipper"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layout_below="@id/changeemail_appBar">
 
-        <EditText
-            android:id="@+id/changeemail_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:hint="@string/prompt_email"
-            android:inputType="textEmailAddress"
-            android:singleLine="true"
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+            <EditText
+                android:id="@+id/changeemail_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                android:hint="@string/prompt_email"
+                android:inputType="textEmailAddress"
+                android:singleLine="true"
             />
-    </android.support.design.widget.TextInputLayout>
 
 
-    <Button android:id="@+id/changeemail_save_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:text="Save Changes"
-        />
+            <Button android:id="@+id/changeemail_save_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:inputType="textEmailAddress"
+                    android:text="GET CODE"
+            />
+
+        </RelativeLayout>
+
+
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+            <EditText android:id="@+id/changeemail_pin_code"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="@dimen/activity_horizontal_margin"
+                      android:inputType="number"
+                      android:hint="Validation Code"
+            />
+
+            <Button android:id="@+id/changeemail_check_verify"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:text="SAVE"
+            />
+        </RelativeLayout>
+
+    </ViewFlipper>
 
     <ProgressBar
         android:id="@+id/changeemail_progressbar"

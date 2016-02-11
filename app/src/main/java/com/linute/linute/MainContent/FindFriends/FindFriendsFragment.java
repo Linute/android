@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -19,6 +20,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -238,6 +240,12 @@ public class FindFriendsFragment extends UpdatableFragment {
         if (activity != null) {
             activity.raiseAppBarLayoutElevation();
         }
+
+        if (mSearchView.hasFocus() && getActivity() != null){
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+
+        }
     }
 
     private Handler mSearchHandler; //handles filtering and searchign
@@ -362,6 +370,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     mSearchHandler.postDelayed(mSearchByNameRunnable, 400);
                 }
             }
+
             return false;
         }
     };

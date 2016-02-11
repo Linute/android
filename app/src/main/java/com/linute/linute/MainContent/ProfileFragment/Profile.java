@@ -121,7 +121,7 @@ public class Profile extends UpdatableFragment {
 
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
-            String name = mSharedPreferences.getString("firstName", "")+ " "+mSharedPreferences.getString("lastName", "");
+            String name = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
             mainActivity.setTitle(name);
             mainActivity.resetToolbar();
         }
@@ -181,6 +181,8 @@ public class Profile extends UpdatableFragment {
 
                     savePreferences(user);
 //                    Log.d(TAG, body);
+                    if (getActivity() == null) return;
+
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -189,7 +191,9 @@ public class Profile extends UpdatableFragment {
                     });
                 } else {//else something went
                     Log.v(TAG, response.body().string());
-                    getActivity().runOnUiThread(rServerErrorAction);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(rServerErrorAction);
+                    }
                 }
             }
         });
@@ -215,6 +219,7 @@ public class Profile extends UpdatableFragment {
         user.getUserActivities(mSharedPreferences.getString("userID", null), "posted status", "posted photo", new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
                     public void run() {
@@ -230,7 +235,7 @@ public class Profile extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
-                        Log.i(TAG, "onResponse: "+body);
+                        Log.i(TAG, "onResponse: " + body);
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
 //                        Log.d(TAG, "onResponse getActivities" + body);
 
@@ -246,32 +251,43 @@ public class Profile extends UpdatableFragment {
                                     )); //create activity objects and add to array
 
                         }
+
+                        if (mUserActivityItems.isEmpty()) {
+                            mUserActivityItems.add(new EmptyUserActivityItem());
+                        }
+
+                        if (getActivity() == null) return;
+                        //turn refresh off if it's on and notify ListView we might have updated information
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() { //update view
+
+                                if (mSwipeRefreshLayout.isRefreshing())
+                                    mSwipeRefreshLayout.setRefreshing(false);
+
+                                mProfileAdapter.notifyDataSetChanged();
+
+                            }
+                        });
+
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
-                        getActivity().runOnUiThread(rServerErrorAction);
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(rServerErrorAction);
+                        }
                     }
                 } else { //unable to connect with DB
                     Log.v(TAG, response.body().string());
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getContext());
-                        }
-                    });
-                }
-
-                //turn refresh off if it's on and notify ListView we might have updated information
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() { //update view
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
-
-                        mProfileAdapter.notifyDataSetChanged();
-
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
                     }
-                });
-
+                }
             }
         });
     }
