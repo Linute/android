@@ -15,10 +15,41 @@
 
         <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
                                            android:layout_width="match_parent"
-                                           android:layout_height="wrap_content"
+                                           android:layout_height="?attr/actionBarSize"
                                            android:background="@color/colorPrimary"
-                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"
-            />
+                                           android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+            <RelativeLayout android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginRight="@dimen/activity_horizontal_margin">
+
+                <RelativeLayout android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true">
+
+                    <TextView android:id="@+id/create_page_post_button"
+                        android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:text="POST"
+                              android:textColor="#FFFFFF"
+                              android:textSize="@dimen/header_font_size"
+                              android:textStyle="bold"
+                    />
+
+                    <ProgressBar android:id="@+id/create_page_progress_bar"
+                                 style="?android:attr/progressBarStyleSmall"
+                                 android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content"
+                                 android:layout_centerInParent="true"
+                                 android:visibility="gone"
+                    />
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+
+        </android.support.v7.widget.Toolbar>
 
         <LinearLayout android:id="@+id/postContent_edit_text_parent"
                       android:layout_width="match_parent"
@@ -37,18 +68,18 @@
                 android:maxHeight="125dp"
                 android:maxLength="240"
                 android:textSize="14sp"
-                />
+            />
         </LinearLayout>
         <View android:layout_width="wrap_content"
               android:layout_height="1px"
               android:layout_marginEnd="5dp"
               android:layout_marginStart="5dp"
               android:background="@color/grey_color"
-            />
+        />
 
         <RelativeLayout android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-            >
+        >
 
             <TextView android:id="@+id/postContent_character_counter"
                       android:layout_width="wrap_content"
@@ -57,7 +88,7 @@
                       android:padding="5dp"
                       android:text="200"
                       android:textSize="18sp"
-                />
+            />
 
 
             <Switch

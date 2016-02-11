@@ -234,16 +234,20 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
         //sets up view
         public void bindView(Update update) {
-
             mUpdate = update;
 
             mNameText.setText(update.isAnon() ? "Anonymous" : update.getUserFullName());
-                    mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
+            mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
 
             mDescriptionText.setText(update.getDescription());
 
             setUpPictures(update); //profile and event image
-            setUpOnClickListeners(update); //set onclick listeners
+
+            if (!mUpdate.isAnon()) {
+                setUpProfileOnClickListeners(update.getUserFullName(), update.getUserId());
+            }
+
+            setUpEventPictureTouchListener(update);
         }
 
 
@@ -253,7 +257,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //set profile image
             Glide.with(mContext)
-                    .load( update.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
+                    .load(update.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
                     .asBitmap()
                     .override(mImageSize, mImageSize)
                     .placeholder(R.drawable.image_loading_background)
@@ -300,29 +304,25 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             }
         }
 
-        private void setUpOnClickListeners(final Update update) {
-
-            if (!update.isAnon()) { //is not anon
-                View.OnClickListener goToProfile = new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+        private void setUpProfileOnClickListeners(final String name, final String id) {
+            View.OnClickListener goToProfile = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mUpdate.isAnon()) {
+                        Log.i("TEST_UPDATE", "inside: " + getAdapterPosition());
                         //show profile fragment
                         ((MainActivity) mContext)
                                 .addFragmentToContainer(
-                                        TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId())
+                                        TaptUserProfileFragment.newInstance(name, id)
                                 );
                     }
-                };
+                }
+            };
 
-                //clicking name or profile image takes person to user's profile
-                mProfileImage.setOnClickListener(goToProfile);
-                mNameText.setOnClickListener(goToProfile);
-            }
-
-
-            setUpEventPictureTouchListener(update);
+            //clicking name or profile image takes person to user's profile
+            mProfileImage.setOnClickListener(goToProfile);
+            mNameText.setOnClickListener(goToProfile);
         }
-
 
 
         private void setUpEventPictureTouchListener(final Update update) {
@@ -333,11 +333,11 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 mEventPicture.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((MainActivity)mContext).addFragmentToContainer(
+                        ((MainActivity) mContext).addFragmentToContainer(
                                 FeedDetailPage.newInstance(false,
                                         update.isPicturePost()
-                                        ,update.getEventID()
-                                        ,update.getUserId()
+                                        , update.getEventID()
+                                        , update.getUserId()
                                 ));
                     }
                 });
@@ -353,7 +353,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                 mEventPicture.setImageResource(R.drawable.follow_back); //plus icon
 
-                if (mEventPicture.getVisibility() == View.GONE){
+                if (mEventPicture.getVisibility() == View.GONE) {
                     mEventPicture.setVisibility(View.VISIBLE);
                 }
 
@@ -403,7 +403,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                                             mUpdate.setFollowedBack(false);
                                         }
                                     });
-                                }else {
+                                } else {
                                     mUpdate.setFollowedBack(true);
                                 }
                             }

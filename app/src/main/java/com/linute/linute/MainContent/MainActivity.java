@@ -70,10 +70,6 @@ public class MainActivity extends BaseTaptActivity {
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
 
-    private FloatingActionButton fab;
-    //public TaptUserProfileFragment mTaptUserProfileFragment;
-    //public FeedDetailPage mFeedDetailPage;
-
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
 
@@ -122,15 +118,12 @@ public class MainActivity extends BaseTaptActivity {
 
 
         //this arrow changes from navigation to back arrow
-        final DrawerArrowDrawable arrowDrawable = new DrawerArrowDrawable(this);
-        arrowDrawable.setColor(ContextCompat.getColor(this, R.color.white));
-        mToolbar.setNavigationIcon(arrowDrawable);
 
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
                 boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
-                ObjectAnimator.ofFloat(arrowDrawable, "progress", drawer ? 0 : 1).start();
+                mToolbar.setNavigationIcon(drawer ? R.drawable.ic_action_navigation_menu : R.drawable.ic_action_navigation_arrow_back_inverted);
             }
         });
 
@@ -225,6 +218,7 @@ public class MainActivity extends BaseTaptActivity {
 
         if (savedInstanceState == null) {
             //only loads one fragment
+            mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
             mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])

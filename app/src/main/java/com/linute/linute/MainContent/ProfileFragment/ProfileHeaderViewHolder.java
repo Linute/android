@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -89,7 +90,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         itemView.findViewById(R.id.prof_header_following_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity != null){
+                if (activity != null) {
                     activity.addFragmentToContainer(FriendsListFragment.newInstance(true, mUser.getUserID()));
                 }
             }
@@ -98,7 +99,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         itemView.findViewById(R.id.prof_header_followers_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (activity != null){
+                if (activity != null) {
                     activity.addFragmentToContainer(FriendsListFragment.newInstance(false, mUser.getUserID()));
                 }
             }
@@ -115,13 +116,22 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                         new LSDKPeople(mContext).postFollow(postData, new Callback() {
                             @Override
                             public void onFailure(Request request, IOException e) {
-                                e.printStackTrace();
+                                final Activity activity = (Activity) mContext;
+                                if (activity != null) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Utils.showBadConnectionToast(activity);
+                                        }
+                                    });
+                                }
                             }
 
                             @Override
                             public void onResponse(Response response) throws IOException {
                                 if (!response.isSuccessful()) {
                                     Log.d(TAG, response.body().string());
+                                    return;
                                 }
 //                                Log.d(TAG, "onResponse: " + response.body().string());
                                 jsonObject = null;
@@ -154,16 +164,26 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                         new LSDKPeople(mContext).putUnfollow(putData, mUser.getFriendship(), new Callback() {
                             @Override
                             public void onFailure(Request request, IOException e) {
-                                e.printStackTrace();
+                                final Activity activity = (Activity) mContext;
+                                if (activity != null) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Utils.showBadConnectionToast(activity);
+                                        }
+                                    });
+                                }
                             }
 
                             @Override
                             public void onResponse(Response response) throws IOException {
                                 if (!response.isSuccessful()) {
                                     Log.d(TAG, response.body().string());
-                                }else {
+                                } else {
                                     response.body().close();
-                                    ((MainActivity) mContext).runOnUiThread(new Runnable() {
+                                    BaseTaptActivity activity1 = (BaseTaptActivity) mContext;
+                                    if (activity == null) return;
+                                    activity1.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             vFollowStatus.setImageResource(R.drawable.follow);
