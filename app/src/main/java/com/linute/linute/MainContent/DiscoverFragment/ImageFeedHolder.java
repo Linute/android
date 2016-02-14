@@ -175,7 +175,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
             vLikesHeart.toggle();
         } else if (v == vCommentButton) {
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(true,true
+                    FeedDetailPage.newInstance(false, true
                             , mPosts.get(getAdapterPosition()).getPostId()
                             , mPosts.get(getAdapterPosition()).getUserId())
             );

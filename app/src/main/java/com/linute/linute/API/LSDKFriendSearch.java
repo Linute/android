@@ -32,8 +32,8 @@ public class LSDKFriendSearch {
     public Call searchFriendByName(String name, Callback callback){
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, String> fullName = new HashMap<>();
@@ -49,8 +49,8 @@ public class LSDKFriendSearch {
     public Call searchFriendByFacebook(String fbToken, Callback callback){
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, Object> param = new HashMap<>();
@@ -63,8 +63,8 @@ public class LSDKFriendSearch {
     public Call searchFriendByContacts(JSONArray phone, JSONArray email, Callback callback){
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, Object> param = new HashMap<>();

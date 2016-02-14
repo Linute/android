@@ -31,8 +31,8 @@ public class LSDKActivity {
 
     public Call getActivities(Integer skip, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, String> params = new HashMap<>();
@@ -57,8 +57,8 @@ public class LSDKActivity {
 
     public Call readActivities(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("activities/read", header, param, callback);

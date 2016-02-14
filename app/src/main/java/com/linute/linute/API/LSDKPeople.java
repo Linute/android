@@ -26,8 +26,8 @@ public class LSDKPeople {
 
     public Call getPeople(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"people"};
@@ -37,8 +37,8 @@ public class LSDKPeople {
 
     public Call postFollow(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("friends", header, param, callback);
@@ -46,8 +46,8 @@ public class LSDKPeople {
 
     public Call putUnfollow(Map<String, Object> param, String friendshipID, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.put("friends/" + friendshipID, header, param, callback);
@@ -69,8 +69,8 @@ public class LSDKPeople {
 
     public Call getPeoplNearMe(Callback callback){
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, String> param = new HashMap<>();

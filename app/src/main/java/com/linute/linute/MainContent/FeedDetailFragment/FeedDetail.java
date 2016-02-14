@@ -82,6 +82,10 @@ public class FeedDetail {
         return mComments;
     }
 
+    public void setComments(List<Comment> comments){
+        mComments.addAll(comments);
+    }
+
     //public String getUserLiked() {
         //return mUserLiked;
     //}

@@ -1,14 +1,20 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -42,6 +48,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
+        setHasOptionsMenu(true);
+
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
         mViewPager.setAdapter(mFragmentHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -50,6 +58,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 //we will only load the other fragment if it is needed
                 //ex. we start on the campus tab. we won't load the friends tab until we swipe left
                 loadFragmentAtPositionIfNeeded(position);
+                mInitiallyPresentedFragmentWasCampus = position == 0;
             }
 
             @Override
@@ -62,6 +71,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
             }
         });
+
         tabLayout.setupWithViewPager(mViewPager);
 
         return rootView;
@@ -128,7 +138,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         //only load when fragment comes into view
         if (fragment != null) {
             if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
-                fragment.getFeed(0);
+                fragment.refreshFeed();
                 if (position == 0) mCampusFeedNeedsUpdating = false;
                 else mFriendsFeedNeedsUpdating = false;
             }
@@ -159,5 +169,26 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.showFAB(false);
         }
 //        setFragmentNeedUpdating(true);
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.people_fragment_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.people_fragment_menu_chat && getActivity() != null) {
+            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+            enterRooms.putExtra("CHATICON", true);
+            startActivity(enterRooms);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

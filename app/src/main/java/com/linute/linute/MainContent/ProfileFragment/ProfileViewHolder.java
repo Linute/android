@@ -60,7 +60,9 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
             vEventImage.setVisibility(View.GONE);
         }
 
-        if (userActivityItem.isAnon()) vAnonIcon.setVisibility(View.VISIBLE);
+
+        vAnonIcon.setVisibility(userActivityItem.isAnon() ? View.VISIBLE : View.GONE);
+
 
         String text = userActivityItem.getDescription();
         vDescriptionLabel.setText(text.equals("") ? "Image post..." : text);
@@ -85,8 +87,8 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     @Override
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
-        if (activity != null){
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false,mIsImagePost, mPostId, mUserId ));
+        if (activity != null) {
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, mIsImagePost, mPostId, mUserId));
         }
     }
 }

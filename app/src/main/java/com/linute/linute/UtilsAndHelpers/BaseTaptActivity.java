@@ -46,4 +46,8 @@ public class BaseTaptActivity extends AppCompatActivity {
 
     }
 
+    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
+
+    }
+
 }

@@ -179,7 +179,7 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
 
         else if (v == vCommentButton) {
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(true,false
+                    FeedDetailPage.newInstance(false, false
                             , mPosts.get(getAdapterPosition()).getPostId()
                             , mPosts.get(getAdapterPosition()).getUserId())
             );

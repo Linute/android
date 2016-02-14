@@ -241,16 +241,23 @@ public class Profile extends UpdatableFragment {
 
                         if (activities == null || getActivity() == null) return;
 
-                        mUserActivityItems.clear(); //clear so we don't have duplicates
+//                        mUserActivityItems.clear(); //clear so we don't have duplicates
+
+                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
+
+                        String fullName = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
+
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                            mUserActivityItems.add(
+                            userActItems.add(
                                     new UserActivityItem(
                                             activities.getJSONObject(i),
                                             activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
+                                            fullName
                                     )); //create activity objects and add to array
-
                         }
+
+                        mUserActivityItems.clear();
+                        mUserActivityItems.addAll(userActItems);
 
                         if (mUserActivityItems.isEmpty()) {
                             mUserActivityItems.add(new EmptyUserActivityItem());
@@ -261,7 +268,6 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() { //update view
-
                                 if (mSwipeRefreshLayout.isRefreshing())
                                     mSwipeRefreshLayout.setRefreshing(false);
 

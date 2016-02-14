@@ -8,6 +8,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,8 +28,8 @@ public class LSDKEvents {
 
     public Call getEvents(boolean friendsOnly,Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"events", friendsOnly ? "friends" : "discover"};
@@ -39,8 +40,8 @@ public class LSDKEvents {
 
     public Call getEventWithId(String id, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"events", id};
@@ -50,8 +51,8 @@ public class LSDKEvents {
 
     public Call getComments(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"comments"};
@@ -61,8 +62,8 @@ public class LSDKEvents {
 
     public Call postEvent(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("events", header, param, callback);
@@ -70,8 +71,8 @@ public class LSDKEvents {
 
     public Call postComment(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("comments", header, param, callback);
@@ -79,8 +80,8 @@ public class LSDKEvents {
 
     public Call postLike(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("likes", header, param, callback);
@@ -89,11 +90,37 @@ public class LSDKEvents {
     public Call updateLike(Map<String, Object> param, String eventId,
                            Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.delete("likes/" + eventId, header, param, callback);
+    }
+
+    public Call reportEvent(int reason, String postID, Callback callback){
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
+                mEncodedToken);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("event", postID);
+        params.put("reason", reason);
+
+        return API_Methods.post("reports", header, params, callback);
+    }
+
+    public Call deleteEvent(String postID, Callback callback){
+        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
+                mEncodedToken);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", postID);
+        params.put("isDeleted", 1);
+
+        return API_Methods.put("events/"+postID, header,params,callback);
     }
 
 }

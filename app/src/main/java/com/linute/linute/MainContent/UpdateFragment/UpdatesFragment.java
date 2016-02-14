@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.MainContent.MainActivity;
@@ -183,22 +184,31 @@ public class UpdatesFragment extends UpdatableFragment {
                             return;
                         }
 
-                        mOldUpdates.clear();
-                        mRecentUpdates.clear();
+//                        mOldUpdates.clear();
+//                        mRecentUpdates.clear();
+                        ArrayList<Update> oldItems = new ArrayList<>();
+                        ArrayList<Update> newItems = new ArrayList<>();
 
                         //no more information to load
                         //if (activities.length() < 25) mCanLoadMore = false;
 
                         //mSkip = 25;
 
+                        Update update;
                         //iterate through array of activities
                         for (int i = 0; i < activities.length(); i++) {
-                            Update update = new Update(activities.getJSONObject(i));
-                            if (update.isRead()) mOldUpdates.add(update); //if read, it's old
-                            else mRecentUpdates.add(update); //else recent
+                            update = new Update(activities.getJSONObject(i));
+                            if (update.isRead()) oldItems.add(update); //if read, it's old
+                            else newItems.add(update); //else recent
                         }
 
                         if (getActivity() == null) return;
+
+                        mOldUpdates.clear();
+                        mOldUpdates.addAll(oldItems);
+
+                        mRecentUpdates.clear();
+                        mRecentUpdates.addAll(newItems);
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

@@ -1,6 +1,8 @@
 package com.linute.linute.API;
 
 
+import android.util.Log;
+
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -26,8 +28,8 @@ public class API_Methods {
 
     // API ENPOINT URL
     private static String SCHEME = "https";
-    private static String HOST = "api.linute.com";
-    //private static String HOST = "devapi.linute.com";
+    //private static String HOST = "api.linute.com";
+    private static String HOST = "devapi.linute.com";
     private static String VERSION = "v1.3.1";
 
     //JSON TYPE
@@ -54,8 +56,13 @@ public class API_Methods {
                 .host(HOST)
                 .addPathSegment(VERSION);
 
-        for (String p : path) {
-            url.addPathSegment(p);
+        //if (path == null) return null;
+
+
+        if (path != null) {
+            for (String p : path) {
+                url.addPathSegment(p);
+            }
         }
 
         if (parameters != null) {

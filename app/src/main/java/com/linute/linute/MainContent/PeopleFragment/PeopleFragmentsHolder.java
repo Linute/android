@@ -12,9 +12,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -50,6 +54,8 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         View rootView = inflater.inflate(R.layout.fragment_people_holder, container, false);
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.people_sliding_tabs);
+
+        setHasOptionsMenu(true);
 
         mViewPager = (ViewPager) rootView.findViewById(R.id.people_hostViewPager);
 
@@ -196,5 +202,26 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 fragment.gotPermissionResults();
             }
         }
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.people_fragment_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.people_fragment_menu_chat && getActivity() != null) {
+            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+            enterRooms.putExtra("CHATICON", true);
+            startActivity(enterRooms);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

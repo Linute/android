@@ -102,8 +102,8 @@ public class LSDKUser {
         params.put("owner", userId);
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"activities"};
@@ -120,8 +120,8 @@ public class LSDKUser {
 
         // /users/id {1235rewt5y52u}
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.get(url, header, null, callback);

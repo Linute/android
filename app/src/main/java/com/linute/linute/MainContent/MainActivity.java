@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent;
 
-import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -15,25 +14,21 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.graphics.drawable.DrawerArrowDrawable;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
@@ -113,6 +108,12 @@ public class MainActivity extends BaseTaptActivity {
 
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i(TAG, "onClicked: toolbar");
+            }
+        });
         setSupportActionBar(mToolbar);
         mActionBar = getSupportActionBar();
 
@@ -147,7 +148,6 @@ public class MainActivity extends BaseTaptActivity {
                 startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
-
 
         //profile image and header setup
         loadDrawerHeader();
@@ -210,11 +210,11 @@ public class MainActivity extends BaseTaptActivity {
                     default:
                         break;
                 }
-
                 mDrawerLayout.closeDrawers();
                 return true;
             }
         });
+
 
         if (savedInstanceState == null) {
             //only loads one fragment
@@ -230,7 +230,6 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private Fragment getFragment(short index) {
-
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
             UpdatableFragment fragment;
 
@@ -251,7 +250,6 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = null;
                     break;
             }
-
             mFragments[index] = fragment;
         }
 
@@ -296,6 +294,7 @@ public class MainActivity extends BaseTaptActivity {
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
         super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public void startNewActivity(final Class activity) {
@@ -303,7 +302,6 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void run() {
                 Intent i = new Intent(MainActivity.this, activity);
-
                 startActivity(i);
             }
         });
@@ -330,6 +328,7 @@ public class MainActivity extends BaseTaptActivity {
 
 
     //sets needsUpdating for fragment at index
+    @Override
     public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index) {
         if (mFragments[index] != null) {
             mFragments[index].setFragmentNeedUpdating(needsUpdating);
@@ -419,12 +418,6 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.people_fragment_menu, menu);
-        return true;
-    }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -438,12 +431,6 @@ public class MainActivity extends BaseTaptActivity {
                 if (getSupportFragmentManager().getBackStackEntryCount() > 0)
                     getSupportFragmentManager().popBackStack();
                 else mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
-
-            case R.id.people_fragment_menu_chat:
-                Intent enterRooms = new Intent(this, RoomsActivity.class);
-                enterRooms.putExtra("CHATICON", true);
-                startActivity(enterRooms);
                 return true;
         }
 
@@ -482,12 +469,28 @@ public class MainActivity extends BaseTaptActivity {
     private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
 
         private Runnable mChangeFragmentOrActivityAction;
+        private boolean mKeyboardHasBeenClosed = false;
 
         @Override
         public void onDrawerClosed(View drawerView) {
+            mKeyboardHasBeenClosed = false;
             if (mChangeFragmentOrActivityAction != null) {
                 mChangeFragmentOrActivityAction.run();
                 mChangeFragmentOrActivityAction = null;
+            }
+        }
+
+        @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+            super.onDrawerSlide(drawerView, slideOffset);
+            if (!mKeyboardHasBeenClosed && slideOffset > 0){
+                mKeyboardHasBeenClosed = true;
+                View focused = getCurrentFocus();
+                if (focused != null) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
+                }
+
             }
         }
 

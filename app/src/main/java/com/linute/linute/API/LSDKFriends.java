@@ -31,8 +31,8 @@ public class LSDKFriends {
 
     public Call getFriends(String userId, boolean following, String skip, Callback callback){
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, String> param = new HashMap<>();
