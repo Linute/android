@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.linute.linute.R;
@@ -180,6 +181,8 @@ public class FindFriendsActivity extends BaseTaptActivity {
                 }
             }
 
+            if (mSocket == null) return;
+
             mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -199,6 +202,9 @@ public class FindFriendsActivity extends BaseTaptActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
+        if (mSocket == null) return;
+
         mSocket.disconnect();
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -228,4 +234,9 @@ public class FindFriendsActivity extends BaseTaptActivity {
             });
         }
     };
+
+    @Override
+    public void setToolbarOnClickListener(View.OnClickListener listener){
+        mToolbar.setOnClickListener(listener);
+    }
 }

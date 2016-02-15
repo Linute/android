@@ -10,6 +10,7 @@ public class Comment {
     private String mCommentUserPostText;
     private String mCommentUserPostId;
     private boolean mIsAnon;
+    private String mAnonImage;
 
     public Comment() {
         mCommentUserId = "";
@@ -17,15 +18,17 @@ public class Comment {
         mCommentUserName = "";
         mCommentUserPostText = "";
         mCommentUserPostId = "";
+        mAnonImage = "";
     }
 
-    public Comment(String commentUserId, String commentUserProfileImage, String commentUserName, String commentUserPostText, String commentUserPostId, boolean isAnon) {
+    public Comment(String commentUserId, String commentUserProfileImage, String commentUserName, String commentUserPostText, String commentUserPostId, boolean isAnon, String anonImage) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
         mCommentUserName = commentUserName;
         mCommentUserPostText = commentUserPostText;
         mCommentUserPostId = commentUserPostId;
         mIsAnon = isAnon;
+        mAnonImage = anonImage;
     }
 
     public String getCommentUserId() {
@@ -50,5 +53,9 @@ public class Comment {
 
     public boolean isAnon(){
         return mIsAnon;
+    }
+
+    public String getAnonImage(){
+        return mAnonImage;
     }
 }

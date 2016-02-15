@@ -108,18 +108,11 @@ public class MainActivity extends BaseTaptActivity {
 
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
-        mToolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "onClicked: toolbar");
-            }
-        });
         setSupportActionBar(mToolbar);
         mActionBar = getSupportActionBar();
 
 
         //this arrow changes from navigation to back arrow
-
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
@@ -164,6 +157,7 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                 }
+
 
                 replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
             }
@@ -215,10 +209,28 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
 
-        if (savedInstanceState == null) {
+        Intent intent = getIntent();
+
+        //came in from notification
+        if (intent != null && intent.getBooleanExtra("NOTIFICATION", false)){
+
+            clearBackStack();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
+                    .commit();
+
+            mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
+
+            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
+            mPreviousItem.setChecked(true);
+        }
+
+        //regular start
+        else if (savedInstanceState == null) {
             //only loads one fragment
-            mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
             mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.mainActivity_fragment_holder, mFragments[FRAGMENT_INDEXES.FEED])
@@ -226,6 +238,7 @@ public class MainActivity extends BaseTaptActivity {
             mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
             mPreviousItem.setChecked(true);
         }
+
     }
 
 
@@ -439,14 +452,16 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
+            mDrawerLayout.closeDrawers();
+        }
 
         //if there is a profile view or feedDetailView
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+        else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
+        }
 
-        else if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
-            mDrawerLayout.closeDrawers();
-        } else {
+        else {
             super.onBackPressed();
         }
     }
@@ -582,8 +597,30 @@ public class MainActivity extends BaseTaptActivity {
                     .setBehavior(null);
             ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
                     .setScrollFlags(0);
-
         }
     }
 
+    @Override
+    public void setToolbarOnClickListener(View.OnClickListener listener){
+        mToolbar.setOnClickListener(listener);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent.getBooleanExtra("NOTIFICATION", false)){
+
+            clearBackStack();
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
+                    .commit();
+
+            mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
+
+            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
+            mPreviousItem.setChecked(true);
+        }
+    }
 }

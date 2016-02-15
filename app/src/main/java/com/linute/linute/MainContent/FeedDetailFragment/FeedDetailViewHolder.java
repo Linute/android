@@ -45,15 +45,14 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder  implements Vi
     }
 
     void bindModel(Comment comment) {
-        Glide.with(mContext)
-                .load(comment.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(comment.getCommentUserProfileImage()))
-                .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into(vCommentUserImage);
+        if (comment.isAnon()){
+            setAnonImage(comment.getAnonImage());
+            vCommentUserName.setText("Anonymous");
+        }else{
+            setProfileImage(comment.getCommentUserProfileImage());
+            vCommentUserName.setText(comment.getCommentUserName());
+        }
 
-        vCommentUserName.setText(comment.isAnon() ? "Anonymous": comment.getCommentUserName());
         vCommentUserText.setText(comment.getCommentUserPostText());
 
         if (comment.getCommentUserId().equals(mSharedPreferences.getString("userID", ""))) {
@@ -77,5 +76,25 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder  implements Vi
         if (activity != null){
             activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mUserName, mCommenterUserId));
         }
+    }
+
+
+    public void setProfileImage(String image){
+        Glide.with(mContext)
+                .load(Utils.getImageUrlOfUser(image))
+                .asBitmap()
+                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(vCommentUserImage);
+    }
+
+    public void setAnonImage(String image){
+        Glide.with(mContext)
+                .load(Utils.getAnonImageUrl(image))
+                .asBitmap()
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(vCommentUserImage);
     }
 }

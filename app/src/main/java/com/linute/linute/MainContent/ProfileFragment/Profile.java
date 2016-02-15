@@ -1,9 +1,6 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
-
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,7 +13,6 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.Settings.ChangeProfileImageFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -124,6 +120,15 @@ public class Profile extends UpdatableFragment {
             String name = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
             mainActivity.setTitle(name);
             mainActivity.resetToolbar();
+
+            //scroll to top of list
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (recList != null)
+                        recList.smoothScrollToPosition(0);
+                }
+            });
         }
 
         //only update this fragment when it is first created or set to reupdate from outside
@@ -138,6 +143,18 @@ public class Profile extends UpdatableFragment {
             setActivities();
             setFragmentNeedUpdating(false);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null){
+            activity.setToolbarOnClickListener(null);
+        }
+
     }
 
     @Override
@@ -240,8 +257,6 @@ public class Profile extends UpdatableFragment {
 //                        Log.d(TAG, "onResponse getActivities" + body);
 
                         if (activities == null || getActivity() == null) return;
-
-//                        mUserActivityItems.clear(); //clear so we don't have duplicates
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 

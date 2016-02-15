@@ -110,18 +110,20 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         vFeedDetail = feedDetail;
         if (feedDetail.getPostPrivacy() == 0) {
 
-            if (feedDetail.getUserImage() != null)
+            if (feedDetail.getUserImage() != null && !feedDetail.getUserImage().equals(""))
                 getProfileImage(feedDetail.getUserImage());
 
             vPostUserName.setText(feedDetail.getUserName());
         } else if (feedDetail.getPostPrivacy() == 1){
-            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
+            if (feedDetail.getAnonPic() != null && !feedDetail.getAnonPic().equals(""))
+                getAnonImage(feedDetail.getAnonPic());
+
             vPostUserName.setText("Anonymous");
         }
         vLikesHeart.setChecked(feedDetail.isPostLiked());
         vLikesText.setText("Like (" + feedDetail.getPostLikeNum() + ")");
 
-        vCommentsText.setText("Comment (" + feedDetail.getNumOfComments() + ")"); //TODO: fix
+        vCommentsText.setText("Comment (" + feedDetail.getNumOfComments() + ")");
 
         vPostTime.setText(feedDetail.getPostTime());
 
@@ -249,5 +251,14 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(mPostImage);
+    }
+
+    private void getAnonImage(String image){
+        Glide.with(mContext)
+                .load(Utils.getAnonImageUrl(image))
+                .asBitmap()
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(vUserImage);
     }
 }

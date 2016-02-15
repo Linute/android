@@ -106,6 +106,8 @@ public class PeopleFragment extends UpdatableFragment {
 
         mRationaleLayer = rootView.findViewById(R.id.peopleFragment_rationale_view);
 
+        setHasOptionsMenu(true);
+
         recList = (RecyclerView) rootView.findViewById(R.id.people_frag_rec);
         recList.setHasFixedSize(true);
         llm = new LinearLayoutManager(getActivity());
@@ -611,11 +613,17 @@ public class PeopleFragment extends UpdatableFragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
-        if (holderFragment != null)
-            holderFragment.setFragmentNeedUpdating(true);
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
+//        if (holderFragment != null)
+//            holderFragment.setFragmentNeedUpdating(true);
+//    }
+
+    public void scrollUp(){
+        if (recList != null){
+            recList.smoothScrollToPosition(0);
+        }
     }
 }

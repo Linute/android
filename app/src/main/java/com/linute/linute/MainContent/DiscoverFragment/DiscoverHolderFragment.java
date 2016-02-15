@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -31,15 +32,12 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
     private FragmentHolderPagerAdapter mFragmentHolderPagerAdapter;
 
+    private DiscoverFragment[] mDiscoverFragments;
+
     public DiscoverHolderFragment() {
 
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager());
-    }
 
     @Nullable
     @Override
@@ -50,6 +48,11 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
+        if (mDiscoverFragments == null || mDiscoverFragments.length != 2) {
+            mDiscoverFragments = new DiscoverFragment[]{DiscoverFragment.newInstance(false), DiscoverFragment.newInstance(true)};
+        }
+
+        mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
         mViewPager.setAdapter(mFragmentHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -134,28 +137,32 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
     private void loadFragmentAtPositionIfNeeded(int position) {
-        DiscoverFragment fragment = (DiscoverFragment) mFragmentHolderPagerAdapter.instantiateItem(mViewPager, position);
         //only load when fragment comes into view
-        if (fragment != null) {
-            if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
-                fragment.refreshFeed();
-                if (position == 0) mCampusFeedNeedsUpdating = false;
-                else mFriendsFeedNeedsUpdating = false;
-            }
+        if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
+            mDiscoverFragments[position].refreshFeed();
+            if (position == 0) mCampusFeedNeedsUpdating = false;
+            else mFriendsFeedNeedsUpdating = false;
         }
+
     }
+
 
     @Override
     public void onResume() {
         super.onResume();
 
         MainActivity mainActivity = (MainActivity) getActivity();
-
         if (mainActivity != null) {
             mainActivity.setTitle("Feed");
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.showFAB(true); //show the floating button
             mainActivity.resetToolbar();
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+                }
+            });
         }
     }
 
@@ -167,8 +174,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         if (mainActivity != null) {
             mainActivity.raiseAppBarLayoutElevation();
             mainActivity.showFAB(false);
+            mainActivity.setToolbarOnClickListener(null);
         }
-//        setFragmentNeedUpdating(true);
     }
 
 

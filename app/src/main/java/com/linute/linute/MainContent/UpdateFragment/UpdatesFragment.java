@@ -65,6 +65,7 @@ public class UpdatesFragment extends UpdatableFragment {
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mUpdatesRecyclerView.setLayoutManager(llm);
+        mUpdatesRecyclerView.setHasFixedSize(true);
 
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
@@ -105,7 +106,16 @@ public class UpdatesFragment extends UpdatableFragment {
         if (mainActivity != null) {
             mainActivity.setTitle("Updates");
             mainActivity.resetToolbar();
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mUpdatesRecyclerView != null){
+                        mUpdatesRecyclerView.smoothScrollToPosition(0);
+                    }
+                }
+            });
         }
+
         if (fragmentNeedsUpdating()) {
 
             mSwipeRefreshLayout.post(new Runnable() {
@@ -118,10 +128,25 @@ public class UpdatesFragment extends UpdatableFragment {
             getUpdatesInformation();
             setFragmentNeedUpdating(false);
         }
+
+        else {
+            if (mRecentUpdates.isEmpty() && mOldUpdates.isEmpty()){
+                if(mEmptyView.getVisibility() == View.GONE){
+                    mEmptyView.setVisibility(View.VISIBLE);
+                }
+            }
+        }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
 
-
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null){
+            activity.setToolbarOnClickListener(null);
+        }
+    }
 
     private void updateUpdatesInformation() {
         JSONArray unread = new JSONArray();

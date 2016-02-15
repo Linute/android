@@ -188,7 +188,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
             getProfileImage(post.getUserImage());
             vPostUserName.setText(post.getUserName());
         } else {
-            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
+            getAnonImage(post.getAnonImage());
             vPostUserName.setText("Anonymous");
         }
 
@@ -206,6 +206,15 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(vUserImage);
+    }
+
+    private void getAnonImage(String image){
+        Glide.with(mContext)
+                .load(Utils.getAnonImageUrl(image))
+                .asBitmap()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);

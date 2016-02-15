@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -34,7 +35,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     public static final String TAG = PeopleFragmentsHolder.class.getSimpleName();
     private ViewPager mViewPager;
-    private boolean mInitiallyPopularPeople = true; //first fragment presented by viewpager was popular users
     private PeopleHolderPagerAdapter mPeopleHolderPagerAdapter;
 
 
@@ -66,11 +66,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 //we will only load the other fragment if it is needed
                 //ex. we start on the campus tab. we won't load the near me tab until we swipe left
                 loadFragmentAtPositionIfNeeded(position);
+                mInitiallyPresentedFragmentWasActive = position == 0;
             }
 
             @Override
             public void onPageSelected(int position) {
-                Log.i(TAG, "onPageSelected: " + position);
             }
 
             @Override
@@ -143,19 +143,20 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
     private void loadFragmentAtPositionIfNeeded(int position) {
+
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
-        //only load when fragment comes into view
-        if (fragment != null) {
-            if (position == 0 ? mActiveNeedsUpdating : mNearMeNeedsUpdating) {
-                if (position == 0) {
-                    mActiveNeedsUpdating = false;
-                    fragment.getPeople();
-                } else {
-                    mNearMeNeedsUpdating = false;
-                    fragment.getPeopleNearMe();
-                }
+
+        if (fragment == null) return;
+        if (position == 0 ? mActiveNeedsUpdating : mNearMeNeedsUpdating) {
+            if (position == 0) {
+                mActiveNeedsUpdating = false;
+                fragment.getPeople();
+            } else {
+                mNearMeNeedsUpdating = false;
+                fragment.getPeopleNearMe();
             }
         }
+
     }
 
     @Override
@@ -168,6 +169,12 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
             mainActivity.setTitle("People");
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.resetToolbar();
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scrollViewRecListUp(mViewPager.getCurrentItem());
+                }
+            });
         }
     }
 
@@ -177,8 +184,9 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.raiseAppBarLayoutElevation();
+            mainActivity.setToolbarOnClickListener(null);
+            setFragmentNeedUpdating(true);
         }
-        //setFragmentNeedUpdating(true);
     }
 
     //there's problems with nested fragments
@@ -223,5 +231,12 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void scrollViewRecListUp(int position) {
+        PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
+        if (fragment != null) {
+            fragment.scrollUp();
+        }
     }
 }

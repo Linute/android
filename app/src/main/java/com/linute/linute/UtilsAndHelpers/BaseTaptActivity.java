@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 /**
  * Created by QiFeng on 1/25/16.
@@ -47,6 +48,10 @@ public class BaseTaptActivity extends AppCompatActivity {
     }
 
     public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
+
+    }
+
+    public void setToolbarOnClickListener(View.OnClickListener listener){
 
     }
 

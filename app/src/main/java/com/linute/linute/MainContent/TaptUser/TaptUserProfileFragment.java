@@ -121,6 +121,13 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         if (activity != null) { //changes app bar title to user's name
             activity.setTitle(mUserName);
             activity.resetToolbar();
+            activity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (recList != null)
+                        recList.smoothScrollToPosition(0);
+                }
+            });
         }
 
         //if first time creating this fragment
@@ -130,6 +137,15 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             updateAndSetHeader();
             setActivities(); //get activities
             setFragmentNeedUpdating(false);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null){
+            activity.setToolbarOnClickListener(null);
         }
     }
 

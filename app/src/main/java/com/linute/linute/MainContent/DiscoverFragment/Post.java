@@ -18,6 +18,7 @@ public class Post implements Parcelable {
     private String mPostTime;
     private String mPostId;
     private int mNumOfComments;
+    private String mAnonImage;
 
     private boolean mPostLiked;
 
@@ -27,7 +28,7 @@ public class Post implements Parcelable {
 
     public Post(String userId, String userName, String userImage, String title,
                 String image, int privacy, int numLike, boolean userLiked,
-                String postTime, String postId, int numComments) {
+                String postTime, String postId, int numComments, String anonImage) {
         mUserId = userId;
         mUserName = userName;
         mImage = "";
@@ -40,6 +41,7 @@ public class Post implements Parcelable {
         mPostTime = postTime;
         mPostId = postId;
         mNumOfComments = numComments;
+        mAnonImage = anonImage;
 
         mPostLiked = mUserLiked;
     }
@@ -104,6 +106,10 @@ public class Post implements Parcelable {
         return mNumOfComments;
     }
 
+    public String getAnonImage(){
+        return mAnonImage;
+    }
+
     @Override
     public String toString() {
         return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
@@ -127,6 +133,7 @@ public class Post implements Parcelable {
         dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
         dest.writeString(mPostTime);
         dest.writeString(mPostId);
+        dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
     }
 
@@ -141,6 +148,7 @@ public class Post implements Parcelable {
         mUserLiked = in.readByte() != 0; //true if byte != 0
         mPostTime = in.readString();
         mPostId = in.readString();
+        mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0
     }
 

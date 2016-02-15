@@ -146,6 +146,9 @@ public class Utils {
         return "http://images.linute.com/profiles/original/" + userImage;
     }
 
+    public static String getAnonImageUrl(String image){
+        return "http://images.linute.com/profiles/anonymous/"+image;
+    }
 
     public static String formatDateToReadableString(String date) {
         SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

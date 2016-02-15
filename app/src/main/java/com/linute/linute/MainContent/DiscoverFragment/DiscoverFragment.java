@@ -57,8 +57,6 @@ public class DiscoverFragment extends UpdatableFragment {
 
     private String mCollegeId;
 
-    //private RecyclerViewDisabler mRecyclerViewDisabler;
-
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
         Bundle args = new Bundle();
@@ -204,6 +202,19 @@ public class DiscoverFragment extends UpdatableFragment {
                 && fragment.getFriendsFeedNeedsUpdating()) {
             refreshFeed();
             fragment.setFriendsFeedNeedsUpdating(false);
+        } else {
+            if (!mFriendsOnly && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
+                mEmptyView.setImageResource(R.drawable.campus);
+                mEmptyView.requestLayout();
+                mEmptyView.setVisibility(View.VISIBLE);
+
+            } else if (mFriendsOnly && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
+                Log.i(TAG, "onResume: test");
+                mEmptyView.setImageResource(R.drawable.loser_512);
+                mEmptyView.requestLayout();
+                mEmptyView.setVisibility(View.VISIBLE);
+
+            }
         }
     }
 
@@ -299,7 +310,9 @@ public class DiscoverFragment extends UpdatableFragment {
                                         jsonObject.getBoolean("isLiked"),
                                         postString,
                                         jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"));
+                                        jsonObject.getInt("numberOfComments"),
+                                        jsonObject.getString("anonymousImage")
+                                );
                                 mPosts.add(post);
 
                                 postImage = "";
@@ -430,7 +443,9 @@ public class DiscoverFragment extends UpdatableFragment {
                                         jsonObject.getBoolean("isLiked"),
                                         postString,
                                         jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"));
+                                        jsonObject.getInt("numberOfComments"),
+                                        jsonObject.getString("anonymousImage")
+                                );
 
                                 refreshedPosts.add(post);
 
@@ -441,7 +456,9 @@ public class DiscoverFragment extends UpdatableFragment {
                             mPosts.clear();
                             mPosts.addAll(refreshedPosts);
 
-                            if (getActivity() == null) return;
+                            if (getActivity() == null) {
+                                return;
+                            }
 
                             getActivity().runOnUiThread(
                                     new Runnable() {
@@ -507,12 +524,9 @@ public class DiscoverFragment extends UpdatableFragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        DiscoverHolderFragment holderFragment = (DiscoverHolderFragment) getParentFragment();
-        if (holderFragment != null)
-            holderFragment.setFragmentNeedUpdating(true);
+    public void scrollUp() {
+        if (recList != null) {
+            recList.smoothScrollToPosition(0);
+        }
     }
-
 }

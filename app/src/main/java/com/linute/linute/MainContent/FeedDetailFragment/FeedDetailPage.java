@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -73,12 +72,13 @@ public class FeedDetailPage extends UpdatableFragment {
 
     private boolean mOpenKeyBoard = false;
 
+    private boolean mCommentPosted = false;
+
 
     public FeedDetailPage() {
     }
 
 
-    //TODO: NEED TO FIX
     public static FeedDetailPage newInstance(boolean openKeyBoard,
                                              boolean isImage,
                                              String taptUserPostId,
@@ -209,7 +209,7 @@ public class FeedDetailPage extends UpdatableFragment {
             @Override
             public void onClick(View v) {
 
-                if (mCommentText.trim().isEmpty()) return;
+                if (mCommentText.trim().isEmpty() || getActivity() == null) return;
 
                 final View progressBar = rootView.findViewById(R.id.comment_progressbar);
                 final View sendButton = rootView.findViewById(R.id.feed_detail_send_comment);
@@ -267,6 +267,7 @@ public class FeedDetailPage extends UpdatableFragment {
                             Log.d(TAG, "onResponseSuccessful: " + response.body().string());
 
                             if (getActivity() == null) return;
+                            mCommentPosted = true;
 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -295,6 +296,13 @@ public class FeedDetailPage extends UpdatableFragment {
             activity.setTitle(mIsImage ? "Image" : "Status");
             activity.resetToolbar();
             activity.enableBarScrolling(false);
+            activity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (recList != null)
+                        recList.smoothScrollToPosition(0);
+                }
+            });
         }
 
         //only updates first time it is created
@@ -313,6 +321,7 @@ public class FeedDetailPage extends UpdatableFragment {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.enableBarScrolling(true);
+            activity.setToolbarOnClickListener(null);
         }
     }
 
@@ -372,7 +381,9 @@ public class FeedDetailPage extends UpdatableFragment {
                             postString,
                             jsonObject.getBoolean("isLiked"),
                             jsonObject.getString("numberOfLikes"),
-                            jsonObject.getString("numberOfComments"));
+                            jsonObject.getString("numberOfComments"),
+                            jsonObject.getString("anonymousImage")
+                    );
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                     if (getActivity() != null) {
@@ -400,101 +411,98 @@ public class FeedDetailPage extends UpdatableFragment {
         eventComments.put("event", mTaptPostId);
         eventComments.put("skip", "0");
         event.getComments(eventComments, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getActivity());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d(TAG, "onResponse: " + response.body().string());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                            }
-                        });
-                    }
-                    return;
-                }
-                JSONObject jsonObject;
-                JSONArray comments;
-
-                ArrayList<Comment> tempComments = new ArrayList<>();
-                try {
-                    jsonObject = new JSONObject(response.body().string());
-                    comments = jsonObject.getJSONArray("comments");
-                    for (int i = 0; i < comments.length(); i++) {
-                        Log.d(TAG, "comment: " + comments.get(i).toString());
-                        tempComments
-                                .add(new Comment(
-                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
-                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
-                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                        ((JSONObject) comments.get(i)).getString("text"),
-                                        ((JSONObject) comments.get(i)).getString("id"),
-                                        ((JSONObject) comments.get(i)).getInt("privacy") == 1
-                                ));
-                    }
-
-                    if (comments.length() == 0) {
-                        tempComments.add(null);
-                    }
-
-                    mFeedDetail.getComments().clear();
-                    mFeedDetail.getComments().addAll(tempComments);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                            }
-                        });
-                    }
-                }
-
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(new Runnable() {
                     @Override
-                    public void run() {
-                        mFeedDetailAdapter.notifyDataSetChanged();
-                        if (mOpenKeyBoard) { //if open keyboard
-
-                            if (mReopenKeyboard) {
-                                mCommentEditText.requestFocus();
-                                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-                                mReopenKeyboard = false;
-                            }
-
-                            recList.postDelayed(new Runnable() {
+                    public void onFailure(Request request, IOException e) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                                    Utils.showBadConnectionToast(getActivity());
                                 }
-                            }, 500);
-                        } else {
-                            mOpenKeyBoard = true; //don't open first time, but open other times
+                            });
                         }
                     }
-                });
-            }
-        });
-    }
 
-    private boolean mReopenKeyboard = true;
+                    @Override
+                    public void onResponse(Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            Log.d(TAG, "onResponse: " + response.body().string());
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getActivity());
+                                    }
+                                });
+                            }
+                            return;
+                        }
+                        JSONObject jsonObject;
+                        JSONArray comments;
+
+                        ArrayList<Comment> tempComments = new ArrayList<>();
+                        try {
+                            jsonObject = new JSONObject(response.body().string());
+                            comments = jsonObject.getJSONArray("comments");
+                            for (int i = 0; i < comments.length(); i++) {
+                                Log.d(TAG, "comment: " + comments.get(i).toString());
+                                tempComments
+                                        .add(new Comment(
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
+                                                ((JSONObject) comments.get(i)).getString("text"),
+                                                ((JSONObject) comments.get(i)).getString("id"),
+                                                ((JSONObject) comments.get(i)).getInt("privacy") == 1,
+                                                ((JSONObject) comments.get(i)).getString("anonymousImage")
+                                        ));
+                            }
+
+                            if (comments.length() == 0) {
+                                tempComments.add(null);
+                            }
+
+                            mFeedDetail.getComments().clear();
+                            mFeedDetail.getComments().addAll(tempComments);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getActivity());
+                                    }
+                                });
+                            }
+                        }
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mFeedDetailAdapter.notifyDataSetChanged();
+
+                                        if (mCommentPosted) {
+                                            mCommentPosted = false;
+                                            recList.postDelayed(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                                                }
+                                            }, 500);
+                                        }
+
+                                    }
+                                }
+
+                        );
+                    }
+                }
+
+        );
+    }
 
 
     private void setCommentViewEditable(boolean editable) {
@@ -534,7 +542,7 @@ public class FeedDetailPage extends UpdatableFragment {
 
     private void showReportOptionsDialog() {
         if (getActivity() == null) return;
-        final CharSequence options[] = new CharSequence[]{"Spam","Inappropriate","Harassment", "Suspected Parent", "Suspected Professor", "Cancel"};
+        final CharSequence options[] = new CharSequence[]{"Spam", "Inappropriate", "Harassment", "Suspected Parent", "Suspected Professor", "Cancel"};
         AlertDialog alert = new AlertDialog.Builder(getActivity())
                 .setTitle("Report As")
                 .setItems(options, new DialogInterface.OnClickListener() {
@@ -581,7 +589,7 @@ public class FeedDetailPage extends UpdatableFragment {
                         }
                     });
                 } else {
-                    Log.e(TAG, "onResponse: "+response.body().string());
+                    Log.e(TAG, "onResponse: " + response.body().string());
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -616,7 +624,7 @@ public class FeedDetailPage extends UpdatableFragment {
                 .show();
     }
 
-    private void deletePost(){
+    private void deletePost() {
         if (getActivity() == null) return;
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true);
@@ -624,7 +632,7 @@ public class FeedDetailPage extends UpdatableFragment {
         new LSDKEvents(getActivity()).deleteEvent(mTaptPostId, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -637,7 +645,7 @@ public class FeedDetailPage extends UpdatableFragment {
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     response.body().close();
 
                     final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
@@ -654,8 +662,8 @@ public class FeedDetailPage extends UpdatableFragment {
                         }
                     });
 
-                }else {
-                    Log.e(TAG, "onResponse: "+response.body().string());
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

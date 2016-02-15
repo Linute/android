@@ -12,20 +12,17 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
  */
 public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
 
+    public DiscoverFragment[] mDiscoverFragments;
 
-    public FragmentHolderPagerAdapter(FragmentManager fm) {
+
+    public FragmentHolderPagerAdapter(FragmentManager fm, DiscoverFragment[] fragments) {
         super(fm);
+        mDiscoverFragments = fragments;
     }
 
     @Override
     public Fragment getItem(int position) {
-        switch (position){
-            case 0:
-                return DiscoverFragment.newInstance(false);
-            case 1:
-                return DiscoverFragment.newInstance(true);
-        }
-        return null;
+        return mDiscoverFragments[position];
     }
 
     @Override
