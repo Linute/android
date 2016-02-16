@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -92,9 +93,13 @@ public class DiscoverFragment extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+
+        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+
         llm.setOrientation(LinearLayoutManager.VERTICAL);
+
         recList.setLayoutManager(llm);
+
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
         //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
@@ -529,4 +534,7 @@ public class DiscoverFragment extends UpdatableFragment {
             recList.smoothScrollToPosition(0);
         }
     }
+
+
+
 }

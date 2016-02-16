@@ -94,6 +94,8 @@ public class MainActivity extends BaseTaptActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
 
@@ -524,13 +526,16 @@ public class MainActivity extends BaseTaptActivity {
 
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
+                    IO.Options op = new IO.Options();
+                    op.query = "token=" + mSharedPreferences.getString("userID", "");
+                    op.forceNew = true;
+                    op.reconnectionDelay = 5;
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
 
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.on("authorization", authorization);
@@ -543,7 +548,6 @@ public class MainActivity extends BaseTaptActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            mSocket.emit("authorization", jsonObject);
         }
     }
 

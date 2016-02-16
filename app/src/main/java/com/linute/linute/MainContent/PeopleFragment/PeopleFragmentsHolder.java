@@ -181,11 +181,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     public void onStop() {
         super.onStop();
+        setFragmentNeedUpdating(true);
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.raiseAppBarLayoutElevation();
             mainActivity.setToolbarOnClickListener(null);
-            setFragmentNeedUpdating(true);
         }
     }
 

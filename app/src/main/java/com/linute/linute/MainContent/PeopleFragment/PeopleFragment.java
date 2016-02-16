@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -110,7 +111,7 @@ public class PeopleFragment extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.people_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));

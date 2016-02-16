@@ -212,8 +212,8 @@ public class SettingActivity extends AppCompatActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
                     intent.setData(Uri.parse("mailto:")); // only email apps should handle this
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"info@linute.com"});
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Linute Feedback");
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback");
                     intent.putExtra(android.content.Intent.EXTRA_TEXT, "Replace this text with any feedback you'd like to give us!");
                     if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                         startActivity(intent);
