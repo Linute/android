@@ -26,8 +26,8 @@ public class LSDKCollege {
 
     public Call getColleges(Map<String, String> params, Callback callback){
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
         String[] path = {"colleges"};
         return API_Methods.get(path, header,params, callback);

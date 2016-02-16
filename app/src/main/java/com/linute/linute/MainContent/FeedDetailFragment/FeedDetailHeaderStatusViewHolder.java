@@ -94,9 +94,12 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
         if (feedDetail.getPostPrivacy() == 0) {
             if (feedDetail.getUserImage() != null)
                 getProfileImage(feedDetail.getUserImage());
+
             vPostUserName.setText(feedDetail.getUserName());
         } else if (feedDetail.getPostPrivacy() == 1){
-            vUserImage.setImageResource(R.drawable.profile_picture_placeholder);
+            if (feedDetail.getAnonPic() != null && !feedDetail.getAnonPic().equals(""))
+                getAnonImage(feedDetail.getAnonPic());
+
             vPostUserName.setText("Anonymous");
         }
 
@@ -185,6 +188,15 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(vUserImage);
+    }
+
+    private void getAnonImage(String image){
+        Glide.with(mContext)
+                .load(Utils.getAnonImageUrl(image))
+                .asBitmap()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);

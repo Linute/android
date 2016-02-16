@@ -47,6 +47,8 @@ public class RoomsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rooms);
 
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
         toolbar.setTitle("Messages");
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -139,13 +141,16 @@ public class RoomsActivity extends AppCompatActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL));/*R.string.DEV_SOCKET_URL*/
+                    IO.Options op = new IO.Options();
+                    op.query = "token=" + mSharedPreferences.getString("userID", "");
+                    op.forceNew = true;
+                    op.reconnectionDelay = 5;
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
-
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.on("authorization", authorization);
@@ -157,7 +162,6 @@ public class RoomsActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            mSocket.emit("authorization", jsonObject);
         }
     }
 

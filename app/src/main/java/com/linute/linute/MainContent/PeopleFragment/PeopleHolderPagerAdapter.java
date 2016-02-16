@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
 
-
     public PeopleHolderPagerAdapter(FragmentManager fm) {
         super(fm);
     }

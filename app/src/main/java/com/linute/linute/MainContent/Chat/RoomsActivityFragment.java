@@ -143,7 +143,8 @@ public class RoomsActivityFragment extends Fragment {
                         JSONArray users;
                         JSONArray messages;
 
-                        mRoomsList.clear();
+//                        mRoomsList.clear();
+                        ArrayList<Rooms> tempRooms = new ArrayList<>();
 
                         for (int i = 0; i < rooms.length(); i++) {
                             room = rooms.getJSONObject(i);
@@ -172,7 +173,7 @@ public class RoomsActivityFragment extends Fragment {
                             Log.i("ROOM_TEST", "onResponse: "+room.toString());
 
                             //Throws error but still runs correctly... weird
-                            mRoomsList.add(new Rooms(getStringFromObj(room, "owner"),
+                            tempRooms.add(new Rooms(getStringFromObj(room, "owner"),
                                     getStringFromObj(room, "id"),
                                     getStringFromObj(users.getJSONObject(0), "id"),
                                     getStringFromObj(users.getJSONObject(0), "fullName"),
@@ -182,6 +183,9 @@ public class RoomsActivityFragment extends Fragment {
                                     chatHeads
                             ));
                         }
+
+                        mRoomsList.clear();
+                        mRoomsList.addAll(tempRooms);
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {

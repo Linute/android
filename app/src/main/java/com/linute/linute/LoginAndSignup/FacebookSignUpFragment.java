@@ -365,8 +365,8 @@ public class FacebookSignUpFragment extends Fragment {
 
     private void getPinCode(String email) {
         if(getActivity() == null) return;
-        final String fName = mFirstNameEditText.getText().toString();
-        final String lName = mLastNameEditText.getText().toString();
+        final String fName = mFirstNameEditText.getText().toString().trim();
+        final String lName = mLastNameEditText.getText().toString().trim();
 
         new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName,new Callback() {
             @Override

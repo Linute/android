@@ -105,11 +105,13 @@ public class PostCreatePage extends AppCompatActivity {
     private void postStatus(){
         if (mPostInProgress) return;
 
+        //SHIT !!
+        if(textContent.getText().toString().trim().equals("")) return;
+
         mPostInProgress = true;
 
         mProgressbar.setVisibility(View.VISIBLE);
-        mPostButton.setVisibility(View.GONE);
-
+        mPostButton.setVisibility(View.INVISIBLE);
         Map<String, Object> postData = new HashMap<>();
 
         JSONArray coord = new JSONArray();
@@ -121,7 +123,6 @@ public class PostCreatePage extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
 //                Log.d(TAG, "" + jsonObject.toString());
 
@@ -175,8 +176,6 @@ public class PostCreatePage extends AppCompatActivity {
             }
         });
     }
-
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

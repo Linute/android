@@ -28,8 +28,8 @@ public class LSDKChat {
 
     public Call getRooms(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"rooms"};
@@ -38,8 +38,8 @@ public class LSDKChat {
 
     public Call getUsers(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"friends"};
@@ -48,8 +48,8 @@ public class LSDKChat {
 
     public Call checkUserConvo(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"rooms"};
@@ -58,8 +58,8 @@ public class LSDKChat {
 
     public Call newChat(Map<String, Object> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         return API_Methods.post("messages", header, param, callback);
@@ -67,8 +67,8 @@ public class LSDKChat {
 
     public Call getChat(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         String[] path = {"messages"};
@@ -79,8 +79,8 @@ public class LSDKChat {
     public Call getPastMessages(JSONArray users,Callback callback){
 
         Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
+                mSharedPreferences.getString("email", ""),
+                mSharedPreferences.getString("password", ""),
                 mEncodedToken);
 
         Map<String, Object> params = new HashMap<>();

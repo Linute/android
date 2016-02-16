@@ -28,9 +28,12 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatHead;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -120,6 +123,15 @@ public class MyGcmListenerService extends GcmListenerService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+                    PendingIntent.FLAG_ONE_SHOT);
+        }else{
+            boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
+            intent = new Intent(this,isLoggedIn ? MainActivity.class : PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+            intent.putExtra("NOTIFICATION", true);
+
             pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }

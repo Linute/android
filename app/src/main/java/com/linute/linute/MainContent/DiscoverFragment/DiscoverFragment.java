@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,13 +13,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -47,7 +45,6 @@ import java.util.Map;
 public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
-    private LinearLayoutManager llm;
 
     private ImageView mEmptyView;
 
@@ -58,6 +55,8 @@ public class DiscoverFragment extends UpdatableFragment {
     private boolean feedDone;
 
     private boolean mFriendsOnly = false;
+
+    private String mCollegeId;
 
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
@@ -70,6 +69,10 @@ public class DiscoverFragment extends UpdatableFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mCollegeId = sharedPreferences.getString("collegeId", "");
+
         if (getArguments() != null) {
             mFriendsOnly = getArguments().getBoolean("friendsOnly");
         }
@@ -90,9 +93,13 @@ public class DiscoverFragment extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+
+        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+
         llm.setOrientation(LinearLayoutManager.VERTICAL);
+
         recList.setLayoutManager(llm);
+
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
         //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
@@ -116,13 +123,21 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
+        /*mRecyclerViewDisabler = new RecyclerViewDisabler();
+        mRecyclerViewDisabler.setScrolledUpRunnable(new RecyclerViewDisabler.ScrolledUpRunnable() {
+            @Override
+            public void onScrolledUp() {
+                refreshingAndScrolledUp();
+            }
+        });*/
+
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 feedDone = false;
-                getFeed(0);
+                refreshFeed();
             }
         });
 
@@ -185,13 +200,26 @@ public class DiscoverFragment extends UpdatableFragment {
         if (fragment.getInitiallyPresentedFragmentWasCampus()
                 && !mFriendsOnly
                 && fragment.getCampusFeedNeedsUpdating()) {
-            getFeed(0);
+            refreshFeed();
             fragment.setCampusFeedNeedsUpdating(false);
         } else if (!fragment.getInitiallyPresentedFragmentWasCampus()
                 && mFriendsOnly
                 && fragment.getFriendsFeedNeedsUpdating()) {
-            getFeed(0);
+            refreshFeed();
             fragment.setFriendsFeedNeedsUpdating(false);
+        } else {
+            if (!mFriendsOnly && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
+                mEmptyView.setImageResource(R.drawable.campus);
+                mEmptyView.requestLayout();
+                mEmptyView.setVisibility(View.VISIBLE);
+
+            } else if (mFriendsOnly && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
+                Log.i(TAG, "onResume: test");
+                mEmptyView.setImageResource(R.drawable.loser_512);
+                mEmptyView.requestLayout();
+                mEmptyView.setVisibility(View.VISIBLE);
+
+            }
         }
     }
 
@@ -201,18 +229,15 @@ public class DiscoverFragment extends UpdatableFragment {
         if (feedDone) {
             Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
         } else {
-            getFeed(1);
+            loadMoreFeedFromServer();
         }
     }
 
-    public void getFeed(int type) {
-        if (type == 1) {
-            mSkip += 25;
-        } else {
-            mSkip = 0;
-        }
+    public void loadMoreFeedFromServer() {
+        mSkip += 25;
 
         final int skip = mSkip;
+
         if (getActivity() == null) return;
 
         if (!refreshLayout.isRefreshing()) {
@@ -224,9 +249,9 @@ public class DiscoverFragment extends UpdatableFragment {
             });
         }
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         Map<String, String> events = new HashMap<>();
-        events.put("college", sharedPreferences.getString("collegeId", ""));
+        events.put("college", mCollegeId);
         events.put("skip", skip + "");
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
@@ -240,13 +265,11 @@ public class DiscoverFragment extends UpdatableFragment {
                     public void onResponse(Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("HEY", response.body().string());
-                            if (getActivity() != null) {
+                            if (getActivity() != null) { //shows server error toast
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (refreshLayout.isRefreshing()){
-                                            refreshLayout.setRefreshing(false);
-                                        }
+                                        refreshLayout.setRefreshing(false);
                                         Utils.showServerErrorToast(getActivity());
                                     }
                                 });
@@ -254,26 +277,24 @@ public class DiscoverFragment extends UpdatableFragment {
                             return;
                         }
 
-                        if (skip == 0) {
-                            mPosts.clear();
-                        }
                         String json = response.body().string();
                         Log.i(TAG, "onResponse: " + json);
-                        JSONObject jsonObject = null;
-                        JSONArray jsonArray = null;
+                        JSONObject jsonObject;
+                        JSONArray jsonArray;
                         try {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (!feedDone) {
-                                if (jsonArray.length() != 25)
-                                    feedDone = true;
-                            }
-                            Post post = null;
+
+                            if (jsonArray.length() != 25) feedDone = true; //no more feed to load
+
+
+                            Post post;
                             String postImage = "";
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
                             String postString;
+
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 jsonObject = (JSONObject) jsonArray.get(i);
                                 if (jsonObject.getJSONArray("images").length() > 0)
@@ -283,7 +304,6 @@ public class DiscoverFragment extends UpdatableFragment {
 
                                 postString = Utils.getTimeAgoString(myDate.getTime());
 
-//                        Log.d("-TAG-", myDate + " " + postString);
                                 post = new Post(
                                         jsonObject.getJSONObject("owner").getString("id"),
                                         jsonObject.getJSONObject("owner").getString("fullName"),
@@ -295,41 +315,194 @@ public class DiscoverFragment extends UpdatableFragment {
                                         jsonObject.getBoolean("isLiked"),
                                         postString,
                                         jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"));
+                                        jsonObject.getInt("numberOfComments"),
+                                        jsonObject.getString("anonymousImage")
+                                );
                                 mPosts.add(post);
+
                                 postImage = "";
                             }
 
+                            if (getActivity() == null) return;
+
+                            getActivity().runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            cancelRefresh();
+
+                                            if (mPosts.isEmpty()) {
+                                                if (mEmptyView.getVisibility() == View.GONE) {
+                                                    mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    mEmptyView.setVisibility(View.VISIBLE);
+                                                }
+                                            } else if (mEmptyView.getVisibility() == View.VISIBLE) {
+                                                mEmptyView.setVisibility(View.GONE);
+                                            }
+                                            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                        }
+                                    }
+
+                            );
+
                         } catch (JSONException | ParseException e) {
                             e.printStackTrace();
-                        }
-
-                        if (getActivity() == null)
-                            return;
-
-                        getActivity().runOnUiThread(
-                                new Runnable() {
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        cancelRefresh();
-
-                                        if (mPosts.isEmpty()) {
-                                            if (mEmptyView.getVisibility() == View.GONE) {
-                                                mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
-                                                mEmptyView.setVisibility(View.VISIBLE);
-                                            }
-                                        } else if (mEmptyView.getVisibility() == View.VISIBLE) {
-                                            mEmptyView.setVisibility(View.GONE);
-                                        }
-                                        mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                        Utils.showServerErrorToast(getActivity());
+                                        refreshLayout.setRefreshing(false);
                                     }
-                                }
-
-                        );
+                                });
+                            }
+                        }
                     }
                 }
-
         );
+    }
+
+
+    public void refreshFeed() {
+
+        if (getActivity() == null) return;
+
+        if (!refreshLayout.isRefreshing()) {
+            refreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(true);
+                }
+            });
+        }
+
+
+        mSkip = 0;
+
+        Map<String, String> events = new HashMap<>();
+        events.put("college", mCollegeId);
+        events.put("skip", "0");
+        events.put("limit", "25");
+        LSDKEvents events1 = new LSDKEvents(getActivity());
+
+        events1.getEvents(mFriendsOnly, events, new Callback() {
+                    @Override
+                    public void onFailure(Request request, IOException e) {
+                        noInternet();
+                    }
+
+                    @Override
+                    public void onResponse(Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            Log.d("HEY", response.body().string());
+                            if (getActivity() != null) { //shows server error toast
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (refreshLayout.isRefreshing()) {
+                                            refreshLayout.setRefreshing(false);
+                                        }
+                                        Utils.showServerErrorToast(getActivity());
+                                    }
+                                });
+                            }
+                            return;
+                        }
+
+                        String json = response.body().string();
+                        Log.i(TAG, "onResponse: " + json);
+                        JSONObject jsonObject;
+                        JSONArray jsonArray;
+                        try {
+
+                            jsonObject = new JSONObject(json);
+                            jsonArray = jsonObject.getJSONArray("events");
+
+                            if (jsonArray.length() != 25) feedDone = true; //no more feed to load
+
+                            ArrayList<Post> refreshedPosts = new ArrayList<>();
+
+                            Post post;
+                            String postImage = "";
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            Date myDate;
+                            String postString;
+
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                jsonObject = (JSONObject) jsonArray.get(i);
+                                if (jsonObject.getJSONArray("images").length() > 0)
+                                    postImage = (String) jsonObject.getJSONArray("images").get(0);
+
+                                myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+
+                                postString = Utils.getTimeAgoString(myDate.getTime());
+
+                                post = new Post(
+                                        jsonObject.getJSONObject("owner").getString("id"),
+                                        jsonObject.getJSONObject("owner").getString("fullName"),
+                                        jsonObject.getJSONObject("owner").getString("profileImage"),
+                                        jsonObject.getString("title"),
+                                        postImage,
+                                        jsonObject.getInt("privacy"),
+                                        jsonObject.getInt("numberOfLikes"),
+                                        jsonObject.getBoolean("isLiked"),
+                                        postString,
+                                        jsonObject.getString("id"),
+                                        jsonObject.getInt("numberOfComments"),
+                                        jsonObject.getString("anonymousImage")
+                                );
+
+                                refreshedPosts.add(post);
+
+                                postImage = "";
+                            }
+
+
+                            mPosts.clear();
+                            mPosts.addAll(refreshedPosts);
+
+                            if (getActivity() == null) {
+                                return;
+                            }
+
+                            getActivity().runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            cancelRefresh();
+
+                                            if (mPosts.isEmpty()) {
+                                                if (mEmptyView.getVisibility() == View.GONE) {
+                                                    mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    mEmptyView.setVisibility(View.VISIBLE);
+                                                }
+                                            } else if (mEmptyView.getVisibility() == View.VISIBLE) {
+                                                mEmptyView.setVisibility(View.GONE);
+                                            }
+                                            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                        }
+                                    }
+
+                            );
+
+
+                        } catch (JSONException | ParseException e) {
+                            e.printStackTrace();
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getActivity());
+                                        refreshLayout.setRefreshing(false);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+        );
+
+
     }
 
     private void noInternet() {
@@ -345,6 +518,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
     private void cancelRefresh() {
         if (getActivity() == null) return;
+
         if (refreshLayout.isRefreshing()) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -355,11 +529,12 @@ public class DiscoverFragment extends UpdatableFragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        DiscoverHolderFragment holderFragment = (DiscoverHolderFragment) getParentFragment();
-        if (holderFragment != null)
-            holderFragment.setFragmentNeedUpdating(true);
+    public void scrollUp() {
+        if (recList != null) {
+            recList.smoothScrollToPosition(0);
+        }
     }
+
+
+
 }

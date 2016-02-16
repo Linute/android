@@ -304,6 +304,8 @@ public class ChatFragment extends Fragment {
     private void getChat() {
         Map<String, String> chat = new HashMap<>();
         chat.put(ROOM_ID, mRoomId);
+        if (getActivity() == null) return;
+
         LSDKChat getChat = new LSDKChat(getActivity());
         getChat.getChat(chat, new Callback() {
             @Override
@@ -318,7 +320,8 @@ public class ChatFragment extends Fragment {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                 } else {
 //                    Log.d(TAG, "onResponseSuccessful: " + response.body().string());
-                    mChatList.clear();
+//                    mChatList.clear();
+                    ArrayList<Chat> tempChatList = new ArrayList<>();
                     JSONObject jsonObject = null;
                     JSONArray messages = null;
                     JSONObject message = null;
@@ -369,7 +372,10 @@ public class ChatFragment extends Fragment {
                             }
 ////                            chat.setIsRead(message.getJSONObject(""));
                             chat.setType(Chat.TYPE_MESSAGE);
-                            mChatList.add(chat);
+                            tempChatList.add(chat);
+
+                            mChatList.clear();
+                            mChatList.addAll(tempChatList);
                         }
 
                         if (getActivity() != null) {
@@ -525,6 +531,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -538,6 +545,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -570,6 +578,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -590,6 +599,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onStopTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -620,6 +630,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onLeave = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -638,6 +649,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onJoin = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -656,6 +668,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onError = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -674,6 +687,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onRead = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -692,6 +706,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onDelivered = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

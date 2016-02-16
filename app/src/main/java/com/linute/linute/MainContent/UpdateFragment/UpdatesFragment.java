@@ -10,10 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.squareup.okhttp.Callback;
@@ -61,9 +63,10 @@ public class UpdatesFragment extends UpdatableFragment {
         mUpdatesRecyclerView = (RecyclerView) rootView.findViewById(R.id.updatesFragment_recycler_view);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.updatesFragment_swipe_refresh);
 
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mUpdatesRecyclerView.setLayoutManager(llm);
+        mUpdatesRecyclerView.setHasFixedSize(true);
 
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
@@ -104,7 +107,16 @@ public class UpdatesFragment extends UpdatableFragment {
         if (mainActivity != null) {
             mainActivity.setTitle("Updates");
             mainActivity.resetToolbar();
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mUpdatesRecyclerView != null) {
+                        mUpdatesRecyclerView.smoothScrollToPosition(0);
+                    }
+                }
+            });
         }
+
         if (fragmentNeedsUpdating()) {
 
             mSwipeRefreshLayout.post(new Runnable() {
@@ -116,13 +128,28 @@ public class UpdatesFragment extends UpdatableFragment {
 
             getUpdatesInformation();
             setFragmentNeedUpdating(false);
+        } else {
+            if (mRecentUpdates.isEmpty() && mOldUpdates.isEmpty()) {
+                if (mEmptyView.getVisibility() == View.GONE) {
+                    mEmptyView.setVisibility(View.VISIBLE);
+                }
+            }
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
 
-
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.setToolbarOnClickListener(null);
+        }
+    }
 
     private void updateUpdatesInformation() {
+
+        if (getActivity() == null) return;
         JSONArray unread = new JSONArray();
         for (Update update : mRecentUpdates) {
             unread.put(update.getActionID());
@@ -156,16 +183,12 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
     private void getUpdatesInformation() {
+        if (getActivity() == null) return;
 
         new LSDKActivity(getContext()).getActivities(0, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showBadConnectiontToast();
-                    }
-                });
+                showBadConnectiontToast();
             }
 
             @Override
@@ -173,41 +196,48 @@ public class UpdatesFragment extends UpdatableFragment {
                 if (response.isSuccessful()) {
                     try {
                         String resString = response.body().string();
-                        Log.i(TAG, "onResponse: "+resString);
+                        Log.i(TAG, "onResponse: " + resString);
 
                         JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(resString), "activities");
 
                         if (activities == null) {
-                            Log.i(TAG, "onResponse: activities was null");
                             showServerErrorToast();
                             return;
                         }
 
-                        mOldUpdates.clear();
-                        mRecentUpdates.clear();
+//                        mOldUpdates.clear();
+//                        mRecentUpdates.clear();
+                        ArrayList<Update> oldItems = new ArrayList<>();
+                        ArrayList<Update> newItems = new ArrayList<>();
 
                         //no more information to load
                         //if (activities.length() < 25) mCanLoadMore = false;
 
                         //mSkip = 25;
 
+                        Update update;
                         //iterate through array of activities
                         for (int i = 0; i < activities.length(); i++) {
-                            Update update = new Update(activities.getJSONObject(i));
-                            if (update.isRead()) mOldUpdates.add(update); //if read, it's old
-                            else mRecentUpdates.add(update); //else recent
+                            update = new Update(activities.getJSONObject(i));
+                            if (update.isRead()) oldItems.add(update); //if read, it's old
+                            else newItems.add(update); //else recent
                         }
 
                         if (getActivity() == null) return;
 
+                        mOldUpdates.clear();
+                        mOldUpdates.addAll(oldItems);
+
+                        mRecentUpdates.clear();
+                        mRecentUpdates.addAll(newItems);
+
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0 ) {
+                                if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
                                     if (mEmptyView.getVisibility() == View.GONE)
                                         mEmptyView.setVisibility(View.VISIBLE);
-                                }
-                                else {
+                                } else {
                                     if (mEmptyView.getVisibility() == View.VISIBLE)
                                         mEmptyView.setVisibility(View.GONE);
                                 }
@@ -310,6 +340,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     private void showServerErrorToast() {
+        if(getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -320,6 +351,7 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
     private void showBadConnectiontToast() {
+        if(getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

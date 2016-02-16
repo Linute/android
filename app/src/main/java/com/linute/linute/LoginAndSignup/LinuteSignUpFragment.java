@@ -272,8 +272,8 @@ public class LinuteSignUpFragment extends Fragment {
         final String email = mEmailView.getText().toString().trim().toLowerCase();
 
         final String password = mPasswordView.getText().toString();
-        final String fName = mFirstNameTextView.getText().toString();
-        final String lName = mLastNameTextView.getText().toString();
+        final String fName = mFirstNameTextView.getText().toString().trim();
+        final String lName = mLastNameTextView.getText().toString().trim();
 
         if (checkEmail(email) && areGoodCredentials(password, fName, lName)) {
 
@@ -310,8 +310,8 @@ public class LinuteSignUpFragment extends Fragment {
     private void getPinCode() {
         if (getActivity() == null) return;
 
-        final String fName = mFirstNameTextView.getText().toString();
-        final String lName = mLastNameTextView.getText().toString();
+        final String fName = mFirstNameTextView.getText().toString().trim();
+        final String lName = mLastNameTextView.getText().toString().trim();
         new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
@@ -478,8 +478,8 @@ public class LinuteSignUpFragment extends Fragment {
 
         final String email = mEmailString;
         final String password = mPasswordView.getText().toString();
-        final String fName = mFirstNameTextView.getText().toString();
-        final String lName = mLastNameTextView.getText().toString();
+        final String fName = mFirstNameTextView.getText().toString().trim();
+        final String lName = mLastNameTextView.getText().toString().trim();
 
         boolean areGoodCredentials = areGoodCredentials(password, fName, lName);
 

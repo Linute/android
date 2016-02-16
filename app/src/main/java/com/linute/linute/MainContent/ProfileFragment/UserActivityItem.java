@@ -5,6 +5,7 @@ import android.os.Parcelable;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -32,6 +33,8 @@ public class UserActivityItem implements Parcelable {
     private String mOwnerID;
     private boolean mIsAnon;
 
+    private Post mPost;
+
     public UserActivityItem(){
 
     }
@@ -43,7 +46,7 @@ public class UserActivityItem implements Parcelable {
 //        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
 
         mIsAnon = (getIntFromJson(activityInfo, "privacy") == 1);
-        mDescription = "";
+//        mDescription = "";
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -59,13 +62,12 @@ public class UserActivityItem implements Parcelable {
 
         if (event != null) {
 
-
             mDescription = getStringValue(event, "title");
             mEventID = getStringValue(event, "id");
 
 
             JSONObject owner = getObject(activityInfo, "owner");
-
+//
             if (owner!=null){
                 mOwnerID = getStringValue(owner, "id");
             }
@@ -85,10 +87,7 @@ public class UserActivityItem implements Parcelable {
                 mEventImagePath = null;
             }
 
-        } else {
-            mEventImagePath = "";
         }
-
 
     }
 
@@ -116,6 +115,14 @@ public class UserActivityItem implements Parcelable {
         }catch (JSONException e) {
             e.printStackTrace();
             return 0;
+        }
+    }
+
+    public JSONArray getJSONArray(JSONObject obj, String key){
+        try {
+            return obj.getJSONArray(key);
+        } catch (JSONException e) {
+            return null;
         }
     }
 

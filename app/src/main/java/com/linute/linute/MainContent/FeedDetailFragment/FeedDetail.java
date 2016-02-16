@@ -20,13 +20,15 @@ public class FeedDetail {
     private String mPostLikeNum = "0";
     private String mNumOfComments = "0";
 
+    private String mAnonPic;
+
     private List<Comment> mComments = new ArrayList<>();
 
     public FeedDetail() {
 
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum, String numComments) {
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -36,6 +38,7 @@ public class FeedDetail {
         isPostLiked = postLiked;
         mPostLikeNum = postLikeNum;
         mNumOfComments = numComments;
+        mAnonPic = anonPic;
     }
 
     public String getPostImage() {
@@ -82,6 +85,10 @@ public class FeedDetail {
         return mComments;
     }
 
+    public void setComments(List<Comment> comments){
+        mComments.addAll(comments);
+    }
+
     //public String getUserLiked() {
         //return mUserLiked;
     //}
@@ -108,5 +115,9 @@ public class FeedDetail {
 
     public void setPostPrivacy(int privacy){
         mPostPrivacy = privacy;
+    }
+
+    public String getAnonPic(){
+        return mAnonPic;
     }
 }

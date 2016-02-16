@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -18,13 +17,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -109,9 +107,11 @@ public class PeopleFragment extends UpdatableFragment {
 
         mRationaleLayer = rootView.findViewById(R.id.peopleFragment_rationale_view);
 
+        setHasOptionsMenu(true);
+
         recList = (RecyclerView) rootView.findViewById(R.id.people_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -217,7 +217,6 @@ public class PeopleFragment extends UpdatableFragment {
             mRationaleLayer.setVisibility(View.VISIBLE);
 
             mPeopleList.clear();
-
             mPeopleAdapter.notifyDataSetChanged();
 
             if (mSwipeRefreshLayout.isRefreshing()){
@@ -238,7 +237,6 @@ public class PeopleFragment extends UpdatableFragment {
             Toast.makeText(getActivity(), "Please make sure your location service is turned on", Toast.LENGTH_SHORT).show();
 
             return false;
-
         }
         return true;
     }
@@ -313,7 +311,8 @@ public class PeopleFragment extends UpdatableFragment {
 
                     JSONObject userOwner;
 
-                    mPeopleList.clear();
+                    ArrayList<People> tempPeople = new ArrayList<>();
+
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jsonObject = (JSONObject) jsonArray.get(i);
                         friend = jsonObject.getString("friend");
@@ -347,11 +346,14 @@ public class PeopleFragment extends UpdatableFragment {
                                 personId,
                                 dateString,
                                 areFriends);
-                        mPeopleList.add(people);
+
+                        tempPeople.add(people);
                     }
 
+                    mPeopleList.clear();
+                    mPeopleList.addAll(tempPeople);
+
                     if (getActivity() == null) {
-                        Log.d("TAG", "Null");
                         return;
                     }
                     getActivity().runOnUiThread(new Runnable() {
@@ -500,7 +502,7 @@ public class PeopleFragment extends UpdatableFragment {
                     DecimalFormat twoDForm = new DecimalFormat("#.#");
                     JSONObject userOwner;
 
-                    mPeopleList.clear();
+                    ArrayList<People> tempPeople = new ArrayList<>();
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jsonObject = (JSONObject) jsonArray.get(i);
@@ -542,10 +544,14 @@ public class PeopleFragment extends UpdatableFragment {
                                 personId,
                                 distanceString,
                                 areFriends);
-                        mPeopleList.add(people);
+                        tempPeople.add(people);
 
 
                     }
+
+
+                    mPeopleList.clear();
+                    mPeopleList.addAll(tempPeople);
 
                     if (getActivity() == null) {
                         Log.d("TAG", "Null");
@@ -608,11 +614,17 @@ public class PeopleFragment extends UpdatableFragment {
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
-        if (holderFragment != null)
-            holderFragment.setFragmentNeedUpdating(true);
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
+//        if (holderFragment != null)
+//            holderFragment.setFragmentNeedUpdating(true);
+//    }
+
+    public void scrollUp(){
+        if (recList != null){
+            recList.smoothScrollToPosition(0);
+        }
     }
 }

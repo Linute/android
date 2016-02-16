@@ -34,6 +34,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKFriendSearch;
+import com.linute.linute.MainContent.FriendsList.Friend;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
@@ -190,7 +191,7 @@ public class FindFriendsFragment extends UpdatableFragment {
 
         setupSearchViewHandler();
 
-        if (fragmentNeedsUpdating()){
+        if (fragmentNeedsUpdating()) {
             if (mSearchType == 0) { //if search by name, we need init text
                 mDescriptionText.setText("Enter your friends name in the search bar");
                 mDescriptionText.setVisibility(View.VISIBLE);
@@ -241,8 +242,8 @@ public class FindFriendsFragment extends UpdatableFragment {
             activity.raiseAppBarLayoutElevation();
         }
 
-        if (mSearchView.hasFocus() && getActivity() != null){
-            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (mSearchView.hasFocus() && getActivity() != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
 
         }
@@ -278,13 +279,16 @@ public class FindFriendsFragment extends UpdatableFragment {
 
                             JSONArray friends = json.getJSONArray("friends");
 
-                            if (friends != null) {
-                                mFriendFoundList.clear();
+                            ArrayList<FriendSearchUser> tempFriends = new ArrayList<>();
 
+                            if (friends != null) {
                                 for (int i = 0; i < friends.length(); i++) {
-                                    mFriendFoundList.add(new FriendSearchUser(friends.getJSONObject(i)));
+                                    tempFriends.add(new FriendSearchUser(friends.getJSONObject(i)));
                                 }
                             }
+
+                            mFriendFoundList.clear();
+                            mFriendFoundList.addAll(tempFriends);
 
                             if (getActivity() == null) return;
 
@@ -320,21 +324,25 @@ public class FindFriendsFragment extends UpdatableFragment {
     private Runnable mFilterFacebookAndContactsRunnable = new Runnable() {
         @Override
         public void run() {
-            mFriendFoundList.clear();
+            ArrayList<FriendSearchUser> tempFriend = new ArrayList<>();
+
             if (mQueryString.trim().isEmpty()) {
                 for (FriendSearchUser user : mUnfilteredList)
-                    mFriendFoundList.add(user);
+                    tempFriend.add(user);
             } else {
                 for (FriendSearchUser user : mUnfilteredList)
-                    if (user.nameContains(mQueryString)) {
-                        mFriendFoundList.add(user);
+                    if (user.nameBeginsWith(mQueryString)){
+                        tempFriend.add(user);
                     }
-                if (mFriendFoundList.isEmpty()) { //empty, show empty text
+
+                if (tempFriend.isEmpty()) { //empty, show empty text
                     if (mDescriptionText.getVisibility() == View.INVISIBLE) {
                         mDescriptionText.setVisibility(View.VISIBLE);
                     }
                 }
             }
+            mFriendFoundList.clear();
+            mFriendFoundList.addAll(tempFriend);
 
             mFriendSearchAdapter.notifyDataSetChanged();
         }
@@ -364,11 +372,8 @@ public class FindFriendsFragment extends UpdatableFragment {
                 if (mDescriptionText.getVisibility() == View.VISIBLE)
                     mDescriptionText.setVisibility(View.INVISIBLE);
 
-                if (newText.length() > 2) { //will wait longer when less than 2 characters
-                    mSearchHandler.postDelayed(mSearchByNameRunnable, 1000);
-                } else { //searches more often else
-                    mSearchHandler.postDelayed(mSearchByNameRunnable, 400);
-                }
+
+                mSearchHandler.postDelayed(mSearchByNameRunnable, 300);
             }
 
             return false;
@@ -505,7 +510,7 @@ public class FindFriendsFragment extends UpdatableFragment {
         if (requestCode == READ_CONTACTS_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (mInRationalText) {
-                     mFindFriendsRationale.setVisibility(View.GONE);
+                    mFindFriendsRationale.setVisibility(View.GONE);
                 }
                 mInRationalText = true;
                 mProgressBar.setVisibility(View.VISIBLE);

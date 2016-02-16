@@ -1,9 +1,6 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
-
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,8 +13,8 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.Settings.ChangeProfileImageFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -87,7 +84,7 @@ public class Profile extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -124,6 +121,15 @@ public class Profile extends UpdatableFragment {
             String name = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
             mainActivity.setTitle(name);
             mainActivity.resetToolbar();
+
+            //scroll to top of list
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (recList != null)
+                        recList.smoothScrollToPosition(0);
+                }
+            });
         }
 
         //only update this fragment when it is first created or set to reupdate from outside
@@ -138,6 +144,18 @@ public class Profile extends UpdatableFragment {
             setActivities();
             setFragmentNeedUpdating(false);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null){
+            activity.setToolbarOnClickListener(null);
+        }
+
     }
 
     @Override
@@ -241,16 +259,21 @@ public class Profile extends UpdatableFragment {
 
                         if (activities == null || getActivity() == null) return;
 
-                        mUserActivityItems.clear(); //clear so we don't have duplicates
+                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
+
+                        String fullName = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
+
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                            mUserActivityItems.add(
+                            userActItems.add(
                                     new UserActivityItem(
                                             activities.getJSONObject(i),
                                             activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
+                                            fullName
                                     )); //create activity objects and add to array
-
                         }
+
+                        mUserActivityItems.clear();
+                        mUserActivityItems.addAll(userActItems);
 
                         if (mUserActivityItems.isEmpty()) {
                             mUserActivityItems.add(new EmptyUserActivityItem());
@@ -261,7 +284,6 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() { //update view
-
                                 if (mSwipeRefreshLayout.isRefreshing())
                                     mSwipeRefreshLayout.setRefreshing(false);
 

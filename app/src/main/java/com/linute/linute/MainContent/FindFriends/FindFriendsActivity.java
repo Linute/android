@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.linute.linute.R;
@@ -47,6 +48,8 @@ public class FindFriendsActivity extends BaseTaptActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_friends);
+
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
         mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
@@ -174,13 +177,18 @@ public class FindFriendsActivity extends BaseTaptActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
+                    IO.Options op = new IO.Options();
+                    op.query = "token=" + mSharedPreferences.getString("userID", "");
+                    op.forceNew = true;
+                    op.reconnectionDelay = 5;
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
 
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            if (mSocket == null) return;
+
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.on("authorization", authorization);
@@ -192,13 +200,15 @@ public class FindFriendsActivity extends BaseTaptActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            mSocket.emit("authorization", jsonObject);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
+        if (mSocket == null) return;
+
         mSocket.disconnect();
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -228,4 +238,9 @@ public class FindFriendsActivity extends BaseTaptActivity {
             });
         }
     };
+
+    @Override
+    public void setToolbarOnClickListener(View.OnClickListener listener){
+        mToolbar.setOnClickListener(listener);
+    }
 }

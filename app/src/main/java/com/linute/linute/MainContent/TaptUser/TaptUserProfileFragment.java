@@ -19,6 +19,7 @@ import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -89,7 +90,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -121,6 +122,13 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         if (activity != null) { //changes app bar title to user's name
             activity.setTitle(mUserName);
             activity.resetToolbar();
+            activity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (recList != null)
+                        recList.smoothScrollToPosition(0);
+                }
+            });
         }
 
         //if first time creating this fragment
@@ -130,6 +138,15 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             updateAndSetHeader();
             setActivities(); //get activities
             setFragmentNeedUpdating(false);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null){
+            activity.setToolbarOnClickListener(null);
         }
     }
 
@@ -197,9 +214,10 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
                         if (activities == null || getActivity() == null) return;
 
-                        mUserActivityItems.clear(); //clear so we don't have duplicates
+                        ArrayList<UserActivityItem> tempActivies = new ArrayList<>();
+
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                            mUserActivityItems.add(
+                            tempActivies.add(
                                     new UserActivityItem(
                                             activities.getJSONObject(i),
                                             activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
@@ -207,6 +225,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                     )); //create activity objects and add to array
                         }
 
+                        mUserActivityItems.clear();
+                        mUserActivityItems.addAll(tempActivies);
                         if (mUserActivityItems.isEmpty()) {
                             mUserActivityItems.add(new EmptyUserActivityItem());
                         }

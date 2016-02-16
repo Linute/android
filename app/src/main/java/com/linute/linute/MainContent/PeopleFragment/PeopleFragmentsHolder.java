@@ -12,9 +12,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -30,7 +35,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     public static final String TAG = PeopleFragmentsHolder.class.getSimpleName();
     private ViewPager mViewPager;
-    private boolean mInitiallyPopularPeople = true; //first fragment presented by viewpager was popular users
     private PeopleHolderPagerAdapter mPeopleHolderPagerAdapter;
 
 
@@ -51,6 +55,8 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.people_sliding_tabs);
 
+        setHasOptionsMenu(true);
+
         mViewPager = (ViewPager) rootView.findViewById(R.id.people_hostViewPager);
 
         mViewPager.setAdapter(mPeopleHolderPagerAdapter);
@@ -60,11 +66,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 //we will only load the other fragment if it is needed
                 //ex. we start on the campus tab. we won't load the near me tab until we swipe left
                 loadFragmentAtPositionIfNeeded(position);
+                mInitiallyPresentedFragmentWasActive = position == 0;
             }
 
             @Override
             public void onPageSelected(int position) {
-                Log.i(TAG, "onPageSelected: " + position);
             }
 
             @Override
@@ -137,19 +143,20 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
     private void loadFragmentAtPositionIfNeeded(int position) {
+
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
-        //only load when fragment comes into view
-        if (fragment != null) {
-            if (position == 0 ? mActiveNeedsUpdating : mNearMeNeedsUpdating) {
-                if (position == 0) {
-                    mActiveNeedsUpdating = false;
-                    fragment.getPeople();
-                } else {
-                    mNearMeNeedsUpdating = false;
-                    fragment.getPeopleNearMe();
-                }
+
+        if (fragment == null) return;
+        if (position == 0 ? mActiveNeedsUpdating : mNearMeNeedsUpdating) {
+            if (position == 0) {
+                mActiveNeedsUpdating = false;
+                fragment.getPeople();
+            } else {
+                mNearMeNeedsUpdating = false;
+                fragment.getPeopleNearMe();
             }
         }
+
     }
 
     @Override
@@ -162,17 +169,24 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
             mainActivity.setTitle("People");
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.resetToolbar();
+            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scrollViewRecListUp(mViewPager.getCurrentItem());
+                }
+            });
         }
     }
 
 
     public void onStop() {
         super.onStop();
+        setFragmentNeedUpdating(true);
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.raiseAppBarLayoutElevation();
+            mainActivity.setToolbarOnClickListener(null);
         }
-        //setFragmentNeedUpdating(true);
     }
 
     //there's problems with nested fragments
@@ -195,6 +209,34 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 1);
                 fragment.gotPermissionResults();
             }
+        }
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.people_fragment_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() == R.id.people_fragment_menu_chat && getActivity() != null) {
+            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+            enterRooms.putExtra("CHATICON", true);
+            startActivity(enterRooms);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void scrollViewRecListUp(int position) {
+        PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
+        if (fragment != null) {
+            fragment.scrollUp();
         }
     }
 }
