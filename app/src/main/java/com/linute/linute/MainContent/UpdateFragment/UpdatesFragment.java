@@ -185,7 +185,7 @@ public class UpdatesFragment extends UpdatableFragment {
     private void getUpdatesInformation() {
         if (getActivity() == null) return;
 
-        new LSDKActivity(getContext()).getActivities(0, new Callback() {
+        new LSDKActivity(getActivity()).getActivities(0, new Callback() {
             @Override
             public void onFailure(Request request, IOException e) {
                 showBadConnectiontToast();
@@ -345,7 +345,7 @@ public class UpdatesFragment extends UpdatableFragment {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(false);
-                Utils.showServerErrorToast(getContext());
+                Utils.showServerErrorToast(getActivity());
             }
         });
     }
@@ -355,7 +355,7 @@ public class UpdatesFragment extends UpdatableFragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Utils.showBadConnectionToast(getContext());
+                Utils.showBadConnectionToast(getActivity());
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });

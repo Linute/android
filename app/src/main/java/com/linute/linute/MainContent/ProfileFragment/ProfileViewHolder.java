@@ -65,7 +65,9 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
 
         String text = userActivityItem.getDescription();
-        vDescriptionLabel.setText(text.equals("") ? "Image post..." : text);
+
+        vDescriptionLabel.setText(text == null || text.equals("") ? "No title..." : text);
+
         vTimeLabel.setText(Utils.getTimeAgoString(userActivityItem.getPostDate()));
 
         //profile image on the right

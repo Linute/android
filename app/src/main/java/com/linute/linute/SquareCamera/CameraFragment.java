@@ -198,12 +198,10 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mChangeCameraFlashModeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)) {
-                    mFlashMode = Camera.Parameters.FLASH_MODE_ON;
-                } else if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON)) {
+                if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON)) {
                     mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
                 } else if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)) {
-                    mFlashMode = Camera.Parameters.FLASH_MODE_AUTO;
+                    mFlashMode = Camera.Parameters.FLASH_MODE_ON;
                 }
 
                 setupFlashMode();
@@ -225,7 +223,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         final TextView autoFlashIcon = (TextView) view.findViewById(R.id.auto_flash_icon);
         if (Camera.Parameters.FLASH_MODE_AUTO.equalsIgnoreCase(mFlashMode)) {
-            autoFlashIcon.setText("Auto");
+            mFlashMode = Camera.Parameters.FLASH_MODE_ON;
+            autoFlashIcon.setText("On");
         } else if (Camera.Parameters.FLASH_MODE_ON.equalsIgnoreCase(mFlashMode)) {
             autoFlashIcon.setText("On");
         } else if (Camera.Parameters.FLASH_MODE_OFF.equalsIgnoreCase(mFlashMode)) {

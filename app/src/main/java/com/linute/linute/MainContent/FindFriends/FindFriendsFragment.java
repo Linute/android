@@ -331,7 +331,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     tempFriend.add(user);
             } else {
                 for (FriendSearchUser user : mUnfilteredList)
-                    if (user.nameBeginsWith(mQueryString)){
+                    if (user.nameContains(mQueryString)){
                         tempFriend.add(user);
                     }
 

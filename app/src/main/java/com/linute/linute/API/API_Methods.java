@@ -28,8 +28,8 @@ public class API_Methods {
 
     // API ENPOINT URL
     private static String SCHEME = "https";
-    //private static String HOST = "api.linute.com";
-    private static String HOST = "devapi.linute.com";
+    //private static String HOST = "api.tapt.io";
+    private static String HOST = "devapi.tapt.io";
     private static String VERSION = "v1.3.1";
 
     //JSON TYPE

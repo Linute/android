@@ -429,32 +429,36 @@ public class DiscoverFragment extends UpdatableFragment {
                             String postString;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                jsonObject = (JSONObject) jsonArray.get(i);
-                                if (jsonObject.getJSONArray("images").length() > 0)
-                                    postImage = (String) jsonObject.getJSONArray("images").get(0);
+                                try {
+                                    jsonObject = (JSONObject) jsonArray.get(i);
+                                    if (jsonObject.getJSONArray("images").length() > 0)
+                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
 
-                                myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
 
-                                postString = Utils.getTimeAgoString(myDate.getTime());
+                                    postString = Utils.getTimeAgoString(myDate.getTime());
 
-                                post = new Post(
-                                        jsonObject.getJSONObject("owner").getString("id"),
-                                        jsonObject.getJSONObject("owner").getString("fullName"),
-                                        jsonObject.getJSONObject("owner").getString("profileImage"),
-                                        jsonObject.getString("title"),
-                                        postImage,
-                                        jsonObject.getInt("privacy"),
-                                        jsonObject.getInt("numberOfLikes"),
-                                        jsonObject.getBoolean("isLiked"),
-                                        postString,
-                                        jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"),
-                                        jsonObject.getString("anonymousImage")
-                                );
+                                    post = new Post(
+                                            jsonObject.getJSONObject("owner").getString("id"),
+                                            jsonObject.getJSONObject("owner").getString("fullName"),
+                                            jsonObject.getJSONObject("owner").getString("profileImage"),
+                                            jsonObject.getString("title"),
+                                            postImage,
+                                            jsonObject.getInt("privacy"),
+                                            jsonObject.getInt("numberOfLikes"),
+                                            jsonObject.getBoolean("isLiked"),
+                                            postString,
+                                            jsonObject.getString("id"),
+                                            jsonObject.getInt("numberOfComments"),
+                                            jsonObject.getString("anonymousImage")
+                                    );
 
-                                refreshedPosts.add(post);
+                                    refreshedPosts.add(post);
 
-                                postImage = "";
+                                    postImage = "";
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                }
                             }
 
 

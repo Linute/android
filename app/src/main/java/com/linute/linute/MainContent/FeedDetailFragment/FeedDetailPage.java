@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,18 +22,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
+import com.linkedin.android.spyglass.mentions.MentionSpan;
+import com.linkedin.android.spyglass.suggestions.SuggestionsResult;
+import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsResultListener;
+import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsVisibilityManager;
+import com.linkedin.android.spyglass.tokenization.QueryToken;
+import com.linkedin.android.spyglass.tokenization.impl.WordTokenizer;
+import com.linkedin.android.spyglass.tokenization.impl.WordTokenizerConfig;
+import com.linkedin.android.spyglass.tokenization.interfaces.QueryTokenReceiver;
+import com.linkedin.android.spyglass.ui.MentionsEditText;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
+import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -44,14 +60,16 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by Arman on 1/11/16.
  */
-public class FeedDetailPage extends UpdatableFragment {
+public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -63,8 +81,7 @@ public class FeedDetailPage extends UpdatableFragment {
     private String mTaptPostId;
     private String mTaptPostUserId;
     private FeedDetailAdapter mFeedDetailAdapter;
-    private String mCommentText;
-    private EditText mCommentEditText;
+    private MentionsEditText mCommentEditText;
 
     private View mAnonCheckBoxContainer;
 
@@ -74,6 +91,12 @@ public class FeedDetailPage extends UpdatableFragment {
     private boolean mOpenKeyBoard = false;
 
     private boolean mCommentPosted = false;
+
+    private RecyclerView mMentionedList;
+
+    private SharedPreferences mSharedPreferences;
+
+    private MentionedPersonAdapter mMentionedPersonAdapter;
 
 
     public FeedDetailPage() {
@@ -122,30 +145,33 @@ public class FeedDetailPage extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         recList.setHasFixedSize(true);
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
         recList.setAdapter(mFeedDetailAdapter);
 
-//        recList.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                rootView.findViewById(R.id.comment_field).clearFocus();
-//                imm.hideSoftInputFromWindow(rootView.findViewById(R.id.comment_field).getWindowToken(), 0);
-//                return false;
-//            }
-//        });
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        manager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        mMentionedList = (RecyclerView) rootView.findViewById(R.id.feed_detail_mentions);
+        mMentionedList.setLayoutManager(manager);
+        mMentionedList.setHasFixedSize(true);
+        mMentionedList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
+        mMentionedList.setAdapter(mMentionedPersonAdapter);
+
 
         mSendButtonContainer = rootView.findViewById(R.id.comment_send_button_container);
         mSendButtonContainer.setEnabled(false);
 
         mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
 
-        mCommentEditText = (EditText) rootView.findViewById(R.id.comment_field);
+        mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -162,8 +188,6 @@ public class FeedDetailPage extends UpdatableFragment {
                 if (!s.toString().trim().equals("")) {
                     mSendButtonContainer.setEnabled(true);
                     mSendButton.setAlpha((float) 1);
-
-                    mCommentText = s.toString();
                 } else {
                     mSendButtonContainer.findViewById(R.id.comment_send_button_container).setEnabled(false);
                     mSendButton.setAlpha((float) 0.25);
@@ -184,6 +208,10 @@ public class FeedDetailPage extends UpdatableFragment {
                 return false;
             }
         });
+
+        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(2).setThreshold(2).build()));
+        mCommentEditText.setQueryTokenReceiver(this);
+        mCommentEditText.setSuggestionsVisibilityManager(this);
 
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
@@ -210,7 +238,9 @@ public class FeedDetailPage extends UpdatableFragment {
             @Override
             public void onClick(View v) {
 
-                if (mCommentText.trim().isEmpty() || getActivity() == null) return;
+                String commentText = mCommentEditText.getText().toString().trim();
+
+                if (commentText.isEmpty() || getActivity() == null) return;
 
                 final View progressBar = rootView.findViewById(R.id.comment_progressbar);
                 final View sendButton = rootView.findViewById(R.id.feed_detail_send_comment);
@@ -222,9 +252,23 @@ public class FeedDetailPage extends UpdatableFragment {
                 Map<String, Object> comment = new HashMap<String, Object>();
                 JSONArray jsonArray = new JSONArray();
                 comment.put("image", jsonArray);
-                comment.put("text", mCommentText);
+                comment.put("text", commentText);
                 comment.put("event", mTaptPostId);
                 comment.put("privacy", checkBox.isChecked() ? 1 : 0);
+
+                //add people mentioned in comment
+                List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
+                if (!spanList.isEmpty()) {
+
+                    JSONArray mentions = new JSONArray();
+
+                    for (MentionSpan s : spanList) {
+                        mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
+                    }
+
+                    comment.put("mentions", mentions);
+                }
+
                 recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
 
                 setCommentViewEditable(false);
@@ -242,7 +286,6 @@ public class FeedDetailPage extends UpdatableFragment {
                                     sendButton.setVisibility(View.VISIBLE);
                                     progressBar.setVisibility(View.GONE);
                                     setCommentViewEditable(true);
-
                                 }
                             });
                         }
@@ -300,7 +343,7 @@ public class FeedDetailPage extends UpdatableFragment {
             activity.setToolbarOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (recList != null)
+                    if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
                         recList.smoothScrollToPosition(0);
                 }
             });
@@ -364,7 +407,6 @@ public class FeedDetailPage extends UpdatableFragment {
                 Date myDate;
                 String postString;
                 String res = response.body().string();
-                Log.i(TAG, "onResponse: " + res);
                 try {
                     jsonObject = new JSONObject(res);
 
@@ -440,23 +482,41 @@ public class FeedDetailPage extends UpdatableFragment {
                         }
                         JSONObject jsonObject;
                         JSONArray comments;
+                        JSONArray mentionedPeople;
 
                         ArrayList<Comment> tempComments = new ArrayList<>();
+
                         try {
                             jsonObject = new JSONObject(response.body().string());
                             comments = jsonObject.getJSONArray("comments");
+
                             for (int i = 0; i < comments.length(); i++) {
-                                Log.d(TAG, "comment: " + comments.get(i).toString());
+                                Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+
+                                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
+                                mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
+
+                                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
+                                    mentionedPersonLightArrayList.add(
+                                            new Comment.MentionedPersonLight( //just need fullname and id
+                                                    mentionedPeople.getJSONObject(j).getString("fullName"),
+                                                    mentionedPeople.getJSONObject(j).getString("id")
+                                            )
+                                    );
+                                }
+
                                 tempComments
                                         .add(new Comment(
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                                ((JSONObject) comments.get(i)).getString("text"),
-                                                ((JSONObject) comments.get(i)).getString("id"),
-                                                ((JSONObject) comments.get(i)).getInt("privacy") == 1,
-                                                ((JSONObject) comments.get(i)).getString("anonymousImage")
-                                        ));
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
+                                                        ((JSONObject) comments.get(i)).getString("text"),
+                                                        ((JSONObject) comments.get(i)).getString("id"),
+                                                        ((JSONObject) comments.get(i)).getInt("privacy") == 1,
+                                                        ((JSONObject) comments.get(i)).getString("anonymousImage"),
+                                                        mentionedPersonLightArrayList
+                                                )
+                                        );
                             }
 
                             if (comments.length() == 0) {
@@ -520,8 +580,7 @@ public class FeedDetailPage extends UpdatableFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (getActivity() != null) {
-            SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            inflater.inflate(mTaptPostUserId.equals(pref.getString("userID", "")) ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
+            inflater.inflate(mTaptPostUserId.equals(mSharedPreferences.getString("userID", "")) ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -677,7 +736,190 @@ public class FeedDetailPage extends UpdatableFragment {
                 }
             }
         });
+    }
 
 
+
+    /* MENTIONS CODE */
+
+    private final String BUCKET = "MENTIONS";
+    private Handler mSearchHandler = new Handler();
+    private String mQueryString = "";
+    private boolean mDisplayList = false;
+
+    private Runnable mSearchRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getActivity() == null) return;
+            new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
+                @Override
+                public void onFailure(Request request, IOException e) {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+
+                @Override
+                public void onResponse(Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        try {
+
+                            String res = response.body().string();
+                            Log.i(TAG, "onResponse: " + res);
+
+                            JSONArray friends = new JSONObject(res).getJSONArray("friends");
+
+                            final ArrayList<MentionedPerson> personList = new ArrayList<>();
+
+                            for (int i = 0; i < friends.length(); i++) {
+                                try {
+                                    personList.add(
+                                            new MentionedPerson(
+                                                    friends.getJSONObject(i).getString("fullName"),
+                                                    friends.getJSONObject(i).getString("id"),
+                                                    friends.getJSONObject(i).getString("profileImage")
+                                            )
+                                    );
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            if (getActivity() == null) return;
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMentionedPersonAdapter = new MentionedPersonAdapter(personList);
+                                    mMentionedList.swapAdapter(mMentionedPersonAdapter, true);
+                                    if (mDisplayList) displaySuggestions(!personList.isEmpty());
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+
+
+                    } else {
+                        Log.e(TAG, "onResponse: " + response.body().string());
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+    @Override
+    public List<String> onQueryReceived(@NonNull QueryToken queryToken) {
+        mSearchHandler.removeCallbacks(mSearchRunnable);
+        mDisplayList = false;
+
+        if (queryToken.isExplicit()) {
+            String text = queryToken.getKeywords(); //words inputted
+
+            if (text.length() > 0 && !mQueryString.equals(text)) {
+                mDisplayList = true;
+                mQueryString = text;
+                mSearchHandler.postDelayed(mSearchRunnable, 350);
+            }
+        }
+        return Collections.singletonList(BUCKET);
+    }
+
+    @Override
+    public void onReceiveSuggestionsResult(@NonNull SuggestionsResult result, @NonNull String bucket) {
+    }
+
+    @Override
+    public void displaySuggestions(boolean display) {
+        mMentionedList.setVisibility(display ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public boolean isDisplayingSuggestions() {
+        return mMentionedList.getVisibility() == View.VISIBLE;
+    }
+
+
+    private class MentionedPersonAdapter extends RecyclerView.Adapter<MentionedPersonAdapter.MentionedPersonViewHolder> {
+
+        private ArrayList<MentionedPerson> mMentionedPersons;
+
+        public MentionedPersonAdapter(ArrayList<MentionedPerson> personList) {
+            mMentionedPersons = personList;
+        }
+
+        @Override
+        public MentionedPersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new MentionedPersonViewHolder(LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(R.layout.item_mentioned_person, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(MentionedPersonViewHolder holder, final int position) {
+            holder.bindView(mMentionedPersons.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return mMentionedPersons.size();
+        }
+
+        public class MentionedPersonViewHolder extends RecyclerView.ViewHolder {
+
+            public CircularImageView mProfileImageView;
+            public TextView mName;
+
+            public MentionedPersonViewHolder(View itemView) {
+                super(itemView);
+                mProfileImageView = (CircularImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
+                mName = (TextView) itemView.findViewById(R.id.mentioned_person_name);
+            }
+
+            public void bindView(final MentionedPerson person) {
+
+
+                mName.setText(person.getFullname());
+                Glide.with(mProfileImageView.getContext())
+                        .load(Utils.getImageUrlOfUser(person.getProfileImage()))
+                        .asBitmap()
+                        .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                        .placeholder(R.drawable.image_loading_background)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                        .into(mProfileImageView);
+
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mCommentEditText.insertMention(person);
+                        mMentionedList.swapAdapter(new MentionedPersonAdapter(new ArrayList<MentionedPerson>()), true);
+                        displaySuggestions(false);
+                        mCommentEditText.requestFocus();
+                    }
+                });
+
+            }
+
+
+        }
     }
 }

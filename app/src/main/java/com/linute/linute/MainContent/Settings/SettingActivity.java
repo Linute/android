@@ -106,6 +106,7 @@ public class SettingActivity extends AppCompatActivity {
         Preference mPrivacyPolicy;
         Preference mTermsOfService;
         Preference mLogOut;
+        Preference mAttributions;
 
         @Override
         public void onCreate(final Bundle savedInstanceState) {
@@ -124,6 +125,7 @@ public class SettingActivity extends AppCompatActivity {
             mPrivacyPolicy = findPreference("privacy policy");
             mTermsOfService = findPreference("terms_of_service");
             mLogOut = findPreference("logout");
+            mAttributions = findPreference("attributions");
         }
 
         /* TODO: still need to add the following on click listeners:
@@ -191,6 +193,15 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent i = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                    startActivity(i);
+                    return true;
+                }
+            });
+
+            mAttributions.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), AttributionsActivity.class);
                     startActivity(i);
                     return true;
                 }
