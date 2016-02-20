@@ -209,7 +209,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
         });
 
-        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(2).setThreshold(2).build()));
+        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
         mCommentEditText.setQueryTokenReceiver(this);
         mCommentEditText.setSuggestionsVisibilityManager(this);
 
@@ -796,7 +796,13 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 public void run() {
                                     mMentionedPersonAdapter = new MentionedPersonAdapter(personList);
                                     mMentionedList.swapAdapter(mMentionedPersonAdapter, true);
-                                    if (mDisplayList) displaySuggestions(!personList.isEmpty());
+                                    if (mDisplayList) {
+                                        displaySuggestions(!personList.isEmpty());
+                                    }
+                                    else if (personList.isEmpty()){
+                                        displaySuggestions(false);
+                                    }
+
                                 }
                             });
 
@@ -835,7 +841,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         if (queryToken.isExplicit()) {
             String text = queryToken.getKeywords(); //words inputted
 
-            if (text.length() > 0 && !mQueryString.equals(text)) {
+            if (text.length() > 0) {
                 mDisplayList = true;
                 mQueryString = text;
                 mSearchHandler.postDelayed(mSearchRunnable, 350);
@@ -913,6 +919,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         mCommentEditText.insertMention(person);
                         mMentionedList.swapAdapter(new MentionedPersonAdapter(new ArrayList<MentionedPerson>()), true);
                         displaySuggestions(false);
+                        mSearchHandler.removeCallbacks(mSearchRunnable);
                         mCommentEditText.requestFocus();
                     }
                 });

@@ -473,47 +473,34 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             setSafeToTakePhoto(false);
 
             mOrientationListener.rememberOrientation();
+            // Shutter callback occurs after the image is captured. This can
+            // be used to trigger a sound to let the user know that image is taken
+            final Camera.ShutterCallback shutterCallback = null;
 
-//            List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
-//            boolean hasAutoFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO);
-//
-//            String flashNotOn = mCamera.getParameters().getFlashMode();
-//            if (hasAutoFocus && flashNotOn != null && flashNotOn ==  ) {
-//                mCamera.autoFocus(new Camera.AutoFocusCallback() {
-//                    @Override
-//                    public void onAutoFocus(boolean success, Camera camera) {
-                        // Shutter callback occurs after the image is captured. This can
-                        // be used to trigger a sound to let the user know that image is taken
-                        Camera.ShutterCallback shutterCallback = null;
+            // Raw callback occurs when the raw image data is available
+            final Camera.PictureCallback raw = null;
 
-                        // Raw callback occurs when the raw image data is available
-                        Camera.PictureCallback raw = null;
+            // postView callback occurs when a scaled, fully processed
+            // postView image is available.
+            final Camera.PictureCallback postView = null;
 
-                        // postView callback occurs when a scaled, fully processed
-                        // postView image is available.
-                        Camera.PictureCallback postView = null;
+            //if on or auto, dont autofocus
+            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON) || mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)){
+                mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+            }
 
+            //autofocus
+            else{
+                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                    @Override
+                    public void onAutoFocus(boolean success, Camera camera) {
                         // jpeg callback occurs when the compressed image is available
                         mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
                     }
-//                });
-//            } else {
-//
-//                // Shutter callback occurs after the image is captured. This can
-//                // be used to trigger a sound to let the user know that image is taken
-//                Camera.ShutterCallback shutterCallback = null;
-//
-//                // Raw callback occurs when the raw image data is available
-//                Camera.PictureCallback raw = null;
-//
-//                // postView callback occurs when a scaled, fully processed
-//                // postView image is available.
-//                Camera.PictureCallback postView = null;
-//
-//                // jpeg callback occurs when the compressed image is available
-//                mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
-//            }
-//        }
+                });
+            }
+        }
+
     }
 
     @Override

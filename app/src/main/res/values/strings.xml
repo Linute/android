@@ -137,8 +137,8 @@
     <!--<string name="DEV_SOCKET_URL">https://devapi.tapt.io/</string>-->
 
 
-    <!--<string name="SOCKET_URL">https://api.tapt.io/</string>-->
-    <string name="SOCKET_URL">https://devapi.tapt.io/</string>
+    <string name="SOCKET_URL">https://api.tapt.io/</string>
+    <!--<string name="SOCKET_URL">https://devapi.tapt.io/</string>-->
 
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
