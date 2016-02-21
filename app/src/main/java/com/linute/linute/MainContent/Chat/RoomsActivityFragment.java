@@ -17,9 +17,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +25,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -115,7 +116,7 @@ public class RoomsActivityFragment extends Fragment {
         final LSDKChat chat = new LSDKChat(getActivity());
         chat.getRooms(null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -128,7 +129,7 @@ public class RoomsActivityFragment extends Fragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 String resString = response.body().string();
 
                 if (response.isSuccessful()) {

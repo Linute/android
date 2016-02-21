@@ -37,6 +37,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
     protected CircularImageView vCommentUserImage;
     protected TextView vCommentUserName;
     protected TextView vCommentUserText;
+    protected TextView vTimeStamp;
 
     private String mCommenterUserId;
     private String mUserName;
@@ -58,7 +59,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
         vCommentUserImage = (CircularImageView) itemView.findViewById(R.id.comment_user_image);
         vCommentUserName = (TextView) itemView.findViewById(R.id.comment_user_name);
         vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
-
+        vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);
 
     }
 
@@ -70,6 +71,10 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
             setProfileImage(comment.getCommentUserProfileImage());
             vCommentUserName.setText(comment.getCommentUserName());
         }
+
+
+
+        vTimeStamp.setText(comment.getDateString());
 
         if (comment.getCommentUserId().equals(mViewerUserId)) {
             vCommentUserName.setTextColor(ContextCompat.getColor(mContext, R.color.user_name_blue));
@@ -84,6 +89,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
 
         vCommentUserName.setOnClickListener(this);
         vCommentUserImage.setOnClickListener(this);
+
 
         //setting mentions and comment text
         if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()){
@@ -100,9 +106,9 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
 
         int startSearchAtIndex = 0; //start search from
 
-        //NOTE: assumes the list comes back in the order people were tagged.
-        //NOTE: i.e. if text is: "@AndrewBee @JonathanI hello there" , the List will have the order {Andrew, Jonathan}
-        //NOTE: this way we won't look for @JonathanI at index 0 when we know it will come after @Andrew
+        // assumes the list comes back in the order people were tagged.
+        // i.e. if text is: "@AndrewBee @JonathanI hello there" , the List will have the order {Andrew, Jonathan}
+        // this way we won't look for @JonathanI at index 0 when we know it will come after @Andrew
 
         final BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity == null) {

@@ -31,13 +31,15 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class RegistrationIntentService extends IntentService {
 
@@ -81,7 +83,7 @@ public class RegistrationIntentService extends IntentService {
 
             //requestServices();
 
-           sendRegistrationDevice(mToken);
+           //sendRegistrationDevice(mToken);
 
 
             // Subscribe to topic channels
@@ -115,49 +117,49 @@ public class RegistrationIntentService extends IntentService {
      *
      */
 
-    private void sendRegistrationDevice(String token) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String versionName = "";
-        String versionCode = "";
-        try {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            versionName = pInfo.versionName;
-            versionCode = pInfo.versionCode + "";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        Map<String, Object> device = new HashMap<>();
-        device.put("token", token);
-        device.put("version", versionName);
-        device.put("build", versionCode);
-        device.put("os", Build.VERSION.SDK_INT + "");
-        device.put("type", "android");
-
-        Device.createDevice(headers, device, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                Log.e(TAG, "failed registration");
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, response.body().string());
-                    Log.e(TAG, "ERROR REGISTERING TOKEN");
-                } else {
-                    Log.v(TAG, response.body().string());
-                    Log.d(TAG, "sendRegistrationDevice");
-                    sharedPreferences.edit().putBoolean("deviceRegistered", true).apply();
-//                    // Notify UI that registration has completed, so the progress indicator can be hidden.
-//                    Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
-//                    LocalBroadcastManager.getInstance(RegistrationIntentService.this).sendBroadcast(registrationComplete);
-                }
-            }
-        });
-
-    }
+//    private void sendRegistrationDevice(String token) {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        try {
+//            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e(TAG, "failed registration");
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    Log.e(TAG, "ERROR REGISTERING TOKEN");
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    Log.d(TAG, "sendRegistrationDevice");
+//                    sharedPreferences.edit().putBoolean("deviceRegistered", true).apply();
+////                    // Notify UI that registration has completed, so the progress indicator can be hidden.
+////                    Intent registrationComplete = new Intent(QuickstartPreferences.REGISTRATION_COMPLETE);
+////                    LocalBroadcastManager.getInstance(RegistrationIntentService.this).sendBroadcast(registrationComplete);
+//                }
+//            }
+//        });
+//
+//    }
 //    private void sendRegistrationDevice( JSONObject coord) {
 //        final String token = mToken;
 //        Map<String, String> headers = new HashMap<>();

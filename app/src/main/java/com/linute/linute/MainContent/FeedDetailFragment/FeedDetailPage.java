@@ -37,6 +37,7 @@ import com.linkedin.android.spyglass.tokenization.impl.WordTokenizer;
 import com.linkedin.android.spyglass.tokenization.impl.WordTokenizerConfig;
 import com.linkedin.android.spyglass.tokenization.interfaces.QueryTokenReceiver;
 import com.linkedin.android.spyglass.ui.MentionsEditText;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.MainContent.MainActivity;
@@ -48,9 +49,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,6 +64,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.socket.emitter.Emitter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 1/11/16.
@@ -86,10 +90,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private View mAnonCheckBoxContainer;
 
     private View mSendButtonContainer;
-    private View mSendButton;
-
-    private boolean mOpenKeyBoard = false;
-
     private boolean mCommentPosted = false;
 
     private RecyclerView mMentionedList;
@@ -97,6 +97,11 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private SharedPreferences mSharedPreferences;
 
     private MentionedPersonAdapter mMentionedPersonAdapter;
+
+    private View mProgressbar;
+    private View mSendButton;
+
+    private CheckBox mCheckBox;
 
 
     public FeedDetailPage() {
@@ -117,8 +122,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         return fragment;
     }
 
-    private static final String POST_KEY = "INPUT_POST";
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -130,7 +133,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             mIsImage = getArguments().getBoolean("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
             mTaptPostUserId = getArguments().getString("TAPTPOSTUSERID");
-            mOpenKeyBoard = getArguments().getBoolean("OPEN_KEYBOARD");
 
             mFeedDetail.setPostId(mTaptPostId);
             mFeedDetail.setPostUserId(mTaptPostUserId);
@@ -168,8 +170,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         mSendButtonContainer = rootView.findViewById(R.id.comment_send_button_container);
         mSendButtonContainer.setEnabled(false);
-
-        mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
 
         mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
         mCommentEditText.addTextChangedListener(new TextWatcher() {
@@ -216,116 +216,32 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
-        final CheckBox checkBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
+        mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
 
         mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkBox.isChecked()) {
+                if (mCheckBox.isChecked()) {
                     ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
                             .setText("OFF");
-                    checkBox.setChecked(false);
+                    mCheckBox.setChecked(false);
                 } else {
                     ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
                             .setText("ON");
-                    checkBox.setChecked(true);
+                    mCheckBox.setChecked(true);
                 }
             }
         });
 
 
+        mProgressbar = rootView.findViewById(R.id.comment_progressbar);
+        mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
+
+
         rootView.findViewById(R.id.comment_send_button_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                String commentText = mCommentEditText.getText().toString().trim();
-
-                if (commentText.isEmpty() || getActivity() == null) return;
-
-                final View progressBar = rootView.findViewById(R.id.comment_progressbar);
-                final View sendButton = rootView.findViewById(R.id.feed_detail_send_comment);
-
-                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-
-                LSDKEvents lsdkEvents = new LSDKEvents(getActivity());
-                Map<String, Object> comment = new HashMap<String, Object>();
-                JSONArray jsonArray = new JSONArray();
-                comment.put("image", jsonArray);
-                comment.put("text", commentText);
-                comment.put("event", mTaptPostId);
-                comment.put("privacy", checkBox.isChecked() ? 1 : 0);
-
-                //add people mentioned in comment
-                List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
-                if (!spanList.isEmpty()) {
-
-                    JSONArray mentions = new JSONArray();
-
-                    for (MentionSpan s : spanList) {
-                        mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
-                    }
-
-                    comment.put("mentions", mentions);
-                }
-
-                recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-
-                setCommentViewEditable(false);
-                sendButton.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-
-                lsdkEvents.postComment(comment, new Callback() {
-                    @Override
-                    public void onFailure(Request request, IOException e) {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showBadConnectionToast(getActivity());
-                                    sendButton.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
-                                    setCommentViewEditable(true);
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Utils.showBadConnectionToast(getActivity());
-                                        sendButton.setVisibility(View.VISIBLE);
-                                        progressBar.setVisibility(View.GONE);
-                                        setCommentViewEditable(true);
-                                    }
-                                });
-                            }
-
-                        } else {
-                            Log.d(TAG, "onResponseSuccessful: " + response.body().string());
-
-                            if (getActivity() == null) return;
-                            mCommentPosted = true;
-
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mCommentEditText.setText("");
-                                    sendButton.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
-                                    setCommentViewEditable(true);
-                                    displayCommentsAndPost();
-                                }
-                            });
-                        }
-                    }
-                });
+                sendComment();
             }
         });
 
@@ -347,12 +263,37 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+
+            activity.emitSocket(API_Methods.VERSION + ":comments:joined", "");
+            activity.connectSocket("new comment", newComment);
+            activity.setSocketErrorResponse(new BaseTaptActivity.SocketErrorResponse() {
+                @Override
+                public void runSocketError() {
+                    mProgressbar.setVisibility(View.GONE);
+                    mSendButton.setVisibility(View.VISIBLE);
+                }
+            });
         }
 
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity != null) {
+            activity.disconnectSocket("new comment", newComment);
+            activity.emitSocket(API_Methods.VERSION + ":messages:left", "");
+            activity.setSocketErrorResponse(null);
         }
     }
 
@@ -372,10 +313,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
 
+        mCommentPosted = false;
+
         LSDKEvents event = new LSDKEvents(getActivity());
         event.getEventWithId(mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -387,7 +330,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, response.body().string());
                     if (getActivity() != null) {
@@ -455,7 +398,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         eventComments.put("skip", "0");
         event.getComments(eventComments, new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
+                    public void onFailure(Call call, IOException e) {
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -467,7 +410,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d(TAG, "onResponse: " + response.body().string());
                             if (getActivity() != null) {
@@ -490,8 +433,22 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             jsonObject = new JSONObject(response.body().string());
                             comments = jsonObject.getJSONArray("comments");
 
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            Date myDate;
+                            String date;
+
+
                             for (int i = 0; i < comments.length(); i++) {
-                                Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+                                //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+
+                                //get date
+                                try {
+                                    myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
+                                    date = Utils.getTimeAgoString(myDate.getTime());
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    date = "";
+                                }
 
                                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
                                 mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
@@ -514,7 +471,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                                         ((JSONObject) comments.get(i)).getString("id"),
                                                         ((JSONObject) comments.get(i)).getInt("privacy") == 1,
                                                         ((JSONObject) comments.get(i)).getString("anonymousImage"),
-                                                        mentionedPersonLightArrayList
+                                                        mentionedPersonLightArrayList,
+                                                        date
                                                 )
                                         );
                             }
@@ -545,15 +503,15 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                     public void run() {
                                         mFeedDetailAdapter.notifyDataSetChanged();
 
-                                        if (mCommentPosted) {
-                                            mCommentPosted = false;
-                                            recList.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-                                                }
-                                            }, 500);
-                                        }
+//                                        if (mCommentPosted) {
+//                                            mCommentPosted = false;
+//                                            recList.postDelayed(new Runnable() {
+//                                                @Override
+//                                                public void run() {
+//                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+//                                                }
+//                                            }, 500);
+//                                        }
 
                                     }
                                 }
@@ -626,7 +584,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         new LSDKEvents(getActivity()).reportEvent(reason, mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -638,7 +596,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
                     if (getActivity() == null) return;
@@ -691,7 +649,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         new LSDKEvents(getActivity()).deleteEvent(mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -704,7 +662,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
 
@@ -753,7 +711,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             if (getActivity() == null) return;
             new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     if (getActivity() == null) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -764,7 +722,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
                         try {
 
@@ -798,8 +756,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                     mMentionedList.swapAdapter(mMentionedPersonAdapter, true);
                                     if (mDisplayList) {
                                         displaySuggestions(!personList.isEmpty());
-                                    }
-                                    else if (personList.isEmpty()){
+                                    } else if (personList.isEmpty()) {
                                         displaySuggestions(false);
                                     }
 
@@ -927,6 +884,83 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
 
+        }
+    }
+
+    private Emitter.Listener newComment = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i(TAG, "call: " + args[0]);
+
+            if (getActivity() != null) {
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mCommentPosted) {
+                            mCommentPosted = false;
+                            mCommentEditText.setText("");
+                            mSendButton.setVisibility(View.VISIBLE);
+                            mProgressbar.setVisibility(View.GONE);
+                            setCommentViewEditable(true);
+                        }
+
+
+                    }
+                });
+            }
+            //// TODO: 2/21/16 notify data changed
+        }
+    };
+
+
+    private void sendComment() {
+        String commentText = mCommentEditText.getText().toString().trim();
+
+        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null) return;
+
+        try {
+            JSONObject comment = new JSONObject();
+            JSONArray jsonArray = new JSONArray();
+            comment.put("owner", mSharedPreferences.getString("userID", ""));
+            comment.put("image", jsonArray);
+            comment.put("text", commentText);
+            comment.put("event", mTaptPostId);
+            comment.put("privacy", mCheckBox.isChecked() ? 1 : 0);
+
+            //add people mentioned in comment
+            List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
+            if (!spanList.isEmpty()) {
+
+                JSONArray mentions = new JSONArray();
+
+                for (MentionSpan s : spanList) {
+                    mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
+                }
+
+                comment.put("mentions", mentions);
+            }
+
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
+
+            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+
+            setCommentViewEditable(false);
+            mSendButton.setVisibility(View.GONE);
+            mProgressbar.setVisibility(View.VISIBLE);
+
+            mCommentPosted = true;
+
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity != null) {
+                activity.emitSocket(API_Methods.VERSION + "comments:new comment", comment);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Utils.showServerErrorToast(getActivity());
+            mCommentPosted = false;
         }
     }
 }

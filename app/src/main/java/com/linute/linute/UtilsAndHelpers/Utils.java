@@ -94,12 +94,9 @@ public class Utils {
         pref.putString("userID", null);
         pref.putString("firstName", null);
         pref.putString("lastName", null);
-        pref.putString("email", null);
         pref.putString("status", null);
         pref.putString("socialFacebook", null);
         pref.putString("dob", null);
-
-        pref.putString("fbToken", null);
 
         pref.putInt("sex", 0);
 
@@ -111,7 +108,12 @@ public class Utils {
         pref.putString("collegeName", null);
         pref.putString("collegeId", null);
         pref.putString("campus", null);
-        pref.putString("passwordFacebook", null);
+
+        pref.putString("userToken", null);
+        pref.putString("points", "0");
+        pref.putString("userName", null);
+
+
         pref.commit();
     }
 

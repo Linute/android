@@ -5,11 +5,12 @@ import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
 
 /**
  * Created by QiFeng on 1/8/16.
@@ -19,21 +20,18 @@ public class LSDKActivity {
     // where user information will be
     private static SharedPreferences mSharedPreferences;
 
-    private static String mEncodedToken;
+    private static String mToken;
 
 
     public LSDKActivity(Context context) {
 
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mEncodedToken = Utils.encode_base64(mSharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null));
+        mToken = mSharedPreferences.getString("userToken","");
     }
 
 
     public Call getActivities(Integer skip, Callback callback) {
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", ""),
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> params = new HashMap<>();
         params.put("skip", skip.toString());
@@ -56,10 +54,7 @@ public class LSDKActivity {
     }
 
     public Call readActivities(Map<String, Object> param, Callback callback) {
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", ""),
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         return API_Methods.post("activities/read", header, param, callback);
     }

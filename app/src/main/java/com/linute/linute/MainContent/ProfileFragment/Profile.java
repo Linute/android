@@ -20,9 +20,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +27,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class Profile extends UpdatableFragment {
     public static final String TAG = Profile.class.getSimpleName();
@@ -177,14 +178,14 @@ public class Profile extends UpdatableFragment {
     public void updateAndSetHeader() {
         mUser.getProfileInfo(mSharedPreferences.getString("userID", null), new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(rFailedConnectionAction);
                 }
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //attempt to update view with response
                     final String body = response.body().string();
                     if (getActivity() == null) return;
@@ -236,7 +237,7 @@ public class Profile extends UpdatableFragment {
         LSDKUser user = new LSDKUser(getContext());
         user.getUserActivities(mSharedPreferences.getString("userID", null), "posted status", "posted photo", new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
@@ -249,7 +250,7 @@ public class Profile extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();

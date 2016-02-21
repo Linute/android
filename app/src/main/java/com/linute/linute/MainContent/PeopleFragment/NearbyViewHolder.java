@@ -22,14 +22,15 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 /**
@@ -104,7 +105,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder {
 
                     new LSDKPeople(mContext).postFollow(postData, new Callback() {
                         @Override
-                        public void onFailure(Request request, IOException e) {
+                        public void onFailure(Call call, IOException e) {
                             Activity activity = ((Activity) mContext);
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -116,7 +117,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder {
                         }
 
                         @Override
-                        public void onResponse(Response response) throws IOException {
+                        public void onResponse(Call call, Response response) throws IOException {
                             Activity activity = ((Activity) mContext);
 
                             if (!response.isSuccessful()) {

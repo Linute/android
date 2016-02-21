@@ -1,7 +1,5 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +15,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKEvents;
-import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -26,14 +23,15 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 12/27/15.
@@ -127,12 +125,12 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
             new LSDKEvents(mContext).postLike(postData, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                     }else{
@@ -151,12 +149,12 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             postData.put("event" ,mPosts.get(getAdapterPosition()).getPostId());
             new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getPostId(),new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                     }

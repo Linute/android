@@ -269,7 +269,7 @@ public class LaunchActivity extends Activity {
         SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         //if user is logged in
-        if (sharedPreferences.getBoolean("isLoggedIn", false) && !sharedPreferences.getString("email", "noAuth").equals("noAuth")) {
+        if (sharedPreferences.getBoolean("isLoggedIn", false) && sharedPreferences.getString("userToken", null) != null) {
             //college set, go to college
             if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
                 nextActivity = MainActivity.class;

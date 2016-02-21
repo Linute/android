@@ -25,14 +25,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +46,9 @@ import java.util.Map;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -193,7 +194,7 @@ public class ChatFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            mSocket.emit("joined", joinLeft);
+            mSocket.emit(API_Methods.VERSION+":messages:joined", joinLeft);
         }
     }
 
@@ -206,7 +207,7 @@ public class ChatFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        mSocket.emit("left", joinLeft);
+        mSocket.emit(API_Methods.VERSION+":messages:left", joinLeft);
 
         mSocket.disconnect();
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -257,7 +258,7 @@ public class ChatFragment extends Fragment {
 
                 if (!mTyping) {
                     mTyping = true;
-                    mSocket.emit("typing", typingJson);
+                    mSocket.emit(API_Methods.VERSION+":messages:typing", typingJson);
                 }
 
                 mTypingHandler.removeCallbacks(onTypingTimeout);
@@ -309,13 +310,12 @@ public class ChatFragment extends Fragment {
         LSDKChat getChat = new LSDKChat(getActivity());
         getChat.getChat(chat, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
-                Log.d(TAG, "onFailure: " + request.body());
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                 } else {
@@ -451,7 +451,7 @@ public class ChatFragment extends Fragment {
         read.put("room", mRoomId);
 
         if (!checkRead(mUserId, data))
-            mSocket.emit("read", read);
+            mSocket.emit(API_Methods.VERSION+":messages:read", read);
     }
 
     private void addTyping(String username) {
@@ -514,7 +514,7 @@ public class ChatFragment extends Fragment {
 
 
         // perform the sending message attempt.
-        mSocket.emit("new message", newMessage);
+        mSocket.emit(API_Methods.VERSION+":messages:new message", newMessage);
     }
 
     private void leave() {
@@ -566,7 +566,7 @@ public class ChatFragment extends Fragment {
                     try {
                         addMessage(data);
                         delivered.put("id", data.getString("id"));
-                        mSocket.emit("delivered", delivered);
+                        mSocket.emit(API_Methods.VERSION+":messages:delivered", delivered);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -623,7 +623,7 @@ public class ChatFragment extends Fragment {
             if (!mTyping) return;
 
             mTyping = false;
-            mSocket.emit("stop typing", typingJson);
+            mSocket.emit(API_Methods.VERSION+":messages:stop typing", typingJson);
         }
     };
 

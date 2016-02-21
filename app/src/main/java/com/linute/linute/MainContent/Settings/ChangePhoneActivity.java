@@ -19,9 +19,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +27,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class ChangePhoneActivity extends AppCompatActivity {
 
@@ -173,12 +175,12 @@ public class ChangePhoneActivity extends AppCompatActivity {
 
         mUser.isUniquePhone(phone, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) { //no connection
+            public void onFailure(Call call, IOException e) { //no connection
                 showBadConnectionToast(mGetConfirmation, mProgressBar1, mPhoneNumber);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
                     getConfirmationCode(phone); //is unqiue so try to get confirmation code
@@ -210,12 +212,12 @@ public class ChangePhoneActivity extends AppCompatActivity {
     private void getConfirmationCode(final String phone) {
         mUser.getConfirmationCodeForPhone(phone, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 showBadConnectionToast(mGetConfirmation, mProgressBar1, mPhoneNumber);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         String code = new JSONObject(response.body().string()).getString("pinCode");
@@ -255,12 +257,12 @@ public class ChangePhoneActivity extends AppCompatActivity {
 
         mUser.updateUserInfo(userInfo, null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 showBadConnectionToast(mSecondViewButtons, mProgressBar2, mConfirmation);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         persistData(new LinuteUser(new JSONObject(response.body().string()))); //save phone number

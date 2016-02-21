@@ -43,14 +43,12 @@ import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.net.URISyntaxException;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
 
 public class MainActivity extends BaseTaptActivity {
 
@@ -73,6 +71,8 @@ public class MainActivity extends BaseTaptActivity {
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
     private SharedPreferences mSharedPreferences;
     private boolean mConnecting;
+
+    private SocketErrorResponse mSocketErrorResponse;
 
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
@@ -216,7 +216,7 @@ public class MainActivity extends BaseTaptActivity {
         Intent intent = getIntent();
 
         //came in from notification
-        if (intent != null && intent.getBooleanExtra("NOTIFICATION", false)){
+        if (intent != null && intent.getBooleanExtra("NOTIFICATION", false)) {
 
             clearBackStack();
 
@@ -433,7 +433,6 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -461,9 +460,7 @@ public class MainActivity extends BaseTaptActivity {
         //if there is a profile view or feedDetailView
         else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
-        }
-
-        else {
+        } else {
             super.onBackPressed();
         }
     }
@@ -500,7 +497,7 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void onDrawerSlide(View drawerView, float slideOffset) {
             super.onDrawerSlide(drawerView, slideOffset);
-            if (!mKeyboardHasBeenClosed && slideOffset > 0){
+            if (!mKeyboardHasBeenClosed && slideOffset > 0) {
                 mKeyboardHasBeenClosed = true;
                 View focused = getCurrentFocus();
                 if (focused != null) {
@@ -517,37 +514,35 @@ public class MainActivity extends BaseTaptActivity {
 
     }
 
+
+
+    /******Socket stuff********/
+
     @Override
     protected void onResume() {
         super.onResume();
 
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+        if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
             mConnecting = true;
 
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + mSharedPreferences.getString("userID", "");
-                    op.forceNew = true;
+                    op.query = "token=" + mSharedPreferences.getString("userToken", "");
                     op.reconnectionDelay = 5;
+                    op.secure = true;
+                    op.transports = new String[]{WebSocket.NAME};
+
                     mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
 
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on("authorization", authorization);
+            mSocket.on(Socket.EVENT_ERROR, eventError);
             mSocket.connect();
             mConnecting = false;
-
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -559,8 +554,36 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off("authorization", authorization);
+            mSocket.off(Socket.EVENT_ERROR, eventError);
         }
+    }
+
+
+    @Override
+    public void connectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.on(event, emitter);
+        }
+    }
+
+    @Override
+    public void emitSocket(String event, Object arg) {
+        if (mSocket != null)
+            mSocket.emit(event, arg);
+    }
+
+
+    @Override
+    public void disconnectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.off(event, emitter);
+        }
+    }
+
+
+    @Override
+    public void setSocketErrorResponse(SocketErrorResponse error){
+        mSocketErrorResponse = error;
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -570,22 +593,26 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private Emitter.Listener authorization = new Emitter.Listener() {
+    private Emitter.Listener eventError = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+            Log.i(TAG, "ERROR: " + args[0]);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        Log.d(TAG, "runAuthorization: " + ((JSONObject) args[0]).toString(4));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+
+                    if (mSocketErrorResponse != null) {
+                        mSocketErrorResponse.runSocketError();
                     }
+
+                    Utils.showServerErrorToast(MainActivity.this);
                 }
             });
         }
     };
 
+
+    //hiding toolbar / showing toolbar
     @Override
     public void enableBarScrolling(boolean enabled) {
 
@@ -604,16 +631,18 @@ public class MainActivity extends BaseTaptActivity {
         }
     }
 
+    //when tap toolbar
     @Override
-    public void setToolbarOnClickListener(View.OnClickListener listener){
+    public void setToolbarOnClickListener(View.OnClickListener listener) {
         mToolbar.setOnClickListener(listener);
     }
 
+    //when notification is pressed, takes you to updates fragment
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        if (intent.getBooleanExtra("NOTIFICATION", false)){
+        if (intent.getBooleanExtra("NOTIFICATION", false)) {
 
             clearBackStack();
 

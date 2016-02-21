@@ -5,13 +5,14 @@ import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
 
 import org.json.JSONArray;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
 
 /**
  * Created by QiFeng on 2/6/16.
@@ -20,20 +21,17 @@ public class LSDKFriends {
 
     private static SharedPreferences mSharedPreferences;
 
-    private static String mEncodedToken;
+    private static String mToken;
 
 
     public LSDKFriends(Context context) {
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mEncodedToken = Utils.encode_base64(mSharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null));
+        mToken = mSharedPreferences.getString("userToken","");
     }
 
 
     public Call getFriends(String userId, boolean following, String skip, Callback callback){
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", ""),
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> param = new HashMap<>();
         param.put("action[0]", following ? "following" : "follower");

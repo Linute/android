@@ -22,13 +22,14 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 2/4/16.
@@ -145,7 +146,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
             postData.put("event", ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
             new LSDKEvents(mContext).postLike(postData, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     Activity activity = (Activity) mContext;
                     if (activity != null) {
                         activity.runOnUiThread(new Runnable() {
@@ -160,7 +161,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                         Activity activity = (Activity) mContext;
@@ -192,7 +193,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
             postData.put("isDeleted", true);
             new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     e.printStackTrace();
                     Activity activity = (Activity) mContext;
                     if (activity != null) {
@@ -209,7 +210,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (!response.isSuccessful()) {
                         Log.d("TAG", response.body().string());
                         Activity activity = (Activity) mContext;

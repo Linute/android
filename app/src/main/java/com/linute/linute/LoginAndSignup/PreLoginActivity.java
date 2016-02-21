@@ -34,9 +34,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +42,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class PreLoginActivity extends AppCompatActivity {
 
@@ -169,7 +170,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
         new LSDKUser(this).authorizationFacebook(fbToken, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -180,7 +181,7 @@ public class PreLoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
 
                     try {
@@ -290,10 +291,6 @@ public class PreLoginActivity extends AppCompatActivity {
     private void persistData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
-        Log.i(TAG, "persistData: "+mFBToken);
-        Log.i(TAG, "persistData: "+user.getPasswordFacebook());
-        //sharedPreferences.putString("password", user.getPasswordFacebook());
-        sharedPreferences.putString("password", mFBToken);
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("firstName", user.getFirstName());
@@ -310,14 +307,12 @@ public class PreLoginActivity extends AppCompatActivity {
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
-
     }
 
     private void persistTempData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
 
         sharedPreferences.putString("userID", user.getUserID());
-        sharedPreferences.putString("password", user.getPasswordFacebook());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
         sharedPreferences.putInt("sex", user.getSex());
         sharedPreferences.putString("dob", user.getDob());
@@ -325,7 +320,6 @@ public class PreLoginActivity extends AppCompatActivity {
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("firstName", user.getFirstName());
         sharedPreferences.putString("lastName", user.getLastName());
-        sharedPreferences.putString("passwordFacebook", user.getPasswordFacebook());
         sharedPreferences.putString("email", user.getEmail());
 
         sharedPreferences.apply();
@@ -378,7 +372,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
         Device.createDevice(headers, device, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -389,7 +383,7 @@ public class PreLoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.e(TAG, response.body().string());
                     showServerErrorToast(progress);

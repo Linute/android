@@ -31,9 +31,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +39,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 12/30/15.
@@ -121,7 +123,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
                         new LSDKPeople(mContext).postFollow(postData, new Callback() {
                             @Override
-                            public void onFailure(Request request, IOException e) {
+                            public void onFailure(Call call, IOException e) {
                                 final Activity activity = (Activity) mContext;
                                 if (activity != null) {
                                     activity.runOnUiThread(new Runnable() {
@@ -134,7 +136,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                             }
 
                             @Override
-                            public void onResponse(Response response) throws IOException {
+                            public void onResponse(Call call, Response response) throws IOException {
                                 if (!response.isSuccessful()) {
                                     Log.d(TAG, response.body().string());
                                     return;
@@ -170,7 +172,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
                         new LSDKPeople(mContext).putUnfollow(putData, mUser.getFriendship(), new Callback() {
                             @Override
-                            public void onFailure(Request request, IOException e) {
+                            public void onFailure(Call call, IOException e) {
                                 final Activity activity = (Activity) mContext;
                                 if (activity != null) {
                                     activity.runOnUiThread(new Runnable() {
@@ -183,7 +185,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                             }
 
                             @Override
-                            public void onResponse(Response response) throws IOException {
+                            public void onResponse(Call call, Response response) throws IOException {
                                 if (!response.isSuccessful()) {
                                     Log.d(TAG, response.body().string());
                                 } else {

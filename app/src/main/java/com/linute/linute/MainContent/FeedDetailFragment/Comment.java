@@ -13,6 +13,7 @@ public class Comment {
     private String mCommentUserName;
     private String mCommentUserPostText;
     private String mCommentUserPostId;
+    private String mDateString;
     private boolean mIsAnon;
     private String mAnonImage;
 
@@ -27,9 +28,18 @@ public class Comment {
         mCommentUserPostId = "";
         mAnonImage = "";
         mMentionedPeople = new ArrayList<>();
+        mDateString = "";
     }
 
-    public Comment(String commentUserId, String commentUserProfileImage, String commentUserName, String commentUserPostText, String commentUserPostId, boolean isAnon, String anonImage, List<MentionedPersonLight> mentionedPeople) {
+    public Comment(String commentUserId,
+                   String commentUserProfileImage,
+                   String commentUserName,
+                   String commentUserPostText,
+                   String commentUserPostId, boolean isAnon,
+                   String anonImage,
+                   List<MentionedPersonLight> mentionedPeople,
+                   String date
+    ) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
         mCommentUserName = commentUserName;
@@ -38,6 +48,8 @@ public class Comment {
         mIsAnon = isAnon;
         mAnonImage = anonImage;
         mMentionedPeople = mentionedPeople;
+        mDateString = date;
+
     }
 
     public String getCommentUserId() {
@@ -72,7 +84,9 @@ public class Comment {
         return mAnonImage;
     }
 
-
+    public String getDateString(){
+        return mDateString;
+    }
 
 
     public static class MentionedPersonLight{
