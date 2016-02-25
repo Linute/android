@@ -74,19 +74,26 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
-            beginCrop(data.getData()); //crop image
+            if(data != null) {
+                beginCrop(data.getData()); //crop image
+            }
         }
 
         else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
             Log.i(TAG, "onActivityResult: okay");
             if (resultCode == RESULT_OK) {
 
-                Uri imageUri = Crop.getOutput(data);
-                ImageUtils.normalizeImageForUri(this, imageUri);
-                launchEditAndSaveFragment(imageUri);
+
+                if (data != null) {
+                    Uri imageUri = Crop.getOutput(data);
+                    ImageUtils.normalizeImageForUri(this, imageUri);
+                    launchEditAndSaveFragment(imageUri);
+                }
 
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
-                Toast.makeText(this, Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
+                if (data != null) {
+                    Toast.makeText(this, Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }

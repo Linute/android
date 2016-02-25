@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -47,6 +48,10 @@ public class Profile extends UpdatableFragment {
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
+
+    //we have 2 seperate queries, one for header and one for activities
+    //we call notify only after
+    private boolean mOtherCompotentHasUpdated = false;
 
     public static final int IMAGE_CHANGED = 1234;
 
@@ -99,6 +104,7 @@ public class Profile extends UpdatableFragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mOtherCompotentHasUpdated = false;
                 updateAndSetHeader();
                 setActivities(); //get activities
 
@@ -131,10 +137,21 @@ public class Profile extends UpdatableFragment {
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Profile");
+                mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
+            mOtherCompotentHasUpdated = false;
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -144,6 +161,23 @@ public class Profile extends UpdatableFragment {
             updateAndSetHeader(); //get information from server to update profile
             setActivities();
             setFragmentNeedUpdating(false);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Profile");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -202,18 +236,25 @@ public class Profile extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProfileAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    if (!mOtherCompotentHasUpdated){
+                        mOtherCompotentHasUpdated = true;
+                    }else {
+                        mOtherCompotentHasUpdated = false;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProfileAdapter.notifyDataSetChanged();
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
+                    }
                 } else {//else something went
                     Log.v(TAG, response.body().string());
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(rServerErrorAction);
                     }
                 }
+
             }
         });
     }
@@ -265,12 +306,16 @@ public class Profile extends UpdatableFragment {
                         String fullName = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
 
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                            userActItems.add(
-                                    new UserActivityItem(
-                                            activities.getJSONObject(i),
-                                            activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                            fullName
-                                    )); //create activity objects and add to array
+                            try {
+                                userActItems.add(
+                                        new UserActivityItem(
+                                                activities.getJSONObject(i),
+                                                activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
+                                                fullName
+                                        )); //create activity objects and add to array
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
                         }
 
                         mUserActivityItems.clear();
@@ -281,18 +326,22 @@ public class Profile extends UpdatableFragment {
                         }
 
                         if (getActivity() == null) return;
-                        //turn refresh off if it's on and notify ListView we might have updated information
+
+
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() { //update view
-                                if (mSwipeRefreshLayout.isRefreshing())
+
+
+                                if (!mOtherCompotentHasUpdated){
+                                    mOtherCompotentHasUpdated = true;
+                                }else {
+                                    mOtherCompotentHasUpdated = false;
+                                    mProfileAdapter.notifyDataSetChanged();
                                     mSwipeRefreshLayout.setRefreshing(false);
-
-                                mProfileAdapter.notifyDataSetChanged();
-
+                                }
                             }
                         });
-
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
                         if (getActivity() != null) {

@@ -17,7 +17,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.json.JSONException;
@@ -32,7 +34,7 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
 
-public class RoomsActivity extends AppCompatActivity {
+public class RoomsActivity extends BaseTaptActivity {
 
     private static final String TAG = RoomsActivity.class.getSimpleName();
     private TextView mTitle;
@@ -138,12 +140,23 @@ public class RoomsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+        if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
             mConnecting = true;
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + mSharedPreferences.getString("userToken", "");
+
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken="+device.getDeviceToken() +
+                                    "&udid="+device.getUdid()+
+                                    "&version="+device.getVersonName()+
+                                    "&build="+device.getVersionCode()+
+                                    "&os="+device.getOS()+
+                                    "&type="+device.getType()
+                    ;
+
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
                     op.transports = new String[]{WebSocket.NAME};
@@ -157,12 +170,6 @@ public class RoomsActivity extends AppCompatActivity {
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.connect();
             mConnecting = false;
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -187,5 +194,27 @@ public class RoomsActivity extends AppCompatActivity {
             });
         }
     };
+
+
+
+    @Override
+    public void connectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.on(event, emitter);
+        }
+    }
+
+    @Override
+    public void emitSocket(String event, Object arg) {
+        if (mSocket != null)
+            mSocket.emit(event, arg);
+    }
+
+    @Override
+    public void disconnectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.off(event, emitter);
+        }
+    }
 
 }

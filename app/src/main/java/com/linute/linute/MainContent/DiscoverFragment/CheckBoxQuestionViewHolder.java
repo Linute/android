@@ -14,15 +14,19 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -120,25 +124,34 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
             mPosts.get(getAdapterPosition()).setPostLiked(true);
             mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
 
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("owner", mSharedPreferences.getString("userID", ""));
-            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
-            new LSDKEvents(mContext).postLike(postData, new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                }
+//            Map<String, Object> postData = new HashMap<>();
+//            postData.put("owner", mSharedPreferences.getString("userID", ""));
+//            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
+//            new LSDKEvents(mContext).postLike(postData, new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    if (!response.isSuccessful()) {
+//                        Log.d("TAG", response.body().string());
+//                    }else{
+//                        response.body().close();
+//                    }
+//                }
+//            });
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        Log.d("TAG", response.body().string());
-                    }else{
-                        response.body().close();
-                    }
+//            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+//
+//
+//            try {
+//                JSONObject body = new JSONObject();
+//                body.put("user", )
+//                activity.emitSocket(API_Methods.VERSION+":posts:like", );
+//            }
 
-                }
-            });
 
             mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
         } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {

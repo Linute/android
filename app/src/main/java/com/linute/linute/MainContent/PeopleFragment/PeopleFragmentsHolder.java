@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -18,12 +19,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -175,9 +183,35 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                     scrollViewRecListUp(mViewPager.getCurrentItem());
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "People");
+                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "People");
+                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public void onStop() {
         super.onStop();
@@ -223,11 +257,20 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.people_fragment_menu_chat && getActivity() != null) {
-            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-            enterRooms.putExtra("CHATICON", true);
-            startActivity(enterRooms);
-            return true;
+        if (getActivity() != null) {
+            switch (item.getItemId()) {
+                case R.id.people_fragment_menu_chat:
+                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                    enterRooms.putExtra("CHATICON", true);
+                    startActivity(enterRooms);
+                    return true;
+                case R.id.menu_find_friends:
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                    if (activity != null){
+                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                    }
+                    return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);

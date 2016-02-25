@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +17,7 @@ public class FeedDetail {
     private String mUserImage;
     private String mUserName;
     private int mPostPrivacy = 2;
-    private String mPostTime;
+    private long mPostTime;
     private boolean isPostLiked;
     private String mPostLikeNum = "0";
     private String mNumOfComments = "0";
@@ -28,7 +30,7 @@ public class FeedDetail {
 
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, String postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic) {
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, long postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -62,7 +64,7 @@ public class FeedDetail {
     }
 
     public String getPostTime() {
-        return mPostTime;
+        return Utils.getTimeAgoString(mPostTime);
     }
 
     public boolean isPostLiked() {
@@ -115,6 +117,10 @@ public class FeedDetail {
 
     public void setPostPrivacy(int privacy){
         mPostPrivacy = privacy;
+    }
+
+    public void refreshCommentCount(){
+        mNumOfComments = mComments.size()+"";
     }
 
     public String getAnonPic(){

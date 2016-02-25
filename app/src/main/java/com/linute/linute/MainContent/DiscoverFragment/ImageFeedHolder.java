@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
@@ -25,6 +26,9 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,14 +63,19 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     protected List<Post> mPosts;
 
     private Context mContext;
-    private SharedPreferences mSharedPreferences;
+
+    private String mUserId;
+    private String mImageSignature;
+    //private SharedPreferences mSharedPreferences;
 
 
     public ImageFeedHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
         super(itemView);
 
         mContext = context;
-        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUserId = mSharedPreferences.getString("userID","");
+        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         mPosts = posts;
         mCheckBoxChoiceCapableAdapters = adapter;
@@ -105,53 +114,44 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked()) {
-            mPosts.get(getAdapterPosition()).setPostLiked(true);
-            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
 
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("owner", mSharedPreferences.getString("userID", ""));
-            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
-            new LSDKEvents(mContext).postLike(postData, new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
+            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+            if (activity != null) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("user", mUserId);
+                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
+
+                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
+
+                    mPosts.get(getAdapterPosition()).setPostLiked(true);
+                    mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
+
+                    mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        Log.d("TAG", response.body().string());
-                    } else {
-                        response.body().close();
-                    }
-
-                }
-            });
-
-            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
         } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {
-            mPosts.get(getAdapterPosition()).setPostLiked(false);
-            mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
 
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("event", mPosts.get(getAdapterPosition()).getPostId());
-            new LSDKEvents(mContext).updateLike(postData, mPosts.get(getAdapterPosition()).getPostId(), new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
+            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+            if (activity != null) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("user", mUserId);
+                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
+
+                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
+
+                    mPosts.get(getAdapterPosition()).setPostLiked(false);
+                    mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
+
+                    mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        Log.d("TAG", response.body().string());
-                    } else {
-                        response.body().close();
-                    }
-                }
-            });
-
-            mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+            }
         }
     }
 
@@ -174,7 +174,8 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         //like button pressed
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
-        } else if (v == vCommentButton) {
+        }
+        else if (v == vCommentButton) {
             activity.addFragmentToContainer(
                     FeedDetailPage.newInstance(false, true
                             , mPosts.get(getAdapterPosition()).getPostId()
@@ -206,7 +207,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .signature(new StringSignature(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);

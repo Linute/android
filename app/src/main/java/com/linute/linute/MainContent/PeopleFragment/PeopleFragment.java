@@ -6,6 +6,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -26,6 +27,7 @@ import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +67,6 @@ public class PeopleFragment extends UpdatableFragment {
     public static final long TIME_DIFFERENCE = 600000; //10 minutes
 
     public PeopleFragment() {
-        Log.i(TAG, "PeopleFragment: created");
         // Required empty public constructor
     }
 
@@ -178,11 +179,12 @@ public class PeopleFragment extends UpdatableFragment {
         } else {
             if (Utils.isNetworkAvailable(getActivity())) {
 
-                if (!checkLocationOn()){ //location service not enabled
+                if (!checkLocationOn()) { //location service not enabled
                     return;
                 }
 
-                if (mRationaleLayer.getVisibility() == View.VISIBLE) mRationaleLayer.setVisibility(View.GONE);
+                if (mRationaleLayer.getVisibility() == View.VISIBLE)
+                    mRationaleLayer.setVisibility(View.GONE);
 
                 mSwipeRefreshLayout.post(new Runnable() {
                     @Override
@@ -197,29 +199,58 @@ public class PeopleFragment extends UpdatableFragment {
                     //if older than 10 minutes
                     if (SystemClock.currentThreadTimeMillis() - loca.getTime() > TIME_DIFFERENCE) {
                         mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
-                    }else{
+
+                        mTimeoutHandler = new Handler();
+                        mTimeoutRunnable = new Runnable() {
+                            @SuppressWarnings("MissingPermission")
+                            @Override
+                            public void run() {
+                                mLocationManager.removeUpdates(mLocationListener);
+                                showRationalLayer();
+                            }
+                        };
+
+                        mTimeoutHandler.postDelayed(mTimeoutRunnable, 10000);
+                    } else {
                         updateLocationAndGetPeople(loca);
                     }
                 }
                 //no known last known location
-                else{
+                else {
                     mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
+
+                    mTimeoutHandler = new Handler();
+
+                    mTimeoutRunnable = new Runnable() {
+                        @SuppressWarnings("MissingPermission")
+                        @Override
+                        public void run() {
+                            mLocationManager.removeUpdates(mLocationListener);
+                            showRationalLayer();
+                        }
+                    };
+                    mTimeoutHandler.postDelayed(mTimeoutRunnable, 10000);
                 }
 
             } else {
                 Utils.showBadConnectionToast(getActivity());
             }
         }
+
     }
 
-    private boolean checkLocationOn(){
-        if (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+
+    private Handler mTimeoutHandler;
+    private Runnable mTimeoutRunnable;
+
+    private boolean checkLocationOn() {
+        if (!mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
             mRationaleLayer.setVisibility(View.VISIBLE);
 
             mPeopleList.clear();
             mPeopleAdapter.notifyDataSetChanged();
 
-            if (mSwipeRefreshLayout.isRefreshing()){
+            if (mSwipeRefreshLayout.isRefreshing()) {
                 mSwipeRefreshLayout.setRefreshing(false);
             }
 
@@ -246,7 +277,7 @@ public class PeopleFragment extends UpdatableFragment {
         mPeopleList.clear();
         mPeopleAdapter.notifyDataSetChanged();
 
-        if (mSwipeRefreshLayout.isRefreshing()){
+        if (mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.setRefreshing(false);
         }
 
@@ -262,7 +293,7 @@ public class PeopleFragment extends UpdatableFragment {
 
     public void getPeople() {
 
-        if (!mSwipeRefreshLayout.isRefreshing()){
+        if (!mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -293,8 +324,6 @@ public class PeopleFragment extends UpdatableFragment {
                 if (!response.isSuccessful()) {
                     Log.d("TAG", responsString);
                     return;
-                } else {
-                    Log.d("TAG", responsString);
                 }
                 JSONObject jsonObject;
                 JSONArray jsonArray;
@@ -391,7 +420,10 @@ public class PeopleFragment extends UpdatableFragment {
     LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.i(TAG, "onLocationChanged: " + location.toString());
+            //Log.i(TAG, "onLocationChanged: " + location.toString());
+            if (mTimeoutHandler != null) {
+                mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
+            }
             updateLocationAndGetPeople(location);
         }
 
@@ -410,7 +442,7 @@ public class PeopleFragment extends UpdatableFragment {
     };
 
 
-    private void updateLocationAndGetPeople(Location location){
+    private void updateLocationAndGetPeople(Location location) {
         JSONArray coord = new JSONArray();
         try {
             coord.put(location.getLatitude());
@@ -622,8 +654,8 @@ public class PeopleFragment extends UpdatableFragment {
 //            holderFragment.setFragmentNeedUpdating(true);
 //    }
 
-    public void scrollUp(){
-        if (recList != null){
+    public void scrollUp() {
+        if (recList != null) {
             recList.smoothScrollToPosition(0);
         }
     }

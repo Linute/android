@@ -1,16 +1,26 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -23,10 +33,20 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private Context context;
     private GetMoreFeed mGetMoreFeed; //interface that gets more feed
 
+    private boolean mSendImpressions = true; //when scrolling back up, we don't want to send impressions
+
+    private String mCollege;
+    private String mUserId;
+
+
     public CheckBoxQuestionAdapter(List<Post> posts, Context context) {
         super(new MultiChoiceMode());
         mPosts = posts;
         this.context = context;
+
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mCollege = sharedPreferences.getString("collegeId","");
+        mUserId = sharedPreferences.getString("userID", "");
     }
 
     public void setGetMoreFeed(GetMoreFeed moreFeed){
@@ -48,10 +68,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
                     mPosts,
                     context);
         }
-
-//        return new CheckBoxQuestionViewHolder(this, LayoutInflater.
-//                from(parent.getContext()).
-//                inflate(R.layout.feed_discover, parent, false), mPosts, context);
     }
 
     @Override
@@ -62,10 +78,24 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
         }
 
-        //holder.bindModel(mPosts.get(position));
+
         if (position + 1 == mPosts.size()) {
             //NOTE: Changed refresh to interface
             mGetMoreFeed.getMoreFeed();
+        }else if (position == 0){
+            MainActivity activity = (MainActivity) context;
+            if (activity != null){
+                activity.setFeedNotification(0);
+                activity.setNumNewPostsInDiscover(0);
+            }
+        }
+
+        //tracking impressions
+        if (!mSendImpressions){ //scrolled back to the top
+            if (position == 0)
+                mSendImpressions = true;
+        }else {
+            sendImpressionsAsync(mPosts.get(position).getPostId());
         }
     }
 
@@ -87,6 +117,39 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
         return position == 0;
     }
 
+    public void setSendImpressions(boolean set){
+        mSendImpressions = set;
+    }
+
+    private void sendImpressionsAsync (final String id){
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject body = new JSONObject();
+
+                    body.put("college", mCollege);
+                    body.put("user", mUserId);
+
+                    JSONArray mEventIds = new JSONArray();
+                    mEventIds.put(id);
+                    body.put("events", mEventIds);
+
+                    BaseTaptActivity activity = (BaseTaptActivity) context;
+
+                    if (activity != null) {
+                        activity.emitSocket(API_Methods.VERSION + ":posts:impressions", body);
+                        //Log.i(TAG, "run: impression sent");
+                    }else {
+                        Log.i(TAG, "impression not sent: no activity");
+                    }
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
 
     public interface GetMoreFeed {

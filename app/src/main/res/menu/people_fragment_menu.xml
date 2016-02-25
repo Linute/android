@@ -5,6 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:contex=".MainActivity">
 
+    <item android:id="@+id/menu_find_friends"
+          android:icon="@drawable/ic_action_add_light"
+          android:orderInCategory="100"
+          android:title="Find friends"
+          app:showAsAction="ifRoom"
+          />
+
+
     <item
         android:id="@+id/people_fragment_menu_chat"
         android:icon="@drawable/ic_chat81"

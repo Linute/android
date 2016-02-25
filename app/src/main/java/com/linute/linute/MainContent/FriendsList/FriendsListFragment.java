@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.FriendsList;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,10 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -113,9 +116,35 @@ public class FriendsListFragment extends UpdatableFragment {
         if (activity != null) {
             activity.setTitle(mFollowing ? "Following" : "Followers");
             activity.resetToolbar();
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Followers");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Followers");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void getFriendsList() {
         if (getActivity() == null) return;

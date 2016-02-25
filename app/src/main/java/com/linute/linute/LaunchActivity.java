@@ -22,7 +22,9 @@ import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
 import io.fabric.sdk.android.Fabric;
+
 import java.util.Random;
 
 
@@ -57,20 +59,14 @@ public class LaunchActivity extends Activity {
             public void onReceive(Context context, Intent intent) {
 
                 SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-                boolean sentToken = sharedPreferences
-                        .getBoolean(QuickstartPreferences.SENT_TOKEN_TO_SERVER, false);
 
                 String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
-
-                //token was sent or we already have token
-                //we need a token for this app to work. Will stop app if there is no token available
-                if (sentToken || token != null) {
-//                    requestServices();
+////                    requestServices();
+                if (token != null) {
                     goToNextActivity();
                 }
-
-                //No token and unsuccessful registration
-                else {
+//                //No token and unsuccessful registration
+               else {
                     new AlertDialog.Builder(LaunchActivity.this)
                             .setTitle("Problem With Connection")
                             .setMessage("Make sure you are connected to a network.")
@@ -78,12 +74,7 @@ public class LaunchActivity extends Activity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {  //retry to connect
                                     runRegistrationIntentService();
-                                }
-                            })
-                            .setOnCancelListener(new DialogInterface.OnCancelListener() { //exit
-                                @Override
-                                public void onCancel(DialogInterface dialog) {
-                                    finish();
+                                    dialog.dismiss();
                                 }
                             })
                             .show();
@@ -104,7 +95,6 @@ public class LaunchActivity extends Activity {
 
     //register device
     private void runRegistrationIntentService() {
-        Log.v(TAG, "Service Verified");
         Intent intent = new Intent(this, RegistrationIntentService.class);
         startService(intent);
     }
@@ -287,7 +277,7 @@ public class LaunchActivity extends Activity {
         Intent i = new Intent(LaunchActivity.this, nextActivity);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out); //no transition effects FIXME
+        overridePendingTransition(0, 0);
         LaunchActivity.this.finish();
     }
 }

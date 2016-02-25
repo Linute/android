@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import io.socket.client.Ack;
 import io.socket.emitter.Emitter;
 
 /**
@@ -66,6 +67,10 @@ public class BaseTaptActivity extends AppCompatActivity {
     }
 
     public void emitSocket(String event, Object arg){
+
+    }
+
+    public void emitSocket(String event, Object arg, Ack ack){
 
     }
 

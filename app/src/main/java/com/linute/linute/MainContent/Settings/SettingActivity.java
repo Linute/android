@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -29,6 +30,7 @@ import java.net.URISyntaxException;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
 
 
 public class SettingActivity extends AppCompatActivity {
@@ -245,7 +247,24 @@ public class SettingActivity extends AppCompatActivity {
             mConnecting = true;
             {
                 try {
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
+                    IO.Options op = new IO.Options();
+
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken="+device.getDeviceToken() +
+                                    "&udid="+device.getUdid()+
+                                    "&version="+device.getVersonName()+
+                                    "&build="+device.getVersionCode()+
+                                    "&os="+device.getOS()+
+                                    "&type="+device.getType()
+                    ;
+
+                    op.forceNew = true;
+                    op.reconnectionDelay = 5;
+                    op.transports = new String[]{WebSocket.NAME};
+
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -254,16 +273,8 @@ public class SettingActivity extends AppCompatActivity {
             mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on("authorization", authorization);
             mSocket.connect();
             mConnecting = false;
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            mSocket.emit("authorization", jsonObject);
         }
     }
 
@@ -274,7 +285,6 @@ public class SettingActivity extends AppCompatActivity {
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("authorization", authorization);
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -284,21 +294,6 @@ public class SettingActivity extends AppCompatActivity {
         }
     };
 
-    private Emitter.Listener authorization = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Log.d(TAG, "runAuthorization: " + ((JSONObject) args[0]).toString(4));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-        }
-    };
     // TODO: stop copy here
 }
 

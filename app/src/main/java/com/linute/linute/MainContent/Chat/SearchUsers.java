@@ -166,7 +166,8 @@ public class SearchUsers extends Fragment {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                 } else {
-                    mSearchUserList.clear();
+//                    mSearchUserList.clear();
+                    ArrayList<SearchUser> tempUsers = new ArrayList<>();
                     JSONObject jsonObject = null;
                     JSONArray friends = null;
                     try {
@@ -175,11 +176,15 @@ public class SearchUsers extends Fragment {
                         JSONObject user = null;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
-                            mSearchUserList.add(new SearchUser(
+                            tempUsers.add(new SearchUser(
                                     user.getString("id"),
                                     user.getString("profileImage"),
                                     user.getString("fullName")));
                         }
+
+                        mSearchUserList.clear();
+                        mSearchUserList.addAll(tempUsers);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

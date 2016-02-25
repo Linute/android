@@ -77,7 +77,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
         vTimeStamp.setText(comment.getDateString());
 
         if (comment.getCommentUserId().equals(mViewerUserId)) {
-            vCommentUserName.setTextColor(ContextCompat.getColor(mContext, R.color.user_name_blue));
+            vCommentUserName.setTextColor(ContextCompat.getColor(mContext, R.color.secondaryColor));
         } else {
             vCommentUserName.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
         }

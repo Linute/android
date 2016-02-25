@@ -33,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -309,7 +310,7 @@ public class EditSavePhotoFragment extends Fragment {
 
             postData.put("geo", jsonObject);
 
-            mSocket.emit(API_Methods.VERSION+":posts:new post", postData);
+            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -454,7 +455,16 @@ public class EditSavePhotoFragment extends Fragment {
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
+                    op.query =
+                            "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType()
+                    ;
                     op.reconnectionDelay = 5;
                     op.secure = true;
 
@@ -474,6 +484,18 @@ public class EditSavePhotoFragment extends Fragment {
             mSocket.connect();
             mConnecting = false;
 
+            if (getActivity() != null) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("action", "active");
+                    obj.put("screen", "Create");
+                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
         }
     }
 
@@ -483,6 +505,19 @@ public class EditSavePhotoFragment extends Fragment {
         super.onPause();
 
         if (mSocket != null) {
+
+            if (getActivity() != null) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("action", "inactive");
+                    obj.put("screen", "Create");
+                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -490,7 +525,6 @@ public class EditSavePhotoFragment extends Fragment {
             mSocket.off("new post", newPost);
         }
     }
-
 
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -521,7 +555,7 @@ public class EditSavePhotoFragment extends Fragment {
     private Emitter.Listener newPost = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i(TAG, "response: "+ args[0].toString());
+            Log.i(TAG, "response: " + args[0].toString());
             if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -533,8 +567,6 @@ public class EditSavePhotoFragment extends Fragment {
             });
         }
     };
-
-
 
 
     interface BackButtonAction {

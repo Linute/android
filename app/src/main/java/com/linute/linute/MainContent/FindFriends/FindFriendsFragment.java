@@ -33,12 +33,15 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.MainContent.FriendsList.Friend;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -227,9 +230,35 @@ public class FindFriendsFragment extends UpdatableFragment {
             activity.setTitle("Find Friends");
             activity.lowerAppBarElevation();
             activity.resetToolbar();
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Friend List");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Friend List");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     @Override
     public void onStop() {
@@ -291,16 +320,18 @@ public class FindFriendsFragment extends UpdatableFragment {
                             mFriendFoundList.clear();
                             mFriendFoundList.addAll(tempFriends);
 
-                            if (getActivity() == null) return;
+                            if (getActivity() == null || mCancelLoad) return;
 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+
                                     if (mFriendFoundList.isEmpty()) { //show no results found if empty
                                         mDescriptionText.setText("No results found");
                                         mDescriptionText.setVisibility(View.VISIBLE);
                                     }
                                     mFriendSearchAdapter.notifyDataSetChanged();
+
                                 }
                             });
 
@@ -332,7 +363,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     tempFriend.add(user);
             } else {
                 for (FriendSearchUser user : mUnfilteredList)
-                    if (user.nameContains(mQueryString)){
+                    if (user.nameContains(mQueryString)) {
                         tempFriend.add(user);
                     }
 
@@ -348,6 +379,9 @@ public class FindFriendsFragment extends UpdatableFragment {
             mFriendSearchAdapter.notifyDataSetChanged();
         }
     };
+
+
+    private boolean mCancelLoad = false;
 
     //searching by name
     private SearchView.OnQueryTextListener mSearchListener = new SearchView.OnQueryTextListener() {
@@ -367,13 +401,14 @@ public class FindFriendsFragment extends UpdatableFragment {
             if (newText.isEmpty()) { //no text in search bar
                 mFriendFoundList.clear();
                 mFriendSearchAdapter.notifyDataSetChanged();
+                mCancelLoad = true;
                 mDescriptionText.setText("Enter your friends name in the search bar");
                 mDescriptionText.setVisibility(View.VISIBLE);
             } else {
                 if (mDescriptionText.getVisibility() == View.VISIBLE)
                     mDescriptionText.setVisibility(View.INVISIBLE);
 
-
+                mCancelLoad = false;
                 mSearchHandler.postDelayed(mSearchByNameRunnable, 300);
             }
 

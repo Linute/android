@@ -204,7 +204,7 @@ public class LinuteSignUpFragment extends Fragment {
         mVerifyLayer.findViewById(R.id.signup_get_verify_code_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkDeviceRegistered();
+                checkEmailAndGetPinCode();
             }
         });
 
@@ -251,21 +251,21 @@ public class LinuteSignUpFragment extends Fragment {
         }
     };
 
-    //this is just to double check if the device was registered properly
-    private void checkDeviceRegistered() {
-        if (mCredentialCheckInProgress) return;
-
-        if (getActivity() == null) return;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-        showProgress(true, 0);
-
-        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
-            checkEmailAndGetPinCode();
-        } else {
-            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""));
-        }
-    }
+//    //this is just to double check if the device was registered properly
+//    private void checkDeviceRegistered() {
+//        if (mCredentialCheckInProgress) return;
+//
+//        if (getActivity() == null) return;
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//
+//        showProgress(true, 0);
+//
+//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
+//            checkEmailAndGetPinCode();
+//        } else {
+//            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""));
+//        }
+//    }
 
 
     private void checkEmailAndGetPinCode() {
@@ -798,56 +798,57 @@ public class LinuteSignUpFragment extends Fragment {
 
     }
 
-    //used to registere device if somehow device wasn't registered
-    private void sendRegistrationDevice(String token) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String versionName = "";
-        String versionCode = "";
-        try {
-            if (getActivity() == null) return;
-            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            versionName = pInfo.versionName;
-            versionCode = pInfo.versionCode + "";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        Map<String, Object> device = new HashMap<>();
-        device.put("token", token);
-        device.put("version", versionName);
-        device.put("build", versionCode);
-        device.put("os", Build.VERSION.SDK_INT + "");
-        device.put("type", "android");
-
-        Device.createDevice(headers, device, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "failed registration");
-                failedConnectionWithCurrentView(0);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, response.body().string());
-                    serverErrorCurrentView(0);
-                } else {
-                    Log.v(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("deviceRegistered", true)
-                            .apply();
-                    checkEmailAndGetPinCode();
-                }
-            }
-        });
-    }
+//    //used to registere device if somehow device wasn't registered
+//    private void sendRegistrationDevice(String token) {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        try {
+//            if (getActivity() == null) return;
+//            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e(TAG, "failed registration");
+//                failedConnectionWithCurrentView(0);
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    serverErrorCurrentView(0);
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+//                            .edit()
+//                            .putBoolean("deviceRegistered", true)
+//                            .apply();
+//                    checkEmailAndGetPinCode();
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onStop() {
         super.onStop();
+
         if (mFirstNameTextView.hasFocus()){
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);

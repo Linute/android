@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
@@ -22,6 +23,9 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,7 +44,6 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
     private Context mContext;
     private RecyclerView.Adapter mAdapater;
-    private SharedPreferences mSharedPreferences;
 
     private View vLikeContainer;
 
@@ -56,13 +59,19 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
     private FeedDetail vFeedDetail;
 
+    private String mUserId;
+    private String mImageSignature;
+
     public FeedDetailHeaderImageViewHolder(RecyclerView.Adapter adapter, View itemView, Context context) {
         super(itemView);
 
         mContext = context;
         mAdapater = adapter;
 
-        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+        mUserId = mSharedPreferences.getString("userID","");
+        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         vPostUserName = (TextView) itemView.findViewById(R.id.feedDetail_user_name);
         vLikesText = (TextView) itemView.findViewById(R.id.postNumHearts);
@@ -137,100 +146,133 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         if (isChecked && !((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
             // ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(true);
             //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) + 1) + "");
-            vFeedDetail.setIsPostLiked(true);
-            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//            vFeedDetail.setIsPostLiked(true);
+//            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
+//            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
 
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("owner", mSharedPreferences.getString("userID", ""));
-            postData.put("event", ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
-            new LSDKEvents(mContext).postLike(postData, new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Activity activity = (Activity) mContext;
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                vFeedDetail.setIsPostLiked(false);
-                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-                            }
-                        });
-                    }
+
+
+            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+            if (activity != null) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("user", mUserId);
+                    body.put("room", vFeedDetail.getPostId());
+
+                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
+
+                    vFeedDetail.setIsPostLiked(true);
+                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
+                    mAdapater.notifyItemChanged(0);
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+            }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        Log.d("TAG", response.body().string());
-                        Activity activity = (Activity) mContext;
-                        if (activity != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    vFeedDetail.setIsPostLiked(false);
-                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-                                }
-                            });
-                        }
-                    } else {
-                        response.body().close();
-                    }
-                }
-            });
+//            Map<String, Object> postData = new HashMap<>();
+//            postData.put("owner", mSharedPreferences.getString("userID", ""));
+//            postData.put("event", ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
+//            new LSDKEvents(mContext).postLike(postData, new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    Activity activity = (Activity) mContext;
+//                    if (activity != null) {
+//                        activity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                vFeedDetail.setIsPostLiked(false);
+//                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
+//                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//                            }
+//                        });
+//                    }
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    if (!response.isSuccessful()) {
+//                        Log.d("TAG", response.body().string());
+//                        Activity activity = (Activity) mContext;
+//                        if (activity != null) {
+//                            activity.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    vFeedDetail.setIsPostLiked(false);
+//                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
+//                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//                                }
+//                            });
+//                        }
+//                    } else {
+//                        response.body().close();
+//                    }
+//                }
+//            });
 
-            mAdapater.notifyDataSetChanged();
         } else if (!isChecked && ((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
             //((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(false);
             //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) - 1) + "");
-            vFeedDetail.setIsPostLiked(false);
-            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//            vFeedDetail.setIsPostLiked(false);
+//            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
+//            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//
+//            Map<String, Object> postData = new HashMap<>();
+//            postData.put("isDeleted", true);
+//            new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    e.printStackTrace();
+//                    Activity activity = (Activity) mContext;
+//                    if (activity != null) {
+//                        activity.runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                vFeedDetail.setIsPostLiked(true);
+//                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
+//                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//                            }
+//                        });
+//                    }
+//                    ;
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    if (!response.isSuccessful()) {
+//                        Log.d("TAG", response.body().string());
+//                        Activity activity = (Activity) mContext;
+//                        if (activity != null) {
+//                            activity.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    vFeedDetail.setIsPostLiked(true);
+//                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
+//                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
+//                                }
+//                            });
+//                        }
+//                    } else {
+//                        response.body().close();
+//                    }
+//                }
+//            });
 
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("isDeleted", true);
-            new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
+            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+            if (activity != null) {
+                try {
+                    JSONObject body = new JSONObject();
+                    body.put("user", mUserId);
+                    body.put("room", vFeedDetail.getPostId());
+
+                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
+
+                    vFeedDetail.setIsPostLiked(false);
+                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
+                    mAdapater.notifyItemChanged(0);
+                } catch (JSONException e) {
                     e.printStackTrace();
-                    Activity activity = (Activity) mContext;
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                vFeedDetail.setIsPostLiked(true);
-                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-                            }
-                        });
-                    }
-                    ;
                 }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful()) {
-                        Log.d("TAG", response.body().string());
-                        Activity activity = (Activity) mContext;
-                        if (activity != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    vFeedDetail.setIsPostLiked(true);
-                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-                                }
-                            });
-                        }
-                    } else {
-                        response.body().close();
-                    }
-                }
-            });
-
-            mAdapater.notifyDataSetChanged();
+            }
         }
     }
 
@@ -239,7 +281,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(image))
                 .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .signature(new StringSignature(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);

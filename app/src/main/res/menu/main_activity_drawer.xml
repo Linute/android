@@ -25,10 +25,10 @@
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
-        <item android:id="@+id/navigation_item_find_friends"
-              android:icon="@drawable/ic_action_add99"
-              android:title="Add Friends"
-              />
+        <!--<item android:id="@+id/navigation_item_find_friends"-->
+              <!--android:icon="@drawable/ic_action_add99"-->
+              <!--android:title="Add Friends"-->
+              <!--/>-->
 
         <item android:id="@+id/navigation_item_settings"
               android:icon="@drawable/ic_action_action_settings"

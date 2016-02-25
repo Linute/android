@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,8 +110,8 @@ public class EditNameFragment extends Fragment {
     }
 
     private void saveName() {
-        String lastName = mLastName.getText().toString();
-        String firstName = mFirstName.getText().toString();
+        String lastName = mLastName.getText().toString().trim();
+        String firstName = mFirstName.getText().toString().trim();
 
         if (areValidFields(firstName, lastName)) {
             LSDKUser user = new LSDKUser(getActivity());
@@ -169,7 +170,7 @@ public class EditNameFragment extends Fragment {
 
 
                     } else {
-                        response.body().close();
+                        Log.i(TAG, "onResponse: "+response.body().string());
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

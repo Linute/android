@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ public class Comment {
     private String mCommentUserName;
     private String mCommentUserPostText;
     private String mCommentUserPostId;
-    private String mDateString;
+    private long mDateLong;
     private boolean mIsAnon;
     private String mAnonImage;
 
@@ -28,7 +30,7 @@ public class Comment {
         mCommentUserPostId = "";
         mAnonImage = "";
         mMentionedPeople = new ArrayList<>();
-        mDateString = "";
+        mDateLong = 0;
     }
 
     public Comment(String commentUserId,
@@ -38,7 +40,7 @@ public class Comment {
                    String commentUserPostId, boolean isAnon,
                    String anonImage,
                    List<MentionedPersonLight> mentionedPeople,
-                   String date
+                   long date
     ) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
@@ -48,7 +50,7 @@ public class Comment {
         mIsAnon = isAnon;
         mAnonImage = anonImage;
         mMentionedPeople = mentionedPeople;
-        mDateString = date;
+        mDateLong = date;
 
     }
 
@@ -85,7 +87,7 @@ public class Comment {
     }
 
     public String getDateString(){
-        return mDateString;
+        return mDateLong == 0 ? "" : Utils.getTimeAgoString(mDateLong);
     }
 
 

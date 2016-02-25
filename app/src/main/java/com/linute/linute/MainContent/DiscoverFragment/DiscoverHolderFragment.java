@@ -1,12 +1,11 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,10 +14,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Created by QiFeng on 1/20/16.
@@ -163,6 +173,33 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                     mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Discover");
+                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Discover");
+                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -189,13 +226,75 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.people_fragment_menu_chat && getActivity() != null) {
-            Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-            enterRooms.putExtra("CHATICON", true);
-            startActivity(enterRooms);
-            return true;
+        if (getActivity() != null) {
+            switch (item.getItemId()) {
+                case R.id.people_fragment_menu_chat:
+                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                    enterRooms.putExtra("CHATICON", true);
+                    startActivity(enterRooms);
+                    return true;
+                case R.id.menu_find_friends:
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                    if (activity != null){
+                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                    }
+                    return true;
+            }
         }
 
+
         return super.onOptionsItemSelected(item);
+    }
+
+
+    //returns if success
+    public boolean addPostToFeed(Object post){
+
+        JSONObject obj = (JSONObject) post;
+
+        if (obj != null){
+
+            String postImage = "";
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            Date myDate;
+
+
+            try {
+                if (obj.getJSONArray("images").length() > 0)
+                    postImage = (String) obj.getJSONArray("images").get(0);
+
+                try {
+                    myDate = simpleDateFormat.parse(obj.getString("date"));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    myDate = null;
+                }
+
+                Post post1 = new Post(
+                        obj.getJSONObject("owner").getString("id"),
+                        obj.getJSONObject("owner").getString("fullName"),
+                        obj.getJSONObject("owner").getString("profileImage"),
+                        obj.getString("title"),
+                        postImage,
+                        obj.getInt("privacy"),
+                        0,
+                        false,
+                        myDate == null? 0 : myDate.getTime(),
+                        obj.getString("id"),
+                        0,
+                        obj.getString("anonymousImage")
+                );
+
+                return mDiscoverFragments[0].addPostToTop(post1);
+
+            }catch (JSONException e){
+                e.printStackTrace();
+                return false;
+            }
+
+        }else {
+            Log.i(TAG, "addPostToFeed: obj was null");
+            return false;
+        }
     }
 }

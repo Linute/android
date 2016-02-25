@@ -61,7 +61,7 @@
                 android:layout_weight="4"
                 android:background="#FFFFFF"
                 android:hint="Enter your comment... "
-                android:inputType="textCapSentences|textMultiLine"
+                android:inputType="textCapSentences|textMultiLine|textShortMessage"
                 android:singleLine="false"
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/sub_font_size"

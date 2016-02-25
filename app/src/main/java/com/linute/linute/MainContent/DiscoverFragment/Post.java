@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 /**
  * Created by Arman on 12/27/15.
  */
@@ -15,7 +17,7 @@ public class Post implements Parcelable {
     private int mPrivacy;
     private int mNumLikes;
     private boolean mUserLiked;
-    private String mPostTime;
+    private long mPostTime;
     private String mPostId;
     private int mNumOfComments;
     private String mAnonImage;
@@ -28,7 +30,7 @@ public class Post implements Parcelable {
 
     public Post(String userId, String userName, String userImage, String title,
                 String image, int privacy, int numLike, boolean userLiked,
-                String postTime, String postId, int numComments, String anonImage) {
+                long postTime, String postId, int numComments, String anonImage) {
         mUserId = userId;
         mUserName = userName;
         mImage = "";
@@ -83,7 +85,7 @@ public class Post implements Parcelable {
     }
 
     public String getPostTime() {
-        return mPostTime;
+        return Utils.getTimeAgoString(mPostTime);
     }
 
     public String getPostId() {
@@ -131,7 +133,7 @@ public class Post implements Parcelable {
         dest.writeInt(mPrivacy);
         dest.writeInt(mNumLikes);
         dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
-        dest.writeString(mPostTime);
+        dest.writeLong(mPostTime);
         dest.writeString(mPostId);
         dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
@@ -146,7 +148,7 @@ public class Post implements Parcelable {
         mPrivacy = in.readInt();
         mNumLikes = in.readInt();
         mUserLiked = in.readByte() != 0; //true if byte != 0
-        mPostTime = in.readString();
+        mPostTime = in.readLong();
         mPostId = in.readString();
         mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0

@@ -279,7 +279,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        Log.i(TAG, "onResponse: " + json);
+                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -294,7 +294,6 @@ public class DiscoverFragment extends UpdatableFragment {
                             String postImage = "";
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String postString;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
@@ -302,9 +301,12 @@ public class DiscoverFragment extends UpdatableFragment {
                                     if (jsonObject.getJSONArray("images").length() > 0)
                                         postImage = (String) jsonObject.getJSONArray("images").get(0);
 
-                                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-
-                                    postString = Utils.getTimeAgoString(myDate.getTime());
+                                    try {
+                                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                                    }catch (ParseException w){
+                                        w.printStackTrace();
+                                        myDate = null;
+                                    }
 
                                     post = new Post(
                                             jsonObject.getJSONObject("owner").getString("id"),
@@ -315,7 +317,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                             jsonObject.getInt("privacy"),
                                             jsonObject.getInt("numberOfLikes"),
                                             jsonObject.getBoolean("isLiked"),
-                                            postString,
+                                            myDate == null ? 0 : myDate.getTime(),
                                             jsonObject.getString("id"),
                                             jsonObject.getInt("numberOfComments"),
                                             jsonObject.getString("anonymousImage")
@@ -350,7 +352,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
                             );
 
-                        } catch (JSONException | ParseException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -368,6 +370,8 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
 
+    private boolean mRefreshing = false;
+
     public void refreshFeed() {
 
         if (getActivity() == null) return;
@@ -381,6 +385,7 @@ public class DiscoverFragment extends UpdatableFragment {
             });
         }
 
+        mRefreshing = true;
 
         mSkip = 0;
 
@@ -394,6 +399,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         noInternet();
+                        mRefreshing = false;
                     }
 
                     @Override
@@ -406,6 +412,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         if (refreshLayout.isRefreshing()) {
                                             refreshLayout.setRefreshing(false);
+                                            mRefreshing = false;
                                         }
                                         Utils.showServerErrorToast(getActivity());
                                     }
@@ -415,7 +422,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        Log.i(TAG, "onResponse: " + json);
+                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -431,7 +438,6 @@ public class DiscoverFragment extends UpdatableFragment {
                             String postImage = "";
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String postString;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
@@ -440,8 +446,6 @@ public class DiscoverFragment extends UpdatableFragment {
                                         postImage = (String) jsonObject.getJSONArray("images").get(0);
 
                                     myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-
-                                    postString = Utils.getTimeAgoString(myDate.getTime());
 
                                     post = new Post(
                                             jsonObject.getJSONObject("owner").getString("id"),
@@ -452,7 +456,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                             jsonObject.getInt("privacy"),
                                             jsonObject.getInt("numberOfLikes"),
                                             jsonObject.getBoolean("isLiked"),
-                                            postString,
+                                            myDate.getTime(),
                                             jsonObject.getString("id"),
                                             jsonObject.getInt("numberOfComments"),
                                             jsonObject.getString("anonymousImage")
@@ -489,6 +493,8 @@ public class DiscoverFragment extends UpdatableFragment {
                                                 mEmptyView.setVisibility(View.GONE);
                                             }
                                             mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+
+                                            mRefreshing = false;
                                         }
                                     }
 
@@ -503,6 +509,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         Utils.showServerErrorToast(getActivity());
                                         refreshLayout.setRefreshing(false);
+                                        mRefreshing = false;
                                     }
                                 });
                             }
@@ -540,10 +547,17 @@ public class DiscoverFragment extends UpdatableFragment {
 
     public void scrollUp() {
         if (recList != null) {
+            mCheckBoxChoiceCapableAdapters.setSendImpressions(false);
             recList.smoothScrollToPosition(0);
         }
     }
 
+    public boolean addPostToTop(Post post){
+        if (mRefreshing) return false;
 
-
+        mPosts.add(0, post);
+        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+        mSkip++;
+        return true;
+    }
 }

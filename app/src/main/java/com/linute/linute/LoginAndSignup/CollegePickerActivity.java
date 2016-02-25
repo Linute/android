@@ -168,11 +168,15 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
                             return;
                         }
 
-                        mColleges.clear(); //clear colleges
+                        ArrayList<College> tempColleges = new ArrayList<>();
 
                         for (int i = 0; i < colleges.length(); i++) { //add new college results
-                            mColleges.add(new College(colleges.getJSONObject(i)));
+                            tempColleges.add(new College(colleges.getJSONObject(i)));
                         }
+
+                        mColleges.clear(); //clear colleges
+                        mColleges.addAll(tempColleges);
+
 
                         if (mColleges.isEmpty()) { //if empty, tell user no result found
                             runOnUiThread(new Runnable() {

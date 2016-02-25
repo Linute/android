@@ -29,8 +29,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsActivity;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -45,6 +45,7 @@ import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.net.URISyntaxException;
 
+import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -160,7 +161,6 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem = null;
                 }
 
-
                 replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
             }
         });
@@ -200,9 +200,9 @@ public class MainActivity extends BaseTaptActivity {
                     case R.id.navigation_item_settings:
                         startActivityForResults(SettingActivity.class, SETTINGS_REQUEST_CODE);
                         break;
-                    case R.id.navigation_item_find_friends:
-                        startNewActivity(FindFriendsActivity.class);
-                        break;
+//                    case R.id.navigation_item_find_friends:
+//                        startNewActivity(FindFriendsActivity.class);
+//                        break;
                     default:
                         break;
                 }
@@ -301,25 +301,13 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            //NOTE: need to reload others?
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
-        super.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 
-    public void startNewActivity(final Class activity) {
-        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
-            @Override
-            public void run() {
-                Intent i = new Intent(MainActivity.this, activity);
-                startActivity(i);
-            }
-        });
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 
@@ -327,6 +315,7 @@ public class MainActivity extends BaseTaptActivity {
     //or load image or status
     @Override
     public void addFragmentToContainer(final Fragment fragment) {
+        if (!mSafeForFragmentTransaction) return;
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainActivity_fragment_holder, fragment)
@@ -353,7 +342,6 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
-
         //TODO: track which fragment we're in
     }
 
@@ -474,10 +462,25 @@ public class MainActivity extends BaseTaptActivity {
     //the items in navigation view
     //this sets the number to the right of it
     public void setNavItemNotification(@IdRes int itemId, int count) {
-        TextView view = (TextView) mNavigationView.getMenu().findItem(itemId).getActionView();
-        view.setText(count > 0 ? String.valueOf(count) : null);
+
+        View main = mNavigationView.getMenu().findItem(itemId).getActionView();
+
+        if (count > 0){
+            ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(count > 99 ? "+" : String.valueOf(count));
+            (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.VISIBLE);
+        }else {
+            ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(null);
+            (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.GONE);
+        }
     }
 
+    public void setFeedNotification(int count) {
+        setNavItemNotification(R.id.navigation_item_feed, count);
+    }
+
+    public void setNumNewPostsInDiscover(int count){
+        mNumNewPostsInDiscover = count;
+    }
 
     //So we change fragments or activities only after the drawer closes
     private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
@@ -515,12 +518,17 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
+    private boolean mSafeForFragmentTransaction = true;
 
-    /******Socket stuff********/
+    /******
+     * Socket stuff
+     ********/
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        mSafeForFragmentTransaction = true;
 
         if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
             mConnecting = true;
@@ -528,7 +536,17 @@ public class MainActivity extends BaseTaptActivity {
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + mSharedPreferences.getString("userToken", "");
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType()
+                    ;
+
                     op.reconnectionDelay = 5;
                     op.secure = true;
                     op.transports = new String[]{WebSocket.NAME};
@@ -539,8 +557,9 @@ public class MainActivity extends BaseTaptActivity {
                 }
             }
 
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on(Socket.EVENT_ERROR, eventError);
+            mSocket.on("new post", newPostListener);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);//fixme
+            mSocket.on(Socket.EVENT_ERROR, onEventError);
             mSocket.connect();
             mConnecting = false;
         }
@@ -550,11 +569,14 @@ public class MainActivity extends BaseTaptActivity {
     protected void onPause() {
         super.onPause();
 
+        mSafeForFragmentTransaction = false;
+
         if (mSocket != null) {
             mSocket.disconnect();
+            mSocket.off("new post", newPostListener);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off(Socket.EVENT_ERROR, eventError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
+            mSocket.off(Socket.EVENT_ERROR, onEventError);
         }
     }
 
@@ -572,7 +594,6 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.emit(event, arg);
     }
 
-
     @Override
     public void disconnectSocket(String event, Emitter.Listener emitter) {
         if (mSocket != null) {
@@ -582,7 +603,7 @@ public class MainActivity extends BaseTaptActivity {
 
 
     @Override
-    public void setSocketErrorResponse(SocketErrorResponse error){
+    public void setSocketErrorResponse(SocketErrorResponse error) {
         mSocketErrorResponse = error;
     }
 
@@ -593,14 +614,13 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private Emitter.Listener eventError = new Emitter.Listener() {
+    private Emitter.Listener onEventError = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             Log.i(TAG, "ERROR: " + args[0]);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
                     if (mSocketErrorResponse != null) {
                         mSocketErrorResponse.runSocketError();
                     }
@@ -608,6 +628,44 @@ public class MainActivity extends BaseTaptActivity {
                     Utils.showServerErrorToast(MainActivity.this);
                 }
             });
+        }
+    };
+
+
+    private Emitter.Listener onSocketTimeOut = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mSocketErrorResponse != null) {
+                        mSocketErrorResponse.runSocketError();
+                    }
+                    Utils.showBadConnectionToast(MainActivity.this);
+                }
+            });
+        }
+    };
+
+
+    private int mNumNewPostsInDiscover = 0;
+
+    private Emitter.Listener newPostListener = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
+
+                if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                        .addPostToFeed(args[0])) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setFeedNotification(++mNumNewPostsInDiscover);
+                        }
+                    });
+                }
+            }
         }
     };
 

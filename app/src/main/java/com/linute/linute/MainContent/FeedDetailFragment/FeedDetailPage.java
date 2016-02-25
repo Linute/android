@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.socket.client.Ack;
 import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -128,7 +129,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mFeedDetail = new FeedDetail();
-
 
             mIsImage = getArguments().getBoolean("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
@@ -264,8 +264,22 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 }
             });
 
+            //user -- user Id
+            //room -- id of event
 
-            activity.emitSocket(API_Methods.VERSION + ":comments:joined", "");
+            JSONObject joinParam = new JSONObject();
+
+            try {
+                joinParam.put("room", mTaptPostId);
+                joinParam.put("user", mSharedPreferences.getString("userID", ""));
+                activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                if (getActivity() != null) {
+                    Utils.showServerErrorToast(getActivity());
+                }
+            }
+
             activity.connectSocket("new comment", newComment);
             activity.setSocketErrorResponse(new BaseTaptActivity.SocketErrorResponse() {
                 @Override
@@ -274,6 +288,16 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     mSendButton.setVisibility(View.VISIBLE);
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Details");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         //only updates first time it is created
@@ -291,8 +315,27 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null) {
+
+            JSONObject leaveParam = new JSONObject();
+            try {
+                leaveParam.put("room", mTaptPostId);
+                leaveParam.put("user", mSharedPreferences.getString("userID", ""));
+                activity.emitSocket(API_Methods.VERSION + ":comments:left", leaveParam);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Details");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             activity.disconnectSocket("new comment", newComment);
-            activity.emitSocket(API_Methods.VERSION + ":messages:left", "");
             activity.setSocketErrorResponse(null);
         }
     }
@@ -345,16 +388,15 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 //                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
 
                 }
-                JSONObject jsonObject = null;
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                JSONObject jsonObject;
+
                 Date myDate;
                 String postString;
                 String res = response.body().string();
                 try {
                     jsonObject = new JSONObject(res);
-
-                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                    postString = Utils.getTimeAgoString(myDate.getTime());
+                    SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    myDate = fm.parse(jsonObject.getString("date"));
 
                     String imageName = jsonObject.getJSONArray("images").length() != 0 ? jsonObject.getJSONArray("images").getString(0) : "";
 
@@ -364,7 +406,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             jsonObject.getJSONObject("owner").getString("profileImage"),
                             jsonObject.getJSONObject("owner").getString("fullName"),
                             Integer.parseInt(jsonObject.getString("privacy")),
-                            postString,
+                            myDate.getTime(),
                             jsonObject.getBoolean("isLiked"),
                             jsonObject.getString("numberOfLikes"),
                             jsonObject.getString("numberOfComments"),
@@ -387,7 +429,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mFeedDetailAdapter.notifyDataSetChanged();
+                        mFeedDetailAdapter.notifyItemChanged(0);
                     }
                 });
             }
@@ -444,10 +486,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 //get date
                                 try {
                                     myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
-                                    date = Utils.getTimeAgoString(myDate.getTime());
                                 } catch (ParseException e) {
                                     e.printStackTrace();
-                                    date = "";
+                                    myDate = null;
                                 }
 
                                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
@@ -472,7 +513,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                                         ((JSONObject) comments.get(i)).getInt("privacy") == 1,
                                                         ((JSONObject) comments.get(i)).getString("anonymousImage"),
                                                         mentionedPersonLightArrayList,
-                                                        date
+                                                        myDate == null ? 0 : myDate.getTime()
                                                 )
                                         );
                             }
@@ -483,6 +524,29 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                             mFeedDetail.getComments().clear();
                             mFeedDetail.getComments().addAll(tempComments);
+
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFeedDetailAdapter.notifyItemRangeInserted(1, mFeedDetail.getComments().size());
+                                            mCommentsRetrieved = true;
+
+//                                        if (mCommentPosted) {
+//                                            mCommentPosted = false;
+//                                            recList.postDelayed(new Runnable() {
+//                                                @Override
+//                                                public void run() {
+//                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+//                                                }
+//                                            }, 500);
+//                                        }
+
+                                        }
+                                    }
+
+                            );
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -495,28 +559,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 });
                             }
                         }
-
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mFeedDetailAdapter.notifyDataSetChanged();
-
-//                                        if (mCommentPosted) {
-//                                            mCommentPosted = false;
-//                                            recList.postDelayed(new Runnable() {
-//                                                @Override
-//                                                public void run() {
-//                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-//                                                }
-//                                            }, 500);
-//                                        }
-
-                                    }
-                                }
-
-                        );
                     }
                 }
 
@@ -887,29 +929,90 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         }
     }
 
+    private boolean mCommentsRetrieved = false;
+
     private Emitter.Listener newComment = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i(TAG, "call: " + args[0]);
+
+            if (!mCommentsRetrieved) return;
+
+            JSONObject object = (JSONObject) args[0];
+
+            if (object == null) {
+                Log.i(TAG, "call: Error retrieving new comment");
+                return;
+            }
+
+            boolean caughtException = false;
+
+            try {
+
+                Date myDate;
+                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+                myDate = fm.parse(object.getString("date"));
+
+                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
+                JSONArray mentionedPeople = object.getJSONArray("mentions");
+
+                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
+                    mentionedPersonLightArrayList.add(
+                            new Comment.MentionedPersonLight( //just need fullname and id
+                                    mentionedPeople.getJSONObject(j).getString("fullName"),
+                                    mentionedPeople.getJSONObject(j).getString("id")
+                            )
+                    );
+                }
+
+                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null){
+                    mFeedDetail.getComments().clear();
+                }
+
+                mFeedDetail.getComments().add(
+                        new Comment(
+                                object.getJSONObject("owner").getString("id"),
+                                object.getJSONObject("owner").getString("profileImage"),
+                                object.getJSONObject("owner").getString("fullName"),
+                                object.getString("text"),
+                                object.getString("id"),
+                                object.getInt("privacy") == 1,
+                                object.getString("anonymousImage"),
+                                mentionedPersonLightArrayList,
+                                myDate.getTime()
+                        )
+                );
+
+                mFeedDetail.refreshCommentCount();
+
+            } catch (JSONException | ParseException e) {
+                caughtException = true;
+                e.printStackTrace();
+            }
+
+
+            final boolean excep = caughtException;
 
             if (getActivity() != null) {
 
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (mCommentPosted) {
+                        if (mCommentPosted) { //was the user that posted the comment
                             mCommentPosted = false;
                             mCommentEditText.setText("");
                             mSendButton.setVisibility(View.VISIBLE);
                             mProgressbar.setVisibility(View.GONE);
                             setCommentViewEditable(true);
                         }
-
-
+                        if (!excep){
+                            //because of header we can use size, change if decide to add it to array
+                            mFeedDetailAdapter.notifyDataSetChanged();
+                            recList.smoothScrollToPosition(mFeedDetail.getComments().size());
+                        }
                     }
                 });
             }
-            //// TODO: 2/21/16 notify data changed
         }
     };
 
@@ -921,30 +1024,26 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         try {
             JSONObject comment = new JSONObject();
-            JSONArray jsonArray = new JSONArray();
-            comment.put("owner", mSharedPreferences.getString("userID", ""));
-            comment.put("image", jsonArray);
+            comment.put("user", mSharedPreferences.getString("userID", ""));
+            //comment.put("image", jsonArray);
             comment.put("text", commentText);
-            comment.put("event", mTaptPostId);
+            comment.put("room", mTaptPostId);
             comment.put("privacy", mCheckBox.isChecked() ? 1 : 0);
 
             //add people mentioned in comment
             List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
+            JSONArray mentions = new JSONArray();
+
             if (!spanList.isEmpty()) {
-
-                JSONArray mentions = new JSONArray();
-
                 for (MentionSpan s : spanList) {
                     mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
                 }
-
-                comment.put("mentions", mentions);
             }
+
+            comment.put("mentions", mentions);
 
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-
-            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
 
             setCommentViewEditable(false);
             mSendButton.setVisibility(View.GONE);
@@ -954,7 +1053,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity != null) {
-                activity.emitSocket(API_Methods.VERSION + "comments:new comment", comment);
+                activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
             }
 
         } catch (JSONException e) {

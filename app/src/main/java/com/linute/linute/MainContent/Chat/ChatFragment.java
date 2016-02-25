@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -194,7 +195,19 @@ public class ChatFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            mSocket.emit(API_Methods.VERSION+":messages:joined", joinLeft);
+            mSocket.emit(API_Methods.VERSION + ":messages:joined", joinLeft);
+
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
+                obj.put("action", "active");
+                obj.put("screen", "Chat");
+                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -207,7 +220,17 @@ public class ChatFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        mSocket.emit(API_Methods.VERSION+":messages:left", joinLeft);
+        mSocket.emit(API_Methods.VERSION + ":messages:left", joinLeft);
+
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("owner", mSharedPreferences.getString("userID", ""));
+            obj.put("action", "inactive");
+            obj.put("screen", "Chat");
+            mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         mSocket.disconnect();
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -258,7 +281,7 @@ public class ChatFragment extends Fragment {
 
                 if (!mTyping) {
                     mTyping = true;
-                    mSocket.emit(API_Methods.VERSION+":messages:typing", typingJson);
+                    mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
                 }
 
                 mTypingHandler.removeCallbacks(onTypingTimeout);
@@ -451,7 +474,7 @@ public class ChatFragment extends Fragment {
         read.put("room", mRoomId);
 
         if (!checkRead(mUserId, data))
-            mSocket.emit(API_Methods.VERSION+":messages:read", read);
+            mSocket.emit(API_Methods.VERSION + ":messages:read", read);
     }
 
     private void addTyping(String username) {
@@ -514,7 +537,7 @@ public class ChatFragment extends Fragment {
 
 
         // perform the sending message attempt.
-        mSocket.emit(API_Methods.VERSION+":messages:new message", newMessage);
+        mSocket.emit(API_Methods.VERSION + ":messages:new message", newMessage);
     }
 
     private void leave() {
@@ -566,7 +589,7 @@ public class ChatFragment extends Fragment {
                     try {
                         addMessage(data);
                         delivered.put("id", data.getString("id"));
-                        mSocket.emit(API_Methods.VERSION+":messages:delivered", delivered);
+                        mSocket.emit(API_Methods.VERSION + ":messages:delivered", delivered);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -623,7 +646,7 @@ public class ChatFragment extends Fragment {
             if (!mTyping) return;
 
             mTyping = false;
-            mSocket.emit(API_Methods.VERSION+":messages:stop typing", typingJson);
+            mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
         }
     };
 

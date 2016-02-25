@@ -18,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -27,18 +27,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 
 public class PostCreatePage extends AppCompatActivity {
@@ -52,11 +46,15 @@ public class PostCreatePage extends AppCompatActivity {
 
     private boolean mPostInProgress = false;
 
+    private SharedPreferences mSharedPreferences;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_post_content_page);
+
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         //setup toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
@@ -214,7 +212,16 @@ public class PostCreatePage extends AppCompatActivity {
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getString("userToken", "");
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken="+device.getDeviceToken() +
+                                    "&udid="+device.getUdid()+
+                                    "&version="+device.getVersonName()+
+                                    "&build="+device.getVersionCode()+
+                                    "&os="+device.getOS()+
+                                    "&type="+device.getType()
+                    ;
                     op.reconnectionDelay = 5;
                     op.secure = true;
 
@@ -234,6 +241,15 @@ public class PostCreatePage extends AppCompatActivity {
             mSocket.connect();
             mConnecting = false;
 
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Create");
+                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -242,11 +258,23 @@ public class PostCreatePage extends AppCompatActivity {
         super.onPause();
 
         if (mSocket != null) {
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Create");
+                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.off(Socket.EVENT_ERROR, eventError);
             mSocket.off("new post", newPost);
+
         }
     }
 
@@ -269,14 +297,13 @@ public class PostCreatePage extends AppCompatActivity {
 
         try {
             JSONObject postData = new JSONObject();
-            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            postData.put("college", sharedPreferences.getString("collegeId", ""));
+            postData.put("college", mSharedPreferences.getString("collegeId", ""));
             postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
             postData.put("title", textContent.getText().toString());
             JSONArray emptyArray = new JSONArray();
             postData.put("images", emptyArray);
             postData.put("type", "0");
-            postData.put("owner", sharedPreferences.getString("userID", ""));
+            postData.put("owner", mSharedPreferences.getString("userID", ""));
 
 
             JSONArray coord = new JSONArray();
@@ -325,15 +352,23 @@ public class PostCreatePage extends AppCompatActivity {
     private Emitter.Listener newPost = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i(TAG, "response: "+ args[0].toString());
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setResult(RESULT_OK);
-                    Toast.makeText(PostCreatePage.this, "Status has been posted", Toast.LENGTH_SHORT).show();
-                    finish();
+            JSONObject t = (JSONObject) args[0];
+            if (t != null){
+                try {
+                    if (t.getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", "1"))) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setResult(RESULT_OK);
+                                Toast.makeText(PostCreatePage.this, "Status has been posted", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        });
+                    }
+                }catch (JSONException e){
+                    e.printStackTrace();
                 }
-            });
+            }
         }
     };
 }

@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
@@ -56,6 +58,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
     private String mTaptUserId;
+
+    private boolean mOtherSectionUpdated = false;
 
 
     public TaptUserProfileFragment() {
@@ -104,6 +108,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mOtherSectionUpdated = false;
                 updateAndSetHeader();
                 setActivities(); //get activities
 
@@ -130,6 +135,16 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Visitor");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         //if first time creating this fragment
@@ -139,6 +154,24 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             updateAndSetHeader();
             setActivities(); //get activities
             setFragmentNeedUpdating(false);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Visitor");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -176,12 +209,18 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProfileAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    if (!mOtherSectionUpdated){
+                        mOtherSectionUpdated = true;
+                    }else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mOtherSectionUpdated = false;
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mProfileAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
                 } else {//else something went
                     Log.v(TAG, response.code() + response.body().string());
                 }
@@ -235,13 +274,18 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         if (getActivity() == null) return;
 
                         //turn refresh off if it's on and notify ListView we might have updated information
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() { //update view
-                                mSwipeRefreshLayout.setRefreshing(false);
-                                mProfileAdapter.notifyDataSetChanged();
-                            }
-                        });
+                        if (!mOtherSectionUpdated){
+                            mOtherSectionUpdated = true;
+                        }else {
+                            mOtherSectionUpdated = false;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { //update view
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                    mProfileAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
 
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();

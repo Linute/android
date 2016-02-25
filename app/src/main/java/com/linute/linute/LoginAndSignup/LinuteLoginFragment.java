@@ -173,20 +173,20 @@ public class LinuteLoginFragment extends Fragment {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            checkRegisteredDevice(email, password);
-        }
-    }
-
-    private void checkRegisteredDevice(String email, String password) {
-        if (getActivity() == null) return;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
             checkCredentialsWithDB(email, password);
-        } else {
-            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
         }
     }
+
+//    private void checkRegisteredDevice(String email, String password) {
+//        if (getActivity() == null) return;
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//
+//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
+//            checkCredentialsWithDB(email, password);
+//        } else {
+//            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
+//        }
+//    }
 
     private boolean isEmailValid(String email) {
         /*NOTE: some old users still have non-edu emails
@@ -382,60 +382,60 @@ public class LinuteLoginFragment extends Fragment {
     }
 
 
-    //used to registere device if somehow device wasn't registered
-    private void sendRegistrationDevice(String token, final String email, final String password) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String versionName = "";
-        String versionCode = "";
-        if (getActivity() == null) return;
-        try {
-            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            versionName = pInfo.versionName;
-            versionCode = pInfo.versionCode + "";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        Map<String, Object> device = new HashMap<>();
-        device.put("token", token);
-        device.put("version", versionName);
-        device.put("build", versionCode);
-        device.put("os", Build.VERSION.SDK_INT + "");
-        device.put("type", "android");
-
-        Device.createDevice(headers, device, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.e(TAG, "failed registration");
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(rFailedConnectionAction);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getActivity());
-                            showProgress(false);
-                        }
-                    });
-                } else {
-                    Log.v(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("deviceRegistered", true)
-                            .apply();
-                    checkCredentialsWithDB(email, password);
-                }
-            }
-        });
-    }
+//    //used to registere device if somehow device wasn't registered
+//    private void sendRegistrationDevice(String token, final String email, final String password) {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        if (getActivity() == null) return;
+//        try {
+//            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e(TAG, "failed registration");
+//                if (getActivity() == null) return;
+//                getActivity().runOnUiThread(rFailedConnectionAction);
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Utils.showServerErrorToast(getActivity());
+//                            showProgress(false);
+//                        }
+//                    });
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+//                            .edit()
+//                            .putBoolean("deviceRegistered", true)
+//                            .apply();
+//                    checkCredentialsWithDB(email, password);
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onStop() {

@@ -351,12 +351,12 @@ public class FacebookSignUpFragment extends Fragment {
     private boolean checkNames() {
 
         boolean goodCredentials = true;
-        if (TextUtils.isEmpty(mLastNameEditText.getText().toString())) {
+        if (TextUtils.isEmpty(mLastNameEditText.getText().toString().trim())) {
             mLastNameEditText.setError(getString(R.string.error_field_required));
             mLastNameEditText.requestFocus();
             goodCredentials = false;
         }
-        if (TextUtils.isEmpty(mFirstNameEditText.getText().toString())) {
+        if (TextUtils.isEmpty(mFirstNameEditText.getText().toString().trim())) {
             mFirstNameEditText.setError(getString(R.string.error_field_required));
             mFirstNameEditText.requestFocus();
             goodCredentials = false;
