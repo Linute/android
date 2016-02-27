@@ -22,14 +22,15 @@ import android.widget.ViewFlipper;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 2/6/16.
@@ -272,13 +273,14 @@ public class ForgotPasswordFragment extends Fragment {
             showProgress(true, 0);
 
             new LSDKUser(getActivity()).resetPassword(email, new Callback() {
+
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     failedConnectionWithCurrentView(0);
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
                         try {
                             JSONObject jsonObject = new JSONObject(response.body().string());
@@ -396,7 +398,7 @@ public class ForgotPasswordFragment extends Fragment {
             showProgress(true, 2);
             new LSDKUser(getActivity()).changePassword(mTempPassword, mEmailString, mUserID, password, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     if (getActivity() == null){
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -409,7 +411,7 @@ public class ForgotPasswordFragment extends Fragment {
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()){
                         Log.i(TAG, "onResponse: "+response.body().string());
                         if (getActivity() != null){

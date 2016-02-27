@@ -6,6 +6,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import io.socket.client.Ack;
+import io.socket.emitter.Emitter;
+
 /**
  * Created by QiFeng on 1/25/16.
  */
@@ -55,4 +58,30 @@ public class BaseTaptActivity extends AppCompatActivity {
 
     }
 
+    public void connectSocket(String event, Emitter.Listener emitter){
+
+    }
+
+    public void disconnectSocket(String event, Emitter.Listener emitter){
+
+    }
+
+    public void emitSocket(String event, Object arg){
+
+    }
+
+    public void emitSocket(String event, Object arg, Ack ack){
+
+    }
+
+
+    public void setSocketErrorResponse(SocketErrorResponse error){
+
+    }
+
+
+    public interface SocketErrorResponse{
+        void runSocketError();
+    }
 }
+

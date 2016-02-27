@@ -2,19 +2,18 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 
-import com.linute.linute.SquareCamera.CameraFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
 
 /**
  * Created by QiFeng on 11/22/15.
@@ -24,11 +23,11 @@ public class LSDKUser {
     // where user information will be
     private static SharedPreferences mSharedPreferences;
 
-    private static String mEncodedToken;
+    private static String mToken;
 
     public LSDKUser(Context context) {
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mEncodedToken = Utils.encode_base64(mSharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null));
+        mToken = mSharedPreferences.getString("userToken","");
     }
 
 
@@ -38,7 +37,7 @@ public class LSDKUser {
     public Call isUniqueEmail(String email,
                               Callback callback) {
         //create headers
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
         //create post parameters
         Map<String, Object> postParam = new HashMap<>();
         postParam.put("email", email);
@@ -53,7 +52,7 @@ public class LSDKUser {
     public Call isUniquePhone(String phone,
                               Callback callback) {
         //create headers
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
 
         //create post parameters
         Map<String, Object> postParam = new HashMap<>();
@@ -68,7 +67,7 @@ public class LSDKUser {
     public Call createUser(Map<String, Object> userInfo,
                            Callback callback) {
 
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
 
         return API_Methods.post("users", header, userInfo, callback);
     }
@@ -82,7 +81,7 @@ public class LSDKUser {
                                    String password,
                                    Callback callback) {
 
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
 
         Map<String, Object> postParam = new HashMap<>();
         postParam.put("email", email);
@@ -101,10 +100,7 @@ public class LSDKUser {
         params.put("limit", "25");
         params.put("owner", userId);
 
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", ""),
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         String[] path = {"activities"};
 
@@ -119,10 +115,7 @@ public class LSDKUser {
         String[] url = {"users", userID};
 
         // /users/id {1235rewt5y52u}
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", ""),
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         return API_Methods.get(url, header, null, callback);
     }
@@ -135,14 +128,10 @@ public class LSDKUser {
                                String tempEmail,
                                Callback callback) {
 
-        Map<String, String> header;
+        Map<String, String> header = API_Methods.getMainHeader(mToken);;
 
         //get appropriate header
         //if there is a tempEmail (new email we want to change to) we use the temp email as the header
-        header = API_Methods.getHeaderWithAuthUser(
-                tempEmail == null ? mSharedPreferences.getString("email", "") : tempEmail,
-                mSharedPreferences.getString("password", ""),
-                mEncodedToken);
 
         return API_Methods.put("users/" + mSharedPreferences.getString("userID", ""),
                 header,
@@ -151,7 +140,7 @@ public class LSDKUser {
     }
 
     public Call changePassword(String tempPass, String email, String userId, String newPass, Callback callback){
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(email, tempPass, mEncodedToken);
+        Map<String, String> header = new HashMap<>();
         Map<String, Object> params = new HashMap<>();
 
         params.put("password", newPass);
@@ -165,7 +154,7 @@ public class LSDKUser {
     public Call getConfirmationCodeForPhone(String phoneNumber,
                                             Callback callback){
 
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
 
         Map<String, Object> param = new HashMap<>();
         param.put("phone", phoneNumber);
@@ -176,7 +165,7 @@ public class LSDKUser {
 
 
     public Call getConfirmationCodeForEmail(String email, String fName, String lName, Callback callback){
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, Object> param = new HashMap<>();
         param.put("email", email);
@@ -186,7 +175,7 @@ public class LSDKUser {
     }
 
     public Call authorizationFacebook(String fbToken, Callback callback ){
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, Object> param = new HashMap<>();
         param.put("token", fbToken);
@@ -196,15 +185,12 @@ public class LSDKUser {
 
 
     public Call updateLocation(Map<String, Object> params, Callback callback){
-        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-                mSharedPreferences.getString("email", null),
-                mSharedPreferences.getString("password", null),
-                mEncodedToken);
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
         return API_Methods.post("geo", header, params, callback);
     }
 
     public Call resetPassword(String email, Callback callback){
-        Map<String, String> header = API_Methods.getMainHeader(mEncodedToken);
+        Map<String, String> header = new HashMap<>();
 
         Map<String, Object> params = new HashMap<>();
         params.put("email",email);

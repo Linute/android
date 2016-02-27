@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.Preference;
@@ -9,7 +8,6 @@ import android.preference.PreferenceFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.linute.linute.R;
@@ -118,15 +116,13 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
             bindPreferences();
             setOnClickListeners();
-            setSummaries();
-
-            setUpPrefChangeListeners();
         }
 
         @Override
         public void onResume() {
             super.onResume();
             ((EditProfileInfoActivity)getActivity()).setTitle("Edit Profile");
+            setSummaries();
         }
 
 
@@ -135,29 +131,12 @@ public class EditProfileInfoActivity extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
-        private void bindPreferences(){
-            mEditName =  findPreference("edit_name_pref");
+        private void bindPreferences() {
+            mEditName = findPreference("edit_name_pref");
             mEditStatus = findPreference("edit_status_pref");
-            mDob =  findPreference("edit_birthday_pref");
+            mDob = findPreference("edit_birthday_pref");
             mEditGender = findPreference("edit_sex_pref");
             mPhoto = findPreference("edit_photo_pref");
-        }
-
-        //checks if preferences where changed
-        private void setUpPrefChangeListeners(){
-            mSharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-                @Override
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                    if (key.equals("firstName") || key.equals("lastName"))
-                        mEditName.setSummary(sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", ""));
-                    else if (key.equals("status"))
-                        mEditStatus.setSummary(sharedPreferences.getString("status", ""));
-                    else if (key.equals("dob"))
-                        mDob.setSummary(Utils.formatDateToReadableString(sharedPreferences.getString("dob", "")));
-                    else if (key.equals("sex"))
-                        mEditGender.setSummary(EditGenderFragment.getGenderFromIndex(sharedPreferences.getInt("sex", 0)));
-                }
-            });
         }
 
         //TODO: FIX
@@ -209,6 +188,7 @@ public class EditProfileInfoActivity extends AppCompatActivity {
         }
 
         private void setSummaries(){
+            if (mSharedPreferences == null) return;
             mEditName.setSummary(mSharedPreferences.getString("firstName", " ")
                     + " " + mSharedPreferences.getString("lastName", " "));
 

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,9 +21,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +28,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class EditNameFragment extends Fragment {
 
@@ -108,8 +110,8 @@ public class EditNameFragment extends Fragment {
     }
 
     private void saveName() {
-        String lastName = mLastName.getText().toString();
-        String firstName = mFirstName.getText().toString();
+        String lastName = mLastName.getText().toString().trim();
+        String firstName = mFirstName.getText().toString().trim();
 
         if (areValidFields(firstName, lastName)) {
             LSDKUser user = new LSDKUser(getActivity());
@@ -119,7 +121,7 @@ public class EditNameFragment extends Fragment {
             userInfo.put("lastName", lastName);
             user.updateUserInfo(userInfo, null, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     if (getActivity() == null) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -131,7 +133,7 @@ public class EditNameFragment extends Fragment {
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
                         try {
                             LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
@@ -168,7 +170,7 @@ public class EditNameFragment extends Fragment {
 
 
                     } else {
-                        response.body().close();
+                        Log.i(TAG, "onResponse: "+response.body().string());
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

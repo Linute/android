@@ -22,9 +22,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +32,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class EditBirthdayFragment extends Fragment {
 
@@ -120,7 +121,7 @@ public class EditBirthdayFragment extends Fragment {
 
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -132,7 +133,7 @@ public class EditBirthdayFragment extends Fragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));

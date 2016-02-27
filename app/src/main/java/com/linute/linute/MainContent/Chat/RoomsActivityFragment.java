@@ -12,14 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,6 +27,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -106,6 +109,38 @@ public class RoomsActivityFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getRooms();
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Inbox");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Inbox");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void getRooms() {
@@ -115,7 +150,7 @@ public class RoomsActivityFragment extends Fragment {
         final LSDKChat chat = new LSDKChat(getActivity());
         chat.getRooms(null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -128,7 +163,7 @@ public class RoomsActivityFragment extends Fragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 String resString = response.body().string();
 
                 if (response.isSuccessful()) {

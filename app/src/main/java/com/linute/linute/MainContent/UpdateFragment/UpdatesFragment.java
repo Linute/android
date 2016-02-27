@@ -1,26 +1,31 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKActivity;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +35,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 1/6/16.
@@ -59,6 +68,8 @@ public class UpdatesFragment extends UpdatableFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_updates, container, false);
+
+        setHasOptionsMenu(true);
 
         mUpdatesRecyclerView = (RecyclerView) rootView.findViewById(R.id.updatesFragment_recycler_view);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.updatesFragment_swipe_refresh);
@@ -115,6 +126,18 @@ public class UpdatesFragment extends UpdatableFragment {
                     }
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mainActivity
+                        .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+                        .getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Updates");
+                mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         if (fragmentNeedsUpdating()) {
@@ -133,6 +156,25 @@ public class UpdatesFragment extends UpdatableFragment {
                 if (mEmptyView.getVisibility() == View.GONE) {
                     mEmptyView.setVisibility(View.VISIBLE);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity
+                        .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+                        .getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Updates");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -165,12 +207,12 @@ public class UpdatesFragment extends UpdatableFragment {
 
         new LSDKActivity(getContext()).readActivities(params, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 showBadConnectiontToast();
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
                     getUpdatesInformation();
@@ -185,18 +227,18 @@ public class UpdatesFragment extends UpdatableFragment {
     private void getUpdatesInformation() {
         if (getActivity() == null) return;
 
-        new LSDKActivity(getContext()).getActivities(0, new Callback() {
+        new LSDKActivity(getActivity()).getActivities(0, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 showBadConnectiontToast();
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         String resString = response.body().string();
-                        Log.i(TAG, "onResponse: " + resString);
+                        //Log.i(TAG, "onResponse: " + resString);
 
                         JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(resString), "activities");
 
@@ -345,7 +387,7 @@ public class UpdatesFragment extends UpdatableFragment {
             @Override
             public void run() {
                 mSwipeRefreshLayout.setRefreshing(false);
-                Utils.showServerErrorToast(getContext());
+                Utils.showServerErrorToast(getActivity());
             }
         });
     }
@@ -355,10 +397,39 @@ public class UpdatesFragment extends UpdatableFragment {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Utils.showBadConnectionToast(getContext());
+                Utils.showBadConnectionToast(getActivity());
                 mSwipeRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.people_fragment_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (getActivity() != null) {
+            switch (item.getItemId()) {
+                case R.id.people_fragment_menu_chat:
+                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                    enterRooms.putExtra("CHATICON", true);
+                    startActivity(enterRooms);
+                    return true;
+                case R.id.menu_find_friends:
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                    if (activity != null){
+                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                    }
+                    return true;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

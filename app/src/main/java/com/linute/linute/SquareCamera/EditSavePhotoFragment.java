@@ -32,21 +32,29 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 /**
@@ -256,69 +264,98 @@ public class EditSavePhotoFragment extends Fragment {
 
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
-        JSONArray coord = new JSONArray();
-        JSONObject jsonObject = new JSONObject();
-        JSONArray images = new JSONArray();
-        try {
-            coord.put(0);
-            coord.put(0);
-            jsonObject.put("coordinates", coord);
-            images.put(Utils.encodeImageBase64(bitmap));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Map<String, Object> postData = new HashMap<>();
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-        postData.put("college", sharedPreferences.getString("collegeId", "")); //TODO: FIX COLLEGE
-        postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
-        postData.put("images", images);
-        postData.put("type", "1");
-        postData.put("title", mText.getText().toString()); //TODO: What if empty?
-        postData.put("geo", jsonObject);
+//        JSONArray coord = new JSONArray();
+//        JSONObject jsonObject = new JSONObject();
+//        JSONArray images = new JSONArray();
+//        try {
+//            coord.put(0);
+//            coord.put(0);
+//            jsonObject.put("coordinates", coord);
+//            images.put(Utils.encodeImageBase64(bitmap));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+//
+//        JSONObject  postData = new HashMap<>();
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//
+//        postData.put("college", sharedPreferences.getString("collegeId", "")); //TODO: FIX COLLEGE
+//        postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+//        postData.put("images", images);
+//        postData.put("type", "1");
+//        postData.put("title", mText.getText().toString()); //TODO: What if empty?
+//        postData.put("geo", jsonObject);
 
         showProgress(true);
 
-        new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showBadConnectionToast(getActivity());
-                        showProgress(false);
-                    }
-                });
-            }
+        if (getActivity() == null) return;
+        try {
+            JSONObject postData = new JSONObject();
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            postData.put("college", sharedPreferences.getString("collegeId", ""));
+            postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+            postData.put("title", mText.getText().toString());
+            JSONArray imageArray = new JSONArray();
+            imageArray.put(Utils.encodeImageBase64(bitmap));
+            postData.put("images", imageArray);
+            postData.put("type", "1");
+            postData.put("owner", sharedPreferences.getString("userID", ""));
 
-            @Override
-            public void onResponse(final Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    if (getActivity() == null) return;
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getActivity(), "Picture Posted", Toast.LENGTH_SHORT).show();
-                            try {
-                                Log.i(TAG, "run: " + response.body().string());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            getActivity().setResult(Activity.RESULT_OK);
-                            getActivity().finish();
-                        }
-                    });
+            JSONArray coord = new JSONArray();
+            JSONObject jsonObject = new JSONObject();
+            coord.put(0);
+            coord.put(0);
+            jsonObject.put("coordinates", coord);
 
-                } else {
-                    showServerError();
-                    Log.e(TAG, "onResponse: " + response.code() + " : " + response.body().string());
-                }
-            }
-        });
+            postData.put("geo", jsonObject);
 
+            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Utils.showServerErrorToast(getActivity());
+            showProgress(false);
+        }
+
+//        new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                if (getActivity() == null) return;
+//                getActivity().runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        Utils.showBadConnectionToast(getActivity());
+//                        showProgress(false);
+//                    }
+//                });
+//            }
+//
+//            @Override
+//            public void onResponse(Call call ,final Response response) throws IOException {
+//                if (response.isSuccessful()) {
+//                    if (getActivity() == null) return;
+//
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(getActivity(), "Picture Posted", Toast.LENGTH_SHORT).show();
+//                            try {
+//                                Log.i(TAG, "run: " + response.body().string());
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                            getActivity().setResult(Activity.RESULT_OK);
+//                            getActivity().finish();
+//                        }
+//                    });
+//
+//                } else {
+//                    showServerError();
+//                    Log.e(TAG, "onResponse: " + response.code() + " : " + response.body().string());
+//                }
+//            }
+//        });
     }
 
     private void showServerError() {
@@ -401,6 +438,136 @@ public class EditSavePhotoFragment extends Fragment {
             mBackAction = action;
         }
     }
+
+
+    private Socket mSocket;
+    private boolean mConnecting = false;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getActivity() == null) return;
+
+        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+            mConnecting = true;
+
+            {
+                try {
+                    IO.Options op = new IO.Options();
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
+                    op.query =
+                            "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType()
+                    ;
+                    op.reconnectionDelay = 5;
+                    op.secure = true;
+
+
+                    op.transports = new String[]{WebSocket.NAME};
+
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.on(Socket.EVENT_ERROR, eventError);
+            mSocket.on("new post", newPost);
+            mSocket.connect();
+            mConnecting = false;
+
+            if (getActivity() != null) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("action", "active");
+                    obj.put("screen", "Create");
+                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mSocket != null) {
+
+            if (getActivity() != null) {
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("action", "inactive");
+                    obj.put("screen", "Create");
+                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            mSocket.disconnect();
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off(Socket.EVENT_ERROR, eventError);
+            mSocket.off("new post", newPost);
+        }
+    }
+
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i(TAG, "call: failed socket connection");
+
+        }
+    };
+
+
+    //event ERROR
+    private Emitter.Listener eventError = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            Log.i(TAG, "call: " + args[0]);
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Utils.showServerErrorToast(getActivity());
+                    showProgress(false);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener newPost = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i(TAG, "response: " + args[0].toString());
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    getActivity().setResult(Activity.RESULT_OK);
+                    Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
+                }
+            });
+        }
+    };
+
 
     interface BackButtonAction {
         public void backPressed();

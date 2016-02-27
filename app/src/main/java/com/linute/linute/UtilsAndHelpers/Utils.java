@@ -94,12 +94,9 @@ public class Utils {
         pref.putString("userID", null);
         pref.putString("firstName", null);
         pref.putString("lastName", null);
-        pref.putString("email", null);
         pref.putString("status", null);
         pref.putString("socialFacebook", null);
         pref.putString("dob", null);
-
-        pref.putString("fbToken", null);
 
         pref.putInt("sex", 0);
 
@@ -111,7 +108,12 @@ public class Utils {
         pref.putString("collegeName", null);
         pref.putString("collegeId", null);
         pref.putString("campus", null);
-        pref.putString("passwordFacebook", null);
+
+        pref.putString("userToken", null);
+        pref.putString("points", "0");
+        pref.putString("userName", null);
+
+
         pref.commit();
     }
 
@@ -171,13 +173,16 @@ public class Utils {
 
     //returns a nicely formated string about when event occurred
     public static String getTimeAgoString(long beforeTime) {
-        if (beforeTime == 0) return "n/a";
+        if (beforeTime == 0) return "";
         //DateFormat df = DateFormat.getTimeInstance();
         //df.setTimeZone(TimeZone.getTimeZone("gmt"));
 
         long timeDifference = getUTCdatetimeAsDate().getTime() - beforeTime;
 
-        if (timeDifference > DateUtils.YEAR_IN_MILLIS) //years
+        if (timeDifference < 0){ //time less than 0
+            return 0 + "s";
+        }
+        else if (timeDifference > DateUtils.YEAR_IN_MILLIS) //years
             return ((int)(timeDifference / DateUtils.YEAR_IN_MILLIS))+"y";
 
         //NOTE: skipped months - number of milli in a month changes

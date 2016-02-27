@@ -24,9 +24,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +33,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 1/19/16.
@@ -117,13 +118,12 @@ public class NewChatDialog extends DialogFragment {
 
                 newChat.getPastMessages(users, new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
-                        Log.d(TAG, "onFailureCheckChat: " + request.body().toString());
+                    public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         Log.i(TAG, "onResponse: "+response.body().string());
                     }
                 });

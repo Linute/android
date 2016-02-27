@@ -25,14 +25,15 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 1/6/16.
@@ -375,7 +376,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                         new LSDKPeople(mContext).postFollow(params, new Callback() {
                             @Override
-                            public void onFailure(Request request, IOException e) {
+                            public void onFailure(Call call, IOException e) {
                                 Log.e("UpdatesAdapter", "No internet connection");
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
@@ -391,7 +392,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             }
 
                             @Override
-                            public void onResponse(Response response) throws IOException {
+                            public void onResponse(Call call, Response response) throws IOException {
                                 response.body().close();
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     activity.runOnUiThread(new Runnable() {

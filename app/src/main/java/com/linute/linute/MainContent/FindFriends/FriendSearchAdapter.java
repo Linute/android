@@ -21,14 +21,16 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 1/16/16.
@@ -130,7 +132,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
                         new LSDKPeople(mContext).postFollow(params, new Callback() {
                             @Override
-                            public void onFailure(Request request, IOException e) {
+                            public void onFailure(Call call, IOException e) {
                                 Log.e("UpdatesAdapter", "No internet connection");
 
                                 activity.runOnUiThread(new Runnable() {
@@ -145,7 +147,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                             }
 
                             @Override
-                            public void onResponse(Response response) throws IOException {
+                            public void onResponse(Call call, Response response) throws IOException {
                                 Log.i("Update Adapter", "onResponse: " + response.body().string());
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     activity.runOnUiThread(new Runnable() {

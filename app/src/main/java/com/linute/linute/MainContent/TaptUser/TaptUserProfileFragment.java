@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
@@ -25,9 +27,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +34,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 1/9/16.
@@ -55,6 +58,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
     private String mTaptUserId;
+
+    private boolean mOtherSectionUpdated = false;
 
 
     public TaptUserProfileFragment() {
@@ -103,6 +108,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mOtherSectionUpdated = false;
                 updateAndSetHeader();
                 setActivities(); //get activities
 
@@ -129,6 +135,16 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Visitor");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         //if first time creating this fragment
@@ -138,6 +154,24 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             updateAndSetHeader();
             setActivities(); //get activities
             setFragmentNeedUpdating(false);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Visitor");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -154,12 +188,12 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void updateAndSetHeader() {
         mUser.getProfileInfo(mTaptUserId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //attempt to update view with response
                     final String body = response.body().string();
                     if (getActivity() == null) return;
@@ -175,12 +209,18 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mProfileAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    if (!mOtherSectionUpdated){
+                        mOtherSectionUpdated = true;
+                    }else {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mOtherSectionUpdated = false;
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                mProfileAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    }
                 } else {//else something went
                     Log.v(TAG, response.code() + response.body().string());
                 }
@@ -192,7 +232,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         LSDKUser user = new LSDKUser(getActivity());
         user.getUserActivities(mTaptUserId, "posted status", "posted photo", new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
@@ -205,7 +245,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
@@ -234,13 +274,18 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         if (getActivity() == null) return;
 
                         //turn refresh off if it's on and notify ListView we might have updated information
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() { //update view
-                                mSwipeRefreshLayout.setRefreshing(false);
-                                mProfileAdapter.notifyDataSetChanged();
-                            }
-                        });
+                        if (!mOtherSectionUpdated){
+                            mOtherSectionUpdated = true;
+                        }else {
+                            mOtherSectionUpdated = false;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { //update view
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                    mProfileAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
 
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();

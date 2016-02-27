@@ -17,7 +17,7 @@
                   android:layout_alignParentBottom="true"
                   android:background="#FFFFFF"
                   android:orientation="vertical"
-        >
+    >
 
         <View android:layout_width="match_parent"
               android:layout_height="1dp"
@@ -54,17 +54,17 @@
 
             </RelativeLayout>
 
-            <EditText
+            <com.linkedin.android.spyglass.ui.MentionsEditText
                 android:id="@+id/comment_field"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="4"
                 android:background="#FFFFFF"
                 android:hint="Enter your comment... "
-                android:inputType="textCapSentences|textMultiLine"
-                android:textSize="@dimen/sub_font_size"
-                android:textColor="@color/eighty_black"
+                android:inputType="textCapSentences|textMultiLine|textShortMessage"
                 android:singleLine="false"
+                android:textColor="@color/eighty_black"
+                android:textSize="@dimen/sub_font_size"
                 tools:text="Hello there eat my ass. I love cock. fight me. swing first. don't dwing first. i need more text to test this comment box out"/>
 
 
@@ -79,8 +79,8 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
                     android:layout_margin="12dp"
-                    android:scaleType="fitCenter"
                     android:alpha="0.25"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/icon_send"/>
 
                 <ProgressBar android:id="@+id/comment_progressbar"
@@ -90,7 +90,7 @@
                              android:layout_centerInParent="true"
                              android:layout_margin="10dp"
                              android:visibility="gone"
-                    />
+                />
 
             </RelativeLayout>
 
@@ -98,10 +98,18 @@
 
     </LinearLayout>
 
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/comment_container"/>
+
+    <android.support.v7.widget.RecyclerView android:id="@+id/feed_detail_mentions"
+                                            android:background="@color/white"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_above="@id/comment_container"
+                                            android:visibility="gone"/>
 
 </RelativeLayout>

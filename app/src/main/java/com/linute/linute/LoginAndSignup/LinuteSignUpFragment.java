@@ -46,9 +46,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.soundcloud.android.crop.Crop;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +58,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * A login screen that offers login via email/password.
@@ -203,7 +204,7 @@ public class LinuteSignUpFragment extends Fragment {
         mVerifyLayer.findViewById(R.id.signup_get_verify_code_button).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkDeviceRegistered();
+                checkEmailAndGetPinCode();
             }
         });
 
@@ -250,21 +251,21 @@ public class LinuteSignUpFragment extends Fragment {
         }
     };
 
-    //this is just to double check if the device was registered properly
-    private void checkDeviceRegistered() {
-        if (mCredentialCheckInProgress) return;
-
-        if (getActivity() == null) return;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-        showProgress(true, 0);
-
-        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
-            checkEmailAndGetPinCode();
-        } else {
-            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""));
-        }
-    }
+//    //this is just to double check if the device was registered properly
+//    private void checkDeviceRegistered() {
+//        if (mCredentialCheckInProgress) return;
+//
+//        if (getActivity() == null) return;
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//
+//        showProgress(true, 0);
+//
+//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
+//            checkEmailAndGetPinCode();
+//        } else {
+//            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""));
+//        }
+//    }
 
 
     private void checkEmailAndGetPinCode() {
@@ -284,12 +285,12 @@ public class LinuteSignUpFragment extends Fragment {
 
             new LSDKUser(getActivity()).isUniqueEmail(email, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     failedConnectionWithCurrentView(0);
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     if (response.code() == 200) { //email was good
                         response.body().string();
                         getPinCode();
@@ -314,12 +315,12 @@ public class LinuteSignUpFragment extends Fragment {
         final String lName = mLastNameTextView.getText().toString().trim();
         new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 failedConnectionWithCurrentView(0);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         String stringResp = response.body().string();
@@ -502,16 +503,16 @@ public class LinuteSignUpFragment extends Fragment {
             if (getActivity() == null) return;
             new LSDKUser(getActivity()).createUser(userInfo, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) { // no response
+                public void onFailure(Call call, IOException e) { // no response
                     failedConnectionWithCurrentView(1);
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException { //get response
+                public void onResponse(Call call, Response response) throws IOException { //get response
                     if (response.isSuccessful()) { //got response
 
                         try {
-                            saveSuccessInformation(response.body().string(), password);
+                            saveSuccessInformation(response.body().string());
                             if (getActivity() == null) return;
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -541,18 +542,16 @@ public class LinuteSignUpFragment extends Fragment {
         }
     }
 
-    private void saveSuccessInformation(String responseString, String password) throws JSONException {
+    private void saveSuccessInformation(String responseString) throws JSONException {
         JSONObject response = new JSONObject(responseString);
         LinuteUser user = new LinuteUser(response);
         if (getActivity() == null) return;
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
 
-        sharedPreferences.putString("password", password);
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("firstName", user.getFirstName());
         sharedPreferences.putString("lastName", user.getLastName());
-        sharedPreferences.putString("email", user.getEmail());
         sharedPreferences.putString("status", user.getStatus());
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
@@ -564,11 +563,14 @@ public class LinuteSignUpFragment extends Fragment {
         if (user.getSocialFacebook() != null)
             sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
 
+        sharedPreferences.putString("userToken", user.getUserToken());
+        sharedPreferences.putString("userName", user.getUserName());
+        sharedPreferences.putString("points", user.getPoints());
+
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
 
         Utils.testLog(getActivity(), TAG);
-
     }
 
     private void serverErrorCurrentView(final int index) {
@@ -796,56 +798,57 @@ public class LinuteSignUpFragment extends Fragment {
 
     }
 
-    //used to registere device if somehow device wasn't registered
-    private void sendRegistrationDevice(String token) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String versionName = "";
-        String versionCode = "";
-        try {
-            if (getActivity() == null) return;
-            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            versionName = pInfo.versionName;
-            versionCode = pInfo.versionCode + "";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        Map<String, Object> device = new HashMap<>();
-        device.put("token", token);
-        device.put("version", versionName);
-        device.put("build", versionCode);
-        device.put("os", Build.VERSION.SDK_INT + "");
-        device.put("type", "android");
-
-        Device.createDevice(headers, device, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                Log.e(TAG, "failed registration");
-                failedConnectionWithCurrentView(0);
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, response.body().string());
-                    serverErrorCurrentView(0);
-                } else {
-                    Log.v(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("deviceRegistered", true)
-                            .apply();
-                    checkEmailAndGetPinCode();
-                }
-            }
-        });
-    }
+//    //used to registere device if somehow device wasn't registered
+//    private void sendRegistrationDevice(String token) {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        try {
+//            if (getActivity() == null) return;
+//            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e(TAG, "failed registration");
+//                failedConnectionWithCurrentView(0);
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    serverErrorCurrentView(0);
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+//                            .edit()
+//                            .putBoolean("deviceRegistered", true)
+//                            .apply();
+//                    checkEmailAndGetPinCode();
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onStop() {
         super.onStop();
+
         if (mFirstNameTextView.hasFocus()){
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);

@@ -23,9 +23,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +35,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 11/17/15.
@@ -257,12 +258,12 @@ public class DiscoverFragment extends UpdatableFragment {
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(mFriendsOnly, events, new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
+                    public void onFailure(Call call, IOException e) {
                         noInternet();
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("HEY", response.body().string());
                             if (getActivity() != null) { //shows server error toast
@@ -278,7 +279,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        Log.i(TAG, "onResponse: " + json);
+                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -293,34 +294,40 @@ public class DiscoverFragment extends UpdatableFragment {
                             String postImage = "";
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String postString;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                jsonObject = (JSONObject) jsonArray.get(i);
-                                if (jsonObject.getJSONArray("images").length() > 0)
-                                    postImage = (String) jsonObject.getJSONArray("images").get(0);
+                                try {
+                                    jsonObject = (JSONObject) jsonArray.get(i);
+                                    if (jsonObject.getJSONArray("images").length() > 0)
+                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
 
-                                myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                                    try {
+                                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                                    }catch (ParseException w){
+                                        w.printStackTrace();
+                                        myDate = null;
+                                    }
 
-                                postString = Utils.getTimeAgoString(myDate.getTime());
+                                    post = new Post(
+                                            jsonObject.getJSONObject("owner").getString("id"),
+                                            jsonObject.getJSONObject("owner").getString("fullName"),
+                                            jsonObject.getJSONObject("owner").getString("profileImage"),
+                                            jsonObject.getString("title"),
+                                            postImage,
+                                            jsonObject.getInt("privacy"),
+                                            jsonObject.getInt("numberOfLikes"),
+                                            jsonObject.getBoolean("isLiked"),
+                                            myDate == null ? 0 : myDate.getTime(),
+                                            jsonObject.getString("id"),
+                                            jsonObject.getInt("numberOfComments"),
+                                            jsonObject.getString("anonymousImage")
+                                    );
+                                    mPosts.add(post);
 
-                                post = new Post(
-                                        jsonObject.getJSONObject("owner").getString("id"),
-                                        jsonObject.getJSONObject("owner").getString("fullName"),
-                                        jsonObject.getJSONObject("owner").getString("profileImage"),
-                                        jsonObject.getString("title"),
-                                        postImage,
-                                        jsonObject.getInt("privacy"),
-                                        jsonObject.getInt("numberOfLikes"),
-                                        jsonObject.getBoolean("isLiked"),
-                                        postString,
-                                        jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"),
-                                        jsonObject.getString("anonymousImage")
-                                );
-                                mPosts.add(post);
-
-                                postImage = "";
+                                    postImage = "";
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                }
                             }
 
                             if (getActivity() == null) return;
@@ -345,7 +352,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
                             );
 
-                        } catch (JSONException | ParseException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -363,6 +370,8 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
 
+    private boolean mRefreshing = false;
+
     public void refreshFeed() {
 
         if (getActivity() == null) return;
@@ -376,6 +385,7 @@ public class DiscoverFragment extends UpdatableFragment {
             });
         }
 
+        mRefreshing = true;
 
         mSkip = 0;
 
@@ -387,12 +397,13 @@ public class DiscoverFragment extends UpdatableFragment {
 
         events1.getEvents(mFriendsOnly, events, new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
+                    public void onFailure(Call call, IOException e) {
                         noInternet();
+                        mRefreshing = false;
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("HEY", response.body().string());
                             if (getActivity() != null) { //shows server error toast
@@ -401,6 +412,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         if (refreshLayout.isRefreshing()) {
                                             refreshLayout.setRefreshing(false);
+                                            mRefreshing = false;
                                         }
                                         Utils.showServerErrorToast(getActivity());
                                     }
@@ -410,7 +422,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        Log.i(TAG, "onResponse: " + json);
+                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -426,35 +438,36 @@ public class DiscoverFragment extends UpdatableFragment {
                             String postImage = "";
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String postString;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
-                                jsonObject = (JSONObject) jsonArray.get(i);
-                                if (jsonObject.getJSONArray("images").length() > 0)
-                                    postImage = (String) jsonObject.getJSONArray("images").get(0);
+                                try {
+                                    jsonObject = (JSONObject) jsonArray.get(i);
+                                    if (jsonObject.getJSONArray("images").length() > 0)
+                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
 
-                                myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+                                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
 
-                                postString = Utils.getTimeAgoString(myDate.getTime());
+                                    post = new Post(
+                                            jsonObject.getJSONObject("owner").getString("id"),
+                                            jsonObject.getJSONObject("owner").getString("fullName"),
+                                            jsonObject.getJSONObject("owner").getString("profileImage"),
+                                            jsonObject.getString("title"),
+                                            postImage,
+                                            jsonObject.getInt("privacy"),
+                                            jsonObject.getInt("numberOfLikes"),
+                                            jsonObject.getBoolean("isLiked"),
+                                            myDate.getTime(),
+                                            jsonObject.getString("id"),
+                                            jsonObject.getInt("numberOfComments"),
+                                            jsonObject.getString("anonymousImage")
+                                    );
 
-                                post = new Post(
-                                        jsonObject.getJSONObject("owner").getString("id"),
-                                        jsonObject.getJSONObject("owner").getString("fullName"),
-                                        jsonObject.getJSONObject("owner").getString("profileImage"),
-                                        jsonObject.getString("title"),
-                                        postImage,
-                                        jsonObject.getInt("privacy"),
-                                        jsonObject.getInt("numberOfLikes"),
-                                        jsonObject.getBoolean("isLiked"),
-                                        postString,
-                                        jsonObject.getString("id"),
-                                        jsonObject.getInt("numberOfComments"),
-                                        jsonObject.getString("anonymousImage")
-                                );
+                                    refreshedPosts.add(post);
 
-                                refreshedPosts.add(post);
-
-                                postImage = "";
+                                    postImage = "";
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                }
                             }
 
 
@@ -480,6 +493,8 @@ public class DiscoverFragment extends UpdatableFragment {
                                                 mEmptyView.setVisibility(View.GONE);
                                             }
                                             mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+
+                                            mRefreshing = false;
                                         }
                                     }
 
@@ -494,6 +509,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         Utils.showServerErrorToast(getActivity());
                                         refreshLayout.setRefreshing(false);
+                                        mRefreshing = false;
                                     }
                                 });
                             }
@@ -531,10 +547,17 @@ public class DiscoverFragment extends UpdatableFragment {
 
     public void scrollUp() {
         if (recList != null) {
+            mCheckBoxChoiceCapableAdapters.setSendImpressions(false);
             recList.smoothScrollToPosition(0);
         }
     }
 
+    public boolean addPostToTop(Post post){
+        if (mRefreshing) return false;
 
-
+        mPosts.add(0, post);
+        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+        mSkip++;
+        return true;
+    }
 }

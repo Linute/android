@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.FriendsList;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,15 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +26,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 2/6/16.
@@ -112,15 +116,41 @@ public class FriendsListFragment extends UpdatableFragment {
         if (activity != null) {
             activity.setTitle(mFollowing ? "Following" : "Followers");
             activity.resetToolbar();
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Followers");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null){
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Followers");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private void getFriendsList() {
         if (getActivity() == null) return;
         new LSDKFriends(getActivity()).getFriends(mUserId, mFollowing, "0", new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -134,7 +164,7 @@ public class FriendsListFragment extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         JSONObject actions = new JSONObject(response.body().string());
@@ -198,7 +228,7 @@ public class FriendsListFragment extends UpdatableFragment {
         if (!mCanLoadMore && getActivity() == null) return;
         new LSDKFriends(getActivity()).getFriends(mUserId, mFollowing, mSkip + "", new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -212,7 +242,7 @@ public class FriendsListFragment extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         String res = response.body().string();

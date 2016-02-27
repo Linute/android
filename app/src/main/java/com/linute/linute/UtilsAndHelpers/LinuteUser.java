@@ -21,7 +21,6 @@ public class LinuteUser {
     private String mEmail;
     private String mPhone;
     private String mSocialFacebook;
-    private String mSocialTwitter;
     private String mStatus;
     private int mSex;
     private String mIsDeleted;
@@ -35,7 +34,6 @@ public class LinuteUser {
     private String mCollegeName;
     private String mCollegeId;
     private String mCampus;
-    private String mPasswordFacebook;
 
     private int mPosts;
     private int mFollowers;
@@ -44,6 +42,10 @@ public class LinuteUser {
     private String mFriendship;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
+
+    //NOTE: new stuff
+    private String mPoints;
+    private String mUserToken;
 
 
     public LinuteUser() {
@@ -66,6 +68,11 @@ public class LinuteUser {
         user.setCollegeName(sharedPreferences.getString("collegeName", ""));
         user.setCollegeId(sharedPreferences.getString("collegeId", ""));
         user.setUserID(sharedPreferences.getString("userID", ""));
+
+
+        user.setUserToken(sharedPreferences.getString("userToken",""));
+        user.setPoints(sharedPreferences.getString("points", "0"));
+
 
         return user;
     }
@@ -90,7 +97,6 @@ public class LinuteUser {
         mEmail = getStringFromJson("email", userInfo);
         mPhone = getStringFromJson("phone", userInfo);
         mSocialFacebook = getStringFromJson("socialFaceBook", userInfo);
-        mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
         mStatus = getStringFromJson("status", userInfo);
         mSex = getIntFromJson("sex", userInfo);
         mIsDeleted = getStringFromJson("isDeleted", userInfo);
@@ -106,6 +112,14 @@ public class LinuteUser {
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
+
+
+
+        //NOTE: NEW STUFF
+        mPoints = getStringFromJson("points", userInfo);
+        mUserToken = getStringFromJson("token", userInfo);
+
+        //NOTE: END
 
         mFriend = "";
         mFriendship = "";
@@ -138,7 +152,6 @@ public class LinuteUser {
         mEmail = getStringFromJson("email", userInfo);
         mPhone = getStringFromJson("phone", userInfo);
         mSocialFacebook = getStringFromJson("socialFacebook", userInfo);
-        mSocialTwitter = getStringFromJson("socialTwitter", userInfo);
         mStatus = getStringFromJson("status", userInfo);
         mSex = getIntFromJson("sex", userInfo);
         mIsDeleted = getStringFromJson("isDeleted", userInfo);
@@ -155,7 +168,7 @@ public class LinuteUser {
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
         // NEW end
-        mPasswordFacebook = getStringFromJson("passwordFacebook", userInfo);
+        //mPasswordFacebook = getStringFromJson("passwordFacebook", userInfo);
 
         JSONObject college = getJsonObjectFromJson("college", userInfo);
 
@@ -163,6 +176,14 @@ public class LinuteUser {
             mCollegeName = getStringFromJson("name", college);
             mCollegeId = getStringFromJson("id", college);
         }
+
+
+        //NOTE: NEW
+
+        mPoints = getStringFromJson("points", userInfo);
+        mUserToken = getStringFromJson("token", userInfo);
+
+        //NOTE: END
 
         mFriend = "";
         mFriendship = "";
@@ -218,10 +239,6 @@ public class LinuteUser {
         return mFirstName;
     }
 
-    public String getPasswordFacebook(){
-        return mPasswordFacebook;
-    }
-
     public void setFirstName(String firstName) {
         mFirstName = firstName;
     }
@@ -248,14 +265,6 @@ public class LinuteUser {
 
     public void setSocialFacebook(String socialFacebook) {
         mSocialFacebook = socialFacebook;
-    }
-
-    public String getSocialTwitter() {
-        return mSocialTwitter;
-    }
-
-    public void setSocialTwitter(String socialTwitter) {
-        mSocialTwitter = socialTwitter;
     }
 
     public String getStatus() {
@@ -490,5 +499,21 @@ public class LinuteUser {
 
     public void setFriendship(String friendship) {
         mFriendship = friendship;
+    }
+
+    public String getPoints(){
+        return mPoints;
+    }
+
+    public String getUserToken() {
+        return mUserToken;
+    }
+
+    public void setUserToken(String userToken) {
+        mUserToken = userToken;
+    }
+
+    public void setPoints(String points) {
+        mPoints = points;
     }
 }

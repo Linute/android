@@ -34,12 +34,13 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 /**
@@ -61,7 +62,7 @@ public class LinuteLoginFragment extends Fragment {
 
     private View mButtonsLayer;
 
-    private View mForgotPassword; //TODO
+    private View mForgotPassword;
 
 
     public LinuteLoginFragment() {
@@ -172,20 +173,20 @@ public class LinuteLoginFragment extends Fragment {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            checkRegisteredDevice(email, password);
-        }
-    }
-
-    private void checkRegisteredDevice(String email, String password) {
-        if (getActivity() == null) return;
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
             checkCredentialsWithDB(email, password);
-        } else {
-            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
         }
     }
+
+//    private void checkRegisteredDevice(String email, String password) {
+//        if (getActivity() == null) return;
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+//
+//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
+//            checkCredentialsWithDB(email, password);
+//        } else {
+//            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
+//        }
+//    }
 
     private boolean isEmailValid(String email) {
         /*NOTE: some old users still have non-edu emails
@@ -247,21 +248,19 @@ public class LinuteLoginFragment extends Fragment {
         LSDKUser checker = new LSDKUser(getActivity());
         checker.loginUserWithEmail(email, password, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(rFailedConnectionAction);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call , Response response) throws IOException {
 
                 String res = response.body().string();
 
-                Log.i(TAG, "onResponse: "+response.code()+" "+res);
-
                 if (response.isSuccessful()) {
                     try {
-                        saveCredentials(res, password);
+                        saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
                         activity.runOnUiThread(new Runnable() {
@@ -282,49 +281,50 @@ public class LinuteLoginFragment extends Fragment {
                             }
                         });
                     }
-                } else if (response.code() == 404) { //bad credentials
-
-                    try{
-                        JSONObject obj = new JSONObject(res);
-                        final boolean emailError = obj.getString("error").equals("email");
-
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (emailError){
-                                    mEmailView.setError("No account with this email");
-                                }else {
-                                    mPasswordView.setError("Invalid password");
-                                }
-                                showProgress(false);
-                            }
-                        });
-
-                    }catch (JSONException e){
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                                showProgress(false);
-                            }
-                        });
-                    }
-
-                } else {
-                    //Log.e(TAG, "onResponse: "+res);
-                    if (getActivity() == null) return;
-
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getActivity());
-                            showProgress(false);
-                        }
-                    });
-
                 }
+                //else if (response.code() == 404) { //bad credentials
+//
+//                    try{
+//                        JSONObject obj = new JSONObject(res);
+//                        final boolean emailError = obj.getString("error").equals("email");
+//
+//                        if (getActivity() == null) return;
+//                        getActivity().runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                if (emailError){
+//                                    mEmailView.setError("No account with this email");
+//                                }else {
+//                                    mPasswordView.setError("Invalid password");
+//                                }
+//                                showProgress(false);
+//                            }
+//                        });
+//
+//                    }catch (JSONException e){
+//                        if (getActivity() == null) return;
+//                        getActivity().runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Utils.showServerErrorToast(getActivity());
+//                                showProgress(false);
+//                            }
+//                        });
+//                    }
+//
+//                } else {
+//                    //Log.e(TAG, "onResponse: "+res);
+//                    if (getActivity() == null) return;
+//
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Utils.showServerErrorToast(getActivity());
+//                            showProgress(false);
+//                        }
+//                    });
+//
+//                }
             }
         });
     }
@@ -344,7 +344,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView.setError("Invalid email or password");
     }
 
-    private void saveCredentials(String responseString, String password) throws JSONException {
+    private void saveCredentials(String responseString) throws JSONException {
 
         if (getActivity() == null) return;
 
@@ -353,12 +353,10 @@ public class LinuteLoginFragment extends Fragment {
 
         LinuteUser user = new LinuteUser(response);
 
-        sharedPreferences.putString("password", password);
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("firstName", user.getFirstName());
         sharedPreferences.putString("lastName", user.getLastName());
-        sharedPreferences.putString("email", user.getEmail());
         sharedPreferences.putString("status", user.getStatus());
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
@@ -370,65 +368,74 @@ public class LinuteLoginFragment extends Fragment {
 
         sharedPreferences.putString("lastLoginEmail", user.getEmail());
 
+        //NOTE: new stuff
+        //took out password
+        sharedPreferences.putString("userName", user.getUserName());
+        sharedPreferences.putString("points", user.getPoints());
+        sharedPreferences.putString("userToken", user.getUserToken());
+        sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+
+        //NOTE:end
+
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
     }
 
 
-    //used to registere device if somehow device wasn't registered
-    private void sendRegistrationDevice(String token, final String email, final String password) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        String versionName = "";
-        String versionCode = "";
-        if (getActivity() == null) return;
-        try {
-            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-            versionName = pInfo.versionName;
-            versionCode = pInfo.versionCode + "";
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        Map<String, Object> device = new HashMap<>();
-        device.put("token", token);
-        device.put("version", versionName);
-        device.put("build", versionCode);
-        device.put("os", Build.VERSION.SDK_INT + "");
-        device.put("type", "android");
-
-        Device.createDevice(headers, device, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                Log.e(TAG, "failed registration");
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(rFailedConnectionAction);
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getActivity());
-                            showProgress(false);
-                        }
-                    });
-                } else {
-                    Log.v(TAG, response.body().string());
-                    if (getActivity() == null) return;
-                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                            .edit()
-                            .putBoolean("deviceRegistered", true)
-                            .apply();
-                    checkCredentialsWithDB(email, password);
-                }
-            }
-        });
-    }
+//    //used to registere device if somehow device wasn't registered
+//    private void sendRegistrationDevice(String token, final String email, final String password) {
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Content-Type", "application/json");
+//
+//        String versionName = "";
+//        String versionCode = "";
+//        if (getActivity() == null) return;
+//        try {
+//            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
+//            versionName = pInfo.versionName;
+//            versionCode = pInfo.versionCode + "";
+//        } catch (PackageManager.NameNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Map<String, Object> device = new HashMap<>();
+//        device.put("token", token);
+//        device.put("version", versionName);
+//        device.put("build", versionCode);
+//        device.put("os", Build.VERSION.SDK_INT + "");
+//        device.put("type", "android");
+//
+//        Device.createDevice(headers, device, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                Log.e(TAG, "failed registration");
+//                if (getActivity() == null) return;
+//                getActivity().runOnUiThread(rFailedConnectionAction);
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.e(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Utils.showServerErrorToast(getActivity());
+//                            showProgress(false);
+//                        }
+//                    });
+//                } else {
+//                    Log.v(TAG, response.body().string());
+//                    if (getActivity() == null) return;
+//                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
+//                            .edit()
+//                            .putBoolean("deviceRegistered", true)
+//                            .apply();
+//                    checkCredentialsWithDB(email, password);
+//                }
+//            }
+//        });
+//    }
 
     @Override
     public void onStop() {

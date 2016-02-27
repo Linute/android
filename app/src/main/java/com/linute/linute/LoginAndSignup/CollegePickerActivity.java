@@ -25,9 +25,6 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class CollegePickerActivity extends AppCompatActivity implements SearchView.OnQueryTextListener{
 
@@ -138,8 +140,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
 
         new LSDKCollege(this).getColleges(params, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
-
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -157,8 +158,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
-
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         JSONArray colleges = (new JSONObject(response.body().string())).getJSONArray("colleges");
@@ -168,11 +168,15 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
                             return;
                         }
 
-                        mColleges.clear(); //clear colleges
+                        ArrayList<College> tempColleges = new ArrayList<>();
 
                         for (int i = 0; i < colleges.length(); i++) { //add new college results
-                            mColleges.add(new College(colleges.getJSONObject(i)));
+                            tempColleges.add(new College(colleges.getJSONObject(i)));
                         }
+
+                        mColleges.clear(); //clear colleges
+                        mColleges.addAll(tempColleges);
+
 
                         if (mColleges.isEmpty()) { //if empty, tell user no result found
                             runOnUiThread(new Runnable() {
@@ -245,7 +249,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
 
         new LSDKUser(this).updateUserInfo(newInfo, null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -256,7 +260,7 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseString = response.body().string();
                     Log.i(TAG, "onResponse: " + responseString);

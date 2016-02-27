@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,21 +22,34 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
+import com.linkedin.android.spyglass.mentions.MentionSpan;
+import com.linkedin.android.spyglass.suggestions.SuggestionsResult;
+import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsResultListener;
+import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsVisibilityManager;
+import com.linkedin.android.spyglass.tokenization.QueryToken;
+import com.linkedin.android.spyglass.tokenization.impl.WordTokenizer;
+import com.linkedin.android.spyglass.tokenization.impl.WordTokenizerConfig;
+import com.linkedin.android.spyglass.tokenization.interfaces.QueryTokenReceiver;
+import com.linkedin.android.spyglass.ui.MentionsEditText;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
+import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.mikhaellopez.circularimageview.CircularImageView;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,14 +59,22 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import io.socket.client.Ack;
+import io.socket.emitter.Emitter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by Arman on 1/11/16.
  */
-public class FeedDetailPage extends UpdatableFragment {
+public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -63,17 +86,23 @@ public class FeedDetailPage extends UpdatableFragment {
     private String mTaptPostId;
     private String mTaptPostUserId;
     private FeedDetailAdapter mFeedDetailAdapter;
-    private String mCommentText;
-    private EditText mCommentEditText;
+    private MentionsEditText mCommentEditText;
 
     private View mAnonCheckBoxContainer;
 
     private View mSendButtonContainer;
+    private boolean mCommentPosted = false;
+
+    private RecyclerView mMentionedList;
+
+    private SharedPreferences mSharedPreferences;
+
+    private MentionedPersonAdapter mMentionedPersonAdapter;
+
+    private View mProgressbar;
     private View mSendButton;
 
-    private boolean mOpenKeyBoard = false;
-
-    private boolean mCommentPosted = false;
+    private CheckBox mCheckBox;
 
 
     public FeedDetailPage() {
@@ -94,8 +123,6 @@ public class FeedDetailPage extends UpdatableFragment {
         return fragment;
     }
 
-    private static final String POST_KEY = "INPUT_POST";
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -103,11 +130,9 @@ public class FeedDetailPage extends UpdatableFragment {
         if (getArguments() != null) {
             mFeedDetail = new FeedDetail();
 
-
             mIsImage = getArguments().getBoolean("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
             mTaptPostUserId = getArguments().getString("TAPTPOSTUSERID");
-            mOpenKeyBoard = getArguments().getBoolean("OPEN_KEYBOARD");
 
             mFeedDetail.setPostId(mTaptPostId);
             mFeedDetail.setPostUserId(mTaptPostUserId);
@@ -122,30 +147,31 @@ public class FeedDetailPage extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         recList.setHasFixedSize(true);
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
         recList.setAdapter(mFeedDetailAdapter);
 
-//        recList.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                rootView.findViewById(R.id.comment_field).clearFocus();
-//                imm.hideSoftInputFromWindow(rootView.findViewById(R.id.comment_field).getWindowToken(), 0);
-//                return false;
-//            }
-//        });
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        manager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        mMentionedList = (RecyclerView) rootView.findViewById(R.id.feed_detail_mentions);
+        mMentionedList.setLayoutManager(manager);
+        mMentionedList.setHasFixedSize(true);
+        mMentionedList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
+        mMentionedList.setAdapter(mMentionedPersonAdapter);
+
 
         mSendButtonContainer = rootView.findViewById(R.id.comment_send_button_container);
         mSendButtonContainer.setEnabled(false);
 
-        mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
-
-        mCommentEditText = (EditText) rootView.findViewById(R.id.comment_field);
+        mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -162,8 +188,6 @@ public class FeedDetailPage extends UpdatableFragment {
                 if (!s.toString().trim().equals("")) {
                     mSendButtonContainer.setEnabled(true);
                     mSendButton.setAlpha((float) 1);
-
-                    mCommentText = s.toString();
                 } else {
                     mSendButtonContainer.findViewById(R.id.comment_send_button_container).setEnabled(false);
                     mSendButton.setAlpha((float) 0.25);
@@ -185,104 +209,39 @@ public class FeedDetailPage extends UpdatableFragment {
             }
         });
 
+        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
+        mCommentEditText.setQueryTokenReceiver(this);
+        mCommentEditText.setSuggestionsVisibilityManager(this);
+
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
-        final CheckBox checkBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
+        mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
 
         mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (checkBox.isChecked()) {
+                if (mCheckBox.isChecked()) {
                     ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
                             .setText("OFF");
-                    checkBox.setChecked(false);
+                    mCheckBox.setChecked(false);
                 } else {
                     ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
                             .setText("ON");
-                    checkBox.setChecked(true);
+                    mCheckBox.setChecked(true);
                 }
             }
         });
 
 
+        mProgressbar = rootView.findViewById(R.id.comment_progressbar);
+        mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
+
+
         rootView.findViewById(R.id.comment_send_button_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (mCommentText.trim().isEmpty() || getActivity() == null) return;
-
-                final View progressBar = rootView.findViewById(R.id.comment_progressbar);
-                final View sendButton = rootView.findViewById(R.id.feed_detail_send_comment);
-
-                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-
-                LSDKEvents lsdkEvents = new LSDKEvents(getActivity());
-                Map<String, Object> comment = new HashMap<String, Object>();
-                JSONArray jsonArray = new JSONArray();
-                comment.put("image", jsonArray);
-                comment.put("text", mCommentText);
-                comment.put("event", mTaptPostId);
-                comment.put("privacy", checkBox.isChecked() ? 1 : 0);
-                recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-
-                setCommentViewEditable(false);
-                sendButton.setVisibility(View.GONE);
-                progressBar.setVisibility(View.VISIBLE);
-
-                lsdkEvents.postComment(comment, new Callback() {
-                    @Override
-                    public void onFailure(Request request, IOException e) {
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showBadConnectionToast(getActivity());
-                                    sendButton.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
-                                    setCommentViewEditable(true);
-
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onResponse(Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Utils.showBadConnectionToast(getActivity());
-                                        sendButton.setVisibility(View.VISIBLE);
-                                        progressBar.setVisibility(View.GONE);
-                                        setCommentViewEditable(true);
-                                    }
-                                });
-                            }
-
-                        } else {
-                            Log.d(TAG, "onResponseSuccessful: " + response.body().string());
-
-                            if (getActivity() == null) return;
-                            mCommentPosted = true;
-
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mCommentEditText.setText("");
-                                    sendButton.setVisibility(View.VISIBLE);
-                                    progressBar.setVisibility(View.GONE);
-                                    setCommentViewEditable(true);
-                                    displayCommentsAndPost();
-                                }
-                            });
-                        }
-                    }
-                });
+                sendComment();
             }
         });
 
@@ -300,16 +259,84 @@ public class FeedDetailPage extends UpdatableFragment {
             activity.setToolbarOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (recList != null)
+                    if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+            //user -- user Id
+            //room -- id of event
+
+            JSONObject joinParam = new JSONObject();
+
+            try {
+                joinParam.put("room", mTaptPostId);
+                joinParam.put("user", mSharedPreferences.getString("userID", ""));
+                activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                if (getActivity() != null) {
+                    Utils.showServerErrorToast(getActivity());
+                }
+            }
+
+            activity.connectSocket("new comment", newComment);
+            activity.setSocketErrorResponse(new BaseTaptActivity.SocketErrorResponse() {
+                @Override
+                public void runSocketError() {
+                    mProgressbar.setVisibility(View.GONE);
+                    mSendButton.setVisibility(View.VISIBLE);
+                }
+            });
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "active");
+                obj.put("screen", "Details");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
+        }
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity != null) {
+
+            JSONObject leaveParam = new JSONObject();
+            try {
+                leaveParam.put("room", mTaptPostId);
+                leaveParam.put("user", mSharedPreferences.getString("userID", ""));
+                activity.emitSocket(API_Methods.VERSION + ":comments:left", leaveParam);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Details");
+                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            activity.disconnectSocket("new comment", newComment);
+            activity.setSocketErrorResponse(null);
         }
     }
 
@@ -329,10 +356,12 @@ public class FeedDetailPage extends UpdatableFragment {
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
 
+        mCommentPosted = false;
+
         LSDKEvents event = new LSDKEvents(getActivity());
         event.getEventWithId(mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -344,7 +373,7 @@ public class FeedDetailPage extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, response.body().string());
                     if (getActivity() != null) {
@@ -359,17 +388,15 @@ public class FeedDetailPage extends UpdatableFragment {
 //                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
 
                 }
-                JSONObject jsonObject = null;
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                JSONObject jsonObject;
+
                 Date myDate;
                 String postString;
                 String res = response.body().string();
-                Log.i(TAG, "onResponse: " + res);
                 try {
                     jsonObject = new JSONObject(res);
-
-                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                    postString = Utils.getTimeAgoString(myDate.getTime());
+                    SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    myDate = fm.parse(jsonObject.getString("date"));
 
                     String imageName = jsonObject.getJSONArray("images").length() != 0 ? jsonObject.getJSONArray("images").getString(0) : "";
 
@@ -379,7 +406,7 @@ public class FeedDetailPage extends UpdatableFragment {
                             jsonObject.getJSONObject("owner").getString("profileImage"),
                             jsonObject.getJSONObject("owner").getString("fullName"),
                             Integer.parseInt(jsonObject.getString("privacy")),
-                            postString,
+                            myDate.getTime(),
                             jsonObject.getBoolean("isLiked"),
                             jsonObject.getString("numberOfLikes"),
                             jsonObject.getString("numberOfComments"),
@@ -402,7 +429,7 @@ public class FeedDetailPage extends UpdatableFragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mFeedDetailAdapter.notifyDataSetChanged();
+                        mFeedDetailAdapter.notifyItemChanged(0);
                     }
                 });
             }
@@ -413,7 +440,7 @@ public class FeedDetailPage extends UpdatableFragment {
         eventComments.put("skip", "0");
         event.getComments(eventComments, new Callback() {
                     @Override
-                    public void onFailure(Request request, IOException e) {
+                    public void onFailure(Call call, IOException e) {
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -425,7 +452,7 @@ public class FeedDetailPage extends UpdatableFragment {
                     }
 
                     @Override
-                    public void onResponse(Response response) throws IOException {
+                    public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d(TAG, "onResponse: " + response.body().string());
                             if (getActivity() != null) {
@@ -440,23 +467,55 @@ public class FeedDetailPage extends UpdatableFragment {
                         }
                         JSONObject jsonObject;
                         JSONArray comments;
+                        JSONArray mentionedPeople;
 
                         ArrayList<Comment> tempComments = new ArrayList<>();
+
                         try {
                             jsonObject = new JSONObject(response.body().string());
                             comments = jsonObject.getJSONArray("comments");
+
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            Date myDate;
+                            String date;
+
+
                             for (int i = 0; i < comments.length(); i++) {
-                                Log.d(TAG, "comment: " + comments.get(i).toString());
+                                //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+
+                                //get date
+                                try {
+                                    myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    myDate = null;
+                                }
+
+                                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
+                                mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
+
+                                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
+                                    mentionedPersonLightArrayList.add(
+                                            new Comment.MentionedPersonLight( //just need fullname and id
+                                                    mentionedPeople.getJSONObject(j).getString("fullName"),
+                                                    mentionedPeople.getJSONObject(j).getString("id")
+                                            )
+                                    );
+                                }
+
                                 tempComments
                                         .add(new Comment(
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                                ((JSONObject) comments.get(i)).getString("text"),
-                                                ((JSONObject) comments.get(i)).getString("id"),
-                                                ((JSONObject) comments.get(i)).getInt("privacy") == 1,
-                                                ((JSONObject) comments.get(i)).getString("anonymousImage")
-                                        ));
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
+                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
+                                                        ((JSONObject) comments.get(i)).getString("text"),
+                                                        ((JSONObject) comments.get(i)).getString("id"),
+                                                        ((JSONObject) comments.get(i)).getInt("privacy") == 1,
+                                                        ((JSONObject) comments.get(i)).getString("anonymousImage"),
+                                                        mentionedPersonLightArrayList,
+                                                        myDate == null ? 0 : myDate.getTime()
+                                                )
+                                        );
                             }
 
                             if (comments.length() == 0) {
@@ -465,6 +524,29 @@ public class FeedDetailPage extends UpdatableFragment {
 
                             mFeedDetail.getComments().clear();
                             mFeedDetail.getComments().addAll(tempComments);
+
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFeedDetailAdapter.notifyItemRangeInserted(1, mFeedDetail.getComments().size());
+                                            mCommentsRetrieved = true;
+
+//                                        if (mCommentPosted) {
+//                                            mCommentPosted = false;
+//                                            recList.postDelayed(new Runnable() {
+//                                                @Override
+//                                                public void run() {
+//                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+//                                                }
+//                                            }, 500);
+//                                        }
+
+                                        }
+                                    }
+
+                            );
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -477,28 +559,6 @@ public class FeedDetailPage extends UpdatableFragment {
                                 });
                             }
                         }
-
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mFeedDetailAdapter.notifyDataSetChanged();
-
-                                        if (mCommentPosted) {
-                                            mCommentPosted = false;
-                                            recList.postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-                                                }
-                                            }, 500);
-                                        }
-
-                                    }
-                                }
-
-                        );
                     }
                 }
 
@@ -520,8 +580,7 @@ public class FeedDetailPage extends UpdatableFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         if (getActivity() != null) {
-            SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            inflater.inflate(mTaptPostUserId.equals(pref.getString("userID", "")) ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
+            inflater.inflate(mTaptPostUserId.equals(mSharedPreferences.getString("userID", "")) ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
         }
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -567,7 +626,7 @@ public class FeedDetailPage extends UpdatableFragment {
 
         new LSDKEvents(getActivity()).reportEvent(reason, mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -579,7 +638,7 @@ public class FeedDetailPage extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
                     if (getActivity() == null) return;
@@ -632,7 +691,7 @@ public class FeedDetailPage extends UpdatableFragment {
 
         new LSDKEvents(getActivity()).deleteEvent(mTaptPostId, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -645,7 +704,7 @@ public class FeedDetailPage extends UpdatableFragment {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     response.body().close();
 
@@ -677,7 +736,330 @@ public class FeedDetailPage extends UpdatableFragment {
                 }
             }
         });
+    }
 
 
+
+    /* MENTIONS CODE */
+
+    private final String BUCKET = "MENTIONS";
+    private Handler mSearchHandler = new Handler();
+    private String mQueryString = "";
+    private boolean mDisplayList = false;
+
+    private Runnable mSearchRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (getActivity() == null) return;
+            new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        try {
+
+                            String res = response.body().string();
+                            Log.i(TAG, "onResponse: " + res);
+
+                            JSONArray friends = new JSONObject(res).getJSONArray("friends");
+
+                            final ArrayList<MentionedPerson> personList = new ArrayList<>();
+
+                            for (int i = 0; i < friends.length(); i++) {
+                                try {
+                                    personList.add(
+                                            new MentionedPerson(
+                                                    friends.getJSONObject(i).getString("fullName"),
+                                                    friends.getJSONObject(i).getString("id"),
+                                                    friends.getJSONObject(i).getString("profileImage")
+                                            )
+                                    );
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            if (getActivity() == null) return;
+
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mMentionedPersonAdapter = new MentionedPersonAdapter(personList);
+                                    mMentionedList.swapAdapter(mMentionedPersonAdapter, true);
+                                    if (mDisplayList) {
+                                        displaySuggestions(!personList.isEmpty());
+                                    } else if (personList.isEmpty()) {
+                                        displaySuggestions(false);
+                                    }
+
+                                }
+                            });
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            if (getActivity() == null) return;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+
+
+                    } else {
+                        Log.e(TAG, "onResponse: " + response.body().string());
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    };
+
+    @Override
+    public List<String> onQueryReceived(@NonNull QueryToken queryToken) {
+        mSearchHandler.removeCallbacks(mSearchRunnable);
+        mDisplayList = false;
+
+        if (queryToken.isExplicit()) {
+            String text = queryToken.getKeywords(); //words inputted
+
+            if (text.length() > 0) {
+                mDisplayList = true;
+                mQueryString = text;
+                mSearchHandler.postDelayed(mSearchRunnable, 350);
+            }
+        }
+        return Collections.singletonList(BUCKET);
+    }
+
+    @Override
+    public void onReceiveSuggestionsResult(@NonNull SuggestionsResult result, @NonNull String bucket) {
+    }
+
+    @Override
+    public void displaySuggestions(boolean display) {
+        mMentionedList.setVisibility(display ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public boolean isDisplayingSuggestions() {
+        return mMentionedList.getVisibility() == View.VISIBLE;
+    }
+
+
+    private class MentionedPersonAdapter extends RecyclerView.Adapter<MentionedPersonAdapter.MentionedPersonViewHolder> {
+
+        private ArrayList<MentionedPerson> mMentionedPersons;
+
+        public MentionedPersonAdapter(ArrayList<MentionedPerson> personList) {
+            mMentionedPersons = personList;
+        }
+
+        @Override
+        public MentionedPersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new MentionedPersonViewHolder(LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(R.layout.item_mentioned_person, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(MentionedPersonViewHolder holder, final int position) {
+            holder.bindView(mMentionedPersons.get(position));
+        }
+
+        @Override
+        public int getItemCount() {
+            return mMentionedPersons.size();
+        }
+
+        public class MentionedPersonViewHolder extends RecyclerView.ViewHolder {
+
+            public CircularImageView mProfileImageView;
+            public TextView mName;
+
+            public MentionedPersonViewHolder(View itemView) {
+                super(itemView);
+                mProfileImageView = (CircularImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
+                mName = (TextView) itemView.findViewById(R.id.mentioned_person_name);
+            }
+
+            public void bindView(final MentionedPerson person) {
+
+
+                mName.setText(person.getFullname());
+                Glide.with(mProfileImageView.getContext())
+                        .load(Utils.getImageUrlOfUser(person.getProfileImage()))
+                        .asBitmap()
+                        .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                        .placeholder(R.drawable.image_loading_background)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                        .into(mProfileImageView);
+
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mCommentEditText.insertMention(person);
+                        mMentionedList.swapAdapter(new MentionedPersonAdapter(new ArrayList<MentionedPerson>()), true);
+                        displaySuggestions(false);
+                        mSearchHandler.removeCallbacks(mSearchRunnable);
+                        mCommentEditText.requestFocus();
+                    }
+                });
+
+            }
+
+
+        }
+    }
+
+    private boolean mCommentsRetrieved = false;
+
+    private Emitter.Listener newComment = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+            if (!mCommentsRetrieved) return;
+
+            JSONObject object = (JSONObject) args[0];
+
+            if (object == null) {
+                Log.i(TAG, "call: Error retrieving new comment");
+                return;
+            }
+
+            boolean caughtException = false;
+
+            try {
+
+                Date myDate;
+                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+                myDate = fm.parse(object.getString("date"));
+
+                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
+                JSONArray mentionedPeople = object.getJSONArray("mentions");
+
+                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
+                    mentionedPersonLightArrayList.add(
+                            new Comment.MentionedPersonLight( //just need fullname and id
+                                    mentionedPeople.getJSONObject(j).getString("fullName"),
+                                    mentionedPeople.getJSONObject(j).getString("id")
+                            )
+                    );
+                }
+
+                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null){
+                    mFeedDetail.getComments().clear();
+                }
+
+                mFeedDetail.getComments().add(
+                        new Comment(
+                                object.getJSONObject("owner").getString("id"),
+                                object.getJSONObject("owner").getString("profileImage"),
+                                object.getJSONObject("owner").getString("fullName"),
+                                object.getString("text"),
+                                object.getString("id"),
+                                object.getInt("privacy") == 1,
+                                object.getString("anonymousImage"),
+                                mentionedPersonLightArrayList,
+                                myDate.getTime()
+                        )
+                );
+
+                mFeedDetail.refreshCommentCount();
+
+            } catch (JSONException | ParseException e) {
+                caughtException = true;
+                e.printStackTrace();
+            }
+
+
+            final boolean excep = caughtException;
+
+            if (getActivity() != null) {
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mCommentPosted) { //was the user that posted the comment
+                            mCommentPosted = false;
+                            mCommentEditText.setText("");
+                            mSendButton.setVisibility(View.VISIBLE);
+                            mProgressbar.setVisibility(View.GONE);
+                            setCommentViewEditable(true);
+                        }
+                        if (!excep){
+                            //because of header we can use size, change if decide to add it to array
+                            mFeedDetailAdapter.notifyDataSetChanged();
+                            recList.smoothScrollToPosition(mFeedDetail.getComments().size());
+                        }
+                    }
+                });
+            }
+        }
+    };
+
+
+    private void sendComment() {
+        String commentText = mCommentEditText.getText().toString().trim();
+
+        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null) return;
+
+        try {
+            JSONObject comment = new JSONObject();
+            comment.put("user", mSharedPreferences.getString("userID", ""));
+            //comment.put("image", jsonArray);
+            comment.put("text", commentText);
+            comment.put("room", mTaptPostId);
+            comment.put("privacy", mCheckBox.isChecked() ? 1 : 0);
+
+            //add people mentioned in comment
+            List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
+            JSONArray mentions = new JSONArray();
+
+            if (!spanList.isEmpty()) {
+                for (MentionSpan s : spanList) {
+                    mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
+                }
+            }
+
+            comment.put("mentions", mentions);
+
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
+
+            setCommentViewEditable(false);
+            mSendButton.setVisibility(View.GONE);
+            mProgressbar.setVisibility(View.VISIBLE);
+
+            mCommentPosted = true;
+
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity != null) {
+                activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Utils.showServerErrorToast(getActivity());
+            mCommentPosted = false;
+        }
     }
 }

@@ -17,7 +17,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.json.JSONException;
@@ -30,8 +32,9 @@ import de.greenrobot.event.Subscribe;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
 
-public class RoomsActivity extends AppCompatActivity {
+public class RoomsActivity extends BaseTaptActivity {
 
     private static final String TAG = RoomsActivity.class.getSimpleName();
     private TextView mTitle;
@@ -137,31 +140,36 @@ public class RoomsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+        if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
             mConnecting = true;
             {
                 try {
                     IO.Options op = new IO.Options();
-                    op.query = "token=" + mSharedPreferences.getString("userID", "");
+
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken="+device.getDeviceToken() +
+                                    "&udid="+device.getUdid()+
+                                    "&version="+device.getVersonName()+
+                                    "&build="+device.getVersionCode()+
+                                    "&os="+device.getOS()+
+                                    "&type="+device.getType()
+                    ;
+
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    op.transports = new String[]{WebSocket.NAME};
 
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
             mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on("authorization", authorization);
             mSocket.connect();
             mConnecting = false;
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("user", mSharedPreferences.getString("userID", ""));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -172,7 +180,6 @@ public class RoomsActivity extends AppCompatActivity {
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
         mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("authorization", authorization);
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
@@ -188,19 +195,26 @@ public class RoomsActivity extends AppCompatActivity {
         }
     };
 
-    private Emitter.Listener authorization = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Log.d(TAG, "runAuthorization: " + ((JSONObject) args[0]).toString(4));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
+
+
+    @Override
+    public void connectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.on(event, emitter);
         }
-    };
+    }
+
+    @Override
+    public void emitSocket(String event, Object arg) {
+        if (mSocket != null)
+            mSocket.emit(event, arg);
+    }
+
+    @Override
+    public void disconnectSocket(String event, Emitter.Listener emitter) {
+        if (mSocket != null) {
+            mSocket.off(event, emitter);
+        }
+    }
+
 }

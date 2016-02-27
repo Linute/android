@@ -4,19 +4,21 @@ package com.linute.linute.API;
 import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Headers;
-import com.squareup.okhttp.HttpUrl;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
+
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Headers;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 
 /**
@@ -27,10 +29,10 @@ public class API_Methods {
     public static String TAG = "API_METHODS";
 
     // API ENPOINT URL
-    private static String SCHEME = "https";
-    //private static String HOST = "api.linute.com";
-    private static String HOST = "devapi.linute.com";
-    private static String VERSION = "v1.3.1";
+    public static final String SCHEME = "https";
+    //private static String HOST = "api.tapt.io";
+    public static final String HOST = "devapi.tapt.io";
+    public static final String VERSION = "v1.3.3";
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -61,7 +63,9 @@ public class API_Methods {
 
         if (path != null) {
             for (String p : path) {
-                url.addPathSegment(p);
+                if (p != null) {
+                    url.addPathSegment(p);
+                }
             }
         }
 
@@ -166,10 +170,10 @@ public class API_Methods {
     }
 
     // returns main header containing: Content-Type and authorizationDevice
-    public static Map<String, String> getMainHeader(String authDeviceToken) {
+    public static Map<String, String> getMainHeader(String token) {
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
-        header.put("authorizationDevice", "Basic " + authDeviceToken);
+        header.put("authorization", "Basic " + Utils.encode_base64(token));
         return header;
     }
 

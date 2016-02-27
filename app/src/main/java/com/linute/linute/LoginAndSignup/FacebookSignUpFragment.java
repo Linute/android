@@ -31,9 +31,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +38,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 1/14/16.
@@ -219,8 +221,8 @@ public class FacebookSignUpFragment extends Fragment {
             newInfo.put("dob", dob);
         }
         newInfo.put("registrationType", mSharedPreferences.getString("registrationType", ""));
-        newInfo.put("passwordFacebook", mSharedPreferences.getString("passwordFacebook", ""));
-        newInfo.put("password", mSharedPreferences.getString("password", ""));
+        //newInfo.put("passwordFacebook", mSharedPreferences.getString("passwordFacebook", ""));
+        //newInfo.put("password", mSharedPreferences.getString("password", ""));
 
 
         showProgress(true, 1);
@@ -276,12 +278,12 @@ public class FacebookSignUpFragment extends Fragment {
         if (getActivity() == null) return;
         new LSDKUser(getActivity()).createUser(params, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 failedInternetConnection(1);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         String responseString = response.body().string();
@@ -323,12 +325,12 @@ public class FacebookSignUpFragment extends Fragment {
 
             new LSDKUser(getActivity()).isUniqueEmail(email, new Callback() {
                 @Override
-                public void onFailure(Request request, IOException e) {
+                public void onFailure(Call call, IOException e) {
                     failedInternetConnection(0);
                 }
 
                 @Override
-                public void onResponse(Response response) throws IOException {
+                public void onResponse(Call call, Response response) throws IOException {
                     String reponseString = response.body().string();
                     if (response.code() == 200) { //email was good
                         getPinCode(email);
@@ -340,6 +342,7 @@ public class FacebookSignUpFragment extends Fragment {
                         serverError(0);
                     }
                 }
+
             });
         }
     }
@@ -348,12 +351,12 @@ public class FacebookSignUpFragment extends Fragment {
     private boolean checkNames() {
 
         boolean goodCredentials = true;
-        if (TextUtils.isEmpty(mLastNameEditText.getText().toString())) {
+        if (TextUtils.isEmpty(mLastNameEditText.getText().toString().trim())) {
             mLastNameEditText.setError(getString(R.string.error_field_required));
             mLastNameEditText.requestFocus();
             goodCredentials = false;
         }
-        if (TextUtils.isEmpty(mFirstNameEditText.getText().toString())) {
+        if (TextUtils.isEmpty(mFirstNameEditText.getText().toString().trim())) {
             mFirstNameEditText.setError(getString(R.string.error_field_required));
             mFirstNameEditText.requestFocus();
             goodCredentials = false;
@@ -370,12 +373,12 @@ public class FacebookSignUpFragment extends Fragment {
 
         new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName,new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 failedInternetConnection(0);
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
@@ -526,7 +529,6 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("firstName", user.getFirstName());
         sharedPreferences.putString("lastName", user.getLastName());
-        sharedPreferences.putString("email", user.getEmail());
         sharedPreferences.putString("status", user.getStatus());
         sharedPreferences.putString("dob", user.getDob());
         sharedPreferences.putInt("sex", user.getSex());
@@ -535,7 +537,10 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
-        sharedPreferences.putString("password", mSharedPreferences.getString("password", ""));
+
+        sharedPreferences.putString("userToken", user.getUserToken());
+        sharedPreferences.putString("userName", user.getUserName());
+        sharedPreferences.putString("points", user.getPoints());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();

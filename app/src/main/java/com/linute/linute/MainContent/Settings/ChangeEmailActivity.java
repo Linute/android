@@ -20,9 +20,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +27,10 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class ChangeEmailActivity extends AppCompatActivity {
 
@@ -140,7 +141,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
         user.isUniqueEmail(email, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) { //no connection
+            public void onFailure(Call call, IOException e) { //no connection
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -151,7 +152,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {//unique email
                     response.body().close();
                     getPinCode(email);
@@ -177,7 +178,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
         new LSDKUser(this).getConfirmationCodeForEmail(email, fName, lName, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -188,7 +189,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
 
@@ -250,7 +251,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
 
         user.updateUserInfo(userInfo, null, new Callback() {
             @Override
-            public void onFailure(Request request, IOException e) {
+            public void onFailure(Call call, IOException e) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -261,7 +262,7 @@ public class ChangeEmailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
                         LinuteUser user = new LinuteUser(new JSONObject(response.body().string()));
