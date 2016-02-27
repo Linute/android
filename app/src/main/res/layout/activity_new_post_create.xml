@@ -1,0 +1,92 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainContent.PostCreatePage">
+
+
+    <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="?attr/actionBarSize"
+                                       android:background="@color/colorPrimary"
+                                       android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin">
+
+            <RelativeLayout android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true">
+
+                <TextView android:id="@+id/create_page_post_button"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:text="POST"
+                          android:textColor="#FFFFFF"
+                          android:textSize="@dimen/header_font_size"
+                          android:textStyle="bold"
+                />
+
+                <ProgressBar android:id="@+id/create_page_progress_bar"
+                             style="?android:attr/progressBarStyleSmall"
+                             android:layout_width="wrap_content"
+                             android:layout_height="wrap_content"
+                             android:layout_centerInParent="true"
+                             android:visibility="gone"
+                />
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
+                                                         android:layout_height="wrap_content"
+    >
+
+
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_margin="@dimen/activity_horizontal_margin"
+                  android:weightSum="6"
+    >
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="0px"
+                                                             android:layout_height="wrap_content"
+                                                             android:layout_weight="1"
+                                                             android:background="@drawable/post_color_0"
+
+        >
+
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:background="@drawable/post_color_0"
+            android:layout_weight="1"
+        >
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="T"
+                      android:textColor="#FFFFFF"
+                      android:textSize="25sp"
+            />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>
