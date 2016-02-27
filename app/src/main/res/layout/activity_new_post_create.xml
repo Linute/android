@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     android:orientation="vertical"
     tools:context=".MainContent.PostCreatePage">
 
@@ -47,6 +48,7 @@
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
+                                                         android:background="#FFFFFF"
     >
 
 
@@ -55,16 +57,25 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_margin="@dimen/activity_horizontal_margin"
+                  android:baselineAligned="false"
+                  android:layout_margin="8dp"
                   android:weightSum="6"
     >
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="0px"
+                                                             android:layout_margin="4dp"
                                                              android:layout_height="wrap_content"
                                                              android:layout_weight="1"
                                                              android:background="@drawable/post_color_0"
 
         >
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:textColor="#000000"
+                      android:textSize="25sp"
+                      android:text="T"
+            />
 
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -72,7 +83,44 @@
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:background="@drawable/post_color_0"
+            android:layout_margin="4dp"
+            android:background="@drawable/post_color_1"
+            android:layout_weight="1"
+        >
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="A"
+                      android:textColor="#FFFFFF"
+                      android:textSize="25sp"
+            />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/post_color_2"
+            android:layout_weight="1"
+        >
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="P"
+                      android:textColor="#FFFFFF"
+                      android:textSize="25sp"
+            />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/post_color_3"
             android:layout_weight="1"
         >
 
@@ -80,6 +128,43 @@
                       android:layout_height="wrap_content"
                       android:layout_gravity="center"
                       android:text="T"
+                      android:textColor="#FFFFFF"
+                      android:textSize="25sp"
+            />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/post_color_4"
+            android:layout_weight="1"
+        >
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="I"
+                      android:textColor="#FFFFFF"
+                      android:textSize="25sp"
+            />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:background="@drawable/post_color_5"
+            android:layout_weight="1"
+        >
+
+            <TextView android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center"
+                      android:text="N"
                       android:textColor="#FFFFFF"
                       android:textSize="25sp"
             />

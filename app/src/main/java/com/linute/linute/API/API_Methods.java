@@ -63,7 +63,9 @@ public class API_Methods {
 
         if (path != null) {
             for (String p : path) {
-                url.addPathSegment(p);
+                if (p != null) {
+                    url.addPathSegment(p);
+                }
             }
         }
 
