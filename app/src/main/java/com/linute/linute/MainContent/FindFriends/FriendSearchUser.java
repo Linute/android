@@ -83,7 +83,7 @@ public class FriendSearchUser implements Parcelable{
     }
 
     public boolean nameContains(String pre){
-        return mFullName.toLowerCase().contains(pre);
+        return mFullName.toLowerCase().contains(pre.toLowerCase());
     }
 
     @Override

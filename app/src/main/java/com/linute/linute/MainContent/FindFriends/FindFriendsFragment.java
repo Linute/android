@@ -197,7 +197,7 @@ public class FindFriendsFragment extends UpdatableFragment {
 
         if (fragmentNeedsUpdating()) {
             if (mSearchType == 0) { //if search by name, we need init text
-                mDescriptionText.setText("Enter your friends name in the search bar");
+                mDescriptionText.setText("Enter your friend's name in the search bar");
                 mDescriptionText.setVisibility(View.VISIBLE);
             } else if (mSearchType == 1) { //facebook
                 FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
@@ -367,10 +367,8 @@ public class FindFriendsFragment extends UpdatableFragment {
                         tempFriend.add(user);
                     }
 
-                if (tempFriend.isEmpty()) { //empty, show empty text
-                    if (mDescriptionText.getVisibility() == View.INVISIBLE) {
+                if (tempFriend.isEmpty() && mDescriptionText.getVisibility() == View.INVISIBLE) { //empty, show empty text
                         mDescriptionText.setVisibility(View.VISIBLE);
-                    }
                 }
             }
             mFriendFoundList.clear();
@@ -402,7 +400,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                 mFriendFoundList.clear();
                 mFriendSearchAdapter.notifyDataSetChanged();
                 mCancelLoad = true;
-                mDescriptionText.setText("Enter your friends name in the search bar");
+                mDescriptionText.setText("Enter your friend's name in the search bar");
                 mDescriptionText.setVisibility(View.VISIBLE);
             } else {
                 if (mDescriptionText.getVisibility() == View.VISIBLE)

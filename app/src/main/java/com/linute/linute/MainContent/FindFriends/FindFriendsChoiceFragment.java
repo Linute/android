@@ -26,6 +26,8 @@ public class FindFriendsChoiceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_findfriends_choices, container, false);
 
+        getActivity().invalidateOptionsMenu();
+
         mContacts = rootView.findViewById(R.id.findFriends_search_contacts);
         mFacebook = rootView.findViewById(R.id.findFriends_search_facebook);
         mName = rootView.findViewById(R.id.findFriends_search_name);

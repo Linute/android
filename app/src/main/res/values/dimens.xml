@@ -52,4 +52,7 @@
 
     <dimen name="list_space">6dp</dimen>
 
+    <dimen name="post_create_button_space">6dp</dimen>
+    <dimen name="post_create_corner_radius">4dp</dimen>
+
 </resources>

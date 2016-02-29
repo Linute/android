@@ -19,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -288,11 +289,11 @@ public class MainActivity extends BaseTaptActivity {
 
     private static final int SETTINGS_REQUEST_CODE = 13;
 
-    public void startActivityForResults(Class activity, final int requestCode) {
+    public void startActivityForResults(final Class activity, final int requestCode) {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
             @Override
             public void run() {
-                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                Intent i = new Intent(MainActivity.this, activity);
                 startActivityForResult(i, requestCode);
             }
         });
@@ -300,10 +301,10 @@ public class MainActivity extends BaseTaptActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
+        if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
-        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
+        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
             setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
         }
 
@@ -329,7 +330,6 @@ public class MainActivity extends BaseTaptActivity {
             getSupportFragmentManager().popBackStackImmediate(PROFILE_OR_EVENT_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
     }
-
 
     //sets needsUpdating for fragment at index
     @Override
@@ -420,7 +420,6 @@ public class MainActivity extends BaseTaptActivity {
                 }).show();
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -469,8 +468,10 @@ public class MainActivity extends BaseTaptActivity {
             ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(count > 99 ? "+" : String.valueOf(count));
             (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.VISIBLE);
         }else {
-            ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(null);
-            (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.GONE);
+            if (mNumNewPostsInDiscover != 0) {
+                ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(null);
+                (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.GONE);
+            }
         }
     }
 
@@ -490,7 +491,7 @@ public class MainActivity extends BaseTaptActivity {
 
         @Override
         public void onDrawerClosed(View drawerView) {
-            mKeyboardHasBeenClosed = false;
+            //will go to next activity or fragment after drawer is closed
             if (mChangeFragmentOrActivityAction != null) {
                 mChangeFragmentOrActivityAction.run();
                 mChangeFragmentOrActivityAction = null;
@@ -499,8 +500,10 @@ public class MainActivity extends BaseTaptActivity {
 
         @Override
         public void onDrawerSlide(View drawerView, float slideOffset) {
+
             super.onDrawerSlide(drawerView, slideOffset);
-            if (!mKeyboardHasBeenClosed && slideOffset > 0) {
+
+            if (!mKeyboardHasBeenClosed && slideOffset > 0) { //close keyboard
                 mKeyboardHasBeenClosed = true;
                 View focused = getCurrentFocus();
                 if (focused != null) {
@@ -509,6 +512,12 @@ public class MainActivity extends BaseTaptActivity {
                 }
 
             }
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+            if (newState == DrawerLayout.STATE_IDLE) mKeyboardHasBeenClosed = false;
+            super.onDrawerStateChanged(newState);
         }
 
         public void setChangeFragmentOrActivityAction(Runnable action) {
@@ -618,6 +627,9 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(final Object... args) {
             Log.i(TAG, "ERROR: " + args[0]);
+
+            //our fragments might have something they must do if an error occurs with socket
+            //i.e. if a progressbar is shown, we should hide it if error occured
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -648,7 +660,7 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
-    private int mNumNewPostsInDiscover = 0;
+    private int mNumNewPostsInDiscover = 0; //new posts in discover fragment
 
     private Emitter.Listener newPostListener = new Emitter.Listener() {
         @Override

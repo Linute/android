@@ -531,11 +531,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public void onPause() {
         super.onPause();
-        mCamera.cancelAutoFocus();
         mOrientationListener.disable();
         mShowCameraHandler.removeCallbacks(mShowPreview);
         // stop the preview
         if (mCamera != null) {
+            mCamera.cancelAutoFocus();
             stopCameraPreview();
             mCamera.release();
             mCamera = null;

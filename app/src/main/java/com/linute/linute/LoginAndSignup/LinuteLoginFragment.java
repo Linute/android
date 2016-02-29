@@ -245,6 +245,7 @@ public class LinuteLoginFragment extends Fragment {
     private void checkCredentialsWithDB(String email, final String password) {
 
         if (getActivity() == null) return;
+
         LSDKUser checker = new LSDKUser(getActivity());
         checker.loginUserWithEmail(email, password, new Callback() {
             @Override
@@ -282,49 +283,49 @@ public class LinuteLoginFragment extends Fragment {
                         });
                     }
                 }
-                //else if (response.code() == 404) { //bad credentials
-//
-//                    try{
-//                        JSONObject obj = new JSONObject(res);
-//                        final boolean emailError = obj.getString("error").equals("email");
-//
-//                        if (getActivity() == null) return;
-//                        getActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                if (emailError){
-//                                    mEmailView.setError("No account with this email");
-//                                }else {
-//                                    mPasswordView.setError("Invalid password");
-//                                }
-//                                showProgress(false);
-//                            }
-//                        });
-//
-//                    }catch (JSONException e){
-//                        if (getActivity() == null) return;
-//                        getActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Utils.showServerErrorToast(getActivity());
-//                                showProgress(false);
-//                            }
-//                        });
-//                    }
-//
-//                } else {
-//                    //Log.e(TAG, "onResponse: "+res);
-//                    if (getActivity() == null) return;
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Utils.showServerErrorToast(getActivity());
-//                            showProgress(false);
-//                        }
-//                    });
-//
-//                }
+                else if (response.code() == 404) { //bad credentials
+
+                    try{
+                        JSONObject obj = new JSONObject(res);
+                        final boolean emailError = obj.getString("error").equals("email");
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (emailError){
+                                    mEmailView.setError("No account with this email");
+                                }else {
+                                    mPasswordView.setError("Invalid password");
+                                }
+                                showProgress(false);
+                            }
+                        });
+
+                    }catch (JSONException e){
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                showProgress(false);
+                            }
+                        });
+                    }
+
+                } else {
+                    //Log.e(TAG, "onResponse: "+res);
+                    if (getActivity() == null) return;
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(getActivity());
+                            showProgress(false);
+                        }
+                    });
+
+                }
             }
         });
     }

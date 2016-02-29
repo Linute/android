@@ -43,10 +43,10 @@
 
 
     <color name="post_color_0">#FFFFFF</color>
-    <color name="post_color_1">#3b4854</color>
-    <color name="post_color_2"></color>
-    <color name="post_color_3"></color>
-    <color name="post_color_4"></color>
-    <color name="post_color_5"></color>
+    <color name="post_color_1">#3B4854</color>
+    <color name="post_color_2">#3c3741</color>
+    <color name="post_color_3">#2C514A</color>
+    <color name="post_color_4">#8ec1b0</color>
+    <color name="post_color_5">#cd613a</color>
 </resources>
 

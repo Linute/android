@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -65,7 +66,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.socket.client.Ack;
 import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -74,6 +74,7 @@ import okhttp3.Response;
 /**
  * Created by Arman on 1/11/16.
  */
+
 public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
@@ -221,13 +222,17 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                TextView text = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
                 if (mCheckBox.isChecked()) {
-                    ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
-                            .setText("OFF");
+
+                    text.setText("OFF");
+                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(false);
+
                 } else {
-                    ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
-                            .setText("ON");
+
+                    text.setText("ON");
+                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(true);
                 }
             }
