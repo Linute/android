@@ -48,5 +48,9 @@
     <color name="post_color_3">#2C514A</color>
     <color name="post_color_4">#8ec1b0</color>
     <color name="post_color_5">#cd613a</color>
+
+    <color name="pure_white">#FFFFFF</color>
+    <color name="pure_black">#000000</color>
+
 </resources>
 

@@ -17,10 +17,11 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/20/16.
@@ -58,7 +59,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     class RoomsViewHolder extends RecyclerView.ViewHolder {
         protected LinearLayout vRoomsListLinear;
-        protected CircularImageView vUserImage;
+        protected CircleImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
 
@@ -66,7 +67,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             super(itemView);
 
             vRoomsListLinear = (LinearLayout) itemView.findViewById(R.id.rooms_list_linear);
-            vUserImage = (CircularImageView) itemView.findViewById(R.id.rooms_user_image);
+            vUserImage = (CircleImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
 

@@ -7,14 +7,13 @@
               android:orientation="horizontal"
 >
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/comment_user_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:scaleType="centerCrop"
-        app:border_color="@color/seperator_color"
-        app:border_width="1dp"
+        app:civ_border_color="@color/seperator_color"
+        app:civ_border_width="1dp"
     />
 
     <LinearLayout

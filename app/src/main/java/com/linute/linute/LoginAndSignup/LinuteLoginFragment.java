@@ -158,14 +158,17 @@ public class LinuteLoginFragment extends Fragment {
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             cancel = true;
+            mPasswordView.requestFocus();
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
+            mEmailView.requestFocus();
             cancel = true;
         } else if (!isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
+            mEmailView.requestFocus();
             cancel = true;
         }
 

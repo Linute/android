@@ -38,7 +38,6 @@ import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -68,7 +68,7 @@ public class ChangeProfileImageFragment extends Fragment {
     private TextView mSaveButton;
     private View mButtonLayer;
 
-    private CircularImageView mImageView;
+    private CircleImageView mImageView;
 
     private SharedPreferences mSharedPreferences;
 
@@ -96,7 +96,7 @@ public class ChangeProfileImageFragment extends Fragment {
         mEditButton = (TextView) rootView.findViewById(R.id.changeprofileimage_change_button);
         mButtonLayer = rootView.findViewById(R.id.changeprofileimage_buttons);
 
-        mImageView = (CircularImageView) rootView.findViewById(R.id.changeprofileimage_image);
+        mImageView = (CircleImageView) rootView.findViewById(R.id.changeprofileimage_image);
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.changeprofileimage_progressbar);
     }

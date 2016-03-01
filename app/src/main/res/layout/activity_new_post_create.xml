@@ -46,21 +46,26 @@
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_frame"
                                                          android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
+                                                         android:focusableInTouchMode="true"
                                                          android:background="#FFFFFF">
 
-        <EditText android:id="@+id/post_create_text"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_margin="16dp"
-                  android:background="@null"
-                  android:inputType="textCapSentences|textMultiLine"
-                  android:textColor="#000000"
-                  android:gravity="center_vertical"
-                  android:imeOptions="actionDone"
-                  android:maxLines="8"
-                  tools:text="TESTTEST TEST TESTTESTTESTTESTTESTTESTTESTESTTEST"
-                  android:textSize="36sp"
-                  android:textStyle="italic"
+        <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
+            android:id="@+id/post_create_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="Enter your text here"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine|textPhonetic|textCapSentences"
+            android:maxLines="8"
+            android:textColor="#000000"
+            android:textSize="32sp"
+            android:textStyle="italic"
         />
 
 
@@ -198,7 +203,8 @@
               android:layout_height="0px"
               android:layout_weight="1"/>
 
-        <com.linute.linute.SquareCamera.SquareImageView android:layout_width="0px"
+        <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/post_create_anon_switch"
+                                                        android:layout_width="0px"
                                                         android:layout_height="wrap_content"
                                                         android:layout_marginEnd="16dp"
                                                         android:layout_marginStart="16dp"

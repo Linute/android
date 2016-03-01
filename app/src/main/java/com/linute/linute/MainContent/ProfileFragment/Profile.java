@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,8 +15,6 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -39,7 +37,7 @@ public class Profile extends UpdatableFragment {
     public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
 
     private RecyclerView recList;
-    private LinearLayoutManager llm;
+    private GridLayoutManager llm;
     private ProfileAdapter mProfileAdapter;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -90,10 +88,20 @@ public class Profile extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new CustomLinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        llm = new GridLayoutManager(getActivity(), 3);
+
+        llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (position == 0) return 3;
+                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem) return 3;
+
+                else return 1;
+            }
+        });
+
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+//        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         user = LinuteUser.getDefaultUser(getContext()); //get data from sharedpref
 
@@ -295,7 +303,7 @@ public class Profile extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
-                        Log.i(TAG, "onResponse: " + body);
+                        //Log.i(TAG, "onResponse: " + body);
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
 //                        Log.d(TAG, "onResponse getActivities" + body);
 

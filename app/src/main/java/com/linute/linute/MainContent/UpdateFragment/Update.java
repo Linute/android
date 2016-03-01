@@ -69,6 +69,7 @@ public class Update {
     private boolean mFollowedBack;
 
     private boolean mIsAnon;
+    private String mAnonImage;
 
     public Update(){
 
@@ -86,6 +87,8 @@ public class Update {
         mActionID = getStringFromJson(json, "id");
 
         mIsAnon = getIntFromJson(json, "privacy") == 1;
+
+        mAnonImage = getStringFromJson(json,"anonymousImage");
 
         setUpUserInformation(json);
 
@@ -152,7 +155,6 @@ public class Update {
 
         if (event == null) return;
 
-        mIsPicturePost = getIntFromJson(event, "type") != 0;
         mEventID = getStringFromJson(event, "id");
         mEventTitle = getStringFromJson(event, "title");
 
@@ -163,9 +165,11 @@ public class Update {
         if (images != null && images.length() > 0) {
             try {
                 mEventImageName = images.getString(0);
+                mIsPicturePost = true;
             } catch (JSONException e) {
                 e.printStackTrace();
                 mEventImageName = null;
+                mIsPicturePost = false;
             }
         }
     }
@@ -184,6 +188,9 @@ public class Update {
         mUserProfileImageName = getStringFromJson(user, "profileImage");
     }
 
+    public String getAnonImage(){
+        return mAnonImage;
+    }
 
     private static String getActionDescription(UpdateType type) {
         switch (type){

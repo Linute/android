@@ -30,7 +30,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +38,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -66,7 +66,7 @@ public class FacebookSignUpFragment extends Fragment {
     private EditText mVerificationCodeEditText;
     private EditText mEmailEditText;
 
-    private CircularImageView mProfileImage;
+    private CircleImageView mProfileImage;
 
     private ProgressBar mProgressBar1;
     private ProgressBar mProgressBar2;
@@ -174,7 +174,7 @@ public class FacebookSignUpFragment extends Fragment {
         mVerificationCodeEditText = (EditText) root.findViewById(R.id.signUp_verify_code);
         mEmailEditText = (EditText) root.findViewById(R.id.fbSignUp_email);
 
-        mProfileImage = (CircularImageView) root.findViewById(R.id.fbSignUp_profile_pic_view);
+        mProfileImage = (CircleImageView) root.findViewById(R.id.fbSignUp_profile_pic_view);
         mProgressBar1 = (ProgressBar) root.findViewById(R.id.fbSignUp_progress_bar1);
         mProgressBar2 = (ProgressBar) root.findViewById(R.id.fbSignUp_progress_bar2);
 

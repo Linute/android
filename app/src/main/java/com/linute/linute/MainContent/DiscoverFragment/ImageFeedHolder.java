@@ -25,7 +25,6 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -58,7 +58,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     protected CheckBox vLikesHeart; //toggle heart
 
     protected ImageView vPostImage;
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected List<Post> mPosts;
 
@@ -93,7 +93,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
         vLikesHeart.setOnCheckedChangeListener(this);
 
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 
         vLikeButton.setOnClickListener(this);
         vCommentButton.setOnClickListener(this);

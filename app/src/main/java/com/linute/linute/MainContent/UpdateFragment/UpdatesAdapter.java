@@ -24,13 +24,13 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -213,7 +213,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     public class UpdateItemViewHolder extends RecyclerView.ViewHolder {
 
-        private CircularImageView mProfileImage;
+        private CircleImageView mProfileImage;
         private ImageView mIconImage;
         private ImageView mEventPicture;
         private TextView mNameText;
@@ -225,7 +225,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         public UpdateItemViewHolder(View itemView) {
             super(itemView);
 
-            mProfileImage = (CircularImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
+            mProfileImage = (CircleImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
             mEventPicture = (ImageView) itemView.findViewById(R.id.updatesFragment_update_picture);
 
             mIconImage = (ImageView) itemView.findViewById((R.id.updatesFragment_icon_image));
@@ -256,9 +256,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
+
             //set profile image
             Glide.with(mContext)
-                    .load(update.isAnon() ? R.drawable.profile_picture_placeholder : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
+                    .load(update.isAnon() ? ((update.getAnonImage() == null || update.getAnonImage().equals("")) ? R.drawable.profile_picture_placeholder : update.getAnonImage()) : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
                     .asBitmap()
                     .override(mImageSize, mImageSize)
                     .placeholder(R.drawable.image_loading_background)
@@ -273,7 +274,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             //COMMENT or LIKE  - show image or post
             if (update.hasEventInformation()) {
 
-                if (!update.isPicturePost()) { //not a picture post; status post
+                if (update.getEventImageName() == null || update.getEventImageName().equals("")) { //not a picture post; status post
                     Glide.with(mContext)
                             .load(R.drawable.quotation2)
                             .override(mImageSize, mImageSize)
@@ -289,11 +290,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             .into(mEventPicture);
                 }
 
-                //NOTE: THIS WAS DRIVING ME NUTS.
-                //NOTE: When you scrolled up and down, some images would disappear
-                //NOTE: I made sure i wasn't setting it to gone
-                //NOTE: YET they'd set themselves to gone
-                //NOTE: The only solution I thought of was to reset it to visible..
                 if (mEventPicture.getVisibility() == View.GONE) {
                     mEventPicture.setVisibility(View.VISIBLE);
                 }
@@ -310,7 +306,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 @Override
                 public void onClick(View v) {
                     if (!mUpdate.isAnon()) {
-                        Log.i("TEST_UPDATE", "inside: " + getAdapterPosition());
                         //show profile fragment
                         ((MainActivity) mContext)
                                 .addFragmentToContainer(

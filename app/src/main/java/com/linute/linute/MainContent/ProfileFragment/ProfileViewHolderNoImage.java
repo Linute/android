@@ -7,22 +7,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
-import com.linute.linute.MainContent.FeedDetailFragment.FeedDetail;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
- * Created by Arman on 12/30/15.
+ * Created by QiFeng on 2/29/16.
  */
-public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-    protected ImageView vEventImage;
+public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements View.OnClickListener {
+    protected ImageView vTextImage;
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
@@ -30,29 +24,27 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private String mPostId;
     private String mUserId;
 
+    private TextView mTextView;
+
     //private View vAnonIcon;
 
 
-    public ProfileViewHolder(View itemView, Context context) {
+    public ProfileViewHolderNoImage(View itemView, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        vEventImage = (ImageView) itemView.findViewById(R.id.profile_grid_item_image);
+        mTextView = (TextView) itemView.findViewById(R.id.profile_grid_item_no_image_text);
 
+        //vAnonIcon = itemView.findViewById(R.id.profile_frag_anon_icon);
         itemView.setOnClickListener(this);
     }
 
     void bindModel(UserActivityItem userActivityItem) {
-        //profile image on the right
-        Glide.with(mContext)
-                .load(userActivityItem.getEventImagePath())
-                .asBitmap()
-                .placeholder(R.drawable.image_loading_background)
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .into(vEventImage);
+        String text = userActivityItem.getDescription();
+
+        mTextView.setText((text == null || text.equals("")) ? "No text..." : text);
 
         mPostId = userActivityItem.getEventID();
         mUserId = userActivityItem.getOwnerID();
@@ -64,7 +56,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity != null) {
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, true, mPostId, mUserId));
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, false, mPostId, mUserId));
         }
     }
 }

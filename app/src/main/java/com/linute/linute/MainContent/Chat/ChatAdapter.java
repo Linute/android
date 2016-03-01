@@ -16,11 +16,12 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/20/16.
@@ -74,8 +75,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     public class ChatViewHolder extends RecyclerView.ViewHolder {
         protected LinearLayout vOwnerLinear;
         protected RelativeLayout vUserRelative;
-        protected CircularImageView vOwnerImage;
-        protected CircularImageView vUserImage;
+        protected CircleImageView vOwnerImage;
+        protected CircleImageView vUserImage;
         protected TextView vOwnerName;
         protected TextView vUserName;
         protected TextView vOwnerMessage;
@@ -95,8 +96,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
             vOwnerLinear = (LinearLayout) itemView.findViewById(R.id.chat_owner);
             vUserRelative = (RelativeLayout) itemView.findViewById(R.id.chat_user);
-            vOwnerImage = (CircularImageView) itemView.findViewById(R.id.chat_owner_image);
-            vUserImage = (CircularImageView) itemView.findViewById(R.id.chat_user_image);
+            vOwnerImage = (CircleImageView) itemView.findViewById(R.id.chat_owner_image);
+            vUserImage = (CircleImageView) itemView.findViewById(R.id.chat_user_image);
             vOwnerName = (TextView) itemView.findViewById(R.id.chat_owner_name);
             vUserName = (TextView) itemView.findViewById(R.id.chat_user_name);
             vOwnerMessage = (TextView) itemView.findViewById(R.id.chat_owner_message);

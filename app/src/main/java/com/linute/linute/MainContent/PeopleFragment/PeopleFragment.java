@@ -156,16 +156,16 @@ public class PeopleFragment extends UpdatableFragment {
         //initially presented fragment by discoverHolderFragment doesn't get loaded by discoverholderfragment
         //do it in on resume
         //if initial fragment was campus feed, we are in campus feed, and it needs to be updated
-        if (fragment.getInitiallyPresentedFragmentWasActive()
-                && !mNearMe
-                && fragment.activeNeedsUpdating()) {
-            getPeople();
-            fragment.setActiveNeedsUpdating(false);
-        } else if (!fragment.getInitiallyPresentedFragmentWasActive()
+        if (fragment.getInitiallyPresentedFragmentWasNearby()
                 && mNearMe
                 && fragment.nearMeFragmentNeedsUpdating()) {
             getPeopleNearMe();
             fragment.setNearMeNeedsUpdating(false);
+        } else if (!fragment.getInitiallyPresentedFragmentWasNearby()
+                && !mNearMe
+                && fragment.activeNeedsUpdating()) {
+            getPeople();
+            fragment.setActiveNeedsUpdating(false);
         }
     }
 
@@ -437,7 +437,9 @@ public class PeopleFragment extends UpdatableFragment {
 
         @Override
         public void onProviderDisabled(String provider) {
-            //TODO:remove call
+            if (mTimeoutHandler != null) {
+                mTimeoutHandler.removeCallbacks(mTimeoutRunnable);
+            }
         }
     };
 

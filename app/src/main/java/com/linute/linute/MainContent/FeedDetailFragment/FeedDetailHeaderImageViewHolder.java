@@ -22,7 +22,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +30,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -53,7 +53,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
     protected TextView vCommentsText;
     protected TextView vPostTime;
     protected CheckBox vLikesHeart;
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected ImageView mPostImage;
 
@@ -80,7 +80,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vLikeContainer = itemView.findViewById(R.id.feed_control_bar_like_button);
 
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 
         mPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
 

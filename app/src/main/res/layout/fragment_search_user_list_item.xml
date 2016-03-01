@@ -6,12 +6,11 @@
               android:layout_height="wrap_content"
               android:orientation="horizontal">
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/search_users_list_image"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_margin="5dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/icon_user"
         card_view:border="false"
         card_view:border_width="0dp"

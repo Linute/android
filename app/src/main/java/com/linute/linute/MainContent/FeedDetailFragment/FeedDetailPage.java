@@ -49,7 +49,6 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 
 import org.json.JSONArray;
@@ -66,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -896,12 +896,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         public class MentionedPersonViewHolder extends RecyclerView.ViewHolder {
 
-            public CircularImageView mProfileImageView;
+            public CircleImageView mProfileImageView;
             public TextView mName;
 
             public MentionedPersonViewHolder(View itemView) {
                 super(itemView);
-                mProfileImageView = (CircularImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
+                mProfileImageView = (CircleImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
                 mName = (TextView) itemView.findViewById(R.id.mentioned_person_name);
             }
 

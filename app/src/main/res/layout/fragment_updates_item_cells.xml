@@ -4,16 +4,15 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:background="@android:color/holo_red_light"
-    >
+                tools:background="@android:color/holo_red_light">
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/updatesFragment_profile_picture"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        app:border_color="@color/seperator_color"
-        app:border_width="1dp"
+        app:civ_border_color="@color/seperator_color"
+        app:civ_border_width="1dp"
         tools:background="@android:color/darker_gray"
         />
 
@@ -29,9 +28,9 @@
 
     <ImageView
         android:id="@+id/updatesFragment_update_picture"
-        android:layout_width="@dimen/action_picture_size"
-        android:layout_height="@dimen/action_picture_size"
-        android:layout_alignParentRight="true"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:scaleType="centerCrop"
         tools:background="@android:color/darker_gray"/>
@@ -39,8 +38,8 @@
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_centerVertical="true"
-                  android:layout_toLeftOf="@id/updatesFragment_update_picture"
-                  android:layout_toRightOf="@id/updatesFragment_profile_picture"
+                  android:layout_toStartOf="@id/updatesFragment_update_picture"
+                  android:layout_toEndOf="@id/updatesFragment_profile_picture"
                   android:orientation="vertical">
 
         <TextView android:id="@+id/updatesFragment_name_text"

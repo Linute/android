@@ -22,9 +22,10 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/13/16.
@@ -34,7 +35,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
     private Context mContext;
     private SharedPreferences mSharedPreferences;
 
-    protected CircularImageView vCommentUserImage;
+    protected CircleImageView vCommentUserImage;
     protected TextView vCommentUserName;
     protected TextView vCommentUserText;
     protected TextView vTimeStamp;
@@ -56,7 +57,7 @@ public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements Vie
         mViewerUserId = mSharedPreferences.getString("userID", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
-        vCommentUserImage = (CircularImageView) itemView.findViewById(R.id.comment_user_image);
+        vCommentUserImage = (CircleImageView) itemView.findViewById(R.id.comment_user_image);
         vCommentUserName = (TextView) itemView.findViewById(R.id.comment_user_name);
         vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
         vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);

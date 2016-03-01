@@ -2,24 +2,28 @@ package com.linute.linute.MainContent;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.Switch;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -35,11 +39,13 @@ import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
 
 
-public class PostCreatePage extends AppCompatActivity {
+public class PostCreatePage extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = PostCreatePage.class.getSimpleName();
 
-    private EditText textContent;
-    private Switch anonymousSwitch;
+    private CustomBackPressedEditText mPostEditText;
+    private View mTextFrame;
+
+    private boolean mSwitchOn = false;
 
     private View mPostButton;
     private View mProgressbar;
@@ -52,14 +58,13 @@ public class PostCreatePage extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_post_content_page);
+        setContentView(R.layout.activity_new_post_create);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         //setup toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolbar.setTitle("Post Status");
         setSupportActionBar(toolbar);
 
         mPostButton = toolbar.findViewById(R.id.create_page_post_button);
@@ -68,122 +73,51 @@ public class PostCreatePage extends AppCompatActivity {
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideKeyboard();
                 postContent();
             }
         });
+        mPostEditText = (CustomBackPressedEditText) findViewById(R.id.post_create_text);
+        mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+            @Override
+            public void backPressed() {
+                hideKeyboard();
+            }
+        });
 
+        mPostEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    hideKeyboard();
+                }
+                return false;
+            }
+        });
 
-        findViewById(R.id.postContent_edit_text_parent).setOnClickListener(new View.OnClickListener() {
+        final ImageView mAnonymousSwitch = (ImageView) findViewById(R.id.post_create_anon_switch);
+        mAnonymousSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                textContent.requestFocusFromTouch();
-
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(textContent, 0);
+                if (mSwitchOn){
+                    mSwitchOn = false;
+                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_off);
+                }else {
+                    mSwitchOn = true;
+                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_on);
+                }
             }
         });
 
-        textContent = (EditText) findViewById(R.id.postContentPageEditText);
-        textContent.setFilters(new InputFilter[]{new InputFilter.LengthFilter(240)}); //set char limit
-        textContent.addTextChangedListener(new TextWatcher() {
-            TextView textView = (TextView) PostCreatePage.this.findViewById(R.id.postContent_character_counter);
+        mTextFrame = findViewById(R.id.post_create_frame);
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                textView.setText(240 - s.length() + "");
-            }
-        });
-
-
-        anonymousSwitch = (Switch) findViewById(R.id.anonymous);
+        findViewById(R.id.post_create_0).setOnClickListener(this);
+        findViewById(R.id.post_create_1).setOnClickListener(this);
+        findViewById(R.id.post_create_2).setOnClickListener(this);
+        findViewById(R.id.post_create_3).setOnClickListener(this);
+        findViewById(R.id.post_create_4).setOnClickListener(this);
+        findViewById(R.id.post_create_5).setOnClickListener(this);
     }
-
-
-//    private void postStatus() {
-//        if (mPostInProgress) return;
-//
-//        if (textContent.getText().toString().trim().equals("")) return;
-//
-//        mPostInProgress = true;
-//
-//        mProgressbar.setVisibility(View.VISIBLE);
-//        mPostButton.setVisibility(View.INVISIBLE);
-
-
-
-
-//        Map<String, Object> postData = new HashMap<>();
-//
-//        JSONArray coord = new JSONArray();
-//        JSONObject jsonObject = new JSONObject();
-//        try {
-//            coord.put(0);
-//            coord.put(0);
-//            jsonObject.put("coordinates", coord);
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-////                Log.d(TAG, "" + jsonObject.toString());
-//
-//        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-//        postData.put("college", sharedPreferences.getString("collegeId", ""));
-//        postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
-//        postData.put("title", textContent.getText().toString());
-//        JSONArray emptyArray = new JSONArray();
-//        postData.put("images", emptyArray);
-//        postData.put("type", "0");
-//        postData.put("geo", jsonObject);
-//
-//        new LSDKEvents(this).postEvent(postData, new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Utils.showBadConnectionToast(PostCreatePage.this);
-//                        mPostButton.setVisibility(View.VISIBLE);
-//                        mProgressbar.setVisibility(View.GONE);
-//                        mPostInProgress = false;
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                if (!response.isSuccessful()) {
-//                    Log.d(TAG, "onResponseNotSuccessful" + response.body().string());
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Utils.showServerErrorToast(PostCreatePage.this);
-//                            mPostButton.setVisibility(View.VISIBLE);
-//                            mProgressbar.setVisibility(View.GONE);
-//                            mPostInProgress = false;
-//                        }
-//                    });
-//                } else {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mPostInProgress = false;
-//                            Toast.makeText(PostCreatePage.this, "Posted status", Toast.LENGTH_SHORT).show();
-//                            setResult(RESULT_OK);
-//                            finish();
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -283,7 +217,7 @@ public class PostCreatePage extends AppCompatActivity {
         if (mPostInProgress) return;
 
         //SHIT !!
-        if (textContent.getText().toString().trim().equals("")) return;
+        if (mPostEditText.getText().toString().trim().equals("")) return;
 
         if (!Utils.isNetworkAvailable(this) || !mSocket.connected()){
             Utils.showBadConnectionToast(this);
@@ -298,13 +232,8 @@ public class PostCreatePage extends AppCompatActivity {
         try {
             JSONObject postData = new JSONObject();
             postData.put("college", mSharedPreferences.getString("collegeId", ""));
-            postData.put("privacy", (anonymousSwitch.isChecked() ? 1 : 0) + "");
-            postData.put("title", textContent.getText().toString());
-            JSONArray emptyArray = new JSONArray();
-            postData.put("images", emptyArray);
-            postData.put("type", "0");
-            postData.put("owner", mSharedPreferences.getString("userID", ""));
-
+            postData.put("privacy", (mSwitchOn ? 1 : 0) + "");
+            postData.put("title", mPostEditText.getText().toString());
 
             JSONArray coord = new JSONArray();
             JSONObject jsonObject = new JSONObject();
@@ -313,6 +242,12 @@ public class PostCreatePage extends AppCompatActivity {
             jsonObject.put("coordinates", coord);
 
             postData.put("geo", jsonObject);
+            postData.put("type", "0");
+            postData.put("owner", mSharedPreferences.getString("userID", ""));
+
+            JSONArray imageArray = new JSONArray();
+            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 1080, 1080, true)));
+            postData.put("images", imageArray);
 
             mSocket.emit(API_Methods.VERSION+":posts:new post", postData);
         } catch (JSONException e) {
@@ -371,4 +306,68 @@ public class PostCreatePage extends AppCompatActivity {
             }
         }
     };
+
+    @Override
+    public void onClick(View v) {
+        int viewId = v.getId();
+
+        int backgroundColor;
+        int textColor;
+
+        switch (viewId){
+            case R.id.post_create_0:
+                backgroundColor = R.color.post_color_0;
+                textColor = R.color.pure_black;
+                break;
+            case R.id.post_create_1:
+                backgroundColor = R.color.post_color_1;
+                textColor = R.color.pure_white;
+                break;
+            case R.id.post_create_2:
+                backgroundColor = R.color.post_color_2;
+                textColor = R.color.pure_white;
+                break;
+            case R.id.post_create_3:
+                backgroundColor = R.color.post_color_3;
+                textColor = R.color.pure_white;
+                break;
+            case R.id.post_create_4:
+                backgroundColor = R.color.post_color_4;
+                textColor = R.color.pure_white;
+                break;
+            case R.id.post_create_5:
+                backgroundColor = R.color.post_color_5;
+                textColor = R.color.pure_white;
+                break;
+            default:
+                backgroundColor = R.color.post_color_0;
+                textColor = R.color.pure_black;
+                break;
+        }
+
+        mPostEditText.setTextColor(ContextCompat.getColor(PostCreatePage.this, textColor));
+        mTextFrame.setBackgroundColor(ContextCompat.getColor(PostCreatePage.this, backgroundColor));
+    }
+
+
+    private void hideKeyboard() {
+        mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
+    }
+
+
+    //cuts a bitmap from our RelativeLayout
+    public static Bitmap getBitmapFromView(View view) {
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null)
+            bgDrawable.draw(canvas);
+        else
+            canvas.drawColor(Color.WHITE);
+        view.draw(canvas);
+        return returnedBitmap;
+    }
+
 }

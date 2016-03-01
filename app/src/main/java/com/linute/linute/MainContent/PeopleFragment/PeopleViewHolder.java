@@ -25,7 +25,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -43,7 +43,7 @@ import okhttp3.Response;
 public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private static final String TAG = PeopleViewHolder.class.getSimpleName();
-    protected CircularImageView vProfilePicture;
+    protected CircleImageView vProfilePicture;
     protected TextView vName;
     protected TextView vState;
     protected ImageView vStateImage;
@@ -61,7 +61,7 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
         mSharedPreferences = vContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         vPeopleList = peopleList;
 
-        vProfilePicture = (CircularImageView) itemView.findViewById(R.id.people_user_image);
+        vProfilePicture = (CircleImageView) itemView.findViewById(R.id.people_user_image);
         vName = (TextView) itemView.findViewById(R.id.list_people_name);
         vState = (TextView) itemView.findViewById(R.id.list_people_state);
         vStateImage = (ImageView) itemView.findViewById(R.id.list_people_image_state);

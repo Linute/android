@@ -21,13 +21,13 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -38,7 +38,7 @@ import okhttp3.Response;
  */
 public class NearbyViewHolder extends RecyclerView.ViewHolder {
 
-    private CircularImageView mProfileImage;
+    private CircleImageView mProfileImage;
     private TextView mName;
     private TextView mDistance;
     private TextView mStatus;
@@ -51,7 +51,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         mContext = context;
 
-        mProfileImage = (CircularImageView) itemView.findViewById(R.id.peopleNearby_profile_image);
+        mProfileImage = (CircleImageView) itemView.findViewById(R.id.peopleNearby_profile_image);
         mName = (TextView) itemView.findViewById(R.id.peopleNearby_person_name);
         mDistance = (TextView) itemView.findViewById(R.id.peopleNearby_distance);
         mStatus = (TextView) itemView.findViewById(R.id.peopleNearby_status);

@@ -21,12 +21,12 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -47,7 +47,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
     protected TextView vPostTime;
     protected CheckBox vLikesHeart;
     protected ImageView vPostImage;
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected LinearLayout vPostImageLinear;
     protected TextView vPostTimeImage;
@@ -68,7 +68,7 @@ public class FeedDetailHeaderViewHolder extends RecyclerView.ViewHolder implemen
         vLikesText = (TextView) itemView.findViewById(R.id.postNumLikesDetail);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeartStatusDetail);
         vPostImage = (ImageView) itemView.findViewById(R.id.postImageDetail);
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.comment_head_post_user_image);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.comment_head_post_user_image);
         vPostTime = (TextView) itemView.findViewById(R.id.postTimeElapsedDetail);
 
         vPostImageLinear = (LinearLayout) itemView.findViewById(R.id.post_image_linear_detail);

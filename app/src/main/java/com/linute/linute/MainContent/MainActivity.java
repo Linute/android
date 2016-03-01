@@ -42,10 +42,10 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.net.URISyntaxException;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -375,7 +375,7 @@ public class MainActivity extends BaseTaptActivity {
                 .override(size, size) //change image to the size we want
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into((CircularImageView) header.findViewById(R.id.navigation_header_profile_image));
+                .into((CircleImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
 
     public void showFAB(boolean show) {

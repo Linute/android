@@ -16,9 +16,9 @@ public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         if (position == 0){
-            return PeopleFragment.newInstance(false);
-        }else
             return PeopleFragment.newInstance(true);
+        }else
+            return PeopleFragment.newInstance(false);
     }
 
     @Override
@@ -30,9 +30,9 @@ public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position){
             case 0:
-                return "Top Players";
-            case 1:
                 return "Nearby";
+            case 1:
+                return "Top Players";
             default:
                 return super.getPageTitle(position);
         }

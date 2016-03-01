@@ -44,7 +44,6 @@ import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
@@ -59,6 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -96,7 +96,7 @@ public class LinuteSignUpFragment extends Fragment {
 
     private TextView mEmailConfirmTextView;
 
-    private CircularImageView mProfilePictureView;
+    private CircleImageView mProfilePictureView;
 
     private boolean mCredentialCheckInProgress = false; //determine if currently querying database
 
@@ -182,7 +182,7 @@ public class LinuteSignUpFragment extends Fragment {
         mPasswordView = (EditText) root.findViewById(R.id.signup_password);
         mFirstNameTextView = (EditText) root.findViewById(R.id.signup_fname_text);
         mLastNameTextView = (EditText) root.findViewById(R.id.signup_lname_text);
-        mProfilePictureView = (CircularImageView) root.findViewById(R.id.signup_profile_pic_view);
+        mProfilePictureView = (CircleImageView) root.findViewById(R.id.signup_profile_pic_view);
 
         mProgressBar1 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar1);
         mProgressBar2 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar2);
@@ -276,6 +276,8 @@ public class LinuteSignUpFragment extends Fragment {
         final String fName = mFirstNameTextView.getText().toString().trim();
         final String lName = mLastNameTextView.getText().toString().trim();
 
+        showProgress(true, 0);
+
         if (checkEmail(email) && areGoodCredentials(password, fName, lName)) {
 
             mEmailString = email;
@@ -325,7 +327,7 @@ public class LinuteSignUpFragment extends Fragment {
                     try {
                         String stringResp = response.body().string();
                         mPinCode = (new JSONObject(stringResp).getString("pinCode"));
-//                        Log.i(TAG, "onResponse: " + stringResp);
+                        Log.i(TAG, "onResponse: " + stringResp);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {

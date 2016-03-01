@@ -8,15 +8,14 @@
     android:background="#ffffff"
     android:orientation="vertical">
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/postUserImage"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_gravity="center"
         android:layout_marginTop="15dp"
-        android:scaleType="centerCrop"
-        app:border_width="1dp"
-        app:border_color="@color/light_grey"
+        app:civ_border_width="1dp"
+        app:civ_border_color="@color/light_grey"
         />
 
     <RelativeLayout

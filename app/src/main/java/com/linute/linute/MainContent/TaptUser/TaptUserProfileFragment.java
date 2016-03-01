@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,7 +47,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public static final String TAG = TaptUserProfileFragment.class.getSimpleName();
 
     private RecyclerView recList;
-    private LinearLayoutManager llm;
+    private GridLayoutManager llm;
     private ProfileAdapter mProfileAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -95,10 +96,17 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new CustomLinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        llm = new GridLayoutManager(getActivity(), 3);
+        llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (position == 0) return 3;
+                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem) return 3;
+                else return 1;
+            }
+        });
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        //recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         mLinuteUser.setUserID(mTaptUserId);
         mProfileAdapter = new ProfileAdapter(mUserActivityItems, mLinuteUser, getActivity());
