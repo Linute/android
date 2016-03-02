@@ -16,14 +16,11 @@ import okhttp3.Callback;
  */
 public class LSDKEvents {
 
-    // where user information will be
-    private static SharedPreferences mSharedPreferences;
-
     private static String mToken;
 
     public LSDKEvents(Context context) {
-        mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mToken = mSharedPreferences.getString("userToken","");
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mToken = sharedPreferences.getString("userToken","");
     }
 
     public Call getEvents(boolean friendsOnly, Map<String, String> param, Callback callback) {
@@ -93,6 +90,26 @@ public class LSDKEvents {
         params.put("isDeleted", 1);
 
         return API_Methods.put("events/"+postID, header,params,callback);
+    }
+
+    public Call reportComment(String commentId, String userId, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("owner", userId);
+        params.put("comment", commentId);
+        params.put("reason", 2);
+
+        return API_Methods.post("reports", header, params, callback);
+    }
+
+    public Call revealComment(String commentId, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("privacy", 1);
+
+
     }
 
 }

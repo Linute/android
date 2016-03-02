@@ -5,8 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
@@ -24,12 +22,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.R;

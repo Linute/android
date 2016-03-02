@@ -155,7 +155,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
+
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
+
         recList.setAdapter(mFeedDetailAdapter);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
@@ -214,6 +216,15 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mCommentEditText.setQueryTokenReceiver(this);
         mCommentEditText.setSuggestionsVisibilityManager(this);
 
+        mFeedDetailAdapter.setMentionedTextAdder(new FeedDetailAdapter.MentionedTextAdder() {
+            @Override
+            public void addMentionedPerson(MentionedPerson person) {
+                mCommentEditText.append(" @");
+                mCommentEditText.insertMention(person);
+                mCommentEditText.requestFocus();
+            }
+        });
+
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
@@ -258,7 +269,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onResume();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            activity.setTitle(mIsImage ? "Image" : "Status");
+            activity.setTitle("Comments");
             activity.resetToolbar();
             activity.enableBarScrolling(false);
             activity.setToolbarOnClickListener(new View.OnClickListener() {
@@ -296,10 +307,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -332,10 +343,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -774,7 +785,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         try {
 
                             String res = response.body().string();
-                            Log.i(TAG, "onResponse: " + res);
+                            //Log.i(TAG, "onResponse: " + res);
 
                             JSONArray friends = new JSONObject(res).getJSONArray("friends");
 
@@ -970,7 +981,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     );
                 }
 
-                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null){
+                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
                     mFeedDetail.getComments().clear();
                 }
 
@@ -1010,7 +1021,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             mProgressbar.setVisibility(View.GONE);
                             setCommentViewEditable(true);
                         }
-                        if (!excep){
+                        if (!excep) {
                             //because of header we can use size, change if decide to add it to array
                             mFeedDetailAdapter.notifyDataSetChanged();
                             recList.smoothScrollToPosition(mFeedDetail.getComments().size());

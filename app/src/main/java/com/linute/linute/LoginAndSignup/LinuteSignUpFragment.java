@@ -606,6 +606,7 @@ public class LinuteSignUpFragment extends Fragment {
             @Override
             public void run() {
                 mEmailView.setError(getString(R.string.signup_error_email_taken));
+                mEmailView.requestFocus();
                 showProgress(false, 0);
             }
         });

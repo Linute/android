@@ -1,61 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal"
->
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/comment_user_image"
-        android:layout_width="@dimen/profile_image_radius"
-        android:layout_height="@dimen/profile_image_radius"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        app:civ_border_color="@color/seperator_color"
-        app:civ_border_width="1dp"
-    />
+
+<com.daimajia.swipe.SwipeLayout android:id="@+id/comment_swipe_layout"
+                                xmlns:android="http://schemas.android.com/apk/res/android"
+                                xmlns:app="http://schemas.android.com/apk/res-auto"
+                                xmlns:tools="http://schemas.android.com/tools"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                app:leftEdgeSwipeOffset="0dp"
+                                app:rightEdgeSwipeOffset="0dp">
+
+    <LinearLayout android:id="@+id/comment_bottom_wrapper"
+                  android:layout_width="wrap_content"
+                  android:layout_height="match_parent"
+                  android:orientation="horizontal">
+
+        <RelativeLayout android:id="@+id/comment_delete"
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent"
+                        android:background="#c8c7cd"
+        >
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_centerInParent="true"
+                       android:src="@drawable/ic_action_delete"
+            />
+
+        </RelativeLayout>
+
+        <RelativeLayout android:id="@+id/comment_reveal"
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent"
+                        android:background="#5ccdc9">
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_centerInParent="true"
+                       android:src="@drawable/ic_action_reveal"
+            />
+
+        </RelativeLayout>
+
+        <RelativeLayout android:id="@+id/comment_report"
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent"
+                        android:background="#ff9000">
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_centerInParent="true"
+                       android:src="@drawable/ic_action_whistle14"
+            />
+
+        </RelativeLayout>
+
+        <RelativeLayout android:id="@+id/comment_reply"
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent"
+                        android:background="#27425a">
+
+            <ImageView android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_centerInParent="true"
+                       android:src="@drawable/ic_action_reply"
+            />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+    >
 
-        <RelativeLayout android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/comment_user_image"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            app:civ_border_color="@color/seperator_color"
+            app:civ_border_width="1dp"
+        />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:orientation="vertical">
+
+            <RelativeLayout android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/comment_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/user_name_blue"
+                    android:textSize="@dimen/body_font_size"
+                    android:textStyle="bold"
+                    tools:text="Name Name"/>
+
+                <TextView android:id="@+id/comment_time_ago"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_alignParentEnd="true"
+                          android:textColor="@color/twentyfive_black"
+                          android:textSize="@dimen/sub_font_size"
+                          tools:text="1h"
+                />
+
+
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/comment_user_name"
+                android:id="@+id/comment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/user_name_blue"
-                android:textSize="@dimen/body_font_size"
-                android:textStyle="bold"
-                tools:text="Name Name"/>
+                android:textColor="@color/eighty_black"
+                android:textSize="@dimen/sub_font_size"
+                tools:text="test test test testtest test test testtest "/>
 
-            <TextView android:id="@+id/comment_time_ago"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textColor="@color/twentyfive_black"
-                      android:textSize="@dimen/sub_font_size"
-                      tools:text="1h"
-                      android:layout_alignParentEnd="true"
-            />
-
-
-        </RelativeLayout>
-
-        <TextView
-            android:id="@+id/comment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/eighty_black"
-            android:textSize="@dimen/sub_font_size"
-            tools:text="test test test testtest test test testtest test test testtest test test testtest test test test "/>
+        </LinearLayout>
 
     </LinearLayout>
-
-</LinearLayout>
+</com.daimajia.swipe.SwipeLayout>

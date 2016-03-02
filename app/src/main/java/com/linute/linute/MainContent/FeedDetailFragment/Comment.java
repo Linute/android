@@ -19,6 +19,7 @@ public class Comment {
     private boolean mIsAnon;
     private String mAnonImage;
 
+
     private List<MentionedPersonLight> mMentionedPeople;
 
 

@@ -52,5 +52,7 @@
     <color name="pure_white">#FFFFFF</color>
     <color name="pure_black">#000000</color>
 
+    <color name="user_comment_color">#56bb1d</color>
+
 </resources>
 
