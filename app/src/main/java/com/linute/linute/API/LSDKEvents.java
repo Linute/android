@@ -105,11 +105,10 @@ public class LSDKEvents {
 
     public Call revealComment(String commentId, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
         Map<String, Object> params = new HashMap<>();
         params.put("privacy", 1);
 
-
+        return API_Methods.put("comments/"+commentId, header, params, callback);
     }
 
 }
