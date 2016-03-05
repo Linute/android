@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 /**
  * Created by QiFeng on 2/15/16.
@@ -21,6 +22,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
         final LinearSmoothScroller linearSmoothScroller =
                 new LinearSmoothScroller(recyclerView.getContext()) {
                     private static final float MILLISECONDS_PER_INCH =  150f;
+                    private static final float MAX_SPEED = 0.01f;
 
                     @Override
                     public PointF computeScrollVectorForPosition(int targetPosition) {
@@ -30,7 +32,9 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
                     @Override
                     protected float calculateSpeedPerPixel
                             (DisplayMetrics displayMetrics) {
-                        return MILLISECONDS_PER_INCH / getItemCount() / displayMetrics.densityDpi;
+                        float num = MILLISECONDS_PER_INCH / getItemCount() / displayMetrics.densityDpi;
+
+                        return num > MAX_SPEED ? MAX_SPEED : num;
                     }
                 };
 

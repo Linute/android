@@ -2,6 +2,7 @@
 <android.support.v4.widget.SwipeRefreshLayout
     android:id="@+id/swipe_layout"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -14,15 +15,36 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <ImageView android:id="@+id/discover_no_posts"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center_horizontal"
-                   android:layout_marginStart="100dp"
-                   android:layout_marginEnd="100dp"
-                   android:layout_marginTop="50dp"
-                   android:visibility="gone"
-        />
+
+        <RelativeLayout android:id="@+id/discover_no_posts_frame"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="100dp"
+                        android:visibility="gone"
+                        android:layout_marginTop="50dp">
+
+            <ImageView android:id="@+id/discover_no_posts"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:layout_centerHorizontal="true"
+                       tools:src="@drawable/campus"
+            />
+
+            <TextView android:id="@+id/dicover_no_posts_text"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/discover_no_posts"
+                      android:layout_centerHorizontal="true"
+                      android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                      android:layout_marginStart="@dimen/activity_horizontal_margin"
+                      android:layout_marginTop="16dp"
+                      android:gravity="center"
+                      tools:text="@string/discover_no_posts_campus"
+            />
+        </RelativeLayout>
+
+
     </RelativeLayout>
 
 

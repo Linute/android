@@ -112,7 +112,7 @@ public class RoomsActivity extends BaseTaptActivity {
     public void onBackPressed() {
         int count = getSupportFragmentManager().getBackStackEntryCount();
         if (count == 0) {
-            finish();
+            super.onBackPressed();
         } else {
             if (count == 1){
                 toggleFab(true);

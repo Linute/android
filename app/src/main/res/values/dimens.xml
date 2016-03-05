@@ -18,7 +18,7 @@
     <dimen name="small_profile_image_radius">40dp</dimen>
 
 
-    <dimen name="action_picture_size">40dp</dimen>
+    <dimen name="action_picture_size">64dp</dimen>
     <dimen name="updatefragment_icon_size">17dp</dimen>
 
     <!-- Square Camera -->
@@ -51,5 +51,10 @@
     <dimen name="header_font_size">16sp</dimen>
 
     <dimen name="list_space">6dp</dimen>
+
+    <dimen name="post_create_button_space">6dp</dimen>
+    <dimen name="post_create_corner_radius">4dp</dimen>
+
+    <dimen name="grid_layout_sep_margin">8dp</dimen>
 
 </resources>

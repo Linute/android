@@ -40,7 +40,6 @@ import java.util.List;
  */
 public class PeopleFragmentsHolder extends UpdatableFragment {
 
-
     public static final String TAG = PeopleFragmentsHolder.class.getSimpleName();
     private ViewPager mViewPager;
     private PeopleHolderPagerAdapter mPeopleHolderPagerAdapter;
@@ -74,7 +73,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 //we will only load the other fragment if it is needed
                 //ex. we start on the campus tab. we won't load the near me tab until we swipe left
                 loadFragmentAtPositionIfNeeded(position);
-                mInitiallyPresentedFragmentWasActive = position == 0;
+                mInitiallyPresentedFragmentWasNearby = position == 0;
             }
 
             @Override
@@ -94,7 +93,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     private boolean mActiveNeedsUpdating = true;
     private boolean mNearMeNeedsUpdating = true;
-    private boolean mInitiallyPresentedFragmentWasActive = true;
+    private boolean mInitiallyPresentedFragmentWasNearby = true;
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -110,7 +109,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
             int index = savedInstanceState.getInt("viewPagerIndex");
-            mInitiallyPresentedFragmentWasActive = index == 0;
+            mInitiallyPresentedFragmentWasNearby = index == 0;
             mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate");
             mNearMeNeedsUpdating = savedInstanceState.getBoolean("nearMeNeedsUpdate");
             mViewPager.setCurrentItem(index);
@@ -144,8 +143,8 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         mActiveNeedsUpdating = needsUpdating;
     }
 
-    public boolean getInitiallyPresentedFragmentWasActive() {
-        return mInitiallyPresentedFragmentWasActive;
+    public boolean getInitiallyPresentedFragmentWasNearby() {
+        return mInitiallyPresentedFragmentWasNearby;
     }
 
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
@@ -155,13 +154,13 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
 
         if (fragment == null) return;
-        if (position == 0 ? mActiveNeedsUpdating : mNearMeNeedsUpdating) {
+        if (position == 0 ? mNearMeNeedsUpdating : mActiveNeedsUpdating) {
             if (position == 0) {
-                mActiveNeedsUpdating = false;
-                fragment.getPeople();
-            } else {
                 mNearMeNeedsUpdating = false;
                 fragment.getPeopleNearMe();
+            } else {
+                mActiveNeedsUpdating = false;
+                fragment.getPeople();
             }
         }
 
@@ -225,6 +224,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     //there's problems with nested fragments
     public boolean hasLocationPermissions() {
+        if (getActivity() == null) return false;
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -240,7 +240,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PeopleFragment.LOCATION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 1);
+                PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 0);
                 fragment.gotPermissionResults();
             }
         }

@@ -11,4 +11,11 @@
           app:showAsAction="always"/>
 
 
+    <item android:id="@+id/feed_detail_reveal"
+          android:icon="@drawable/ic_action_reveal"
+          android:orderInCategory="1"
+          android:title="Reveal"
+          app:showAsAction="ifRoom"/>
+
+
 </menu>

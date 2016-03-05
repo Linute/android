@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.linute.linute.R;
 
@@ -16,6 +17,7 @@ public class EmptyProfileHolder extends RecyclerView.ViewHolder {
         super(itemView);
         Log.i("test", "EmptyProfileHolder: ");
         ((ImageView) itemView.findViewById(R.id.empty_cell_bg_image)).setImageResource(R.drawable.no_profile);
+        ((TextView) itemView.findViewById(R.id.empty_cell_bg_text)).setText(R.string.profile_no_posts);
     }
 
 }

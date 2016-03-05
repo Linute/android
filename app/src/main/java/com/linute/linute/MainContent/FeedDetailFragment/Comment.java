@@ -19,6 +19,7 @@ public class Comment {
     private boolean mIsAnon;
     private String mAnonImage;
 
+
     private List<MentionedPersonLight> mMentionedPeople;
 
 
@@ -84,6 +85,10 @@ public class Comment {
 
     public String getAnonImage(){
         return mAnonImage;
+    }
+
+    public void setIsAnon(boolean anon) {
+        mIsAnon = anon;
     }
 
     public String getDateString(){

@@ -23,13 +23,10 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true">
 
-                <TextView android:id="@+id/create_page_post_button"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:text="POST"
-                          android:textColor="#FFFFFF"
-                          android:textSize="@dimen/header_font_size"
-                          android:textStyle="bold"
+                <ImageView android:id="@+id/create_page_post_button"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:src="@drawable/ic_action_check83"
                 />
 
                 <ProgressBar android:id="@+id/create_page_progress_bar"
@@ -46,10 +43,30 @@
     </android.support.v7.widget.Toolbar>
 
 
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_frame"
+                                                         android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
-                                                         android:background="#FFFFFF"
-    >
+                                                         android:focusableInTouchMode="true"
+                                                         android:background="#FFFFFF">
+
+        <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
+            android:id="@+id/post_create_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="32dp"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="Enter your text here"
+            android:imeOptions="actionDone"
+            android:inputType="textMultiLine|textPhonetic|textCapSentences"
+            android:maxLines="8"
+            android:textColor="#000000"
+            android:textSize="32sp"
+            android:textStyle="italic"
+        />
 
 
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -57,37 +74,34 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
+                  android:layout_margin="10dp"
                   android:baselineAligned="false"
-                  android:layout_margin="8dp"
                   android:weightSum="6"
     >
 
-        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="0px"
-                                                             android:layout_margin="4dp"
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_0"
+                                                             android:layout_width="0px"
                                                              android:layout_height="wrap_content"
+                                                             android:layout_margin="@dimen/post_create_button_space"
                                                              android:layout_weight="1"
-                                                             android:background="@drawable/post_color_0"
-
-        >
+                                                             android:background="@drawable/post_color_0">
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center"
+                      android:text="T"
                       android:textColor="#000000"
                       android:textSize="25sp"
-                      android:text="T"
             />
-
-
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_1"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_color_1"
+            android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
+            android:background="@drawable/post_color_1"
         >
-
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center"
@@ -95,15 +109,15 @@
                       android:textColor="#FFFFFF"
                       android:textSize="25sp"
             />
-
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_2"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_color_2"
+            android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
+            android:background="@drawable/post_color_2"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -117,12 +131,12 @@
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_3"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_color_3"
+            android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-        >
+            android:background="@drawable/post_color_3">
 
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -136,11 +150,12 @@
 
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_4"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_color_4"
+            android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
+            android:background="@drawable/post_color_4"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -154,11 +169,12 @@
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_5"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_color_5"
+            android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
+            android:background="@drawable/post_color_5"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -170,6 +186,41 @@
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="horizontal">
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+
+        <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/post_create_anon_switch"
+                                                        android:layout_width="0px"
+                                                        android:layout_height="wrap_content"
+                                                        android:layout_marginEnd="16dp"
+                                                        android:layout_marginStart="16dp"
+                                                        android:layout_weight="1"
+                                                        android:scaleType="centerCrop"
+                                                        android:src="@drawable/ic_anon_off"/>
+
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
+        <View android:layout_width="0px"
+              android:layout_height="0px"
+              android:layout_weight="1"/>
 
     </LinearLayout>
 

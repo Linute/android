@@ -24,7 +24,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONObject;
 
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -50,7 +50,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
     protected TextView vPostTime;
     protected CheckBox vLikesHeart;
     protected ImageView vPostImage;
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected LinearLayout vPostImageLinear;
     protected TextView vPostTimeImage;
@@ -76,7 +76,7 @@ public class CheckBoxQuestionViewHolder extends RecyclerView.ViewHolder implemen
         vLikesText = (TextView) itemView.findViewById(R.id.postNumLikes);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeartStatus);
         vPostImage = (ImageView) itemView.findViewById(R.id.postImage);
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.postUserImage);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.postUserImage);
         vPostTime = (TextView) itemView.findViewById(R.id.postTimeElapsed);
 
         vPostImageLinear = (LinearLayout) itemView.findViewById(R.id.post_image_linear);

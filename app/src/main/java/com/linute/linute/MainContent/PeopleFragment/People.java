@@ -13,12 +13,19 @@ public class People {
 
     private boolean mFriend;
 
-    public People(String profileImage, String name, String ID, String date, boolean friend) {
+    private String mStatus;
+
+    public People(String profileImage, String name, String ID, String date, boolean friend, String status) {
         mProfileImage = profileImage;
         mName = name;
         mID = ID;
         mDate = date;
         mFriend = friend;
+        mStatus = status;
+    }
+
+    public String getStatus(){
+        return mStatus;
     }
 
     public String getProfileImage() {

@@ -3,18 +3,34 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="vertical"
               android:background="@color/white"
+              android:orientation="vertical"
               tools:background="@android:color/holo_red_light">
 
     <include layout="@layout/feed_detail_header"/>
 
-    <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
-                                                    android:layout_width="match_parent"
-                                                    android:layout_height="wrap_content"
-                                                    android:layout_marginTop="@dimen/activity_vertical_margin"
-                                                    android:scaleType="centerCrop"
-                                                    android:src="@drawable/image_loading_background"/>
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
+                                                         android:layout_height="wrap_content"
+                                                         android:layout_marginTop="@dimen/activity_vertical_margin"
+    >
+
+        <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
+                                                        android:layout_width="match_parent"
+                                                        android:layout_height="wrap_content"
+                                                        android:scaleType="centerCrop"
+                                                        android:src="@drawable/image_loading_background"/>
+
+        <View android:id="@+id/feed_detail_hidden_animation"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:alpha="0.3"
+              android:background="#EA294C"
+              android:visibility="invisible"
+        />
+
+
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
 
     <include layout="@layout/feed_detail_action_bar"/>
 

@@ -53,6 +53,8 @@ public class SettingActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_settings);
 
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
         //get toolbar
         setUpToolbar();
 

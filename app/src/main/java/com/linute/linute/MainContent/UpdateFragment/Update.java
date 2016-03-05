@@ -39,7 +39,9 @@ public class Update {
         MENTIONED, //need icon
         FRIEND_JOINED, //need icon
         POSTED_STATUS,
-        POSTED_PHOTO
+        POSTED_PHOTO,
+        AlSO_COMMENTED_STATUS,
+        ALSO_COMMENTED_IMAGE
     }
 
     private String mDescription;
@@ -69,23 +71,29 @@ public class Update {
     private boolean mFollowedBack;
 
     private boolean mIsAnon;
+    private String mAnonImage;
+
+    private String mText;
 
     public Update(){
 
     }
 
 
-    public Update(JSONObject json) {
-        mUpdateType = getUpdateTypeFromString(getStringFromJson(json, "action"));
+    public Update(JSONObject json) throws JSONException {
+
+        mUpdateType = getUpdateTypeFromString(getStringFromJson(json,"action"));
 
         mIsRead = getBooleanFromJson(json, "isRead");
 
         //uncomment if we decide to use it
         //mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
 
-        mActionID = getStringFromJson(json, "id");
+        mActionID = getStringFromJson(json,"id");
 
         mIsAnon = getIntFromJson(json, "privacy") == 1;
+
+        mAnonImage = getStringFromJson(json,"anonymousImage");
 
         setUpUserInformation(json);
 
@@ -97,7 +105,7 @@ public class Update {
         if (hasEventInformation())
             setUpEvent(json);
 
-        mDescription = getActionDescription(mUpdateType);
+        mDescription = getStringFromJson(json, "text");
     }
 
     private static UpdateType getUpdateTypeFromString(String action) {
@@ -120,6 +128,10 @@ public class Update {
                 return UpdateType.POSTED_STATUS;
             case "posted photo":
                 return UpdateType.POSTED_PHOTO;
+            case "also commented status":
+                return UpdateType.AlSO_COMMENTED_STATUS;
+            case "also commented photo":
+                return UpdateType.ALSO_COMMENTED_IMAGE;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -139,7 +151,8 @@ public class Update {
     public final boolean hasEventInformation(){
         return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
                 mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
-                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED;
+                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED
+                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -152,7 +165,6 @@ public class Update {
 
         if (event == null) return;
 
-        mIsPicturePost = getIntFromJson(event, "type") != 0;
         mEventID = getStringFromJson(event, "id");
         mEventTitle = getStringFromJson(event, "title");
 
@@ -163,27 +175,29 @@ public class Update {
         if (images != null && images.length() > 0) {
             try {
                 mEventImageName = images.getString(0);
+                mIsPicturePost = true;
             } catch (JSONException e) {
                 e.printStackTrace();
                 mEventImageName = null;
+                mIsPicturePost = false;
             }
         }
     }
 
-    private void setUpUserInformation(JSONObject json) {
+    private void setUpUserInformation(JSONObject json) throws JSONException {
         JSONObject user = getJsonObjectFromJson(json, "user");
 
         //no user info, try getting owner info
-        if (user == null) user = getJsonObjectFromJson(json, "owner");
-
-        //still null, just return
-        if (user == null) return;
+        if (user == null) user = json.getJSONObject("owner");
 
         mUserFullName = getStringFromJson(user, "fullName");
-        mUserId = getStringFromJson(user, "id");
+        mUserId = user.getString("id");
         mUserProfileImageName = getStringFromJson(user, "profileImage");
     }
 
+    public String getAnonImage(){
+        return mAnonImage;
+    }
 
     private static String getActionDescription(UpdateType type) {
         switch (type){
@@ -205,6 +219,10 @@ public class Update {
                 return "Posted a photo";
             case POSTED_STATUS:
                 return "Posted a status";
+            case ALSO_COMMENTED_IMAGE:
+                return "Also commented on a photo";
+            case AlSO_COMMENTED_STATUS:
+                return "Also commented on a status";
             default:
                 return  "";
         }

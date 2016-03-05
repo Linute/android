@@ -23,7 +23,6 @@ import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -92,7 +92,7 @@ public class NewChatDialog extends DialogFragment {
 
         ImageView cancelChat = (ImageView) rootView.findViewById(R.id.new_chat_check_cancel);
         ImageView submitChat = (ImageView) rootView.findViewById(R.id.new_chat_check_submit);
-        CircularImageView userImage = (CircularImageView) rootView.findViewById(R.id.new_chat_user_image);
+        CircleImageView userImage = (CircleImageView) rootView.findViewById(R.id.new_chat_user_image);
         TextView userName = (TextView) rootView.findViewById(R.id.new_chat_user_name);
         final EditText userChatMessage = (EditText) rootView.findViewById(R.id.new_chat_text_entry);
 

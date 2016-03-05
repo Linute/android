@@ -5,8 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
@@ -24,12 +22,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.R;
@@ -61,8 +55,6 @@ public class LinuteLoginFragment extends Fragment {
     private View mCreateAccount;
 
     private View mButtonsLayer;
-
-    private View mForgotPassword;
 
 
     public LinuteLoginFragment() {
@@ -105,9 +97,9 @@ public class LinuteLoginFragment extends Fragment {
         });
 
 
-        mForgotPassword = rootView.findViewById(R.id.login_forgot_pass);
+        View forgotPassword = rootView.findViewById(R.id.login_forgot_pass);
 
-        mForgotPassword.setOnClickListener(new OnClickListener() {
+        forgotPassword.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
@@ -155,17 +147,20 @@ public class LinuteLoginFragment extends Fragment {
         boolean cancel = false;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             cancel = true;
+            mPasswordView.requestFocus();
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
+            mEmailView.requestFocus();
             cancel = true;
         } else if (!isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
+            mEmailView.requestFocus();
             cancel = true;
         }
 
@@ -194,6 +189,7 @@ public class LinuteLoginFragment extends Fragment {
          *
          */
         // @.edu                        //hey@.edu          //hey.edu
+
         if (email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
                 !email.contains(".") || email.contains(" "))
             //hello@edededu             //whitespace
@@ -245,6 +241,7 @@ public class LinuteLoginFragment extends Fragment {
     private void checkCredentialsWithDB(String email, final String password) {
 
         if (getActivity() == null) return;
+
         LSDKUser checker = new LSDKUser(getActivity());
         checker.loginUserWithEmail(email, password, new Callback() {
             @Override
@@ -260,6 +257,7 @@ public class LinuteLoginFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     try {
+                        Log.i(TAG, "onResponse: "+res);
                         saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
@@ -282,49 +280,51 @@ public class LinuteLoginFragment extends Fragment {
                         });
                     }
                 }
-                //else if (response.code() == 404) { //bad credentials
-//
-//                    try{
-//                        JSONObject obj = new JSONObject(res);
-//                        final boolean emailError = obj.getString("error").equals("email");
-//
-//                        if (getActivity() == null) return;
-//                        getActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                if (emailError){
-//                                    mEmailView.setError("No account with this email");
-//                                }else {
-//                                    mPasswordView.setError("Invalid password");
-//                                }
-//                                showProgress(false);
-//                            }
-//                        });
-//
-//                    }catch (JSONException e){
-//                        if (getActivity() == null) return;
-//                        getActivity().runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                Utils.showServerErrorToast(getActivity());
-//                                showProgress(false);
-//                            }
-//                        });
-//                    }
-//
-//                } else {
-//                    //Log.e(TAG, "onResponse: "+res);
-//                    if (getActivity() == null) return;
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Utils.showServerErrorToast(getActivity());
-//                            showProgress(false);
-//                        }
-//                    });
-//
-//                }
+                else if (response.code() == 404) { //bad credentials
+
+                    try{
+                        JSONObject obj = new JSONObject(res);
+                        final boolean emailError = obj.getString("error").equals("email");
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                showProgress(false);
+                                if (emailError){
+                                    mEmailView.setError("No account with this email");
+                                    mEmailView.requestFocus();
+                                }else {
+                                    mPasswordView.setError("Invalid password");
+                                    mPasswordView.requestFocus();
+                                }
+                            }
+                        });
+
+                    }catch (JSONException e){
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                showProgress(false);
+                            }
+                        });
+                    }
+
+                } else {
+                    //Log.e(TAG, "onResponse: "+res);
+                    if (getActivity() == null) return;
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showServerErrorToast(getActivity());
+                            showProgress(false);
+                        }
+                    });
+
+                }
             }
         });
     }
@@ -338,11 +338,6 @@ public class LinuteLoginFragment extends Fragment {
         }
     };
 
-    private void invalidCredentials() {
-        showProgress(false);
-        mEmailView.setError("Invalid email or password");
-        mPasswordView.setError("Invalid email or password");
-    }
 
     private void saveCredentials(String responseString) throws JSONException {
 

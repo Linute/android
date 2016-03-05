@@ -8,19 +8,25 @@
     android:background="#ffffff"
     android:orientation="vertical">
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <!--<com.mikhaellopez.circularimageview.CircularImageView-->
+        <!--android:id="@+id/comment_head_post_user_image"-->
+        <!--android:layout_width="45dp"-->
+        <!--android:layout_height="45dp"-->
+        <!--android:layout_gravity="center"-->
+        <!--android:layout_marginTop="15dp"-->
+        <!--card_view:civ_border="false"-->
+        <!--card_view:civ_border_color="#EEEEEE"-->
+        <!--card_view:civ_border_width="0dp"-->
+        <!--card_view:civ_shadow="false"-->
+        <!--card_view:civ_shadow_color="#8BC34A"-->
+        <!--card_view:civ_shadow_radius="10"/>-->
+
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/comment_head_post_user_image"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:scaleType="centerCrop"
-        card_view:border="false"
-        card_view:border_color="#EEEEEE"
-        card_view:border_width="0dp"
-        card_view:shadow="false"
-        card_view:shadow_color="#8BC34A"
-        card_view:shadow_radius="10"/>
+        android:layout_marginTop="15dp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -22,7 +24,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -53,7 +55,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
     protected TextView vCommentsText;
     protected TextView vPostTime;
     protected CheckBox vLikesHeart;
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected ImageView mPostImage;
 
@@ -62,7 +64,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
     private String mUserId;
     private String mImageSignature;
 
-    public FeedDetailHeaderImageViewHolder(RecyclerView.Adapter adapter, View itemView, Context context) {
+    public FeedDetailHeaderImageViewHolder(RecyclerView.Adapter adapter, final View itemView, Context context) {
         super(itemView);
 
         mContext = context;
@@ -80,7 +82,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vLikeContainer = itemView.findViewById(R.id.feed_control_bar_like_button);
 
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 
         mPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
 
@@ -95,7 +97,37 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
             @Override
             public void onDoubleClick(View v) {
-                vLikesHeart.toggle();
+                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+                a.setDuration(400);
+
+                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+                a2.setDuration(200);
+
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        layer.startAnimation(a2);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                layer.startAnimation(a);
+
+                if (!vLikesHeart.isChecked()){
+                    vLikesHeart.toggle();
+                }
+
             }
         });
     }
@@ -163,7 +195,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
                     vFeedDetail.setIsPostLiked(true);
                     vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-                    mAdapater.notifyItemChanged(0);
+                    vLikesText.setText("Like ("+vFeedDetail.getPostLikeNum()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -268,7 +300,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
                     vFeedDetail.setIsPostLiked(false);
                     vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-                    mAdapater.notifyItemChanged(0);
+                    vLikesText.setText("Like ("+vFeedDetail.getPostLikeNum()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

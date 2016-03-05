@@ -45,7 +45,7 @@
                    android:layout_width="0px"
                    android:layout_height="wrap_content"
                    android:layout_weight="1"
-                   android:scaleType="fitEnd"
+                   android:scaleType="centerCrop"
                    android:src="@drawable/facebook_login_button"
                    android:layout_gravity="bottom"
             />
@@ -54,7 +54,7 @@
             android:id="@+id/prelogin_linute_login"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:scaleType="fitEnd"
+            android:scaleType="centerCrop"
             android:src="@drawable/tapt_login_button"
             android:layout_gravity="bottom"
             android:layout_weight="1"/>

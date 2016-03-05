@@ -19,7 +19,6 @@ import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 
 
@@ -32,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -71,7 +71,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     class SearchViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         protected LinearLayout vSearchItemLinear;
-        protected CircularImageView vUserImage;
+        protected CircleImageView vUserImage;
         protected TextView vUserName;
         protected String mUserId;
 
@@ -79,7 +79,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             super(itemView);
 
             vSearchItemLinear = (LinearLayout) itemView.findViewById(R.id.search_users_list_layout);
-            vUserImage = (CircularImageView) itemView.findViewById(R.id.search_users_list_image);
+            vUserImage = (CircleImageView) itemView.findViewById(R.id.search_users_list_image);
             vUserName = (TextView) itemView.findViewById(R.id.search_users_list_name);
 
             vSearchItemLinear.setOnClickListener(this);

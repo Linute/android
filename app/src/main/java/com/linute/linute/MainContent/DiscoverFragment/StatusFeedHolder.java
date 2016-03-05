@@ -23,7 +23,6 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -57,7 +57,7 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
 
-    protected CircularImageView vUserImage;
+    protected CircleImageView vUserImage;
 
     protected TextView vStatus;
     protected View vStatusContainer; //so status is easier to press
@@ -95,7 +95,7 @@ public class StatusFeedHolder extends RecyclerView.ViewHolder implements CheckBo
 
         vStatusContainer = itemView.findViewById(R.id.feedDetail_status_container);
 
-        vUserImage = (CircularImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 
         vLikesHeart.setOnCheckedChangeListener(this);
 

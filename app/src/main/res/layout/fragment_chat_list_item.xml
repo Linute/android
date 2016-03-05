@@ -13,11 +13,10 @@
         android:orientation="horizontal"
         android:visibility="gone">
 
-        <com.mikhaellopez.circularimageview.CircularImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/chat_owner_image"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:scaleType="centerCrop"
             android:src="@drawable/icon_user"
             card_view:border="false"
             card_view:border_color="#EEEEEE"
@@ -93,12 +92,11 @@
                 android:text="Hey there Job"/>
         </LinearLayout>
 
-        <com.mikhaellopez.circularimageview.CircularImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/chat_user_image"
             android:layout_width="45dp"
             android:layout_height="45dp"
             android:layout_alignParentEnd="true"
-            android:scaleType="centerCrop"
             android:src="@drawable/icon_user"
             card_view:border="false"
             card_view:border_color="#EEEEEE"

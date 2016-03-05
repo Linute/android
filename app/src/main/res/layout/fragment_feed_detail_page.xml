@@ -47,9 +47,10 @@
                           android:layout_alignParentBottom="true"
                           android:layout_centerHorizontal="true"
                           android:layout_marginBottom="8dp"
+                          android:textSize="@dimen/sub_font_size"
                           android:text="OFF"
                           android:textColor="@color/twentyfive_black"
-                          android:textStyle="bold"/>
+                          />
 
 
             </RelativeLayout>

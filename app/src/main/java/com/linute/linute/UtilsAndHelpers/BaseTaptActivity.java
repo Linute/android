@@ -79,9 +79,14 @@ public class BaseTaptActivity extends AppCompatActivity {
 
     }
 
+    public boolean socketConnected(){
+        return false;
+    }
 
     public interface SocketErrorResponse{
         void runSocketError();
     }
+
+
 }
 

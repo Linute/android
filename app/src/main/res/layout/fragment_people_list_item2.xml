@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/pure_white"
+              android:orientation="vertical">
+
+    <RelativeLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/activity_horizontal_margin">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/people_user_image"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            android:layout_centerHorizontal="true"
+            app:civ_border_color="@color/seperator_color"
+            app:civ_border_width="1dp"
+            tools:src="@drawable/profile_picture_placeholder"
+        />
+
+        <TextView android:id="@+id/people_time_or_active_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentEnd="true"
+                  android:layout_alignParentTop="true"
+                  android:textColor="@color/twentyfive_black"
+                  android:textSize="@dimen/sub_font_size"
+                  tools:text="right now"/>
+    </RelativeLayout>
+
+    <TextView android:id="@+id/people_name"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_horizontal"
+              android:layout_marginEnd="@dimen/activity_horizontal_margin"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:gravity="center"
+              android:lines="1"
+              android:textColor="@color/user_name_blue"
+              android:textSize="@dimen/header_font_size"
+              android:textStyle="bold"
+              tools:text="Qi Feng Huang"/>
+
+    <TextView android:id="@+id/people_status"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_horizontal"
+              android:layout_marginBottom="@dimen/activity_vertical_margin"
+              android:layout_marginEnd="48dp"
+              android:layout_marginStart="48dp"
+              android:layout_marginTop="@dimen/activity_vertical_margin"
+              android:gravity="center"
+              android:maxLines="3"
+              android:textColor="@color/fifty_black"
+              android:textSize="@dimen/body_font_size"
+              android:textStyle="italic"
+              tools:text="test test tset st esest test tset st esest test tset st esest test tset st esest test tset st esest test tset st es"/>
+
+    <View android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:background="@color/seperator_color"/>
+
+    <FrameLayout android:id="@+id/people_state_button_container"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_margin="8dp"
+                      android:gravity="center"
+                      android:orientation="horizontal">
+
+            <ImageView android:id="@+id/people_action_icon"
+                       android:layout_width="24dp"
+                       android:layout_height="24dp"
+                       android:src="@drawable/ic_action_add99"/>
+
+            <TextView android:id="@+id/people_action_add_text"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="@color/fifty_black"
+                      tools:text="Follow"/>
+
+
+        </LinearLayout>
+    </FrameLayout>
+
+
+</LinearLayout>

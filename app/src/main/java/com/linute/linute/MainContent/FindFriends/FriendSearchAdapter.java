@@ -97,6 +97,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     .asBitmap()
                     //.override(mImageSize, mImageSize)
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
+                    .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
 

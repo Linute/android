@@ -97,7 +97,7 @@ public class LSDKUser {
         params.put("action[0]", status);
         params.put("action[1]", photo);
         params.put("skip", "0");
-        params.put("limit", "25");
+        params.put("limit", "24");
         params.put("owner", userId);
 
         Map<String, String> header = API_Methods.getMainHeader(mToken);
@@ -139,8 +139,8 @@ public class LSDKUser {
                 callback);
     }
 
-    public Call changePassword(String tempPass, String email, String userId, String newPass, Callback callback){
-        Map<String, String> header = new HashMap<>();
+    public Call changePassword(String token, String userId, String newPass, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(token);
         Map<String, Object> params = new HashMap<>();
 
         params.put("password", newPass);

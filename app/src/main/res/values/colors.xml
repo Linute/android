@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimary">#142029</color>
     <color name="secondaryColor">#67CDC9</color>
+
     <color name="colorPrimaryDark">#0f181e</color>
     <color name="colorAccent">#1d4261</color>
     <color name="tabsScrollColor">#8a140e</color>
@@ -43,10 +44,16 @@
 
 
     <color name="post_color_0">#FFFFFF</color>
-    <color name="post_color_1">#3b4854</color>
-    <color name="post_color_2"></color>
-    <color name="post_color_3"></color>
-    <color name="post_color_4"></color>
-    <color name="post_color_5"></color>
+    <color name="post_color_1">#3B4854</color>
+    <color name="post_color_2">#3c3741</color>
+    <color name="post_color_3">#2C514A</color>
+    <color name="post_color_4">#8ec1b0</color>
+    <color name="post_color_5">#cd613a</color>
+
+    <color name="pure_white">#FFFFFF</color>
+    <color name="pure_black">#000000</color>
+
+    <color name="user_comment_color">#56bb1d</color>
+
 </resources>
 

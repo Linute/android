@@ -6,16 +6,15 @@
                 android:layout_height="wrap_content"
     >
 
-    <com.mikhaellopez.circularimageview.CircularImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/friend_user_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:scaleType="centerCrop"
-        app:border_color="@color/seperator_color"
-        app:border_width="1dp"
+        app:civ_border_color="@color/seperator_color"
+        app:civ_border_width="1dp"
         />
 
     <!--<ImageView-->

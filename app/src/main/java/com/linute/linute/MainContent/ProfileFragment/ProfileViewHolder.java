@@ -21,19 +21,16 @@ import com.linute.linute.UtilsAndHelpers.Utils;
  * Created by Arman on 12/30/15.
  */
 public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-    protected ImageView vTextIcon;
-    protected TextView vDescriptionLabel;
-    protected TextView vTimeLabel;
+
     protected ImageView vEventImage;
 
     private Context mContext;
     private SharedPreferences mSharedPreferences;
 
-    private boolean mIsImagePost;
     private String mPostId;
     private String mUserId;
 
-    private View vAnonIcon;
+    //private View vAnonIcon;
 
 
     public ProfileViewHolder(View itemView, Context context) {
@@ -42,34 +39,12 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        vTextIcon = (ImageView) itemView.findViewById(R.id.profilelistitem_event_text);
-        vDescriptionLabel = (TextView) itemView.findViewById(R.id.activities_text);
-        vTimeLabel = (TextView) itemView.findViewById(R.id.activities_date);
-        vEventImage = (ImageView) itemView.findViewById(R.id.profilelistitem_event_image);
-        vAnonIcon = itemView.findViewById(R.id.profile_frag_anon_icon);
+        vEventImage = (ImageView) itemView.findViewById(R.id.profile_grid_item_image);
 
         itemView.setOnClickListener(this);
     }
 
     void bindModel(UserActivityItem userActivityItem) {
-        if (userActivityItem.isImagePost()) {
-            vTextIcon.setVisibility(View.GONE);
-            vEventImage.setVisibility(View.VISIBLE);
-        } else {
-            vTextIcon.setVisibility(View.VISIBLE);
-            vEventImage.setVisibility(View.GONE);
-        }
-
-
-        vAnonIcon.setVisibility(userActivityItem.isAnon() ? View.VISIBLE : View.GONE);
-
-
-        String text = userActivityItem.getDescription();
-
-        vDescriptionLabel.setText(text == null || text.equals("") ? "No title..." : text);
-
-        vTimeLabel.setText(Utils.getTimeAgoString(userActivityItem.getPostDate()));
-
         //profile image on the right
         Glide.with(mContext)
                 .load(userActivityItem.getEventImagePath())
@@ -79,7 +54,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
 
-        mIsImagePost = userActivityItem.isImagePost();
         mPostId = userActivityItem.getEventID();
         mUserId = userActivityItem.getOwnerID();
 
@@ -90,7 +64,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity != null) {
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, mIsImagePost, mPostId, mUserId));
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, true, mPostId, mUserId));
         }
     }
 }

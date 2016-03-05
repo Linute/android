@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -48,7 +49,6 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 
 import org.json.JSONArray;
@@ -65,7 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.socket.client.Ack;
+import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -74,6 +74,7 @@ import okhttp3.Response;
 /**
  * Created by Arman on 1/11/16.
  */
+
 public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
@@ -154,7 +155,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
+
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
+
         recList.setAdapter(mFeedDetailAdapter);
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
@@ -199,12 +202,14 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEvent.ACTION_UP == event.getAction())
+                    //recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                     recList.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                         }
                     }, 500);
+
                 return false;
             }
         });
@@ -212,6 +217,15 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
         mCommentEditText.setQueryTokenReceiver(this);
         mCommentEditText.setSuggestionsVisibilityManager(this);
+
+        mFeedDetailAdapter.setMentionedTextAdder(new FeedDetailAdapter.MentionedTextAdder() {
+            @Override
+            public void addMentionedPerson(MentionedPerson person) {
+                mCommentEditText.append(" @");
+                mCommentEditText.insertMention(person);
+                mCommentEditText.requestFocus();
+            }
+        });
 
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
@@ -221,13 +235,17 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                TextView text = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
                 if (mCheckBox.isChecked()) {
-                    ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
-                            .setText("OFF");
+
+                    text.setText("OFF");
+                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(false);
+
                 } else {
-                    ((TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text))
-                            .setText("ON");
+
+                    text.setText("ON");
+                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(true);
                 }
             }
@@ -253,7 +271,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onResume();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            activity.setTitle(mIsImage ? "Image" : "Status");
+            activity.setTitle("Comments");
             activity.resetToolbar();
             activity.enableBarScrolling(false);
             activity.setToolbarOnClickListener(new View.OnClickListener() {
@@ -291,10 +309,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -327,10 +345,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -391,7 +409,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 JSONObject jsonObject;
 
                 Date myDate;
-                String postString;
                 String res = response.body().string();
                 try {
                     jsonObject = new JSONObject(res);
@@ -438,6 +455,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         Map<String, String> eventComments = new HashMap<>();
         eventComments.put("event", mTaptPostId);
         eventComments.put("skip", "0");
+
         event.getComments(eventComments, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -477,11 +495,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String date;
-
 
                             for (int i = 0; i < comments.length(); i++) {
-                                //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+                                Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
 
                                 //get date
                                 try {
@@ -596,6 +612,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             case R.id.feed_detail_delete:
                 showConfirmDeleteDialog();
                 return true;
+            case R.id.feed_detail_reveal:
+                showRevealConfirm();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -669,13 +689,13 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         new AlertDialog.Builder(getActivity())
                 .setTitle("Delete Post")
                 .setMessage("Are you sure you want to delete this post?")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deletePost();
@@ -739,6 +759,71 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     }
 
 
+    public void showRevealConfirm(){
+        if (getActivity() == null) return;
+        boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+        new AlertDialog.Builder(getActivity())
+                .setTitle(isAnon ? "Reveal" : "Hide")
+                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        revealPost();
+                    }
+                })
+                .show();
+    }
+
+
+    private void revealPost(){
+        final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+
+        mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+        mFeedDetailAdapter.notifyItemChanged(0);
+
+        new LSDKEvents(getActivity()).revealEvent(mTaptPostId, !isAnon, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                            mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+                            mFeedDetailAdapter.notifyItemChanged(0);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+                                mFeedDetailAdapter.notifyItemChanged(0);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
 
     /* MENTIONS CODE */
 
@@ -769,7 +854,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         try {
 
                             String res = response.body().string();
-                            Log.i(TAG, "onResponse: " + res);
+                            //Log.i(TAG, "onResponse: " + res);
 
                             JSONArray friends = new JSONObject(res).getJSONArray("friends");
 
@@ -891,12 +976,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         public class MentionedPersonViewHolder extends RecyclerView.ViewHolder {
 
-            public CircularImageView mProfileImageView;
+            public CircleImageView mProfileImageView;
             public TextView mName;
 
             public MentionedPersonViewHolder(View itemView) {
                 super(itemView);
-                mProfileImageView = (CircularImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
+                mProfileImageView = (CircleImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
                 mName = (TextView) itemView.findViewById(R.id.mentioned_person_name);
             }
 
@@ -965,7 +1050,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     );
                 }
 
-                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null){
+                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
                     mFeedDetail.getComments().clear();
                 }
 
@@ -1005,7 +1090,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             mProgressbar.setVisibility(View.GONE);
                             setCommentViewEditable(true);
                         }
-                        if (!excep){
+                        if (!excep) {
                             //because of header we can use size, change if decide to add it to array
                             mFeedDetailAdapter.notifyDataSetChanged();
                             recList.smoothScrollToPosition(mFeedDetail.getComments().size());
@@ -1018,9 +1103,19 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void sendComment() {
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+
         String commentText = mCommentEditText.getText().toString().trim();
 
-        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null) return;
+        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null || activity == null)
+            return;
+
+        if (!activity.socketConnected() || !Utils.isNetworkAvailable(activity)) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
 
         try {
             JSONObject comment = new JSONObject();
@@ -1051,11 +1146,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             mCommentPosted = true;
 
-            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-            if (activity != null) {
-                activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
-            }
-
+            activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());

@@ -27,16 +27,18 @@
 
                 <CheckBox
                     android:id="@+id/postHeart"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_centerVertical="true"
-                    android:button="@drawable/post_likes_selector"
-                    android:checked="true"
+                    android:button="@null"
+                    android:background="@drawable/post_likes_selector"
+                    android:checked="false"
                     />
 
                 <TextView android:id="@+id/postNumHearts"
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
+                          android:layout_marginStart="8dp"
                           android:layout_centerVertical="true"
                           android:layout_toEndOf="@id/postHeart"
                           android:textSize="@dimen/sub_font_size"
@@ -59,8 +61,8 @@
                 >
 
                 <ImageView android:id="@+id/postComments"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
+                           android:layout_width="20dp"
+                           android:layout_height="20dp"
                            android:layout_centerVertical="true"
                            android:src="@drawable/ic_oval19"
                     />
@@ -69,6 +71,7 @@
                           android:layout_width="wrap_content"
                           android:layout_height="wrap_content"
                           android:layout_centerVertical="true"
+                          android:layout_marginStart="8dp"
                           android:layout_toEndOf="@id/postComments"
                           android:text="Comment (0)"
                           android:textColor="@color/twentyfive_black"

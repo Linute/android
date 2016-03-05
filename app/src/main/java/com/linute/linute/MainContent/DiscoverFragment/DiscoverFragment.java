@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
@@ -47,7 +48,7 @@ public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
 
-    private ImageView mEmptyView;
+    private View mEmptyView;
 
     private SwipeRefreshLayout refreshLayout;
 
@@ -90,7 +91,7 @@ public class DiscoverFragment extends UpdatableFragment {
                 container, false); //setContent
 
 
-        mEmptyView = (ImageView) rootView.findViewById(R.id.discover_no_posts);
+        mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
         recList.setHasFixedSize(true);
@@ -210,13 +211,14 @@ public class DiscoverFragment extends UpdatableFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mFriendsOnly && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
-                mEmptyView.setImageResource(R.drawable.campus);
+                ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.campus);
+                ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
 
             } else if (mFriendsOnly && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
-                Log.i(TAG, "onResume: test");
-                mEmptyView.setImageResource(R.drawable.loser_512);
+                ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.loser_512);
+                ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_friends);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
 
@@ -340,7 +342,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {
@@ -486,7 +489,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    mEmptyView.setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {

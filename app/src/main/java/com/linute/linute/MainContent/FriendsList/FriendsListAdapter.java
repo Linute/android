@@ -21,9 +21,10 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.mikhaellopez.circularimageview.CircularImageView;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by QiFeng on 2/6/16.
@@ -114,7 +115,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public class FriendsListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private CircularImageView mProfilePicture;
+        private CircleImageView mProfilePicture;
         //private ImageView mStateImage;
         private TextView mUserName;
 
@@ -124,7 +125,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public FriendsListViewHolder(View itemView) {
             super(itemView);
 
-            mProfilePicture = (CircularImageView) itemView.findViewById(R.id.friend_user_image);
+            mProfilePicture = (CircleImageView) itemView.findViewById(R.id.friend_user_image);
             //mStateImage = (ImageView) itemView.findViewById(R.id.friend_image_state);
             mUserName = (TextView) itemView.findViewById(R.id.friend_name);
         }
