@@ -202,12 +202,14 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEvent.ACTION_UP == event.getAction())
+                    //recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                     recList.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                         }
                     }, 500);
+
                 return false;
             }
         });
@@ -407,7 +409,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 JSONObject jsonObject;
 
                 Date myDate;
-                String postString;
                 String res = response.body().string();
                 try {
                     jsonObject = new JSONObject(res);
@@ -454,6 +455,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         Map<String, String> eventComments = new HashMap<>();
         eventComments.put("event", mTaptPostId);
         eventComments.put("skip", "0");
+
         event.getComments(eventComments, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -493,11 +495,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
-                            String date;
-
 
                             for (int i = 0; i < comments.length(); i++) {
-                                //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+                                Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
 
                                 //get date
                                 try {
@@ -612,6 +612,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             case R.id.feed_detail_delete:
                 showConfirmDeleteDialog();
                 return true;
+            case R.id.feed_detail_reveal:
+                showRevealConfirm();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -685,13 +689,13 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         new AlertDialog.Builder(getActivity())
                 .setTitle("Delete Post")
                 .setMessage("Are you sure you want to delete this post?")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                     }
                 })
-                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         deletePost();
@@ -746,6 +750,71 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
                                 progressDialog.dismiss();
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
+    public void showRevealConfirm(){
+        if (getActivity() == null) return;
+        boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+        new AlertDialog.Builder(getActivity())
+                .setTitle(isAnon ? "Reveal" : "Hide")
+                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        revealPost();
+                    }
+                })
+                .show();
+    }
+
+
+    private void revealPost(){
+        final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
+
+        mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+        mFeedDetailAdapter.notifyItemChanged(0);
+
+        new LSDKEvents(getActivity()).revealEvent(mTaptPostId, !isAnon, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                            mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+                            mFeedDetailAdapter.notifyItemChanged(0);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+                                mFeedDetailAdapter.notifyItemChanged(0);
                             }
                         });
                     }
@@ -1034,9 +1103,19 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void sendComment() {
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+
         String commentText = mCommentEditText.getText().toString().trim();
 
-        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null) return;
+        if (commentText.isEmpty() || getActivity() == null || mTaptPostId == null || activity == null)
+            return;
+
+        if (!activity.socketConnected() || !Utils.isNetworkAvailable(activity)) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
 
         try {
             JSONObject comment = new JSONObject();
@@ -1067,11 +1146,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             mCommentPosted = true;
 
-            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-            if (activity != null) {
-                activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
-            }
-
+            activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());

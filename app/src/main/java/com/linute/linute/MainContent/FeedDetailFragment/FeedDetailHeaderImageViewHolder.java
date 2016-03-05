@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -62,7 +64,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
     private String mUserId;
     private String mImageSignature;
 
-    public FeedDetailHeaderImageViewHolder(RecyclerView.Adapter adapter, View itemView, Context context) {
+    public FeedDetailHeaderImageViewHolder(RecyclerView.Adapter adapter, final View itemView, Context context) {
         super(itemView);
 
         mContext = context;
@@ -95,7 +97,37 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
             @Override
             public void onDoubleClick(View v) {
-                vLikesHeart.toggle();
+                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+                a.setDuration(400);
+
+                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+                a2.setDuration(200);
+
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        layer.startAnimation(a2);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                layer.startAnimation(a);
+
+                if (!vLikesHeart.isChecked()){
+                    vLikesHeart.toggle();
+                }
+
             }
         });
     }
@@ -163,7 +195,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
                     vFeedDetail.setIsPostLiked(true);
                     vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-                    mAdapater.notifyItemChanged(0);
+                    vLikesText.setText("Like ("+vFeedDetail.getPostLikeNum()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -268,7 +300,7 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
 
                     vFeedDetail.setIsPostLiked(false);
                     vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-                    mAdapater.notifyItemChanged(0);
+                    vLikesText.setText("Like ("+vFeedDetail.getPostLikeNum()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

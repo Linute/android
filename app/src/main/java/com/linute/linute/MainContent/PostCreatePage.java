@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -42,7 +43,7 @@ import io.socket.engineio.client.transports.WebSocket;
 public class PostCreatePage extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = PostCreatePage.class.getSimpleName();
 
-    private CustomBackPressedEditText mPostEditText;
+    private  CustomBackPressedEditText mPostEditText;
     private View mTextFrame;
 
     private boolean mSwitchOn = false;
@@ -78,6 +79,9 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
         mPostEditText = (CustomBackPressedEditText) findViewById(R.id.post_create_text);
+
+        mPostEditText.setTypeface(Typeface.createFromAsset(getAssets(),
+                "Lato-LightItalic.ttf"));
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
@@ -214,10 +218,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
     private void postContent() {
 
-        if (mPostInProgress) return;
-
-        //SHIT !!
-        if (mPostEditText.getText().toString().trim().equals("")) return;
+        if (mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
 
         if (!Utils.isNetworkAvailable(this) || !mSocket.connected()){
             Utils.showBadConnectionToast(this);

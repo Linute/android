@@ -14,12 +14,12 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -35,6 +35,7 @@ import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -42,6 +43,9 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
@@ -67,7 +71,6 @@ public class MainActivity extends BaseTaptActivity {
 
     private CoordinatorLayout parentView;
     private FloatingActionsMenu fam;
-
     private UpdatableFragment[] mFragments; //holds our fragments
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
@@ -411,13 +414,9 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void noInternet() {
-        Snackbar.make(parentView, "Seems like you don't have internet, might wanna fix that...", Snackbar.LENGTH_INDEFINITE)
-                .setAction("Gotcha", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                    }
-                }).show();
+        Snackbar sn = Snackbar.make(parentView, "Could not find internet connection", Snackbar.LENGTH_LONG);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
+        sn.show();
     }
 
     @Override
@@ -460,26 +459,30 @@ public class MainActivity extends BaseTaptActivity {
 
     //the items in navigation view
     //this sets the number to the right of it
-    public void setNavItemNotification(@IdRes int itemId, int count) {
+    public void setNavItemNotification(@IdRes int itemId, int count, int oldCount) {
 
         View main = mNavigationView.getMenu().findItem(itemId).getActionView();
 
-        if (count > 0){
+        if (count > 0) {
             ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(count > 99 ? "+" : String.valueOf(count));
             (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.VISIBLE);
-        }else {
-            if (mNumNewPostsInDiscover != 0) {
-                ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(null);
+        } else {
+            if (oldCount != 0) {
+                ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText("");
                 (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.GONE);
             }
         }
     }
 
     public void setFeedNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_feed, count);
+        setNavItemNotification(R.id.navigation_item_feed, count, mNumNewPostsInDiscover);
     }
 
-    public void setNumNewPostsInDiscover(int count){
+    public void setUpdateNotification(int count){
+        setNavItemNotification(R.id.navigation_item_activity, count, mNumNewActivities);
+    }
+
+    public void setNumNewPostsInDiscover(int count) {
         mNumNewPostsInDiscover = count;
     }
 
@@ -566,6 +569,7 @@ public class MainActivity extends BaseTaptActivity {
                 }
             }
 
+            mSocket.on("activity", newActivity);
             mSocket.on("new post", newPostListener);
             mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);//fixme
             mSocket.on(Socket.EVENT_ERROR, onEventError);
@@ -582,6 +586,7 @@ public class MainActivity extends BaseTaptActivity {
 
         if (mSocket != null) {
             mSocket.disconnect();
+            mSocket.off("activity", newActivity);
             mSocket.off("new post", newPostListener);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
@@ -608,6 +613,11 @@ public class MainActivity extends BaseTaptActivity {
         if (mSocket != null) {
             mSocket.off(event, emitter);
         }
+    }
+
+    @Override
+    public boolean socketConnected() {
+        return mSocket.connected();
     }
 
 
@@ -661,6 +671,12 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private int mNumNewPostsInDiscover = 0; //new posts in discover fragment
+    private int mNumNewActivities = 0;
+
+
+    public void setNumNewActivities(int num){
+        mNumNewActivities = num;
+    }
 
     private Emitter.Listener newPostListener = new Emitter.Listener() {
         @Override
@@ -681,6 +697,57 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
+    private Emitter.Listener newActivity = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject activity = new JSONObject(args[0].toString());
+
+                Log.i(TAG, "call: "+activity);
+
+                Update update = new Update(activity);
+
+                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+                }
+
+                newActivitySnackbar(update.getDescription());
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUpdateNotification(++mNumNewActivities);
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+
+    private void newActivitySnackbar(String text){
+        final Snackbar sn = Snackbar.make(fam, text, Snackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+        sn.getView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearBackStack();
+
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
+                        .commit();
+
+                mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
+
+                mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
+                mPreviousItem.setChecked(true);
+                sn.dismiss();
+            }
+        });
+        sn.show();
+    }
+
 
     //hiding toolbar / showing toolbar
     @Override
@@ -700,6 +767,10 @@ public class MainActivity extends BaseTaptActivity {
                     .setScrollFlags(0);
         }
     }
+
+
+    //activity
+
 
     //when tap toolbar
     @Override

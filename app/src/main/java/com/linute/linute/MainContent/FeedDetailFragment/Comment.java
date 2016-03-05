@@ -87,6 +87,10 @@ public class Comment {
         return mAnonImage;
     }
 
+    public void setIsAnon(boolean anon) {
+        mIsAnon = anon;
+    }
+
     public String getDateString(){
         return mDateLong == 0 ? "" : Utils.getTimeAgoString(mDateLong);
     }

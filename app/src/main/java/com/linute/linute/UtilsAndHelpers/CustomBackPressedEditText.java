@@ -14,8 +14,16 @@ public class CustomBackPressedEditText extends EditText {
 
     BackButtonAction mBackAction;
 
+    public CustomBackPressedEditText(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+    }
+
     public CustomBackPressedEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    public CustomBackPressedEditText(Context context) {
+        super(context);
     }
 
     @Override

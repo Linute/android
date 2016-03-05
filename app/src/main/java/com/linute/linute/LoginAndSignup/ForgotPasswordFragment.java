@@ -65,9 +65,9 @@ public class ForgotPasswordFragment extends Fragment {
 
     private TextView mEmailConfirmTextView;
 
-    private String mTempPassword;
-
     private String mUserID;
+
+    private String mUserToken;
 
     public ForgotPasswordFragment() {
 
@@ -126,8 +126,8 @@ public class ForgotPasswordFragment extends Fragment {
         outState.putString("mSavedEmail", mEmailString);
         outState.putString("mSavedPin", mPinCode);
         outState.putInt("mCurrentFlipperIndex", mCurrentViewFlipperIndex);
-        outState.putString("mPassword", mTempPassword);
         outState.putString("mUserID", mUserID);
+        outState.putString("userToken", mUserToken);
         super.onSaveInstanceState(outState);
     }
 
@@ -138,8 +138,8 @@ public class ForgotPasswordFragment extends Fragment {
             mPinCode = savedInstanceState.getString("mSavedPin");
             mCurrentViewFlipperIndex = savedInstanceState.getInt("mCurrentFlipperIndex");
             mEmailString = savedInstanceState.getString("mSavedEmail");
-            mTempPassword = savedInstanceState.getString("mPassword");
             mUserID = savedInstanceState.getString("mUserID");
+            mUserToken = savedInstanceState.getString("userToken");
             if (mEmailString != null) {
                 mEmailView.setText(mEmailString);
                 mEmailConfirmTextView.setText(mEmailString);
@@ -284,10 +284,13 @@ public class ForgotPasswordFragment extends Fragment {
                     if (response.isSuccessful()) {
                         try {
                             JSONObject jsonObject = new JSONObject(response.body().string());
-                            mTempPassword = jsonObject.getString("tempPassword");
+
+                            Log.i(TAG, "onResponse: "+jsonObject);
                             mPinCode = jsonObject.getString("pinCode");
 
-                            mUserID = jsonObject.getJSONObject("user").getString("id");
+                            JSONObject user = jsonObject.getJSONObject("user");
+                            mUserID = user.getString("id");
+                            mUserToken = user.getString("token");
 
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -346,13 +349,6 @@ public class ForgotPasswordFragment extends Fragment {
             return false;
         }
 
-
-        else if (!emailString.endsWith(".edu")){
-            mEmailView.setError("Must be a valid edu email");
-            mEmailView.requestFocus();
-            return false;
-        }
-
         //good email
         else {
             return true;
@@ -396,7 +392,7 @@ public class ForgotPasswordFragment extends Fragment {
             if (getActivity() == null) return;
 
             showProgress(true, 2);
-            new LSDKUser(getActivity()).changePassword(mTempPassword, mEmailString, mUserID, password, new Callback() {
+            new LSDKUser(getActivity()).changePassword(mUserToken, mUserID, password, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() == null){

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,8 +34,6 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriendSearch;
-import com.linute.linute.MainContent.FriendsList.Friend;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
@@ -746,7 +743,9 @@ public class FindFriendsFragment extends UpdatableFragment {
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.i(TAG, "onClick: clicked fb");
                 loginFacebook();
+                mFindFriendsRationale.setVisibility(View.GONE);
             }
         });
     }

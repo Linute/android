@@ -19,7 +19,6 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.io.IOException;

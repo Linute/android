@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +45,8 @@ public class LSDKActivity {
         params.put("action[7]", "friend joined");
         params.put("action[8]", "posted status");
         params.put("action[9]", "posted photo");
+        params.put("action[10]", "also commented status");
+        params.put("action[11]", "also commented photo");
 
         params.put("owner", mSharedPreferences.getString("userID", ""));
 

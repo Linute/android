@@ -70,63 +70,77 @@
 
     </LinearLayout>
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+    <RelativeLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
     >
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/comment_user_image"
-            android:layout_width="@dimen/profile_image_radius"
-            android:layout_height="@dimen/profile_image_radius"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            app:civ_border_color="@color/seperator_color"
-            app:civ_border_width="1dp"
-        />
-
-        <LinearLayout
+        <LinearLayout android:id="@+id/feed_detail_main"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <RelativeLayout android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/comment_user_image"
+                android:layout_width="@dimen/profile_image_radius"
+                android:layout_height="@dimen/profile_image_radius"
+                android:layout_margin="@dimen/activity_horizontal_margin"
+                app:civ_border_color="@color/seperator_color"
+                app:civ_border_width="1dp"
+            />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:orientation="vertical">
+
+                <RelativeLayout android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/comment_user_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/user_name_blue"
+                        android:textSize="@dimen/body_font_size"
+                        android:textStyle="bold"
+                        tools:text="Name Name"/>
+
+                    <TextView android:id="@+id/comment_time_ago"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_alignParentEnd="true"
+                              android:textColor="@color/twentyfive_black"
+                              android:textSize="@dimen/sub_font_size"
+                              tools:text="1h"
+                    />
+
+
+                </RelativeLayout>
 
                 <TextView
-                    android:id="@+id/comment_user_name"
+                    android:id="@+id/comment"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/user_name_blue"
-                    android:textSize="@dimen/body_font_size"
-                    android:textStyle="bold"
-                    tools:text="Name Name"/>
+                    android:textColor="@color/eighty_black"
+                    android:textSize="@dimen/sub_font_size"
+                    tools:text="test test test testtest test test testtest "/>
 
-                <TextView android:id="@+id/comment_time_ago"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_alignParentEnd="true"
-                          android:textColor="@color/twentyfive_black"
-                          android:textSize="@dimen/sub_font_size"
-                          tools:text="1h"
-                />
-
-
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/eighty_black"
-                android:textSize="@dimen/sub_font_size"
-                tools:text="test test test testtest test test testtest "/>
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <ProgressBar
+            android:id="@+id/feed_detail_progress_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/feed_detail_main"
+            android:visibility="gone"
+            android:indeterminateOnly="true"/>
+
+    </RelativeLayout>
+
 </com.daimajia.swipe.SwipeLayout>

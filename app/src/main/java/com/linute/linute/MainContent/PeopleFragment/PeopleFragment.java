@@ -25,6 +25,7 @@ import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -115,7 +116,8 @@ public class PeopleFragment extends UpdatableFragment {
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
 
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.peoplefrag_swipe_refresh);
@@ -325,6 +327,8 @@ public class PeopleFragment extends UpdatableFragment {
                     Log.d("TAG", responsString);
                     return;
                 }
+
+                Log.i(TAG, "onResponse: "+responsString);
                 JSONObject jsonObject;
                 JSONArray jsonArray;
                 try {
@@ -374,7 +378,9 @@ public class PeopleFragment extends UpdatableFragment {
                                 userOwner.getString("fullName"),
                                 personId,
                                 dateString,
-                                areFriends);
+                                areFriends,
+                                userOwner.getString("status")
+                        );
 
                         tempPeople.add(people);
                     }
@@ -577,10 +583,9 @@ public class PeopleFragment extends UpdatableFragment {
                                 userOwner.getString("fullName"),
                                 personId,
                                 distanceString,
-                                areFriends);
+                                areFriends,
+                                userOwner.getString("status"));
                         tempPeople.add(people);
-
-
                     }
 
 
@@ -640,6 +645,19 @@ public class PeopleFragment extends UpdatableFragment {
                     }
                 });
                 mRationaleLayer.setVisibility(View.GONE);
+
+                mTimeoutHandler = new Handler();
+
+                mTimeoutRunnable = new Runnable() {
+                    @SuppressWarnings("MissingPermission")
+                    @Override
+                    public void run() {
+                        mLocationManager.removeUpdates(mLocationListener);
+                        showRationalLayer();
+                    }
+                };
+                mTimeoutHandler.postDelayed(mTimeoutRunnable, 10000);
+
             } else {
                 Utils.showBadConnectionToast(getActivity());
             }

@@ -210,9 +210,9 @@ public class FacebookSignUpFragment extends Fragment {
 
 
         final Map<String, Object> newInfo = new HashMap<>();
-        newInfo.put("firstName", mFirstNameEditText.getText().toString());
-        newInfo.put("lastName", mLastNameEditText.getText().toString());
-        newInfo.put("email", mEmailEditText.getText().toString().trim());
+        newInfo.put("firstName", mFirstNameEditText.getText().toString().trim());
+        newInfo.put("lastName", mLastNameEditText.getText().toString().trim());
+        newInfo.put("email", mEmailEditText.getText().toString().trim().trim());
         newInfo.put("socialFacebook", mSharedPreferences.getString("socialFacebook", ""));
         newInfo.put("sex", mSharedPreferences.getInt("sex", 0));
 

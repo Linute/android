@@ -86,15 +86,6 @@
                                                   app:itemTextAppearance="@style/NavDrawerTextStyle"
                                                   app:menu="@menu/main_activity_drawer">
 
-        <Button android:id="@+id/mainActivity_nav_logout_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|fill_horizontal"
-                android:layout_margin="@dimen/activity_vertical_margin"
-                android:background="@drawable/unfollowing"
-                android:src="@drawable/unfollowing"
-                android:visibility="gone"
-        />
 
     </android.support.design.widget.NavigationView>
 

@@ -36,6 +36,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -263,29 +264,14 @@ public class EditSavePhotoFragment extends Fragment {
 
     private void savePicture() {
 
-        Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
+        if (getActivity() == null) return;
 
-//        JSONArray coord = new JSONArray();
-//        JSONObject jsonObject = new JSONObject();
-//        JSONArray images = new JSONArray();
-//        try {
-//            coord.put(0);
-//            coord.put(0);
-//            jsonObject.put("coordinates", coord);
-//            images.put(Utils.encodeImageBase64(bitmap));
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        JSONObject  postData = new HashMap<>();
-//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-//
-//        postData.put("college", sharedPreferences.getString("collegeId", "")); //TODO: FIX COLLEGE
-//        postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
-//        postData.put("images", images);
-//        postData.put("type", "1");
-//        postData.put("title", mText.getText().toString()); //TODO: What if empty?
-//        postData.put("geo", jsonObject);
+        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
+            Utils.showBadConnectionToast(getActivity());
+            return;
+        }
+
+        Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
         showProgress(true);
 

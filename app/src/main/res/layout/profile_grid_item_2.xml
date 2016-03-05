@@ -8,7 +8,7 @@
     android:layout_margin="4dp">
 
     <com.makeramen.roundedimageview.RoundedImageView android:id="@+id/profile_grid_item_image"
-                                                     app:riv_corner_radius="6dp"
+                                                     app:riv_corner_radius="@dimen/post_create_corner_radius"
                                                      android:layout_width="match_parent"
                                                      android:layout_height="match_parent"
                                                      android:scaleType="centerCrop"

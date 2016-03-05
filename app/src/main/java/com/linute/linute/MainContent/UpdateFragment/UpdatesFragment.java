@@ -131,7 +131,7 @@ public class UpdatesFragment extends UpdatableFragment {
             try {
                 obj.put("owner", mainActivity
                         .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                        .getString("userID",""));
+                        .getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Updates");
                 mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -157,6 +157,11 @@ public class UpdatesFragment extends UpdatableFragment {
                     mEmptyView.setVisibility(View.VISIBLE);
                 }
             }
+//            if (mainActivity != null) {
+//                mainActivity.setUpdateNotification(0);
+//                mainActivity.setNumNewActivities(0);
+//
+//            }
         }
     }
 
@@ -164,12 +169,12 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onPause() {
         super.onPause();
         MainActivity activity = (MainActivity) getActivity();
-        if (activity != null){
+        if (activity != null) {
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", activity
                         .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                        .getString("userID",""));
+                        .getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Updates");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -260,10 +265,15 @@ public class UpdatesFragment extends UpdatableFragment {
                         Update update;
                         //iterate through array of activities
                         for (int i = 0; i < activities.length(); i++) {
-                            update = new Update(activities.getJSONObject(i));
-                            if (update.isRead()) oldItems.add(update); //if read, it's old
-                            else newItems.add(update); //else recent
+                            try {
+                                update = new Update(activities.getJSONObject(i));
+                                if (update.isRead()) oldItems.add(update); //if read, it's old
+                                else newItems.add(update); //else recent
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
+
 
                         if (getActivity() == null) return;
 
@@ -382,7 +392,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     private void showServerErrorToast() {
-        if(getActivity() == null) return;
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -393,7 +403,7 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
     private void showBadConnectiontToast() {
-        if(getActivity() == null) return;
+        if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -423,13 +433,24 @@ public class UpdatesFragment extends UpdatableFragment {
                     return true;
                 case R.id.menu_find_friends:
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity != null){
+                    if (activity != null) {
                         activity.addFragmentToContainer(new FindFriendsChoiceFragment());
                     }
                     return true;
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public void addItemToRecents(Update update) {
+        if (!mSwipeRefreshLayout.isRefreshing()) {
+            mRecentUpdates.add(0, update);
+            mUpdatesAdapter.notifyItemInserted(0);
+            if (mEmptyView.getVisibility() == View.VISIBLE) {
+                mEmptyView.setVisibility(View.GONE);
+            }
+        }
     }
 
 }

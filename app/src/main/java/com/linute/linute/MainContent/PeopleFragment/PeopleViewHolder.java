@@ -1,10 +1,10 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -14,23 +14,19 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.ViewPropertyAnimation;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.PlaceholderStatuses;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
@@ -45,14 +41,13 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
     private static final String TAG = PeopleViewHolder.class.getSimpleName();
     protected CircleImageView vProfilePicture;
     protected TextView vName;
-    protected TextView vState;
-    protected ImageView vStateImage;
+    protected View vStateButton;
+    private TextView mStatus;
+    private TextView vTime;
 
     private Context vContext;
     private SharedPreferences mSharedPreferences;
     private List<People> vPeopleList;
-
-    private TextView mStatus;
 
     public PeopleViewHolder(View itemView, Context context, List<People> peopleList) {
         super(itemView);
@@ -62,14 +57,14 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
         vPeopleList = peopleList;
 
         vProfilePicture = (CircleImageView) itemView.findViewById(R.id.people_user_image);
-        vName = (TextView) itemView.findViewById(R.id.list_people_name);
-        vState = (TextView) itemView.findViewById(R.id.list_people_state);
-        vStateImage = (ImageView) itemView.findViewById(R.id.list_people_image_state);
+        vName = (TextView) itemView.findViewById(R.id.people_name);
+        vStateButton =  itemView.findViewById(R.id.people_state_button_container);
         mStatus = (TextView) itemView.findViewById(R.id.people_status);
+        vTime = (TextView) itemView.findViewById(R.id.people_time_or_active_text);
 
         vProfilePicture.setOnClickListener(this);
         vName.setOnClickListener(this);
-        vStateImage.setOnClickListener(this);
+        vStateButton.setOnClickListener(this);
     }
 
     @Override
@@ -83,12 +78,13 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                         vPeopleList.get(getAdapterPosition()).getID()));
         }
 
-        if (v == vStateImage) {
+        if (v == vStateButton) {
             if (!vPeopleList.get(getAdapterPosition() /*- 4*/).isFriend()) {
                 Map<String, Object> postData = new HashMap<>();
                 postData.put("user", vPeopleList.get(getAdapterPosition() /*- 4*/).getID());
 
                 new LSDKPeople(vContext).postFollow(postData, new Callback() {
+                    final int position = getAdapterPosition();
                     @Override
                     public void onFailure(Call call, IOException e) {
                         e.printStackTrace();
@@ -120,13 +116,16 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                         }
 
                         response.body().close();
-//                        Log.d(TAG, response.body().string());
                         ((Activity) vContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                vStateImage.setImageResource(R.drawable.message_friend);
+                                //vStateImage.setImageResource(R.drawable.message_friend);
                                 Toast.makeText(vContext, "You got a new friend!", Toast.LENGTH_SHORT).show();
-                                vPeopleList.get(getAdapterPosition() /*- 4*/).setFriend(true);
+                                vPeopleList.get(position /*- 4*/).setFriend(true);
+                                TextView v = ((TextView)vStateButton.findViewById(R.id.people_action_add_text));
+                                v.setText("Chat");
+                                v.setTextColor(ContextCompat.getColor(vContext, R.color.secondaryColor));
+                                ((ImageView)vStateButton.findViewById(R.id.people_action_icon)).setImageResource(R.drawable.ic_chat_people);
                             }
                         });
 
@@ -152,14 +151,23 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                 .into(vProfilePicture);
 
         vName.setText(peeps.getName());
-        vState.setText(peeps.getDate());
+        vTime.setText(peeps.getDate());
 
-        mStatus.setText(vContext.getString(PlaceholderStatuses.getRandomStringRes(new Random().nextInt(41))));
+        mStatus.setText(peeps.getStatus());
 
-        if (peeps.isFriend())
-            vStateImage.setImageResource(R.drawable.message_friend);
-        else
-            vStateImage.setImageResource(R.drawable.add_friend);
+        if (peeps.isFriend()){
+            TextView v = (TextView)vStateButton.findViewById(R.id.people_action_add_text);
+            v.setText("Chat");
+            v.setTextColor(ContextCompat.getColor(vContext, R.color.secondaryColor));
+            ((ImageView)vStateButton.findViewById(R.id.people_action_icon)).setImageResource(R.drawable.ic_chat_people);
+        }
+
+        else {
+            TextView v = (TextView)vStateButton.findViewById(R.id.people_action_add_text);
+            v.setText("Follow");
+            v.setTextColor(ContextCompat.getColor(vContext, R.color.fifty_black));
+            ((ImageView)vStateButton.findViewById(R.id.people_action_icon)).setImageResource(R.drawable.ic_action_add_people);
+        }
     }
 
 //    ViewPropertyAnimation.Animator animationObject = new ViewPropertyAnimation.Animator() {

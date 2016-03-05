@@ -2,9 +2,13 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -13,6 +17,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.ViewAnimation;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
@@ -69,7 +74,7 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
     //private SharedPreferences mSharedPreferences;
 
 
-    public ImageFeedHolder(ChoiceCapableAdapter adapter, View itemView, List<Post> posts, Context context) {
+    public ImageFeedHolder(ChoiceCapableAdapter adapter, final View itemView, List<Post> posts, Context context) {
         super(itemView);
 
         mContext = context;
@@ -106,8 +111,39 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
 
             @Override
             public void onDoubleClick(View v) {
-                vLikesHeart.toggle();
+                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+                a.setDuration(400);
+
+                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+                a2.setDuration(200);
+
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        layer.startAnimation(a2);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                layer.startAnimation(a);
+
+                if (!vLikesHeart.isChecked()){
+                    vLikesHeart.toggle();
+                }
             }
+
+
         });
     }
 
@@ -124,10 +160,10 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
 
                     activity.emitSocket(API_Methods.VERSION+":posts:like", body);
 
-                    mPosts.get(getAdapterPosition()).setPostLiked(true);
-                    mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
-
-                    mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+                    Post p = mPosts.get(getAdapterPosition());
+                    p.setPostLiked(true);
+                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
+                    vLikesText.setText("Like ("+p.getNumLike()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -144,10 +180,10 @@ public class ImageFeedHolder extends RecyclerView.ViewHolder implements CheckBox
 
                     activity.emitSocket(API_Methods.VERSION+":posts:like", body);
 
-                    mPosts.get(getAdapterPosition()).setPostLiked(false);
-                    mPosts.get(getAdapterPosition()).setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
-
-                    mCheckBoxChoiceCapableAdapters.notifyItemChanged(getAdapterPosition());
+                    Post p = mPosts.get(getAdapterPosition());
+                    p.setPostLiked(false);
+                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
+                    vLikesText.setText("Like ("+p.getNumLike()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

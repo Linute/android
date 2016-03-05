@@ -159,105 +159,23 @@
     <string name="need_location">Tapt needs your location to find friends near you</string>
     <string name="no_comment">Share your opinions publicly or anonymously below…</string>
 
-
-    <string name="placeholder_bio0">I\’m a big fat poopy face who didn\’t write a bio</string>
-    <string name="placeholder_bio1">I keep things boring by writing nothing</string>
-    <string name="placeholder_bio2">Sometimes I like to act like I\’m a piece of furniture and just
-        be.
-    </string>
-    <string name="placeholder_bio3">I once pooped my pants to get out of an exam</string>
-    <string name="placeholder_bio4">Hate dogs, hate cats, love sharks and whales. Never owned any of
-        them
-    </string>
-    <string name="placeholder_bio5">I own a DSLR, therefore am a professional photographer/douche
-    </string>
-    <string name="placeholder_bio6">I cheat on all my exams and lie that i\’ve never done it
-    </string>
-    <string name="placeholder_bio7">Studying a bullshit major because I plan on selling protein
-        shakes on instagram after i graduate
-    </string>
-    <string name="placeholder_bio8">trying to make friends so my phone doesn\’t stay dry as fuck
-    </string>
-    <string name="placeholder_bio9">hoping Hillary doesn\’t hack my emails so ppl dont see how empty
-        it is.
-    </string>
-    <string name="placeholder_bio10">the only kind of mail I get is spam #foreveralone</string>
-    <string name="placeholder_bio11">I once gave my cat : dog food because it wasn\’t really my cat.
-        or my dog food
-    </string>
-    <string name="placeholder_bio12">waiting for the future to arrive so we can all live like \“Game
-        of Thrones\” :)
-    </string>
-    <string name="placeholder_bio13">I promise to go to bed early every night but then netflix
-        happens.
-    </string>
-    <string name="placeholder_bio14">some of my special powers included : Finishing 2 seasons of
-        breaking bad day before a final.
-    </string>
-    <string name="placeholder_bio15">i post really really emotional statuses and then end them with
-        \“dont talk to me\” just because…
-    </string>
-    <string name="placeholder_bio16">Currently working towards an MBA with an emphasis in fantasy
-        football. jk about the MBA
-    </string>
-    <string name="placeholder_bio17">god bless this hot mess</string>
-    <string name="placeholder_bio18">putting the Hot in psychotic since 2005. not when i was born,
-        when i learnd the word
-    </string>
-    <string name="placeholder_bio19">i sit in the back of all my classes. no one can see me eat my
-        boogers then
-    </string>
-    <string name="placeholder_bio20">don\’t ask me what im doing with life. No one knows, not even
-        me.
-    </string>
-    <string name="placeholder_bio21">sometimes when class is boring i go to bathroom stalls to read
-        graffiti
-    </string>
-    <string name="placeholder_bio22">i once stuck gum underneath a chair to eat it next class.
-        flavors changed somehow
-    </string>
-    <string name="placeholder_bio23">i hate instagram and anything else related to hashtags.
-        #realtalk
-    </string>
-    <string name="placeholder_bio24">quit world of warcraft. 4.0 gpa this semester.</string>
-    <string name="placeholder_bio25">some people bake cookies, some bake cakes, some even bake
-        chicken. Not me i just get baked
-    </string>
-
-    <string name="placeholder_bio26">waiting for my crush to realize that i\’m the bae of his
-        dreams
-    </string>
-    <string name="placeholder_bio27">was so tired after an exam once, that i took the A train
-        downtown after falling asleep.
-    </string>
-    <string name="placeholder_bio28">ghost-writer for drizzy #6godfolife</string>
-    <string name="placeholder_bio29">woke up for an 8am class once… at noon.</string>
-    <string name="placeholder_bio30">hard working student always looking for brand new ways to reach
-        the word count
-    </string>
-    <string name="placeholder_bio31">waiting to be drafted, hardcore bballer in 2k16</string>
-    <string name="placeholder_bio32">became a bed bug after being bitten by one</string>
-    <string name="placeholder_bio33">hey there! like me page??? gimme a call at
-        1–800-GTFOmyPROFILE
-    </string>
-    <string name="placeholder_bio34">buying all the caffeine ivy drips for my exams starting now
-    </string>
-    <string name="placeholder_bio35">are you a banker? because i\’d like you to leave me a loan
-    </string>
-    <string name="placeholder_bio36">love wearing “Nirvana” shirts even though i don’t listen to
-        them
-    </string>
-    <string name="placeholder_bio37">*placeholder* until my creativity kicks in</string>
-    <string name="placeholder_bio38">i can bite down on jolly ranchers and then say the alphabet
-    </string>
-    <string name="placeholder_bio39">if you walk slow enough to block the street with your squad. i
-        will throw my feces at you
-    </string>
-    <string name="placeholder_bio40">Normal people do tea cleanses. I do the chipotle cleanse.
-    </string>
     <string name="no_results">No results found.</string>
 
-    
+    <string name="discover_no_posts_campus">Is anybody out there?!\n\n Looks like you\’re the first
+        one here. Make a post so the rest of the campus can recognize
+    </string>
+    <string name="discover_no_posts_friends">Don\’t be #foreveralone \n\n Start adding your friends
+        to Tapt
+    </string>
+
+    <string name="profile_no_posts">Your Story \n\n It\’s a ghost town out here! Make a post so the
+        rest of the campus can recognize
+    </string>
+
+    <string name="updates_no_updates">Feel the vibrations \n\n add your friends, comment on some
+        stuff, leave the studying for later
+    </string>
+
     <string name="attp"><![CDATA[
         This product may contain the following software:\n
         \n
@@ -385,7 +303,7 @@
         (b) You must cause any modified files to carry prominent notices
         stating that You changed the files; and\n\n
 
-        (c) You must retain, in the Source form of any Derivative Works
+        © You must retain, in the Source form of any Derivative Works
         that You distribute, all copyright, patent, trademark, and
         attribution notices from the Source form of the Work,
         excluding those notices that do not pertain to any part of
@@ -590,7 +508,7 @@
         (b) You must cause any modified files to carry prominent notices
         stating that You changed the files; and\n\n
 
-        (c) You must retain, in the Source form of any Derivative Works
+        © You must retain, in the Source form of any Derivative Works
         that You distribute, all copyright, patent, trademark, and
         attribution notices from the Source form of the Work,
         excluding those notices that do not pertain to any part of
@@ -896,5 +814,27 @@
         See the License for the specific language governing permissions and\n
         limitations under the License.\n\n
 
+        AndroidSwipeLayout\n
+        The MIT License (MIT)\n\n
+
+        Copyright © 2014 代码家\n\n
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy\n
+        of this software and associated documentation files (the \"Software\"), to deal\n
+        in the Software without restriction, including without limitation the rights\n
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n
+        copies of the Software, and to permit persons to whom the Software is\n
+        furnished to do so, subject to the following conditions:\n\n
+
+        The above copyright notice and this permission notice shall be included in all\n
+        copies or substantial portions of the Software.\n
+
+        THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n
+        SOFTWARE.\n
     ]]></string>
 </resources>

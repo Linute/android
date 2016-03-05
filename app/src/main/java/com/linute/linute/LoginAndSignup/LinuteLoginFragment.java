@@ -56,8 +56,6 @@ public class LinuteLoginFragment extends Fragment {
 
     private View mButtonsLayer;
 
-    private View mForgotPassword;
-
 
     public LinuteLoginFragment() {
 
@@ -99,9 +97,9 @@ public class LinuteLoginFragment extends Fragment {
         });
 
 
-        mForgotPassword = rootView.findViewById(R.id.login_forgot_pass);
+        View forgotPassword = rootView.findViewById(R.id.login_forgot_pass);
 
-        mForgotPassword.setOnClickListener(new OnClickListener() {
+        forgotPassword.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
@@ -149,7 +147,7 @@ public class LinuteLoginFragment extends Fragment {
         boolean cancel = false;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             cancel = true;
             mPasswordView.requestFocus();
@@ -191,6 +189,7 @@ public class LinuteLoginFragment extends Fragment {
          *
          */
         // @.edu                        //hey@.edu          //hey.edu
+
         if (email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
                 !email.contains(".") || email.contains(" "))
             //hello@edededu             //whitespace
@@ -258,6 +257,7 @@ public class LinuteLoginFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     try {
+                        Log.i(TAG, "onResponse: "+res);
                         saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
@@ -290,12 +290,14 @@ public class LinuteLoginFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                showProgress(false);
                                 if (emailError){
                                     mEmailView.setError("No account with this email");
+                                    mEmailView.requestFocus();
                                 }else {
                                     mPasswordView.setError("Invalid password");
+                                    mPasswordView.requestFocus();
                                 }
-                                showProgress(false);
                             }
                         });
 
@@ -336,11 +338,6 @@ public class LinuteLoginFragment extends Fragment {
         }
     };
 
-    private void invalidCredentials() {
-        showProgress(false);
-        mEmailView.setError("Invalid email or password");
-        mPasswordView.setError("Invalid email or password");
-    }
 
     private void saveCredentials(String responseString) throws JSONException {
 

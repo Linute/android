@@ -224,6 +224,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     //there's problems with nested fragments
     public boolean hasLocationPermissions() {
+        if (getActivity() == null) return false;
         if (ContextCompat.checkSelfPermission(getActivity(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -239,7 +240,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PeopleFragment.LOCATION_REQUEST) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 1);
+                PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, 0);
                 fragment.gotPermissionResults();
             }
         }

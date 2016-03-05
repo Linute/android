@@ -49,7 +49,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     private Context mContext;
 
-    private boolean mAutoLoad = true;
+    //private boolean mAutoLoad = true;
 
 
     //image width / radius
@@ -85,9 +85,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    public void setAutoLoadMore(boolean autoLoad) {
-        mAutoLoad = autoLoad;
-    }
+    //public void setAutoLoadMore(boolean autoLoad) {
+       // mAutoLoad = autoLoad;
+    //}
 
     @Override //header view
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
@@ -124,6 +124,14 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             }
             return;
         }*/
+
+        if(absolutePosition == 0) {
+            MainActivity activity = (MainActivity) mContext;
+            if (activity != null) {
+                activity.setUpdateNotification(0);
+                activity.setNumNewActivities(0);
+            }
+        }
 
         UpdateItemViewHolder tHolder = (UpdateItemViewHolder) holder;
         if (holder == null) { //error
@@ -444,6 +452,12 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     break;
                 case POSTED_STATUS:
                     drawable = R.drawable.icon_comment; //TODO: NEED ICON
+                    break;
+                case ALSO_COMMENTED_IMAGE:
+                    drawable = R.drawable.icon_comment;
+                    break;
+                case AlSO_COMMENTED_STATUS:
+                    drawable = R.drawable.icon_comment;
                     break;
                 default:
                     drawable = R.drawable.icon_user;

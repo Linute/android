@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.ProfileFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,10 +17,8 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
  * Created by QiFeng on 2/29/16.
  */
 public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements View.OnClickListener {
-    protected ImageView vTextImage;
 
     private Context mContext;
-    private SharedPreferences mSharedPreferences;
 
     private String mPostId;
     private String mUserId;
@@ -33,9 +32,9 @@ public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements
         super(itemView);
 
         mContext = context;
-        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         mTextView = (TextView) itemView.findViewById(R.id.profile_grid_item_no_image_text);
+        mTextView.setTypeface(Typeface.createFromAsset(context.getAssets(), "Lato-LightItalic.ttf"));
 
         //vAnonIcon = itemView.findViewById(R.id.profile_frag_anon_icon);
         itemView.setOnClickListener(this);
@@ -48,8 +47,6 @@ public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements
 
         mPostId = userActivityItem.getEventID();
         mUserId = userActivityItem.getOwnerID();
-
-
     }
 
     @Override

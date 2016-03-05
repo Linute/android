@@ -139,8 +139,8 @@ public class LSDKUser {
                 callback);
     }
 
-    public Call changePassword(String tempPass, String email, String userId, String newPass, Callback callback){
-        Map<String, String> header = new HashMap<>();
+    public Call changePassword(String token, String userId, String newPass, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(token);
         Map<String, Object> params = new HashMap<>();
 
         params.put("password", newPass);
