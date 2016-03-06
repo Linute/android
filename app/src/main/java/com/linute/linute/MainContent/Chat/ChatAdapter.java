@@ -77,8 +77,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         protected RelativeLayout vUserRelative;
         protected CircleImageView vOwnerImage;
         protected CircleImageView vUserImage;
-        protected TextView vOwnerName;
-        protected TextView vUserName;
         protected TextView vOwnerMessage;
         protected TextView vUserMessage;
         protected TextView vOwnerTime;
@@ -98,8 +96,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             vUserRelative = (RelativeLayout) itemView.findViewById(R.id.chat_user);
             vOwnerImage = (CircleImageView) itemView.findViewById(R.id.chat_owner_image);
             vUserImage = (CircleImageView) itemView.findViewById(R.id.chat_user_image);
-            vOwnerName = (TextView) itemView.findViewById(R.id.chat_owner_name);
-            vUserName = (TextView) itemView.findViewById(R.id.chat_user_name);
             vOwnerMessage = (TextView) itemView.findViewById(R.id.chat_owner_message);
             vUserMessage = (TextView) itemView.findViewById(R.id.chat_user_message);
             vOwnerTime = (TextView) itemView.findViewById(R.id.chat_owner_time);
@@ -131,7 +127,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(vOwnerImage);
 
-                    vOwnerName.setText(chat.getUserName());
                     vOwnerMessage.setText(chat.getMessage());
                     vOwnerTime.setText(chat.getShortDate());
                 } else {
@@ -146,7 +141,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(vUserImage);
 
-                    vUserName.setText(chat.getUserName());
                     vUserMessage.setText(chat.getMessage());
                     vUserTime.setText(chat.getShortDate());
                 }

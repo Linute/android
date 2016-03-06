@@ -5,50 +5,54 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                tools:background="@color/grey_color">
+                tools:background="@drawable/background">
 
     <ViewSwitcher android:id="@+id/fbSignUp_view_switcher"
                   android:layout_width="match_parent"
                   android:layout_height="match_parent">
 
-        <LinearLayout android:id="@+id/fbSignUp_info_form"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:layout_marginEnd="32dp"
-                      android:layout_marginStart="32dp"
-                      android:layout_marginTop="130dp"
-                      android:gravity="center_horizontal"
-                      android:orientation="vertical">
+
+        <RelativeLayout android:id="@+id/fbSignUp_info_form"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginEnd="32dp"
+                        android:layout_marginStart="32dp"
+                        android:gravity="center_horizontal"
+                        android:orientation="vertical">
 
 
-            <RelativeLayout android:layout_width="wrap_content"
+            <RelativeLayout android:id="@+id/fbsignup_profile_image"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
                             android:layout_marginBottom="16dp"
                             android:layout_marginTop="16dp">
 
-                <ImageView android:layout_width="132dp"
-                           android:layout_height="132dp"
+                <ImageView android:layout_width="116dp"
+                           android:layout_height="116dp"
                            android:layout_centerInParent="true"
                            android:src="@drawable/photo_rad"
-                    />
+                />
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/fbSignUp_profile_pic_view"
-                    android:layout_width="130dp"
-                    android:layout_height="130dp"
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/image_loading_background"
                     android:alpha="0.5"
+                    android:src="@drawable/image_loading_background"
                     app:civ_border_color="@color/seperator_color"
                     app:civ_border_width="1dp"/>
 
             </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
+            <LinearLayout android:id="@+id/fbsignup_name"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_below="@id/fbsignup_profile_image"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
 
 
                 <EditText
@@ -91,8 +95,8 @@
                 android:id="@+id/fbSignUp_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_below="@id/fbsignup_name"
+                android:layout_marginTop="8dp"
                 android:hint="Edu Email"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -106,6 +110,7 @@
             <LinearLayout android:id="@+id/fb_signup_button_layer"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
+                          android:layout_below="@id/fbSignUp_email"
                           android:orientation="horizontal">
 
                 <View android:layout_width="0px"
@@ -126,13 +131,68 @@
 
             <ProgressBar
                 android:id="@+id/fbSignUp_progress_bar1"
+                android:layout_below="@id/fbSignUp_email"
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="32dp"
                 android:visibility="gone"
+            />
+
+
+            <TextView android:id="@+id/fb_agree_text"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/fb_signup_button_layer"
+                      android:layout_marginEnd="8dp"
+                      android:layout_marginStart="8dp"
+                      android:layout_marginTop="64dp"
+                      android:gravity="center"
+                      android:text="@string/create_account_agree"
+                      android:textColor="@color/fifty_white"
+                      android:textSize="@dimen/sub_font_size"
+            />
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_below="@id/fb_agree_text"
+                          android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                          android:layout_marginStart="@dimen/activity_horizontal_margin"
+                          android:layout_marginTop="4dp"
+                          android:layout_marginBottom="8dp"
+                          android:orientation="horizontal"
+            >
+                <TextView android:id="@+id/fb_create_privacy_policy"
+                          android:layout_width="0px"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:background="@null"
+                          android:gravity="center"
+                          android:paddingBottom="8dp"
+                          android:paddingTop="8dp"
+                          android:text="Privacy Policy"
+                          android:textColor="@color/secondaryColor"
+                          android:textSize="@dimen/sub_font_size"
                 />
 
-        </LinearLayout>
+                <TextView android:id="@+id/fb_create_terms_of_services"
+                          android:layout_width="0px"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:background="@null"
+                          android:gravity="center"
+                          android:paddingBottom="8dp"
+                          android:paddingTop="8dp"
+                          android:text="Terms of service"
+                          android:textColor="@color/secondaryColor"
+                          android:textSize="@dimen/sub_font_size"
+                />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
 
 
         <LinearLayout android:id="@+id/fbSignUp_verify_form"
@@ -194,17 +254,17 @@
 
                 <View android:layout_width="0px"
                       android:layout_height="0px"
-                      android:layout_weight="2"/>
+                      android:layout_weight="1"/>
 
                 <ImageView android:id="@+id/fbSignUp_update_info_button"
                            android:layout_width="0px"
                            android:layout_height="wrap_content"
-                           android:layout_weight="3"
+                           android:layout_weight="1"
                            android:src="@drawable/verify_button"
-                    />
+                />
                 <View android:layout_width="0px"
                       android:layout_height="0px"
-                      android:layout_weight="2"/>
+                      android:layout_weight="1"/>
 
             </LinearLayout>
 
@@ -214,7 +274,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                />
+            />
 
         </LinearLayout>
 

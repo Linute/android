@@ -257,7 +257,7 @@ public class LinuteLoginFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     try {
-                        Log.i(TAG, "onResponse: "+res);
+                        //Log.i(TAG, "onResponse: "+res);
                         saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
@@ -359,6 +359,7 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.putString("collegeName", user.getCollegeName());
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
+        sharedPreferences.putString("email", user.getEmail());
 
 
         sharedPreferences.putString("lastLoginEmail", user.getEmail());
@@ -370,10 +371,13 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.putString("userToken", user.getUserToken());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
 
+
         //NOTE:end
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
+
+
     }
 
 

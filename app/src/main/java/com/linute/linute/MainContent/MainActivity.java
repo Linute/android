@@ -11,7 +11,6 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -40,6 +39,7 @@ import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -49,8 +49,8 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
+import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -414,8 +414,10 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void noInternet() {
-        Snackbar sn = Snackbar.make(parentView, "Could not find internet connection", Snackbar.LENGTH_LONG);
+        CustomSnackbar sn = CustomSnackbar.make(parentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
+        sn.getView().setAlpha(0.8f);
+
         sn.show();
     }
 
@@ -726,9 +728,10 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
+
     private void newActivitySnackbar(String text){
-        final Snackbar sn = Snackbar.make(fam, text, Snackbar.LENGTH_SHORT);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+        final CustomSnackbar sn = CustomSnackbar.make(parentView, text, CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

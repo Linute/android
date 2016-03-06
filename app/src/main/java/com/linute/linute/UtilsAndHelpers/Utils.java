@@ -98,6 +98,9 @@ public class Utils {
         pref.putString("socialFacebook", null);
         pref.putString("dob", null);
 
+        pref.putString("email", null);
+        pref.putString("password", null);
+
         pref.putInt("sex", 0);
 
         pref.putBoolean("isLoggedIn", false);

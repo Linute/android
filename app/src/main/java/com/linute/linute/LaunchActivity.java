@@ -47,7 +47,7 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Fabric.with(this, new Crashlytics());
-        setContentView(R.layout.activity_launch);
+        //setContentView(R.layout.activity_launch);
 
         generateNewSigniture();
 
@@ -275,9 +275,7 @@ public class LaunchActivity extends Activity {
         }
 
         Intent i = new Intent(LaunchActivity.this, nextActivity);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
-        overridePendingTransition(0, 0);
-        LaunchActivity.this.finish();
+        finish();
     }
 }

@@ -11,4 +11,12 @@
         <attr name="android:textColor" />
         <attr name="android:textColorHint" />
     </declare-styleable>
+
+
+    <declare-styleable name="CustomSnackbarLayout">
+        <attr name="android:maxWidth"/>
+        <attr name="elevation"/>
+        <attr name="cmaxActionInlineWidth" format="dimension"/>
+    </declare-styleable>
+
 </resources>

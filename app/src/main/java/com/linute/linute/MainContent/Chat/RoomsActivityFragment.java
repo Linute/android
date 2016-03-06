@@ -205,7 +205,7 @@ public class RoomsActivityFragment extends Fragment {
                                 lastMessage = "...";
                             }
 
-                            Log.i("ROOM_TEST", "onResponse: "+room.toString());
+                            //Log.i("ROOM_TEST", "onResponse: "+room.toString());
 
                             //Throws error but still runs correctly... weird
                             tempRooms.add(new Rooms(getStringFromObj(room, "owner"),

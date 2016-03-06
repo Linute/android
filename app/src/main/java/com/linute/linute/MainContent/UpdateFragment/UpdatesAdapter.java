@@ -267,9 +267,11 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //set profile image
             Glide.with(mContext)
-                    .load(update.isAnon() ? ((update.getAnonImage() == null || update.getAnonImage().equals("")) ? R.drawable.profile_picture_placeholder : update.getAnonImage()) : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
+                    .load(update.isAnon() ? ((update.getAnonImage() == null || update.getAnonImage().equals(""))
+                            ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(update.getAnonImage()))
+                            : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
+
                     .asBitmap()
-                    .override(mImageSize, mImageSize)
                     .placeholder(R.drawable.image_loading_background)
                     .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -285,7 +287,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 if (update.getEventImageName() == null || update.getEventImageName().equals("")) { //not a picture post; status post
                     Glide.with(mContext)
                             .load(R.drawable.quotation2)
-                            .override(mImageSize, mImageSize)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(mEventPicture);
                 } else { //picture post
@@ -293,7 +294,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     Glide.with(mContext)
                             .load(Utils.getEventImageURL(update.getEventImageName()))
                             .asBitmap()
-                            .override(mImageSize, mImageSize)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(mEventPicture);
                 }

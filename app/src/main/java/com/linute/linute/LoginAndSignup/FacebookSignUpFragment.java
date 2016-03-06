@@ -3,6 +3,7 @@ package com.linute.linute.LoginAndSignup;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
+import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -112,6 +115,22 @@ public class FacebookSignUpFragment extends Fragment {
                 }else {
                     getFragmentManager().popBackStack();
                 }
+            }
+        });
+
+        rootView.findViewById(R.id.fb_create_privacy_policy).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        rootView.findViewById(R.id.fb_create_terms_of_services).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -464,12 +483,12 @@ public class FacebookSignUpFragment extends Fragment {
             buttons = mLayer2Buttons;
         }
 
-        buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+        buttons.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         buttons.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+                buttons.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
             }
         });
 
@@ -537,6 +556,7 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+        sharedPreferences.putString("email", user.getEmail());
 
         sharedPreferences.putString("userToken", user.getUserToken());
         sharedPreferences.putString("userName", user.getUserName());

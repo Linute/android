@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -47,6 +48,7 @@ import java.util.Map;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import io.socket.engineio.client.transports.WebSocket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -83,7 +85,7 @@ public class ChatFragment extends Fragment {
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
-    private Socket mSocket;
+    //private Socket mSocket;
     private JSONArray mIsReadMessageJSONArray;
 
     private List<Chat> mChatList = new ArrayList<>();
@@ -157,26 +159,20 @@ public class ChatFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (mSocket == null || !mSocket.connected()) {
-            {
-                try {
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL));//R.string.DEV_SOCKET_URL
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            }
 
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on("new message", onNewMessage);
-            mSocket.on("typing", onTyping);
-            mSocket.on("stop typing", onStopTyping);
-            mSocket.on("read", onRead);
-            mSocket.on("joined", onJoin);
-            mSocket.on("left", onLeave);
-            mSocket.on("error", onError);
-            mSocket.on("delivered", onDelivered);
-            mSocket.connect();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            activity.connectSocket("new message", onNewMessage);
+            activity.connectSocket("typing", onTyping);
+            activity.connectSocket("stop typing", onStopTyping);
+            activity.connectSocket("read", onRead);
+            activity.connectSocket("joined", onJoin);
+            activity.connectSocket("left", onLeave);
+            activity.connectSocket("error", onError);
+            activity.connectSocket("delivered", onDelivered);
+
             mIsReadMessageJSONArray = new JSONArray();
             typingJson = new JSONObject();
             joinLeft = new JSONObject();
@@ -195,7 +191,7 @@ public class ChatFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            mSocket.emit(API_Methods.VERSION + ":messages:joined", joinLeft);
+            activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
 
 
             JSONObject obj = new JSONObject();
@@ -203,13 +199,15 @@ public class ChatFragment extends Fragment {
                 obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Chat");
-                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
+
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -220,29 +218,35 @@ public class ChatFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        mSocket.emit(API_Methods.VERSION + ":messages:left", joinLeft);
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        JSONObject obj = new JSONObject();
-        try {
-            obj.put("owner", mSharedPreferences.getString("userID", ""));
-            obj.put("action", "inactive");
-            obj.put("screen", "Chat");
-            mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (activity != null) {
+            activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
+
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
+                obj.put("action", "inactive");
+                obj.put("screen", "Chat");
+                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            activity.disconnectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+
+            activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            activity.disconnectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            activity.disconnectSocket("new message", onNewMessage);
+            activity.disconnectSocket("typing", onTyping);
+            activity.disconnectSocket("stop typing", onStopTyping);
+            activity.disconnectSocket("read", onRead);
+            activity.disconnectSocket("joined", onJoin);
+            activity.disconnectSocket("left", onLeave);
+            activity.disconnectSocket("error", onError);
+            activity.disconnectSocket("delivered", onDelivered);
         }
-
-        mSocket.disconnect();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        mSocket.off("new message", onNewMessage);
-        mSocket.off("typing", onTyping);
-        mSocket.off("stop typing", onStopTyping);
-        mSocket.off("read", onRead);
-        mSocket.off("joined", onJoin);
-        mSocket.off("left", onLeave);
-        mSocket.off("error", onError);
-        mSocket.off("delivered", onDelivered);
     }
 
     @Override
@@ -276,12 +280,13 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (null == mUsername) return;
-                if (!mSocket.connected()) return;
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (null == mUsername || activity == null) return;
+                if (!activity.socketConnected()) return;
 
                 if (!mTyping) {
                     mTyping = true;
-                    mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
+                    activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
                 }
 
                 mTypingHandler.removeCallbacks(onTypingTimeout);
@@ -325,6 +330,7 @@ public class ChatFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
     private void getChat() {
         Map<String, String> chat = new HashMap<>();
         chat.put(ROOM_ID, mRoomId);
@@ -334,26 +340,23 @@ public class ChatFragment extends Fragment {
         getChat.getChat(chat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
+                //todo later
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
-                } else {
-//                    Log.d(TAG, "onResponseSuccessful: " + response.body().string());
-//                    mChatList.clear();
-                    ArrayList<Chat> tempChatList = new ArrayList<>();
-                    JSONObject jsonObject = null;
-                    JSONArray messages = null;
-                    JSONObject message = null;
-                    Chat chat = null;
-
+                if (response.isSuccessful()) {
                     try {
-                        jsonObject = new JSONObject(response.body().string());
-                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
-                        messages = jsonObject.getJSONArray("messages");
+                        JSONObject object = new JSONObject(response.body().string());
+                        JSONArray messages = object.getJSONArray("messages");
+                        ArrayList<Chat> tempChatList = new ArrayList<>();
+
+                        JSONObject message;
+                        JSONArray peopleWhoRead;
+                        Chat chat;
+
+                        JSONArray listOfUnreadMessages = new JSONArray();
+
                         for (int i = 0; i < messages.length(); i++) {
                             message = (JSONObject) messages.get(i);
                             chat = new Chat(
@@ -364,67 +367,165 @@ public class ChatFragment extends Fragment {
                                     message.getJSONObject("owner").getString("id"),
                                     message.getString("id"),
                                     message.getString("text"));
-//                            Log.d(TAG, "onResponse: " + message.toString(4));
-                            if (mLastRead == -1) {
-                                if (checkRead(mUserId, message)) {
-                                    mLastRead = i;
-                                    mLastReadId = message.getString("id");
+                            peopleWhoRead = message.getJSONArray("read");
+
+                            boolean haveRead = false;
+                            for (int j = 0; j < peopleWhoRead.length(); j++) {
+                                if (peopleWhoRead.get(j).equals(mUserId)) {
+                                    haveRead = true;
                                 }
                             }
 
-                            if (checkChatHead(message)) {
-                                if (mLastRead != -1 && mRoomUsersCnt - 1 == message.getJSONArray("read").length()) {
-//                                        // do nothing
-                                } else {
-                                    boolean found = false;
-                                    for (int j = 0; j < mChatHeadList.size(); j++) {
-                                        for (int k = 0; k < message.getJSONArray("read").length(); k++) {
-                                            if (mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadList.get(j).getUserId().equals(((JSONObject) message.getJSONArray("read").get(k)).getString("id"))) {
-                                                found = true;
-                                            }
-                                        }
-                                        if (!found) {
-                                            if (!mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadPos.containsKey(mChatHeadList.get(j).getUserId())) {
-                                                mChatHeadPos.put(mChatHeadList.get(j).getUserId(), j);
-                                            }
-                                        }
-                                        found = false;
-                                    }
-//                                        // add queue to layout; add chatheads to addedchatheadlist
-                                }
+                            //Log.i(TAG, "onResponse: " + haveRead);
+                            if (!haveRead) {
+                                listOfUnreadMessages.put(chat.getMessageId());
                             }
-////                            chat.setIsRead(message.getJSONObject(""));
+
                             chat.setType(Chat.TYPE_MESSAGE);
                             tempChatList.add(chat);
 
-                            mChatList.clear();
-                            mChatList.addAll(tempChatList);
                         }
 
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
+                        mChatList.clear();
+                        mChatList.addAll(tempChatList);
+
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mChatAdapter.notifyDataSetChanged();
-                                    if (mLastRead != -1) {
-                                        recList.scrollToPosition(mLastRead);
-                                    } else {
-                                        scrollToBottom();
-                                    }
+                                    scrollToBottom();
                                 }
                             });
+                            if (listOfUnreadMessages.length() > 0) {
+
+                                JSONObject obj = new JSONObject();
+                                obj.put("room", mRoomId);
+                                obj.put("messages", listOfUnreadMessages);
+                                activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                            }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        //// TODO: 3/5/16 error
                     }
+
+
                 }
             }
         });
+
     }
 
-    private boolean checkChatHead(JSONObject message) throws JSONException {
-        return message.getJSONArray("read").length() != mRoomUsersCnt;
-    }
+//    private void getChat() {
+//        Map<String, String> chat = new HashMap<>();
+//        chat.put(ROOM_ID, mRoomId);
+//        if (getActivity() == null) return;
+//
+//        LSDKChat getChat = new LSDKChat(getActivity());
+//        getChat.getChat(chat, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (!response.isSuccessful()) {
+//                    Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
+//                } else {
+////                    Log.d(TAG, "onResponseSuccessful: " + response.body().string());
+////                    mChatList.clear();
+//                    ArrayList<Chat> tempChatList = new ArrayList<>();
+//                    JSONObject jsonObject = null;
+//                    JSONArray messages = null;
+//                    JSONObject message = null;
+//                    Chat chat = null;
+//
+//                    try {
+//                        jsonObject = new JSONObject(response.body().string());
+//                        Log.d(TAG, "onResponse: " + jsonObject.toString(4));
+//                        messages = jsonObject.getJSONArray("messages");
+//
+//
+//
+//
+//
+//                        for (int i = 0; i < messages.length(); i++) {
+//                            message = (JSONObject) messages.get(i);
+//                            chat = new Chat(
+//                                    message.getString("room"),
+//                                    message.getJSONObject("owner").getString("profileImage"),
+//                                    message.getJSONObject("owner").getString("fullName"),
+//                                    Utils.formatDateToReadableString(message.getString("date")),
+//                                    message.getJSONObject("owner").getString("id"),
+//                                    message.getString("id"),
+//                                    message.getString("text"));
+////                            Log.d(TAG, "onResponse: " + message.toString(4));
+////                            if (mLastRead == -1) {
+////                                if (checkRead(mUserId, message)) {
+////                                    Log.i(TAG, "onResponse: "+message);
+////                                    mLastRead = i;
+////                                    mLastReadId = message.getString("id");
+////                                }
+////                            }
+//
+////                            if (checkChatHead(message)) {
+//                                //if (mLastRead != -1 && mRoomUsersCnt - 1 == message.getJSONArray("read").length()) {
+////                                        // do nothing
+//                                } else {
+//                                    boolean found = false;
+//                                    for (int j = 0; j < mChatHeadList.size(); j++) {
+//                                        for (int k = 0; k < message.getJSONArray("read").length(); k++) {
+//                                            if (mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadList.get(j).getUserId().equals(((JSONObject) message.getJSONArray("read").get(k)).getString("id"))) {
+//                                                found = true;
+//                                            }
+//                                        }
+//                                        if (!found) {
+//                                            if (!mChatHeadList.get(j).getUserId().equals(mUserId) && mChatHeadPos.containsKey(mChatHeadList.get(j).getUserId())) {
+//                                                mChatHeadPos.put(mChatHeadList.get(j).getUserId(), j);
+//                                            }
+//                                        }
+//                                        found = false;
+//                                    }
+////                                        // add queue to layout; add chatheads to addedchatheadlist
+//                                }
+//                            }
+//////                            chat.setIsRead(message.getJSONObject(""));
+//                            chat.setType(Chat.TYPE_MESSAGE);
+//                            tempChatList.add(chat);
+//
+//                            mChatList.clear();
+//                            mChatList.addAll(tempChatList);
+//                        }
+//
+//
+//
+//
+//
+//
+//
+//                        if (getActivity() != null) {
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mChatAdapter.notifyDataSetChanged();
+//                                    if (mLastRead != -1) {
+//                                        recList.scrollToPosition(mLastRead);
+//                                    } else {
+//                                        scrollToBottom();
+//                                    }
+//                                }
+//                            });
+//                        }
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        });
+//    }
 
     private boolean checkRead(String userId, JSONObject message) throws JSONException {
         String id = "";
@@ -453,6 +554,10 @@ public class ChatFragment extends Fragment {
 
     private void addMessage(JSONObject data) throws JSONException {
 //        Log.d(TAG, "addMessage: " + data.toString(4));
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity == null) return;
+
         Chat chat = new Chat(
                 mRoomId,
                 data.getJSONObject("owner").getString("profileImage"),
@@ -474,7 +579,7 @@ public class ChatFragment extends Fragment {
         read.put("room", mRoomId);
 
         if (!checkRead(mUserId, data))
-            mSocket.emit(API_Methods.VERSION + ":messages:read", read);
+            activity.emitSocket(API_Methods.VERSION + ":messages:read", read);
     }
 
     private void addTyping(String username) {
@@ -486,6 +591,8 @@ public class ChatFragment extends Fragment {
     }
 
     private void removeTyping(String username) {
+        if (getActivity() == null) return;
+
         for (int i = mChatList.size() - 1; i >= 0; i--) {
             Chat message = mChatList.get(i);
             if (message.getType() == Chat.TYPE_ACTION && message.getUserName().equals(username)) {
@@ -512,8 +619,10 @@ public class ChatFragment extends Fragment {
     }
 
     private void attemptSend() {
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (null == mUsername) return;
-        if (!mSocket.connected()) return;
+        if (!activity.socketConnected()) return;
 
         mTyping = false;
 
@@ -533,19 +642,19 @@ public class ChatFragment extends Fragment {
             newMessage.put("message", message);
         } catch (JSONException e) {
             e.printStackTrace();
+            return;
         }
 
-
         // perform the sending message attempt.
-        mSocket.emit(API_Methods.VERSION + ":messages:new message", newMessage);
+        activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
     }
 
-    private void leave() {
-        mUsername = null;
-        mSocket.disconnect();
-        mSocket.connect();
-//        startSignIn();
-    }
+//    private void leave() {
+//        mUsername = null;
+//        mSocket.disconnect();
+//        mSocket.connect();
+////        startSignIn();
+//    }
 
     private void scrollToBottom() {
         recList.scrollToPosition(mChatAdapter.getItemCount() - 1);
@@ -568,8 +677,12 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
+
+
+            final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity == null) return;
+
+            activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
@@ -589,7 +702,7 @@ public class ChatFragment extends Fragment {
                     try {
                         addMessage(data);
                         delivered.put("id", data.getString("id"));
-                        mSocket.emit(API_Methods.VERSION + ":messages:delivered", delivered);
+                        activity.emitSocket(API_Methods.VERSION + ":messages:delivered", delivered);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -601,6 +714,7 @@ public class ChatFragment extends Fragment {
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
+
             if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -643,10 +757,12 @@ public class ChatFragment extends Fragment {
     private Runnable onTypingTimeout = new Runnable() {
         @Override
         public void run() {
-            if (!mTyping) return;
+
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (!mTyping || activity == null) return;
 
             mTyping = false;
-            mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
+            activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
         }
     };
 

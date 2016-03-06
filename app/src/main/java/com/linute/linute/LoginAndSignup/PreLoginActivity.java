@@ -182,7 +182,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
                     try {
                         String responseString = response.body().string();
-                        Log.i(TAG, "onResponse: " + responseString);
+                        //Log.i(TAG, "onResponse: " + responseString);
                         JSONObject object = new JSONObject(responseString);
                         boolean isUnique = object.getBoolean("isUnique");
 
@@ -207,7 +207,6 @@ public class PreLoginActivity extends AppCompatActivity {
                                             ? CollegePickerActivity.class : MainActivity.class);
                                 }
                             });
-
                         }
 
                     } catch (JSONException e) {
@@ -300,6 +299,7 @@ public class PreLoginActivity extends AppCompatActivity {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+        sharedPreferences.putString("userToken", user.getUserToken());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();

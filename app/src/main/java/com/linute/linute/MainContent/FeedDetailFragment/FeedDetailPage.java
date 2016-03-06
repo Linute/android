@@ -41,6 +41,7 @@ import com.linkedin.android.spyglass.ui.MentionsEditText;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriendSearch;
+import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -497,7 +498,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             Date myDate;
 
                             for (int i = 0; i < comments.length(); i++) {
-                                Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+                                //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
 
                                 //get date
                                 try {
@@ -836,7 +837,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         @Override
         public void run() {
             if (getActivity() == null) return;
-            new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
+            new LSDKFriends(getActivity()).getFriendsForMention(mSharedPreferences.getString("userID", ""),mQueryString, "0", new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() == null) return;
@@ -864,9 +865,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 try {
                                     personList.add(
                                             new MentionedPerson(
-                                                    friends.getJSONObject(i).getString("fullName"),
-                                                    friends.getJSONObject(i).getString("id"),
-                                                    friends.getJSONObject(i).getString("profileImage")
+                                                    friends.getJSONObject(i).getJSONObject("user").getString("fullName"),
+                                                    friends.getJSONObject(i).getJSONObject("user").getString("id"),
+                                                    friends.getJSONObject(i).getJSONObject("user").getString("profileImage")
                                             )
                                     );
                                 } catch (JSONException e) {

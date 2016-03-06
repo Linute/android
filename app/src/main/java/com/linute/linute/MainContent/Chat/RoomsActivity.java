@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -216,5 +217,12 @@ public class RoomsActivity extends BaseTaptActivity {
             mSocket.off(event, emitter);
         }
     }
+
+
+    @Override
+    public boolean socketConnected() {
+        return mSocket.connected();
+    }
+
 
 }

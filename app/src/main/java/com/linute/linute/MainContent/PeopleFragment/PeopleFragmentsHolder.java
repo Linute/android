@@ -35,6 +35,8 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import io.socket.emitter.Emitter;
+
 /**
  * Created by QiFeng on 1/27/16.
  */
@@ -183,6 +185,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                 }
             });
 
+            mainActivity.connectSocket("unread", haveUnread);
+
+            JSONObject object = new JSONObject();
+            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
+
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
@@ -200,6 +207,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onPause();
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
+            mainActivity.disconnectSocket("unread", haveUnread);
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
@@ -249,7 +257,8 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.people_fragment_menu, menu);
+        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
+        mCreateActionMenu = true;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -282,4 +291,26 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
             fragment.scrollUp();
         }
     }
+
+    private boolean mCreateActionMenu = false;
+    private boolean mHasMessages = false;
+
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mHasMessages = (boolean) args[0];
+            //Log.i(TAG, "call: "+mHasMessages);
+            if (mCreateActionMenu){
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            act.invalidateOptionsMenu();
+                        }
+                    });
+                }
+            }
+        }
+    };
 }

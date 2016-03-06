@@ -7,11 +7,17 @@
               android:orientation="vertical"
               tools:background="@android:color/holo_red_light">
 
+
     <include layout="@layout/feed_detail_header"/>
+
+    <View android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:background="@color/seperator_color"
+          android:layout_marginTop="@dimen/activity_vertical_margin"
+    />
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
-                                                         android:layout_marginTop="@dimen/activity_vertical_margin"
     >
 
         <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"

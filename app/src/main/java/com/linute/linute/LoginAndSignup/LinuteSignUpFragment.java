@@ -39,6 +39,8 @@ import android.widget.ViewFlipper;
 import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.API.QuickstartPreferences;
+import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
+import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -128,6 +130,22 @@ public class LinuteSignUpFragment extends Fragment {
                 } else {
                     getFragmentManager().popBackStack();
                 }
+            }
+        });
+
+        rootView.findViewById(R.id.create_privacy_policy).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        rootView.findViewById(R.id.create_terms_of_services).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -367,7 +385,6 @@ public class LinuteSignUpFragment extends Fragment {
             return false;
         }
 
-
         else if (!emailString.endsWith(".edu")){
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
@@ -439,12 +456,12 @@ public class LinuteSignUpFragment extends Fragment {
                 return;
         }
 
-        button.setVisibility(show ? View.GONE : View.VISIBLE);
+        button.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         button.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                button.setVisibility(show ? View.GONE : View.VISIBLE);
+                button.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
             }
         });
 
@@ -561,6 +578,7 @@ public class LinuteSignUpFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
 
         sharedPreferences.putString("lastLoginEmail", user.getEmail());
+        sharedPreferences.putString("email", user.getEmail());
 
         if (user.getSocialFacebook() != null)
             sharedPreferences.putString("socialFacebook", user.getSocialFacebook());

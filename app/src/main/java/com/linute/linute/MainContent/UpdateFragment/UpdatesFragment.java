@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -114,6 +115,8 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
+        mHasMessages = false;
+
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.setTitle("Updates");
@@ -126,6 +129,11 @@ public class UpdatesFragment extends UpdatableFragment {
                     }
                 }
             });
+
+            mainActivity.connectSocket("unread", haveUnread);
+
+            JSONObject object = new JSONObject();
+            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
 
             JSONObject obj = new JSONObject();
             try {
@@ -170,6 +178,8 @@ public class UpdatesFragment extends UpdatableFragment {
         super.onPause();
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
+            activity.disconnectSocket("unread", haveUnread);
+
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", activity
@@ -390,6 +400,25 @@ public class UpdatesFragment extends UpdatableFragment {
         });
     }*/
 
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mHasMessages = (boolean) args[0];
+            //Log.i(TAG, "call: "+mHasMessages);
+            if (mCreateActionMenu){
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            act.invalidateOptionsMenu();
+                        }
+                    });
+                }
+            }
+        }
+    };
+
 
     private void showServerErrorToast() {
         if (getActivity() == null) return;
@@ -414,9 +443,13 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
+    private boolean mCreateActionMenu = false;
+    private boolean mHasMessages = false;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.people_fragment_menu, menu);
+        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
+        mCreateActionMenu = true;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
