@@ -6,101 +6,156 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.SquareImageView;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SquareVideoView;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class VideoFeedHolder extends RecyclerView.ViewHolder {
+public class VideoFeedHolder extends ImageFeedHolder {
 
     private SquareVideoView mSquareVideoView;
 
-
-    protected View vLikeButton;
-    protected View vCommentButton;
-
-    protected CircleImageView vUserImage;
-    protected TextView vPostUserName;
-    protected TextView vLikesText; //how many likes we have
-
-    protected TextView vCommentText; //how many comments we have
-    protected TextView vPostTime;
-    protected TextView vLikesHeart;
-
-    private Context mContext;
-
-    private String mUserId;
-    private String mImageSignature;
     private String mCollegeId;
 
+    private boolean videoPaused = true;
 
 
-    public VideoFeedHolder(View itemView, Context context) {
-        super(itemView);
+    public VideoFeedHolder(final View itemView, List<Post> posts, Context context) {
+        super(itemView, posts, context);
         mSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
-        mContext = context;
+
 
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mUserId = mSharedPreferences.getString("userID", "");
         mCollegeId = mSharedPreferences.getString("collegeId", "");
-        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
-        vPostUserName = (TextView) itemView.findViewById(R.id.feedDetail_user_name);
-        vLikesText = (TextView) itemView.findViewById(R.id.postNumHearts);
-        vCommentText = (TextView) itemView.findViewById(R.id.postNumComments);
-        vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
-        vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
-
-        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
-
-        mSquareVideoView.setKeepScreenOn(true);
-
-        itemView.findViewById(R.id.video_frame).setOnClickListener(new View.OnClickListener() {
-            private boolean videoPaused = true;
-
+        mSquareVideoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View v) {
-                if (videoPaused) {
-                    mSquareVideoView.start();
-                    videoPaused = false;
-                } else {
-                    mSquareVideoView.pause();
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus){
                     videoPaused = true;
+                    mSquareVideoView.setVisibility(View.GONE);
+                    vPostImage.setVisibility(View.VISIBLE);
                 }
             }
         });
 
+        vPostImage.setOnClickListener(null); //let parent handle it
 
-        //// TODO: 3/8/16 onclick listeners
-    }
+        itemView.findViewById(R.id.video_frame).setOnClickListener(
+                new DoubleClickListener() {
 
+                    @Override
+                    public void onSingleClick(View v) {
+                        if (vPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
+                            if (mVideoUrl == null) return;
 
-    public void bindModel(final Post post) {
+                            vPostImage.setVisibility(View.GONE);
+                            mSquareVideoView.setVisibility(View.VISIBLE);
+                            mSquareVideoView.setVideoURI(mVideoUrl);
+                            mSquareVideoView.start();
+                            videoPaused = false;
+                            if (mPostId != null) sendImpressionsAsync(mPostId);
 
-        mSquareVideoView.setVideoURI(Uri.parse("https://scontent-lga3-1.cdninstagram.com/t50.2886-16/12630057_104029733314966_194904134_n.mp4"));
+                        } else { //video already visible
+                            if (videoPaused) {
+                                mSquareVideoView.start();
+                                videoPaused = false;
+                            } else {
+                                mSquareVideoView.pause();
+                                videoPaused = true;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onDoubleClick(View v) {
+                        final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+                        AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+                        a.setDuration(400);
+
+                        final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+                        a2.setDuration(200);
+
+                        a.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
+
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                layer.startAnimation(a2);
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
+
+                            }
+                        });
+
+                        layer.startAnimation(a);
+
+                        if (!vLikesHeart.isChecked()) {
+                            vLikesHeart.toggle();
+                        }
+                    }
+                }
+        );
 
         mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() { //restart video when finished
             @Override
             public void onCompletion(MediaPlayer mp) {
                 mSquareVideoView.seekTo(0);
                 mSquareVideoView.start();
-                sendImpressionsAsync(post.getPostId());
+
+                if (mPostId != null) sendImpressionsAsync(mPostId);
             }
         });
+
+    }
+
+
+    private String mPostId;
+    private Uri mVideoUrl;
+
+
+    public void bindModel(final Post post) {
+
+        super.bindModel(post);
+        videoPaused = true;
+
+        if (mSquareVideoView.getVisibility() == View.VISIBLE) {
+            mSquareVideoView.setVisibility(View.GONE);
+            vPostImage.setVisibility(View.VISIBLE);
+        }
+
+        mPostId = post.getPostId();
+
+        //// TODO: 3/8/16 fix
+        mVideoUrl = Uri.parse(Utils.getVideoURL(post.getVideoUrl()));
 
     }
 
@@ -118,7 +173,7 @@ public class VideoFeedHolder extends RecyclerView.ViewHolder {
                     JSONObject body = new JSONObject();
 
                     body.put("college", mCollegeId);
-                    body.put("user", mUserId);
+                    body.put("user", getUserId());
 
                     JSONArray mEventIds = new JSONArray();
                     mEventIds.put(id);

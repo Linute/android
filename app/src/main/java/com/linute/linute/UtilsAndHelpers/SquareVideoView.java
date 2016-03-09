@@ -2,8 +2,10 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.VideoView;
 
 /**
@@ -30,10 +32,10 @@ public class SquareVideoView extends VideoView {
     }
 
 
-
     //make it square
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, widthMeasureSpec);
     }
+    
 }

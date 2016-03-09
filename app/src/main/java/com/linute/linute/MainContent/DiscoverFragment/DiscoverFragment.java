@@ -249,7 +249,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d("HEY", response.body().string());
+                            //Log.d("HEY", response.body().string());
                             if (getActivity() != null) { //shows server error toast
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -263,52 +263,18 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
+                        Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-
                             if (jsonArray.length() != 25) feedDone = true; //no more feed to load
-
-
-                            Post post;
-                            String postImage = "";
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            Date myDate;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
-                                    jsonObject = (JSONObject) jsonArray.get(i);
-                                    if (jsonObject.getJSONArray("images").length() > 0)
-                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
-
-                                    try {
-                                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                                    }catch (ParseException w){
-                                        w.printStackTrace();
-                                        myDate = null;
-                                    }
-
-                                    post = new Post(
-                                            jsonObject.getJSONObject("owner").getString("id"),
-                                            jsonObject.getJSONObject("owner").getString("fullName"),
-                                            jsonObject.getJSONObject("owner").getString("profileImage"),
-                                            jsonObject.getString("title"),
-                                            postImage,
-                                            jsonObject.getInt("privacy"),
-                                            jsonObject.getInt("numberOfLikes"),
-                                            jsonObject.getBoolean("isLiked"),
-                                            myDate == null ? 0 : myDate.getTime(),
-                                            jsonObject.getString("id"),
-                                            jsonObject.getInt("numberOfComments"),
-                                            jsonObject.getString("anonymousImage")
-                                    );
-                                    mPosts.add(post);
-
-                                    postImage = "";
+                                    mPosts.add(new Post(jsonArray.getJSONObject(i)));
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                 }
@@ -407,6 +373,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
+                        Log.i(TAG, "onResponse: "+json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -418,37 +385,9 @@ public class DiscoverFragment extends UpdatableFragment {
 
                             ArrayList<Post> refreshedPosts = new ArrayList<>();
 
-                            Post post;
-                            String postImage = "";
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            Date myDate;
-
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
-                                    jsonObject = (JSONObject) jsonArray.get(i);
-                                    if (jsonObject.getJSONArray("images").length() > 0)
-                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
-
-                                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-
-                                    post = new Post(
-                                            jsonObject.getJSONObject("owner").getString("id"),
-                                            jsonObject.getJSONObject("owner").getString("fullName"),
-                                            jsonObject.getJSONObject("owner").getString("profileImage"),
-                                            jsonObject.getString("title"),
-                                            postImage,
-                                            jsonObject.getInt("privacy"),
-                                            jsonObject.getInt("numberOfLikes"),
-                                            jsonObject.getBoolean("isLiked"),
-                                            myDate.getTime(),
-                                            jsonObject.getString("id"),
-                                            jsonObject.getInt("numberOfComments"),
-                                            jsonObject.getString("anonymousImage")
-                                    );
-
-                                    refreshedPosts.add(post);
-
-                                    postImage = "";
+                                    refreshedPosts.add(new Post(jsonArray.getJSONObject(i)));
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                 }
@@ -486,7 +425,7 @@ public class DiscoverFragment extends UpdatableFragment {
                             );
 
 
-                        } catch (JSONException | ParseException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {

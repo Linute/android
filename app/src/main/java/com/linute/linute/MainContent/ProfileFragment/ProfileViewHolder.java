@@ -30,6 +30,8 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private String mPostId;
     private String mUserId;
 
+    private boolean mHasVideo = false;
+
     //private View vAnonIcon;
 
 
@@ -56,7 +58,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
         mPostId = userActivityItem.getEventID();
         mUserId = userActivityItem.getOwnerID();
-
+        mHasVideo = userActivityItem.hasVideo();
 
     }
 
@@ -64,7 +66,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
         if (activity != null) {
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, true, mPostId, mUserId));
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(mHasVideo, true, mPostId, mUserId));
         }
     }
 }

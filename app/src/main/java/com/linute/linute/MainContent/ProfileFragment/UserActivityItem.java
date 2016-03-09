@@ -21,13 +21,15 @@ import java.util.TimeZone;
 /**
  * Created by QiFeng on 12/4/15.
  */
-public class UserActivityItem implements Parcelable {
+public class UserActivityItem{
 
     private String mProfileImagePath;   //exact url to image
     private String mUserName;           //first name and last
     private String mDescription;        //user hosted or attended event
     private String mEventImagePath;     //exact url to image of event
     private boolean isImagePost;
+    private boolean mHasVideo;
+    private String mVideoPath;
     private long mPostDate;
     private String mEventID;
     private String mOwnerID;
@@ -75,12 +77,19 @@ public class UserActivityItem implements Parcelable {
             //try to get event image
             try {
                 JSONArray eventImages = event.getJSONArray("images");
-                if (eventImages.length() > 0) {
+                if (eventImages != null && eventImages.length() > 0) {
                     mEventImagePath = Utils.getEventImageURL(eventImages.getString(0)); //get the first image
                     isImagePost = true;
                 } else {
-                    Log.i("UserActivityItem", "eventImages was empty");
                     isImagePost = false;
+                }
+                JSONArray videos = event.getJSONArray("videos");
+                if (videos != null && videos.length() > 0){
+                    mVideoPath = videos.getString(0);
+                    mHasVideo = true;
+                }else {
+                    mVideoPath = "";
+                    mHasVideo = false;
                 }
             } catch (JSONException e) { //counld't get image
                 e.printStackTrace();
@@ -166,39 +175,10 @@ public class UserActivityItem implements Parcelable {
         return mOwnerID;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public boolean hasVideo(){
+        return mHasVideo;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mProfileImagePath);
-        dest.writeString(mUserName);
-        dest.writeString(mDescription);
-        dest.writeLong(mPostDate);
-        dest.writeString(mEventImagePath);
-    }
-
-    private UserActivityItem(Parcel in) {
-        mProfileImagePath = in.readString();
-        mUserName = in.readString();
-        mDescription = in.readString();
-        mPostDate = in.readLong();
-        mEventImagePath = in.readString();
-    }
-
-    public static final Creator<UserActivityItem> CREATOR = new Creator<UserActivityItem>() {
-        @Override
-        public UserActivityItem createFromParcel(Parcel source) {
-            return new UserActivityItem(source);
-        }
-
-        @Override
-        public UserActivityItem[] newArray(int size) {
-            return new UserActivityItem[size];
-        }
-    };
 
     public boolean isImagePost() {
         return isImagePost;

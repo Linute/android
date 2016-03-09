@@ -201,20 +201,20 @@ public class Profile extends UpdatableFragment {
 
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) { //saves fragment state
-        outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) { //gets saved frament state
-        if (savedInstanceState != null) {
-            mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
-        }
-
-        super.onViewStateRestored(savedInstanceState);
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) { //saves fragment state
+//        outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
+//        super.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    public void onViewStateRestored(Bundle savedInstanceState) { //gets saved frament state
+//        if (savedInstanceState != null) {
+//            mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
+//        }
+//
+//        super.onViewStateRestored(savedInstanceState);
+//    }
 
     //get user information from server
     public void updateAndSetHeader() {

@@ -264,37 +264,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         JSONObject obj = (JSONObject) post;
 
         if (obj != null){
-
-            String postImage = "";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            Date myDate;
-
-
             try {
-                if (obj.getJSONArray("images").length() > 0)
-                    postImage = (String) obj.getJSONArray("images").get(0);
 
-                try {
-                    myDate = simpleDateFormat.parse(obj.getString("date"));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    myDate = null;
-                }
-
-                Post post1 = new Post(
-                        obj.getJSONObject("owner").getString("id"),
-                        obj.getJSONObject("owner").getString("fullName"),
-                        obj.getJSONObject("owner").getString("profileImage"),
-                        obj.getString("title"),
-                        postImage,
-                        obj.getInt("privacy"),
-                        0,
-                        false,
-                        myDate == null? 0 : myDate.getTime(),
-                        obj.getString("id"),
-                        0,
-                        obj.getString("anonymousImage")
-                );
+                Post post1 = new Post(obj);
 
                 return mDiscoverFragments[0].addPostToTop(post1);
 
@@ -302,7 +274,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 e.printStackTrace();
                 return false;
             }
-
         }else {
             Log.i(TAG, "addPostToFeed: obj was null");
             return false;

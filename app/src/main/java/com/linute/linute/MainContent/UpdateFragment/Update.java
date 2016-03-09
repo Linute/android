@@ -73,7 +73,8 @@ public class Update {
     private boolean mIsAnon;
     private String mAnonImage;
 
-    private String mText;
+    private String mEventUserId;
+
 
     public Update(){
 
@@ -160,10 +161,10 @@ public class Update {
     }
 
 
-    private void setUpEvent(JSONObject json) {
-        JSONObject event = getJsonObjectFromJson(json, "event");
+    private void setUpEvent(JSONObject json) throws JSONException{
+        JSONObject event = json.getJSONObject("event");
 
-        if (event == null) return;
+        mEventUserId = event.getJSONObject("owner").getString("id");
 
         mEventID = getStringFromJson(event, "id");
         mEventTitle = getStringFromJson(event, "title");
@@ -345,4 +346,7 @@ public class Update {
         return mIsAnon;
     }
 
+    public String getEventUserId() {
+        return mEventUserId;
+    }
 }

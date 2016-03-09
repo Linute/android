@@ -176,13 +176,6 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked && !((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
-            // ((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(true);
-            //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) + 1) + "");
-//            vFeedDetail.setIsPostLiked(true);
-//            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-//            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-
-
 
             BaseTaptActivity activity = (BaseTaptActivity) mContext;
             if (activity != null) {
@@ -201,93 +194,8 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
                 }
             }
 
-//            Map<String, Object> postData = new HashMap<>();
-//            postData.put("owner", mSharedPreferences.getString("userID", ""));
-//            postData.put("event", ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId());
-//            new LSDKEvents(mContext).postLike(postData, new Callback() {
-//                @Override
-//                public void onFailure(Call call, IOException e) {
-//                    Activity activity = (Activity) mContext;
-//                    if (activity != null) {
-//                        activity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                vFeedDetail.setIsPostLiked(false);
-//                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-//                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-//                            }
-//                        });
-//                    }
-//                }
-//
-//                @Override
-//                public void onResponse(Call call, Response response) throws IOException {
-//                    if (!response.isSuccessful()) {
-//                        Log.d("TAG", response.body().string());
-//                        Activity activity = (Activity) mContext;
-//                        if (activity != null) {
-//                            activity.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    vFeedDetail.setIsPostLiked(false);
-//                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-//                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-//                                }
-//                            });
-//                        }
-//                    } else {
-//                        response.body().close();
-//                    }
-//                }
-//            });
 
         } else if (!isChecked && ((FeedDetailAdapter) mAdapater).getFeedDetail().isPostLiked()) {
-            //((FeedDetailAdapter) mAdapater).getFeedDetail().setIsPostLiked(false);
-            //((FeedDetailAdapter) mAdapater).getFeedDetail().setPostLikeNum((Integer.parseInt(((FeedDetailAdapter) mAdapater).getFeedDetail().getPostLikeNum()) - 1) + "");
-//            vFeedDetail.setIsPostLiked(false);
-//            vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) - 1 + "");
-//            vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-//
-//            Map<String, Object> postData = new HashMap<>();
-//            postData.put("isDeleted", true);
-//            new LSDKEvents(mContext).updateLike(postData, ((FeedDetailAdapter) mAdapater).getFeedDetail().getPostId(), new Callback() {
-//                @Override
-//                public void onFailure(Call call, IOException e) {
-//                    e.printStackTrace();
-//                    Activity activity = (Activity) mContext;
-//                    if (activity != null) {
-//                        activity.runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                vFeedDetail.setIsPostLiked(true);
-//                                vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-//                                vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-//                            }
-//                        });
-//                    }
-//                    ;
-//                }
-//
-//                @Override
-//                public void onResponse(Call call, Response response) throws IOException {
-//                    if (!response.isSuccessful()) {
-//                        Log.d("TAG", response.body().string());
-//                        Activity activity = (Activity) mContext;
-//                        if (activity != null) {
-//                            activity.runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    vFeedDetail.setIsPostLiked(true);
-//                                    vFeedDetail.setPostLikeNum(Integer.parseInt(vFeedDetail.getPostLikeNum()) + 1 + "");
-//                                    vLikesText.setText("Like (" + vFeedDetail.getNumOfComments() + ")");
-//                                }
-//                            });
-//                        }
-//                    } else {
-//                        response.body().close();
-//                    }
-//                }
-//            });
 
             BaseTaptActivity activity = (BaseTaptActivity) mContext;
             if (activity != null) {

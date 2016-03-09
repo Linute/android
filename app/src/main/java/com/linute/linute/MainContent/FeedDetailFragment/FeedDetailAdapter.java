@@ -44,6 +44,7 @@ import okhttp3.Response;
 public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder> {
     private static final int TYPE_IMAGE_HEADER = 0;
     private static final int TYPE_STATUS_HEADER = 1;
+    private static final int TYPE_VIDEO_HEADER = 4;
     private static final int TYPE_ITEM = 2;
     private static final int TYPE_NO_COMMENTS = 3;
 
@@ -53,13 +54,15 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private FeedDetail mFeedDetail;
 
     private boolean mIsImage;
+    private boolean mHasVideo;
 
     private MentionedTextAdder mMentionedTextAdder;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context, boolean isImage) {
+    public FeedDetailAdapter(FeedDetail feedDetail, Context context, boolean isImage, boolean hasVideo) {
         this.context = context;
         mFeedDetail = feedDetail;
         mIsImage = isImage;
+        mHasVideo = hasVideo;
     }
 
     @Override
@@ -95,6 +98,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
             ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail);
         }
+
+        //// TODO: 3/8/16 Video
     }
 
     @Override
@@ -104,8 +109,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     @Override
     public int getItemViewType(int position) {
-        if (isPositionHeader(position))
-            return mIsImage ? TYPE_IMAGE_HEADER : TYPE_STATUS_HEADER;
+        if (isPositionHeader(position)) {
+            if (mIsImage) {
+                if (mHasVideo) return TYPE_VIDEO_HEADER;
+                return TYPE_IMAGE_HEADER;
+            }
+
+            return TYPE_STATUS_HEADER;
+        }
 
         if (mFeedDetail.getComments().get(0) == null)  //first item is no, means no comments
             return TYPE_NO_COMMENTS;

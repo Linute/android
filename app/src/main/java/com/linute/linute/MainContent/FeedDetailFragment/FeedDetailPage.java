@@ -85,6 +85,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private FeedDetail mFeedDetail;
 
     private boolean mIsImage;
+    private boolean mHasVideo;
     private String mTaptPostId;
     private String mTaptPostUserId;
     private FeedDetailAdapter mFeedDetailAdapter;
@@ -111,16 +112,16 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     }
 
 
-    public static FeedDetailPage newInstance(boolean openKeyBoard,
+    public static FeedDetailPage newInstance(boolean hasVideo,
                                              boolean isImage,
                                              String taptUserPostId,
                                              String taptPostUserId) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
         args.putBoolean("TITLE", isImage);
+        args.putBoolean("HAS_VIDEO", hasVideo);
         args.putString("TAPTPOST", taptUserPostId);
         args.putString("TAPTPOSTUSERID", taptPostUserId);
-        args.putBoolean("OPEN_KEYBOARD", openKeyBoard);
         fragment.setArguments(args);
         return fragment;
     }
@@ -135,6 +136,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             mIsImage = getArguments().getBoolean("TITLE");
             mTaptPostId = getArguments().getString("TAPTPOST");
             mTaptPostUserId = getArguments().getString("TAPTPOSTUSERID");
+            mHasVideo = getArguments().getBoolean("HAS_VIDEO");
 
             mFeedDetail.setPostId(mTaptPostId);
             mFeedDetail.setPostUserId(mTaptPostUserId);
@@ -157,7 +159,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage);
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mIsImage, mHasVideo);
 
         recList.setAdapter(mFeedDetailAdapter);
 

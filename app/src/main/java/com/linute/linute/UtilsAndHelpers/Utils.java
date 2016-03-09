@@ -146,6 +146,10 @@ public class Utils {
         return "http://images.linute.com/events/original/" + jpegName;
     }
 
+    public static String getVideoURL(String videoEnd){
+        return "http://images.linute.com/events/video/" + videoEnd;
+    }
+
     //return url to a profile image of user
     public static String getImageUrlOfUser(String userImage) {
         return "http://images.linute.com/profiles/original/" + userImage;
@@ -154,6 +158,8 @@ public class Utils {
     public static String getAnonImageUrl(String image){
         return "http://images.linute.com/profiles/anonymous/"+image;
     }
+
+
 
     public static String formatDateToReadableString(String date) {
         SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

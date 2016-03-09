@@ -5,15 +5,29 @@ import android.os.Parcelable;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by Arman on 12/27/15.
  */
 public class Post implements Parcelable {
+
+    public static int POST_TYPE_STATUS = 0;
+    public static int POST_TYPE_IMAGE = 1;
+    public static int POST_TYPE_VIDEO = 2;
+
+    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
     private String mUserId;
     private String mUserName;
     private String mUserImage;
     private String mTitle;
-    private String mImage;
+    private String mImage = "";
     private int mPrivacy;
     private int mNumLikes;
     private boolean mUserLiked;
@@ -24,28 +38,88 @@ public class Post implements Parcelable {
 
     private boolean mPostLiked;
 
+    private String mVideoURL = "";
+
     public Post(){
 
     }
 
-    public Post(String userId, String userName, String userImage, String title,
-                String image, int privacy, int numLike, boolean userLiked,
-                long postTime, String postId, int numComments, String anonImage) {
-        mUserId = userId;
-        mUserName = userName;
-        mImage = "";
-        mUserImage = userImage;
-        mTitle = title;
-        mImage = image;
-        mPrivacy = privacy;
-        mNumLikes = numLike;
-        mUserLiked = userLiked;
-        mPostTime = postTime;
-        mPostId = postId;
-        mNumOfComments = numComments;
-        mAnonImage = anonImage;
+//    public Post(String userId,
+//                String userName,
+//                String userImage,
+//                String title,
+//                String image,
+//                int privacy,
+//                int numLike,
+//                boolean userLiked,
+//                long postTime,
+//                String postId,
+//                int numComments,
+//                String anonImage,
+//                String video
+//    ) {
+//
+//        mUserId = userId;
+//        mUserName = userName;
+//        mImage = "";
+//        mUserImage = userImage;
+//        mTitle = title;
+//        mImage = image;
+//        mPrivacy = privacy;
+//        mNumLikes = numLike;
+//        mUserLiked = userLiked;
+//        mPostTime = postTime;
+//        mPostId = postId;
+//        mNumOfComments = numComments;
+//        mAnonImage = anonImage;
+//
+//        mPostLiked = mUserLiked;
+//        mVideoURL = video;
+//
+//    }
 
-        mPostLiked = mUserLiked;
+    public Post(JSONObject jsonObject)throws JSONException{
+
+        int type = jsonObject.getInt("type");
+
+        if (jsonObject.getJSONArray("images").length() > 0)
+            mImage = (String) jsonObject.getJSONArray("images").get(0);
+
+        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+            mVideoURL = (String) jsonObject.getJSONArray("videos").get(0);
+
+        Date myDate;
+
+        try {
+            myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+        }catch (ParseException w){
+            w.printStackTrace();
+            myDate = null;
+        }
+
+        mPostTime = (myDate == null ? 0 : myDate.getTime());
+
+        JSONObject owner = jsonObject.getJSONObject("owner");
+
+        mUserId = owner.getString("id");
+        mUserName = owner.getString("fullName");
+        mUserImage = owner.getString("profileImage");
+        mTitle = jsonObject.getString("title");
+        mPrivacy = jsonObject.getInt("privacy");
+
+        mPostId = jsonObject.getString("id");
+
+        mAnonImage = jsonObject.getString("anonymousImage");
+
+        try {
+            mNumLikes = jsonObject.getInt("numberOfLikes");
+            mNumOfComments = jsonObject.getInt("numberOfComments");
+            mPostLiked = jsonObject.getBoolean("isLiked");
+        }catch (JSONException e){
+            mNumLikes = 0;
+            mNumOfComments = 0;
+            mPostLiked = false;
+        }
     }
 
     public String getNumLike() {
@@ -101,7 +175,16 @@ public class Post implements Parcelable {
     }
 
     public boolean isImagePost(){
-        return !mImage.equals("");
+        return mImage != null && !mImage.equals("");
+    }
+
+    public boolean isVideoPost() {
+        return mVideoURL != null && !mVideoURL.equals("");
+    }
+
+
+    public String getVideoUrl() {
+        return mVideoURL;
     }
 
     public int getNumOfComments() {
@@ -137,6 +220,7 @@ public class Post implements Parcelable {
         dest.writeString(mPostId);
         dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
+        dest.writeString(mVideoURL);
     }
 
     private Post(Parcel in){
@@ -152,6 +236,7 @@ public class Post implements Parcelable {
         mPostId = in.readString();
         mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0
+        mVideoURL = in.readString();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {

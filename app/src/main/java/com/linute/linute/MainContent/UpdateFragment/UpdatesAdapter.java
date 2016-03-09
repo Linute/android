@@ -341,7 +341,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                                 FeedDetailPage.newInstance(false,
                                         update.isPicturePost()
                                         , update.getEventID()
-                                        , update.getUserId()
+                                        , update.getEventUserId()
                                 ));
                     }
                 });
