@@ -94,7 +94,6 @@ public class DiscoverFragment extends UpdatableFragment {
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
-        recList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
 
@@ -104,7 +103,6 @@ public class DiscoverFragment extends UpdatableFragment {
 
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
-        //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
@@ -125,33 +123,17 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        /*mRecyclerViewDisabler = new RecyclerViewDisabler();
-        mRecyclerViewDisabler.setScrolledUpRunnable(new RecyclerViewDisabler.ScrolledUpRunnable() {
-            @Override
-            public void onScrolledUp() {
-                refreshingAndScrolledUp();
-            }
-        });*/
-
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.i(TAG, "onRefresh: "+refreshLayout.canChildScrollUp());
                 feedDone = false;
                 refreshFeed();
             }
         });
 
-        //NOTE: don't remember what it does. uncomment if somethings happens
-//        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-//                refreshLayout.setEnabled(firstVisibleItem == 0);
-//            }
-//        });
 
         return rootView;
     }
@@ -425,7 +407,6 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -521,8 +502,6 @@ public class DiscoverFragment extends UpdatableFragment {
                     }
                 }
         );
-
-
     }
 
     private void noInternet() {

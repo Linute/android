@@ -8,13 +8,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.linute.linute.API.LSDKUser;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
@@ -23,8 +28,18 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import io.fabric.sdk.android.Fabric;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import io.fabric.sdk.android.Fabric;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -43,6 +58,7 @@ public class LaunchActivity extends Activity {
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +66,7 @@ public class LaunchActivity extends Activity {
         //setContentView(R.layout.activity_launch);
 
         generateNewSigniture();
+        updateLocationIfPossible();
 
 //        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -66,7 +83,7 @@ public class LaunchActivity extends Activity {
                     goToNextActivity();
                 }
 //                //No token and unsuccessful registration
-               else {
+                else {
                     new AlertDialog.Builder(LaunchActivity.this)
                             .setTitle("Problem With Connection")
                             .setMessage("Make sure you are connected to a network.")
@@ -109,12 +126,14 @@ public class LaunchActivity extends Activity {
         if (checkPlayServices()) {
             runRegistrationIntentService();
         }
+
     }
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
         super.onPause();
+
     }
 
     /**
@@ -138,119 +157,6 @@ public class LaunchActivity extends Activity {
         return true;
     }
 
-
-//    public void requestServices() {
-//        if (!Utils.isNetworkAvailable(this)) {
-//            goToNextActivity();
-//        }
-//
-//        else {
-//            if (ContextCompat.checkSelfPermission(this,
-//                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                    == PackageManager.PERMISSION_GRANTED) {
-//                requestLocation();
-//            } else {
-//                goToNextActivity();
-//            }
-//        }
-//    }
-
-
-//    private Handler mStopGettingLocationHandler;
-//    private Runnable mStopGettingLocation = new Runnable() {
-//        @Override
-//        public void run() {
-//            try {
-//                mLocationManager.removeUpdates(mLocationListener);
-//            } catch (SecurityException e) {
-//                e.printStackTrace();
-//            }
-//            Log.i(TAG, "run: ");
-//            goToNextActivity();
-//        }
-//    };
-
-//    private void requestLocation() throws SecurityException {
-//
-//        mLocationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, mLocationListener, null);
-//
-//        mStopGettingLocationHandler = new Handler();
-//        //mStopGettingLocationHandler.postDelayed(mStopGettingLocation, 2000); //if taking longer than 1.5 seconds to get location, stop it
-//    }
-
-//    LocationListener mLocationListener = new LocationListener() {
-//        @Override
-//        public void onLocationChanged(Location location) {
-//            Log.i(TAG, "onLocationChanged: " + location.toString());
-//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
-//
-//            SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-//
-//            sharedPreferences.edit()
-//                    .putString("geoLongitude", location.getLongitude() + "") //will be saved as String. Cant store double
-//                    .putString("geoLatitude", location.getLatitude() + "")
-//                    .apply();
-//
-//
-//            if (sharedPreferences.getBoolean("isLoggedIn", false)) {
-//                JSONArray coord = new JSONArray();
-//                try {
-//                    coord.put(location.getLatitude());
-//                    coord.put(location.getLongitude());
-//
-//                    JSONObject coordinates = new JSONObject();
-//                    coordinates.put("geo", coord);
-//
-//                    Map<String, Object> params = new HashMap<>();
-//                    params.put("coordinates", coordinates);
-//
-//                    new LSDKUser(LaunchActivity.this).updateLocation(params, new Callback() {
-//                        @Override
-//                        public void onFailure(Request request, IOException e) {
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    goToNextActivity();
-//                                }
-//                            });
-//                        }
-//
-//                        @Override
-//                        public void onResponse(Response response) throws IOException {
-//                            Log.i(TAG, "onResponse: " + response.code() + response.body().string());
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    goToNextActivity();
-//                                }
-//                            });
-//                        }
-//                    });
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                    goToNextActivity();
-//                }
-//            } else {
-//                goToNextActivity();
-//            }
-//
-//        }
-//
-//        @Override
-//        public void onStatusChanged(String provider, int status, Bundle extras) {
-//        }
-//
-//        @Override
-//        public void onProviderEnabled(String provider) {
-//        }
-//
-//        @Override
-//        public void onProviderDisabled(String provider) {
-//            mStopGettingLocationHandler.removeCallbacks(mStopGettingLocation);
-//            goToNextActivity();
-//        }
-//    };
 
     private void goToNextActivity() {
 
@@ -277,5 +183,50 @@ public class LaunchActivity extends Activity {
         Intent i = new Intent(LaunchActivity.this, nextActivity);
         startActivity(i);
         finish();
+    }
+
+
+    private void updateLocationIfPossible() {
+        if (getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getString("userToken", null) == null){
+            Log.i(TAG, "updateLocationIfPossible: no user token");
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Location loca = ((LocationManager) getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if (loca != null) { //if location was from more than 10 min ago, don't sent
+                try {
+                    JSONArray coord = new JSONArray();
+                    coord.put(loca.getLatitude());
+                    coord.put(loca.getLongitude());
+
+                    JSONObject obj = new JSONObject();
+                    obj.put("coordinates", coord);
+
+                    Map<String, Object> param = new HashMap<>();
+                    param.put("geo", obj);
+
+
+                    new LSDKUser(this).updateLocation(param, new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (!response.isSuccessful()){
+                                Log.i(TAG, "onResponse: "+response.body().string());
+                            }else {
+                                response.body().close();
+                            }
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

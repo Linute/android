@@ -24,7 +24,6 @@ import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -328,7 +327,7 @@ public class PeopleFragment extends UpdatableFragment {
                     return;
                 }
 
-                Log.i(TAG, "onResponse: "+responsString);
+                Log.i(TAG, "onResponse: " + responsString);
                 JSONObject jsonObject;
                 JSONArray jsonArray;
                 try {
@@ -665,14 +664,6 @@ public class PeopleFragment extends UpdatableFragment {
             e.printStackTrace();
         }
     }
-
-//    @Override
-//    public void onDestroy() {
-//        super.onDestroy();
-//        PeopleFragmentsHolder holderFragment = (PeopleFragmentsHolder) getParentFragment();
-//        if (holderFragment != null)
-//            holderFragment.setFragmentNeedUpdating(true);
-//    }
 
     public void scrollUp() {
         if (recList != null) {

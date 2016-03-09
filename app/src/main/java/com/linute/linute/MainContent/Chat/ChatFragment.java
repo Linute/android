@@ -367,6 +367,7 @@ public class ChatFragment extends Fragment {
                                     message.getJSONObject("owner").getString("id"),
                                     message.getString("id"),
                                     message.getString("text"));
+
                             peopleWhoRead = message.getJSONArray("read");
 
                             boolean haveRead = false;

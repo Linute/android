@@ -31,7 +31,7 @@ public class ImageUtility {
 
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                context.getString(R.string.app_name)
+                "Tapt"
         );
 
         if (!mediaStorageDir.exists()) {

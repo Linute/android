@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
@@ -259,7 +260,8 @@ public class SettingActivity extends AppCompatActivity {
                                     "&version="+device.getVersonName()+
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
-                                    "&type="+device.getType()
+                                    "&type="+device.getType() +
+                                    "&api="+ API_Methods.VERSION
                     ;
 
                     op.forceNew = true;

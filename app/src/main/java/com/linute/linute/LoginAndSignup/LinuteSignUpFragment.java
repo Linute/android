@@ -776,7 +776,7 @@ public class LinuteSignUpFragment extends Fragment {
         String imageFileName = "JPEG_" + timeStamp + "_";
         //create folder for our pictures
         File storageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "Linute");
+                Environment.DIRECTORY_PICTURES), "Tapt");
 
         if (!storageDir.exists()) storageDir.mkdir();
 

@@ -126,6 +126,7 @@
         <activity
             android:name=".MainContent.Chat.RoomsActivity"
             android:label="@string/title_activity_rooms"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainContent.MainActivity"
             android:theme="@style/AppTheme"/>
 

@@ -29,6 +29,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
@@ -44,12 +45,12 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
-import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -558,8 +559,8 @@ public class MainActivity extends BaseTaptActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType()
-                    ;
+                                    "&type=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION;
 
                     op.reconnectionDelay = 5;
                     op.secure = true;
@@ -684,17 +685,17 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-
-                if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                        .addPostToFeed(args[0])) {
-
+                    final Object post = args[0];
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            setFeedNotification(++mNumNewPostsInDiscover);
+                            if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                    .addPostToFeed(post)) {
+                                setFeedNotification(++mNumNewPostsInDiscover);
+                            }
                         }
                     });
-                }
+
             }
         }
     };

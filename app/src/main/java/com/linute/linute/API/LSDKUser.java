@@ -163,7 +163,7 @@ public class LSDKUser {
     }
 
 
-
+    //sends user a pincode to verify email
     public Call getConfirmationCodeForEmail(String email, String fName, String lName, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
@@ -174,6 +174,7 @@ public class LSDKUser {
         return API_Methods.post("users/confirm-email", header, param, callback);
     }
 
+    //login facebook
     public Call authorizationFacebook(String fbToken, Callback callback ){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
@@ -189,6 +190,7 @@ public class LSDKUser {
         return API_Methods.post("geo", header, params, callback);
     }
 
+    //change password
     public Call resetPassword(String email, Callback callback){
         Map<String, String> header = new HashMap<>();
 

@@ -8,9 +8,12 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -99,6 +102,28 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
 
+        mPostEditText.addTextChangedListener(new TextWatcher() {
+            String beforeText;
+            final int maxLines = 9;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                beforeText = s.toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (mPostEditText.getLineCount() > maxLines){
+                    mPostEditText.setText(beforeText);
+                    mPostEditText.setSelection(mPostEditText.getText().length());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         final ImageView mAnonymousSwitch = (ImageView) findViewById(R.id.post_create_anon_switch);
         mAnonymousSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,8 +183,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                                     "&version="+device.getVersonName()+
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
-                                    "&type="+device.getType()
-                    ;
+                                    "&type="+device.getType() +
+                                    "&api=" + API_Methods.VERSION;
                     op.reconnectionDelay = 5;
                     op.secure = true;
 

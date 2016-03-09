@@ -427,8 +427,8 @@ public class EditSavePhotoFragment extends Fragment {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType()
-                    ;
+                                    "&type=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION;
                     op.reconnectionDelay = 5;
                     op.secure = true;
 

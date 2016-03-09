@@ -1,37 +1,35 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/black">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/black"
+              android:gravity="center"
+              android:orientation="vertical">
+    <TextView android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:layout_marginStart="32dp"
+              android:layout_marginEnd="32dp"
+              android:gravity="center"
+              android:text="Take photos with Tapt's camera"
+              android:textColor="@android:color/white"
+              android:textSize="18dp"
+              android:textStyle="bold"/>
+    <TextView android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:gravity="center"
+              android:layout_marginStart="32dp"
+              android:layout_marginEnd="32dp"
+              android:text="Tapt needs permission to use your phone's camera and storage."
+              android:textColor="@android:color/darker_gray"
+              android:textSize="16dp"
+    />
+    <TextView android:id="@+id/needPermission_text_button"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:text="Turn On"
+              android:textColor="@android:color/holo_blue_dark"
+              android:textSize="16dp"/>
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_centerInParent="true"
-                  android:layout_marginLeft="40dp"
-                  android:layout_marginRight="40dp"
-                  android:orientation="vertical">
-        <TextView android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginBottom="10dp"
-                  android:gravity="center"
-                  android:text="Take photos with Woohoo's camera"
-                  android:textColor="@android:color/white"
-                  android:textSize="18dp"
-                  android:textStyle="bold"/>
-        <TextView android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginBottom="10dp"
-                  android:gravity="center"
-                  android:text="Woohoo needs permission to use your phone's camera and storage."
-                  android:textColor="@android:color/darker_gray"
-                  android:textSize="16dp"
-            />
-        <TextView android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:gravity="center"
-                  android:text="Turn On"
-                  android:id="@+id/needPermission_text_button"
-                  android:textColor="@android:color/holo_blue_dark"
-                  android:textSize="16dp"/>
-
-    </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

@@ -155,8 +155,8 @@ public class RoomsActivity extends BaseTaptActivity {
                                     "&version="+device.getVersonName()+
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
-                                    "&type="+device.getType()
-                    ;
+                                    "&type="+device.getType() +
+                                    "&api=" + API_Methods.VERSION;
 
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
@@ -221,7 +221,7 @@ public class RoomsActivity extends BaseTaptActivity {
 
     @Override
     public boolean socketConnected() {
-        return mSocket.connected();
+        return !(mSocket == null || !mSocket.connected());
     }
 
 

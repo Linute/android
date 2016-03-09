@@ -55,18 +55,24 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        if (viewType == IMAGE_POST){
-            return new ImageFeedHolder(this,
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
-                    mPosts,
-                    context);
-        }
-        else{
-            return new StatusFeedHolder(this,
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
-                    mPosts,
-                    context);
+        
+        switch (viewType){
+            case IMAGE_POST:
+                return new ImageFeedHolder(this,
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
+                        mPosts,
+                        context);
+            
+            case VIDEO_POST:
+                return new VideoFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
+                        context);
+            
+            default: //status post
+                return new StatusFeedHolder(this,
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
+                        mPosts,
+                        context);
         }
     }
 
@@ -74,13 +80,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ImageFeedHolder){
             ((ImageFeedHolder) holder).bindModel(mPosts.get(position));
+        }else if (holder instanceof  VideoFeedHolder){
+            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
         }else {
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
         }
 
 
         if (position + 1 == mPosts.size()) {
-            //NOTE: Changed refresh to interface
             mGetMoreFeed.getMoreFeed();
         }else if (position == 0){
             MainActivity activity = (MainActivity) context;
@@ -106,11 +113,13 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     public static final int IMAGE_POST = 0;
     public static final int STATUS_POST = 1;
+    public static final int VIDEO_POST = 2;
 
     @Override
     public int getItemViewType(int position) {
 
-        return  mPosts.get(position).isImagePost() ? IMAGE_POST : STATUS_POST;
+        //return  mPosts.get(position).isImagePost() ? IMAGE_POST : STATUS_POST; // TODO: 3/8/16 fix
+        return VIDEO_POST;
     }
 
     private boolean isPositionHeader(int position) {
