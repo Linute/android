@@ -24,16 +24,17 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.volokh.danylo.video_player_manager.manager.PlayerItemChangeListener;
+import com.volokh.danylo.video_player_manager.manager.SingleVideoPlayerManager;
+import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
+import com.volokh.danylo.video_player_manager.meta.MetaData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,6 +60,13 @@ public class DiscoverFragment extends UpdatableFragment {
     private boolean mFriendsOnly = false;
 
     private String mCollegeId;
+
+    private VideoPlayerManager<MetaData> mVideoPlayerManager = new SingleVideoPlayerManager(new PlayerItemChangeListener() {
+        @Override
+        public void onPlayerItemChanged(MetaData metaData) {
+
+        }
+    });
 
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
@@ -104,7 +112,7 @@ public class DiscoverFragment extends UpdatableFragment {
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), mVideoPlayerManager);
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
@@ -128,11 +136,35 @@ public class DiscoverFragment extends UpdatableFragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.i(TAG, "onRefresh: "+refreshLayout.canChildScrollUp());
                 feedDone = false;
                 refreshFeed();
             }
         });
+
+//        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            private boolean stoppedVideos = false;
+//            private int deltaY = 0;
+//
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                super.onScrolled(recyclerView, dx, dy);
+//                if (!stoppedVideos && (deltaY > 100 || deltaY < -100)) {
+//                    mVideoPlayerManager.stopAnyPlayback();
+//                    stoppedVideos = true;
+//                }else {
+//                    deltaY += dy;
+//                }
+//            }
+//
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    stoppedVideos = false;
+//                    deltaY = 0;
+//                }
+//            }
+//        });
 
 
         return rootView;
@@ -157,7 +189,7 @@ public class DiscoverFragment extends UpdatableFragment {
             feedDone = savedInstanceState.getBoolean("feedDone");
             mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
 
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), mVideoPlayerManager);
             mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
                 @Override
                 public void getMoreFeed() {
@@ -321,7 +353,7 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
 
-    private boolean mRefreshing = false;
+    private boolean mRefreshing = true;
 
     public void refreshFeed() {
 
@@ -480,6 +512,11 @@ public class DiscoverFragment extends UpdatableFragment {
         mPosts.add(0, post);
         mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
         mSkip++;
+        if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
         return true;
+    }
+
+    public void stopVideos(){
+        mVideoPlayerManager.stopAnyPlayback();
     }
 }

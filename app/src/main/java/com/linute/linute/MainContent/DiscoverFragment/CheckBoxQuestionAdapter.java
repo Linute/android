@@ -15,6 +15,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
+import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
+import com.volokh.danylo.video_player_manager.meta.MetaData;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,11 +38,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mCollege;
     private String mUserId;
 
+    private VideoPlayerManager<MetaData> mVideoPlayerManager;
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context) {
+
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, VideoPlayerManager<MetaData> videoPlayerManager) {
         super(new MultiChoiceMode());
         mPosts = posts;
         this.context = context;
+        mVideoPlayerManager = videoPlayerManager;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId","");
@@ -65,7 +70,8 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
                         mPosts,
-                        context);
+                        context,
+                        mVideoPlayerManager);
             
             default: //status post
                 return new StatusFeedHolder(

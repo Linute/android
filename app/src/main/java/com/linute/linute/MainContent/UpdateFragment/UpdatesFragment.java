@@ -57,6 +57,8 @@ public class UpdatesFragment extends UpdatableFragment {
 
     private View mEmptyView;
 
+    private boolean mSafeToAddToTop = false;
+
     //private SharedPreferences mSharedPreferences;
     //private Integer mSkip = 25;
     //private boolean mCanLoadMore = true;
@@ -306,6 +308,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
                                 mUpdatesAdapter.notifyDataSetChanged();
                                 mSwipeRefreshLayout.setRefreshing(false);
+                                mSafeToAddToTop = true;
                             }
                         });
 
@@ -477,7 +480,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     public void addItemToRecents(Update update) {
-        if (!mSwipeRefreshLayout.isRefreshing()) {
+        if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
             mRecentUpdates.add(0, update);
             mUpdatesAdapter.notifyItemInserted(0);
             if (mEmptyView.getVisibility() == View.VISIBLE) {

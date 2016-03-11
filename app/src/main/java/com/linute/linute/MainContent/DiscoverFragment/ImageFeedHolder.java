@@ -215,6 +215,35 @@ public class ImageFeedHolder extends BaseFeedHolder{
 //        }
 //    }
 
+    @Override
+    public void onClick(View v) {
+
+        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+        if (activity == null) return;
+
+        //tap image or name
+        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+            activity.addFragmentToContainer(
+                    TaptUserProfileFragment.newInstance(
+                            mPosts.get(getAdapterPosition()).getUserName()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
+
+        //like button pressed
+        else if (v == vLikeButton) {
+            vLikesHeart.toggle();
+        }
+        else if (v == vCommentButton) {
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(false, true
+                            , mPosts.get(getAdapterPosition()).getPostId()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
+    }
+
 
     void bindModel(Post post) {
         if (post.getPrivacy() == 0) {

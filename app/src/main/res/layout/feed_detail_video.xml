@@ -14,10 +14,9 @@
           android:background="@color/seperator_color"
     />
 
-    <com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout android:id="@+id/video_frame"
-                                                         android:layout_width="match_parent"
-                                                         android:layout_height="wrap_content"
-                                                         android:clickable="true"
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/video_frame"
+                                                          android:layout_width="match_parent"
+                                                          android:layout_height="wrap_content"
     >
 
         <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
@@ -27,7 +26,7 @@
         <com.linute.linute.UtilsAndHelpers.SquareVideoView android:id="@+id/feed_detail_video"
                                                            android:layout_width="match_parent"
                                                            android:layout_height="wrap_content"
-                                                           android:visibility="gone"/>
+        />
 
         <View android:id="@+id/feed_detail_hidden_animation"
               android:layout_width="match_parent"
@@ -37,7 +36,7 @@
               android:visibility="invisible"
         />
 
-    </com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout>
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
     <include layout="@layout/feed_detail_action_bar"/>
 

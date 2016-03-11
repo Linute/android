@@ -156,6 +156,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     }
 
 
+
     protected void getProfileImage(String image) {
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(image))

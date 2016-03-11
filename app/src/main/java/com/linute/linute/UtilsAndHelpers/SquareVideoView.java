@@ -2,16 +2,14 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.widget.VideoView;
+import com.volokh.danylo.video_player_manager.ui.VideoPlayerView;
 
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class SquareVideoView extends VideoView {
+public class SquareVideoView extends VideoPlayerView {
 
 
     public SquareVideoView(Context context) {
@@ -37,5 +35,5 @@ public class SquareVideoView extends VideoView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, widthMeasureSpec);
     }
-    
+
 }

@@ -83,7 +83,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             return new FeedDetailHeaderStatusViewHolder(this,
                     LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.feed_detail_header_status, parent, false), context);
-        } else {
+        } else if (viewType == TYPE_VIDEO_HEADER){
+            return new FeedDetailHeaderVideoViewHolder(LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(R.layout.feed_detail_header_video, parent, false), context, this);
+        }
+        else {
             return new NoCommentsHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.no_comments_item, parent, false));
         }
     }
@@ -97,6 +102,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail);
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
             ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail);
+        } else if (holder instanceof  FeedDetailHeaderVideoViewHolder){
+            ((FeedDetailHeaderVideoViewHolder) holder).bindViews(mFeedDetail);
         }
 
         //// TODO: 3/8/16 Video

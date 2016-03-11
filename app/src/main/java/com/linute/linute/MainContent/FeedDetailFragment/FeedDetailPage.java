@@ -419,7 +419,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     myDate = fm.parse(jsonObject.getString("date"));
 
                     String imageName = jsonObject.getJSONArray("images").length() != 0 ? jsonObject.getJSONArray("images").getString(0) : "";
-
+                    String video = jsonObject.getJSONArray("videos").length() != 0 ? jsonObject.getJSONArray("videos").getString(0) : "";
                     mFeedDetail.setFeedDetail(
                             imageName,
                             jsonObject.getString("title"),
@@ -430,7 +430,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             jsonObject.getBoolean("isLiked"),
                             jsonObject.getString("numberOfLikes"),
                             jsonObject.getString("numberOfComments"),
-                            jsonObject.getString("anonymousImage")
+                            jsonObject.getString("anonymousImage"),
+                            video
                     );
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();

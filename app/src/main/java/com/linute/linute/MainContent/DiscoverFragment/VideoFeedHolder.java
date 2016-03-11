@@ -2,11 +2,13 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.TextureView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -14,6 +16,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.SquareImageView;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -21,6 +25,10 @@ import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SquareVideoView;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
+import com.volokh.danylo.video_player_manager.meta.MetaData;
+import com.volokh.danylo.video_player_manager.ui.MediaPlayerWrapper;
+import com.volokh.danylo.video_player_manager.ui.VideoPlayerView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,10 +47,10 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
     private String mCollegeId;
 
-    private boolean videoPaused = true;
+    private boolean videoProcessing = false;
 
 
-    public VideoFeedHolder(final View itemView, List<Post> posts, Context context) {
+    public VideoFeedHolder(final View itemView, List<Post> posts, Context context, final VideoPlayerManager<MetaData> mVideoPlayerManager ) {
         super(itemView, posts, context);
         mSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
 
@@ -50,102 +58,166 @@ public class VideoFeedHolder extends ImageFeedHolder {
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
-        mSquareVideoView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        mSquareVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus){
-                    videoPaused = true;
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+            }
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                if (vPostImage.getVisibility() == View.GONE) {
+                    mVideoPlayerManager.stopAnyPlayback();
                     mSquareVideoView.setVisibility(View.GONE);
                     vPostImage.setVisibility(View.VISIBLE);
+                    videoProcessing = false;
                 }
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
             }
         });
 
-        vPostImage.setOnClickListener(null); //let parent handle it
 
-        itemView.findViewById(R.id.video_frame).setOnClickListener(
-                new DoubleClickListener() {
-
-                    @Override
-                    public void onSingleClick(View v) {
-                        if (vPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
-                            if (mVideoUrl == null) return;
-
-                            vPostImage.setVisibility(View.GONE);
-                            mSquareVideoView.setVisibility(View.VISIBLE);
-                            mSquareVideoView.setVideoURI(mVideoUrl);
-                            mSquareVideoView.start();
-                            videoPaused = false;
-                            if (mPostId != null) sendImpressionsAsync(mPostId);
-
-                        } else { //video already visible
-                            if (videoPaused) {
-                                mSquareVideoView.start();
-                                videoPaused = false;
-                            } else {
-                                mSquareVideoView.pause();
-                                videoPaused = true;
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onDoubleClick(View v) {
-                        final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
-
-                        AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-                        a.setDuration(400);
-
-                        final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-                        a2.setDuration(200);
-
-                        a.setAnimationListener(new Animation.AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                layer.startAnimation(a2);
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-
-                            }
-                        });
-
-                        layer.startAnimation(a);
-
-                        if (!vLikesHeart.isChecked()) {
-                            vLikesHeart.toggle();
-                        }
-                    }
-                }
-        );
-
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() { //restart video when finished
+        mSquareVideoView.addMediaPlayerListener(new MediaPlayerWrapper.MainThreadMediaPlayerListener() {
             @Override
-            public void onCompletion(MediaPlayer mp) {
-                mSquareVideoView.seekTo(0);
-                mSquareVideoView.start();
+            public void onVideoSizeChangedMainThread(int width, int height) {
 
+            }
+
+            @Override
+            public void onVideoPreparedMainThread() {
+                vPostImage.setVisibility(View.GONE);
+                mSquareVideoView.setVisibility(View.VISIBLE);
+                videoProcessing = false;
                 if (mPostId != null) sendImpressionsAsync(mPostId);
             }
+
+            @Override
+            public void onVideoCompletionMainThread() {
+                mSquareVideoView.start();
+                if (mPostId != null) sendImpressionsAsync(mPostId);
+            }
+
+            @Override
+            public void onErrorMainThread(int what, int extra) {
+
+            }
+
+            @Override
+            public void onBufferingUpdateMainThread(int percent) {
+
+            }
+
+            @Override
+            public void onVideoStoppedMainThread() {
+                videoProcessing = false;
+                vPostImage.setVisibility(View.VISIBLE);
+                mSquareVideoView.setVisibility(View.GONE);
+            }
         });
 
+
+        View.OnClickListener onClickListener = new DoubleClickListener() {
+
+            @Override
+            public void onSingleClick(View v) {
+                if (mVideoUrl == null || videoProcessing) return;
+                if (vPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
+                    mVideoPlayerManager.playNewVideo(null, mSquareVideoView, mVideoUrl);
+                    videoProcessing = true;
+                } else {
+                    mVideoPlayerManager.stopAnyPlayback();
+                    mSquareVideoView.setVisibility(View.GONE);
+                    vPostImage.setVisibility(View.VISIBLE);
+                    videoProcessing = false;
+                }
+            }
+
+            @Override
+            public void onDoubleClick(View v) {
+                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+                a.setDuration(400);
+
+                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+                a2.setDuration(200);
+
+                a.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        layer.startAnimation(a2);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+
+                layer.startAnimation(a);
+
+                if (!vLikesHeart.isChecked()) {
+                    vLikesHeart.toggle();
+                }
+            }
+        };
+
+        mSquareVideoView.setOnClickListener(onClickListener);
+        vPostImage.setOnClickListener(onClickListener);
+
+               //todo if (mPostId != null) sendImpressionsAsync(mPostId);
+    }
+
+
+    @Override
+    public void onClick(View v) {
+
+        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+        if (activity == null) return;
+
+        //tap image or name
+        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
+            activity.addFragmentToContainer(
+                    TaptUserProfileFragment.newInstance(
+                            mPosts.get(getAdapterPosition()).getUserName()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
+
+        //like button pressed
+        else if (v == vLikeButton) {
+            vLikesHeart.toggle();
+        }
+        else if (v == vCommentButton) {
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(true, true
+                            , mPosts.get(getAdapterPosition()).getPostId()
+                            , mPosts.get(getAdapterPosition()).getUserId())
+            );
+        }
     }
 
 
     private String mPostId;
-    private Uri mVideoUrl;
+    private String mVideoUrl;
 
 
     public void bindModel(final Post post) {
-
         super.bindModel(post);
-        videoPaused = true;
+        videoProcessing = false;
 
         if (mSquareVideoView.getVisibility() == View.VISIBLE) {
             mSquareVideoView.setVisibility(View.GONE);
@@ -155,7 +227,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
         mPostId = post.getPostId();
 
         //// TODO: 3/8/16 fix
-        mVideoUrl = Uri.parse(Utils.getVideoURL(post.getVideoUrl()));
+        mVideoUrl = Utils.getVideoURL(post.getVideoUrl());
 
     }
 

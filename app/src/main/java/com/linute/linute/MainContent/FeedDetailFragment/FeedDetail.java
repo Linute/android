@@ -21,6 +21,7 @@ public class FeedDetail {
     private boolean isPostLiked;
     private String mPostLikeNum = "0";
     private String mNumOfComments = "0";
+    private String mVideoUrl = "";
 
     private String mAnonPic;
 
@@ -30,7 +31,7 @@ public class FeedDetail {
 
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, long postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic) {
+    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, long postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic, String video) {
         mPostImage = postImage;
         mPostText = postText;
         mUserImage = userImage;
@@ -41,6 +42,7 @@ public class FeedDetail {
         mPostLikeNum = postLikeNum;
         mNumOfComments = numComments;
         mAnonPic = anonPic;
+        mVideoUrl = video;
     }
 
     public String getPostImage() {
@@ -125,5 +127,9 @@ public class FeedDetail {
 
     public String getAnonPic(){
         return mAnonPic;
+    }
+
+    public String getVideoUrl(){
+        return mVideoUrl;
     }
 }

@@ -78,7 +78,12 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
             @Override
             public void onPageSelected(int position) {
-                Log.i(TAG, "onPageSelected: " + position);
+                if (mDiscoverFragments[0] != null)
+                    mDiscoverFragments[0].stopVideos();
+
+
+                if (mDiscoverFragments[1] != null)
+                    mDiscoverFragments[1].stopVideos();
             }
 
             @Override
@@ -196,6 +201,14 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        if (mDiscoverFragments[0] != null)
+            mDiscoverFragments[0].stopVideos();
+
+
+        if (mDiscoverFragments[1] != null)
+            mDiscoverFragments[1].stopVideos();
+
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
 
@@ -263,7 +276,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         JSONObject obj = (JSONObject) post;
 
-        if (obj != null){
+        if (obj != null && mDiscoverFragments[0] != null){
             try {
 
                 Post post1 = new Post(obj);

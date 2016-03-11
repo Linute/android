@@ -532,7 +532,7 @@ public class ChatFragment extends Fragment {
         String id = "";
         boolean read = false;
         for (int i = 0; i < message.getJSONArray("read").length(); i++) {
-            id = ((JSONObject) message.getJSONArray("read").get(i)).getString("id");
+            id = (message.getJSONArray("read").getString(i));
             if (userId.equals(id)) {
                 read = true;
             } else {

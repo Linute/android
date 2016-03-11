@@ -327,7 +327,7 @@ public class PeopleFragment extends UpdatableFragment {
                     return;
                 }
 
-                Log.i(TAG, "onResponse: " + responsString);
+                //Log.i(TAG, "onResponse: " + responsString);
                 JSONObject jsonObject;
                 JSONArray jsonArray;
                 try {
