@@ -4,7 +4,7 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
-    <include layout="@layout/feed_detail_image"/>
+    <include layout="@layout/feed_detail_video"/>
 
     <View android:layout_width="match_parent" android:layout_height="6dp"
           android:background="@color/seperator_color"/>

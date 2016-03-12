@@ -30,6 +30,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import java.io.IOException;
 
@@ -53,16 +54,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     //    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private FeedDetail mFeedDetail;
 
-    private boolean mIsImage;
-    private boolean mHasVideo;
+    private SingleVideoPlaybackManager mSingleVideoPlaybackManager;
 
     private MentionedTextAdder mMentionedTextAdder;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context, boolean isImage, boolean hasVideo) {
+    public FeedDetailAdapter(FeedDetail feedDetail, Context context, SingleVideoPlaybackManager manager) {
         this.context = context;
         mFeedDetail = feedDetail;
-        mIsImage = isImage;
-        mHasVideo = hasVideo;
+        mSingleVideoPlaybackManager = manager;
     }
 
     @Override
@@ -76,17 +75,17 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         //image post
         else if (viewType == TYPE_IMAGE_HEADER) { //TODO: FIX ME
             //inflate your layout and pass it to view holder
-            return new FeedDetailHeaderImageViewHolder(this, LayoutInflater
+            return new FeedDetailHeaderImageViewHolder(LayoutInflater
                     .from(parent.getContext())
                     .inflate(R.layout.feed_detail_header_image, parent, false), context);
         } else if (viewType == TYPE_STATUS_HEADER) { //was a status post
-            return new FeedDetailHeaderStatusViewHolder(this,
+            return new FeedDetailHeaderStatusViewHolder(
                     LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.feed_detail_header_status, parent, false), context);
         } else if (viewType == TYPE_VIDEO_HEADER){
             return new FeedDetailHeaderVideoViewHolder(LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.feed_detail_header_video, parent, false), context, this);
+                    .inflate(R.layout.feed_detail_header_video, parent, false), context, mSingleVideoPlaybackManager);
         }
         else {
             return new NoCommentsHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.no_comments_item, parent, false));
@@ -99,14 +98,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             ((FeedDetailViewHolder) holder).bindModel(mFeedDetail.getComments().get(position - 1));
             mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
-            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail);
+            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail.getPost());
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
-            ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail);
+            ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail.getPost());
         } else if (holder instanceof  FeedDetailHeaderVideoViewHolder){
-            ((FeedDetailHeaderVideoViewHolder) holder).bindViews(mFeedDetail);
+            ((FeedDetailHeaderVideoViewHolder) holder).bindModel(mFeedDetail.getPost());
         }
-
-        //// TODO: 3/8/16 Video
     }
 
     @Override
@@ -117,11 +114,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     @Override
     public int getItemViewType(int position) {
         if (isPositionHeader(position)) {
-            if (mIsImage) {
-                if (mHasVideo) return TYPE_VIDEO_HEADER;
+            if (mFeedDetail.getPost().isImagePost()) {
+                if (mFeedDetail.getPost().isVideoPost()) return TYPE_VIDEO_HEADER;
                 return TYPE_IMAGE_HEADER;
             }
-
             return TYPE_STATUS_HEADER;
         }
 

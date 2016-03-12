@@ -2,38 +2,24 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.view.TextureView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
-import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
-import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
-import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
-import com.volokh.danylo.video_player_manager.meta.MetaData;
-import com.volokh.danylo.video_player_manager.ui.MediaPlayerWrapper;
-import com.volokh.danylo.video_player_manager.ui.VideoPlayerView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 /**
  * Created by QiFeng on 3/8/16.
@@ -47,8 +33,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
     private boolean videoProcessing = false;
 
 
-    public VideoFeedHolder(final View itemView, List<Post> posts, Context context, final SingleVideoPlaybackManager manager) {
-        super(itemView, posts, context);
+    public VideoFeedHolder(final View itemView, Context context, final SingleVideoPlaybackManager manager) {
+        super(itemView, context);
         mSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
 
 
@@ -65,14 +51,17 @@ public class VideoFeedHolder extends ImageFeedHolder {
             }
         });
 
+        //when video is loaded and ready to play
         mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
             @Override
             public void onPrepared(MediaPlayer mp) {
                 videoProcessing = false;
+                vPostImage.setVisibility(View.GONE);
                 sendImpressionsAsync(mPostId);
             }
         });
 
+        //when video finishes, restart video
         mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -81,6 +70,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
             }
         });
 
+        //hide the texture view
         mSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
             @Override
             public void hideVideo() {
@@ -95,8 +85,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
             @Override
             public void onSingleClick(View v) {
                 if (mVideoUrl == null || videoProcessing) return;
-
-                if (vPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
+                if (mSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
                     mSquareVideoView.setVisibility(View.VISIBLE);
                     manager.playNewVideo(mSquareVideoView, mVideoUrl);
                     videoProcessing = true;
@@ -147,42 +136,14 @@ public class VideoFeedHolder extends ImageFeedHolder {
     }
 
 
-    @Override
-    public void onClick(View v) {
-
-        BaseTaptActivity activity = (BaseTaptActivity) mContext;
-
-        if (activity == null) return;
-
-        //tap image or name
-        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-            activity.addFragmentToContainer(
-                    TaptUserProfileFragment.newInstance(
-                            mPosts.get(getAdapterPosition()).getUserName()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-
-        //like button pressed
-        else if (v == vLikeButton) {
-            vLikesHeart.toggle();
-        }
-        else if (v == vCommentButton) {
-            activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(true, true
-                            , mPosts.get(getAdapterPosition()).getPostId()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-    }
-
-
     private String mPostId;
     private Uri mVideoUrl;
 
 
+    @Override
     public void bindModel(final Post post) {
         super.bindModel(post);
+
         videoProcessing = false;
 
         if (mSquareVideoView.getVisibility() == View.VISIBLE) {
@@ -191,9 +152,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
         }
 
         mPostId = post.getPostId();
-
-        //// TODO: 3/8/16 fix
-        mVideoUrl = Uri.parse(Utils.getVideoURL(post.getVideoUrl()));
+        mVideoUrl = Uri.parse(post.getVideoUrl());
 
     }
 
@@ -215,9 +174,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                     body.put("college", mCollegeId);
                     body.put("user", getUserId());
 
-                    JSONArray mEventIds = new JSONArray();
-                    mEventIds.put(id);
-                    body.put("events", mEventIds);
+                    body.put("room", id);
 
                     activity.emitSocket(API_Methods.VERSION + ":posts:loops", body);
 

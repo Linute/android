@@ -265,12 +265,14 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         ArrayList<UserActivityItem> tempActivies = new ArrayList<>();
 
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
-                            tempActivies.add(
-                                    new UserActivityItem(
-                                            activities.getJSONObject(i),
-                                            activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "")
-                                    )); //create activity objects and add to array
+                            try {
+                                tempActivies.add(
+                                        new UserActivityItem(
+                                                activities.getJSONObject(i)
+                                        )); //create activity objects and add to array
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
                         }
 
                         mUserActivityItems.clear();

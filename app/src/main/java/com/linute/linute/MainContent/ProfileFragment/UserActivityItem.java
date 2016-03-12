@@ -23,17 +23,17 @@ import java.util.TimeZone;
  */
 public class UserActivityItem{
 
-    private String mProfileImagePath;   //exact url to image
-    private String mUserName;           //first name and last
-    private String mDescription;        //user hosted or attended event
-    private String mEventImagePath;     //exact url to image of event
-    private boolean isImagePost;
-    private boolean mHasVideo;
-    private String mVideoPath;
-    private long mPostDate;
-    private String mEventID;
-    private String mOwnerID;
-    private boolean mIsAnon;
+//    private String mProfileImagePath;   //exact url to image
+//    private String mUserName;           //first name and last
+//    private String mDescription;        //user hosted or attended event
+//    private String mEventImagePath;     //exact url to image of event
+//    private boolean isImagePost;
+//    private boolean mHasVideo;
+//    private String mVideoPath;
+//    private long mPostDate;
+//    private String mEventID;
+//    private String mOwnerID;
+//    private boolean mIsAnon;
 
     private Post mPost;
 
@@ -41,154 +41,60 @@ public class UserActivityItem{
 
     }
 
-    public UserActivityItem(JSONObject activityInfo, String profileImagePath, String userName) {
-        mProfileImagePath = profileImagePath;
-        mUserName = userName;
-
-//        mDescription = getStringValue(activityInfo, "action").equals("host") ? "hosted an event" : "attended an event";
-
-        mIsAnon = (getIntFromJson(activityInfo, "privacy") == 1);
-//        mDescription = "";
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-
-        try {
-            mPostDate = dateFormat.parse(getStringValue(activityInfo, "date")).getTime();
-        } catch (ParseException e) {
-            mPostDate = 0;
-            e.printStackTrace();
-        }
-
-        JSONObject event = getObject(activityInfo, "event");
-
-        if (event != null) {
-
-            mDescription = getStringValue(event, "title");
-            mEventID = getStringValue(event, "id");
-
-
-            JSONObject owner = getObject(activityInfo, "owner");
-//
-            if (owner!=null){
-                mOwnerID = getStringValue(owner, "id");
-            }
-
-            //try to get event image
-            try {
-                JSONArray eventImages = event.getJSONArray("images");
-                if (eventImages != null && eventImages.length() > 0) {
-                    mEventImagePath = Utils.getEventImageURL(eventImages.getString(0)); //get the first image
-                    isImagePost = true;
-                } else {
-                    isImagePost = false;
-                }
-                JSONArray videos = event.getJSONArray("videos");
-                if (videos != null && videos.length() > 0){
-                    mVideoPath = videos.getString(0);
-                    mHasVideo = true;
-                }else {
-                    mVideoPath = "";
-                    mHasVideo = false;
-                }
-            } catch (JSONException e) { //counld't get image
-                e.printStackTrace();
-                mEventImagePath = null;
-            }
-
-        }
-
+    public UserActivityItem(JSONObject activityInfo) throws JSONException {
+        mPost = new Post(activityInfo.getJSONObject("event"));
     }
 
-
-    private JSONObject getObject(JSONObject obj, String key) {
-        try {
-            return obj.getJSONObject(key);
-        } catch (JSONException e) {
-            return null;
-        }
-    }
-
-
-    private String getStringValue(JSONObject obj, String key) {
-        try {
-            return obj.getString(key);
-        } catch (JSONException e) {
-            return "";
-        }
-    }
-
-    public int getIntFromJson(JSONObject json, String key){
-        try {
-            return json.getInt(key);
-        }catch (JSONException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    public JSONArray getJSONArray(JSONObject obj, String key){
-        try {
-            return obj.getJSONArray(key);
-        } catch (JSONException e) {
-            return null;
-        }
-    }
 
     public String getProfileImagePath() {
-        return mProfileImagePath;
+        return mPost.getUserImage();
     }
 
-    public void setProfileImagePath(String profileImagePath) {
-        mProfileImagePath = profileImagePath;
-    }
+//    public void setProfileImagePath(String profileImagePath) {
+//         = profileImagePath;
+//    }
 
     public String getUserName() {
-        return mUserName;
+        return mPost.getUserName();
     }
 
     public void setUserName(String userName) {
-        mUserName = userName;
+        mPost.setUserName(userName);
     }
 
-    public String getDescription() {
-        return mDescription;
-    }
-
-    public void setDescription(String description) {
-        mDescription = description;
+    public String getPostText() {
+        return mPost.getTitle();
     }
 
     public String getEventImagePath() {
-        return mEventImagePath;
-    }
-
-    public void setEventImagePath(String eventImagePath) {
-        mEventImagePath = eventImagePath;
+        return mPost.getImage();
     }
 
     public String getEventID(){
-        return mEventID;
+        return mPost.getPostId();
     }
 
     public String getOwnerID(){
-        return mOwnerID;
+        return mPost.getUserId();
     }
 
     public boolean hasVideo(){
-        return mHasVideo;
+        return mPost.isVideoPost();
     }
-
 
     public boolean isImagePost() {
-        return isImagePost;
+        return mPost.isImagePost();
     }
 
-    public long getPostDate() {
-        return mPostDate;
-    }
+    //public long getPostDate() {
+        //return mPost.get;
+    //}
 
     public boolean isAnon() {
-        return mIsAnon;
+        return mPost.getPrivacy() == 1;
+    }
+
+    public Post getPost(){
+        return mPost;
     }
 }

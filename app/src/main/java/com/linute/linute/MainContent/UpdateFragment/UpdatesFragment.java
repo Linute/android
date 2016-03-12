@@ -59,10 +59,6 @@ public class UpdatesFragment extends UpdatableFragment {
 
     private boolean mSafeToAddToTop = false;
 
-    //private SharedPreferences mSharedPreferences;
-    //private Integer mSkip = 25;
-    //private boolean mCanLoadMore = true;
-
     public UpdatesFragment() {
 
     }
@@ -326,88 +322,10 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    /* NOTE: LOAD MORE
-    private void loadMore() {
-        new LSDKActivity(getContext()).getActivities(mSkip, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                showBadConnectiontToast();
-                mUpdatesAdapter.setAutoLoadMore(false);
-                notifyUpdate();
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(response.body().string()), "activities");
-
-                        if (activities == null) {
-                            mUpdatesAdapter.setAutoLoadMore(false);
-                            showServerErrorToast();
-                            notifyUpdate();
-                            return;
-                        }
-
-                        mSkip += 25;
-
-                        Log.i(TAG, "onResponse:" + activities.length());
-
-                        //remove the progress bar
-                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                            mOldUpdates.remove(mOldUpdates.size() - 1);
-                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                            mRecentUpdates.remove(mRecentUpdates.size() - 1);
-
-                        //iterate through array of activities
-                        for (int i = 0; i < activities.length(); i++) {
-                            Update update = new Update(activities.getJSONObject(i));
-                            if (update.isRead()) { //TODO: use contains to check repeat?
-                                mOldUpdates.add(update); //if read, it's old
-                            } else {
-                                mRecentUpdates.add(update); //else recent
-                            }
-                        }
-
-                        mCanLoadMore = activities.length() == 25;
-
-                        if (mCanLoadMore) {
-                            if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                                mOldUpdates.add(null);
-                            } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                                mRecentUpdates.add(null);
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        showServerErrorToast();
-                        mUpdatesAdapter.setAutoLoadMore(false);
-                    }
-                } else {
-                    showServerErrorToast();//TODO reloadbutton
-                    Log.e(TAG, "onResponse: " + response.body().string());
-                    mUpdatesAdapter.setAutoLoadMore(false);
-                }
-
-                notifyUpdate();
-            }
-        });
-    }*/
-/*
-    private void notifyUpdate() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mUpdatesAdapter.notifyDataSetChanged();
-            }
-        });
-    }*/
-
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             mHasMessages = (boolean) args[0];
-            //Log.i(TAG, "call: "+mHasMessages);
             if (mCreateActionMenu){
                 final BaseTaptActivity act = (BaseTaptActivity) getActivity();
                 if (act != null) {

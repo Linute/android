@@ -51,56 +51,15 @@ public class ImageFeedHolder extends BaseFeedHolder{
 
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
 
-//    protected View vLikeButton;
-//    protected View vCommentButton;
-//
-//    protected TextView vPostUserName;
-//    protected TextView vLikesText; //how many likes we have
-//    protected TextView vCommentText; //how many comments we have
-//    protected TextView vPostTime;
-//    protected CheckBox vLikesHeart; //toggle heart
 
     protected ImageView vPostImage;
-//    protected CircleImageView vUserImage;
-
-    //protected List<Post> mPosts;
-
-//    private Context mContext;
-//
-//    private String mUserId;
-//    private String mImageSignature;
-    //private SharedPreferences mSharedPreferences;
 
 
-    public ImageFeedHolder(final View itemView, List<Post> posts, Context context) {
-        super(itemView, posts, context);
+    public ImageFeedHolder(final View itemView, Context context) {
+        super(itemView, context);
 
-//        mContext = context;
-//        SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-//        mUserId = mSharedPreferences.getString("userID","");
-//        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
-//
-//        mPosts = posts;
-//
-//        vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
-//        vCommentButton = itemView.findViewById(R.id.feed_control_bar_comments_button);
-//
-//        vPostUserName = (TextView) itemView.findViewById(R.id.feedDetail_user_name);
-//        vLikesText = (TextView) itemView.findViewById(R.id.postNumHearts);
-//        vCommentText = (TextView) itemView.findViewById(R.id.postNumComments);
-//        vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
-//        vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
-//
-//        //vLikesHeart.setClickable(false);
-//        vLikesHeart.setOnCheckedChangeListener(this);
 
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-//        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
-//
-//        vLikeButton.setOnClickListener(this);
-//        vCommentButton.setOnClickListener(this);
-//        vPostUserName.setOnClickListener(this);
-//        vUserImage.setOnClickListener(this);
         vPostImage.setOnClickListener(new DoubleClickListener() {
 
             @Override
@@ -139,124 +98,14 @@ public class ImageFeedHolder extends BaseFeedHolder{
         });
     }
 
-//    @Override
-//    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//        if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked()) {
-//
-//            BaseTaptActivity activity = (BaseTaptActivity) mContext;
-//            if (activity != null) {
-//                try {
-//                    JSONObject body = new JSONObject();
-//                    body.put("user", mUserId);
-//                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
-//
-//                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
-//
-//                    Post p = mPosts.get(getAdapterPosition());
-//                    p.setPostLiked(true);
-//                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
-//                    vLikesText.setText("Like ("+p.getNumLike()+")");
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//        } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {
-//
-//            BaseTaptActivity activity = (BaseTaptActivity) mContext;
-//            if (activity != null) {
-//                try {
-//                    JSONObject body = new JSONObject();
-//                    body.put("user", mUserId);
-//                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
-//
-//                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
-//
-//                    Post p = mPosts.get(getAdapterPosition());
-//                    p.setPostLiked(false);
-//                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
-//                    vLikesText.setText("Like ("+p.getNumLike()+")");
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
-//    }
-
-//    @Override
-//    public void onClick(View v) {
-//
-//        BaseTaptActivity activity = (BaseTaptActivity) mContext;
-//
-//        if (activity == null) return;
-//
-//        //tap image or name
-//        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-//            activity.addFragmentToContainer(
-//                    TaptUserProfileFragment.newInstance(
-//                            mPosts.get(getAdapterPosition()).getUserName()
-//                            , mPosts.get(getAdapterPosition()).getUserId())
-//            );
-//        }
-//
-//        //like button pressed
-//        else if (v == vLikeButton) {
-//            vLikesHeart.toggle();
-//        }
-//        else if (v == vCommentButton) {
-//            activity.addFragmentToContainer(
-//                    FeedDetailPage.newInstance(false, true
-//                            , mPosts.get(getAdapterPosition()).getPostId()
-//                            , mPosts.get(getAdapterPosition()).getUserId())
-//            );
-//        }
-//    }
 
     @Override
-    public void onClick(View v) {
-
-        BaseTaptActivity activity = (BaseTaptActivity) mContext;
-
-        if (activity == null) return;
-
-        //tap image or name
-        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-            activity.addFragmentToContainer(
-                    TaptUserProfileFragment.newInstance(
-                            mPosts.get(getAdapterPosition()).getUserName()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-
-        //like button pressed
-        else if (v == vLikeButton) {
-            vLikesHeart.toggle();
-        }
-        else if (v == vCommentButton) {
-            activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(false, true
-                            , mPosts.get(getAdapterPosition()).getPostId()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-    }
-
-
-    void bindModel(Post post) {
-        if (post.getPrivacy() == 0) {
-            getProfileImage(post.getUserImage());
-            vPostUserName.setText(post.getUserName());
-        } else {
-            getAnonImage(post.getAnonImage());
-            vPostUserName.setText("Anonymous");
-        }
+    public void bindModel(Post post) {
+        super.bindModel(post);
 
         // Set Post Image
         getEventImage(post.getImage());
-        vPostTime.setText(post.getPostTime());
-        vLikesHeart.setChecked(post.isPostLiked());
-        vLikesText.setText("Like (" + post.getNumLike() + ")");
-        vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
+
     }
 
 
@@ -264,7 +113,7 @@ public class ImageFeedHolder extends BaseFeedHolder{
 
     private void getEventImage(String image) {
         Glide.with(mContext)
-                .load(Utils.getEventImageURL(image))
+                .load(image)
                 .asBitmap()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

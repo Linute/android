@@ -83,10 +83,10 @@ public class Post implements Parcelable {
         int type = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
-            mImage = (String) jsonObject.getJSONArray("images").get(0);
+            mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
 
         if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
-            mVideoURL = (String) jsonObject.getJSONArray("videos").get(0);
+            mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
 
         Date myDate;
 
@@ -103,13 +103,14 @@ public class Post implements Parcelable {
 
         mUserId = owner.getString("id");
         mUserName = owner.getString("fullName");
-        mUserImage = owner.getString("profileImage");
+        mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
 
         mPostId = jsonObject.getString("id");
 
-        mAnonImage = jsonObject.getString("anonymousImage");
+        String anonImage = jsonObject.getString("anonymousImage");
+        mAnonImage = anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage);
 
         try {
             mNumLikes = jsonObject.getInt("numberOfLikes");
@@ -162,6 +163,10 @@ public class Post implements Parcelable {
         return Utils.getTimeAgoString(mPostTime);
     }
 
+    public long getPostLongTime(){
+        return mPostTime;
+    }
+
     public String getPostId() {
         return mPostId;
     }
@@ -191,13 +196,41 @@ public class Post implements Parcelable {
         return mNumOfComments;
     }
 
+    public void setNumOfComments(int comments){
+        mNumOfComments = comments;
+    }
+
     public String getAnonImage(){
         return mAnonImage;
     }
 
+    public void setUserName(String name) {
+        mUserName = name;
+    }
+
+//    public void setPostId(String id){
+//        mPostId = id;
+//    }
+//
+//    public void setPostUserId(){
+//        mPo
+//    }
+
     @Override
     public String toString() {
         return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
+    }
+
+    public void setProfileImage(String profileImage){
+        mUserImage = profileImage;
+    }
+
+    public void setPostPrivacy(int privacy){
+        mPrivacy = privacy;
+    }
+
+    public void setAnonImage(String anonImage){
+        mAnonImage = anonImage;
     }
 
 
@@ -252,4 +285,5 @@ public class Post implements Parcelable {
             return new Post[size];
         }
     };
+
 }

@@ -311,15 +311,11 @@ public class Profile extends UpdatableFragment {
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
-                        String fullName = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
-
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
                             try {
                                 userActItems.add(
                                         new UserActivityItem(
-                                                activities.getJSONObject(i),
-                                                activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                                fullName
+                                                activities.getJSONObject(i)
                                         )); //create activity objects and add to array
                             }catch (JSONException e){
                                 e.printStackTrace();

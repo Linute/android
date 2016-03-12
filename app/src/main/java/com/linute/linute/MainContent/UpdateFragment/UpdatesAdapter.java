@@ -53,13 +53,11 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
 
     //image width / radius
-    private int mImageSize;
 
     public UpdatesAdapter(Context context, List<Update> recentItems, List<Update> olderItems) {
         mRecentItems = recentItems;
         mOlderItems = olderItems;
         mContext = context;
-        mImageSize = mContext.getResources().getDimensionPixelSize(R.dimen.action_picture_size);
     }
 
     //private onLoadMoreListener mLoadMore;
@@ -85,9 +83,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    //public void setAutoLoadMore(boolean autoLoad) {
-       // mAutoLoad = autoLoad;
-    //}
 
     @Override //header view
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int section) {
@@ -104,26 +99,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     @Override //non header views
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int section, int relativePosition, int absolutePosition) {
 
-        //NOTE: Below is the code for loading more
 
-        /*if (holder instanceof UpdatesViewHolderFooter){
-            final UpdatesViewHolderFooter footer = (UpdatesViewHolderFooter) holder;
-            if (mAutoLoad) {
-                Log.i("test", "onBindViewHolder: ");
-                mLoadMore.loadMore();
-            }
-            else {
-                footer.showButton(true);
-                footer.setButtonListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        footer.showButton(false);
-                        mLoadMore.loadMore();
-                    }
-                });
-            }
-            return;
-        }*/
 
         if(absolutePosition == 0) {
             MainActivity activity = (MainActivity) mContext;
@@ -151,21 +127,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    //private static int VIEW_FOOTER = 1;
-
     @Override
     public int getItemViewType(int section, int relativePosition, int absolutePosition) {
 
-        //NOTE: Below is the code for loading more
-
-        /*
-        if(!mRecentItems.isEmpty() && mOlderItems.isEmpty()){
-            if (mRecentItems.get(relativePosition) == null) return VIEW_FOOTER;
-        }else if (mRecentItems.isEmpty() && !mOlderItems.isEmpty()){
-            if (mOlderItems.get(relativePosition) == null) return VIEW_FOOTER;
-        }else if (section == 1){
-            if (mOlderItems.get(relativePosition) == null) return VIEW_FOOTER;
-        }*/
 
         return super.getItemViewType(section, relativePosition, absolutePosition);
     }
@@ -186,23 +150,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             );
         }
 
-
-        //NOTE: Below is the code for load more
-        /*
-        else if (viewType == VIEW_FOOTER){
-            return new UpdatesViewHolderFooter(
-                    LayoutInflater
-                            .from(parent.getContext())
-                            .inflate(R.layout.load_more_footer, parent, false)
-            );
-        }*/
         return null;
     }
-
-    /*
-    public void setOnLoadMoreListener(onLoadMoreListener listener){
-        mLoadMore = listener;
-    }*/
 
 
     public static class UpdateItemHeaderViewHolder extends RecyclerView.ViewHolder {
@@ -292,8 +241,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 } else { //picture post
                     //set event image
                     Glide.with(mContext)
-                            .load(Utils.getEventImageURL(update.getEventImageName()))
+                            .load(update.getEventImageName())
                             .asBitmap()
+                            .placeholder(R.drawable.image_loading_background)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(mEventPicture);
                 }
@@ -338,14 +288,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     @Override
                     public void onClick(View v) {
                         ((MainActivity) mContext).addFragmentToContainer(
-                                FeedDetailPage.newInstance(false,
-                                        update.isPicturePost()
-                                        , update.getEventID()
-                                        , update.getEventUserId()
-                                ));
+                                FeedDetailPage.newInstance(update.getPost())
+                        );
                     }
                 });
-
             }
         }
 
@@ -442,16 +388,16 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     drawable = R.drawable.icon_user;
                     break;
                 case MENTIONED:
-                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
+                    drawable = R.drawable.icon_comment;
                     break;
                 case FRIEND_JOINED:
-                    drawable = R.drawable.icon_user; //TODO: NEED ICON
+                    drawable = R.drawable.icon_user;
                     break;
                 case POSTED_PHOTO:
-                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
+                    drawable = R.drawable.icon_comment;
                     break;
                 case POSTED_STATUS:
-                    drawable = R.drawable.icon_comment; //TODO: NEED ICON
+                    drawable = R.drawable.icon_comment;
                     break;
                 case ALSO_COMMENTED_IMAGE:
                     drawable = R.drawable.icon_comment;
@@ -468,30 +414,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-//    public static class UpdatesViewHolderFooter extends RecyclerView.ViewHolder {
-//
-//        private Button mRetryButton;
-//        private ProgressBar mProgressBar;
-//
-//        public UpdatesViewHolderFooter(View itemView) {
-//            super(itemView);
-//            mRetryButton =  (Button) itemView.findViewById(R.id.updatesFragment_reload_button);
-//            mProgressBar = (ProgressBar) itemView.findViewById(R.id.updateFragment_progress_bar);
-//        }
-//
-//        public void showButton(boolean show){
-//            mRetryButton.setVisibility(show? View.VISIBLE : View.GONE);
-//            mProgressBar.setVisibility(show ? View.GONE : View.VISIBLE);
-//        }
-//
-//        public void setButtonListener(View.OnClickListener lis){
-//            mRetryButton.setOnClickListener(lis);
-//        }
-//
-//    }
-//
-//    public interface onLoadMoreListener{
-//        public void loadMore();
-//    }
+
 
 }

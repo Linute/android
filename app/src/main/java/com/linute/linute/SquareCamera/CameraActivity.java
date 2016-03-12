@@ -86,8 +86,10 @@ public class CameraActivity extends AppCompatActivity {
 
                 if (data != null) {
                     Uri imageUri = Crop.getOutput(data);
-                    ImageUtils.normalizeImageForUri(this, imageUri);
-                    launchEditAndSaveFragment(imageUri);
+                    if (imageUri != null) {
+                        ImageUtils.normalizeImageForUri(this, imageUri);
+                        launchEditAndSaveFragment(imageUri);
+                    }
                 }
 
             } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error

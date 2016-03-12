@@ -42,22 +42,20 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected CircleImageView vUserImage;
 
-    protected List<Post> mPosts;
-
     protected Context mContext;
 
     private String mUserId;
     private String mImageSignature;
 
-    public BaseFeedHolder(final View itemView, List<Post> posts, Context context) {
+    protected Post mPost;
+
+    public BaseFeedHolder(final View itemView, Context context) {
         super(itemView);
 
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID","");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
-
-        mPosts = posts;
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
         vCommentButton = itemView.findViewById(R.id.feed_control_bar_comments_button);
@@ -80,86 +78,73 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vUserImage.setOnClickListener(this);
     }
 
+    public void bindModel(Post post){
+        mPost = post;
+
+        if (post.getPrivacy() == 0) {
+            getProfileImage(post.getUserImage());
+            vPostUserName.setText(post.getUserName());
+        } else {
+            getAnonImage(post.getAnonImage());
+            vPostUserName.setText("Anonymous");
+        }
+
+        vPostTime.setText(post.getPostTime());
+        vLikesHeart.setChecked(post.isPostLiked());
+        vLikesText.setText("Like (" + post.getNumLike() + ")");
+        vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
+    }
+
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (isChecked && !mPosts.get(getAdapterPosition()).isPostLiked()) {
+
+        if (mPost == null) return;
+
+        if (isChecked && !mPost.isPostLiked()) {
 
             BaseTaptActivity activity = (BaseTaptActivity) mContext;
             if (activity != null) {
                 try {
                     JSONObject body = new JSONObject();
                     body.put("user", mUserId);
-                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
+                    body.put("room", mPost.getPostId());
 
                     activity.emitSocket(API_Methods.VERSION+":posts:like", body);
 
-                    Post p = mPosts.get(getAdapterPosition());
-                    p.setPostLiked(true);
-                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) + 1);
-                    vLikesText.setText("Like ("+p.getNumLike()+")");
+                    mPost.setPostLiked(true);
+                    mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) + 1);
+                    vLikesText.setText("Like ("+mPost.getNumLike()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
 
-        } else if (!isChecked && mPosts.get(getAdapterPosition()).isPostLiked()) {
+        } else if (!isChecked && mPost.isPostLiked()) {
 
             BaseTaptActivity activity = (BaseTaptActivity) mContext;
             if (activity != null) {
                 try {
                     JSONObject body = new JSONObject();
                     body.put("user", mUserId);
-                    body.put("room", mPosts.get(getAdapterPosition()).getPostId());
+                    body.put("room", mPost.getPostId());
 
                     activity.emitSocket(API_Methods.VERSION+":posts:like", body);
 
-                    Post p = mPosts.get(getAdapterPosition());
-                    p.setPostLiked(false);
-                    p.setNumLike(Integer.parseInt(mPosts.get(getAdapterPosition()).getNumLike()) - 1);
-                    vLikesText.setText("Like ("+p.getNumLike()+")");
+                    mPost.setPostLiked(false);
+                    mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) - 1);
+                    vLikesText.setText("Like ("+mPost.getNumLike()+")");
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
-
-
-    @Override
-    public void onClick(View v) {
-
-        BaseTaptActivity activity = (BaseTaptActivity) mContext;
-
-        if (activity == null) return;
-
-        //tap image or name
-        if ((v == vUserImage || v == vPostUserName) && mPosts.get(getAdapterPosition()).getPrivacy() == 0) {
-            activity.addFragmentToContainer(
-                    TaptUserProfileFragment.newInstance(
-                            mPosts.get(getAdapterPosition()).getUserName()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-
-        //like button pressed
-        else if (v == vLikeButton) {
-            vLikesHeart.toggle();
-        }
-        else if (v == vCommentButton) {
-            activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(false, true
-                            , mPosts.get(getAdapterPosition()).getPostId()
-                            , mPosts.get(getAdapterPosition()).getUserId())
-            );
-        }
-    }
-
 
 
     protected void getProfileImage(String image) {
         Glide.with(mContext)
-                .load(Utils.getImageUrlOfUser(image))
+                .load(image)
                 .asBitmap()
                 .signature(new StringSignature(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
@@ -169,7 +154,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected void getAnonImage(String image){
         Glide.with(mContext)
-                .load(Utils.getAnonImageUrl(image))
+                .load(image)
                 .asBitmap()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -180,4 +165,31 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         return mUserId;
     }
 
+
+    @Override
+    public void onClick(View v) {
+
+        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+        if (activity == null || mPost == null) return;
+
+        //tap image or name
+        if ((v == vUserImage || v == vPostUserName) && mPost.getPrivacy() == 0) {
+            activity.addFragmentToContainer(
+                    TaptUserProfileFragment.newInstance(
+                            mPost.getUserName()
+                            , mPost.getUserId())
+            );
+        }
+
+        //like button pressed
+        else if (v == vLikeButton) {
+            vLikesHeart.toggle();
+        }
+        else if (v == vCommentButton) {
+            activity.addFragmentToContainer(
+                    FeedDetailPage.newInstance(mPost)
+            );
+        }
+    }
 }

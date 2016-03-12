@@ -15,25 +15,27 @@
     />
 
     <com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout android:id="@+id/video_frame"
-                                                          android:layout_width="match_parent"
-                                                          android:layout_height="wrap_content"
+                                                                  android:layout_width="match_parent"
+                                                                  android:layout_height="wrap_content"
+                                                                  android:background="@color/pure_black"
     >
 
         <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
                                                         android:layout_width="match_parent"
                                                         android:layout_height="match_parent"/>
 
-        <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView android:id="@+id/feed_detail_video"
-                                                                        android:layout_width="match_parent"
-                                                                        android:layout_height="wrap_content"
-                                                                        android:visibility="gone"
-        />
-
         <ImageView android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:layout_gravity="top|right"
-                   android:src="@drawable/ic_action_check83"
                    android:layout_margin="@dimen/activity_horizontal_margin"
+                   android:src="@drawable/ic_action_check83"
+        />
+
+        <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView
+            android:id="@+id/feed_detail_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
         />
 
         <View android:id="@+id/feed_detail_hidden_animation"
