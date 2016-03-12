@@ -15,6 +15,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
 import com.volokh.danylo.video_player_manager.meta.MetaData;
 
@@ -38,14 +39,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mCollege;
     private String mUserId;
 
-    private VideoPlayerManager<MetaData> mVideoPlayerManager;
+    private SingleVideoPlaybackManager mVideoPlayerManager;
 
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, VideoPlayerManager<MetaData> videoPlayerManager) {
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager) {
         super(new MultiChoiceMode());
         mPosts = posts;
         this.context = context;
-        mVideoPlayerManager = videoPlayerManager;
+        mVideoPlayerManager = singleVideoPlaybackManager;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId","");

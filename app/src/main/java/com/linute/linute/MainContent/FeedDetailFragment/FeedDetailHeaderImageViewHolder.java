@@ -91,9 +91,6 @@ public class FeedDetailHeaderImageViewHolder extends RecyclerView.ViewHolder imp
         vPostUserName.setOnClickListener(this);
         vLikeContainer.setOnClickListener(this);
         mPostImage.setOnClickListener(new DoubleClickListener() {
-            @Override
-            public void onSingleClick(View v) {
-            }
 
             @Override
             public void onDoubleClick(View v) {

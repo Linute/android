@@ -22,6 +22,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,6 +46,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private FragmentHolderPagerAdapter mFragmentHolderPagerAdapter;
 
     private DiscoverFragment[] mDiscoverFragments;
+
+    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
 
@@ -78,12 +81,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
             @Override
             public void onPageSelected(int position) {
-                if (mDiscoverFragments[0] != null)
-                    mDiscoverFragments[0].stopVideos();
-
-
-                if (mDiscoverFragments[1] != null)
-                    mDiscoverFragments[1].stopVideos();
+                mSingleVideoPlaybackManager.stopPlayback();
             }
 
             @Override
@@ -202,12 +200,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     public void onPause() {
         super.onPause();
 
-        if (mDiscoverFragments[0] != null)
-            mDiscoverFragments[0].stopVideos();
-
-
-        if (mDiscoverFragments[1] != null)
-            mDiscoverFragments[1].stopVideos();
+        mSingleVideoPlaybackManager.stopPlayback();
 
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
@@ -315,4 +308,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             }
         }
     };
+
+
+    public SingleVideoPlaybackManager getSinglePlaybackManager(){
+        return mSingleVideoPlaybackManager;
+    }
 }

@@ -88,10 +88,6 @@ public class StatusFeedHolder extends BaseFeedHolder {
 //        vUserImage.setOnClickListener(this);
         vStatusContainer.setOnClickListener(new DoubleClickListener() {
             @Override
-            public void onSingleClick(View v) {
-            }
-
-            @Override
             public void onDoubleClick(View v) {
                 vLikesHeart.toggle();
             }

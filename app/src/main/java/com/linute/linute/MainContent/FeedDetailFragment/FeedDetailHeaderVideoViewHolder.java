@@ -20,7 +20,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.SquareVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.volokh.danylo.video_player_manager.manager.PlayerItemChangeListener;
 import com.volokh.danylo.video_player_manager.manager.SingleVideoPlayerManager;
@@ -103,19 +103,6 @@ public class FeedDetailHeaderVideoViewHolder extends RecyclerView.ViewHolder imp
 
         View.OnClickListener onClickListener = new DoubleClickListener() {
 
-            @Override
-            public void onSingleClick(View v) {
-                if (mVideoUrl == null || videoProcessing) return;
-                if (mPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
-                    mVideoPlayerManager.playNewVideo(null, vSquareVideo, mVideoUrl);
-                    videoProcessing = true;
-                } else {
-                    mVideoPlayerManager.stopAnyPlayback();
-                    vSquareVideo.setVisibility(View.GONE);
-                    mPostImage.setVisibility(View.VISIBLE);
-                    videoProcessing = false;
-                }
-            }
 
             @Override
             public void onDoubleClick(View v) {

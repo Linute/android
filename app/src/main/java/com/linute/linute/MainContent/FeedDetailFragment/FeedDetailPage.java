@@ -42,6 +42,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -82,7 +83,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private RecyclerView recList;
     private LinearLayoutManager llm;
 
-    private FeedDetail mFeedDetail;
+    private Post post;
 
     private boolean mIsImage;
     private boolean mHasVideo;

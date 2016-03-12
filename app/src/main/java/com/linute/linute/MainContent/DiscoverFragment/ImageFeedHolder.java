@@ -102,9 +102,6 @@ public class ImageFeedHolder extends BaseFeedHolder{
 //        vPostUserName.setOnClickListener(this);
 //        vUserImage.setOnClickListener(this);
         vPostImage.setOnClickListener(new DoubleClickListener() {
-            @Override
-            public void onSingleClick(View v) {
-            }
 
             @Override
             public void onDoubleClick(View v) {

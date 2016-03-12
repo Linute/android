@@ -218,6 +218,7 @@ public class Post implements Parcelable {
         dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
         dest.writeLong(mPostTime);
         dest.writeString(mPostId);
+        dest.writeInt(mNumOfComments);
         dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
         dest.writeString(mVideoURL);
@@ -234,6 +235,7 @@ public class Post implements Parcelable {
         mUserLiked = in.readByte() != 0; //true if byte != 0
         mPostTime = in.readLong();
         mPostId = in.readString();
+        mNumOfComments = in.readInt();
         mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0
         mVideoURL = in.readString();

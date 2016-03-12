@@ -22,6 +22,8 @@ public class ClickableSquareFrameLayout extends  SquareFrameLayout {
         mOnClickListener = l;
     }
 
+
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mOnClickListener != null;

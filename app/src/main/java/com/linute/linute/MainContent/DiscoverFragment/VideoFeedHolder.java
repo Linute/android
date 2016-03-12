@@ -6,25 +6,24 @@ import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.widget.CheckBox;
-import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.SquareImageView;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.SquareVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 import com.volokh.danylo.video_player_manager.manager.VideoPlayerManager;
 import com.volokh.danylo.video_player_manager.meta.MetaData;
 import com.volokh.danylo.video_player_manager.ui.MediaPlayerWrapper;
@@ -35,8 +34,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by QiFeng on 3/8/16.
@@ -50,92 +47,65 @@ public class VideoFeedHolder extends ImageFeedHolder {
     private boolean videoProcessing = false;
 
 
-    public VideoFeedHolder(final View itemView, List<Post> posts, Context context, final VideoPlayerManager<MetaData> mVideoPlayerManager ) {
+    public VideoFeedHolder(final View itemView, List<Post> posts, Context context, final SingleVideoPlaybackManager manager) {
         super(itemView, posts, context);
         mSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
 
 
-        SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
-        mSquareVideoView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            }
 
+        mSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
             @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                if (vPostImage.getVisibility() == View.GONE) {
-                    mVideoPlayerManager.stopAnyPlayback();
-                    mSquareVideoView.setVisibility(View.GONE);
-                    vPostImage.setVisibility(View.VISIBLE);
-                    videoProcessing = false;
-                }
-                return false;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+            public void onSurfaceDestroyed() {
+                //when video surface destroyed, hide the video and show image
+                vPostImage.setVisibility(View.VISIBLE);
+                mSquareVideoView.setVisibility(View.GONE);
             }
         });
 
-
-        mSquareVideoView.addMediaPlayerListener(new MediaPlayerWrapper.MainThreadMediaPlayerListener() {
+        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
             @Override
-            public void onVideoSizeChangedMainThread(int width, int height) {
-
-            }
-
-            @Override
-            public void onVideoPreparedMainThread() {
-                vPostImage.setVisibility(View.GONE);
-                mSquareVideoView.setVisibility(View.VISIBLE);
+            public void onPrepared(MediaPlayer mp) {
                 videoProcessing = false;
-                if (mPostId != null) sendImpressionsAsync(mPostId);
+                sendImpressionsAsync(mPostId);
             }
+        });
 
+        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
-            public void onVideoCompletionMainThread() {
+            public void onCompletion(MediaPlayer mp) {
                 mSquareVideoView.start();
-                if (mPostId != null) sendImpressionsAsync(mPostId);
+                sendImpressionsAsync(mPostId);
             }
+        });
 
+        mSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
             @Override
-            public void onErrorMainThread(int what, int extra) {
-
-            }
-
-            @Override
-            public void onBufferingUpdateMainThread(int percent) {
-
-            }
-
-            @Override
-            public void onVideoStoppedMainThread() {
+            public void hideVideo() {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.VISIBLE);
                 mSquareVideoView.setVisibility(View.GONE);
             }
         });
 
-
-        View.OnClickListener onClickListener = new DoubleClickListener() {
+        itemView.findViewById(R.id.video_frame).setOnClickListener(new DoubleAndSingleClickListener() {
 
             @Override
             public void onSingleClick(View v) {
                 if (mVideoUrl == null || videoProcessing) return;
+
                 if (vPostImage.getVisibility() == View.VISIBLE) { //image is there, so video hasnt been started yet
-                    mVideoPlayerManager.playNewVideo(null, mSquareVideoView, mVideoUrl);
+                    mSquareVideoView.setVisibility(View.VISIBLE);
+                    manager.playNewVideo(mSquareVideoView, mVideoUrl);
                     videoProcessing = true;
                 } else {
-                    mVideoPlayerManager.stopAnyPlayback();
-                    mSquareVideoView.setVisibility(View.GONE);
-                    vPostImage.setVisibility(View.VISIBLE);
-                    videoProcessing = false;
+                    if (mSquareVideoView.isPlaying()){
+                        mSquareVideoView.pause();
+                    }else {
+                        mSquareVideoView.start();
+                    }
                 }
             }
 
@@ -172,12 +142,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
                     vLikesHeart.toggle();
                 }
             }
-        };
+        });
 
-        mSquareVideoView.setOnClickListener(onClickListener);
-        vPostImage.setOnClickListener(onClickListener);
-
-               //todo if (mPostId != null) sendImpressionsAsync(mPostId);
     }
 
 
@@ -212,7 +178,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
 
     private String mPostId;
-    private String mVideoUrl;
+    private Uri mVideoUrl;
 
 
     public void bindModel(final Post post) {
@@ -227,13 +193,15 @@ public class VideoFeedHolder extends ImageFeedHolder {
         mPostId = post.getPostId();
 
         //// TODO: 3/8/16 fix
-        mVideoUrl = Utils.getVideoURL(post.getVideoUrl());
+        mVideoUrl = Uri.parse(Utils.getVideoURL(post.getVideoUrl()));
 
     }
 
 
     //sends info on how many times looped
     private void sendImpressionsAsync(final String id) {
+        if (id == null) return;
+
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {

@@ -89,10 +89,6 @@ public class FeedDetailHeaderStatusViewHolder extends RecyclerView.ViewHolder im
 
         itemView.findViewById(R.id.feedDetail_status_container).setOnClickListener(new DoubleClickListener() {
             @Override
-            public void onSingleClick(View v) {
-            }
-
-            @Override
             public void onDoubleClick(View v) {
                 vLikesHeart.toggle();
             }
