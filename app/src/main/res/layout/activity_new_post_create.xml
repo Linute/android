@@ -8,60 +8,57 @@
     tools:context=".MainContent.PostCreatePage">
 
 
-    <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
-                                       android:layout_width="match_parent"
-                                       android:layout_height="?attr/actionBarSize"
-                                       android:background="@color/colorPrimary"
-                                       android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="?attr/actionBarSize">
+        <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="?attr/actionBarSize"
+                                           android:background="@color/colorPrimary"
+                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
-        <RelativeLayout android:layout_width="match_parent"
+        <RelativeLayout android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:layout_marginEnd="@dimen/activity_horizontal_margin">
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="16dp"
+        >
 
-            <RelativeLayout android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true">
+            <ImageView android:id="@+id/create_page_post_button"
+                       android:layout_width="wrap_content"
+                       android:layout_height="match_parent"
+                       android:src="@drawable/ic_action_check83"
+            />
 
-                <ImageView android:id="@+id/create_page_post_button"
-                           android:layout_width="wrap_content"
-                           android:layout_height="wrap_content"
-                           android:src="@drawable/ic_action_check83"
-                />
-
-                <ProgressBar android:id="@+id/create_page_progress_bar"
-                             style="?android:attr/progressBarStyleSmall"
-                             android:layout_width="wrap_content"
-                             android:layout_height="wrap_content"
-                             android:layout_centerInParent="true"
-                             android:visibility="gone"
-                />
-            </RelativeLayout>
-
+            <ProgressBar android:id="@+id/create_page_progress_bar"
+                         style="?android:attr/progressBarStyleSmall"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_centerInParent="true"
+                         android:visibility="gone"
+            />
         </RelativeLayout>
 
-    </android.support.v7.widget.Toolbar>
-
+    </RelativeLayout>
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_frame"
                                                          android:layout_width="match_parent"
                                                          android:layout_height="wrap_content"
-                                                         android:focusableInTouchMode="true"
-                                                         android:background="#FFFFFF">
+                                                         android:background="#FFFFFF"
+                                                         android:focusableInTouchMode="true">
 
         <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
             android:id="@+id/post_create_text"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:background="@null"
             android:gravity="center_vertical"
             android:hint="Enter your text here"
             android:imeOptions="actionDone"
-            android:inputType="textMultiLine|textPhonetic|textCapSentences"
+            android:inputType="textMultiLine|textNoSuggestions|textCapSentences"
             android:maxLines="9"
             android:textColor="#000000"
             android:textSize="30sp"

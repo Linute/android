@@ -12,12 +12,12 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
@@ -25,11 +25,9 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.ImageButton;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 
 import com.linute.linute.R;
 
@@ -65,6 +63,10 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     private View mChangeCameraFlashModeBtn;
     private ImageView mTakePhotoBtn;
 
+    private CheckBox mAnonCheckbox;
+
+    private Toolbar mToolbar;
+
     public static Fragment newInstance() {
         return new CameraFragment();
     }
@@ -98,7 +100,22 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.squarecamera__fragment_camera, container, false);
+
+        View root = inflater.inflate(R.layout.square_camera_take_photo, container, false);
+
+        mToolbar = (Toolbar) root.findViewById(R.id.square_cam_tool_bar);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+            }
+        });
+        mToolbar.setTitle("Camera");
+
+        mAnonCheckbox = (CheckBox) root.findViewById(R.id.anon_checkbox);
+
+        return root;
     }
 
     @Override
@@ -107,13 +124,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mOrientationListener.enable();
 
         bindViews(view);
-
-        view.findViewById(R.id.camera_cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cancelPressed();
-            }
-        });
 
         view.findViewById(R.id.cameraFragment_galleryButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,51 +137,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mImageParameters.mIsPortrait =
                 getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
-        setUpCovers(view, savedInstanceState != null);
         setupFlashMode();
-    }
-
-    //sets up the top and bottom covers of our camera
-    private void setUpCovers(View view, boolean hasSavedInstance) {
-
-        final View topCoverView = view.findViewById(R.id.cover_top_view);
-        final View btnCoverView = view.findViewById(R.id.cover_bottom_view);
-
-        if (!hasSavedInstance) { //we need to know how big the camera preview is
-            ViewTreeObserver observer = mPreviewView.getViewTreeObserver();
-            observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @Override
-                public void onGlobalLayout() {
-                    mImageParameters.mPreviewWidth = mPreviewView.getWidth();
-                    mImageParameters.mPreviewHeight = mPreviewView.getHeight();
-
-                    mImageParameters.mCoverWidth = mImageParameters.mCoverHeight
-                            = mImageParameters.calculateCoverWidthHeight();
-
-                    resizeTopAndBtmCover(topCoverView, btnCoverView);
-
-                    topCoverView.requestLayout();
-                    btnCoverView.requestLayout();
-
-                    //save image parameters ; top cover and lower cover
-                    //we need this for EditAndSaveFragment
-                    if (getActivity() != null)
-                        ((CameraActivity) getActivity()).setImageParameters(mImageParameters.createCopy());
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        mPreviewView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    } else {
-                        mPreviewView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                    }
-                }
-            });
-        } else {
-            resizeTopAndBtmCover(topCoverView, btnCoverView);
-
-            //save image parameters ; top cover and lower cover
-            //we need this for EditAndSaveFragment
-            ((CameraActivity) getActivity()).setImageParameters(mImageParameters.createCopy());
-        }
     }
 
     private void bindViews(View view) {
@@ -241,15 +207,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         super.onSaveInstanceState(outState);
     }
 
-    private void resizeTopAndBtmCover(final View topCover, final View bottomCover) {
-        if (mImageParameters.isPortrait()) {
-            topCover.getLayoutParams().height = mImageParameters.mCoverHeight;
-            bottomCover.getLayoutParams().height = mImageParameters.mCoverHeight;
-        } else {
-            topCover.getLayoutParams().width = mImageParameters.mCoverWidth;
-            bottomCover.getLayoutParams().width = mImageParameters.mCoverWidth;
-        }
-    }
 
     //returns true if able to get camera and false if we werent able to
     private boolean getCamera(int cameraID) {
@@ -294,7 +251,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             mCamera.startPreview();
             setSafeToTakePhoto(true);
             setCameraFocusReady(true);
-            Log.i(TAG, "startCameraPreview: called");
         } catch (IOException e) {
             Log.d(TAG, "Can't start camera preview due to IOException " + e);
             e.printStackTrace();
@@ -386,9 +342,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
         parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
-
-        Log.i(TAG, "setupCamera: " + bestPictureSize.width + " " + bestPictureSize.height);
-
 
         // Set continuous picture focus, if it's supported
         if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -485,12 +438,12 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             final Camera.PictureCallback postView = null;
 
             //if on or auto, dont autofocus
-            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON) || mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)){
+            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON) || mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)) {
                 mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
             }
 
             //autofocus
-            else{
+            else {
                 mCamera.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
                     public void onAutoFocus(boolean success, Camera camera) {
@@ -586,13 +539,36 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
         int rotation = getPhotoRotation();
+        Bitmap map = rotatePicture(rotation, data);
+        Log.i(TAG, "rotatePicture: " + rotation);
 
-        Uri uri = ImageUtility.savePicture(getActivity(), rotatePicture(rotation, data));
+        int x = 0;
+        int y = 0;
+        if (!usingFrontFaceCamera()) {
+            if (rotation == 180) {
+                x += map.getWidth() - map.getHeight();
+            } else if (rotation == 270) {
+                y += map.getHeight() - map.getWidth();
+            }
+        }else {
+            if (rotation == 180){
+                if (map.getWidth() - map.getHeight() > 0 ){
+                    x+=map.getWidth() - map.getHeight();
+                }
+            }else if (rotation == 90){
+                if (map.getHeight() - map.getWidth() > 0 ){
+                    y+=map.getHeight() - map.getWidth();
+                }
+            }
+        }
+
+        int measure = map.getWidth() < map.getHeight() ? map.getWidth() : map.getHeight();
+        Uri uri = ImageUtility.savePicture(getActivity(), Bitmap.createBitmap(map,x,y,measure,measure));
         getFragmentManager()
                 .beginTransaction()
                 .replace(
                         R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri, mImageParameters.createCopy()),
+                        EditSavePhotoFragment.newInstance(uri, mImageParameters.createCopy(), mAnonCheckbox.isChecked()),
                         EditSavePhotoFragment.TAG)
                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
@@ -604,6 +580,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     private Bitmap rotatePicture(int rotation, byte[] data) {
         Bitmap bitmap = ImageUtility.decodeSampledBitmapFromByte(getActivity(), data);
 //        Log.d(TAG, "original bitmap width " + bitmap.getWidth() + " height " + bitmap.getHeight());
+
+
         if (rotation != 0) {
             Bitmap oldBitmap = bitmap;
 
@@ -617,12 +595,13 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             oldBitmap.recycle();
         }
 
+
         if (usingFrontFaceCamera()) {
             Bitmap oldBitmap = bitmap;
 
             Matrix matrix = new Matrix();
             matrix.setScale(-1, 1);
-            matrix.postTranslate(bitmap.getWidth(), 0);
+            matrix.postTranslate(oldBitmap.getWidth(), 0);
 
             bitmap = Bitmap.createBitmap(
                     oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
@@ -708,10 +687,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             return mRememberedNormalOrientation;
         }
 
-    }
-
-    private void cancelPressed() {
-        getActivity().finish();
     }
 
 

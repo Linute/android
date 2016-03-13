@@ -67,7 +67,7 @@ public class ChatFragment extends Fragment {
     private static final String USERID = "userid";
     private static final String USER_COUNT = "usercount";
     private static final String CHAT_HEADS = "chatheads";
-    private static final int TYPING_TIMER_LENGTH = 600;
+    private static final int TYPING_TIMER_LENGTH = 3000;
 
     // TODO: Rename and change types of parameters
     private String mRoomId;

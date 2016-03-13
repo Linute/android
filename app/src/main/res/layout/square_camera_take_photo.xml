@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:orientation="vertical"
+    >
+
+        <android.support.v7.widget.Toolbar android:id="@+id/square_cam_tool_bar"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="?android:attr/actionBarSize"
+                                           android:background="@color/colorPrimary"
+                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"
+
+        />
+
+        <RelativeLayout android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+            <com.linute.linute.SquareCamera.SquareCameraPreview
+                android:id="@+id/camera_preview_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/black"/>
+
+
+            <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/square_frame"
+                                                                 android:layout_width="match_parent"
+                                                                 android:layout_height="wrap_content"/>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:layout_below="@id/square_frame"
+                          android:background="@color/colorPrimary"
+                          android:orientation="vertical"
+            >
+
+                <RelativeLayout android:layout_width="match_parent"
+                                android:layout_height="0px"
+                                android:layout_weight="1"
+                >
+
+                    <LinearLayout android:id="@+id/flash"
+                                  android:layout_width="wrap_content"
+                                  android:layout_height="match_parent">
+
+                        <ImageView android:id="@+id/flash_icon"
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="match_parent"
+                                   android:layout_marginStart="@dimen/activity_horizontal_margin"
+                                   android:src="@drawable/squarecamera__toggle_flash"
+                        />
+
+                        <TextView android:id="@+id/auto_flash_icon"
+                                  android:layout_width="wrap_content"
+                                  android:layout_height="match_parent"
+                                  android:layout_marginEnd="16dp"
+                                  android:layout_marginStart="2dp"
+                                  android:gravity="bottom"
+                                  android:text="ON"
+                                  android:textColor="@color/fifty_white"
+                                  android:textSize="@dimen/sub_font_size"
+                        />
+
+                    </LinearLayout>
+
+
+                    <ImageView android:id="@+id/change_camera"
+                               android:layout_width="wrap_content"
+                               android:layout_height="match_parent"
+                               android:layout_alignParentEnd="true"
+                               android:paddingEnd="16dp"
+                               android:paddingStart="16dp"
+                               android:src="@drawable/squarecamera__toggle_flash"
+                    />
+
+                </RelativeLayout>
+
+
+                <LinearLayout android:layout_width="match_parent"
+                              android:layout_height="0px"
+                              android:layout_weight="3"
+                              android:gravity="center"
+                >
+
+
+                    <ImageView android:id="@+id/cameraFragment_galleryButton"
+                               android:layout_width="wrap_content"
+                               android:layout_height="wrap_content"
+                               android:layout_marginEnd="50dp"
+                               android:src="@drawable/ic_action_image_photo_library"
+                    />
+
+                    <ImageView
+                        android:id="@+id/capture_image_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/squarecamera__capture_photo_button"
+                    />
+
+                    <CheckBox android:id="@+id/anon_checkbox"
+                              android:layout_width="wrap_content"
+                              android:layout_height="wrap_content"
+                              android:layout_marginStart="50dp"
+                              android:background="@drawable/post_as_anon_checkbox"
+                              android:button="@null"
+                    />
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

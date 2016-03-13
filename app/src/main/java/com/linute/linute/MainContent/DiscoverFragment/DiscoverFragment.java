@@ -264,7 +264,9 @@ public class DiscoverFragment extends UpdatableFragment {
 
 
         Map<String, String> events = new HashMap<>();
-        events.put("college", mCollegeId);
+        if (!mFriendsOnly) {
+            events.put("college", mCollegeId);
+        }
         events.put("skip", skip + "");
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());

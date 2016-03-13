@@ -5,10 +5,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
@@ -20,11 +17,7 @@ import java.util.List;
 public class SquareCameraPreview extends SurfaceView{
 
     public static final String TAG = SquareCameraPreview.class.getSimpleName();
-    private static final int INVALID_POINTER_ID = -1;
 
-    private static final int ZOOM_OUT = 0;
-    private static final int ZOOM_IN = 1;
-    private static final int ZOOM_DELTA = 1;
 
     private static final int FOCUS_SQR_SIZE = 100;
     private static final int FOCUS_MAX_BOUND = 1000;
@@ -35,13 +28,6 @@ public class SquareCameraPreview extends SurfaceView{
 
     private float mLastTouchX;
     private float mLastTouchY;
-
-    // For scaling
-    private int mMaxZoom;
-    private boolean mIsZoomSupported;
-    private int mActivePointerId = INVALID_POINTER_ID;
-    private int mScaleFactor = 1;
-    private ScaleGestureDetector mScaleDetector;
 
     // For focus
     private boolean mIsFocus;
@@ -65,7 +51,6 @@ public class SquareCameraPreview extends SurfaceView{
     }
 
     private void init(Context context) {
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
         mFocusArea = new Camera.Area(new Rect(), 1000);
         mFocusAreas = new ArrayList<>();
         mFocusAreas.add(mFocusArea);
@@ -110,19 +95,10 @@ public class SquareCameraPreview extends SurfaceView{
 
     public void setCamera(Camera camera) {
         mCamera = camera;
-
-        if (camera != null) {
-            Camera.Parameters params = camera.getParameters();
-            mIsZoomSupported = params.isZoomSupported();
-            if (mIsZoomSupported) {
-                mMaxZoom = params.getMaxZoom();
-            }
-        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        mScaleDetector.onTouchEvent(event);
 
         final int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
@@ -131,15 +107,12 @@ public class SquareCameraPreview extends SurfaceView{
 
                 mLastTouchX = event.getX();
                 mLastTouchY = event.getY();
-
-                mActivePointerId = event.getPointerId(0);
                 break;
             }
             case MotionEvent.ACTION_UP: {
                 if (mIsFocus && mIsFocusReady) {
                     handleFocus(mCamera.getParameters());
                 }
-                mActivePointerId = INVALID_POINTER_ID;
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
@@ -148,7 +121,6 @@ public class SquareCameraPreview extends SurfaceView{
                 break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                mActivePointerId = INVALID_POINTER_ID;
                 break;
             }
         }
@@ -156,16 +128,6 @@ public class SquareCameraPreview extends SurfaceView{
         return true;
     }
 
-    private void handleZoom(Camera.Parameters params) {
-        int zoom = params.getZoom();
-        if (mScaleFactor == ZOOM_IN) {
-            if (zoom < mMaxZoom) zoom += ZOOM_DELTA;
-        } else if (mScaleFactor == ZOOM_OUT) {
-            if (zoom > 0) zoom -= ZOOM_DELTA;
-        }
-        params.setZoom(zoom);
-        mCamera.setParameters(params);
-    }
 
     private void handleFocus(Camera.Parameters params) {
         float x = mLastTouchX;
@@ -209,13 +171,4 @@ public class SquareCameraPreview extends SurfaceView{
         return true;
     }
 
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            mScaleFactor = (int) detector.getScaleFactor();
-            handleZoom(mCamera.getParameters());
-            return true;
-        }
-    }
 }

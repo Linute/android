@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -16,7 +15,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -69,10 +67,17 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         //setup toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+        toolbar.setTitle("Status");
 
-        mPostButton = toolbar.findViewById(R.id.create_page_post_button);
-        mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
+        mPostButton = findViewById(R.id.create_page_post_button);
+        mProgressbar = findViewById(R.id.create_page_progress_bar);
 
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,17 +153,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.post_create_5).setOnClickListener(this);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                setResult(RESULT_CANCELED);
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
 
     private Socket mSocket;
