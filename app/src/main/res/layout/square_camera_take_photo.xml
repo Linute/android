@@ -39,7 +39,8 @@
                           android:orientation="vertical"
             >
 
-                <RelativeLayout android:layout_width="match_parent"
+                <RelativeLayout android:id="@+id/camera_ops"
+                    android:layout_width="match_parent"
                                 android:layout_height="0px"
                                 android:layout_weight="1"
                 >
@@ -95,13 +96,25 @@
                                android:src="@drawable/ic_action_image_photo_library"
                     />
 
-                    <ImageView
-                        android:id="@+id/capture_image_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_margin="8dp"
-                        android:src="@drawable/squarecamera__capture_photo_button"
-                    />
+
+                    <RelativeLayout android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content">
+
+                        <ImageView android:layout_width="wrap_content"
+                                   android:layout_height="wrap_content"
+                                   android:src="@drawable/square_camera_surround"
+                                   android:layout_centerInParent="true"
+                        />
+
+                        <ImageView
+                            android:id="@+id/capture_image_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/square_camera_unselected"
+                            android:layout_centerInParent="true"
+                        />
+
+                    </RelativeLayout>
 
                     <CheckBox android:id="@+id/anon_checkbox"
                               android:layout_width="wrap_content"

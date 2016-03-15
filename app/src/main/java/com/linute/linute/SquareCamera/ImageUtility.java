@@ -8,6 +8,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -162,6 +163,26 @@ public class ImageUtility {
             return lowerBound;
         } else {
             return upperBound;
+        }
+    }
+
+    public static String getTempFile(Context context, String url) throws IOException {
+        File file;
+
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, ".mp4", context.getCacheDir());
+
+        return file.getPath();
+    }
+
+    public static void deleteCachedVideo(Uri uri){
+        if (uri != null){
+            File video = new File(uri.getPath());
+            if(video.delete()){
+                Log.i("VIDEO", "deleteCachedVideo: cached video deleted");
+            }else {
+                Log.i("VIDEO", "deleteCachedVideo: cached video NOT deleted");
+            }
         }
     }
 

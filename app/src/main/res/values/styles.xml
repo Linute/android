@@ -35,41 +35,41 @@
 
     <!--Square Camera-->
     <!-- Base application theme. -->
-    <style name="squarecamera__CameraFullScreenTheme"
-           parent="squarecamera__CameraFullScreenTheme.Base">
+    <!--<style name="squarecamera__CameraFullScreenTheme"-->
+           <!--parent="squarecamera__CameraFullScreenTheme.Base">-->
 
-    </style>
+    <!--</style>-->
 
-    <style name="squarecamera__CameraFullScreenTheme.Base" parent="AppTheme">
-        <!-- Customize your theme here. -->
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
+    <!--<style name="squarecamera__CameraFullScreenTheme.Base" parent="AppTheme">-->
+        <!--&lt;!&ndash; Customize your theme here. &ndash;&gt;-->
+        <!--<item name="android:windowNoTitle">true</item>-->
+        <!--<item name="android:windowActionBar">false</item>-->
+        <!--<item name="android:windowFullscreen">true</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+    <!--</style>-->
 
-    <style name="squarecamera__CameraFullScreenTheme.AppBarOverlay"
-           parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <!--<style name="squarecamera__CameraFullScreenTheme.AppBarOverlay"-->
+           <!--parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>-->
 
-    <style name="squarecamera__CameraFullScreenTheme.PopupOverlay"
-           parent="ThemeOverlay.AppCompat.Light"/>
+    <!--<style name="squarecamera__CameraFullScreenTheme.PopupOverlay"-->
+           <!--parent="ThemeOverlay.AppCompat.Light"/>-->
 
     <!--<style name="PostDialog" parent="android:Theme.Dialog" >-->
     <!--<item name="android:windowNoTitle">false</item>-->
     <!--<item name="android:windowFullscreen">false</item>-->
     <!--<item name="android:windowIsFloating">false</item>-->
     <!--</style>-->
-    <style name="NewChatDialog" parent="@android:style/Theme.Dialog">
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowBackground">@color/white</item>
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowTitleStyle">@null</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
-        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
-        <item name="android:gravity">center</item>
-    </style>
+    <!--<style name="NewChatDialog" parent="@android:style/Theme.Dialog">-->
+        <!--<item name="android:windowFrame">@null</item>-->
+        <!--<item name="android:windowBackground">@color/white</item>-->
+        <!--<item name="android:windowIsFloating">false</item>-->
+        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <!--<item name="android:windowTitleStyle">@null</item>-->
+        <!--<item name="android:colorBackgroundCacheHint">@null</item>-->
+        <!--<item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>-->
+        <!--<item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>-->
+        <!--<item name="android:gravity">center</item>-->
+    <!--</style>-->
 
     <style name="MSV_ImageButton">
         <item name="android:layout_width">wrap_content</item>

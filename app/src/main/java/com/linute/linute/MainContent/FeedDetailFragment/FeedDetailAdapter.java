@@ -374,6 +374,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mItemManger.removeShownLayouts(mSwipeLayout);
             mFeedDetail.getComments().remove(pos);
             notifyItemRemoved(pos + 1);
+            notifyItemRangeChanged(pos+1, mFeedDetail.getComments().size()+1);
             mFeedDetail.refreshCommentCount();
 
 

@@ -3,29 +3,18 @@ package com.linute.linute.SquareCamera;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -34,11 +23,12 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.URISyntaxException;
 
 import io.socket.client.IO;
@@ -50,9 +40,9 @@ import io.socket.engineio.client.transports.WebSocket;
 /**
  *
  */
-public class EditSavePhotoFragment extends Fragment {
+public class EditSaveVideoFragment extends Fragment {
 
-    public static final String TAG = EditSavePhotoFragment.class.getSimpleName();
+    public static final String TAG = EditSaveVideoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
     //public static final String ROTATION_KEY = "rotation";
     public static final String IMAGE_INFO = "image_info";
@@ -71,9 +61,13 @@ public class EditSavePhotoFragment extends Fragment {
 
     private View mUploadButton;
 
+    private Uri mVideoLink;
+
+    private TextureVideoView mSquareVideoView;
+
 
     public static Fragment newInstance(Uri imageUri, boolean makeAnon) {
-        Fragment fragment = new EditSavePhotoFragment();
+        Fragment fragment = new EditSaveVideoFragment();
 
         Bundle args = new Bundle();
 
@@ -86,46 +80,48 @@ public class EditSavePhotoFragment extends Fragment {
         return fragment;
     }
 
-    public EditSavePhotoFragment() {
+    public EditSaveVideoFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.squarecamera__fragment_edit_save_photo, container, false);
+        return inflater.inflate(R.layout.square_camera_edit_save_video, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Log.i(TAG, "onViewCreated: photo");
-
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID","");
 
         //setup ImageView
-        Uri imageUri = getArguments().getParcelable(BITMAP_URI);
-        final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
+        mVideoLink = getArguments().getParcelable(BITMAP_URI);
+        mSquareVideoView= (TextureVideoView) view.findViewById(R.id.video_frame);
 
-        photoImageView.setImageURI(imageUri);
+        mSquareVideoView.setVideoURI(mVideoLink);
 
-        //shows the text strip when image touched
-        photoImageView.setOnClickListener(new View.OnClickListener() {
+        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mSquareVideoView.start();
+            }
+        });
+
+        view.findViewById(R.id.square_videoFrame).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mText.getVisibility() == View.GONE) {
-                    mText.setVisibility(View.VISIBLE);
-                    mText.requestFocus();
-                    showKeyboard();
-                    mCanMove = false; //can't mvoe strip while in edit
+                if (mSquareVideoView.isPlaying()){
+                    mSquareVideoView.pause();
+                }else {
+                    mSquareVideoView.start();
                 }
             }
         });
 
-        mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
-        mText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
+        //shows the text strip when image touched
         mButtonLayer = view.findViewById(R.id.editFragment_button_layer);
         mProgressBar = (ProgressBar) view.findViewById(R.id.editFragment_progress_bar);
 
@@ -134,7 +130,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolbar.setTitle("Tap the photo to add text");
+        toolbar.setTitle("Video");
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -151,149 +147,57 @@ public class EditSavePhotoFragment extends Fragment {
                 sendPicture();
             }
         });
-
-        setUpEditText();
     }
 
-    //text strip can move or not
-    //can't move during edit
-    private boolean mCanMove = true;
 
-    private void setUpEditText() {
-
-        //when back is pressed
-        mText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
-            @Override
-            public void backPressed() {
-                hideKeyboard();
-
-                mCanMove = true;
-
-                //if EditText is empty, hide it
-                if (mText.getText().toString().trim().isEmpty())
-                    mText.setVisibility(View.GONE);
-            }
-        });
-
-        //when done is pressed on keyboard
-        mText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    hideKeyboard();
-
-                    mCanMove = true;
-
-                    //if EditText is empty, hide it
-                    if (mText.getText().toString().trim().isEmpty())
-                        mText.setVisibility(View.GONE);
-                }
-                return false;
-            }
-        });
-
-        //movement
-        mText.setOnTouchListener(new View.OnTouchListener() {
-            float prevY;
-            private boolean stopped = true;
-            float totalMovement;
-
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                if (!mCanMove) return false; //can't move, so stop
-
-                switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        prevY = event.getY();
-                        stopped = false;
-                        totalMovement = 0;
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        if (totalMovement <= 2) { //tapped and no movement
-                            mText.requestFocus(); //open edittext
-                            showKeyboard();
-                            mCanMove = false;
-                        }
-                        stopped = true;
-                        break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        int change = (int) (event.getY() - prevY);
-                        totalMovement += Math.abs(change);
-                        if (!stopped) { //move the edittext around
-
-                            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) v.getLayoutParams();
-
-                            int newTop = params.topMargin + change; //new margintop
-
-                            if (newTop < 0) { //over the top edge
-                                newTop = 0;
-                                stopped = true;
-                            } else if (newTop > mFrame.getHeight() - v.getHeight()) { //under the bottom edge
-                                newTop = mFrame.getHeight() - v.getHeight();
-                                stopped = true;
-                            }
-
-                            params.setMargins(0, newTop, 0, 0); //set new margin
-                            v.setLayoutParams(params);
-                        }
-                        break;
-                }
-
-                return true;
-            }
-
-        });
+    @Override
+    public void onDestroy() {
+        ImageUtility.deleteCachedVideo(mVideoLink);
+        super.onDestroy();
     }
+
 
     private void sendPicture() {
-
-        if (getActivity() == null) return;
-
-        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
-            Utils.showBadConnectionToast(getActivity());
-            return;
-        }
-
-        Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
-
-        showProgress(true);
-
-        if (getActivity() == null) return;
-        try {
-            JSONObject postData = new JSONObject();
-
-            postData.put("college", mCollegeId);
-            postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
-            postData.put("title", mText.getText().toString());
-            JSONArray imageArray = new JSONArray();
-            imageArray.put(Utils.encodeImageBase64(bitmap));
-            postData.put("images", imageArray);
-            postData.put("type", "1");
-            postData.put("owner", mUserId);
-
-
-            JSONArray coord = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-            coord.put(0);
-            coord.put(0);
-            jsonObject.put("coordinates", coord);
-
-            postData.put("geo", jsonObject);
-
-            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Utils.showServerErrorToast(getActivity());
-            showProgress(false);
-        }
+//
+//        if (getActivity() == null) return;
+//
+//        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
+//            Utils.showBadConnectionToast(getActivity());
+//            return;
+//        }
+//
+//
+//        showProgress(true);
+//
+//        if (getActivity() == null) return;
+//        try {
+//            JSONObject postData = new JSONObject();
+//
+//            postData.put("college", mCollegeId);
+//            postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+//            postData.put("title", mText.getText().toString());
+//            JSONArray imageArray = new JSONArray();
+//            imageArray.put(Utils.encodeImageBase64(bitmap));
+//            postData.put("images", imageArray);
+//            postData.put("type", "1");
+//            postData.put("owner", mUserId);
+//
+//
+//            JSONArray coord = new JSONArray();
+//            JSONObject jsonObject = new JSONObject();
+//            coord.put(0);
+//            coord.put(0);
+//            jsonObject.put("coordinates", coord);
+//
+//            postData.put("geo", jsonObject);
+//
+//            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
+//
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//            Utils.showServerErrorToast(getActivity());
+//            showProgress(false);
+//        }
     }
 
     private void showServerError() {
@@ -305,30 +209,6 @@ public class EditSavePhotoFragment extends Fragment {
                 showProgress(false);
             }
         });
-    }
-
-    private void showKeyboard() { //show keyboard for EditText
-        InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        lManager.showSoftInput(mText, 0);
-    }
-
-    private void hideKeyboard() {
-        mText.clearFocus(); //release focus from EditText and hide keyboard
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
-    }
-
-    //cuts a bitmap from our RelativeLayout
-    public static Bitmap getBitmapFromView(View view) {
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable = view.getBackground();
-        if (bgDrawable != null)
-            bgDrawable.draw(canvas);
-        else
-            canvas.drawColor(Color.WHITE);
-        view.draw(canvas);
-        return returnedBitmap;
     }
 
 
@@ -345,6 +225,8 @@ public class EditSavePhotoFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        mSquareVideoView.start();
 
         if (getActivity() == null) return;
 
@@ -403,6 +285,8 @@ public class EditSavePhotoFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        mSquareVideoView.stopPlayback();
+
         if (mSocket != null) {
 
             if (getActivity() != null) {
@@ -456,7 +340,6 @@ public class EditSavePhotoFragment extends Fragment {
         @Override
         public void call(Object... args) {
             if (getActivity() == null) return;
-
             try {
                 String owner = new JSONObject(args[0].toString()).getJSONObject("owner").getString("id");
                 if (owner.equals(mUserId)) {

@@ -795,10 +795,10 @@ public class FindFriendsFragment extends UpdatableFragment {
     }
 
     private void showServerErrorWithRetryButton() {
-        mProgressBar.setVisibility(View.GONE);
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                mProgressBar.setVisibility(View.GONE);
                 Utils.showServerErrorToast(getActivity());
                 showRetryButton(true);
             }

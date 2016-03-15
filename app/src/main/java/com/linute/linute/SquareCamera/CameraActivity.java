@@ -28,11 +28,8 @@ public class CameraActivity extends AppCompatActivity {
 
     private boolean mHasWriteAndCameraPermission = false;
 
-    private ImageParameters mImageParameters;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.squarecamera__CameraFullScreenTheme);
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.squarecamera__activity_camera);
@@ -59,10 +56,6 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    public void setImageParameters(ImageParameters param) {
-        mImageParameters = param;
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -80,7 +73,6 @@ public class CameraActivity extends AppCompatActivity {
         }
 
         else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
-            Log.i(TAG, "onActivityResult: okay");
             if (resultCode == RESULT_OK) {
 
 
@@ -113,7 +105,7 @@ public class CameraActivity extends AppCompatActivity {
 
     private boolean hasCameraAndWritePermission() {
         return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                && hasPermission(Manifest.permission.CAMERA);
+                && hasPermission(Manifest.permission.CAMERA) && hasPermission(Manifest.permission.RECORD_AUDIO);
     }
 
 
@@ -128,6 +120,9 @@ public class CameraActivity extends AppCompatActivity {
         //check for write
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
+            permissions.add(Manifest.permission.RECORD_AUDIO);
         }
         //we need permissions
         if (!permissions.isEmpty()) {
@@ -184,7 +179,7 @@ public class CameraActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(
                         R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri, mImageParameters, false),
+                        EditSavePhotoFragment.newInstance(uri, false),
                         EditSavePhotoFragment.TAG)
                 .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();

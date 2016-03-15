@@ -1,0 +1,75 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/pure_black"
+                android:focusableInTouchMode="true">
+
+
+    <RelativeLayout android:id="@+id/tool_bar_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="?android:attr/actionBarSize">
+
+        <android.support.v7.widget.Toolbar android:id="@+id/edit_photo_toolbar"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="?android:attr/actionBarSize"
+                                           android:background="@color/colorPrimary"
+                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+
+        <RelativeLayout android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginEnd="16dp">
+
+            <ImageButton
+                android:id="@+id/save_photo"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_action_check83"/>
+
+            <ProgressBar
+                android:id="@+id/editFragment_progress_bar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+            />
+
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView android:id="@+id/video_frame"
+                                                                     android:layout_width="match_parent"
+                                                                     android:layout_height="match_parent"
+                                                                     android:layout_alignParentEnd="true"
+                                                                     android:layout_alignParentStart="true"
+                                                                     android:layout_below="@id/tool_bar_container"/>
+
+
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/square_videoFrame"
+                                                         android:layout_width="match_parent"
+                                                         android:layout_height="wrap_content"
+                                                         android:layout_below="@id/tool_bar_container"
+    />
+
+    <RelativeLayout android:id="@+id/editFragment_button_layer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/square_videoFrame"
+                    android:background="@color/colorPrimary"
+    >
+
+
+        <CheckBox android:id="@+id/editFragment_switch"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_centerInParent="true"
+                  android:background="@drawable/post_as_anon_checkbox"
+                  android:button="@null"
+        />
+
+    </RelativeLayout>
+
+
+</RelativeLayout>
