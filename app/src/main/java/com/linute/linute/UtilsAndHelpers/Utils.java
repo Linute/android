@@ -13,7 +13,11 @@ import android.widget.Toast;
 import com.linute.linute.R;
 
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,6 +48,12 @@ public class Utils {
         byte[] byteFormat = stream.toByteArray();
         // get the base 64 string
         return Base64.encodeToString(byteFormat, Base64.NO_WRAP);
+        //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
+    }
+
+    public static String encodeFileBase64(File file) throws IOException {
+        byte[] filebyte = FileUtils.readFileToByteArray(file);
+        return Base64.encodeToString(filebyte, Base64.NO_WRAP);
         //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
     }
 

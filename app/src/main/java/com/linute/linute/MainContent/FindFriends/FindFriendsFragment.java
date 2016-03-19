@@ -314,10 +314,12 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 }
                             }
 
+                            if (mCancelLoad) return;
+
                             mFriendFoundList.clear();
                             mFriendFoundList.addAll(tempFriends);
 
-                            if (getActivity() == null || mCancelLoad) return;
+                            if (getActivity() == null) return;
 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override

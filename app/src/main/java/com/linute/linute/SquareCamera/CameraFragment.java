@@ -75,6 +75,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
     private Toolbar mToolbar;
 
+    private EditSaveVideoFragment.VideoDimen mVideoDimen;
+
 
     private View mCameraOps;
     private View mGalleryButton;
@@ -216,7 +218,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 @Override
                 public void run() {
                     mVideoUri = prepareMediaRecorder();
-                    if (mVideoUri != null){
+                    if (mVideoUri != null) {
                         hideCameraButtons(true);
                         mTakePhotoBtn.setImageResource(R.drawable.square_camera_record);
                         setSafeToTakePhoto(false);
@@ -231,7 +233,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
 
-                switch (action){
+                switch (action) {
                     case MotionEvent.ACTION_DOWN:
                         mIsRecording = false;
                         mRecordHandler.postDelayed(mRecordRunnable, 1200); //1,5secs
@@ -240,10 +242,10 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
                     case MotionEvent.ACTION_CANCEL:
                         mRecordHandler.removeCallbacks(mRecordRunnable);
-                        if (mIsRecording && mMediaRecorder != null){
+                        if (mIsRecording && mMediaRecorder != null) {
                             try {
                                 mMediaRecorder.stop();
-                            }catch (RuntimeException e){
+                            } catch (RuntimeException e) {
                                 e.printStackTrace();
                             }
 
@@ -256,18 +258,18 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
                     case MotionEvent.ACTION_UP:
                         mRecordHandler.removeCallbacks(mRecordRunnable);
-                        if (mIsRecording){
+                        if (mIsRecording) {
                             try {
                                 mMediaRecorder.stop();
                                 releaseMediaRecorder();
-                                if (System.currentTimeMillis() - mRecordStartTime < 2500){ //recorded video was less than 2 seconds, 1.5 sec for handler
+                                if (System.currentTimeMillis() - mRecordStartTime < 2500) { //recorded video was less than 2 seconds, 1.5 sec for handler
                                     showVideoTooShortDialog();
-                                }else {
-                                    if (mVideoUri != null){
-                                        goToVideoEditFragment(mVideoUri);
+                                } else {
+                                    if (mVideoUri != null) {
+                                        goToVideoEditFragment(mVideoUri, mVideoDimen);
                                     }
                                 }
-                            }catch (RuntimeException e){
+                            } catch (RuntimeException e) {
                                 e.printStackTrace();
                                 releaseMediaRecorder();
                                 showVideoTooShortDialog();
@@ -276,7 +278,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                             mIsRecording = false;
 
                             setSafeToTakePhoto(true);
-                        }else {
+                        } else {
                             takePicture();
                         }
 
@@ -291,21 +293,18 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     }
 
 
-
-
-    private void hideCameraButtons(boolean hide){
-        if (hide && mCameraOps.getVisibility() == View.VISIBLE){
+    private void hideCameraButtons(boolean hide) {
+        if (hide && mCameraOps.getVisibility() == View.VISIBLE) {
             mCameraOps.setVisibility(View.INVISIBLE);
             mGalleryButton.setVisibility(View.INVISIBLE);
-        }else if (!hide && mCameraOps.getVisibility() == View.INVISIBLE){
+        } else if (!hide && mCameraOps.getVisibility() == View.INVISIBLE) {
             mCameraOps.setVisibility(View.VISIBLE);
             mGalleryButton.setVisibility(View.VISIBLE);
         }
     }
 
 
-
-    private void showVideoTooShortDialog(){
+    private void showVideoTooShortDialog() {
         if (getActivity() == null) return;
         new AlertDialog.Builder(getActivity())
                 .setTitle("Video is too short")
@@ -319,12 +318,12 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 .show();
     }
 
-    private void goToVideoEditFragment(Uri uri){
+    private void goToVideoEditFragment(Uri uri, EditSaveVideoFragment.VideoDimen videoDimen) {
         getFragmentManager()
                 .beginTransaction()
                 .replace(
                         R.id.fragment_container,
-                        EditSaveVideoFragment.newInstance(uri, mAnonCheckbox.isChecked()),
+                        EditSaveVideoFragment.newInstance(uri, mAnonCheckbox.isChecked(), videoDimen),
                         EditSaveVideoFragment.TAG)
                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
@@ -476,6 +475,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mCamera.setDisplayOrientation(mImageParameters.mDisplayOrientation);
     }
 
+
     /**
      * Setup the camera parameters
      */
@@ -581,6 +581,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
             //autofocus
             else {
+                mCamera.cancelAutoFocus();
                 mCamera.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
                     public void onAutoFocus(boolean success, Camera camera) {
@@ -588,8 +589,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                         //can cause runtime exeption if click take picture too quickly when activity starts
                         try {
                             mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
-                        }catch (RuntimeException e){
-                           e.printStackTrace();
+                        } catch (RuntimeException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -658,6 +659,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
     }
 
     @Override
@@ -666,6 +668,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         // stop the preview
         if (mCamera != null) {
             mShowCameraHandler.removeCallbacks(mShowPreview);
+            releaseMediaRecorder();
             stopCameraPreview();
             mCamera.release();
             mCamera = null;
@@ -844,33 +847,66 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
 
     private Uri prepareMediaRecorder() {
+        if (getActivity() == null) return null;
+
+        //profile might not exist
+        CamcorderProfile camcorderProfile = CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P) ?
+                CamcorderProfile.get(CamcorderProfile.QUALITY_480P) :
+                CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
+
+        //height has to be 480. try to find width that'll keep aspect ratio 4:3
+        //Log.i(TAG, "prepareMediaRecorder: h:" + camcorderProfile.videoFrameHeight + "W: " + camcorderProfile.videoFrameWidth);
+        int bestWidth = camcorderProfile.videoFrameWidth;
+        Size betterSize = getVideoSize(camcorderProfile.videoFrameHeight);
+
+        if (betterSize != null){
+            bestWidth = betterSize.width;
+        }
+
+        mVideoDimen = new EditSaveVideoFragment.VideoDimen(camcorderProfile.videoFrameHeight, bestWidth, mCameraID == CameraInfo.CAMERA_FACING_FRONT);
+
+        //Log.i(TAG, "prepareMediaRecorder: "+bestWidth +" "+camcorderProfile.videoFrameHeight);
+
+        //stop and restart
+        Camera.Parameters param = mCamera.getParameters();
+        param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
+        mCamera.setParameters(param);
+        mCamera.stopPreview();
+        mCamera.startPreview();
+
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));//// TODO: 3/12/16 play around
-        mMediaRecorder.setOrientationHint(90);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT); //default ?
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT); //default ?
+
+        mMediaRecorder.setProfile(camcorderProfile);//// TODO: 3/12/16 play around
+        mMediaRecorder.setVideoSize(bestWidth, camcorderProfile.videoFrameHeight);
+
+        mMediaRecorder.setOrientationHint(mCameraID == CameraInfo.CAMERA_FACING_FRONT ? 270 : 90);
+
+
         final Uri imageUri;
 
         try {
+
             imageUri = Uri.parse(ImageUtility.getTempFile(getActivity(), "uncropped_video"));
-            //Log.i(TAG, "prepareMediaRecorder: "+imageUri);
             mMediaRecorder.setOutputFile(imageUri.getPath());
 
+            //called when reached file size limit or max duration of video
             mMediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
                 @Override
                 public void onInfo(MediaRecorder mr, int what, int extra) {
-                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED){
+                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED || what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
                         try {
                             mMediaRecorder.stop();
-                        }catch (RuntimeException e){
+                        } catch (RuntimeException e) {
                             e.printStackTrace();
                         }
                         releaseMediaRecorder();
                         setSafeToTakePhoto(true);
 
-                        goToVideoEditFragment(imageUri);
+                        goToVideoEditFragment(imageUri, mVideoDimen);
                     }
                 }
             });
@@ -879,12 +915,30 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             mMediaRecorder.setMaxFileSize(50000000); //50mb
             mMediaRecorder.prepare();
 
-        }catch (IOException e){
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
             releaseMediaRecorder();
+            return null;
+        } catch (IOException e) {
+            releaseMediaRecorder();
+            e.printStackTrace();
             return null;
         }
 
         return imageUri;
+    }
+
+
+    private Camera.Size getVideoSize(int sizePref) {
+
+        List<Camera.Size> supportedSizes = mCamera.getParameters().getSupportedPreviewSizes();
+
+        for (Camera.Size size : supportedSizes) { //need size with 4 : 3 ratio
+            if (size.height == sizePref && size.width / 4 == size.height / 3) {
+                return size;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -893,8 +947,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         ImageUtility.deleteCachedVideo(mVideoUri);
     }
 
-    private void releaseMediaRecorder(){
-        if (mMediaRecorder != null){
+    private void releaseMediaRecorder() {
+        if (mMediaRecorder != null) {
             mMediaRecorder.reset();
             mMediaRecorder.release();
             mMediaRecorder = null;

@@ -64,7 +64,7 @@
               android:paddingTop="5dp"
               android:singleLine="true"
               android:textColor="@android:color/white"
-              android:textSize="12sp"
+              android:textSize="14sp"
               android:visibility="gone"
         />
 

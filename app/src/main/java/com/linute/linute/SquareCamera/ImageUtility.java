@@ -12,8 +12,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.linute.linute.R;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -184,6 +182,36 @@ public class ImageUtility {
                 Log.i("VIDEO", "deleteCachedVideo: cached video NOT deleted");
             }
         }
+    }
+
+    public static String getVideoUri(){
+        File mediaStorageDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "Tapt"
+        );
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                return null;
+            }
+        }
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile = new File(
+                mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4"
+        );
+
+        return mediaFile.getPath();
+    }
+
+
+    public static void broadcastVideo(Context context, String vid){
+        // Mediascanner need to scan for the image saved
+        Intent mediaScannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File file = new File(vid);
+        Uri fileContentUri = Uri.fromFile(file);
+        mediaScannerIntent.setData(fileContentUri);
+        context.sendBroadcast(mediaScannerIntent);
     }
 
 }

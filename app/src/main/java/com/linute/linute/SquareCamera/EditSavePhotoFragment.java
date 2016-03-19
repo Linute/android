@@ -261,6 +261,8 @@ public class EditSavePhotoFragment extends Fragment {
             return;
         }
 
+        mFrame.requestFocus();
+
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
         showProgress(true);
@@ -363,10 +365,10 @@ public class EditSavePhotoFragment extends Fragment {
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION;
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
                     op.reconnectionDelay = 5;
                     op.secure = true;
-
 
                     op.transports = new String[]{WebSocket.NAME};
 
@@ -430,7 +432,6 @@ public class EditSavePhotoFragment extends Fragment {
         @Override
         public void call(Object... args) {
             Log.i(TAG, "call: failed socket connection");
-
         }
     };
 
@@ -451,6 +452,7 @@ public class EditSavePhotoFragment extends Fragment {
         }
     };
 
+    //new post was posted; we aren't sure if we're the one that posted it. must check
     private Emitter.Listener newPost = new Emitter.Listener() {
 
         @Override

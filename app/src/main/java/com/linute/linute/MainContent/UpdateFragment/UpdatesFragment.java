@@ -206,6 +206,10 @@ public class UpdatesFragment extends UpdatableFragment {
 
         if (getActivity() == null) return;
         JSONArray unread = new JSONArray();
+
+
+        mSafeToAddToTop = false;
+
         for (Update update : mRecentUpdates) {
             unread.put(update.getActionID());
         }
@@ -240,6 +244,8 @@ public class UpdatesFragment extends UpdatableFragment {
     private void getUpdatesInformation() {
         if (getActivity() == null) return;
 
+        mSafeToAddToTop = false;
+
         new LSDKActivity(getActivity()).getActivities(0, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -260,8 +266,6 @@ public class UpdatesFragment extends UpdatableFragment {
                             return;
                         }
 
-//                        mOldUpdates.clear();
-//                        mRecentUpdates.clear();
                         ArrayList<Update> oldItems = new ArrayList<>();
                         ArrayList<Update> newItems = new ArrayList<>();
 
@@ -400,7 +404,7 @@ public class UpdatesFragment extends UpdatableFragment {
     public void addItemToRecents(Update update) {
         if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
             mRecentUpdates.add(0, update);
-            mUpdatesAdapter.notifyItemInserted(0);
+            mUpdatesAdapter.notifyItemInserted(1);  //should be 1?
             if (mEmptyView.getVisibility() == View.VISIBLE) {
                 mEmptyView.setVisibility(View.GONE);
             }

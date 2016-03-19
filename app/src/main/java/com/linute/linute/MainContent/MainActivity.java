@@ -111,7 +111,7 @@ public class MainActivity extends BaseTaptActivity {
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
-        mDrawerLayout.setDrawerListener(mMainDrawerListener);
+        mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
@@ -560,7 +560,8 @@ public class MainActivity extends BaseTaptActivity {
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION;
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
 
                     op.reconnectionDelay = 5;
                     op.secure = true;
@@ -706,19 +707,16 @@ public class MainActivity extends BaseTaptActivity {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
 
-                Log.i(TAG, "call: "+activity);
-
-                Update update = new Update(activity);
+                final Update update = new Update(activity);
 
                 if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
                     ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
                 }
 
-                newActivitySnackbar(update.getDescription());
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        newActivitySnackbar(update.getDescription());
                         setUpdateNotification(++mNumNewActivities);
                     }
                 });
@@ -742,8 +740,6 @@ public class MainActivity extends BaseTaptActivity {
                         .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
                         .commit();
 
-                mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
-
                 mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
                 mPreviousItem.setChecked(true);
                 sn.dismiss();
@@ -756,7 +752,6 @@ public class MainActivity extends BaseTaptActivity {
     //hiding toolbar / showing toolbar
     @Override
     public void enableBarScrolling(boolean enabled) {
-
         if (enabled) {
             ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
                     .getLayoutParams())

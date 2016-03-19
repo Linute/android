@@ -661,6 +661,7 @@ public class LinuteSignUpFragment extends Fragment {
                 Uri imageUri = Crop.getOutput(data);
                 if (getActivity() == null) return;
                 ImageUtils.normalizeImageForUri(getActivity(), imageUri);
+
                 try {
                     //release old pictures resources
                     if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();
@@ -674,6 +675,7 @@ public class LinuteSignUpFragment extends Fragment {
 
                     //save mCurrentFilePath
                     mCurrentPhotoPath = imageUri.getPath();
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

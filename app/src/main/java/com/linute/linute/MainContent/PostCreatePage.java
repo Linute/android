@@ -178,7 +178,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
                                     "&type="+device.getType() +
-                                    "&api=" + API_Methods.VERSION;
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
                     op.reconnectionDelay = 5;
                     op.secure = true;
 

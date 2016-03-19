@@ -156,7 +156,8 @@ public class RoomsActivity extends BaseTaptActivity {
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
                                     "&type="+device.getType() +
-                                    "&api=" + API_Methods.VERSION;
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
 
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
