@@ -41,8 +41,6 @@ import okhttp3.Response;
  */
 public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ProfileHeaderViewHolder.class.getSimpleName();
-    private final Profile mProfile;
-    private final RecyclerView.Adapter mAdapter;
     protected CircleImageView vProfilePicture;
     protected TextView vStatusText;
     protected TextView vPosts;
@@ -61,14 +59,14 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private LinuteUser mUser;
     private JSONObject jsonObject;
 
+    private String mProfileImageUrl;
 
-    public ProfileHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context, final Profile profile) {
+
+    public ProfileHeaderViewHolder(View itemView, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mProfile = profile;
-        mAdapter = adapter;
 
         vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
@@ -83,13 +81,22 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
         vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
 
+
+        //when tapped, enlarges image
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: VIEW IMAGE
+                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+                if (mProfileImageUrl != null && activity != null) {
+                    EnlargePhotoViewer
+                            .newInstance(mProfileImageUrl)
+                            .show(activity.getSupportFragmentManager(), "enlarged_image");
+                }
             }
         });
 
+        //goes to roomfragment
         mChatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,6 +109,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
+        //follow someone
         mFollowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,7 +229,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         if (mUser == null)
             mUser = user;
 
-        if (user.getStatus() != null ) {
+        if (user.getStatus() != null) {
             vStatusText.setText(user.getStatus().equals("") ? "No bio... :|" : user.getStatus());
         }
         vPosts.setText(String.valueOf(user.getPosts()));
@@ -239,6 +247,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             mActionBarContainer.setVisibility(View.VISIBLE);
         }
 
+        mProfileImageUrl = user.getProfileImage();
 
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(user.getProfileImage()))
@@ -247,7 +256,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
-
     }
 
 }

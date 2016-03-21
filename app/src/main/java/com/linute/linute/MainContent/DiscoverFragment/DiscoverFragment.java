@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +25,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +41,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 11/17/15.
  */
+
 public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
@@ -87,7 +88,6 @@ public class DiscoverFragment extends UpdatableFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
@@ -100,8 +100,6 @@ public class DiscoverFragment extends UpdatableFragment {
 
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
-
-
 
         mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment)getParentFragment()).getSinglePlaybackManager());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
@@ -504,13 +502,19 @@ public class DiscoverFragment extends UpdatableFragment {
         }
     }
 
-    public boolean addPostToTop(Post post){
+    public boolean addPostToTop(final Post post){
         if (mRefreshing) return false;
 
-        mPosts.add(0, post);
-        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
-        mSkip++;
-        if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+         new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                mPosts.add(0, post);
+                mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                mSkip++;
+                if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+            }
+        });
+
         return true;
     }
 }

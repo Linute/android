@@ -707,15 +707,17 @@ public class MainActivity extends BaseTaptActivity {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
 
-                final Update update = new Update(activity);
+                //Log.i(TAG, "call: "+activity.toString());
 
-                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
-                }
+                final Update update = new Update(activity);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                            ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+                        }
+
                         newActivitySnackbar(update.getDescription());
                         setUpdateNotification(++mNumNewActivities);
                     }

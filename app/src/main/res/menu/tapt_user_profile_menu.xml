@@ -4,16 +4,17 @@
 >
 
     <!--android:icon="@drawable/pencil_icon"-->
-    <item android:id="@+id/feed_detail_delete"
+    <item android:id="@+id/feed_detail_subscribe"
           android:orderInCategory="1"
-          android:title="Delete"
+          android:title="Loading..."
           app:showAsAction="never"/>
 
 
-    <item android:id="@+id/feed_detail_reveal"
-          android:orderInCategory="2"
-          android:title="Reveal"
-          app:showAsAction="never"/>
+    <!--todo add report-->
+    <!--<item android:id="@+id/feed_detail_reveal"-->
+          <!--android:orderInCategory="2"-->
+          <!--android:title="Reveal"-->
+          <!--app:showAsAction="never"/>-->
 
 
 </menu>

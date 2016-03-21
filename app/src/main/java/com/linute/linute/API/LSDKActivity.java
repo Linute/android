@@ -47,6 +47,11 @@ public class LSDKActivity {
         params.put("action[9]", "posted photo");
         params.put("action[10]", "also commented status");
         params.put("action[11]", "also commented photo");
+        params.put("action[12]", "also commented video");
+
+        params.put("action[13]", "posted video");
+        params.put("action[14]", "liked video");
+        params.put("action[15]", "commented video");
 
         params.put("owner", mSharedPreferences.getString("userID", ""));
 

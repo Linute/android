@@ -256,12 +256,12 @@ public class EditSavePhotoFragment extends Fragment {
 
         if (getActivity() == null) return;
 
+        mFrame.requestFocus();
+
         if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
             Utils.showBadConnectionToast(getActivity());
             return;
         }
-
-        mFrame.requestFocus();
 
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
@@ -367,6 +367,7 @@ public class EditSavePhotoFragment extends Fragment {
                                     "&type=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
+
                     op.reconnectionDelay = 5;
                     op.secure = true;
 

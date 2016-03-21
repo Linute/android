@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.UpdateFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -274,6 +275,8 @@ public class UpdatesFragment extends UpdatableFragment {
 
                         //mSkip = 25;
 
+                        if (getActivity() == null) return;
+
                         Update update;
                         //iterate through array of activities
                         for (int i = 0; i < activities.length(); i++) {
@@ -401,13 +404,18 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    public void addItemToRecents(Update update) {
+    public void addItemToRecents(final Update update) {
         if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
-            mRecentUpdates.add(0, update);
-            mUpdatesAdapter.notifyItemInserted(1);  //should be 1?
-            if (mEmptyView.getVisibility() == View.VISIBLE) {
-                mEmptyView.setVisibility(View.GONE);
-            }
+             new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecentUpdates.add(0, update);
+                    mUpdatesAdapter.notifyItemInserted(1);  //should be 1?
+                    if (mEmptyView.getVisibility() == View.VISIBLE) {
+                        mEmptyView.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 

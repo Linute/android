@@ -20,15 +20,19 @@ public class Update {
         UNDEFINED,
         LIKED_STATUS,
         LIKED_PHOTO,
+        LIKED_VIDEO,
         COMMENTED_STATUS,
         COMMENTED_PHOTO,
+        COMMENTED_VIDEO,
         FOLLOWER,
         MENTIONED, //need icon
         FRIEND_JOINED, //need icon
         POSTED_STATUS,
         POSTED_PHOTO,
+        POSTED_VIDEO,
         AlSO_COMMENTED_STATUS,
-        ALSO_COMMENTED_IMAGE
+        ALSO_COMMENTED_IMAGE,
+        ALSO_COMMENTED_VIDEO
     }
 
     private String mDescription;
@@ -98,10 +102,14 @@ public class Update {
                 return UpdateType.LIKED_STATUS;
             case "liked photo":
                 return UpdateType.LIKED_PHOTO;
+            case "liked video":
+                return UpdateType.LIKED_VIDEO;
             case "commented status":
                 return UpdateType.COMMENTED_STATUS;
             case "commented photo":
                 return UpdateType.COMMENTED_PHOTO;
+            case "commented video":
+                return UpdateType.COMMENTED_VIDEO;
             case "follower":
                 return UpdateType.FOLLOWER;
             case "mentioned":
@@ -112,10 +120,14 @@ public class Update {
                 return UpdateType.POSTED_STATUS;
             case "posted photo":
                 return UpdateType.POSTED_PHOTO;
+            case "posted video":
+                return UpdateType.POSTED_VIDEO;
             case "also commented status":
                 return UpdateType.AlSO_COMMENTED_STATUS;
             case "also commented photo":
                 return UpdateType.ALSO_COMMENTED_IMAGE;
+            case "also commented video":
+                return UpdateType.ALSO_COMMENTED_VIDEO;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -137,7 +149,9 @@ public class Update {
         return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
                 mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
                 || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED
-                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS;
+                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS ||
+                mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO || mUpdateType == UpdateType.POSTED_VIDEO ||
+                mUpdateType == UpdateType.LIKED_VIDEO || mUpdateType == UpdateType.COMMENTED_VIDEO;
     }
 
     public final boolean hasFriendShipInformation(){

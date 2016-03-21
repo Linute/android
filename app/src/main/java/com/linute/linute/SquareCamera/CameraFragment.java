@@ -234,13 +234,13 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 int action = event.getAction();
 
                 switch (action) {
-                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_DOWN: //press down
                         mIsRecording = false;
-                        mRecordHandler.postDelayed(mRecordRunnable, 1200); //1,5secs
-                        mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
+                        mRecordHandler.postDelayed(mRecordRunnable, 1000); //if don't pick within 1 sec, switch to camera
+                        mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected); //change icon
                         break;
 
-                    case MotionEvent.ACTION_CANCEL:
+                    case MotionEvent.ACTION_CANCEL: //if cancelled, if was recording and video met minimum, go to screen
                         mRecordHandler.removeCallbacks(mRecordRunnable);
                         if (mIsRecording && mMediaRecorder != null) {
                             try {
@@ -256,15 +256,15 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                         }
                         break;
 
-                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_UP: //picked up finger
                         mRecordHandler.removeCallbacks(mRecordRunnable);
-                        if (mIsRecording) {
+                        if (mIsRecording) { //if was recording, stop recording
                             try {
                                 mMediaRecorder.stop();
                                 releaseMediaRecorder();
-                                if (System.currentTimeMillis() - mRecordStartTime < 2500) { //recorded video was less than 2 seconds, 1.5 sec for handler
+                                if (System.currentTimeMillis() - mRecordStartTime < 2500) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
                                     showVideoTooShortDialog();
-                                } else {
+                                } else {  //go to edit video screen
                                     if (mVideoUri != null) {
                                         goToVideoEditFragment(mVideoUri, mVideoDimen);
                                     }
@@ -293,6 +293,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     }
 
 
+    //hides the gallery, flash, and reverse camera button
     private void hideCameraButtons(boolean hide) {
         if (hide && mCameraOps.getVisibility() == View.VISIBLE) {
             mCameraOps.setVisibility(View.INVISIBLE);
@@ -329,14 +330,17 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 .commit();
     }
 
+    // we do not have an auto flash
+    // some phones crash if both autofocus and flash are on. There is no way to tell from autoflash is
+    // flash is going to go off.
     private void setupFlashMode() {
         View view = getView();
         if (view == null) return;
 
         final TextView autoFlashIcon = (TextView) view.findViewById(R.id.auto_flash_icon);
         if (Camera.Parameters.FLASH_MODE_AUTO.equalsIgnoreCase(mFlashMode)) {
-            mFlashMode = Camera.Parameters.FLASH_MODE_ON;
-            autoFlashIcon.setText("On");
+            mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
+            autoFlashIcon.setText("Off");
         } else if (Camera.Parameters.FLASH_MODE_ON.equalsIgnoreCase(mFlashMode)) {
             autoFlashIcon.setText("On");
         } else if (Camera.Parameters.FLASH_MODE_OFF.equalsIgnoreCase(mFlashMode)) {
@@ -495,6 +499,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
+        //We don't have an auto flash
+        if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)){
+            mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
+        }
+
         final View changeCameraFlashModeBtn = getView().findViewById(R.id.flash);
         List<String> flashModes = parameters.getSupportedFlashModes();
         if (flashModes != null && flashModes.contains(mFlashMode)) {
@@ -575,12 +584,9 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             final Camera.PictureCallback postView = null;
 
             //if on or auto, dont autofocus
-            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON) || mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)) {
-                mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
-            }
 
             //autofocus
-            else {
+            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)){
                 mCamera.cancelAutoFocus();
                 mCamera.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
@@ -595,8 +601,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                     }
                 });
             }
-        }
 
+            else {
+                mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+            }
+        }
     }
 
     @Override
@@ -653,6 +662,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         if (hasCameraAndWritePermission()) {
             mSurfaceAlreadyCreated = true;
+            //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
             mShowCameraHandler.postDelayed(mShowPreview, 250);
         }
     }
@@ -686,6 +696,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         int rotation = getPhotoRotation();
         Bitmap map = rotatePicture(rotation, data);
 
+        //crop image correctly. todo make more efficient by adding this to rotatePicture
         int x = 0;
         int y = 0;
         if (!usingFrontFaceCamera()) {
@@ -708,6 +719,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         int measure = map.getWidth() < map.getHeight() ? map.getWidth() : map.getHeight();
         Uri uri = ImageUtility.savePicture(getActivity(), Bitmap.createBitmap(map, x, y, measure, measure));
+
         getFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -868,10 +880,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         //Log.i(TAG, "prepareMediaRecorder: "+bestWidth +" "+camcorderProfile.videoFrameHeight);
 
         //stop and restart
+
         Camera.Parameters param = mCamera.getParameters();
         param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
-        mCamera.setParameters(param);
-        mCamera.stopPreview();
+        mCamera.setParameters(param); //must set preview size to same size and video size or it will record green on some phones
+        mCamera.stopPreview(); // must stop and reset camera when params are changed
         mCamera.startPreview();
 
         mMediaRecorder = new MediaRecorder();
@@ -880,7 +893,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT); //default ?
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT); //default ?
 
-        mMediaRecorder.setProfile(camcorderProfile);//// TODO: 3/12/16 play around
+        mMediaRecorder.setProfile(camcorderProfile);
         mMediaRecorder.setVideoSize(bestWidth, camcorderProfile.videoFrameHeight);
 
         mMediaRecorder.setOrientationHint(mCameraID == CameraInfo.CAMERA_FACING_FRONT ? 270 : 90);

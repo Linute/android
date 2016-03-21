@@ -4,53 +4,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                tools:background="@drawable/background"
+                tools:background="@color/eighty_black"
                 tools:context=".LoginAndSignup.LinuteSignUpFragment">
 
     <ViewFlipper android:id="@+id/signUp_view_flipper"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent">
-
-
-        <!--<LinearLayout android:id="@+id/signUp_email_form"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="150dp"-->
-        <!--android:gravity="center"-->
-        <!--android:orientation="vertical">-->
-
-        <!--<EditText-->
-        <!--android:id="@+id/signup_email_text"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="16dp"-->
-        <!--android:layout_marginLeft="32dp"-->
-        <!--android:layout_marginRight="32dp"-->
-        <!--android:theme="@style/MyEditTextTheme"-->
-        <!--android:hint="@string/prompt_email"-->
-        <!--android:inputType="textEmailAddress"-->
-        <!--android:maxLines="1"-->
-        <!--android:singleLine="true"-->
-        <!--android:textColor="@color/fifty_white"-->
-        <!--android:textColorHint="@color/thirtyfive_white"-->
-        <!--android:textSize="14sp"/>-->
-
-
-        <!--<Button android:id="@+id/signUp_verify_email_button"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Next"-->
-        <!--/>-->
-
-        <!--<ProgressBar-->
-        <!--android:id="@+id/signUp_progress_bar1"-->
-        <!--style="?android:attr/progressBarStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:visibility="gone"-->
-        <!--/>-->
-
-        <!--</LinearLayout>-->
 
 
         <RelativeLayout

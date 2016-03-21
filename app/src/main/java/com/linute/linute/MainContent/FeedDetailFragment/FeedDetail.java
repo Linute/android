@@ -104,6 +104,10 @@ public class FeedDetail {
         mPost.setAnonImage(image);
     }
 
+    public boolean isAnon (){
+        return mPost.getPrivacy() == 1;
+    }
+
     public String getAnonPic(){
         return mPost.getAnonImage();
     }

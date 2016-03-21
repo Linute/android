@@ -372,6 +372,9 @@ public class FacebookSignUpFragment extends Fragment {
                 if (response.isSuccessful()) {
                     try {
                         mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
+
+                        Log.i(TAG, "onResponse: "+mPinCode);
+
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override

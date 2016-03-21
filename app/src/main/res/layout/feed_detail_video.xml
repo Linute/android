@@ -24,12 +24,6 @@
                                                         android:layout_width="match_parent"
                                                         android:layout_height="match_parent"/>
 
-        <ImageView android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="top|right"
-                   android:layout_margin="@dimen/activity_horizontal_margin"
-                   android:src="@drawable/ic_action_check83"
-        />
 
         <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView
             android:id="@+id/feed_detail_video"
@@ -38,13 +32,21 @@
             android:visibility="gone"
         />
 
+
+        <ImageView android:id="@+id/cinema_icon"
+                   android:layout_width="64dp"
+                   android:layout_height="64dp"
+                   android:layout_gravity="top|right"
+                   android:layout_margin="@dimen/activity_horizontal_margin"
+                   android:src="@drawable/ic_cinema"/>
+
+
         <View android:id="@+id/feed_detail_hidden_animation"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:alpha="0.3"
               android:background="#EA294C"
-              android:visibility="invisible"
-        />
+              android:visibility="invisible"/>
 
     </com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout>
 

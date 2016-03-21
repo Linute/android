@@ -378,10 +378,16 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case LIKED_STATUS:
                     drawable = R.drawable.icon_like;
                     break;
+                case LIKED_VIDEO:
+                    drawable = R.drawable.icon_like;
+                    break;
                 case COMMENTED_PHOTO:
                     drawable = R.drawable.icon_comment;
                     break;
                 case COMMENTED_STATUS:
+                    drawable = R.drawable.icon_comment;
+                    break;
+                case COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
                 case FOLLOWER:
@@ -399,10 +405,16 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case POSTED_STATUS:
                     drawable = R.drawable.icon_comment;
                     break;
+                case POSTED_VIDEO:
+                    drawable = R.drawable.icon_comment;
+                    break;
                 case ALSO_COMMENTED_IMAGE:
                     drawable = R.drawable.icon_comment;
                     break;
                 case AlSO_COMMENTED_STATUS:
+                    drawable = R.drawable.icon_comment;
+                    break;
+                case ALSO_COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
                 default:

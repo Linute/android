@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
@@ -32,6 +33,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
     private boolean videoProcessing = false;
 
+    private View vCinemaIcon;
+
 
     public VideoFeedHolder(final View itemView, Context context, final SingleVideoPlaybackManager manager) {
         super(itemView, context);
@@ -41,6 +44,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
+        vCinemaIcon = itemView.findViewById(R.id.cinema_icon);
 
         mSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
             @Override
@@ -48,6 +52,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 //when video surface destroyed, hide the video and show image
                 vPostImage.setVisibility(View.VISIBLE);
                 mSquareVideoView.setVisibility(View.GONE);
+                vCinemaIcon.setAlpha(1);
             }
         });
 
@@ -57,6 +62,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
             public void onPrepared(MediaPlayer mp) {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.GONE);
+                vCinemaIcon.clearAnimation();
+                vCinemaIcon.setAlpha(0.2f);
                 sendImpressionsAsync(mPostId);
             }
         });
@@ -77,6 +84,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.VISIBLE);
                 mSquareVideoView.setVisibility(View.GONE);
+                vCinemaIcon.clearAnimation();
+                vCinemaIcon.setAlpha(1);
             }
         });
 
@@ -89,11 +98,14 @@ public class VideoFeedHolder extends ImageFeedHolder {
                     mSquareVideoView.setVisibility(View.VISIBLE);
                     manager.playNewVideo(mSquareVideoView, mVideoUrl);
                     videoProcessing = true;
+                    vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
                 } else {
                     if (mSquareVideoView.isPlaying()){
                         mSquareVideoView.pause();
+                        vCinemaIcon.setAlpha(1);
                     }else {
                         mSquareVideoView.start();
+                        vCinemaIcon.setAlpha(0.2f);
                     }
                 }
             }
@@ -149,6 +161,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
         if (mSquareVideoView.getVisibility() == View.VISIBLE) {
             mSquareVideoView.setVisibility(View.GONE);
             vPostImage.setVisibility(View.VISIBLE);
+            vCinemaIcon.clearAnimation();
+            vCinemaIcon.setAlpha(1f);
         }
 
         mPostId = post.getPostId();

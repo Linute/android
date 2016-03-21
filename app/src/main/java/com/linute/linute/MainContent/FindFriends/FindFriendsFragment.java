@@ -229,7 +229,7 @@ public class FindFriendsFragment extends UpdatableFragment {
             activity.resetToolbar();
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Friend List");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -244,10 +244,10 @@ public class FindFriendsFragment extends UpdatableFragment {
     public void onPause() {
         super.onPause();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null){
+        if (activity != null) {
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
+                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Friend List");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -328,9 +328,10 @@ public class FindFriendsFragment extends UpdatableFragment {
                                     if (mFriendFoundList.isEmpty()) { //show no results found if empty
                                         mDescriptionText.setText("No results found");
                                         mDescriptionText.setVisibility(View.VISIBLE);
+                                    } else if (mDescriptionText.getVisibility() == View.VISIBLE) {
+                                        mDescriptionText.setVisibility(View.GONE);
                                     }
                                     mFriendSearchAdapter.notifyDataSetChanged();
-
                                 }
                             });
 
@@ -367,7 +368,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     }
 
                 if (tempFriend.isEmpty() && mDescriptionText.getVisibility() == View.INVISIBLE) { //empty, show empty text
-                        mDescriptionText.setVisibility(View.VISIBLE);
+                    mDescriptionText.setVisibility(View.VISIBLE);
                 }
             }
             mFriendFoundList.clear();

@@ -7,15 +7,13 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
-                  android:orientation="vertical"
-    >
+                  android:orientation="vertical">
 
         <android.support.v7.widget.Toolbar android:id="@+id/square_cam_tool_bar"
                                            android:layout_width="match_parent"
                                            android:layout_height="?android:attr/actionBarSize"
                                            android:background="@color/colorPrimary"
                                            android:theme="@style/ThemeOverlay.AppCompat.Dark"
-
         />
 
         <RelativeLayout android:layout_width="match_parent"
@@ -40,34 +38,36 @@
             >
 
                 <RelativeLayout android:id="@+id/camera_ops"
-                    android:layout_width="match_parent"
+                                android:layout_width="match_parent"
                                 android:layout_height="0px"
                                 android:layout_weight="1"
                 >
 
-                    <LinearLayout android:id="@+id/flash"
-                                  android:layout_width="wrap_content"
-                                  android:layout_height="match_parent">
+                    <RelativeLayout android:id="@+id/flash"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent">
 
-                        <ImageView android:id="@+id/flash_icon"
-                                   android:layout_width="wrap_content"
-                                   android:layout_height="match_parent"
-                                   android:layout_marginStart="@dimen/activity_horizontal_margin"
-                                   android:src="@drawable/squarecamera__toggle_flash"
-                        />
+                            <ImageView android:id="@+id/flash_icon"
+                                       android:layout_width="wrap_content"
+                                       android:layout_height="match_parent"
+                                       android:paddingStart="@dimen/activity_horizontal_margin"
+                                       android:paddingEnd="8dp"
+                                       android:src="@drawable/ic_form1"
+                            />
 
-                        <TextView android:id="@+id/auto_flash_icon"
-                                  android:layout_width="wrap_content"
-                                  android:layout_height="match_parent"
-                                  android:layout_marginEnd="16dp"
-                                  android:layout_marginStart="2dp"
-                                  android:gravity="bottom"
-                                  android:text="ON"
-                                  android:textColor="@color/fifty_white"
-                                  android:textSize="@dimen/sub_font_size"
-                        />
+                            <TextView android:id="@+id/auto_flash_icon"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:layout_alignBottom="@id/flash_icon"
+                                      android:layout_alignEnd="@id/flash_icon"
+                                      android:textColor="@color/fifty_white"
+                                      android:textSize="@dimen/sub_font_size"
+                                      android:layout_marginBottom="8dp"
+                                      android:layout_marginStart="4dp"
+                                      android:text="ON"
+                            />
 
-                    </LinearLayout>
+                    </RelativeLayout>
 
 
                     <ImageView android:id="@+id/change_camera"
@@ -76,7 +76,7 @@
                                android:layout_alignParentEnd="true"
                                android:paddingEnd="16dp"
                                android:paddingStart="16dp"
-                               android:src="@drawable/squarecamera__toggle_flash"
+                               android:src="@drawable/ic_icon_reverse_camera"
                     />
 
                 </RelativeLayout>
@@ -90,11 +90,11 @@
 
 
                     <ImageView android:id="@+id/cameraFragment_galleryButton"
-                               android:contentDescription="Gallery"
                                android:layout_width="wrap_content"
                                android:layout_height="wrap_content"
                                android:layout_marginEnd="50dp"
-                               android:src="@drawable/ic_action_image_photo_library"
+                               android:contentDescription="Gallery"
+                               android:src="@drawable/ic_photography159"
                     />
 
 
@@ -103,17 +103,17 @@
 
                         <ImageView android:layout_width="wrap_content"
                                    android:layout_height="wrap_content"
-                                   android:src="@drawable/square_camera_surround"
                                    android:layout_centerInParent="true"
+                                   android:src="@drawable/square_camera_surround"
                         />
 
                         <ImageView
                             android:id="@+id/capture_image_button"
-                            android:contentDescription="Camera"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/square_camera_unselected"
                             android:layout_centerInParent="true"
+                            android:contentDescription="Camera"
+                            android:src="@drawable/square_camera_unselected"
                         />
 
                     </RelativeLayout>

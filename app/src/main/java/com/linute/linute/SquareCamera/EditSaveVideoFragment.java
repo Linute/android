@@ -127,6 +127,7 @@ public class EditSaveVideoFragment extends Fragment {
         mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
 
         mSquareVideoView.setVideoURI(mVideoLink);
+        mSquareVideoView.seekTo(0);
 
         mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -439,7 +440,7 @@ public class EditSaveVideoFragment extends Fragment {
                         public void run() {
                             if (mProgressDialog != null) mProgressDialog.dismiss();
                             getActivity().setResult(Activity.RESULT_OK);
-                            Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Video has been posted", Toast.LENGTH_SHORT).show();
                             getActivity().finish();
                         }
                     });

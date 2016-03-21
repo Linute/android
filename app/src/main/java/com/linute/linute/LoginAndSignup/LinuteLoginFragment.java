@@ -54,8 +54,7 @@ public class LinuteLoginFragment extends Fragment {
     private View mSigninButton;
     private View mCreateAccount;
 
-    private View mButtonsLayer;
-
+    private boolean mSafeForButtonAction = true;
 
     public LinuteLoginFragment() {
 
@@ -67,8 +66,6 @@ public class LinuteLoginFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
 
         mEmailView = (EditText) rootView.findViewById(R.id.signin_email_text);
-
-        mButtonsLayer = rootView.findViewById(R.id.login_buttons_layer);
 
         //set last logged in email
         mEmailView.append(getActivity().getSharedPreferences(
@@ -90,7 +87,7 @@ public class LinuteLoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null) {
+                if (activity != null && mSafeForButtonAction) {
                     activity.selectedSignup();
                 }
             }
@@ -103,7 +100,7 @@ public class LinuteLoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
-                if (activity != null) {
+                if (activity != null && mSafeForButtonAction) {
                     activity.selectForgotPassword();
                 }
             }
@@ -113,7 +110,7 @@ public class LinuteLoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Activity activity = getActivity();
-                if (activity != null){
+                if (activity != null && mSafeForButtonAction){
                     activity.onBackPressed();
                 }
             }
@@ -205,12 +202,12 @@ public class LinuteLoginFragment extends Fragment {
     private void showProgress(final boolean show) {
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mButtonsLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        mButtonsLayer.animate().setDuration(shortAnimTime).alpha(
+        mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        mSigninButton.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mButtonsLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+                mSigninButton.setVisibility(show ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -226,6 +223,7 @@ public class LinuteLoginFragment extends Fragment {
 
         mCheckingCredentials = show;
         setFocusable(!show);
+        mSafeForButtonAction = !show;
     }
 
     private void setFocusable(boolean focusable) {

@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,7 +41,11 @@ public class Post implements Parcelable {
 
     private String mVideoURL = "";
 
-    public Post(){
+    //horrible hack -- regret doing this..
+    private boolean mPostHidden;
+    private boolean mPostMuted;
+
+    public Post() {
 
     }
 
@@ -78,7 +83,8 @@ public class Post implements Parcelable {
 //
 //    }
 
-    public Post(JSONObject jsonObject)throws JSONException{
+    //@param currentId -- the id of the person using phone
+    public Post(JSONObject jsonObject) throws JSONException {
 
         int type = jsonObject.getInt("type");
 
@@ -92,18 +98,26 @@ public class Post implements Parcelable {
 
         try {
             myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-        }catch (ParseException w){
+        } catch (ParseException w) {
             w.printStackTrace();
             myDate = null;
         }
 
         mPostTime = (myDate == null ? 0 : myDate.getTime());
 
-        JSONObject owner = jsonObject.getJSONObject("owner");
+        try {
+            JSONObject owner = jsonObject.getJSONObject("owner");
 
-        mUserId = owner.getString("id");
-        mUserName = owner.getString("fullName");
-        mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+            mUserId = owner.getString("id");
+            mUserName = owner.getString("fullName");
+            mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+        } catch (JSONException e) {
+            mUserId = jsonObject.getString("owner");
+            mUserName = "";
+            mUserImage = "";
+        }
+
+
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
 
@@ -116,10 +130,22 @@ public class Post implements Parcelable {
             mNumLikes = jsonObject.getInt("numberOfLikes");
             mNumOfComments = jsonObject.getInt("numberOfComments");
             mPostLiked = jsonObject.getBoolean("isLiked");
-        }catch (JSONException e){
+        } catch (JSONException e) {
             mNumLikes = 0;
             mNumOfComments = 0;
             mPostLiked = false;
+        }
+
+        try {
+            mPostHidden = jsonObject.getBoolean("isHidden");
+        } catch (JSONException e) {
+            mPostHidden = false;
+        }
+
+        try {
+            mPostMuted = jsonObject.getBoolean("isMuted");
+        } catch (JSONException e) {
+            mPostMuted = false;
         }
     }
 
@@ -163,7 +189,7 @@ public class Post implements Parcelable {
         return Utils.getTimeAgoString(mPostTime);
     }
 
-    public long getPostLongTime(){
+    public long getPostLongTime() {
         return mPostTime;
     }
 
@@ -171,15 +197,11 @@ public class Post implements Parcelable {
         return mPostId;
     }
 
-    public boolean getUserLiked() {
-        return mUserLiked;
-    }
-
     public String getUserId() {
         return mUserId;
     }
 
-    public boolean isImagePost(){
+    public boolean isImagePost() {
         return mImage != null && !mImage.equals("");
     }
 
@@ -196,11 +218,11 @@ public class Post implements Parcelable {
         return mNumOfComments;
     }
 
-    public void setNumOfComments(int comments){
+    public void setNumOfComments(int comments) {
         mNumOfComments = comments;
     }
 
-    public String getAnonImage(){
+    public String getAnonImage() {
         return mAnonImage;
     }
 
@@ -221,18 +243,34 @@ public class Post implements Parcelable {
         return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
     }
 
-    public void setProfileImage(String profileImage){
+    public void setProfileImage(String profileImage) {
         mUserImage = profileImage;
     }
 
-    public void setPostPrivacy(int privacy){
+    public void setPostPrivacy(int privacy) {
         mPrivacy = privacy;
     }
 
-    public void setAnonImage(String anonImage){
+    public void setAnonImage(String anonImage) {
         mAnonImage = anonImage;
     }
 
+
+    public boolean isPostHidden() {
+        return mPostHidden;
+    }
+
+    public void setPostHidden(boolean postHidden) {
+        mPostHidden = postHidden;
+    }
+
+    public boolean isPostMuted() {
+        return mPostMuted;
+    }
+
+    public void setPostMuted(boolean postMuted) {
+        mPostMuted = postMuted;
+    }
 
     @Override
     public int describeContents() {
@@ -257,7 +295,7 @@ public class Post implements Parcelable {
         dest.writeString(mVideoURL);
     }
 
-    private Post(Parcel in){
+    private Post(Parcel in) {
         mUserId = in.readString();
         mUserName = in.readString();
         mUserImage = in.readString();

@@ -43,8 +43,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private ViewPager mViewPager;
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
-    private FragmentHolderPagerAdapter mFragmentHolderPagerAdapter;
-
     private DiscoverFragment[] mDiscoverFragments;
 
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
@@ -67,9 +65,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mDiscoverFragments = new DiscoverFragment[]{DiscoverFragment.newInstance(false), DiscoverFragment.newInstance(true)};
         }
 
-        mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
+        FragmentHolderPagerAdapter fragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
-        mViewPager.setAdapter(mFragmentHolderPagerAdapter);
+        mViewPager.setAdapter(fragmentHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -269,9 +267,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         JSONObject obj = (JSONObject) post;
 
-        if (obj != null && mDiscoverFragments[0] != null){
+        if (obj != null && getActivity() != null &&  mDiscoverFragments[0] != null){
             try {
-
                 Post post1 = new Post(obj);
 
                 return mDiscoverFragments[0].addPostToTop(post1);
