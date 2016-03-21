@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,21 +12,6 @@ import org.json.JSONObject;
  */
 
 
-
-/* Our Features *
-    -mentioned
-    -commented status
-    -commented photo
-    -liked status
-    -liked photo
-    -follower
-    -friend joined
-
-
-    TODO: implement later
-    -posted status
-    -posted photo
- */
 public class Update {
 
     private static final String TAG = Update.class.getSimpleName();
@@ -33,15 +20,19 @@ public class Update {
         UNDEFINED,
         LIKED_STATUS,
         LIKED_PHOTO,
+        LIKED_VIDEO,
         COMMENTED_STATUS,
         COMMENTED_PHOTO,
+        COMMENTED_VIDEO,
         FOLLOWER,
         MENTIONED, //need icon
         FRIEND_JOINED, //need icon
         POSTED_STATUS,
         POSTED_PHOTO,
+        POSTED_VIDEO,
         AlSO_COMMENTED_STATUS,
-        ALSO_COMMENTED_IMAGE
+        ALSO_COMMENTED_IMAGE,
+        ALSO_COMMENTED_VIDEO
     }
 
     private String mDescription;
@@ -49,10 +40,7 @@ public class Update {
 
     //time stamp -- uncomment if we decide to use it
     //private long mActionTime; //i.e. when someone liked/commented on/etc post
-
-
     private boolean mIsRead;
-    private boolean mIsPicturePost;
 
     private String mActionID;
 
@@ -62,9 +50,14 @@ public class Update {
     private String mUserFullName;
     private String mUserProfileImageName;
 
-    private String mEventImageName;
-    private String mEventID;
-    private String mEventTitle;
+//    private String mEventImageName;
+//    private String mEventID;
+//    private String mEventTitle;
+//    private String mEventUserId;
+//    private boolean mIsPicturePost;
+
+
+    private Post mPost; //Post object will contain event info
 
     //will not be empty if you are following person
     private String mFriendshipID;
@@ -73,11 +66,6 @@ public class Update {
     private boolean mIsAnon;
     private String mAnonImage;
 
-    private String mText;
-
-    public Update(){
-
-    }
 
 
     public Update(JSONObject json) throws JSONException {
@@ -114,10 +102,14 @@ public class Update {
                 return UpdateType.LIKED_STATUS;
             case "liked photo":
                 return UpdateType.LIKED_PHOTO;
+            case "liked video":
+                return UpdateType.LIKED_VIDEO;
             case "commented status":
                 return UpdateType.COMMENTED_STATUS;
             case "commented photo":
                 return UpdateType.COMMENTED_PHOTO;
+            case "commented video":
+                return UpdateType.COMMENTED_VIDEO;
             case "follower":
                 return UpdateType.FOLLOWER;
             case "mentioned":
@@ -128,10 +120,14 @@ public class Update {
                 return UpdateType.POSTED_STATUS;
             case "posted photo":
                 return UpdateType.POSTED_PHOTO;
+            case "posted video":
+                return UpdateType.POSTED_VIDEO;
             case "also commented status":
                 return UpdateType.AlSO_COMMENTED_STATUS;
             case "also commented photo":
                 return UpdateType.ALSO_COMMENTED_IMAGE;
+            case "also commented video":
+                return UpdateType.ALSO_COMMENTED_VIDEO;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -148,11 +144,14 @@ public class Update {
         }
     }
 
+    //following activities will have event info
     public final boolean hasEventInformation(){
         return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
                 mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
                 || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED
-                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS;
+                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS ||
+                mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO || mUpdateType == UpdateType.POSTED_VIDEO ||
+                mUpdateType == UpdateType.LIKED_VIDEO || mUpdateType == UpdateType.COMMENTED_VIDEO;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -160,28 +159,9 @@ public class Update {
     }
 
 
-    private void setUpEvent(JSONObject json) {
-        JSONObject event = getJsonObjectFromJson(json, "event");
-
-        if (event == null) return;
-
-        mEventID = getStringFromJson(event, "id");
-        mEventTitle = getStringFromJson(event, "title");
-
-        //images can be null
-        //if null, then it was a status post
-        JSONArray images = getJsonArrayFromJson(event, "images");
-
-        if (images != null && images.length() > 0) {
-            try {
-                mEventImageName = images.getString(0);
-                mIsPicturePost = true;
-            } catch (JSONException e) {
-                e.printStackTrace();
-                mEventImageName = null;
-                mIsPicturePost = false;
-            }
-        }
+    private void setUpEvent(JSONObject json) throws JSONException{
+        JSONObject event = json.getJSONObject("event");
+        mPost = new Post(event);
     }
 
     private void setUpUserInformation(JSONObject json) throws JSONException {
@@ -245,11 +225,11 @@ public class Update {
     }
 
     public String getEventImageName() {
-        return mEventImageName;
+        return mPost.getImage();
     }
 
     public boolean isPicturePost(){
-        return mIsPicturePost;
+        return mPost.isImagePost();
     }
 
     /*
@@ -267,15 +247,11 @@ public class Update {
     }
 
     public String getEventID() {
-        return mEventID;
+        return mPost.getPostId();
     }
 
     public String getActionID() {
         return mActionID;
-    }
-
-    public String getEventTitle() {
-        return mEventTitle;
     }
 
     public String getUserId() {
@@ -294,6 +270,17 @@ public class Update {
         mFollowedBack = follow;
     }
 
+    public boolean isAnon() {
+        return mIsAnon;
+    }
+
+    public String getEventUserId() {
+        return mPost.getUserId();
+    }
+
+    public Post getPost(){
+        return mPost;
+    }
 
     /* JSON Helpers */
 
@@ -340,9 +327,4 @@ public class Update {
             return 0;
         }
     }
-
-    public boolean isAnon() {
-        return mIsAnon;
-    }
-
 }

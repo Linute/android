@@ -4,7 +4,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                tools:background="@drawable/background"
+                tools:background="@color/eighty_black"
                 tools:context=".LoginAndSignup.LinuteSignUpFragment">
 
     <ViewFlipper android:id="@+id/signUp_view_flipper"
@@ -12,73 +12,32 @@
                  android:layout_height="match_parent">
 
 
-        <!--<LinearLayout android:id="@+id/signUp_email_form"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="150dp"-->
-        <!--android:gravity="center"-->
-        <!--android:orientation="vertical">-->
-
-        <!--<EditText-->
-        <!--android:id="@+id/signup_email_text"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="16dp"-->
-        <!--android:layout_marginLeft="32dp"-->
-        <!--android:layout_marginRight="32dp"-->
-        <!--android:theme="@style/MyEditTextTheme"-->
-        <!--android:hint="@string/prompt_email"-->
-        <!--android:inputType="textEmailAddress"-->
-        <!--android:maxLines="1"-->
-        <!--android:singleLine="true"-->
-        <!--android:textColor="@color/fifty_white"-->
-        <!--android:textColorHint="@color/thirtyfive_white"-->
-        <!--android:textSize="14sp"/>-->
-
-
-        <!--<Button android:id="@+id/signUp_verify_email_button"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="Next"-->
-        <!--/>-->
-
-        <!--<ProgressBar-->
-        <!--android:id="@+id/signUp_progress_bar1"-->
-        <!--style="?android:attr/progressBarStyleSmall"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:visibility="gone"-->
-        <!--/>-->
-
-        <!--</LinearLayout>-->
-
-
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/signUp_name_and_password_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:layout_marginLeft="32dp"
             android:layout_marginRight="32dp"
-            android:layout_marginTop="140dp"
             android:gravity="center"
-            android:orientation="vertical"
-            android:paddingBottom="20dp">
+        >
 
-            <RelativeLayout android:layout_width="wrap_content"
+            <RelativeLayout android:id="@+id/create_prof_image"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
                             android:layout_marginBottom="16dp"
                             android:layout_marginTop="16dp">
 
-                <ImageView android:layout_width="132dp"
-                           android:layout_height="132dp"
+                <ImageView android:layout_width="102dp"
+                           android:layout_height="102dp"
                            android:layout_centerInParent="true"
-                           android:src="@drawable/photo_rad"
-                    />
+                           android:src="@drawable/photo_rad"/>
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/signup_profile_pic_view"
-                    android:layout_width="130dp"
-                    android:layout_height="130dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_centerInParent="true"
                     android:alpha="0.4"
                     android:src="@drawable/addphoto"
@@ -89,11 +48,12 @@
             </RelativeLayout>
 
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2">
+            <LinearLayout android:id="@+id/name_create_parent"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_below="@id/create_prof_image"
+                          android:orientation="horizontal"
+                          android:weightSum="2">
 
                 <EditText
                     android:id="@+id/signup_fname_text"
@@ -135,7 +95,8 @@
                 android:id="@+id/signup_email_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:layout_below="@id/name_create_parent"
+                android:layout_marginTop="8dp"
                 android:hint="@string/prompt_email"
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
@@ -149,8 +110,8 @@
                 android:id="@+id/signup_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:layout_below="@id/signup_email_text"
+                android:layout_marginTop="8dp"
                 android:hint="@string/prompt_password"
                 android:inputType="textPassword"
                 android:maxLines="1"
@@ -162,7 +123,8 @@
 
             <LinearLayout android:id="@+id/signup_verify_layer"
                           android:layout_width="match_parent"
-                          android:layout_height="wrap_content">
+                          android:layout_height="wrap_content"
+                          android:layout_below="@id/signup_password">
 
                 <View android:layout_width="0px"
                       android:layout_height="0px"
@@ -173,7 +135,7 @@
                            android:layout_height="wrap_content"
                            android:layout_weight="3"
                            android:src="@drawable/create_sign_up_button"
-                    />
+                />
 
                 <View android:layout_width="0px"
                       android:layout_height="0px"
@@ -186,17 +148,68 @@
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_below="@id/signup_password"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="32dp"
                 android:visibility="gone"
+            />
+
+            <TextView android:id="@+id/agree_text"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/signup_verify_layer"
+                      android:layout_marginEnd="8dp"
+                      android:layout_marginStart="8dp"
+                      android:layout_marginTop="32dp"
+                      android:gravity="center"
+                      android:text="@string/create_account_agree"
+                      android:textColor="@color/fifty_white"
+                      android:textSize="@dimen/sub_font_size"
+            />
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_below="@id/agree_text"
+                          android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                          android:layout_marginStart="@dimen/activity_horizontal_margin"
+                          android:layout_marginTop="4dp"
+                          android:orientation="horizontal"
+            >
+                <TextView android:id="@+id/create_privacy_policy"
+                          android:layout_width="0px"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:background="@null"
+                          android:gravity="center"
+                          android:paddingBottom="8dp"
+                          android:paddingTop="8dp"
+                          android:text="Privacy Policy"
+                          android:textColor="@color/secondaryColor"
+                          android:textSize="@dimen/sub_font_size"
                 />
 
-        </LinearLayout>
+                <TextView android:id="@+id/create_terms_of_services"
+                          android:layout_width="0px"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:background="@null"
+                          android:gravity="center"
+                          android:paddingBottom="8dp"
+                          android:paddingTop="8dp"
+                          android:text="Terms of service"
+                          android:textColor="@color/secondaryColor"
+                          android:textSize="@dimen/sub_font_size"
+                />
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
 
         <LinearLayout android:id="@+id/signUp_verify_form"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:layout_marginTop="125dp"
+                      android:layout_marginTop="180dp"
                       android:orientation="vertical">
 
             <TextView android:layout_width="match_parent"
@@ -251,18 +264,18 @@
 
                 <View android:layout_width="0px"
                       android:layout_height="0px"
-                      android:layout_weight="2"/>
+                      android:layout_weight="3"/>
 
                 <ImageView android:id="@+id/signUp_submit_butt"
                            android:layout_width="0px"
                            android:layout_height="wrap_content"
                            android:layout_weight="3"
                            android:src="@drawable/verify_button"
-                    />
+                />
 
                 <View android:layout_width="0px"
                       android:layout_height="0px"
-                      android:layout_weight="2"/>
+                      android:layout_weight="3"/>
             </LinearLayout>
 
 
@@ -273,7 +286,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:visibility="gone"
-                />
+            />
 
         </LinearLayout>
 
@@ -283,8 +296,8 @@
     <ImageView android:id="@+id/signUp_back_button"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:padding="@dimen/activity_horizontal_margin"
                android:alpha="0.35"
+               android:padding="@dimen/activity_horizontal_margin"
                android:src="@drawable/ic_action_navigation_arrow_back_inverted"
-        />
+    />
 </RelativeLayout>

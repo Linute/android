@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.UpdateFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -56,9 +58,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
     private View mEmptyView;
 
-    //private SharedPreferences mSharedPreferences;
-    //private Integer mSkip = 25;
-    //private boolean mCanLoadMore = true;
+    private boolean mSafeToAddToTop = false;
 
     public UpdatesFragment() {
 
@@ -114,6 +114,8 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
+        mHasMessages = false;
+
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.setTitle("Updates");
@@ -126,6 +128,11 @@ public class UpdatesFragment extends UpdatableFragment {
                     }
                 }
             });
+
+            mainActivity.connectSocket("unread", haveUnread);
+
+            JSONObject object = new JSONObject();
+            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
 
             JSONObject obj = new JSONObject();
             try {
@@ -170,6 +177,8 @@ public class UpdatesFragment extends UpdatableFragment {
         super.onPause();
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
+            activity.disconnectSocket("unread", haveUnread);
+
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", activity
@@ -198,6 +207,10 @@ public class UpdatesFragment extends UpdatableFragment {
 
         if (getActivity() == null) return;
         JSONArray unread = new JSONArray();
+
+
+        mSafeToAddToTop = false;
+
         for (Update update : mRecentUpdates) {
             unread.put(update.getActionID());
         }
@@ -232,6 +245,8 @@ public class UpdatesFragment extends UpdatableFragment {
     private void getUpdatesInformation() {
         if (getActivity() == null) return;
 
+        mSafeToAddToTop = false;
+
         new LSDKActivity(getActivity()).getActivities(0, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -252,8 +267,6 @@ public class UpdatesFragment extends UpdatableFragment {
                             return;
                         }
 
-//                        mOldUpdates.clear();
-//                        mRecentUpdates.clear();
                         ArrayList<Update> oldItems = new ArrayList<>();
                         ArrayList<Update> newItems = new ArrayList<>();
 
@@ -261,6 +274,8 @@ public class UpdatesFragment extends UpdatableFragment {
                         //if (activities.length() < 25) mCanLoadMore = false;
 
                         //mSkip = 25;
+
+                        if (getActivity() == null) return;
 
                         Update update;
                         //iterate through array of activities
@@ -296,6 +311,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
                                 mUpdatesAdapter.notifyDataSetChanged();
                                 mSwipeRefreshLayout.setRefreshing(false);
+                                mSafeToAddToTop = true;
                             }
                         });
 
@@ -313,82 +329,23 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    /* NOTE: LOAD MORE
-    private void loadMore() {
-        new LSDKActivity(getContext()).getActivities(mSkip, new Callback() {
-            @Override
-            public void onFailure(Request request, IOException e) {
-                showBadConnectiontToast();
-                mUpdatesAdapter.setAutoLoadMore(false);
-                notifyUpdate();
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(response.body().string()), "activities");
-
-                        if (activities == null) {
-                            mUpdatesAdapter.setAutoLoadMore(false);
-                            showServerErrorToast();
-                            notifyUpdate();
-                            return;
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mHasMessages = (boolean) args[0];
+            if (mCreateActionMenu){
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            act.invalidateOptionsMenu();
                         }
-
-                        mSkip += 25;
-
-                        Log.i(TAG, "onResponse:" + activities.length());
-
-                        //remove the progress bar
-                        if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                            mOldUpdates.remove(mOldUpdates.size() - 1);
-                        } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                            mRecentUpdates.remove(mRecentUpdates.size() - 1);
-
-                        //iterate through array of activities
-                        for (int i = 0; i < activities.length(); i++) {
-                            Update update = new Update(activities.getJSONObject(i));
-                            if (update.isRead()) { //TODO: use contains to check repeat?
-                                mOldUpdates.add(update); //if read, it's old
-                            } else {
-                                mRecentUpdates.add(update); //else recent
-                            }
-                        }
-
-                        mCanLoadMore = activities.length() == 25;
-
-                        if (mCanLoadMore) {
-                            if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                                mOldUpdates.add(null);
-                            } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                                mRecentUpdates.add(null);
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        showServerErrorToast();
-                        mUpdatesAdapter.setAutoLoadMore(false);
-                    }
-                } else {
-                    showServerErrorToast();//TODO reloadbutton
-                    Log.e(TAG, "onResponse: " + response.body().string());
-                    mUpdatesAdapter.setAutoLoadMore(false);
+                    });
                 }
-
-                notifyUpdate();
             }
-        });
-    }*/
-/*
-    private void notifyUpdate() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mUpdatesAdapter.notifyDataSetChanged();
-            }
-        });
-    }*/
+        }
+    };
 
 
     private void showServerErrorToast() {
@@ -414,9 +371,13 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
+    private boolean mCreateActionMenu = false;
+    private boolean mHasMessages = false;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.people_fragment_menu, menu);
+        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
+        mCreateActionMenu = true;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -443,13 +404,18 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    public void addItemToRecents(Update update) {
-        if (!mSwipeRefreshLayout.isRefreshing()) {
-            mRecentUpdates.add(0, update);
-            mUpdatesAdapter.notifyItemInserted(0);
-            if (mEmptyView.getVisibility() == View.VISIBLE) {
-                mEmptyView.setVisibility(View.GONE);
-            }
+    public void addItemToRecents(final Update update) {
+        if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
+             new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecentUpdates.add(0, update);
+                    mUpdatesAdapter.notifyItemInserted(1);  //should be 1?
+                    if (mEmptyView.getVisibility() == View.VISIBLE) {
+                        mEmptyView.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 

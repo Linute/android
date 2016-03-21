@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -173,8 +175,12 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                 mAddButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO: Go to message
-                        Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
+                        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                        if (activity != null) {
+                            Intent enterRooms = new Intent(activity, RoomsActivity.class);
+                            enterRooms.putExtra("CHATICON", true);
+                            activity.startActivity(enterRooms);
+                        }
                     }
                 });
             }

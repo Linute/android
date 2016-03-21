@@ -1,51 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/swipe_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
 
-    <RelativeLayout android:id="@+id/discover_fragment_background"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+<RelativeLayout android:id="@+id/discover_fragment_background"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/eventList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-        <RelativeLayout android:id="@+id/discover_no_posts_frame"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:layout_marginStart="100dp"
-                        android:visibility="gone"
-                        android:layout_marginTop="50dp">
+    <RelativeLayout android:id="@+id/discover_no_posts_frame"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginStart="100dp"
+                    android:layout_marginTop="50dp"
+                    android:visibility="gone">
 
-            <ImageView android:id="@+id/discover_no_posts"
-                       android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:layout_centerHorizontal="true"
-                       tools:src="@drawable/campus"
-            />
+        <ImageView android:id="@+id/discover_no_posts"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_centerHorizontal="true"
+                   tools:src="@drawable/campus"
+        />
 
-            <TextView android:id="@+id/dicover_no_posts_text"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_below="@id/discover_no_posts"
-                      android:layout_centerHorizontal="true"
-                      android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                      android:layout_marginStart="@dimen/activity_horizontal_margin"
-                      android:layout_marginTop="16dp"
-                      android:gravity="center"
-                      tools:text="@string/discover_no_posts_campus"
-            />
-        </RelativeLayout>
-
-
+        <TextView android:id="@+id/dicover_no_posts_text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/discover_no_posts"
+                  android:layout_centerHorizontal="true"
+                  android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                  android:layout_marginStart="@dimen/activity_horizontal_margin"
+                  android:layout_marginTop="16dp"
+                  android:gravity="center"
+                  tools:text="@string/discover_no_posts_campus"
+        />
     </RelativeLayout>
 
-
-</android.support.v4.widget.SwipeRefreshLayout>
+</RelativeLayout>

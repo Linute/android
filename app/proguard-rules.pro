@@ -17,3 +17,4 @@
 #}
 
 -dontwarn okio.**
+-dontwarn com.makeramen.roundedimageview.**

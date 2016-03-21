@@ -34,10 +34,9 @@ import okhttp3.Response;
 public class Profile extends UpdatableFragment {
     public static final String TAG = Profile.class.getSimpleName();
 
-    public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
+    //public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
 
     private RecyclerView recList;
-    private GridLayoutManager llm;
     private ProfileAdapter mProfileAdapter;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -50,8 +49,6 @@ public class Profile extends UpdatableFragment {
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
     private boolean mOtherCompotentHasUpdated = false;
-
-    public static final int IMAGE_CHANGED = 1234;
 
     private Runnable rServerErrorAction = new Runnable() {
         @Override
@@ -71,6 +68,9 @@ public class Profile extends UpdatableFragment {
     private LinuteUser user;
 
 
+    private int mSkip = 0;
+    private boolean mCanLoadMore = false;
+
     public Profile() {
         // Required empty public constructor
     }
@@ -88,24 +88,22 @@ public class Profile extends UpdatableFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        llm = new GridLayoutManager(getActivity(), 3);
+        GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if (position == 0) return 3;
-                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem) return 3;
+                if (position == 0) return 3; //header is size 3
+                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
+                    return 3; //empty view size 3
 
                 else return 1;
             }
         });
 
         recList.setLayoutManager(llm);
-//        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
-
         user = LinuteUser.getDefaultUser(getContext()); //get data from sharedpref
-
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
+        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext());
         recList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
@@ -119,10 +117,15 @@ public class Profile extends UpdatableFragment {
             }
         });
 
-        // onCreateView isnt called so this only happens once
-        user = LinuteUser.getDefaultUser(getContext());
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext(), Profile.this);
-        recList.setAdapter(mProfileAdapter);
+        mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts() {
+            @Override
+            public void loadMorePosts() {
+                if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing()) {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                    getMoreActivities();
+                }
+            }
+        });
 
         return rootView;
     }
@@ -148,7 +151,7 @@ public class Profile extends UpdatableFragment {
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Profile");
                 mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -159,6 +162,7 @@ public class Profile extends UpdatableFragment {
 
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
+            mSkip = 0;
             mOtherCompotentHasUpdated = false;
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -167,6 +171,7 @@ public class Profile extends UpdatableFragment {
                 }
             });
             updateAndSetHeader(); //get information from server to update profile
+
             setActivities();
             setFragmentNeedUpdating(false);
         }
@@ -176,10 +181,10 @@ public class Profile extends UpdatableFragment {
     public void onPause() {
         super.onPause();
         MainActivity activity = (MainActivity) getActivity();
-        if (activity != null){
+        if (activity != null) {
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Profile");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -195,26 +200,26 @@ public class Profile extends UpdatableFragment {
 
 
         MainActivity activity = (MainActivity) getActivity();
-        if (activity != null){
+        if (activity != null) {
             activity.setToolbarOnClickListener(null);
         }
 
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) { //saves fragment state
-        outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) { //gets saved frament state
-        if (savedInstanceState != null) {
-            mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
-        }
-
-        super.onViewStateRestored(savedInstanceState);
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) { //saves fragment state
+//        outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
+//        super.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    public void onViewStateRestored(Bundle savedInstanceState) { //gets saved frament state
+//        if (savedInstanceState != null) {
+//            mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
+//        }
+//
+//        super.onViewStateRestored(savedInstanceState);
+//    }
 
     //get user information from server
     public void updateAndSetHeader() {
@@ -244,9 +249,9 @@ public class Profile extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    if (!mOtherCompotentHasUpdated){
+                    if (!mOtherCompotentHasUpdated) {
                         mOtherCompotentHasUpdated = true;
-                    }else {
+                    } else {
                         mOtherCompotentHasUpdated = false;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -283,8 +288,97 @@ public class Profile extends UpdatableFragment {
 
 
     public void setActivities() {
-        LSDKUser user = new LSDKUser(getContext());
-        user.getUserActivities(mSharedPreferences.getString("userID", null), "posted status", "posted photo", new Callback() {
+
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), 0, new Callback() { //todo fix skip
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
+                    @Override
+                    public void run() {
+                        if (mSwipeRefreshLayout.isRefreshing())
+                            mSwipeRefreshLayout.setRefreshing(false);
+                        Utils.showBadConnectionToast(getContext());
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) { //got response
+                    try { //try to grab needed information from response
+
+                        String body = response.body().string();
+                        //Log.i(TAG, "onResponse: " + body);
+                        final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
+
+                        if (activities == null) return;
+
+                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
+
+                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                            try {
+                                userActItems.add(
+                                        new UserActivityItem(
+                                                activities.getJSONObject(i)
+                                        )); //create activity objects and add to array
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        //if we got 24 back, there might still be more
+                        mCanLoadMore = activities.length() == 24;
+
+                        mUserActivityItems.clear();
+                        mUserActivityItems.addAll(userActItems);
+
+                        if (mUserActivityItems.isEmpty()) {
+                            mUserActivityItems.add(new EmptyUserActivityItem());
+                        }
+
+                        if (getActivity() == null) return;
+
+                        mSkip = 24;
+
+                        if (!mOtherCompotentHasUpdated) {
+                            mOtherCompotentHasUpdated = true;
+                        } else {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { //update view
+                                    mOtherCompotentHasUpdated = false;
+                                    mProfileAdapter.notifyDataSetChanged();
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) { //unable to grab needed info
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(rServerErrorAction);
+                        }
+                    }
+                } else { //unable to connect with DB
+                    Log.v(TAG, response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mSwipeRefreshLayout.setRefreshing(false);
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
+    public void getMoreActivities() {
+
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), mSkip, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -303,53 +397,43 @@ public class Profile extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
-                        //Log.i(TAG, "onResponse: " + body);
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-//                        Log.d(TAG, "onResponse getActivities" + body);
 
-                        if (activities == null || getActivity() == null) return;
+                        if (activities == null) return;
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
-                        String fullName = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
+                        String userid = mSharedPreferences.getString("userID", "");
 
                         for (int i = 0; i < activities.length(); i++) { //add each activity into our array
                             try {
                                 userActItems.add(
                                         new UserActivityItem(
-                                                activities.getJSONObject(i),
-                                                activities.getJSONObject(i).getJSONObject("owner").getString("profileImage"),
-                                                fullName
+                                                activities.getJSONObject(i)
                                         )); //create activity objects and add to array
-                            }catch (JSONException e){
+                            } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
 
-                        mUserActivityItems.clear();
+                        //if we got 24 back, there might still be more
+                        mCanLoadMore = activities.length() == 24;
+
                         mUserActivityItems.addAll(userActItems);
 
-                        if (mUserActivityItems.isEmpty()) {
-                            mUserActivityItems.add(new EmptyUserActivityItem());
-                        }
+                        mSkip += 24; //skip 24 posts
 
                         if (getActivity() == null) return;
-
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() { //update view
 
-
-                                if (!mOtherCompotentHasUpdated){
-                                    mOtherCompotentHasUpdated = true;
-                                }else {
-                                    mOtherCompotentHasUpdated = false;
-                                    mProfileAdapter.notifyDataSetChanged();
-                                    mSwipeRefreshLayout.setRefreshing(false);
-                                }
+                                mProfileAdapter.notifyDataSetChanged();
+                                mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
+
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
                         if (getActivity() != null) {

@@ -91,12 +91,13 @@ public class LSDKUser {
     }
 
 
-    public Call getUserActivities(String userId, String status, String photo, Callback callback) {
+    public Call getUserActivities(String userId, int skip, Callback callback) {
 
         Map<String, String> params = new HashMap<>();
-        params.put("action[0]", status);
-        params.put("action[1]", photo);
-        params.put("skip", "0");
+        params.put("action[0]", "posted status");
+        params.put("action[1]", "posted photo");
+        params.put("action[2]", "posted video");
+        params.put("skip", skip + "");
         params.put("limit", "24");
         params.put("owner", userId);
 
@@ -163,7 +164,7 @@ public class LSDKUser {
     }
 
 
-
+    //sends user a pincode to verify email
     public Call getConfirmationCodeForEmail(String email, String fName, String lName, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
@@ -174,6 +175,7 @@ public class LSDKUser {
         return API_Methods.post("users/confirm-email", header, param, callback);
     }
 
+    //login facebook
     public Call authorizationFacebook(String fbToken, Callback callback ){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
@@ -189,6 +191,7 @@ public class LSDKUser {
         return API_Methods.post("geo", header, params, callback);
     }
 
+    //change password
     public Call resetPassword(String email, Callback callback){
         Map<String, String> header = new HashMap<>();
 

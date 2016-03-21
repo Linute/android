@@ -42,4 +42,19 @@ public class LSDKFriends {
         return API_Methods.get(new String[] {"activities"},header, param, callback);
     }
 
+    public Call getFriendsForMention(String userId, String fullname, String skip, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+
+        Map<String, String> param = new HashMap<>();
+        param.put("owner", userId);
+        param.put("limit", "25");
+        param.put("skip", skip);
+        param.put("fullName", fullname);
+
+        return API_Methods.get(new String[] {"friends"},header, param, callback);
+    }
+
+
+
+
 }

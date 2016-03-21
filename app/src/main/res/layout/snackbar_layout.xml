@@ -13,16 +13,17 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
+
+
+  ~ modified gravity
 -->
 
-<!--<view xmlns:android="http://schemas.android.com/apk/res/android"-->
-      <!--class="come$SnackbarLayout"-->
-      <!--android:layout_width="match_parent"-->
-      <!--android:layout_height="wrap_content"-->
-      <!--android:layout_gravity="bottom"-->
-      <!--style="@style/Widget.Design.Snackbar" />-->
 
-<view xmlns:android="http://schemas.android.com/apk/res/android"
+
+<view style="@style/Widget.Design.Snackbar"
+      class="com.linute.linute.UtilsAndHelpers.CustomSnackbar$SnackbarLayout"
+      xmlns:android="http://schemas.android.com/apk/res/android"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:layout_gravity="top"
 />

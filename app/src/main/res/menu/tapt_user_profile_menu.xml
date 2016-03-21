@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+>
+
+    <!--android:icon="@drawable/pencil_icon"-->
+    <item android:id="@+id/feed_detail_subscribe"
+          android:orderInCategory="1"
+          android:title="Loading..."
+          app:showAsAction="never"/>
+
+
+    <!--todo add report-->
+    <!--<item android:id="@+id/feed_detail_reveal"-->
+          <!--android:orderInCategory="2"-->
+          <!--android:title="Reveal"-->
+          <!--app:showAsAction="never"/>-->
+
+
+</menu>

@@ -18,18 +18,14 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private static final int TYPE_ITEM_WITH_IMAGE = 1;
     private static final int TYPE_EMPTY = 2;
     private static final int TYPE_ITEM_WITHOUT_IMAGE = 3;
-    private Profile mProfile;
 
     private Context context;
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private LinuteUser mUser;
 
-    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context, Profile profile) {
-        this.context = context;
-        mProfile = profile;
-        mUserActivityItems = userActivityItems;
-        mUser = user;
-    }
+
+    private LoadMorePosts mLoadMorePosts;
+
 
     public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
         this.context = context;
@@ -55,9 +51,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         else if (viewType == TYPE_HEADER) {
             //inflate your layout and pass it to view holder
-            return new ProfileHeaderViewHolder(this, LayoutInflater
+            return new ProfileHeaderViewHolder(LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header3, parent, false), context, mProfile);
+                    .inflate(R.layout.fragment_profile_header3, parent, false), context);
         }
 
         else if (viewType == TYPE_EMPTY) {
@@ -71,6 +67,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
+        if (position == mUserActivityItems.size()){ //on last elem, need to load more
+            if (mLoadMorePosts != null)
+                mLoadMorePosts.loadMorePosts();
+        }
+
         if (holder instanceof ProfileViewHolder) {
             ((ProfileViewHolder) holder).bindModel(mUserActivityItems.get(position - 1));
         } else if (holder instanceof ProfileHeaderViewHolder) {
@@ -78,8 +80,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         } else if (holder instanceof  ProfileViewHolderNoImage){
             ((ProfileViewHolderNoImage) holder).bindModel(mUserActivityItems.get(position - 1));
         }
-    }
 
+    }
 
     @Override
     public int getItemCount() {
@@ -104,5 +106,14 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private boolean isPositionHeader(int position) {
         return position == 0;
+    }
+
+
+    public void setLoadMorePosts(LoadMorePosts loadMorePosts){
+        mLoadMorePosts = loadMorePosts;
+    }
+
+    public interface LoadMorePosts {
+        void loadMorePosts();
     }
 }

@@ -40,6 +40,8 @@ public class LinuteUser {
     private int mFollowing;
     private String mFriend;
     private String mFriendship;
+
+    private boolean mIsSubscribed;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
 
@@ -51,6 +53,8 @@ public class LinuteUser {
     public LinuteUser() {
         mFriend = "";
         mFriendship = "";
+        mFirstName = "";
+        mIsSubscribed = false;
     }
 
 
@@ -69,9 +73,10 @@ public class LinuteUser {
         user.setCollegeId(sharedPreferences.getString("collegeId", ""));
         user.setUserID(sharedPreferences.getString("userID", ""));
 
-
         user.setUserToken(sharedPreferences.getString("userToken",""));
         user.setPoints(sharedPreferences.getString("points", "0"));
+
+        user.setSubscribed(false);
 
 
         return user;
@@ -118,6 +123,12 @@ public class LinuteUser {
         //NOTE: NEW STUFF
         mPoints = getStringFromJson("points", userInfo);
         mUserToken = getStringFromJson("token", userInfo);
+
+        try {
+            mIsSubscribed = userInfo.getBoolean("isSubscribed");
+        }catch (JSONException e){
+            mIsSubscribed = false;
+        }
 
         //NOTE: END
 
@@ -169,6 +180,12 @@ public class LinuteUser {
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
         // NEW end
         //mPasswordFacebook = getStringFromJson("passwordFacebook", userInfo);
+
+        try {
+            mIsSubscribed = userInfo.getBoolean("isSubscribed");
+        }catch (JSONException e){
+            mIsSubscribed = false;
+        }
 
         JSONObject college = getJsonObjectFromJson("college", userInfo);
 
@@ -439,6 +456,15 @@ public class LinuteUser {
 
     public void setFollowing(int following) {
         mFollowing = following;
+    }
+
+
+    public boolean isSubscribed() {
+        return mIsSubscribed;
+    }
+
+    public void setSubscribed(boolean subscribed) {
+        mIsSubscribed = subscribed;
     }
 
 

@@ -22,6 +22,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +30,8 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import io.socket.emitter.Emitter;
 
 /**
  * Created by QiFeng on 1/20/16.
@@ -40,9 +43,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private ViewPager mViewPager;
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
-    private FragmentHolderPagerAdapter mFragmentHolderPagerAdapter;
-
     private DiscoverFragment[] mDiscoverFragments;
+
+    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
 
@@ -62,9 +65,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mDiscoverFragments = new DiscoverFragment[]{DiscoverFragment.newInstance(false), DiscoverFragment.newInstance(true)};
         }
 
-        mFragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
+        FragmentHolderPagerAdapter fragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
-        mViewPager.setAdapter(mFragmentHolderPagerAdapter);
+        mViewPager.setAdapter(fragmentHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -76,7 +79,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
             @Override
             public void onPageSelected(int position) {
-                Log.i(TAG, "onPageSelected: " + position);
+                mSingleVideoPlaybackManager.stopPlayback();
             }
 
             @Override
@@ -167,6 +170,11 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
             mainActivity.showFAB(true); //show the floating button
             mainActivity.resetToolbar();
+
+            mainActivity.connectSocket("unread", haveUnread);
+            JSONObject object = new JSONObject();
+            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
+
             mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -189,8 +197,14 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        mSingleVideoPlaybackManager.stopPlayback();
+
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
+
+            mainActivity.disconnectSocket("unread", haveUnread);
+
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
@@ -218,7 +232,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.people_fragment_menu, menu);
+        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
+        mCreateActionMenu = true;
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -252,38 +267,9 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         JSONObject obj = (JSONObject) post;
 
-        if (obj != null){
-
-            String postImage = "";
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            Date myDate;
-
-
+        if (obj != null && getActivity() != null &&  mDiscoverFragments[0] != null){
             try {
-                if (obj.getJSONArray("images").length() > 0)
-                    postImage = (String) obj.getJSONArray("images").get(0);
-
-                try {
-                    myDate = simpleDateFormat.parse(obj.getString("date"));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    myDate = null;
-                }
-
-                Post post1 = new Post(
-                        obj.getJSONObject("owner").getString("id"),
-                        obj.getJSONObject("owner").getString("fullName"),
-                        obj.getJSONObject("owner").getString("profileImage"),
-                        obj.getString("title"),
-                        postImage,
-                        obj.getInt("privacy"),
-                        0,
-                        false,
-                        myDate == null? 0 : myDate.getTime(),
-                        obj.getString("id"),
-                        0,
-                        obj.getString("anonymousImage")
-                );
+                Post post1 = new Post(obj);
 
                 return mDiscoverFragments[0].addPostToTop(post1);
 
@@ -291,10 +277,37 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 e.printStackTrace();
                 return false;
             }
-
         }else {
             Log.i(TAG, "addPostToFeed: obj was null");
             return false;
         }
+    }
+
+
+    private boolean mCreateActionMenu = false;
+    private boolean mHasMessages = false;
+
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            mHasMessages = (boolean) args[0];
+            //Log.i(TAG, "call: "+mHasMessages);
+            if (mCreateActionMenu){
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            act.invalidateOptionsMenu();
+                        }
+                    });
+                }
+            }
+        }
+    };
+
+
+    public SingleVideoPlaybackManager getSinglePlaybackManager(){
+        return mSingleVideoPlaybackManager;
     }
 }

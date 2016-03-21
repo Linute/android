@@ -79,8 +79,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder {
         mProfileImage.setOnClickListener(lis);
         mName.setOnClickListener(lis);
 
-        mStatus.setText(mContext.getString(PlaceholderStatuses.getRandomStringRes(new Random().nextInt(41))));
-
 
         mDistance.setText(people.getDate());
 

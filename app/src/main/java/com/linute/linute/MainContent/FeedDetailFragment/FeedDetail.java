@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.ArrayList;
@@ -10,77 +11,57 @@ import java.util.List;
  */
 public class FeedDetail {
     private static final String TAG = FeedDetail.class.getSimpleName();
-    private String mPostId;
-    private String mPostUserId;
-    private String mPostImage;
-    private String mPostText;
-    private String mUserImage;
-    private String mUserName;
-    private int mPostPrivacy = 2;
-    private long mPostTime;
-    private boolean isPostLiked;
-    private String mPostLikeNum = "0";
-    private String mNumOfComments = "0";
-
-    private String mAnonPic;
+    private Post mPost;
 
     private List<Comment> mComments = new ArrayList<>();
 
-    public FeedDetail() {
-
+    public FeedDetail(Post post) {
+        mPost = post;
     }
 
-    public void setFeedDetail(String postImage, String postText, String userImage, String userName, int postPrivacy, long postTime, boolean postLiked, String postLikeNum, String numComments, String anonPic) {
-        mPostImage = postImage;
-        mPostText = postText;
-        mUserImage = userImage;
-        mUserName = userName;
-        mPostPrivacy = postPrivacy;
-        mPostTime = postTime;
-        isPostLiked = postLiked;
-        mPostLikeNum = postLikeNum;
-        mNumOfComments = numComments;
-        mAnonPic = anonPic;
+
+    public Post getPost(){
+        return mPost;
     }
 
     public String getPostImage() {
-        return mPostImage;
+        return mPost.getImage();
     }
 
     public String getPostText() {
-        return mPostText;
+        return mPost.getTitle();
     }
 
     public String getUserImage() {
-        return mUserImage;
+        return mPost.getUserImage();
     }
 
     public String getUserName() {
-        return mUserName;
+        return mPost.getUserName();
     }
 
     public int getPostPrivacy() {
-        return mPostPrivacy;
+        return mPost.getPrivacy();
     }
 
     public String getPostTime() {
-        return Utils.getTimeAgoString(mPostTime);
+        return Utils.getTimeAgoString(mPost.getPostLongTime());
     }
 
     public boolean isPostLiked() {
-        return isPostLiked;
+        return mPost.isPostLiked();
     }
 
     public void setIsPostLiked(boolean isPostLiked) {
-        this.isPostLiked = isPostLiked;
+        mPost.setPostLiked(isPostLiked);
     }
 
     public String getPostLikeNum() {
-        return mPostLikeNum;
+        return mPost.getNumLike();
     }
 
     public void setPostLikeNum(String postLikeNum) {
-        mPostLikeNum = postLikeNum;
+        mPost.setNumLike(Integer.parseInt(postLikeNum));
     }
 
     public List<Comment> getComments() {
@@ -96,34 +77,42 @@ public class FeedDetail {
     //}
 
     public String getPostId() {
-        return mPostId;
-    }
-
-    public void setPostId(String postId) {
-        mPostId = postId;
+        return mPost.getPostId();
     }
 
     public String getPostUserId() {
-        return mPostUserId;
+        return mPost.getUserId();
     }
 
     public String getNumOfComments(){
-        return mNumOfComments;
-    }
-
-    public void setPostUserId(String postUserId) {
-        mPostUserId = postUserId;
+        return mPost.getNumOfComments()+"";
     }
 
     public void setPostPrivacy(int privacy){
-        mPostPrivacy = privacy;
+        mPost.setPostPrivacy(privacy);
     }
 
     public void refreshCommentCount(){
-        mNumOfComments = mComments.size()+"";
+        mPost.setNumOfComments(mComments.size());
+    }
+
+    public void setNumComments(int comments){
+        mPost.setNumOfComments(comments);
+    }
+
+    public void setAnonImage(String image){
+        mPost.setAnonImage(image);
+    }
+
+    public boolean isAnon (){
+        return mPost.getPrivacy() == 1;
     }
 
     public String getAnonPic(){
-        return mAnonPic;
+        return mPost.getAnonImage();
+    }
+
+    public String getVideoUrl(){
+        return mPost.getVideoUrl();
     }
 }

@@ -3,11 +3,9 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
@@ -17,6 +15,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,11 +38,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mCollege;
     private String mUserId;
 
+    private SingleVideoPlaybackManager mVideoPlayerManager;
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context) {
+
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager) {
         super(new MultiChoiceMode());
         mPosts = posts;
         this.context = context;
+        mVideoPlayerManager = singleVideoPlaybackManager;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId","");
@@ -55,24 +58,31 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        if (viewType == IMAGE_POST){
-            return new ImageFeedHolder(this,
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
-                    mPosts,
-                    context);
-        }
-        else{
-            return new StatusFeedHolder(this,
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
-                    mPosts,
-                    context);
+        
+        switch (viewType){
+            case IMAGE_POST:
+                return new ImageFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
+                        context);
+            
+            case VIDEO_POST:
+                return new VideoFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
+                        context,
+                        mVideoPlayerManager);
+            
+            default: //status post
+                return new StatusFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
+                        context);
         }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ImageFeedHolder){
+        if (holder instanceof  VideoFeedHolder){
+            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
+        }else if (holder instanceof  ImageFeedHolder){
             ((ImageFeedHolder) holder).bindModel(mPosts.get(position));
         }else {
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
@@ -80,7 +90,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
 
         if (position + 1 == mPosts.size()) {
-            //NOTE: Changed refresh to interface
             mGetMoreFeed.getMoreFeed();
         }else if (position == 0){
             MainActivity activity = (MainActivity) context;
@@ -106,15 +115,14 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     public static final int IMAGE_POST = 0;
     public static final int STATUS_POST = 1;
+    public static final int VIDEO_POST = 2;
 
     @Override
     public int getItemViewType(int position) {
-
-        return  mPosts.get(position).isImagePost() ? IMAGE_POST : STATUS_POST;
-    }
-
-    private boolean isPositionHeader(int position) {
-        return position == 0;
+        if (mPosts.get(position).isImagePost()){
+            return mPosts.get(position).isVideoPost() ? VIDEO_POST : IMAGE_POST;
+        }
+        return  STATUS_POST;
     }
 
     public void setSendImpressions(boolean set){

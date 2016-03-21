@@ -11,9 +11,10 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -66,10 +67,17 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         //setup toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
+        toolbar.setTitle("Status");
 
-        mPostButton = toolbar.findViewById(R.id.create_page_post_button);
-        mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
+        mPostButton = findViewById(R.id.create_page_post_button);
+        mProgressbar = findViewById(R.id.create_page_progress_bar);
 
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +107,28 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
 
+        mPostEditText.addTextChangedListener(new TextWatcher() {
+            String beforeText;
+            final int maxLines = 9;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                beforeText = s.toString();
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (mPostEditText.getLineCount() > maxLines){
+                    mPostEditText.setText(beforeText);
+                    mPostEditText.setSelection(mPostEditText.getText().length());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
         final ImageView mAnonymousSwitch = (ImageView) findViewById(R.id.post_create_anon_switch);
         mAnonymousSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,17 +153,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.post_create_5).setOnClickListener(this);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                setResult(RESULT_CANCELED);
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 
 
     private Socket mSocket;
@@ -158,8 +177,9 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                                     "&version="+device.getVersonName()+
                                     "&build="+device.getVersionCode()+
                                     "&os="+device.getOS()+
-                                    "&type="+device.getType()
-                    ;
+                                    "&type="+device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
                     op.reconnectionDelay = 5;
                     op.secure = true;
 

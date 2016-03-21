@@ -20,12 +20,11 @@ public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements
 
     private Context mContext;
 
-    private String mPostId;
-    private String mUserId;
-
     private TextView mTextView;
 
     //private View vAnonIcon;
+
+    private UserActivityItem mUserActivityItem ;
 
 
     public ProfileViewHolderNoImage(View itemView, Context context) {
@@ -41,19 +40,17 @@ public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements
     }
 
     void bindModel(UserActivityItem userActivityItem) {
-        String text = userActivityItem.getDescription();
+        String text = userActivityItem.getPostText();
 
         mTextView.setText((text == null || text.equals("")) ? "No text..." : text);
-
-        mPostId = userActivityItem.getEventID();
-        mUserId = userActivityItem.getOwnerID();
+        mUserActivityItem = userActivityItem;
     }
 
     @Override
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
-        if (activity != null) {
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, false, mPostId, mUserId));
+        if (activity != null && mUserActivityItem != null) {
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(mUserActivityItem.getPost()));
         }
     }
 }

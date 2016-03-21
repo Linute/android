@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:card_view="http://schemas.android.com/tools"
               android:layout_width="match_parent"
-              android:layout_height="match_parent"
+              android:layout_height="wrap_content"
               android:orientation="horizontal"
               android:padding="10dp">
 
@@ -32,18 +32,13 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/chat_owner_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Naomi Doll"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#8BC34A"/>
-
-            <TextView
                 android:id="@+id/chat_owner_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Hey there Job"/>
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center"
+                android:text="fdfsf"/>
         </LinearLayout>
 
         <TextView
@@ -73,23 +68,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/chat_user_image"
+            android:layout_centerVertical="true"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/chat_user_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="Naomi Doll"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorPrimary"/>
 
             <TextView
                 android:id="@+id/chat_user_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="end"
-                android:text="Hey there Job"/>
+                android:gravity="end|center_vertical"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="sdfasdsad"/>
         </LinearLayout>
 
         <de.hdodenhof.circleimageview.CircleImageView

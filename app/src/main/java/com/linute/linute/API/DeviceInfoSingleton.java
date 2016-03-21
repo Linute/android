@@ -22,6 +22,7 @@ public class DeviceInfoSingleton {
     private String mOS;
     private String mType;
     private String mUdid;
+    private String mModel;
 
     public static DeviceInfoSingleton getInstance(Context context){
         if (mDeviceInfoSingleton == null){
@@ -44,6 +45,7 @@ public class DeviceInfoSingleton {
 
         mDeviceToken = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString(QuickstartPreferences.OUR_TOKEN, "");
         mOS = Build.VERSION.SDK_INT+"";
+        mModel = Build.MODEL;
         mType = "android";
 
         mUdid = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -71,5 +73,9 @@ public class DeviceInfoSingleton {
 
     public String getUdid(){
         return mUdid;
+    }
+
+    public String getModel(){
+        return mModel;
     }
 }

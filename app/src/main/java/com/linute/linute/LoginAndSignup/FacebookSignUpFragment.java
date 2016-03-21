@@ -3,6 +3,7 @@ package com.linute.linute.LoginAndSignup;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -26,6 +27,8 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
+import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -112,6 +115,22 @@ public class FacebookSignUpFragment extends Fragment {
                 }else {
                     getFragmentManager().popBackStack();
                 }
+            }
+        });
+
+        rootView.findViewById(R.id.fb_create_privacy_policy).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        rootView.findViewById(R.id.fb_create_terms_of_services).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -242,35 +261,6 @@ public class FacebookSignUpFragment extends Fragment {
             update(newInfo);
         }
 
-//        new LSDKUser(this).updateUserInfo(newInfo, mSharedPreferences.getString("email", ""), new Callback() {
-//            @Override
-//            public void onFailure(Request request, IOException e) {
-//                failedInternetConnection(1);
-//            }
-//
-//            @Override
-//            public void onResponse(Response response) throws IOException {
-//                if (response.isSuccessful()) {
-//                    try {
-//                        String responseString = response.body().string();
-//                        Log.i(TAG, "onResponse: " + responseString);
-//                        persistData(new LinuteUser(new JSONObject(responseString))); //save data
-//
-//                        goToCollegePicker();
-//
-//                    } catch (JSONException e) {
-//                        e.printStackTrace();
-//                        serverError(1);
-//                    }
-//
-//
-//                } else {
-//                    serverError(1);
-//                    Log.e(TAG, "onResponse: " + response.body().string());
-//                }
-//            }
-//        });
-
     }
 
     private void update(Map<String, Object> params) {
@@ -287,7 +277,7 @@ public class FacebookSignUpFragment extends Fragment {
                 if (response.isSuccessful()) {
                     try {
                         String responseString = response.body().string();
-                        Log.i(TAG, "onResponse: " + responseString);
+                        //Log.i(TAG, "onResponse: " + responseString);
                         persistData(new LinuteUser(new JSONObject(responseString))); //save data
                         PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity != null){
@@ -382,6 +372,9 @@ public class FacebookSignUpFragment extends Fragment {
                 if (response.isSuccessful()) {
                     try {
                         mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
+
+                        Log.i(TAG, "onResponse: "+mPinCode);
+
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -444,6 +437,9 @@ public class FacebookSignUpFragment extends Fragment {
                 .into(mProfileImage);
     }
 
+    //determine animation
+    //if goback = true, move in from left
+    //else move in from right
     private void goBackAnimation(boolean goBack) {
         if (getActivity() == null) return;
         mViewSwitcher.setInAnimation(getActivity(), goBack ? R.anim.slide_in_left : R.anim.slide_in_right);
@@ -464,12 +460,12 @@ public class FacebookSignUpFragment extends Fragment {
             buttons = mLayer2Buttons;
         }
 
-        buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+        buttons.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         buttons.animate().setDuration(shortAnimTime).alpha(
                 show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                buttons.setVisibility(show ? View.GONE : View.VISIBLE);
+                buttons.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
             }
         });
 
@@ -523,7 +519,6 @@ public class FacebookSignUpFragment extends Fragment {
     private void persistData(LinuteUser user) {
         if (getActivity() == null) return;
 
-
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
@@ -537,6 +532,7 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+        sharedPreferences.putString("email", user.getEmail());
 
         sharedPreferences.putString("userToken", user.getUserToken());
         sharedPreferences.putString("userName", user.getUserName());
@@ -552,16 +548,19 @@ public class FacebookSignUpFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
+        View v = null;
+        //hide keyboard
         if (mFirstNameEditText.isFocused()){
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mFirstNameEditText.getWindowToken(), 0);
+            v = mFirstNameEditText;
         }else if (mLastNameEditText.hasFocus()){
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mLastNameEditText.getWindowToken(), 0);
+            v = mLastNameEditText;
         }else if (mEmailEditText.hasFocus()){
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mEmailEditText.getWindowToken(), 0);
+            v = mEmailEditText;
         }
 
+        if (v != null){
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
     }
 }

@@ -5,17 +5,15 @@
 
     <!--android:icon="@drawable/pencil_icon"-->
     <item android:id="@+id/feed_detail_delete"
-          android:icon="@drawable/ic_action_paper_bin3"
           android:orderInCategory="1"
           android:title="Delete"
-          app:showAsAction="always"/>
+          app:showAsAction="never"/>
 
 
     <item android:id="@+id/feed_detail_reveal"
-          android:icon="@drawable/ic_action_reveal"
-          android:orderInCategory="1"
+          android:orderInCategory="2"
           android:title="Reveal"
-          app:showAsAction="ifRoom"/>
+          app:showAsAction="never"/>
 
 
 </menu>

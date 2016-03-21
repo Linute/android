@@ -8,10 +8,9 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-
-import com.linute.linute.R;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -31,7 +30,7 @@ public class ImageUtility {
 
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                context.getString(R.string.app_name)
+                "Tapt"
         );
 
         if (!mediaStorageDir.exists()) {
@@ -163,6 +162,56 @@ public class ImageUtility {
         } else {
             return upperBound;
         }
+    }
+
+    public static String getTempFile(Context context, String url) throws IOException {
+        File file;
+
+        String fileName = Uri.parse(url).getLastPathSegment();
+        file = File.createTempFile(fileName, ".mp4", context.getCacheDir());
+
+        return file.getPath();
+    }
+
+    public static void deleteCachedVideo(Uri uri){
+        if (uri != null){
+            File video = new File(uri.getPath());
+            if(video.delete()){
+                Log.i("VIDEO", "deleteCachedVideo: cached video deleted");
+            }else {
+                Log.i("VIDEO", "deleteCachedVideo: cached video NOT deleted");
+            }
+        }
+    }
+
+    public static String getVideoUri(){
+        File mediaStorageDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "Tapt"
+        );
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                return null;
+            }
+        }
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile = new File(
+                mediaStorageDir.getPath() + File.separator + "VID_" + timeStamp + ".mp4"
+        );
+
+        return mediaFile.getPath();
+    }
+
+
+    public static void broadcastVideo(Context context, String vid){
+        // Mediascanner need to scan for the image saved
+        Intent mediaScannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File file = new File(vid);
+        Uri fileContentUri = Uri.fromFile(file);
+        mediaScannerIntent.setData(fileContentUri);
+        context.sendBroadcast(mediaScannerIntent);
     }
 
 }

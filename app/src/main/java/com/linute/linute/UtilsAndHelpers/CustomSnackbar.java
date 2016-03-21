@@ -1,9 +1,5 @@
 package com.linute.linute.UtilsAndHelpers;
 
-/**
- * Created by QiFeng on 3/5/16.
- */
-
 
 /*
  * Copyright (C) 2015 The Android Open Source Project
@@ -33,7 +29,6 @@ package com.linute.linute.UtilsAndHelpers;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -41,7 +36,6 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
-import android.support.design.R;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.SwipeDismissBehavior;
 import android.support.v4.view.ViewCompat;
@@ -54,12 +48,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.linute.linute.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -215,7 +209,7 @@ public final class CustomSnackbar {
 
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mView = (SnackbarLayout) inflater.inflate(
-                com.linute.linute.R.layout.snackbar_layout, mTargetParent, false);
+                R.layout.snackbar_layout, mTargetParent, false);
     }
 
     /**
@@ -538,9 +532,8 @@ public final class CustomSnackbar {
     }
 
     private void animateViewIn() {
-        ViewCompat.setTranslationY(mView, mView.getHeight());
         ViewCompat.animate(mView)
-                .translationY(0f)
+                .alpha(1f)
                 .setInterpolator(FAST_OUT_SLOW_IN)
                 .setDuration(ANIMATION_DURATION)
                 .setListener(new ViewPropertyAnimatorListenerAdapter() {
@@ -563,7 +556,7 @@ public final class CustomSnackbar {
 
     private void animateViewOut(final int event) {
         ViewCompat.animate(mView)
-                .translationY(mView.getHeight())
+                .alpha(0f)
                 .setInterpolator(FAST_OUT_SLOW_IN)
                 .setDuration(ANIMATION_DURATION)
                 .setListener(new ViewPropertyAnimatorListenerAdapter() {
@@ -621,7 +614,7 @@ public final class CustomSnackbar {
     }
 
     /**
-     * @hide
+     *
      */
     public static class SnackbarLayout extends LinearLayout {
         private TextView mMessageView;
@@ -649,13 +642,13 @@ public final class CustomSnackbar {
 
         public SnackbarLayout(Context context, AttributeSet attrs) {
             super(context, attrs);
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SnackbarLayout);
-            mMaxWidth = a.getDimensionPixelSize(R.styleable.SnackbarLayout_android_maxWidth, -1);
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomSnackbarLayout);
+            mMaxWidth = a.getDimensionPixelSize(R.styleable.CustomSnackbarLayout_android_maxWidth, -1);
             mMaxInlineActionWidth = a.getDimensionPixelSize(
-                    R.styleable.SnackbarLayout_maxActionInlineWidth, -1);
-            if (a.hasValue(R.styleable.SnackbarLayout_elevation)) {
+                    R.styleable.CustomSnackbarLayout_cmaxActionInlineWidth, -1);
+            if (a.hasValue(R.styleable.CustomSnackbarLayout_elevation)) {
                 ViewCompat.setElevation(this, a.getDimensionPixelSize(
-                        R.styleable.SnackbarLayout_elevation, 0));
+                        R.styleable.CustomSnackbarLayout_elevation, 0));
             }
             a.recycle();
 
@@ -664,7 +657,7 @@ public final class CustomSnackbar {
             // Now inflate our content. We need to do this manually rather than using an <include>
             // in the layout since older versions of the Android do not inflate includes with
             // the correct Context.
-            LayoutInflater.from(context).inflate(com.linute.linute.R.layout.custom_snack_layout, this);
+            LayoutInflater.from(context).inflate(R.layout.custom_snack_layout, this);
 
             ViewCompat.setAccessibilityLiveRegion(this,
                     ViewCompat.ACCESSIBILITY_LIVE_REGION_POLITE);
@@ -695,9 +688,9 @@ public final class CustomSnackbar {
             }
 
             final int multiLineVPadding = getResources().getDimensionPixelSize(
-                    R.dimen.design_snackbar_padding_vertical_2lines);
+                    R.dimen.snackbar_padding_vertical_2lines);
             final int singleLineVPadding = getResources().getDimensionPixelSize(
-                    R.dimen.design_snackbar_padding_vertical);
+                    R.dimen.snackbar_padding_vertical);
             final boolean isMultiLine = mMessageView.getLayout().getLineCount() > 1;
 
             boolean remeasure = false;

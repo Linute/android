@@ -3,11 +3,6 @@
               android:layout_height="match_parent"
               android:background="@android:color/black"
               android:orientation="vertical">
-
-    <RelativeLayout android:layout_width="match_parent"
-                    android:layout_height="20dp">
-
-    </RelativeLayout>
     <FrameLayout
         android:id="@+id/fragment_container"
         xmlns:tools="http://schemas.android.com/tools"

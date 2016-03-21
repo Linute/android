@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,16 +25,12 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,6 +41,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 11/17/15.
  */
+
 public class DiscoverFragment extends UpdatableFragment {
     private static final String TAG = DiscoverFragment.class.getSimpleName();
     private RecyclerView recList;
@@ -90,11 +88,9 @@ public class DiscoverFragment extends UpdatableFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
-        recList.setHasFixedSize(true);
 
         LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
 
@@ -104,9 +100,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
-        //recList.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.feed_divider));
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment)getParentFragment()).getSinglePlaybackManager());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
@@ -125,13 +120,7 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        /*mRecyclerViewDisabler = new RecyclerViewDisabler();
-        mRecyclerViewDisabler.setScrolledUpRunnable(new RecyclerViewDisabler.ScrolledUpRunnable() {
-            @Override
-            public void onScrolledUp() {
-                refreshingAndScrolledUp();
-            }
-        });*/
+
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
@@ -143,15 +132,31 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-        //NOTE: don't remember what it does. uncomment if somethings happens
-//        recList.setOnScrollListener(new RecyclerView.OnScrollListener() {
+//        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            private boolean stoppedVideos = false;
+//            private int deltaY = 0;
+//
 //            @Override
 //            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
 //                super.onScrolled(recyclerView, dx, dy);
-//                int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-//                refreshLayout.setEnabled(firstVisibleItem == 0);
+//                if (!stoppedVideos && (deltaY > 100 || deltaY < -100)) {
+//                    mVideoPlayerManager.stopAnyPlayback();
+//                    stoppedVideos = true;
+//                }else {
+//                    deltaY += dy;
+//                }
+//            }
+//
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    stoppedVideos = false;
+//                    deltaY = 0;
+//                }
 //            }
 //        });
+
 
         return rootView;
     }
@@ -175,7 +180,10 @@ public class DiscoverFragment extends UpdatableFragment {
             feedDone = savedInstanceState.getBoolean("feedDone");
             mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
 
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext());
+            DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
+            if (fragment == null) return;
+
+            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), fragment.getSinglePlaybackManager());
             mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
                 @Override
                 public void getMoreFeed() {
@@ -254,7 +262,9 @@ public class DiscoverFragment extends UpdatableFragment {
 
 
         Map<String, String> events = new HashMap<>();
-        events.put("college", mCollegeId);
+        if (!mFriendsOnly) {
+            events.put("college", mCollegeId);
+        }
         events.put("skip", skip + "");
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
@@ -267,7 +277,7 @@ public class DiscoverFragment extends UpdatableFragment {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
-                            Log.d("HEY", response.body().string());
+                            //Log.d("HEY", response.body().string());
                             if (getActivity() != null) { //shows server error toast
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -288,45 +298,11 @@ public class DiscoverFragment extends UpdatableFragment {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-
                             if (jsonArray.length() != 25) feedDone = true; //no more feed to load
-
-
-                            Post post;
-                            String postImage = "";
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            Date myDate;
 
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
-                                    jsonObject = (JSONObject) jsonArray.get(i);
-                                    if (jsonObject.getJSONArray("images").length() > 0)
-                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
-
-                                    try {
-                                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                                    }catch (ParseException w){
-                                        w.printStackTrace();
-                                        myDate = null;
-                                    }
-
-                                    post = new Post(
-                                            jsonObject.getJSONObject("owner").getString("id"),
-                                            jsonObject.getJSONObject("owner").getString("fullName"),
-                                            jsonObject.getJSONObject("owner").getString("profileImage"),
-                                            jsonObject.getString("title"),
-                                            postImage,
-                                            jsonObject.getInt("privacy"),
-                                            jsonObject.getInt("numberOfLikes"),
-                                            jsonObject.getBoolean("isLiked"),
-                                            myDate == null ? 0 : myDate.getTime(),
-                                            jsonObject.getString("id"),
-                                            jsonObject.getInt("numberOfComments"),
-                                            jsonObject.getString("anonymousImage")
-                                    );
-                                    mPosts.add(post);
-
-                                    postImage = "";
+                                    mPosts.add(new Post(jsonArray.getJSONObject(i)));
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                 }
@@ -373,7 +349,7 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
 
-    private boolean mRefreshing = false;
+    private boolean mRefreshing = true;
 
     public void refreshFeed() {
 
@@ -425,7 +401,7 @@ public class DiscoverFragment extends UpdatableFragment {
                         }
 
                         String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
+                        //Log.i(TAG, "onResponse: "+json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
@@ -437,37 +413,9 @@ public class DiscoverFragment extends UpdatableFragment {
 
                             ArrayList<Post> refreshedPosts = new ArrayList<>();
 
-                            Post post;
-                            String postImage = "";
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            Date myDate;
-
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 try {
-                                    jsonObject = (JSONObject) jsonArray.get(i);
-                                    if (jsonObject.getJSONArray("images").length() > 0)
-                                        postImage = (String) jsonObject.getJSONArray("images").get(0);
-
-                                    myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-
-                                    post = new Post(
-                                            jsonObject.getJSONObject("owner").getString("id"),
-                                            jsonObject.getJSONObject("owner").getString("fullName"),
-                                            jsonObject.getJSONObject("owner").getString("profileImage"),
-                                            jsonObject.getString("title"),
-                                            postImage,
-                                            jsonObject.getInt("privacy"),
-                                            jsonObject.getInt("numberOfLikes"),
-                                            jsonObject.getBoolean("isLiked"),
-                                            myDate.getTime(),
-                                            jsonObject.getString("id"),
-                                            jsonObject.getInt("numberOfComments"),
-                                            jsonObject.getString("anonymousImage")
-                                    );
-
-                                    refreshedPosts.add(post);
-
-                                    postImage = "";
+                                    refreshedPosts.add(new Post(jsonArray.getJSONObject(i)));
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                 }
@@ -505,7 +453,7 @@ public class DiscoverFragment extends UpdatableFragment {
                             );
 
 
-                        } catch (JSONException | ParseException e) {
+                        } catch (JSONException e) {
                             e.printStackTrace();
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -521,8 +469,6 @@ public class DiscoverFragment extends UpdatableFragment {
                     }
                 }
         );
-
-
     }
 
     private void noInternet() {
@@ -552,16 +498,23 @@ public class DiscoverFragment extends UpdatableFragment {
     public void scrollUp() {
         if (recList != null) {
             mCheckBoxChoiceCapableAdapters.setSendImpressions(false);
-            recList.smoothScrollToPosition(0);
+            recList.scrollToPosition(0);
         }
     }
 
-    public boolean addPostToTop(Post post){
+    public boolean addPostToTop(final Post post){
         if (mRefreshing) return false;
 
-        mPosts.add(0, post);
-        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
-        mSkip++;
+         new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                mPosts.add(0, post);
+                mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                mSkip++;
+                if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+            }
+        });
+
         return true;
     }
 }

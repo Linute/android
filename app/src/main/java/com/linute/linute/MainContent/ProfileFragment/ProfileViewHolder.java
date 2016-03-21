@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetail;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
@@ -27,10 +28,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private Context mContext;
     private SharedPreferences mSharedPreferences;
 
-    private String mPostId;
-    private String mUserId;
-
-    //private View vAnonIcon;
+    private UserActivityItem mUserActivityItem;
 
 
     public ProfileViewHolder(View itemView, Context context) {
@@ -54,17 +52,16 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
 
-        mPostId = userActivityItem.getEventID();
-        mUserId = userActivityItem.getOwnerID();
 
+        mUserActivityItem = userActivityItem;
 
     }
 
     @Override
     public void onClick(View v) {
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
-        if (activity != null) {
-            activity.addFragmentToContainer(FeedDetailPage.newInstance(false, true, mPostId, mUserId));
+        if (activity != null && mUserActivityItem != null) {
+            activity.addFragmentToContainer(FeedDetailPage.newInstance(mUserActivityItem.getPost()));
         }
     }
 }

@@ -16,6 +16,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <!-- <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/> -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
@@ -74,7 +75,7 @@
             android:name=".LaunchActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -108,7 +109,7 @@
         <activity
             android:name=".SquareCamera.CameraActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/squarecamera__CameraFullScreenTheme"/>
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".LoginAndSignup.CollegePickerActivity"
             android:label="@string/title_activity_college_picker"
@@ -123,9 +124,11 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
+
         <activity
             android:name=".MainContent.Chat.RoomsActivity"
             android:label="@string/title_activity_rooms"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainContent.MainActivity"
             android:theme="@style/AppTheme"/>
 
@@ -140,12 +143,6 @@
         <!-- </intent-filter> -->
         <!-- </receiver> -->
 
-        <activity
-            android:name=".MainContent.FindFriends.FindFriendsActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".MainContent.Settings.SettingActivity"
             android:configChanges="orientation"

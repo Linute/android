@@ -1,11 +1,8 @@
 package com.linute.linute.SquareCamera;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,7 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.AttributeSet;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,19 +21,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
-import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -45,18 +39,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 
 /**
@@ -68,6 +56,7 @@ public class EditSavePhotoFragment extends Fragment {
     public static final String BITMAP_URI = "bitmap_Uri";
     //public static final String ROTATION_KEY = "rotation";
     public static final String IMAGE_INFO = "image_info";
+    public static final String MAKE_ANON = "make_anon";
 
 
     private View mFrame; //frame where we put edittext and picture
@@ -75,11 +64,15 @@ public class EditSavePhotoFragment extends Fragment {
     private CustomBackPressedEditText mText; //text
     private ProgressBar mProgressBar;
     private View mButtonLayer;
-    private Switch mAnonSwitch;
+    private CheckBox mAnonSwitch;
+
+    private String mCollegeId;
+    private String mUserId;
+
+    private View mUploadButton;
 
 
-    public static Fragment newInstance(Uri imageUri,
-                                       @NonNull ImageParameters parameters) {
+    public static Fragment newInstance(Uri imageUri, boolean makeAnon) {
         Fragment fragment = new EditSavePhotoFragment();
 
         Bundle args = new Bundle();
@@ -87,7 +80,7 @@ public class EditSavePhotoFragment extends Fragment {
         if (imageUri != null)
             args.putParcelable(BITMAP_URI, imageUri);
 
-        args.putParcelable(IMAGE_INFO, parameters);
+        args.putBoolean(MAKE_ANON, makeAnon);
 
         fragment.setArguments(args);
         return fragment;
@@ -106,19 +99,17 @@ public class EditSavePhotoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ImageParameters imageParameters = getArguments().getParcelable(IMAGE_INFO);
-        if (imageParameters == null) {
-            return;
-        }
+        Log.i(TAG, "onViewCreated: photo");
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mCollegeId = sharedPreferences.getString("collegeId", "");
+        mUserId = sharedPreferences.getString("userID","");
 
         //setup ImageView
         Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
         photoImageView.setImageURI(imageUri);
-
-        imageParameters.mIsPortrait =
-                getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
 
         //shows the text strip when image touched
         photoImageView.setOnClickListener(new View.OnClickListener() {
@@ -133,32 +124,31 @@ public class EditSavePhotoFragment extends Fragment {
             }
         });
 
-        //so image is consistent with camera view
-        final View topView = view.findViewById(R.id.topView);
-        if (imageParameters.mIsPortrait) {
-            topView.getLayoutParams().height = imageParameters.mCoverHeight;
-        } else {
-            topView.getLayoutParams().width = imageParameters.mCoverWidth;
-        }
-
         mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
         mText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mButtonLayer = view.findViewById(R.id.editFragment_button_layer);
         mProgressBar = (ProgressBar) view.findViewById(R.id.editFragment_progress_bar);
-        mAnonSwitch = (Switch) view.findViewById(R.id.editFragment_switch);
 
-        //save button
-        view.findViewById(R.id.save_photo).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                savePicture();
-            }
-        });
+        mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
+        mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
 
-        view.findViewById((R.id.cancel)).setOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setTitle("Tap the photo to add text");
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((CameraActivity) getActivity()).clearBackStack();
+            }
+        });
+
+        mUploadButton = view.findViewById(R.id.save_photo);
+
+        //save button
+        mUploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendPicture();
             }
         });
 
@@ -262,9 +252,11 @@ public class EditSavePhotoFragment extends Fragment {
         });
     }
 
-    private void savePicture() {
+    private void sendPicture() {
 
         if (getActivity() == null) return;
+
+        mFrame.requestFocus();
 
         if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
             Utils.showBadConnectionToast(getActivity());
@@ -278,15 +270,15 @@ public class EditSavePhotoFragment extends Fragment {
         if (getActivity() == null) return;
         try {
             JSONObject postData = new JSONObject();
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            postData.put("college", sharedPreferences.getString("collegeId", ""));
+
+            postData.put("college", mCollegeId);
             postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
             postData.put("title", mText.getText().toString());
             JSONArray imageArray = new JSONArray();
             imageArray.put(Utils.encodeImageBase64(bitmap));
             postData.put("images", imageArray);
             postData.put("type", "1");
-            postData.put("owner", sharedPreferences.getString("userID", ""));
+            postData.put("owner", mUserId);
 
 
             JSONArray coord = new JSONArray();
@@ -304,45 +296,6 @@ public class EditSavePhotoFragment extends Fragment {
             Utils.showServerErrorToast(getActivity());
             showProgress(false);
         }
-
-//        new LSDKEvents(getActivity()).postEvent(postData, new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                if (getActivity() == null) return;
-//                getActivity().runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Utils.showBadConnectionToast(getActivity());
-//                        showProgress(false);
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onResponse(Call call ,final Response response) throws IOException {
-//                if (response.isSuccessful()) {
-//                    if (getActivity() == null) return;
-//
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(getActivity(), "Picture Posted", Toast.LENGTH_SHORT).show();
-//                            try {
-//                                Log.i(TAG, "run: " + response.body().string());
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                            getActivity().setResult(Activity.RESULT_OK);
-//                            getActivity().finish();
-//                        }
-//                    });
-//
-//                } else {
-//                    showServerError();
-//                    Log.e(TAG, "onResponse: " + response.code() + " : " + response.body().string());
-//                }
-//            }
-//        });
     }
 
     private void showServerError() {
@@ -382,25 +335,9 @@ public class EditSavePhotoFragment extends Fragment {
 
 
     private void showProgress(final boolean show) {
-        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
         mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-        mButtonLayer.animate().setDuration(shortAnimTime).alpha(
-                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
-            }
-        });
-
+        mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-        });
     }
 
 
@@ -427,11 +364,12 @@ public class EditSavePhotoFragment extends Fragment {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType()
-                    ;
+                                    "&type=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
+
                     op.reconnectionDelay = 5;
                     op.secure = true;
-
 
                     op.transports = new String[]{WebSocket.NAME};
 
@@ -451,7 +389,7 @@ public class EditSavePhotoFragment extends Fragment {
             if (getActivity() != null) {
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("owner", mUserId);
                     obj.put("action", "active");
                     obj.put("screen", "Create");
                     mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
@@ -473,7 +411,7 @@ public class EditSavePhotoFragment extends Fragment {
             if (getActivity() != null) {
                 JSONObject obj = new JSONObject();
                 try {
-                    obj.put("owner", getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
+                    obj.put("owner", mUserId);
                     obj.put("action", "inactive");
                     obj.put("screen", "Create");
                     mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
@@ -495,7 +433,6 @@ public class EditSavePhotoFragment extends Fragment {
         @Override
         public void call(Object... args) {
             Log.i(TAG, "call: failed socket connection");
-
         }
     };
 
@@ -516,19 +453,28 @@ public class EditSavePhotoFragment extends Fragment {
         }
     };
 
+    //new post was posted; we aren't sure if we're the one that posted it. must check
     private Emitter.Listener newPost = new Emitter.Listener() {
+
         @Override
         public void call(Object... args) {
-            Log.i(TAG, "response: " + args[0].toString());
             if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    getActivity().setResult(Activity.RESULT_OK);
-                    Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
+
+            try {
+                String owner = new JSONObject(args[0].toString()).getJSONObject("owner").getString("id");
+                if (owner.equals(mUserId)) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getActivity().setResult(Activity.RESULT_OK);
+                            Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
+                        }
+                    });
                 }
-            });
+            }catch (JSONException e){
+                Log.i(TAG, "call: error in newPost Listener");
+            }
         }
     };
 

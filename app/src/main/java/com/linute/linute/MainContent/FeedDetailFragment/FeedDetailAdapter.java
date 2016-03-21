@@ -30,6 +30,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import java.io.IOException;
 
@@ -44,6 +45,7 @@ import okhttp3.Response;
 public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder> {
     private static final int TYPE_IMAGE_HEADER = 0;
     private static final int TYPE_STATUS_HEADER = 1;
+    private static final int TYPE_VIDEO_HEADER = 4;
     private static final int TYPE_ITEM = 2;
     private static final int TYPE_NO_COMMENTS = 3;
 
@@ -52,14 +54,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     //    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private FeedDetail mFeedDetail;
 
-    private boolean mIsImage;
+    private SingleVideoPlaybackManager mSingleVideoPlaybackManager;
 
     private MentionedTextAdder mMentionedTextAdder;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context, boolean isImage) {
+    public FeedDetailAdapter(FeedDetail feedDetail, Context context, SingleVideoPlaybackManager manager) {
         this.context = context;
         mFeedDetail = feedDetail;
-        mIsImage = isImage;
+        mSingleVideoPlaybackManager = manager;
     }
 
     @Override
@@ -73,14 +75,19 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         //image post
         else if (viewType == TYPE_IMAGE_HEADER) { //TODO: FIX ME
             //inflate your layout and pass it to view holder
-            return new FeedDetailHeaderImageViewHolder(this, LayoutInflater
+            return new FeedDetailHeaderImageViewHolder(LayoutInflater
                     .from(parent.getContext())
                     .inflate(R.layout.feed_detail_header_image, parent, false), context);
         } else if (viewType == TYPE_STATUS_HEADER) { //was a status post
-            return new FeedDetailHeaderStatusViewHolder(this,
+            return new FeedDetailHeaderStatusViewHolder(
                     LayoutInflater.from(parent.getContext())
                             .inflate(R.layout.feed_detail_header_status, parent, false), context);
-        } else {
+        } else if (viewType == TYPE_VIDEO_HEADER){
+            return new FeedDetailHeaderVideoViewHolder(LayoutInflater
+                    .from(parent.getContext())
+                    .inflate(R.layout.feed_detail_header_video, parent, false), context, mSingleVideoPlaybackManager);
+        }
+        else {
             return new NoCommentsHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.no_comments_item, parent, false));
         }
     }
@@ -91,9 +98,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             ((FeedDetailViewHolder) holder).bindModel(mFeedDetail.getComments().get(position - 1));
             mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
-            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail);
+            ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail.getPost());
         } else if (holder instanceof FeedDetailHeaderStatusViewHolder) {
-            ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail);
+            ((FeedDetailHeaderStatusViewHolder) holder).bindModel(mFeedDetail.getPost());
+        } else if (holder instanceof  FeedDetailHeaderVideoViewHolder){
+            ((FeedDetailHeaderVideoViewHolder) holder).bindModel(mFeedDetail.getPost());
         }
     }
 
@@ -104,8 +113,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     @Override
     public int getItemViewType(int position) {
-        if (isPositionHeader(position))
-            return mIsImage ? TYPE_IMAGE_HEADER : TYPE_STATUS_HEADER;
+        if (isPositionHeader(position)) {
+            if (mFeedDetail.getPost().isImagePost()) {
+                if (mFeedDetail.getPost().isVideoPost()) return TYPE_VIDEO_HEADER;
+                return TYPE_IMAGE_HEADER;
+            }
+            return TYPE_STATUS_HEADER;
+        }
 
         if (mFeedDetail.getComments().get(0) == null)  //first item is no, means no comments
             return TYPE_NO_COMMENTS;
@@ -360,6 +374,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mItemManger.removeShownLayouts(mSwipeLayout);
             mFeedDetail.getComments().remove(pos);
             notifyItemRemoved(pos + 1);
+            notifyItemRangeChanged(pos+1, mFeedDetail.getComments().size()+1);
             mFeedDetail.refreshCommentCount();
 
 

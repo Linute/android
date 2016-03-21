@@ -11,7 +11,6 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
@@ -30,6 +29,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
@@ -40,9 +40,11 @@ import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,7 +52,6 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -110,7 +111,7 @@ public class MainActivity extends BaseTaptActivity {
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
-        mDrawerLayout.setDrawerListener(mMainDrawerListener);
+        mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
@@ -414,8 +415,10 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void noInternet() {
-        Snackbar sn = Snackbar.make(parentView, "Could not find internet connection", Snackbar.LENGTH_LONG);
+        CustomSnackbar sn = CustomSnackbar.make(parentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
+        sn.getView().setAlpha(0.8f);
+
         sn.show();
     }
 
@@ -556,8 +559,9 @@ public class MainActivity extends BaseTaptActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType()
-                    ;
+                                    "&type=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
 
                     op.reconnectionDelay = 5;
                     op.secure = true;
@@ -682,17 +686,17 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-
-                if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                        .addPostToFeed(args[0])) {
-
+                    final Object post = args[0];
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            setFeedNotification(++mNumNewPostsInDiscover);
+                            if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                    .addPostToFeed(post)) {
+                                setFeedNotification(++mNumNewPostsInDiscover);
+                            }
                         }
                     });
-                }
+
             }
         }
     };
@@ -703,19 +707,18 @@ public class MainActivity extends BaseTaptActivity {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
 
-                Log.i(TAG, "call: "+activity);
+                //Log.i(TAG, "call: "+activity.toString());
 
-                Update update = new Update(activity);
-
-                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
-                }
-
-                newActivitySnackbar(update.getDescription());
+                final Update update = new Update(activity);
 
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                            ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+                        }
+
+                        newActivitySnackbar(update.getDescription());
                         setUpdateNotification(++mNumNewActivities);
                     }
                 });
@@ -726,9 +729,10 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
+
     private void newActivitySnackbar(String text){
-        final Snackbar sn = Snackbar.make(fam, text, Snackbar.LENGTH_SHORT);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_blue_dark));
+        final CustomSnackbar sn = CustomSnackbar.make(parentView, text, CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -737,8 +741,6 @@ public class MainActivity extends BaseTaptActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
                         .commit();
-
-                mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
 
                 mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
                 mPreviousItem.setChecked(true);
@@ -752,7 +754,6 @@ public class MainActivity extends BaseTaptActivity {
     //hiding toolbar / showing toolbar
     @Override
     public void enableBarScrolling(boolean enabled) {
-
         if (enabled) {
             ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
                     .getLayoutParams())

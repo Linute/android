@@ -4,29 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.BlurBuilder;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -49,8 +41,6 @@ import okhttp3.Response;
  */
 public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ProfileHeaderViewHolder.class.getSimpleName();
-    private final Profile mProfile;
-    private final RecyclerView.Adapter mAdapter;
     protected CircleImageView vProfilePicture;
     protected TextView vStatusText;
     protected TextView vPosts;
@@ -69,14 +59,14 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private LinuteUser mUser;
     private JSONObject jsonObject;
 
+    private String mProfileImageUrl;
 
-    public ProfileHeaderViewHolder(RecyclerView.Adapter adapter, View itemView, Context context, final Profile profile) {
+
+    public ProfileHeaderViewHolder(View itemView, Context context) {
         super(itemView);
 
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mProfile = profile;
-        mAdapter = adapter;
 
         vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
@@ -91,13 +81,22 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
         vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
 
+
+        //when tapped, enlarges image
         vProfilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: VIEW IMAGE
+                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+                if (mProfileImageUrl != null && activity != null) {
+                    EnlargePhotoViewer
+                            .newInstance(mProfileImageUrl)
+                            .show(activity.getSupportFragmentManager(), "enlarged_image");
+                }
             }
         });
 
+        //goes to roomfragment
         mChatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -110,6 +109,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
+        //follow someone
         mFollowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -229,7 +229,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         if (mUser == null)
             mUser = user;
 
-        if (user.getStatus() != null ) {
+        if (user.getStatus() != null) {
             vStatusText.setText(user.getStatus().equals("") ? "No bio... :|" : user.getStatus());
         }
         vPosts.setText(String.valueOf(user.getPosts()));
@@ -247,6 +247,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             mActionBarContainer.setVisibility(View.VISIBLE);
         }
 
+        mProfileImageUrl = user.getProfileImage();
 
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(user.getProfileImage()))
@@ -255,7 +256,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);
-
     }
 
 }

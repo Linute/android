@@ -350,7 +350,6 @@ public class ChangeProfileImageFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.i(TAG, "onRequestPermissionsResult: ");
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
