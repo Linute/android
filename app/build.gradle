@@ -24,8 +24,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 23
-        versionName "1.7.4.3"
+        versionCode 24
+        versionName "1.7.4.4"
     }
     buildTypes {
         release {

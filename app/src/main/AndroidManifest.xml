@@ -132,10 +132,10 @@
             android:parentActivityName=".MainContent.MainActivity"
             android:theme="@style/AppTheme"/>
 
-        <service
-            android:name=".MainContent.Chat.ChatService"
-            android:label="Chat Service">
-        </service>
+        <!--<service-->
+            <!--android:name=".MainContent.Chat.ChatService"-->
+            <!--android:label="Chat Service">-->
+        <!--</service>-->
 
         <!-- <receiver android:name=".UtilsAndHelpers.BootReceiver"> -->
         <!-- <intent-filter> -->

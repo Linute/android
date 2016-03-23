@@ -55,18 +55,18 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
+        //String message = data.getString("message");
         String action = data.getString("action");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
-        for (String key : data.keySet()) {
-            Log.d(TAG, key + " is a key in the bundle");
-        }
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
-        }
+//        Log.d(TAG, "From: " + from);
+//        Log.d(TAG, "Message: " + message);
+//        for (String key : data.keySet()) {
+//            Log.d(TAG, key + " is a key in the bundle");
+//        }
+//        if (from.startsWith("/topics/")) {
+//            // message received from some topic.
+//        } else {
+//            // normal downstream message.
+//        }
 
         // [START_EXCLUDE]
         /**
@@ -96,39 +96,25 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent = null;
         String message = data.getString("message");
 
+        //Log.i(TAG, "action : "  + action);
+        Log.i(TAG, "sendNotification: " + data.toString());
 
-        if (action != null && action.equals("messages")) { //<---
+
+        //// TODO: 3/21/16  fix
+        if (action != null && action.equals("messager")) { //<---
+
+            Intent parent = new Intent(this, MainActivity.class);
+            parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
+
             intent = new Intent(this, RoomsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("ROOMS", "SOMEMESSAGE");
-            intent.putExtra("roomId", data.getString("room"));
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject(data.getString("user"));
-                intent.putExtra("ownerName", jsonObject.getString("fullName"));
-                intent.putExtra("ownerId", jsonObject.getString("id"));
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-                JSONArray jsonArray = null;
-                jsonArray = new JSONArray(data.getString("users"));
-                intent.putExtra("roomCnt", jsonArray.length() + "");
+            pendingIntent = PendingIntent.getActivities(this, 0, new Intent[] {parent, intent}, PendingIntent.FLAG_ONE_SHOT);
 
-                ArrayList<ChatHead> chatHeadList = new ArrayList<>();
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    chatHeadList.add(new ChatHead(
-                            ((JSONObject) jsonArray.get(i)).getString("fullName"),
-                            ((JSONObject) jsonArray.get(i)).getString("profileImage"),
-                            ((JSONObject) jsonArray.get(i)).getString("id")));
-                }
-                intent.putParcelableArrayListExtra("chatHeads", chatHeadList);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
-        }else{
+        } else {
             boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
-            intent = new Intent(this,isLoggedIn ? MainActivity.class : PreLoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             intent.putExtra("NOTIFICATION", true);
 
@@ -136,7 +122,7 @@ public class MyGcmListenerService extends GcmListenerService {
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
-        Log.d(TAG, message);
+        //Log.d(TAG, message);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)

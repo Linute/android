@@ -956,7 +956,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         try {
 
                             String res = response.body().string();
-                            //Log.i(TAG, "onResponse: " + res);
+                            Log.i(TAG, "onResponse: " + res);
 
                             JSONArray friends = new JSONObject(res).getJSONArray("friends");
 

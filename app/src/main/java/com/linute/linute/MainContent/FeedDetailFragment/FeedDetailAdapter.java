@@ -311,13 +311,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mUserName, mCommenterUserId, ""));
                         break;
                     case R.id.comment_delete:
-                        showConfirmDelete();
+                        showConfirmDelete(getAdapterPosition());
                         break;
                     case R.id.comment_report:
                         showConfirmReportDialog();
                         break;
                     case R.id.comment_reveal:
-                        showConfirmRevealDialog();
+                        showConfirmRevealDialog(getAdapterPosition());
                         break;
                 }
                 mSwipeLayout.close();
@@ -347,14 +347,16 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
 
-        private void showConfirmDelete() {
+        private void showConfirmDelete(final int pos) {
             if (context != null) {
                 new AlertDialog.Builder(context).setTitle("Delete")
                         .setMessage("Are you sure you want to delete this comment?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            final int mPos = pos;
+
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                deleteComment();
+                                deleteComment(mPos);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -367,16 +369,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             }
         }
 
-        private void deleteComment() {
-
-            final int pos = getAdapterPosition() - 1;
+        private void deleteComment(int in) {
+            final int pos = in - 1;
             final Comment com = mFeedDetail.getComments().get(pos);
             mItemManger.removeShownLayouts(mSwipeLayout);
             mFeedDetail.getComments().remove(pos);
             notifyItemRemoved(pos + 1);
             notifyItemRangeChanged(pos+1, mFeedDetail.getComments().size()+1);
             mFeedDetail.refreshCommentCount();
-
 
             new LSDKEvents(context).deleteComment(mCommentId, new Callback() {
 
@@ -421,14 +421,16 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             });
         }
 
-        private void showConfirmRevealDialog() {
+        private void showConfirmRevealDialog(final int pos) {
+
             if (context != null)
                 new AlertDialog.Builder(context).setTitle(mIsAnon ? "Reveal" : "Hide")
                         .setMessage(mIsAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to make this comment anonymous?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            final int mPos = pos;
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                revealComment();
+                                revealComment(mPos);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -440,9 +442,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         .show();
         }
 
-        private void revealComment() {
+        private void revealComment(final int in) {
 
-            final int pos = getAdapterPosition() - 1;
+            final int pos = in - 1;
             mFeedDetail.getComments().get(pos).setIsAnon(!mIsAnon);
             notifyItemChanged(pos + 1);
 
@@ -494,6 +496,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 new AlertDialog.Builder(context).setTitle("Report")
                         .setMessage("Are you sure you want to report this comment?")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 reportComment();
@@ -509,7 +512,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
         private void reportComment() {
+
             new LSDKEvents(context).reportComment(mCommentId, mViewerUserId, new Callback() {
+
                 @Override
                 public void onFailure(Call call, IOException e) {
                     final BaseTaptActivity act = (BaseTaptActivity) context;

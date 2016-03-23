@@ -7,65 +7,97 @@ import java.util.List;
  * Created by Arman on 1/16/16.
  */
 public class Rooms {
-    private String mOwnerId;
+
     private String mRoomId;
-    private String mLastMessageOwnerId;
-    private String mLastMessageUserName;
-    private String mLastMessage;
-    private String mLastMessageUserImage;
-    private int mUsersCount;
-    private ArrayList<ChatHead> mChatHeadList;
+
+    private String mUserId; //id of person youre talking to
+    private String mUserName; //person youre talking to
+    private String mUserImage; //image of user youre talking to
+
+    private String mLastMessage; //last message
+
+    private boolean mHasUnread;
+    //private int mUsersCount;
+    //private ArrayList<ChatHead> mChatHeadList;
+
+    private long mTime;
 
     public Rooms() {
-        mOwnerId = "";
         mRoomId = "";
-        mLastMessageOwnerId = "";
-        mLastMessageUserName = "";
+        mUserId = "";
+        mUserName = "";
         mLastMessage = "";
-        mLastMessageUserImage = "";
-        mChatHeadList = new ArrayList<>();
+        mUserImage = "";
+        mHasUnread = false;
+        mTime = 0;
+        //mChatHeadList = new ArrayList<>();
     }
 
-    public Rooms(String ownerId, String roomId, String lastMessageOwnerId, String lastMessageUserName, String lastMessage, String lastMessageUserImage, int usersCount, ArrayList<ChatHead> chatHeadList) {
-        mOwnerId = ownerId;
+
+    //, int usersCount, ArrayList<ChatHead> chatHeadList
+
+    public Rooms(String roomId,
+                 String userId,
+                 String userName,
+                 String lastMessage,
+                 String userImage,
+                 boolean hasUnread,
+                 long time
+    ) {
+
         mRoomId = roomId;
-        mLastMessageOwnerId = lastMessageOwnerId;
-        mLastMessageUserName = lastMessageUserName;
+        mUserId = userId;
+        mUserName = userName;
         mLastMessage = lastMessage;
-        mLastMessageUserImage = lastMessageUserImage;
-        mUsersCount = usersCount;
-        mChatHeadList = chatHeadList;
-    }
+        mUserImage = userImage;
+        mHasUnread = hasUnread;
+        mTime = time;
 
-    public String getOwner() {
-        return mOwnerId;
+        //mUsersCount = usersCount;
+        //mChatHeadList = chatHeadList;
     }
 
     public String getRoomId() {
         return mRoomId;
     }
 
-    public String getLastMessageOwnerId() {
-        return mLastMessageOwnerId;
+    public String getUserId() {
+        return mUserId;
     }
 
-    public String getLastMessageUserName() {
-        return mLastMessageUserName;
+    public String getUserName() {
+        return mUserName;
     }
 
     public String getLastMessage() {
         return mLastMessage;
     }
 
-    public String getLastMessageUserImage() {
-        return mLastMessageUserImage;
+    public String getUserImage() {
+        return mUserImage;
     }
 
-    public int getUsersCount() {
-        return mUsersCount;
+    public boolean hasUnread() {
+        return mHasUnread;
     }
 
-    public ArrayList<ChatHead> getChatHeadList() {
-        return mChatHeadList;
+    public void setHasUnread(boolean hasUnread) {
+        mHasUnread = hasUnread;
     }
+
+    public long getTime() {
+        return mTime;
+    }
+
+    public void setTime(long time) {
+        mTime = time;
+    }
+
+    //    public int getUsersCount() {
+//        return mUsersCount;
+//    }
+//
+//    public ArrayList<ChatHead> getChatHeadList() {
+//        return mChatHeadList;
+//    }
 }

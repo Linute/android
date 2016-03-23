@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -18,7 +17,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -58,18 +56,22 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     class RoomsViewHolder extends RecyclerView.ViewHolder {
-        protected LinearLayout vRoomsListLinear;
+        protected View vRoomsListLinear;
         protected CircleImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
+        protected View vHasUnreadIcon;
+        protected TextView vTimeStamp;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
 
-            vRoomsListLinear = (LinearLayout) itemView.findViewById(R.id.rooms_list_linear);
+            vRoomsListLinear = itemView.findViewById(R.id.rooms_list_linear);
             vUserImage = (CircleImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
+            vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
+            vTimeStamp = (TextView) itemView.findViewById(R.id.room_time_stamp);
 
             vRoomsListLinear.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -78,9 +80,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     ChatFragment newFragment = ChatFragment.newInstance(
                             mRoomsList.get(getAdapterPosition()).getRoomId(),
                             mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
-                            mSharedPreferences.getString("userID", ""),
-                            mRoomsList.get(getAdapterPosition()).getUsersCount(),
-                            mRoomsList.get(getAdapterPosition()).getChatHeadList());
+                            mSharedPreferences.getString("userID", "")
+                            //,
+                            //mRoomsList.get(getAdapterPosition()).getUsersCount(),
+                            //mRoomsList.get(getAdapterPosition()).getChatHeadList()
+                    );
                     Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
                     FragmentTransaction transaction = ((RoomsActivity) aContext).getSupportFragmentManager().beginTransaction();
                     // Replace whatever is in the fragment_container view with this fragment,
@@ -89,23 +93,26 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     transaction.addToBackStack(null);
                     // Commit the transaction
                     transaction.commit();
-                    ((RoomsActivity) aContext).toggleFab(false);
                 }
             });
         }
 
         void bindModel(Rooms room) {
-//            Log.d(TAG, "bindModel: " + room.getLastMessageUserImage());
+
             Glide.with(aContext)
-                    .load(Utils.getImageUrlOfUser(room.getLastMessageUserImage()))
+                    .load(Utils.getImageUrlOfUser(room.getUserImage()))
                     .asBitmap()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setText(room.getLastMessageUserName());
+            vUserName.setText(room.getUserName());
             vLastMessage.setText(room.getLastMessage());
+            vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
+
+            if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE) vHasUnreadIcon.setVisibility(View.VISIBLE);
+            else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE) vHasUnreadIcon.setVisibility(View.INVISIBLE);
         }
     }
 }

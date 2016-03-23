@@ -136,9 +136,11 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                             .replace(R.id.chat_container,
                                                     ChatFragment.newInstance(roomId,
                                                             mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
-                                                            mSharedPreferences.getString("userID", ""),
-                                                            users.length(),
-                                                            new ArrayList<ChatHead>()))
+                                                            mSharedPreferences.getString("userID", "")
+                                                            //,
+//                                                            users.length(),
+//                                                            new ArrayList<ChatHead>())
+                                            ))
                                             .addToBackStack(null)
                                             .commit();
                                 }

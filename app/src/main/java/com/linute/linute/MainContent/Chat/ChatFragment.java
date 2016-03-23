@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -39,16 +38,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -72,7 +68,7 @@ public class ChatFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mRoomId;
     private String mUserId;
-    private int mRoomUsersCnt;
+    //private int mRoomUsersCnt;
     private JSONObject newMessage;
     private JSONObject typingJson;
     private JSONObject joinLeft;
@@ -90,11 +86,11 @@ public class ChatFragment extends Fragment {
 
     private List<Chat> mChatList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
-    private int mLastRead;
-    private String mLastReadId;
-    private List<ChatHead> mChatHeadList;
-    private List<ChatHead> mChatHeadAddedList;
-    private Map<String, Integer> mChatHeadPos = new HashMap<String, Integer>();
+    //private int mLastRead;
+    //private String mLastReadId;
+    //private List<ChatHead> mChatHeadList;
+    //private List<ChatHead> mChatHeadAddedList;
+    //private Map<String, Integer> mChatHeadPos = new HashMap<String, Integer>();
 
 
     public ChatFragment() {
@@ -106,8 +102,8 @@ public class ChatFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         mChatAdapter = new ChatAdapter(getActivity(), mChatList);
-        mChatHeadList = new ArrayList<>();
-        mChatHeadAddedList = new ArrayList<>();
+        //mChatHeadList = new ArrayList<>();
+        //mChatHeadAddedList = new ArrayList<>();
     }
 
     /**
@@ -119,14 +115,17 @@ public class ChatFragment extends Fragment {
      * @return A new instance of fragment ChatFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ChatFragment newInstance(String roomId, String ownerName, String ownerId, int roomUsersCnt, ArrayList<ChatHead> chatHeadList) {
+    //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
+    public static ChatFragment newInstance(String roomId, String ownerName, String ownerId) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
         args.putString(ROOM_ID, roomId);
         args.putString(USERNAME, ownerName);
         args.putString(USERID, ownerId);
-        args.putInt(USER_COUNT, roomUsersCnt);
-        args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
+
+        //args.putInt(USER_COUNT, roomUsersCnt);
+        //args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -138,8 +137,8 @@ public class ChatFragment extends Fragment {
             mRoomId = getArguments().getString(ROOM_ID);
             mUsername = getArguments().getString(USERNAME);
             mUserId = getArguments().getString(USERID);
-            mRoomUsersCnt = getArguments().getInt(USER_COUNT);
-            mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
+            //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
+            //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
         }
 
         setHasOptionsMenu(true);
@@ -358,7 +357,7 @@ public class ChatFragment extends Fragment {
                         JSONArray listOfUnreadMessages = new JSONArray();
 
                         for (int i = 0; i < messages.length(); i++) {
-                            message = (JSONObject) messages.get(i);
+                            message =  messages.getJSONObject(i);
                             chat = new Chat(
                                     message.getString("room"),
                                     message.getJSONObject("owner").getString("profileImage"),
@@ -690,6 +689,7 @@ public class ChatFragment extends Fragment {
                     String username;
 //                    String message;
                     try {
+                        //Log.i(TAG, "run: "+data.toString(4));
                         username = data.getJSONObject("owner").getString("fullName");
 //                        if (owner and id same keep id as mLastId)
 //                        Log.d(TAG, "run: " + data.toString(4));

@@ -96,6 +96,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
+        mProfileInfoHasLoaded = false;
+
         mUser = new LSDKUser(getActivity());
         mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -142,12 +144,19 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     private Menu mProfileMenu;
 
+    private boolean mProfileInfoHasLoaded;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
         if (getActivity() != null) {
             if (!mTaptUserId.equals(mSharedPreferences.getString("userID", ""))){
                 inflater.inflate(R.menu.tapt_user_profile_menu, menu);
+
+                if (mProfileInfoHasLoaded){
+                    menu.findItem(R.id.feed_detail_subscribe).setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+                }
+
                 mProfileMenu = menu;
             }
         }
@@ -245,13 +254,14 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 if (response.isSuccessful()) { //attempt to update view with response
                     final String body = response.body().string();
 
-                    Log.i(TAG, "onResponse: "+body);
+                    //Log.i(TAG, "onResponse: "+body);
 
                     if (getActivity() == null) return;
-                    JSONObject jsonObject = null;
+                    JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
                         mLinuteUser.updateUserInformation(jsonObject); //container for new information
+                        mProfileInfoHasLoaded = true;
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -259,8 +269,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
-
-
 
                     if (!mOtherSectionUpdated){
                         mOtherSectionUpdated = true;

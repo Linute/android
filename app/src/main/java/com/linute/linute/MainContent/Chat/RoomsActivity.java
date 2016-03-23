@@ -1,17 +1,13 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -28,7 +24,6 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
-import de.greenrobot.event.EventBus;
 import de.greenrobot.event.Subscribe;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -40,11 +35,13 @@ public class RoomsActivity extends BaseTaptActivity {
     private static final String TAG = RoomsActivity.class.getSimpleName();
     private TextView mTitle;
     Handler mHandler = new Handler(Looper.getMainLooper());
-    private EventBus mEventBus = EventBus.getDefault();
+    //private EventBus mEventBus = EventBus.getDefault();
     private FloatingActionButton mFab;
     private Socket mSocket;
     private SharedPreferences mSharedPreferences;
     private boolean mConnecting;
+
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +50,10 @@ public class RoomsActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
-        toolbar.setTitle("Messages");
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
+        mToolbar.setTitle("Inbox");
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        setSupportActionBar(mToolbar);
 
         if (savedInstanceState == null){
            getSupportFragmentManager()
@@ -82,7 +79,6 @@ public class RoomsActivity extends BaseTaptActivity {
                 transaction.addToBackStack(null);
                 // Commit the transaction
                 transaction.commit();
-                toggleFab(false);
             }
         });
     }
@@ -101,26 +97,26 @@ public class RoomsActivity extends BaseTaptActivity {
         });
     }
 
-    public void toggleFab(boolean toggleFab) {
-        if (!toggleFab && mFab.isShown()) {
+    public void hideFab(boolean hide) {
+        if (hide && mFab.isShown()) {
             mFab.hide();
-        } else if (toggleFab && !mFab.isShown()) {
+        } else if (!hide && !mFab.isShown()) {
             mFab.show();
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-        if (count == 0) {
-            super.onBackPressed();
-        } else {
-            if (count == 1){
-                toggleFab(true);
-            }
-            getSupportFragmentManager().popBackStack();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+//        int count = getSupportFragmentManager().getBackStackEntryCount();
+//        if (count == 0) {
+//            super.onBackPressed();
+//        } else {
+//            if (count == 1){
+//                toggleFab(true);
+//            }
+//            getSupportFragmentManager().popBackStack();
+//        }
+//    }
 
 
     @Override
@@ -198,6 +194,12 @@ public class RoomsActivity extends BaseTaptActivity {
     };
 
 
+    //gives access to this from our fragments
+    public void changeToolbarTitle(String title){
+        if (mToolbar != null) mToolbar.setTitle(title);
+    }
+
+
 
     @Override
     public void connectSocket(String event, Emitter.Listener emitter) {
@@ -222,7 +224,7 @@ public class RoomsActivity extends BaseTaptActivity {
 
     @Override
     public boolean socketConnected() {
-        return !(mSocket == null || !mSocket.connected());
+        return mSocket != null && mSocket.connected();
     }
 
 
