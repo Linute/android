@@ -244,16 +244,16 @@ public class EditSaveVideoFragment extends Fragment {
 
         String cmd = "-i " + mVideoLink + " "; //input file
 
-        String crop;
-
-        crop = String.format(Locale.US, "-vf crop=%d:%d:%d:0 ",
-                mVideoDimen.height,
-                mVideoDimen.height,
-                (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+        String crop = String.format(Locale.US,
+                                    "-vf crop=%d:%d:%d:0 ",
+                                    mVideoDimen.height,
+                                    mVideoDimen.height,
+                                    (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
 
         cmd += crop; //crop
         cmd += "-preset superfast ";
-        cmd += "-strict -2 "; //audio
+        //cmd += "-strict -2 "; //audio
+        cmd += "-c:a copy "; //copy instead of re-encoding audio
         cmd += outputFile; //output file;
 
         try {

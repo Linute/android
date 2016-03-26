@@ -6,11 +6,25 @@
               android:orientation="vertical"
               tools:context="com.linute.linute.MainContent.Chat.SearchUsers">
 
-    <EditText
-        android:id="@+id/search_users_entry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search for friends..."/>
+
+    <android.support.v7.widget.Toolbar android:id="@+id/search_user_toolbar"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="?attr/actionBarSize"
+                                       android:background="@color/colorPrimary"
+                                       android:elevation="4dp"
+                                       android:theme="@style/ThemeOverlay.AppCompat.Dark">
+        <EditText
+            android:id="@+id/search_users_entry"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/pure_white"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="Search for friends..."/>
+
+    </android.support.v7.widget.Toolbar>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/search_users"

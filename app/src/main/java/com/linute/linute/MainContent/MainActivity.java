@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -427,14 +428,17 @@ public class MainActivity extends BaseTaptActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        switch (id) {
-            case android.R.id.home:
-                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-                    getSupportFragmentManager().popBackStack();
-                else mDrawerLayout.openDrawer(GravityCompat.START);
-                return true;
+        if (mSafeForFragmentTransaction) {
+            int id = item.getItemId();
+
+            switch (id) {
+                case android.R.id.home:
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                        getSupportFragmentManager().popBackStack();
+                    else mDrawerLayout.openDrawer(GravityCompat.START);
+                    return true;
+            }
         }
 
         return super.onOptionsItemSelected(item);
@@ -481,7 +485,7 @@ public class MainActivity extends BaseTaptActivity {
         setNavItemNotification(R.id.navigation_item_feed, count, mNumNewPostsInDiscover);
     }
 
-    public void setUpdateNotification(int count){
+    public void setUpdateNotification(int count) {
         setNavItemNotification(R.id.navigation_item_activity, count, mNumNewActivities);
     }
 
@@ -678,7 +682,7 @@ public class MainActivity extends BaseTaptActivity {
     private int mNumNewActivities = 0;
 
 
-    public void setNumNewActivities(int num){
+    public void setNumNewActivities(int num) {
         mNumNewActivities = num;
     }
 
@@ -686,16 +690,16 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-                    final Object post = args[0];
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                                    .addPostToFeed(post)) {
-                                setFeedNotification(++mNumNewPostsInDiscover);
-                            }
+                final Object post = args[0];
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                .addPostToFeed(post)) {
+                            setFeedNotification(++mNumNewPostsInDiscover);
                         }
-                    });
+                    }
+                });
 
             }
         }
@@ -729,8 +733,7 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
-
-    private void newActivitySnackbar(String text){
+    private void newActivitySnackbar(String text) {
         final CustomSnackbar sn = CustomSnackbar.make(parentView, text, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {

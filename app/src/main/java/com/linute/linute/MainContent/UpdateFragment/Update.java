@@ -16,6 +16,7 @@ public class Update {
 
     private static final String TAG = Update.class.getSimpleName();
 
+    //enum of update types
     public enum UpdateType {
         UNDEFINED,
         LIKED_STATUS,
@@ -35,39 +36,44 @@ public class Update {
         ALSO_COMMENTED_VIDEO
     }
 
-    private String mDescription;
-    private UpdateType mUpdateType;
+    private String mActionID;           // id of action
+    private String mDescription;        // description of action. ie - "max liked your status;
+    private UpdateType mUpdateType;     // type of update
 
-    //time stamp -- uncomment if we decide to use it
-    //private long mActionTime; //i.e. when someone liked/commented on/etc post
-    private boolean mIsRead;
+    private boolean mIsRead;            //determine if viewer has seen this update before
 
-    private String mActionID;
 
     //'User' refers to the person performing the action
     // i.e. if 'max liked your picture' -> user = max
-    private String mUserId;
-    private String mUserFullName;
-    private String mUserProfileImageName;
+    private String mUserId;                 // if of user
+    private String mUserFullName;           // full name
+    private String mUserProfileImageName;   // profile image of user
+    private String mAnonImage;              // anon image of user
+    private boolean mIsAnon;                // determine if user is anon
 
-//    private String mEventImageName;
-//    private String mEventID;
-//    private String mEventTitle;
-//    private String mEventUserId;
-//    private boolean mIsPicturePost;
-
-
-    private Post mPost; //Post object will contain event info
 
     //will not be empty if you are following person
+    //used for FOLLOWER action
+    //will be null if not a FOLLOWER action
     private String mFriendshipID;
     private boolean mFollowedBack;
 
-    private boolean mIsAnon;
-    private String mAnonImage;
+
+    // Post object will contain event info.
+    // ie. "Max liked your image." Post will contain the image url and other information
+    private Post mPost;
 
 
 
+    //time stamp -- uncomment if we decide to use it
+    //private long mActionTime; //i.e. when someone liked/commented on/etc post
+
+
+    /**
+     *
+     * @param json   - update json object retrieved from backend
+     * @throws JSONException
+     */
     public Update(JSONObject json) throws JSONException {
 
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json,"action"));
@@ -96,6 +102,7 @@ public class Update {
         mDescription = getStringFromJson(json, "text");
     }
 
+    //parse action String and return UpdateType
     private static UpdateType getUpdateTypeFromString(String action) {
         switch (action) {
             case "liked status":
@@ -146,12 +153,15 @@ public class Update {
 
     //following activities will have event info
     public final boolean hasEventInformation(){
-        return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
-                mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
-                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED
-                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS ||
-                mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO || mUpdateType == UpdateType.POSTED_VIDEO ||
-                mUpdateType == UpdateType.LIKED_VIDEO || mUpdateType == UpdateType.COMMENTED_VIDEO;
+//        return  mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS
+//                || mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
+//                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS
+//                || mUpdateType == UpdateType.MENTIONED || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE
+//                || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS || mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO
+//                || mUpdateType == UpdateType.POSTED_VIDEO || mUpdateType == UpdateType.LIKED_VIDEO
+//                || mUpdateType == UpdateType.COMMENTED_VIDEO;
+
+        return mUpdateType != UpdateType.UNDEFINED &&  mUpdateType != UpdateType.FOLLOWER && mUpdateType != UpdateType.FRIEND_JOINED;
     }
 
     public final boolean hasFriendShipInformation(){

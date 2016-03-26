@@ -875,6 +875,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             bestWidth = betterSize.width;
         }
 
+        //sent to EditSaveVideoFragment dimensions so we know how much to crop
         mVideoDimen = new EditSaveVideoFragment.VideoDimen(camcorderProfile.videoFrameHeight, bestWidth, mCameraID == CameraInfo.CAMERA_FACING_FRONT);
 
         //Log.i(TAG, "prepareMediaRecorder: "+bestWidth +" "+camcorderProfile.videoFrameHeight);

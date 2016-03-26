@@ -27,9 +27,6 @@ import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import io.socket.emitter.Emitter;
 
@@ -98,18 +95,18 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         super.onSaveInstanceState(outState);
         outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
         outState.putBoolean("friendsNeedsUpdate", mFriendsFeedNeedsUpdating);
-        outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
+        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            int index = savedInstanceState.getInt("viewPagerIndex");
+            int index = savedInstanceState.getInt("viewPagerIndex",0);
             mInitiallyPresentedFragmentWasCampus = index == 0;
-            mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate");
-            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate");
-            mViewPager.setCurrentItem(index);
+            mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate", true);
+            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate", true);
+            if (mViewPager != null) mViewPager.setCurrentItem(index);
         }
     }
 

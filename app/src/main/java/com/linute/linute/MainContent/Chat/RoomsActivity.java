@@ -3,14 +3,9 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.Toolbar;
+import android.support.v4.app.Fragment;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -19,12 +14,8 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.net.URISyntaxException;
 
-import de.greenrobot.event.Subscribe;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -33,77 +24,49 @@ import io.socket.engineio.client.transports.WebSocket;
 public class RoomsActivity extends BaseTaptActivity {
 
     private static final String TAG = RoomsActivity.class.getSimpleName();
-    private TextView mTitle;
-    Handler mHandler = new Handler(Looper.getMainLooper());
+    //private TextView mTitle;
+    //Handler mHandler = new Handler(Looper.getMainLooper());
     //private EventBus mEventBus = EventBus.getDefault();
-    private FloatingActionButton mFab;
+    //private FloatingActionButton mFab;
     private Socket mSocket;
     private SharedPreferences mSharedPreferences;
-    private boolean mConnecting;
+    private boolean mConnecting; //socket is trying to connect
 
-    private Toolbar mToolbar;
+    private boolean mSafeForFragmentTransaction; //if safe for fragment transitions.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rooms);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mSafeForFragmentTransaction = false;
 
-        mToolbar = (Toolbar) findViewById(R.id.rooms_toolbar);
-        mToolbar.setTitle("Inbox");
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        setSupportActionBar(mToolbar);
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         if (savedInstanceState == null){
            getSupportFragmentManager()
                    .beginTransaction()
-                   .replace(R.id.fragment, new RoomsActivityFragment())
+                   .replace(R.id.chat_container, new RoomsActivityFragment())
                    .commit();
         }
 
 
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
-        mFab.setImageResource(R.drawable.ic_action_new_message);
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                // Create fragment and give it an argument specifying the article it should show
-                SearchUsers newFragment = SearchUsers.newInstance("Hi", "Hello");
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                // Replace whatever is in the fragment_container view with this fragment,
-                // and add the transaction to the back stack so the user can navigate back
-                transaction.replace(R.id.fragment, newFragment);
-                transaction.addToBackStack(null);
-                // Commit the transaction
-                transaction.commit();
-            }
-        });
     }
 
-    @Subscribe
-    public void onEvent(final JSONObject object) {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Toast.makeText(RoomsActivity.this, object.getString("username") + " " + object.getString("message"), Toast.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
+//    @Subscribe
+//    public void onEvent(final JSONObject object) {
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Toast.makeText(RoomsActivity.this, object.getString("username") + " " + object.getString("message"), Toast.LENGTH_SHORT).show();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//    }
 
-    public void hideFab(boolean hide) {
-        if (hide && mFab.isShown()) {
-            mFab.hide();
-        } else if (!hide && !mFab.isShown()) {
-            mFab.show();
-        }
-    }
 
 //    @Override
 //    public void onBackPressed() {
@@ -169,11 +132,15 @@ public class RoomsActivity extends BaseTaptActivity {
             mSocket.connect();
             mConnecting = false;
         }
+
+        mSafeForFragmentTransaction = true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mSafeForFragmentTransaction = false;
+
         mSocket.disconnect();
 
         mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -194,12 +161,33 @@ public class RoomsActivity extends BaseTaptActivity {
     };
 
 
-    //gives access to this from our fragments
-    public void changeToolbarTitle(String title){
-        if (mToolbar != null) mToolbar.setTitle(title);
+    //change toolbar title
+    @Override
+    public void setTitle(String title) {
+
     }
 
+    @Override
+    public void addFragmentToContainer(Fragment fragment) {
+        if (!mSafeForFragmentTransaction) return;
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.chat_container, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
 
+    @Override
+    public void replaceContainerWithFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.chat_container, fragment)
+                .commit();
+    }
+
+    @Override
+    public void setToolbarOnClickListener(View.OnClickListener listener) {
+    }
 
     @Override
     public void connectSocket(String event, Emitter.Listener emitter) {
@@ -215,6 +203,11 @@ public class RoomsActivity extends BaseTaptActivity {
     }
 
     @Override
+    public void setSocketErrorResponse(SocketErrorResponse error) {
+
+    }
+
+    @Override
     public void disconnectSocket(String event, Emitter.Listener emitter) {
         if (mSocket != null) {
             mSocket.off(event, emitter);
@@ -226,6 +219,5 @@ public class RoomsActivity extends BaseTaptActivity {
     public boolean socketConnected() {
         return mSocket != null && mSocket.connected();
     }
-
 
 }

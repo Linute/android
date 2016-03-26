@@ -102,7 +102,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onSaveInstanceState(outState);
         outState.putBoolean("activeNeedsUpdate", mActiveNeedsUpdating);
         outState.putBoolean("nearMeNeedsUpdate", mNearMeNeedsUpdating);
-        outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
+        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
     }
 
 
@@ -110,11 +110,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            int index = savedInstanceState.getInt("viewPagerIndex");
+            int index = savedInstanceState.getInt("viewPagerIndex", 0);
             mInitiallyPresentedFragmentWasNearby = index == 0;
-            mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate");
-            mNearMeNeedsUpdating = savedInstanceState.getBoolean("nearMeNeedsUpdate");
-            mViewPager.setCurrentItem(index);
+            mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate", true);
+            mNearMeNeedsUpdating = savedInstanceState.getBoolean("nearMeNeedsUpdate", true);
+            if (mViewPager != null) mViewPager.setCurrentItem(index);
         }
     }
 

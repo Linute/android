@@ -74,6 +74,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         protected CircleImageView vUserImage;
         protected TextView vUserName;
         protected String mUserId;
+        protected String mUserName;
 
         public SearchViewHolder(View itemView) {
             super(itemView);
@@ -122,7 +123,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             JSONObject jsonObject = new JSONObject(resString);
 
                             final String roomId = jsonObject.getString("id");
-                            final JSONArray users = jsonObject.getJSONArray("users");
+                            //final JSONArray users = jsonObject.getJSONArray("users");
 
 
                             final RoomsActivity activity = (RoomsActivity) aContext;
@@ -135,8 +136,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                                             .beginTransaction()
                                             .replace(R.id.chat_container,
                                                     ChatFragment.newInstance(roomId,
-                                                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
-                                                            mSharedPreferences.getString("userID", "")
+                                                            mUserName,
+                                                            mUserId
                                                             //,
 //                                                            users.length(),
 //                                                            new ArrayList<ChatHead>())
@@ -197,6 +198,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .into(vUserImage);
 
             mUserId = user.getUserId();
+            mUserName = user.getUserName();
 
             vUserName.setText(user.getUserName());
         }

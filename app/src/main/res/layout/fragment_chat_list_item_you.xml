@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+>
+
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:background="@drawable/chat_item_you"
+                  android:layout_alignParentStart="true"
+                  android:layout_marginStart="12dp"
+                  android:layout_marginEnd="48dp"
+                  android:layout_marginTop="4dp"
+                  android:layout_marginBottom="4dp"
+                  android:padding="12dp"
+                  android:orientation="vertical">
+
+        <TextView android:id="@+id/chat_user_message"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textSize="@dimen/body_font_size"
+                  android:textColor="@color/eighty_black"
+                  tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
+        />
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal"
+                      android:layout_marginTop="4dp"
+        >
+            <TextView android:id="@+id/chat_user_time"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textSize="@dimen/sub_font_size"
+                      android:textColor="@color/twentyfive_black"
+                      tools:text="3:00AM"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -243,4 +243,24 @@ public class FindFriendsActivity extends BaseTaptActivity {
     public void setToolbarOnClickListener(View.OnClickListener listener){
         mToolbar.setOnClickListener(listener);
     }
+
+    @Override
+    public void connectSocket(String event, Emitter.Listener emitter) {
+
+    }
+
+    @Override
+    public void disconnectSocket(String event, Emitter.Listener emitter) {
+
+    }
+
+    @Override
+    public void emitSocket(String event, Object arg) {
+
+    }
+
+    @Override
+    public void setSocketErrorResponse(SocketErrorResponse error) {
+
+    }
 }

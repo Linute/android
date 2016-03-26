@@ -40,7 +40,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     private SingleVideoPlaybackManager mVideoPlayerManager;
 
-
     public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager) {
         super(new MultiChoiceMode());
         mPosts = posts;

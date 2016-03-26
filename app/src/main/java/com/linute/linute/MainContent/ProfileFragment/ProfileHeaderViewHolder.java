@@ -142,28 +142,39 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                     return;
                                 }
 //                                Log.d(TAG, "onResponse: " + response.body().string());
+
+                                final BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+                                if (activity == null) return;
+
                                 jsonObject = null;
+
                                 try {
                                     jsonObject = new JSONObject(response.body().string());
+
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.secondaryColor));
+                                            mFollowingButtonText.setText("following");
+                                            Toast.makeText(mContext, "You got a new friend!", Toast.LENGTH_SHORT).show();
+                                            try {
+                                                mUser.setFriendship(jsonObject.getString("id"));
+                                                mUser.setFriend("NotEmpty");
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
                                 } catch (JSONException e) {
                                     e.printStackTrace();
-                                }
-                                ((BaseTaptActivity) mContext).runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.secondaryColor));
-                                        mFollowingButtonText.setText("following");
-                                        Toast.makeText(mContext, "You got a new friend!", Toast.LENGTH_SHORT).show();
-                                        try {
-                                            mUser.setFriendship(jsonObject.getString("id"));
-                                            mUser.setFriend("NotEmpty");
-                                            Log.d(TAG, "run: " + jsonObject.getString("id"));
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Utils.showServerErrorToast(activity);
                                         }
-                                    }
-                                });
-
+                                    });
+                                }
                             }
                         });
                     } else {
@@ -193,6 +204,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                     BaseTaptActivity activity1 = (BaseTaptActivity) mContext;
 
                                     if (activity1 == null) return;
+
                                     activity1.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -203,8 +215,6 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                                         }
                                     });
                                 }
-
-
                             }
                         });
                     }

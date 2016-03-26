@@ -96,8 +96,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
-        mProfileInfoHasLoaded = false;
-
         mUser = new LSDKUser(getActivity());
         mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -144,7 +142,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     private Menu mProfileMenu;
 
-    private boolean mProfileInfoHasLoaded;
+    private boolean mProfileInfoHasLoaded = false;
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -153,11 +151,12 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             if (!mTaptUserId.equals(mSharedPreferences.getString("userID", ""))){
                 inflater.inflate(R.menu.tapt_user_profile_menu, menu);
 
-                if (mProfileInfoHasLoaded){
-                    menu.findItem(R.id.feed_detail_subscribe).setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                }
-
                 mProfileMenu = menu;
+
+                if (mProfileInfoHasLoaded && mProfileMenu != null){
+                    MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
+                    i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+                }
             }
         }
 
@@ -181,6 +180,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null) { //changes app bar title to user's name
+
             activity.setTitle(mUserName);
             activity.resetToolbar();
             activity.setToolbarOnClickListener(new View.OnClickListener() {
@@ -190,6 +190,11 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         recList.smoothScrollToPosition(0);
                 }
             });
+
+//            if (mProfileInfoHasLoaded && mProfileMenu != null){
+//                MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
+//                i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+//            }
 
             JSONObject obj = new JSONObject();
             try {
@@ -280,7 +285,10 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                 mSwipeRefreshLayout.setRefreshing(false);
                                 mProfileAdapter.notifyDataSetChanged();
                                 if (mProfileMenu != null) {
-                                    mProfileMenu.findItem(R.id.feed_detail_subscribe).setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+                                    MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
+                                    if (i != null) {
+                                        i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+                                    }
                                 }
                             }
                         });
@@ -427,7 +435,10 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         final boolean isSubscribed = mLinuteUser.isSubscribed();
         mLinuteUser.setSubscribed(!isSubscribed);
 
-        mProfileMenu.findItem(R.id.feed_detail_subscribe).setTitle(isSubscribed ? "Subscribe" : "Unsubscribe" );
+        MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
+        if (i != null) {
+            i.setTitle(isSubscribed ? "Subscribe" : "Unsubscribe" );
+        }
 
         JSONObject emit = new JSONObject();
         try {

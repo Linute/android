@@ -73,7 +73,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     inflate(R.layout.fragment_feed_detail_page_list_item, parent, false));
         }
         //image post
-        else if (viewType == TYPE_IMAGE_HEADER) { //TODO: FIX ME
+        else if (viewType == TYPE_IMAGE_HEADER) {
             //inflate your layout and pass it to view holder
             return new FeedDetailHeaderImageViewHolder(LayoutInflater
                     .from(parent.getContext())
@@ -186,7 +186,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mIsAnon = comment.isAnon();
             mCommenterUserId = comment.getCommentUserId();
             mUserName = comment.getCommentUserName();
-            mCommentId = comment.getCommentUserPostId();
+            mCommentId = comment.getCommentPostId();
 
             if (mIsAnon) {
                 setAnonImage(comment.getAnonImage());
@@ -221,7 +221,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
                 setUpMentionedOnClicks(comment);
             } else { //set text to comment's text
-                vCommentUserText.setText(comment.getCommentUserPostText());
+                vCommentUserText.setText(comment.getCommentPostText());
             }
 
         }
@@ -247,7 +247,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
         private void setUpMentionedOnClicks(Comment comment) {
-            String commentText = comment.getCommentUserPostText();
+            String commentText = comment.getCommentPostText();
             SpannableString commentSpannable = new SpannableString(commentText);
 
             int startSearchAtIndex = 0; //start search from
@@ -258,7 +258,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             final BaseTaptActivity activity = (BaseTaptActivity) context;
             if (activity == null) {
-                vCommentUserText.setText(comment.getCommentUserPostText());
+                vCommentUserText.setText(comment.getCommentPostText());
                 return;
             }
 
@@ -372,6 +372,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         private void deleteComment(int in) {
             final int pos = in - 1;
             final Comment com = mFeedDetail.getComments().get(pos);
+
+            //if viewer is not the owner of the comment, return
+            // exception : anon comments can be deleted by post owner
+            if (!com.getCommentUserId().equals(mViewerUserId) && !com.isAnon()) return;
+
             mItemManger.removeShownLayouts(mSwipeLayout);
             mFeedDetail.getComments().remove(pos);
             notifyItemRemoved(pos + 1);
@@ -445,7 +450,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         private void revealComment(final int in) {
 
             final int pos = in - 1;
-            mFeedDetail.getComments().get(pos).setIsAnon(!mIsAnon);
+            Comment comment = mFeedDetail.getComments().get(pos);
+
+            //safe check
+            //double check that they are revealing their own comment
+            if (!comment.getCommentUserId().equals(mViewerUserId)) return;
+
+            comment.setIsAnon(!mIsAnon);
             notifyItemChanged(pos + 1);
 
             new LSDKEvents(context).revealComment(mCommentId, !mIsAnon, new Callback() {

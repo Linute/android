@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_alignParentEnd="true"
+                  android:layout_marginTop="4dp"
+                  android:layout_marginBottom="4dp"
+                  android:layout_marginEnd="12dp"
+                  android:layout_marginStart="48dp"
+                  android:background="@drawable/chat_item_me"
+                  android:orientation="vertical"
+                  android:padding="12dp">
+
+        <TextView android:id="@+id/chat_user_message"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:textColor="@color/pure_white"
+                  android:textSize="@dimen/body_font_size"
+                  tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
+        />
+
+        <LinearLayout android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginTop="4dp"
+                      android:orientation="horizontal"
+        >
+            <TextView android:id="@+id/chat_user_time"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="@color/fifty_white"
+                      android:textSize="@dimen/sub_font_size"
+                      tools:text="3:00AM"/>
+
+            <ImageView
+                android:id="@+id/message_action_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/delivered_chat"
+            />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

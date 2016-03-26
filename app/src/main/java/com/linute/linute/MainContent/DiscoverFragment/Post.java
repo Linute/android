@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,72 +17,37 @@ import java.util.Date;
  */
 public class Post implements Parcelable {
 
-    public static int POST_TYPE_STATUS = 0;
-    public static int POST_TYPE_IMAGE = 1;
-    public static int POST_TYPE_VIDEO = 2;
+    public final static int POST_TYPE_STATUS = 0;
+    public final static int POST_TYPE_IMAGE = 1;
+    public final static int POST_TYPE_VIDEO = 2;
 
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    private String mUserId;
-    private String mUserName;
-    private String mUserImage;
-    private String mTitle;
-    private String mImage = "";
-    private int mPrivacy;
-    private int mNumLikes;
-    private boolean mUserLiked;
-    private long mPostTime;
-    private String mPostId;
-    private int mNumOfComments;
-    private String mAnonImage;
+    private String mUserId;         // id of post owner
+    private String mUserName;       // post owner's full name
+    private String mUserImage;      // post owner's profile image
+    private String mAnonImage;      // anon image of user
 
-    private boolean mPostLiked;
+    private String mPostId;         // id of post
+    private String mVideoURL = "";  // video url
+    private String mTitle;          // text on image or status
+    private String mImage = "";     // image url
+    private int mPrivacy;           // 1 for anon, 0 for public
+    private int mNumLikes;          // num likes on post
+    private long mPostTime;         // post time. millisec since 1970
+    private int mNumOfComments;     // num of comments
 
-    private String mVideoURL = "";
-
-    //horrible hack -- regret doing this..
-    private boolean mPostHidden;
-    private boolean mPostMuted;
+    private boolean mPostLiked;     //did viewer like the image
+    private boolean mPostHidden;    //post hidden from user
+    private boolean mPostMuted;     //post muted from user
 
     public Post() {
 
     }
 
-//    public Post(String userId,
-//                String userName,
-//                String userImage,
-//                String title,
-//                String image,
-//                int privacy,
-//                int numLike,
-//                boolean userLiked,
-//                long postTime,
-//                String postId,
-//                int numComments,
-//                String anonImage,
-//                String video
-//    ) {
-//
-//        mUserId = userId;
-//        mUserName = userName;
-//        mImage = "";
-//        mUserImage = userImage;
-//        mTitle = title;
-//        mImage = image;
-//        mPrivacy = privacy;
-//        mNumLikes = numLike;
-//        mUserLiked = userLiked;
-//        mPostTime = postTime;
-//        mPostId = postId;
-//        mNumOfComments = numComments;
-//        mAnonImage = anonImage;
-//
-//        mPostLiked = mUserLiked;
-//        mVideoURL = video;
-//
-//    }
-
-    //@param currentId -- the id of the person using phone
+    /**
+     * @param jsonObject  - post json object
+     */
     public Post(JSONObject jsonObject) throws JSONException {
 
         int type = jsonObject.getInt("type");
@@ -286,7 +250,6 @@ public class Post implements Parcelable {
         dest.writeString(mImage);
         dest.writeInt(mPrivacy);
         dest.writeInt(mNumLikes);
-        dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
         dest.writeLong(mPostTime);
         dest.writeString(mPostId);
         dest.writeInt(mNumOfComments);
@@ -303,7 +266,6 @@ public class Post implements Parcelable {
         mImage = in.readString();
         mPrivacy = in.readInt();
         mNumLikes = in.readInt();
-        mUserLiked = in.readByte() != 0; //true if byte != 0
         mPostTime = in.readLong();
         mPostId = in.readString();
         mNumOfComments = in.readInt();

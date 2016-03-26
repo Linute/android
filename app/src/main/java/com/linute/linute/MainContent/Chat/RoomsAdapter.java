@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -30,7 +30,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private Context aContext;
     private List<Rooms> mRoomsList;
     private SharedPreferences mSharedPreferences;
-
 
     public RoomsAdapter(Context aContext, List<Rooms> roomsList) {
         this.aContext = aContext;
@@ -62,6 +61,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         protected TextView vLastMessage;
         protected View vHasUnreadIcon;
         protected TextView vTimeStamp;
+        protected Rooms mRooms;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
@@ -76,28 +76,24 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vRoomsListLinear.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    Toast.makeText(aContext, mRoomsList.get(getAdapterPosition()).getLastMessageUserName(), Toast.LENGTH_SHORT).show();
-                    ChatFragment newFragment = ChatFragment.newInstance(
-                            mRoomsList.get(getAdapterPosition()).getRoomId(),
-                            mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", ""),
-                            mSharedPreferences.getString("userID", "")
-                            //,
-                            //mRoomsList.get(getAdapterPosition()).getUsersCount(),
-                            //mRoomsList.get(getAdapterPosition()).getChatHeadList()
-                    );
-                    Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
-                    FragmentTransaction transaction = ((RoomsActivity) aContext).getSupportFragmentManager().beginTransaction();
-                    // Replace whatever is in the fragment_container view with this fragment,
-                    // and add the transaction to the back stack so the user can navigate back
-                    transaction.replace(R.id.chat_container, newFragment);
-                    transaction.addToBackStack(null);
-                    // Commit the transaction
-                    transaction.commit();
+
+                    BaseTaptActivity activity = (BaseTaptActivity) aContext;
+                    if (activity != null) {
+                        activity.addFragmentToContainer(
+                                ChatFragment.newInstance(
+                                        mRooms.getRoomId(),
+                                        mRooms.getUserName(),
+                                        mRooms.getUserId()
+                                )
+                        );
+                    }
                 }
             });
         }
 
         void bindModel(Rooms room) {
+
+            mRooms = room;
 
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(room.getUserImage()))
@@ -111,8 +107,10 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vLastMessage.setText(room.getLastMessage());
             vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
 
-            if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE) vHasUnreadIcon.setVisibility(View.VISIBLE);
-            else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE) vHasUnreadIcon.setVisibility(View.INVISIBLE);
+            if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE)
+                vHasUnreadIcon.setVisibility(View.VISIBLE);
+            else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE)
+                vHasUnreadIcon.setVisibility(View.INVISIBLE);
         }
     }
 }

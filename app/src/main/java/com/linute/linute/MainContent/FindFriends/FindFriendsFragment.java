@@ -94,52 +94,6 @@ public class FindFriendsFragment extends UpdatableFragment {
 
     private GetContactsInBackground mGetContactsInBackground;
 
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//
-////        setContentView(R.layout.fragment_find_friends);
-////
-////        if (getIntent() != null) {
-////            mSearchType = getIntent().getIntExtra(SEARCH_TYPE_KEY, 0);
-////        }
-////
-////        mDescriptionText = (TextView) findViewById(R.id.findFriends_text);
-////        mRecyclerView = (RecyclerView) findViewById(R.id.findFriends_recycler_view);
-////        mSearchView = (MaterialSearchView) findViewById(R.id.findFriends_search_view);
-////        mProgressBar = (ProgressBar) findViewById(R.id.findFriends_progressbar);
-////        mSearchView.showSearch(false);
-////
-////
-//        LinearLayoutManager llm = new LinearLayoutManager(this);
-//        llm.setOrientation(LinearLayoutManager.VERTICAL);
-//        mRecyclerView.setLayoutManager(llm);
-//
-//        mFriendSearchAdapter = new FriendSearchAdapter(this, mFriendFoundList, false);
-//
-//        mRecyclerView.setAdapter(mFriendSearchAdapter);
-//        mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
-//
-//
-//        setupSearchViewHandler();
-//
-//        if (mSearchType == 0) { //if search by name, we need init text
-//            mDescriptionText.setText("Enter your friends name in the search bar");
-//            mDescriptionText.setVisibility(View.VISIBLE);
-//        } else if (mSearchType == 1) { //facebook
-//            FacebookSdk.sdkInitialize(getApplicationContext());
-//
-//            //facebook
-//            mCallbackManager = CallbackManager.Factory.create();
-//
-//            setUpFacebookCallback();
-//
-//            loginFacebook();
-//        } else { //contacts. This process takes forever to get emails. We will use async task
-//            mGetContactsInBackground = new GetContactsInBackground();
-//            setUpContactsList();
-//        }
-//    }
 
     public static FindFriendsFragment newInstance(int searchType) {
         FindFriendsFragment fragment = new FindFriendsFragment();
@@ -222,6 +176,7 @@ public class FindFriendsFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
+        //analytics
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.setTitle("Find Friends");
@@ -243,6 +198,8 @@ public class FindFriendsFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        //analytics
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             JSONObject obj = new JSONObject();

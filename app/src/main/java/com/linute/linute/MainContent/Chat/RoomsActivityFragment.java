@@ -1,12 +1,13 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,7 +59,11 @@ public class RoomsActivityFragment extends Fragment {
     private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
     private String mUserId;
 
+    private FloatingActionButton mFab;
+
     private View mEmptyText;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public RoomsActivityFragment() {
     }
@@ -74,30 +79,6 @@ public class RoomsActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         mUserId = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
-        //if (getActivity().getIntent().getStringExtra("ROOMS") != null) { //make sure not null
-
-            // start chat fragment
-            // use same procedure unless found better
-            //ArrayList<ChatHead> chatHeads = getActivity().getIntent().getParcelableArrayListExtra("chatHeads");
-//            ChatFragment newFragment = ChatFragment.newInstance(
-//                    getActivity().getIntent().getStringExtra("roomId"),
-//                    getActivity().getIntent().getStringExtra("ownerName"),
-//                    getActivity().getIntent().getStringExtra("ownerId")
-//            );
-
-                    /*Integer.parseInt(getActivity().getIntent().getStringExtra("roomCnt")), //2
-                    /*chatHeads*/
-//
-//            Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
-            //FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack so the user can navigate back
-//            transaction.replace(R.id.chat_container, newFragment);
-            //transaction.addToBackStack(null);
-            // Commit the transaction
-//            transaction.commit();
-        //}
-
 
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
@@ -105,6 +86,42 @@ public class RoomsActivityFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.rooms_toolbar);
+        toolbar.setTitle("Inbox");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() != null)
+                    getActivity().onBackPressed();
+            }
+        });
+
+        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
+        mFab.setImageResource(R.drawable.ic_action_new_message);
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                // Create fragment and give it an argument specifying the article it should show
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    activity.addFragmentToContainer(new SearchUsers());
+                }
+            }
+        });
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_rooms);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getRooms();
+            }
+        });
 
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         recList = (RecyclerView) view.findViewById(R.id.rooms_list);
@@ -116,17 +133,26 @@ public class RoomsActivityFragment extends Fragment {
         recList.setAdapter(mRoomsAdapter);
     }
 
+    public void hideFab(boolean hide) {
+        if (hide && mFab.isShown()) {
+            mFab.hide();
+        } else if (!hide && !mFab.isShown()) {
+            mFab.show();
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
+
         getRooms();
 
         RoomsActivity activity = (RoomsActivity) getActivity();
 
         if (activity != null){
 
-            activity.hideFab(false);
-            activity.changeToolbarTitle("Inbox");
+            //hideFab(false);
+            activity.setTitle("Inbox");
 
             JSONObject obj = new JSONObject();
 
@@ -148,7 +174,7 @@ public class RoomsActivityFragment extends Fragment {
         RoomsActivity activity = (RoomsActivity) getActivity();
 
         if (activity != null){
-            activity.hideFab(true);
+            //hideFab(true);
 
             JSONObject obj = new JSONObject();
             try {
@@ -165,8 +191,16 @@ public class RoomsActivityFragment extends Fragment {
     private void getRooms() {
         if (getActivity() == null) return;
 
-        final LSDKChat chat = new LSDKChat(getActivity());
-        chat.getRooms(null, new Callback() {
+        if (!mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
+
+        new LSDKChat(getActivity()).getRooms(null, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -185,7 +219,7 @@ public class RoomsActivityFragment extends Fragment {
 
                 String resString = response.body().string();
 
-                Log.i(TAG, "onResponse: "+resString);
+                //Log.i(TAG, "onResponse: "+resString);
 
                 //todo add unread messages icon
 
@@ -278,6 +312,9 @@ public class RoomsActivityFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    if (mSwipeRefreshLayout.isRefreshing()){
+                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    }
                                     if (mRoomsList.isEmpty()){
                                         if (mEmptyText.getVisibility() == View.GONE)
                                             mEmptyText.setVisibility(View.VISIBLE);
