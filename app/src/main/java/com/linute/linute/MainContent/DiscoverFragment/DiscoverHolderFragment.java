@@ -90,25 +90,25 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         return rootView;
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
-        outState.putBoolean("friendsNeedsUpdate", mFriendsFeedNeedsUpdating);
-        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            int index = savedInstanceState.getInt("viewPagerIndex",0);
-            mInitiallyPresentedFragmentWasCampus = index == 0;
-            mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate", true);
-            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate", true);
-            if (mViewPager != null) mViewPager.setCurrentItem(index);
-        }
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
+//        outState.putBoolean("friendsNeedsUpdate", mFriendsFeedNeedsUpdating);
+//        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
+//    }
+//
+//    @Override
+//    public void onViewStateRestored(Bundle savedInstanceState) {
+//        super.onViewStateRestored(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            int index = savedInstanceState.getInt("viewPagerIndex",0);
+//            mInitiallyPresentedFragmentWasCampus = index == 0;
+//            mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate", true);
+//            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate", true);
+//            if (mViewPager != null) mViewPager.setCurrentItem(index);
+//        }
+//    }
 
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;

@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Size;
@@ -16,6 +17,7 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,20 +29,23 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.Surface;
-import android.view.SurfaceHolder;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.linute.linute.R;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-
-public class CameraFragment extends Fragment implements SurfaceHolder.Callback, Camera.PictureCallback {
+//implements SurfaceHolder.Callback,
+public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     public static final String TAG = CameraFragment.class.getSimpleName();
     public static final String CAMERA_ID_KEY = "camera_id";
@@ -54,7 +59,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     private String mFlashMode;
     private Camera mCamera;
     private SquareCameraPreview mPreviewView;
-    private SurfaceHolder mSurfaceHolder;
+    private SurfaceTexture mSurfaceHolder;
 
     private MediaRecorder mMediaRecorder;
 
@@ -82,6 +87,13 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     private View mGalleryButton;
 
     private Uri mVideoUri;
+
+    private FileObserver mFileObserver;
+
+    private ProgressBar mRecordProgress;
+
+    private Timer mProgressBarTimer;
+
 
     public static Fragment newInstance() {
         return new CameraFragment();
@@ -133,6 +145,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         mCameraOps = root.findViewById(R.id.camera_ops);
 
+        mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
+
         return root;
     }
 
@@ -151,7 +165,44 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             }
         });
 
-        mPreviewView.getHolder().addCallback(CameraFragment.this);
+        mPreviewView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
+            @Override
+            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                mSurfaceHolder = surface;
+
+                if (hasCameraAndWritePermission()) {
+                    mSurfaceAlreadyCreated = true;
+                    //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
+                    mShowCameraHandler.postDelayed(mShowPreview, 250);
+                }
+            }
+
+
+            @Override
+            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+
+            }
+
+            @Override
+            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+                mSurfaceAlreadyCreated = false;
+                // stop the preview
+                if (mCamera != null) {
+                    mShowCameraHandler.removeCallbacks(mShowPreview);
+                    releaseMediaRecorder();
+                    stopCameraPreview();
+                    mCamera.release();
+                    mCamera = null;
+                }
+                return false;
+            }
+
+            @Override
+            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+
+            }
+        });
+        //mPreviewView.getHolder().addCallback(CameraFragment.this);
 
         mImageParameters.mIsPortrait =
                 getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -219,11 +270,41 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 public void run() {
                     mVideoUri = prepareMediaRecorder();
                     if (mVideoUri != null) {
-                        hideCameraButtons(true);
-                        mTakePhotoBtn.setImageResource(R.drawable.square_camera_record);
+
+                        mFileObserver = new FileObserver(mVideoUri.getPath()) {
+                            private boolean mStopRecording = false;
+
+                            @Override
+                            public void onEvent(int event, String path) {
+                                if (!mStopRecording && event == FileObserver.MODIFY) {
+                                    mStopRecording = true;
+                                    mFileObserver.stopWatching();
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            hideCameraButtons(true);
+
+                                            mProgressBarTimer = new Timer();
+                                            mProgressBarTimer.scheduleAtFixedRate(new TimerTask() {
+                                                                                      @Override
+                                                                                      public void run() {
+                                                                                          mRecordProgress.setProgress(mRecordProgress.getProgress() + 100);
+                                                                                      }
+                                                                                  }
+                                                    , 0
+                                                    , 100);
+
+                                            mTakePhotoBtn.setImageResource(R.drawable.square_camera_record);
+                                            mRecordStartTime = System.currentTimeMillis();
+                                        }
+                                    });
+                                }
+                            }
+                        };
+                        mFileObserver.startWatching();
+
                         setSafeToTakePhoto(false);
                         mMediaRecorder.start();
-                        mRecordStartTime = System.currentTimeMillis();
                         mIsRecording = true;
                     }
                 }
@@ -236,7 +317,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 switch (action) {
                     case MotionEvent.ACTION_DOWN: //press down
                         mIsRecording = false;
-                        mRecordHandler.postDelayed(mRecordRunnable, 1000); //if don't pick within 1 sec, switch to camera
+                        mRecordHandler.postDelayed(mRecordRunnable, 500); //if don't pick within 1 sec, switch to camera
                         mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected); //change icon
                         break;
 
@@ -260,9 +341,14 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                         mRecordHandler.removeCallbacks(mRecordRunnable);
                         if (mIsRecording) { //if was recording, stop recording
                             try {
+                                if (mProgressBarTimer != null) {
+                                    mProgressBarTimer.cancel();
+                                    mProgressBarTimer.purge();
+                                    mProgressBarTimer = null;
+                                }
                                 mMediaRecorder.stop();
                                 releaseMediaRecorder();
-                                if (System.currentTimeMillis() - mRecordStartTime < 2500) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
+                                if (mRecordStartTime == 0 || System.currentTimeMillis() - mRecordStartTime < 2000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
                                     showVideoTooShortDialog();
                                 } else {  //go to edit video screen
                                     if (mVideoUri != null) {
@@ -296,9 +382,12 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     //hides the gallery, flash, and reverse camera button
     private void hideCameraButtons(boolean hide) {
         if (hide && mCameraOps.getVisibility() == View.VISIBLE) {
+            mRecordProgress.setVisibility(View.VISIBLE);
+            mRecordProgress.setProgress(0);
             mCameraOps.setVisibility(View.INVISIBLE);
             mGalleryButton.setVisibility(View.INVISIBLE);
         } else if (!hide && mCameraOps.getVisibility() == View.INVISIBLE) {
+            mRecordProgress.setVisibility(View.GONE);
             mCameraOps.setVisibility(View.VISIBLE);
             mGalleryButton.setVisibility(View.VISIBLE);
         }
@@ -397,7 +486,8 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         setupCamera();
 
         try {
-            mCamera.setPreviewDisplay(mSurfaceHolder);
+            //mCamera.setPreviewDisplay(mSurfaceHolder);
+            mCamera.setPreviewTexture(mSurfaceHolder);
             mCamera.startPreview();
             setSafeToTakePhoto(true);
             setCameraFocusReady(true);
@@ -433,6 +523,9 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
      * Determine the current display orientation and rotate the camera preview
      * accordingly
      */
+
+    private int displayOrientation = 0;
+
     private void determineDisplayOrientation() {
         CameraInfo cameraInfo = new CameraInfo();
         Camera.getCameraInfo(mCameraID, cameraInfo);
@@ -459,8 +552,6 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                 break;
             }
         }
-
-        int displayOrientation;
 
         // CameraInfo.Orientation is the angle relative to the natural position of the device
         // in clockwise rotation (angle that is rotated clockwise from the natural position)
@@ -500,7 +591,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         }
 
         //We don't have an auto flash
-        if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)){
+        if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)) {
             mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
         }
 
@@ -586,7 +677,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
             //if on or auto, dont autofocus
 
             //autofocus
-            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)){
+            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)) {
                 mCamera.cancelAutoFocus();
                 mCamera.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
@@ -600,9 +691,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                         }
                     }
                 });
-            }
-
-            else {
+            } else {
                 mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
             }
         }
@@ -636,7 +725,13 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
     @Override
     public void onPause() {
         super.onPause();
-        mOrientationListener.disable();
+        if(mProgressBarTimer != null) {
+            mProgressBarTimer.cancel();
+            mProgressBarTimer.purge();
+            mProgressBarTimer = null;
+        }
+            mOrientationListener.disable();
+
         mShowCameraHandler.removeCallbacks(mShowPreview);
         // stop the preview
         if (mCamera != null) {
@@ -656,34 +751,34 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         mPreviewView.setBackgroundColor(Color.parseColor("#000000"));
     }
 
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        mSurfaceHolder = holder;
-
-        if (hasCameraAndWritePermission()) {
-            mSurfaceAlreadyCreated = true;
-            //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
-            mShowCameraHandler.postDelayed(mShowPreview, 250);
-        }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        mSurfaceAlreadyCreated = false;
-        // stop the preview
-        if (mCamera != null) {
-            mShowCameraHandler.removeCallbacks(mShowPreview);
-            releaseMediaRecorder();
-            stopCameraPreview();
-            mCamera.release();
-            mCamera = null;
-        }
-    }
+//    @Override
+//    public void surfaceCreated(SurfaceHolder holder) {
+//        mSurfaceHolder = holder;
+//
+//        if (hasCameraAndWritePermission()) {
+//            mSurfaceAlreadyCreated = true;
+//            //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
+//            mShowCameraHandler.postDelayed(mShowPreview, 250);
+//        }
+//    }
+//
+//    @Override
+//    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+//
+//    }
+//
+//    @Override
+//    public void surfaceDestroyed(SurfaceHolder holder) {
+//        mSurfaceAlreadyCreated = false;
+//        // stop the preview
+//        if (mCamera != null) {
+//            mShowCameraHandler.removeCallbacks(mShowPreview);
+//            releaseMediaRecorder();
+//            stopCameraPreview();
+//            mCamera.release();
+//            mCamera = null;
+//        }
+//    }
 
     /**
      * A picture has been taken
@@ -693,32 +788,29 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
      */
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        int rotation = getPhotoRotation();
-        Bitmap map = rotatePicture(rotation, data);
+        //int rotation = getPhotoRotation();
 
         //crop image correctly. todo make more efficient by adding this to rotatePicture
-        int x = 0;
-        int y = 0;
-        if (!usingFrontFaceCamera()) {
-            if (rotation == 180) {
-                x += map.getWidth() - map.getHeight();
-            } else if (rotation == 270) {
-                y += map.getHeight() - map.getWidth();
-            }
-        } else {
-            if (rotation == 180) {
-                if (map.getWidth() - map.getHeight() > 0) {
-                    x += map.getWidth() - map.getHeight();
-                }
-            } else if (rotation == 90) {
-                if (map.getHeight() - map.getWidth() > 0) {
-                    y += map.getHeight() - map.getWidth();
-                }
-            }
-        }
-
-        int measure = map.getWidth() < map.getHeight() ? map.getWidth() : map.getHeight();
-        Uri uri = ImageUtility.savePicture(getActivity(), Bitmap.createBitmap(map, x, y, measure, measure));
+//        int x = 0;
+//        int y = 0;
+//        if (!usingFrontFaceCamera()) {
+//            if (rotation == 180) {
+//                x += map.getWidth() - map.getHeight();
+//            } else if (rotation == 270) {
+//                y += map.getHeight() - map.getWidth();
+//            }
+//        } else {
+//            if (rotation == 180) {
+//                if (map.getWidth() - map.getHeight() > 0) {
+//                    x += map.getWidth() - map.getHeight();
+//                }
+//            } else if (rotation == 90) {
+//                if (map.getHeight() - map.getWidth() > 0) {
+//                    y += map.getHeight() - map.getWidth();
+//                }
+//            }
+//        }
+        Uri uri = ImageUtility.savePicture(getActivity(), rotatePicture(displayOrientation, data));
 
         getFragmentManager()
                 .beginTransaction()
@@ -737,25 +829,37 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         Bitmap bitmap = ImageUtility.decodeSampledBitmapFromByte(getActivity(), data);
 //        Log.d(TAG, "original bitmap width " + bitmap.getWidth() + " height " + bitmap.getHeight());
 
+        Bitmap oldBitmap;
+        oldBitmap = bitmap;
 
-        if (rotation != 0) {
-            Bitmap oldBitmap = bitmap;
+        int x = 0;
+        int y = 0;
 
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotation);
+        int measure;
 
-            bitmap = Bitmap.createBitmap(
-                    oldBitmap, 0, 0, oldBitmap.getWidth(), oldBitmap.getHeight(), matrix, false
-            );
-
-            oldBitmap.recycle();
+        if (oldBitmap.getHeight() < oldBitmap.getWidth()) {
+            if (usingFrontFaceCamera()) {
+                x += oldBitmap.getWidth() - oldBitmap.getHeight();
+            }
+            measure = oldBitmap.getHeight();
+        } else {
+            measure = oldBitmap.getWidth();
         }
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(usingFrontFaceCamera() ? 360 - rotation : rotation, oldBitmap.getWidth() / 2, oldBitmap.getHeight() / 2);
+
+        bitmap = Bitmap.createBitmap(
+                oldBitmap, x, y, measure, measure, matrix, false
+        );
+
+        oldBitmap.recycle();
 
 
         if (usingFrontFaceCamera()) {
-            Bitmap oldBitmap = bitmap;
+            oldBitmap = bitmap;
 
-            Matrix matrix = new Matrix();
+            matrix = new Matrix();
             matrix.setScale(-1, 1);
             matrix.postTranslate(oldBitmap.getWidth(), 0);
 
@@ -776,20 +880,20 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         return (info.facing == CameraInfo.CAMERA_FACING_FRONT);
     }
 
-    private int getPhotoRotation() {
-        int rotation;
-        int orientation = mOrientationListener.getRememberedNormalOrientation();
-        CameraInfo info = new CameraInfo();
-        Camera.getCameraInfo(mCameraID, info);
-
-        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-            rotation = (info.orientation - orientation + 360) % 360;
-        } else {
-            rotation = (info.orientation + orientation) % 360;
-        }
-
-        return rotation;
-    }
+//    private int getPhotoRotation() {
+//        int rotation;
+//        int orientation = mOrientationListener.getRememberedNormalOrientation();
+//        CameraInfo info = new CameraInfo();
+//        Camera.getCameraInfo(mCameraID, info);
+//
+//        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
+//            rotation = (info.orientation - orientation + 360) % 360;
+//        } else {
+//            rotation = (info.orientation + orientation) % 360;
+//        }
+//
+//        return rotation;
+//    }
 
     /**
      * When orientation changes, onOrientationChanged(int) of the listener will be called
@@ -871,7 +975,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
         int bestWidth = camcorderProfile.videoFrameWidth;
         Size betterSize = getVideoSize(camcorderProfile.videoFrameHeight);
 
-        if (betterSize != null){
+        if (betterSize != null) {
             bestWidth = betterSize.width;
         }
 
@@ -882,6 +986,7 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
 
         //stop and restart
 
+        mCamera.cancelAutoFocus();
         Camera.Parameters param = mCamera.getParameters();
         param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
         mCamera.setParameters(param); //must set preview size to same size and video size or it will record green on some phones
@@ -916,6 +1021,11 @@ public class CameraFragment extends Fragment implements SurfaceHolder.Callback, 
                             mMediaRecorder.stop();
                         } catch (RuntimeException e) {
                             e.printStackTrace();
+                        }
+                        if (mProgressBarTimer != null) {
+                            mProgressBarTimer.cancel();
+                            mProgressBarTimer.purge();
+                            mProgressBarTimer = null;
                         }
                         releaseMediaRecorder();
                         setSafeToTakePhoto(true);

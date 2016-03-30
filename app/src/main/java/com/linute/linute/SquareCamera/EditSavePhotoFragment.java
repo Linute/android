@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
@@ -99,8 +100,6 @@ public class EditSavePhotoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Log.i(TAG, "onViewCreated: photo");
-
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID","");
@@ -110,6 +109,8 @@ public class EditSavePhotoFragment extends Fragment {
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
         photoImageView.setImageURI(imageUri);
+
+        //photoImageView.setImageURI(imageUri);
 
         //shows the text strip when image touched
         photoImageView.setOnClickListener(new View.OnClickListener() {

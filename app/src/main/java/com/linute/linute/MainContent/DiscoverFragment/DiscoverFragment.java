@@ -162,38 +162,38 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
 
-    public static final String POST_PARCEL_KEY = "post_parcel_items";
+    //public static final String POST_PARCEL_KEY = "post_parcel_items";
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
-        outState.putBoolean("friendsOnly", mFriendsOnly);
-        outState.putBoolean("feedDone", feedDone);
-        super.onSaveInstanceState(outState);
-    }
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        //outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
+//        outState.putBoolean("friendsOnly", mFriendsOnly);
+//        outState.putBoolean("feedDone", feedDone);
+//        super.onSaveInstanceState(outState);
+//    }
 
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
-            feedDone = savedInstanceState.getBoolean("feedDone");
-            mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
-
-            DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
-            if (fragment == null) return;
-
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), fragment.getSinglePlaybackManager());
-            mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
-                @Override
-                public void getMoreFeed() {
-                    loadMoreFeed();
-                }
-            });
-
-            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
-        }
-    }
+//    @Override
+//    public void onViewStateRestored(Bundle savedInstanceState) {
+//        super.onViewStateRestored(savedInstanceState);
+//        if (savedInstanceState != null) {
+//            mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
+//            feedDone = savedInstanceState.getBoolean("feedDone");
+//            //mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
+//
+////            DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
+////            if (fragment == null) return;
+////
+////            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), fragment.getSinglePlaybackManager());
+////            mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
+////                @Override
+////                public void getMoreFeed() {
+////                    loadMoreFeed();
+////                }
+////            });
+////
+////            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+//        }
+    //}
 
 
     @Override

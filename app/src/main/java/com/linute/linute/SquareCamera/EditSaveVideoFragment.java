@@ -67,7 +67,6 @@ public class EditSaveVideoFragment extends Fragment {
     //private View mFrame; //frame where we put edittext and picture
 
     //private CustomBackPressedEditText mText; //text
-    private View mButtonLayer;
     private CheckBox mAnonSwitch;
 
     private String mCollegeId;
@@ -150,7 +149,6 @@ public class EditSaveVideoFragment extends Fragment {
         });
 
         //shows the text strip when image touched
-        mButtonLayer = view.findViewById(R.id.editFragment_switch);
 
         mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
         mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
@@ -263,6 +261,7 @@ public class EditSaveVideoFragment extends Fragment {
 
                 @Override
                 public void onSuccess(String message) {
+                    mProgressDialog.setMessage("Sending video...");
                     new sendVideoAsync().execute(outputFile, mAnonSwitch.isChecked() ? "1" : "0");
                 }
 
@@ -296,7 +295,7 @@ public class EditSaveVideoFragment extends Fragment {
 
     private void showProgress(final boolean show) {
         if (getActivity() == null) return;
-        mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+        mAnonSwitch.setVisibility(show ? View.GONE : View.VISIBLE);
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
 
         if (show) {

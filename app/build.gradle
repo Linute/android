@@ -24,8 +24,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 24
-        versionName "1.7.4.4"
+        versionCode 1
+        versionName "0.1"
     }
     buildTypes {
         release {
@@ -63,4 +63,7 @@ dependencies {
     compile "com.daimajia.swipelayout:library:1.2.0@aar"
     compile 'com.github.hiteshsondhi88.libffmpeg:FFmpegAndroid:0.2.5'
     compile 'commons-io:commons-io:2.4'
+    compile 'com.lyft:scissors:1.0.3'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.0'
 }

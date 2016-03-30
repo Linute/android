@@ -6,7 +6,7 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.SurfaceView;
+import android.view.TextureView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  *
  */
-public class SquareCameraPreview extends SurfaceView{
+public class SquareCameraPreview extends TextureView{
 
     public static final String TAG = SquareCameraPreview.class.getSimpleName();
 
