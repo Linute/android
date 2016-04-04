@@ -31,10 +31,17 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<Rooms> mRoomsList;
     private SharedPreferences mSharedPreferences;
 
+    private Runnable mLoadMore;
+
     public RoomsAdapter(Context aContext, List<Rooms> roomsList) {
         this.aContext = aContext;
         mRoomsList = roomsList;
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+
+    public void setLoadMore(Runnable load){
+        mLoadMore = load;
     }
 
     @Override
@@ -47,6 +54,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ((RoomsViewHolder) holder).bindModel(mRoomsList.get(position));
+
+        //load more
+        if (position == mRoomsList.size() - 1 && mLoadMore != null){
+            mLoadMore.run();
+        }
     }
 
     @Override
@@ -76,9 +88,10 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vRoomsListLinear.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
+                        mRooms.setHasUnread(false);
+
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
                                         mRooms.getRoomId(),
@@ -113,4 +126,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 vHasUnreadIcon.setVisibility(View.INVISIBLE);
         }
     }
+
+
 }

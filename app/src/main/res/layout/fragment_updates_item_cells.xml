@@ -12,8 +12,8 @@
         android:layout_height="@dimen/profile_image_radius"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
         app:civ_border_color="@color/seperator_color"
         app:civ_border_width="1dp"
         tools:background="@android:color/darker_gray"
@@ -36,8 +36,8 @@
         android:layout_alignParentEnd="true"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:scaleType="centerCrop"
         android:padding="1px"
         android:background="@color/seperator_color"/>
@@ -64,8 +64,9 @@
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:textColor="@color/fifty_black"
+            android:ellipsize="end"
             android:textSize="@dimen/sub_font_size"
-            tools:text="Test text. This is what it will looking like test test test test tedfs "
+            tools:text="Test text. This est text. This est text. This est text. This is what it will looking like test test test test tedfs "
             />
 
     </LinearLayout>

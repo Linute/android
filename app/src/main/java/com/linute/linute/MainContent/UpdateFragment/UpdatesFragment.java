@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -10,19 +9,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKActivity;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -37,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -59,6 +51,9 @@ public class UpdatesFragment extends UpdatableFragment {
     private View mEmptyView;
 
     private boolean mSafeToAddToTop = false;
+
+    //private boolean mCanLoadMore = false;
+    //private int mSkip = 0;
 
     public UpdatesFragment() {
 
@@ -83,6 +78,7 @@ public class UpdatesFragment extends UpdatableFragment {
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
         mEmptyView = rootView.findViewById(R.id.updateFragment_empty);
+
         //NOTE: Code for load more
         /*
         mUpdatesAdapter.setOnLoadMoreListener(new UpdatesAdapter.onLoadMoreListener() {
@@ -114,8 +110,6 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        mHasMessages = false;
-
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             mainActivity.setTitle("Updates");
@@ -128,11 +122,6 @@ public class UpdatesFragment extends UpdatableFragment {
                     }
                 }
             });
-
-            mainActivity.connectSocket("unread", haveUnread);
-
-            JSONObject object = new JSONObject();
-            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
 
             JSONObject obj = new JSONObject();
             try {
@@ -177,8 +166,6 @@ public class UpdatesFragment extends UpdatableFragment {
         super.onPause();
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.disconnectSocket("unread", haveUnread);
-
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", activity
@@ -207,7 +194,6 @@ public class UpdatesFragment extends UpdatableFragment {
 
         if (getActivity() == null) return;
         JSONArray unread = new JSONArray();
-
 
         mSafeToAddToTop = false;
 
@@ -279,7 +265,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
                         Update update;
                         //iterate through array of activities
-                        for (int i = 0; i < activities.length(); i++) {
+                        for (int i = activities.length() - 1; i >= 0; i--) {
                             try {
                                 update = new Update(activities.getJSONObject(i));
                                 if (update.isRead()) oldItems.add(update); //if read, it's old
@@ -329,25 +315,6 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    private Emitter.Listener haveUnread = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mHasMessages = (boolean) args[0];
-            if (mCreateActionMenu){
-                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
-                if (act != null) {
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            act.invalidateOptionsMenu();
-                        }
-                    });
-                }
-            }
-        }
-    };
-
-
     private void showServerErrorToast() {
         if (getActivity() == null) return;
         getActivity().runOnUiThread(new Runnable() {
@@ -371,38 +338,6 @@ public class UpdatesFragment extends UpdatableFragment {
     }
 
 
-    private boolean mCreateActionMenu = false;
-    private boolean mHasMessages = false;
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
-        mCreateActionMenu = true;
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        if (getActivity() != null) {
-            switch (item.getItemId()) {
-                case R.id.people_fragment_menu_chat:
-                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                    enterRooms.putExtra("CHATICON", true);
-                    startActivity(enterRooms);
-                    return true;
-                case R.id.menu_find_friends:
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity != null) {
-                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                    }
-                    return true;
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 
     public void addItemToRecents(final Update update) {
         if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
@@ -418,5 +353,4 @@ public class UpdatesFragment extends UpdatableFragment {
             });
         }
     }
-
 }

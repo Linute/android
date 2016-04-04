@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -16,7 +15,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -31,7 +29,9 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -52,7 +52,6 @@ import org.json.JSONObject;
 import java.net.URISyntaxException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -65,7 +64,7 @@ public class MainActivity extends BaseTaptActivity {
     public static final int PHOTO_STATUS_POSTED = 19;
 
     private AppBarLayout mAppBarLayout;
-    private ActionBar mActionBar;
+    //private ActionBar mActionBar;
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private MainDrawerListener mMainDrawerListener;
@@ -117,9 +116,38 @@ public class MainActivity extends BaseTaptActivity {
 
         //get toolbar
         mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
-        setSupportActionBar(mToolbar);
-        mActionBar = getSupportActionBar();
+        mToolbar.inflateMenu(R.menu.people_fragment_menu);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+                    getSupportFragmentManager().popBackStack();
+                else mDrawerLayout.openDrawer(GravityCompat.START);
 
+            }
+        });
+
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (mSafeForFragmentTransaction) {
+                    int id = item.getItemId();
+
+                    switch (id) {
+                        case R.id.people_fragment_menu_chat:
+                            Intent enterRooms = new Intent(MainActivity.this, RoomsActivity.class);
+                            enterRooms.putExtra("CHATICON", true);
+                            startActivity(enterRooms);
+                            return true;
+                        case R.id.menu_find_friends:
+                            addFragmentToContainer(new FindFriendsChoiceFragment());
+                            return true;
+                    }
+                }
+
+                return false;
+            }
+        });
 
         //this arrow changes from navigation to back arrow
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
@@ -284,10 +312,12 @@ public class MainActivity extends BaseTaptActivity {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
             @Override
             public void run() {
-                MainActivity.this.getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.mainActivity_fragment_holder, fragment)
-                        .commit();
+                if(mSafeForFragmentTransaction) {
+                    MainActivity.this.getSupportFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.mainActivity_fragment_holder, fragment)
+                            .commit();
+                }
             }
         });
     }
@@ -345,20 +375,8 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        //TODO: track which fragment we're in
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        //TODO: save state
-    }
-
-    @Override
     public void setTitle(String title) {
-        mActionBar.setTitle(title);
+        mToolbar.setTitle(title);
     }
 
     //loads the header of our drawer
@@ -390,13 +408,13 @@ public class MainActivity extends BaseTaptActivity {
     //pops back toolbar back out
     @Override
     public void resetToolbar() {
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
-
-        if (behavior == null) return;
+//        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+//        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+//
+//        if (behavior == null) return;
 
         mAppBarLayout.setExpanded(true, true);
-        behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
+//        behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
     }
 
     //raise and lower appBar
@@ -423,36 +441,11 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-        if (mSafeForFragmentTransaction) {
-            int id = item.getItemId();
-
-            switch (id) {
-                case android.R.id.home:
-                    if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-                        getSupportFragmentManager().popBackStack();
-                    else mDrawerLayout.openDrawer(GravityCompat.START);
-                    return true;
-            }
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        }
-
-        //if there is a profile view or feedDetailView
-        else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
         } else {
             super.onBackPressed();
         }
@@ -572,17 +565,21 @@ public class MainActivity extends BaseTaptActivity {
                     op.transports = new String[]{WebSocket.NAME};
 
                     mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+
+                    mSocket.on("activity", newActivity);
+                    mSocket.on("new post", newPostListener);
+                    mSocket.on("unread", haveUnread);
+                    mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+                    mSocket.on(Socket.EVENT_ERROR, onEventError);
+                    mSocket.connect();
+                    mConnecting = false;
+
+                    JSONObject object = new JSONObject();
+                    emitSocket(API_Methods.VERSION + ":messages:unread", object);
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
             }
-
-            mSocket.on("activity", newActivity);
-            mSocket.on("new post", newPostListener);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);//fixme
-            mSocket.on(Socket.EVENT_ERROR, onEventError);
-            mSocket.connect();
-            mConnecting = false;
         }
     }
 
@@ -596,6 +593,8 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.disconnect();
             mSocket.off("activity", newActivity);
             mSocket.off("new post", newPostListener);
+            mSocket.on("unread", haveUnread);
+
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -756,19 +755,11 @@ public class MainActivity extends BaseTaptActivity {
 
     //hiding toolbar / showing toolbar
     @Override
-    public void enableBarScrolling(boolean enabled) {
-        if (enabled) {
-            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-                    .getLayoutParams())
-                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
-            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-        } else {
-            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-                    .getLayoutParams())
-                    .setBehavior(null);
-            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-                    .setScrollFlags(0);
+    public void enableBarScrolling(boolean enable) {
+        if (enable && mToolbar.getVisibility() == View.GONE){
+            mToolbar.setVisibility(View.VISIBLE);
+        }else if (!enable && mToolbar.getVisibility() == View.VISIBLE){
+            mToolbar.setVisibility(View.GONE);
         }
     }
 
@@ -801,4 +792,21 @@ public class MainActivity extends BaseTaptActivity {
             mPreviousItem.setChecked(true);
         }
     }
+
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            final boolean newMessage = (boolean) args[0];
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(mToolbar != null)
+                        mToolbar.getMenu()
+                                .findItem(R.id.people_fragment_menu_chat)
+                                .setIcon(newMessage ? R.drawable.notify_mess_icon : R.drawable.ic_chat81);
+                }
+            });
+        }
+    };
 }

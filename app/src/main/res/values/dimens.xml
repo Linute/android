@@ -14,12 +14,12 @@
     <dimen name="padding_s">4dp</dimen>
 
 
-    <dimen name="profile_image_radius">52dp</dimen>
+    <dimen name="profile_image_radius">40dp</dimen>
     <dimen name="small_profile_image_radius">40dp</dimen>
 
 
     <dimen name="action_picture_size">64dp</dimen>
-    <dimen name="updatefragment_icon_size">17dp</dimen>
+    <dimen name="updatefragment_icon_size">16dp</dimen>
 
     <!-- Square Camera -->
     <dimen name="squarecam_edit_frag_default_height">60dp</dimen>

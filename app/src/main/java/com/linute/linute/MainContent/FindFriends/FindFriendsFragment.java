@@ -91,7 +91,6 @@ public class FindFriendsFragment extends UpdatableFragment {
 
     private Button mReloadButton;
 
-
     private GetContactsInBackground mGetContactsInBackground;
 
 

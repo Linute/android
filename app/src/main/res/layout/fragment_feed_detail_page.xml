@@ -8,9 +8,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="?android:attr/actionBarSize"
     android:background="@color/white">
 
+    <android.support.design.widget.AppBarLayout android:id="@+id/toolbar_container"
+        android:layout_width="match_parent"
+                                                android:layout_height="?android:attr/actionBarSize"
+                                                android:layout_alignParentTop="true"
+    >
+
+        <android.support.v7.widget.Toolbar android:id="@+id/feed_detail_toolbar"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="?android:attr/actionBarSize"
+                                           android:background="@color/colorPrimary"
+                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"
+        />
+    </android.support.design.widget.AppBarLayout>
 
     <LinearLayout android:id="@+id/comment_container"
                   android:layout_width="match_parent"
@@ -48,10 +60,10 @@
                           android:layout_alignParentBottom="true"
                           android:layout_centerHorizontal="true"
                           android:layout_marginBottom="8dp"
-                          android:textSize="@dimen/sub_font_size"
                           android:text="OFF"
                           android:textColor="@color/twentyfive_black"
-                          />
+                          android:textSize="@dimen/sub_font_size"
+                />
 
 
             </RelativeLayout>
@@ -61,10 +73,10 @@
                 android:layout_width="0px"
                 android:layout_height="match_parent"
                 android:layout_weight="4"
-                android:maxLines="2"
                 android:background="#FFFFFF"
                 android:hint="Enter your comment... "
                 android:inputType="textCapSentences|textMultiLine|textShortMessage"
+                android:maxLines="2"
                 android:singleLine="false"
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/sub_font_size"
@@ -105,13 +117,16 @@
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/comment_container"/>
+        android:layout_above="@id/comment_container"
+        android:layout_below="@id/toolbar_container"
+    />
 
     <android.support.v7.widget.RecyclerView android:id="@+id/feed_detail_mentions"
-                                            android:background="@color/white"
                                             android:layout_width="match_parent"
                                             android:layout_height="match_parent"
                                             android:layout_above="@id/comment_container"
+                                            android:layout_below="@id/toolbar_container"
+                                            android:background="@color/white"
                                             android:visibility="gone"/>
 
 </RelativeLayout>

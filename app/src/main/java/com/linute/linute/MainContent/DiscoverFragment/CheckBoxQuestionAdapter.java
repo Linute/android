@@ -87,8 +87,8 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
         }
 
-
-        if (position + 1 == mPosts.size()) {
+//position + 1 == mPosts.size()
+        if (position == mPosts.size()) {
             mGetMoreFeed.getMoreFeed();
         }else if (position == 0){
             MainActivity activity = (MainActivity) context;
@@ -102,7 +102,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
         if (!mSendImpressions){ //scrolled back to the top
             if (position == 0)
                 mSendImpressions = true;
-        }else {
+        }else{
             sendImpressionsAsync(mPosts.get(position).getPostId());
         }
     }

@@ -42,6 +42,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
     private DiscoverFragment[] mDiscoverFragments;
 
+    //makes sure only one video is playing at a time
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
@@ -55,8 +56,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
-
-        setHasOptionsMenu(true);
 
         if (mDiscoverFragments == null || mDiscoverFragments.length != 2) {
             mDiscoverFragments = new DiscoverFragment[]{DiscoverFragment.newInstance(false), DiscoverFragment.newInstance(true)};
@@ -168,10 +167,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             mainActivity.showFAB(true); //show the floating button
             mainActivity.resetToolbar();
 
-            mainActivity.connectSocket("unread", haveUnread);
-            JSONObject object = new JSONObject();
-            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
-
             mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -200,8 +195,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
 
-            mainActivity.disconnectSocket("unread", haveUnread);
-
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
@@ -227,38 +220,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     }
 
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
-        mCreateActionMenu = true;
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        if (getActivity() != null) {
-            switch (item.getItemId()) {
-                case R.id.people_fragment_menu_chat:
-                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                    enterRooms.putExtra("CHATICON", true);
-                    startActivity(enterRooms);
-                    return true;
-                case R.id.menu_find_friends:
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity != null){
-                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                    }
-                    return true;
-            }
-        }
-
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
     //returns if success
     public boolean addPostToFeed(Object post){
 
@@ -279,29 +240,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             return false;
         }
     }
-
-
-    private boolean mCreateActionMenu = false;
-    private boolean mHasMessages = false;
-
-    private Emitter.Listener haveUnread = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mHasMessages = (boolean) args[0];
-            //Log.i(TAG, "call: "+mHasMessages);
-            if (mCreateActionMenu){
-                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
-                if (act != null) {
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            act.invalidateOptionsMenu();
-                        }
-                    });
-                }
-            }
-        }
-    };
 
 
     public SingleVideoPlaybackManager getSinglePlaybackManager(){

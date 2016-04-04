@@ -162,7 +162,6 @@ public class Profile extends UpdatableFragment {
 
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
-            mSkip = 0;
             mOtherCompotentHasUpdated = false;
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -289,7 +288,8 @@ public class Profile extends UpdatableFragment {
 
     public void setActivities() {
 
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), 0, new Callback() { //todo fix skip
+        //skip  = -1 so we don't add skip to query
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), -1, 24, new Callback() { //todo fix skip
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -310,13 +310,18 @@ public class Profile extends UpdatableFragment {
 
                         String body = response.body().string();
                         //Log.i(TAG, "onResponse: " + body);
-                        final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
+
+                        JSONObject bodyJson = new JSONObject(body);
+
+                        mSkip = bodyJson.getInt("skip");
+
+                        final JSONArray activities = bodyJson.getJSONArray("activities"); //try to get activities from response
 
                         if (activities == null) return;
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
-                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
                                 userActItems.add(
                                         new UserActivityItem(
@@ -327,8 +332,8 @@ public class Profile extends UpdatableFragment {
                             }
                         }
 
-                        //if we got 24 back, there might still be more
-                        mCanLoadMore = activities.length() == 24;
+                        //if skip was 0, we have reached end of db
+                        mCanLoadMore = mSkip > 0;
 
                         mUserActivityItems.clear();
                         mUserActivityItems.addAll(userActItems);
@@ -339,7 +344,7 @@ public class Profile extends UpdatableFragment {
 
                         if (getActivity() == null) return;
 
-                        mSkip = 24;
+                        mSkip -= 24;
 
                         if (!mOtherCompotentHasUpdated) {
                             mOtherCompotentHasUpdated = true;
@@ -378,7 +383,14 @@ public class Profile extends UpdatableFragment {
 
     public void getMoreActivities() {
 
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), mSkip, new Callback() {
+        int limit = 24;
+
+        if (mSkip < 0){
+            limit += mSkip;
+            mSkip = 0;
+        }
+
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), mSkip, limit, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -403,9 +415,7 @@ public class Profile extends UpdatableFragment {
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
-                        String userid = mSharedPreferences.getString("userID", "");
-
-                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
                                 userActItems.add(
                                         new UserActivityItem(
@@ -416,12 +426,12 @@ public class Profile extends UpdatableFragment {
                             }
                         }
 
-                        //if we got 24 back, there might still be more
-                        mCanLoadMore = activities.length() == 24;
 
                         mUserActivityItems.addAll(userActItems);
 
-                        mSkip += 24; //skip 24 posts
+                        //if skip isn't 0, we can still load more
+                        mCanLoadMore = mSkip > 0;
+                        mSkip -= 24; //skip 24 posts
 
                         if (getActivity() == null) return;
 

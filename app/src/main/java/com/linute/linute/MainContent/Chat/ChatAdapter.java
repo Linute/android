@@ -22,6 +22,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
 
+    private LoadMoreListener mLoadMoreListener;
+
     //private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
     //private SharedPreferences aSharedPreferences;
 
@@ -56,6 +58,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
         holder.bindModel(aChatList.get(position));
+        if (position == 0){
+            if (mLoadMoreListener != null){
+                mLoadMoreListener.loadMore();
+            }
+        }
+    }
+
+    public void setLoadMoreListener(LoadMoreListener l){
+        mLoadMoreListener = l;
     }
 
     @Override
@@ -93,6 +104,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                 vUserTime.setText(mDateFormat.format(new Date(chat.getDate())));
 
         }
+    }
+
+
+    public interface LoadMoreListener{
+        void loadMore();
     }
 
 }

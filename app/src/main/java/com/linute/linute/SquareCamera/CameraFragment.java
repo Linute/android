@@ -676,23 +676,12 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
             //if on or auto, dont autofocus
 
-            //autofocus
-            if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)) {
+            try {
                 mCamera.cancelAutoFocus();
-                mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean success, Camera camera) {
-                        // jpeg callback occurs when the compressed image is available
-                        //can cause runtime exeption if click take picture too quickly when activity starts
-                        try {
-                            mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
-                        } catch (RuntimeException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-            } else {
                 mCamera.takePicture(shutterCallback, raw, postView, CameraFragment.this);
+            } catch (RuntimeException e) {
+                //if we call take picture before camera preview has started: will throw runtime exception
+                e.printStackTrace();
             }
         }
     }
@@ -725,12 +714,12 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     @Override
     public void onPause() {
         super.onPause();
-        if(mProgressBarTimer != null) {
+        if (mProgressBarTimer != null) {
             mProgressBarTimer.cancel();
             mProgressBarTimer.purge();
             mProgressBarTimer = null;
         }
-            mOrientationListener.disable();
+        mOrientationListener.disable();
 
         mShowCameraHandler.removeCallbacks(mShowPreview);
         // stop the preview

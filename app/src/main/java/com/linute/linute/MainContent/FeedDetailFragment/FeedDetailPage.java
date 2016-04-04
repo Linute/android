@@ -11,12 +11,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -93,16 +92,21 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private RecyclerView mMentionedList;
 
-    private SharedPreferences mSharedPreferences;
+    //private SharedPreferences mSharedPreferences;
 
     private MentionedPersonAdapter mMentionedPersonAdapter;
 
     private View mProgressbar;
     private View mSendButton;
 
+    private Toolbar mToolbar;
+
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     private CheckBox mCheckBox;
+
+    private String mViewId;
+    private String mImageSigniture;
 
 
     // feedDetail is divided into 2 parts, the header and the comments. We load them seperatly so one might
@@ -137,9 +141,55 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_feed_detail_page, container, false);
 
-        setHasOptionsMenu(true);
+        SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME,Context.MODE_PRIVATE).getString("imageSigniture", "000");
+        mViewId = pref.getString("userID", "");
 
-        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mToolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
+        mToolbar.setTitle("Comments");
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
+
+        boolean isOwner = mFeedDetail.getPostUserId().equals(mViewId);
+        mToolbar.inflateMenu(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar);
+        if (isOwner) {
+            mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
+        }else {
+            mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
+            mToolbar.getMenu().findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
+        }
+
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+
+                switch (id) {
+                    case R.id.feed_detail_report:
+                        showReportOptionsDialog();
+                        return true;
+                    case R.id.feed_detail_delete:
+                        showConfirmDeleteDialog();
+                        return true;
+                    case R.id.feed_detail_reveal:
+                        showRevealConfirm();
+                        return true;
+                    case R.id.feed_detail_mute_post:
+                        showMuteConfirmation();
+                        return true;
+                    case R.id.feed_detail_hide_post:
+                        showHideConfirmation();
+                        return true;
+                }
+                return false;
+            }
+        });
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         recList.setHasFixedSize(true);
@@ -277,7 +327,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             try {
                 joinParam.put("room", mFeedDetail.getPostId());
-                joinParam.put("user", mSharedPreferences.getString("userID", ""));
+                joinParam.put("user", mViewId);
                 activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -297,7 +347,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
+                obj.put("owner", mViewId);
                 obj.put("action", "active");
                 obj.put("screen", "Details");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -328,7 +378,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             JSONObject leaveParam = new JSONObject();
             try {
                 leaveParam.put("room", mFeedDetail.getPostId());
-                leaveParam.put("user", mSharedPreferences.getString("userID", ""));
+                leaveParam.put("user", mViewId);
                 activity.emitSocket(API_Methods.VERSION + ":comments:left", leaveParam);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -336,7 +386,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
+                obj.put("owner", mViewId);
                 obj.put("action", "inactive");
                 obj.put("screen", "Details");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -576,50 +626,26 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         }
     }
 
-    private Menu mFeedDetailMenu;
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if (getActivity() != null) {
-
-            boolean isOwner = mFeedDetail.getPostUserId().equals(mSharedPreferences.getString("userID", ""));
-            inflater.inflate(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
-            mFeedDetailMenu = menu;
-
-            if (isOwner) { //set correct titles
-                menu.findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
-            }else {
-                menu.findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
-                menu.findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
-            }
-        }
-
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.feed_detail_report:
-                showReportOptionsDialog();
-                return true;
-            case R.id.feed_detail_delete:
-                showConfirmDeleteDialog();
-                return true;
-            case R.id.feed_detail_reveal:
-                showRevealConfirm();
-                return true;
-            case R.id.feed_detail_mute_post:
-                showMuteConfirmation();
-                return true;
-            case R.id.feed_detail_hide_post:
-                showHideConfirmation();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+//    private Menu mFeedDetailMenu;
+//
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        if (getActivity() != null) {
+//
+//            boolean isOwner = mFeedDetail.getPostUserId().equals(mSharedPreferences.getString("userID", ""));
+//            inflater.inflate(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
+//            mFeedDetailMenu = menu;
+//
+//            if (isOwner) { //set correct titles
+//                menu.findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
+//            }else {
+//                menu.findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
+//                menu.findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
+//            }
+//        }
+//
+//        super.onCreateOptionsMenu(menu, inflater);
+//    }
 
     private void showReportOptionsDialog() {
         if (getActivity() == null) return;
@@ -683,6 +709,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private void showConfirmDeleteDialog() {
         if (getActivity() == null) return;
+
         new AlertDialog.Builder(getActivity())
                 .setTitle("Delete Post")
                 .setMessage("Are you sure you want to delete this post?")
@@ -703,6 +730,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private void deletePost() {
         if (getActivity() == null) return;
+        if(!mViewId.equals(mFeedDetail.getPostUserId())) return;
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true);
 
@@ -780,6 +808,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     public void showMuteConfirmation() {
         if (getActivity() == null) return;
+
         new AlertDialog.Builder(getActivity())
                 .setTitle(mFeedDetail.getPost().isPostMuted() ? "Unsilence" : "Silence")
                 .setMessage(mFeedDetail.getPost().isPostMuted() ? "This will turn on future notifications for this post." : "This will turn off future notifications for any activity on this post.")
@@ -812,7 +841,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final boolean isMuted = mFeedDetail.getPost().isPostMuted();
         mFeedDetail.getPost().setPostMuted(!isMuted);
 
-        mFeedDetailMenu.findItem(R.id.feed_detail_mute_post).setTitle(isMuted ? "Mute post" : "Unmute post");
+        mToolbar.getMenu().findItem(R.id.feed_detail_mute_post).setTitle(isMuted ? "Mute post" : "Unmute post");
 
         JSONObject emit = new JSONObject();
         try {
@@ -863,7 +892,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final boolean isHidden = mFeedDetail.getPost().isPostHidden();
         mFeedDetail.getPost().setPostHidden(!isHidden);
 
-        mFeedDetailMenu.findItem(R.id.feed_detail_hide_post).setTitle(isHidden ? "Hide post" : "Unhide post" );
+        mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(isHidden ? "Hide post" : "Unhide post" );
 
         JSONObject emit = new JSONObject();
         try {
@@ -881,13 +910,14 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void revealPost() {
+        if(!mViewId.equals(mFeedDetail.getPostUserId())) return;
+
         final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
 
         mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
         mFeedDetailAdapter.notifyItemChanged(0);
 
-        mFeedDetailMenu.findItem(R.id.feed_detail_reveal).setTitle(isAnon ? "Make anonymous" : "Reveal post");
-
+        mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(isAnon ? "Make anonymous" : "Reveal post");
 
         new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, new Callback() {
             @Override
@@ -938,7 +968,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         @Override
         public void run() {
             if (getActivity() == null) return;
-            new LSDKFriends(getActivity()).getFriendsForMention(mSharedPreferences.getString("userID", ""), mQueryString, "0", new Callback() {
+            new LSDKFriends(getActivity()).getFriendsForMention(mViewId, mQueryString, "0", new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     if (getActivity() == null) return;
@@ -1094,7 +1124,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 Glide.with(mProfileImageView.getContext())
                         .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
-                        .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                        .signature(new StringSignature(mImageSigniture))
                         .placeholder(R.drawable.image_loading_background)
                         .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                         .into(mProfileImageView);
@@ -1177,7 +1207,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         @Override
                         public void run() {
                             boolean smoothScroll = false;
-                            if (com.getCommentUserId().equals(mSharedPreferences.getString("userID", ""))) { //was the user that posted the comment
+                            if (com.getCommentUserId().equals(mViewId)) { //was the user that posted the comment
                                 mCommentEditText.setText("");
                                 mSendButton.setVisibility(View.VISIBLE);
                                 mProgressbar.setVisibility(View.GONE);
@@ -1218,7 +1248,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         try {
             JSONObject comment = new JSONObject();
-            comment.put("user", mSharedPreferences.getString("userID", ""));
+            comment.put("user", mViewId);
             comment.put("text", commentText);
             comment.put("room", mFeedDetail.getPostId());
             comment.put("privacy", mCheckBox.isChecked() ? 1 : 0);

@@ -70,6 +70,13 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         // Required empty public constructor
     }
 
+    /**
+     *
+     * @param userName     - full name of user. this is used to set the actionbar
+     * @param taptUserId   - id of the user
+     * @return
+     */
+
     public static TaptUserProfileFragment newInstance(String userName, String taptUserId) {
         TaptUserProfileFragment fragment = new TaptUserProfileFragment();
         Bundle args = new Bundle();
@@ -302,7 +309,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     public void setActivities() {
         LSDKUser user = new LSDKUser(getActivity());
-        user.getUserActivities(mTaptUserId, 0, new Callback() { //// TODO: 3/19/16  fix skip
+        user.getUserActivities(mTaptUserId, -1, 24, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -321,16 +328,19 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
                         String body = response.body().string();
+
+                        JSONObject jsonObject = new JSONObject(body);
+
+                        mSkip = jsonObject.getInt("skip");
+
                         final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
 //                        Log.d(TAG, body);
 
                         if (activities == null) return;
 
-                        mCanLoadMore = activities.length() == 24; //got 24 back; there might be more posts
-
                         ArrayList<UserActivityItem> tempActivies = new ArrayList<>();
 
-                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
                                 tempActivies.add(
                                         new UserActivityItem(
@@ -341,11 +351,12 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                             }
                         }
 
-
                         mUserActivityItems.clear();
                         mUserActivityItems.addAll(tempActivies);
 
-                        mSkip = 24;
+                        //can load more if skip isn't 0 yet
+                        mCanLoadMore = mSkip > 0;
+                        mSkip -= 24;
 
                         if (mUserActivityItems.isEmpty()) {
                             mUserActivityItems.add(new EmptyUserActivityItem());
@@ -457,7 +468,14 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     public void getMoreActivities() {
 
-        new LSDKUser(getContext()).getUserActivities(mTaptUserId, mSkip, new Callback() {
+        int limit = 24;
+
+        if (mSkip < 0){
+            limit += mSkip;
+            mSkip = 0;
+        }
+
+        new LSDKUser(getContext()).getUserActivities(mTaptUserId, mSkip, limit, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -482,7 +500,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
                         ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
-                        for (int i = 0; i < activities.length(); i++) { //add each activity into our array
+                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
                                 userActItems.add(
                                         new UserActivityItem(
@@ -493,12 +511,12 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                             }
                         }
 
-                        //if we got 24 back, there might still be more
-                        mCanLoadMore = activities.length() == 24;
-
                         mUserActivityItems.addAll(userActItems);
 
-                        mSkip += 24; //skip 24 posts
+                        //if we got 24 back, there might still be more
+                        mCanLoadMore = mSkip > 0;
+
+                        mSkip -= 24; //skip 24 posts
 
                         if (getActivity() == null) return;
 

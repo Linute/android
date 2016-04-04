@@ -154,7 +154,7 @@ public class RoomsActivity extends BaseTaptActivity {
                 @Override
                 public void run() {
                     Toast.makeText(getApplicationContext(),
-                            R.string.error_connect, Toast.LENGTH_LONG).show();
+                            R.string.error_connect, Toast.LENGTH_SHORT).show();
                 }
             });
         }

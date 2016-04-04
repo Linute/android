@@ -30,7 +30,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,17 +55,18 @@ public class RoomsActivityFragment extends Fragment {
     public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private RecyclerView recList;
-    private LinearLayoutManager llm;
     private RoomsAdapter mRoomsAdapter;
 
     private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
     private String mUserId;
 
-    private FloatingActionButton mFab;
-
     private View mEmptyText;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private int mSkip = 0;
+
+    private boolean mCanLoadMore = false;
 
     public RoomsActivityFragment() {
     }
@@ -99,9 +102,9 @@ public class RoomsActivityFragment extends Fragment {
             }
         });
 
-        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
-        mFab.setImageResource(R.drawable.ic_action_new_message);
-        mFab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab.setImageResource(R.drawable.ic_action_new_message);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -123,22 +126,23 @@ public class RoomsActivityFragment extends Fragment {
             }
         });
 
+        mRoomsAdapter.setLoadMore(new Runnable() {
+            @Override
+            public void run() {
+                if (mCanLoadMore){
+                    getMoreRooms();
+                }
+            }
+        });
+
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         recList = (RecyclerView) view.findViewById(R.id.rooms_list);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mRoomsAdapter);
-    }
-
-    public void hideFab(boolean hide) {
-        if (hide && mFab.isShown()) {
-            mFab.hide();
-        } else if (!hide && !mFab.isShown()) {
-            mFab.show();
-        }
     }
 
     @Override
@@ -200,7 +204,11 @@ public class RoomsActivityFragment extends Fragment {
             });
         }
 
-        new LSDKChat(getActivity()).getRooms(null, new Callback() {
+
+        Map<String, String> params = new HashMap<>();
+        params.put("limit", "20");
+
+        new LSDKChat(getActivity()).getRooms(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -221,12 +229,13 @@ public class RoomsActivityFragment extends Fragment {
 
                 //Log.i(TAG, "onResponse: "+resString);
 
-                //todo add unread messages icon
-
                 if (response.isSuccessful()) {
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
+
+                        mSkip = jsonObj.getInt("skip");
+
                         JSONArray rooms = jsonObj.getJSONArray("rooms");
 
                         //ArrayList<ChatHead> chatHeads = new ArrayList<>();
@@ -244,7 +253,7 @@ public class RoomsActivityFragment extends Fragment {
 
                         ArrayList<Rooms> tempRooms = new ArrayList<>();
 
-                        for (int i = 0; i < rooms.length(); i++) {
+                        for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
@@ -305,6 +314,11 @@ public class RoomsActivityFragment extends Fragment {
 //                                    chatHeads
                         }
 
+
+                        mCanLoadMore = mSkip > 0;
+
+                        mSkip -= 20;
+
                         mRoomsList.clear();
                         mRoomsList.addAll(tempRooms);
 
@@ -335,6 +349,7 @@ public class RoomsActivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     Utils.showServerErrorToast(getActivity());
+                                    mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
                         }
@@ -346,6 +361,180 @@ public class RoomsActivityFragment extends Fragment {
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
+
+    private void getMoreRooms(){
+
+        if (getActivity() == null || mSwipeRefreshLayout.isRefreshing()) return;
+
+        if (!mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
+
+        int limit = 20;
+
+        if (mSkip < 0){
+            limit += mSkip;
+            mSkip = 0;
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("skip", mSkip + "");
+        params.put("limit", limit+"");
+
+        new LSDKChat(getActivity()).getRooms(params, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String resString = response.body().string();
+
+                //Log.i(TAG, "onResponse: "+resString);
+
+                if (response.isSuccessful()) {
+                    try {
+
+                        JSONObject jsonObj = new JSONObject(resString);
+
+                        JSONArray rooms = jsonObj.getJSONArray("rooms");
+
+                        //ArrayList<ChatHead> chatHeads = new ArrayList<>();
+                        String lastMessage = "";
+                        boolean hasUnreadMessage;
+
+                        JSONObject room;
+                        JSONObject user;
+                        JSONArray messages;
+
+                        JSONObject message;
+                        JSONArray readArray;
+
+                        Date date;
+
+                        ArrayList<Rooms> tempRooms = new ArrayList<>();
+
+                        for (int i = rooms.length() - 1; i >= 0; i--) {
+                            hasUnreadMessage = true;
+
+                            room = rooms.getJSONObject(i);
+                            user = room.getJSONArray("users").getJSONObject(0);
+
+                            messages = room.getJSONArray("messages"); //list of messages in room
+
+
+                            //if messages not empty or null
+                            if (messages.length() > 0 && !messages.isNull(0)) {
+                                message = messages.getJSONObject(messages.length() - 1);
+                                readArray = message.getJSONArray("read");
+
+                                try {
+                                    date = simpleDateFormat.parse(message.getString("date"));
+                                }catch (ParseException e){
+                                    date = null;
+                                }
+
+                                //check last message. check if we already read it
+                                for (int k = 0; k < readArray.length() ;  k++){
+                                    if (readArray.getString(k).equals(mUserId)){
+                                        hasUnreadMessage = false;
+                                        break;
+                                    }
+                                }
+
+                                //if you sent last message : show  "You: <text>"
+                                if (message.getJSONObject("owner").getString("id").equals(mUserId)) {
+                                    lastMessage = "You: " + messages.getJSONObject(0).getString("text");
+                                }
+
+                                //the other person sent last message : show <message>
+                                else {
+                                    lastMessage = messages.getJSONObject(0).getString("text");
+                                }
+                            }
+
+                            else { //no messages show "..."
+                                lastMessage = "...";
+                                hasUnreadMessage = false;
+                                date = null;
+                            }
+
+
+                            //Throws error but still runs correctly... weird
+                            tempRooms.add(new Rooms(
+                                    room.getString("id"),
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    lastMessage,
+                                    user.getString("profileImage"),
+                                    hasUnreadMessage,
+                                    date == null ? 0 : date.getTime()
+                            ));
+                            // ,
+//                                    users.length() + 1,  // add yourself
+//                                    chatHeads
+                        }
+                        mCanLoadMore = mSkip > 0;
+                        mSkip -= 20;
+
+                        mRoomsList.clear();
+                        mRoomsList.addAll(tempRooms);
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + resString);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
                     }

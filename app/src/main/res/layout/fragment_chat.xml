@@ -12,6 +12,7 @@
                                        android:theme="@style/ThemeOverlay.AppCompat.Dark"
     />
 
+
     <LinearLayout android:id="@+id/message_container"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
@@ -51,7 +52,6 @@
 
     </LinearLayout>
 
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/chat_list"
         android:layout_width="match_parent"
@@ -70,7 +70,23 @@
               android:layout_centerInParent="true"
               android:text="No message history."
               android:textColor="@color/pure_white"
-              android:visibility="gone"
+              android:visibility="gone"/>
+
+
+    <ProgressBar android:id="@+id/load_more_progress_bar"
+                 style="?android:attr/progressBarStyleHorizontal"
+                 android:layout_width="match_parent"
+                 android:layout_height="4dp"
+                 android:layout_below="@id/chat_fragment_toolbar"
+                 android:indeterminate="true"
+                 android:visibility="gone"
+    />
+
+    <ProgressBar android:id="@+id/chat_load_progress"
+                 style="?android:attr/progressBarStyleLarge"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_centerInParent="true"
     />
 
 

@@ -55,9 +55,10 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     protected TextView mFollowingButtonText;
 
     private Context mContext;
-    private SharedPreferences mSharedPreferences;
     private LinuteUser mUser;
-    private JSONObject jsonObject;
+
+    private String mUserid;
+    private String mImageSignature;
 
     private String mProfileImageUrl;
 
@@ -66,7 +67,9 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
 
         mContext = context;
-        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUserid = sharedPreferences.getString("userID", "");
+        mImageSignature = sharedPreferences.getString("imageSigniture", "000");
 
         vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
@@ -116,7 +119,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
                 if (mUser.getUserID() == null) return;
 
-                if (!mSharedPreferences.getString("userID", "").equals(mUser.getUserID())) {
+                if (!mUserid.equals(mUser.getUserID())) {
                     if (mUser.getFriend().equals("")) {
                         Map<String, Object> postData = new HashMap<>();
                         postData.put("user", mUser.getUserID());
@@ -147,10 +150,8 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
                                 if (activity == null) return;
 
-                                jsonObject = null;
-
                                 try {
-                                    jsonObject = new JSONObject(response.body().string());
+                                    final JSONObject jsonObject = new JSONObject(response.body().string());
 
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
@@ -246,7 +247,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers.setText(String.valueOf(user.getFollowers()));
         vCollegeName.setText(user.getCollegeName());
 
-        if (!mSharedPreferences.getString("userID", "").equals(user.getUserID())) {
+        if (!mUser.equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
                 mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.follow_grey));
                 mFollowingButtonText.setText("follow");
@@ -262,7 +263,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         Glide.with(mContext)
                 .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                 .asBitmap()
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                .signature(new StringSignature(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vProfilePicture);

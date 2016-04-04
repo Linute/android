@@ -91,14 +91,19 @@ public class LSDKUser {
     }
 
 
-    public Call getUserActivities(String userId, int skip, Callback callback) {
+    //use negative skip if you don't want to add skip
+    public Call getUserActivities(String userId, int skip, int limit, Callback callback) {
 
         Map<String, String> params = new HashMap<>();
         params.put("action[0]", "posted status");
         params.put("action[1]", "posted photo");
         params.put("action[2]", "posted video");
-        params.put("skip", skip + "");
-        params.put("limit", "24");
+
+        if (skip >= 0) {
+            params.put("skip", skip + "");
+        }
+
+        params.put("limit", limit + "");
         params.put("owner", userId);
 
         Map<String, String> header = API_Methods.getMainHeader(mToken);
