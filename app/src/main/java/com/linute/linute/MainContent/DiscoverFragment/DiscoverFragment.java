@@ -130,7 +130,6 @@ public class DiscoverFragment extends UpdatableFragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                feedDone = false;
                 refreshFeed();
             }
         });
@@ -313,7 +312,7 @@ public class DiscoverFragment extends UpdatableFragment {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (jsonArray.length() != 25 || mSkip == 0)
+                            if (mSkip == 0)
                                 feedDone = true; //no more feed to load
 
                             for (int i = jsonArray.length() - 1; i >= 0; i--) {
@@ -425,7 +424,7 @@ public class DiscoverFragment extends UpdatableFragment {
 
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (jsonArray.length() != 25 || mSkip == 0)
+                            if (mSkip == 0)
                                 feedDone = true; //no more feed to load
 
                             ArrayList<Post> refreshedPosts = new ArrayList<>();

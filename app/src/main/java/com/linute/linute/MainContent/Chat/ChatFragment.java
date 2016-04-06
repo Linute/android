@@ -258,7 +258,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
 
-
         mInputMessageView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

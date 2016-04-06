@@ -233,7 +233,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
         mSafeToAddToTop = false;
 
-        new LSDKActivity(getActivity()).getActivities(0, new Callback() {
+        new LSDKActivity(getActivity()).getActivities(-1, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 showBadConnectiontToast();
@@ -244,7 +244,6 @@ public class UpdatesFragment extends UpdatableFragment {
                 if (response.isSuccessful()) {
                     try {
                         String resString = response.body().string();
-                        //Log.i(TAG, "onResponse: " + resString);
 
                         JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(resString), "activities");
 
@@ -252,6 +251,8 @@ public class UpdatesFragment extends UpdatableFragment {
                             showServerErrorToast();
                             return;
                         }
+
+                        Log.i(TAG, "onResponse: "+activities.getJSONObject(activities.length()-1).toString());
 
                         ArrayList<Update> oldItems = new ArrayList<>();
                         ArrayList<Update> newItems = new ArrayList<>();
@@ -344,8 +345,13 @@ public class UpdatesFragment extends UpdatableFragment {
              new Handler().post(new Runnable() {
                 @Override
                 public void run() {
-                    mRecentUpdates.add(0, update);
-                    mUpdatesAdapter.notifyItemInserted(1);  //should be 1?
+                    if (mRecentUpdates.isEmpty()){
+                        mRecentUpdates.add(update);
+                        mUpdatesAdapter.notifyDataSetChanged();
+                    }else {
+                        mRecentUpdates.add(0, update);
+                        mUpdatesAdapter.notifyItemInserted(1);
+                    }
                     if (mEmptyView.getVisibility() == View.VISIBLE) {
                         mEmptyView.setVisibility(View.GONE);
                     }

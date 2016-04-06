@@ -23,7 +23,6 @@ public class MentionedPerson implements Mentionable {
     }
 
 
-
     public String getProfileImage() {
         return mProfileImage;
     }
@@ -37,7 +36,7 @@ public class MentionedPerson implements Mentionable {
     }
 
     public String getUserName() {
-        return "@"+mFullname.replace(" ","")+" ";
+        return "@"+mFullname.replaceAll("[^a-zA-Z]", "")+" ";
     }
 
 
@@ -59,7 +58,7 @@ public class MentionedPerson implements Mentionable {
 
     @Override
     public String getSuggestiblePrimaryText() {
-        return "@"+mFullname.replace(" ","");
+        return "@"+mFullname.replaceAll("[^a-zA-Z]", "");
     }
 
     @Override

@@ -107,9 +107,8 @@ public class Comment {
         public MentionedPersonLight(String fullName, String id){
             mFullname = fullName;
             mId = id;
-            mFormattedName = "@"+fullName.replace(" ", "");
+            mFormattedName = "@"+fullName.replaceAll("[^a-zA-Z]", "");
         }
-
 
         public String getId(){
             return mId;

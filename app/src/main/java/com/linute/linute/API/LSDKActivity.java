@@ -29,29 +29,38 @@ public class LSDKActivity {
     }
 
 
-    public Call getActivities(Integer skip, Callback callback) {
+    public Call getActivities(int skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> params = new HashMap<>();
-        params.put("skip", skip.toString());
+
+        if (skip >= 0) {
+            params.put("skip", skip + "");
+        }
+
         params.put("limit", "50");
 
         params.put("action[0]", "commented photo");
         params.put("action[1]", "commented status");
-        params.put("action[2]", "liked status");
-        params.put("action[3]", "liked photo");
-        params.put("action[5]", "mentioned");
-        params.put("action[6]", "follower");
-        params.put("action[7]", "friend joined");
-        params.put("action[8]", "posted status");
-        params.put("action[9]", "posted photo");
-        params.put("action[10]", "also commented status");
-        params.put("action[11]", "also commented photo");
-        params.put("action[12]", "also commented video");
+        params.put("action[2]", "commented video");
 
-        params.put("action[13]", "posted video");
-        params.put("action[14]", "liked video");
-        params.put("action[15]", "commented video");
+        params.put("action[3]", "liked status");
+        params.put("action[4]", "liked photo");
+        params.put("action[5]", "liked video");
+
+        params.put("action[6]", "also commented status");
+        params.put("action[7]", "also commented photo");
+        params.put("action[8]", "also commented video");
+
+        params.put("action[9]", "mentioned");
+        params.put("action[10]", "follower");
+        params.put("action[11]", "friend joined");
+
+//
+//        params.put("action[6]", "posted status");
+//        params.put("action[7]", "posted photo");
+//        params.put("action[8]", "posted video");
+
 
         params.put("owner", mSharedPreferences.getString("userID", ""));
 

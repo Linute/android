@@ -40,6 +40,9 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
      */
 
     public void enableBarScrolling(boolean enabled){
+    }
+
+    public void showMainToolbar(boolean show){
 
     }
 
@@ -47,7 +50,6 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
      *  use this function to tell tab it needs to reload
      */
     public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
-
     }
 
 

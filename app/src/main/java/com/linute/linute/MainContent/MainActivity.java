@@ -258,7 +258,7 @@ public class MainActivity extends BaseTaptActivity {
                     .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
                     .commit();
 
-            mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
+            //mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
 
             mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
             mPreviousItem.setChecked(true);
@@ -312,7 +312,7 @@ public class MainActivity extends BaseTaptActivity {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
             @Override
             public void run() {
-                if(mSafeForFragmentTransaction) {
+                if (mSafeForFragmentTransaction) {
                     MainActivity.this.getSupportFragmentManager()
                             .beginTransaction()
                             .replace(R.id.mainActivity_fragment_holder, fragment)
@@ -756,16 +756,28 @@ public class MainActivity extends BaseTaptActivity {
     //hiding toolbar / showing toolbar
     @Override
     public void enableBarScrolling(boolean enable) {
-        if (enable && mToolbar.getVisibility() == View.GONE){
-            mToolbar.setVisibility(View.VISIBLE);
-        }else if (!enable && mToolbar.getVisibility() == View.VISIBLE){
-            mToolbar.setVisibility(View.GONE);
+        if (enable) {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        } else {
+            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+                    .getLayoutParams())
+                    .setBehavior(null);
+            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+                    .setScrollFlags(0);
         }
     }
 
 
-    //activity
+    @Override
+    public void showMainToolbar(boolean show) {
+        mToolbar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
 
+    //activity
 
     //when tap toolbar
     @Override
@@ -797,11 +809,10 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             final boolean newMessage = (boolean) args[0];
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(mToolbar != null)
+                    if (mToolbar != null)
                         mToolbar.getMenu()
                                 .findItem(R.id.people_fragment_menu_chat)
                                 .setIcon(newMessage ? R.drawable.notify_mess_icon : R.drawable.ic_chat81);

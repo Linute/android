@@ -88,7 +88,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
         }
 
 //position + 1 == mPosts.size()
-        if (position == mPosts.size()) {
+        if (position + 1 == mPosts.size()) {
             mGetMoreFeed.getMoreFeed();
         }else if (position == 0){
             MainActivity activity = (MainActivity) context;

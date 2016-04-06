@@ -108,10 +108,16 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private String mViewId;
     private String mImageSigniture;
 
+    private Handler mHandler = new Handler();
+
+    private int mSkip = 0;
+
+    private AlertDialog mAlertDialog;
+
 
     // feedDetail is divided into 2 parts, the header and the comments. We load them seperatly so one might
     // load before the other. i will call notifydataset changed after both have loaded
-    private boolean mOtherHasUpdated = false;
+    //private boolean mOtherHasUpdated = false;
 
 
     public FeedDetailPage() {
@@ -142,7 +148,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final View rootView = inflater.inflate(R.layout.fragment_feed_detail_page, container, false);
 
         SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME,Context.MODE_PRIVATE).getString("imageSigniture", "000");
+        mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
         mViewId = pref.getString("userID", "");
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
@@ -154,13 +160,20 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 getFragmentManager().popBackStack();
             }
         });
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
+                    recList.smoothScrollToPosition(0);
+            }
+        });
 
 
         boolean isOwner = mFeedDetail.getPostUserId().equals(mViewId);
         mToolbar.inflateMenu(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar);
         if (isOwner) {
             mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
-        }else {
+        } else {
             mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
             mToolbar.getMenu().findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
         }
@@ -200,6 +213,13 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
 
         recList.setAdapter(mFeedDetailAdapter);
+
+        mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
+            @Override
+            public void run() {
+                loadMoreComments();
+            }
+        });
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -276,13 +296,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             public void onClick(View v) {
                 TextView text = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
                 if (mCheckBox.isChecked()) {
-
                     text.setText("OFF");
                     text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(false);
-
                 } else {
-
                     text.setText("ON");
                     text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
                     mCheckBox.setChecked(true);
@@ -312,14 +329,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             activity.setTitle("Comments");
             activity.resetToolbar();
             activity.enableBarScrolling(false);
-            activity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
-                        recList.smoothScrollToPosition(0);
-                }
-            });
-
+            activity.showMainToolbar(false);
             //user -- user Id
             //room -- id of event
 
@@ -358,7 +368,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
-            mOtherHasUpdated = false;
+            //mOtherHasUpdated = false; // TODO: 4/4/16
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
         }
@@ -368,6 +378,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     @Override
     public void onPause() {
         super.onPause();
+
+        if (mAlertDialog != null && mAlertDialog.isShowing()) mAlertDialog.dismiss();
+        mFeedDetailAdapter.closeAllDialogs();
+        mFeedDetailAdapter.closeAllItems();
 
         mSingleVideoPlaybackManager.stopPlayback();
 
@@ -408,7 +422,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.enableBarScrolling(true);
-            activity.setToolbarOnClickListener(null);
+            activity.showMainToolbar(true);
         }
     }
 
@@ -446,15 +460,21 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                 }
                 JSONObject jsonObject;
+                JSONArray comments;
+                JSONArray mentionedPeople;
 
                 String res = response.body().string();
-               // Log.i(TAG, "onResponse: " + res);
+                // Log.i(TAG, "onResponse: " + res);
                 try {
                     jsonObject = new JSONObject(res);
 
+                    //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
+
+                    int numOfComments = jsonObject.getInt("numberOfComments");
+
                     mFeedDetail.setPostPrivacy(jsonObject.getInt("privacy"));
                     mFeedDetail.setIsPostLiked(jsonObject.getBoolean("isLiked"));
-                    mFeedDetail.setNumComments(jsonObject.getInt("numberOfComments"));
+                    mFeedDetail.setNumComments(numOfComments);
                     mFeedDetail.setPostLikeNum(jsonObject.getInt("numberOfLikes") + "");
                     String anonImage = jsonObject.getString("anonymousImage");
                     mFeedDetail.setAnonImage(anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage));
@@ -463,6 +483,79 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                     mFeedDetail.getPost().setUserName(owner.getString("fullName"));
                     mFeedDetail.getPost().setProfileImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
+
+                    mSkip = numOfComments - 20;
+
+                    ArrayList<Object> tempComments = new ArrayList<>();
+                    comments = jsonObject.getJSONArray("comments");
+
+
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    Date myDate;
+
+                    if (mSkip > 0) {
+                        tempComments.add(new LoadMoreItem());
+                    }
+
+                    for (int i = 0; i < comments.length(); i++) {
+                        //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
+
+                        //get date
+                        try {
+                            myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                            myDate = null;
+                        }
+
+                        List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
+                        mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
+
+                        for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
+                            mentionedPersonLightArrayList.add(
+                                    new Comment.MentionedPersonLight( //just need fullname and id
+                                            mentionedPeople.getJSONObject(j).getString("fullName"),
+                                            mentionedPeople.getJSONObject(j).getString("id")
+                                    )
+                            );
+                        }
+
+                        tempComments
+                                .add(new Comment(
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
+                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
+                                                ((JSONObject) comments.get(i)).getString("text"),
+                                                ((JSONObject) comments.get(i)).getString("id"),
+                                                ((JSONObject) comments.get(i)).getInt("privacy") == 1,
+                                                ((JSONObject) comments.get(i)).getString("anonymousImage"),
+                                                mentionedPersonLightArrayList,
+                                                myDate == null ? 0 : myDate.getTime()
+                                        )
+                                );
+                    }
+
+                    if (comments.length() == 0) {
+                        tempComments.add(null);
+                    }
+
+                    mFeedDetail.getComments().clear();
+                    mFeedDetail.getComments().addAll(tempComments);
+
+                    if (getActivity() == null) return;
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mCommentsRetrieved = true;
+                                    mFeedDetailAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        }
+                    });
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -475,31 +568,38 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         });
                     }
                 }
-
-                if (getActivity() == null) return;
-
-
-                if (mOtherHasUpdated) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mFeedDetailAdapter.notifyDataSetChanged();
-                        }
-                    });
-                } else {
-                    mOtherHasUpdated = true;
-                }
             }
 
         });
+    }
+
+
+    private void loadMoreComments() {
+
+        if (!mCommentsRetrieved) {
+            return;
+        }
+
+        mFeedDetailAdapter.setDenySwipe(true);
+        mFeedDetailAdapter.closeAllItems();
+
+        mSkip -= 20;
+        int limit = 20;
 
         Map<String, String> eventComments = new HashMap<>();
         eventComments.put("event", mFeedDetail.getPostId());
-        eventComments.put("skip", "0");
+        if (mSkip < 0) {
+            limit += mSkip;
+            mSkip = 0;
+        }
 
-        event.getComments(eventComments, new Callback() {
+        eventComments.put("skip", mSkip + "");
+        eventComments.put("limit", limit + "");
+
+        new LSDKEvents(getActivity()).getComments(eventComments, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
+                        mFeedDetailAdapter.setDenySwipe(false);
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -514,6 +614,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d(TAG, "onResponse: " + response.body().string());
+                            mFeedDetailAdapter.setDenySwipe(false);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -528,14 +629,19 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         JSONArray comments;
                         JSONArray mentionedPeople;
 
-                        ArrayList<Comment> tempComments = new ArrayList<>();
+                        ArrayList<Object> tempComments = new ArrayList<>();
 
                         try {
                             jsonObject = new JSONObject(response.body().string());
+
                             comments = jsonObject.getJSONArray("comments");
 
                             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
+
+                            if (mSkip != 0) {
+                                tempComments.add(new LoadMoreItem());
+                            }
 
                             for (int i = 0; i < comments.length(); i++) {
                                 //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
@@ -575,31 +681,39 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                         );
                             }
 
-                            if (comments.length() == 0) {
-                                tempComments.add(null);
-                            }
-
-                            mFeedDetail.getComments().clear();
-                            mFeedDetail.getComments().addAll(tempComments);
+                            mFeedDetail.getComments().remove(0);
+                            mFeedDetail.getComments().addAll(0, tempComments);
 
                             if (getActivity() == null) return;
 
-                            mCommentsRetrieved = true;
-
-                            if (mOtherHasUpdated) {
-                                getActivity().runOnUiThread(
-                                        new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFeedDetailAdapter.notifyDataSetChanged();
-                                            }
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFeedDetailAdapter.setDenySwipe(false);
+                                            mFeedDetailAdapter.notifyDataSetChanged();
                                         }
-                                );
-                            } else {
-                                mOtherHasUpdated = true;
-                            }
+                                    });
+                                }
+                            });
+
+//                            if (mOtherHasUpdated) {
+//                                getActivity().runOnUiThread(
+//                                        new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                mFeedDetailAdapter.notifyDataSetChanged();
+//                                            }
+//                                        }
+//                                );
+//                            } else {
+//                                mOtherHasUpdated = true;
+//                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
+                            mFeedDetailAdapter.setDenySwipe(false);
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
@@ -611,7 +725,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         }
                     }
                 }
-
         );
     }
 
@@ -648,9 +761,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 //    }
 
     private void showReportOptionsDialog() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || !mCommentsRetrieved) return;
         final CharSequence options[] = new CharSequence[]{"Spam", "Inappropriate", "Harassment"};
-        AlertDialog alert = new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle("Report As")
                 .setItems(options, new DialogInterface.OnClickListener() {
                     @Override
@@ -659,7 +772,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     }
                 })
                 .create();
-        alert.show();
+        mAlertDialog.show();
 
     }
 
@@ -708,9 +821,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void showConfirmDeleteDialog() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || !mCommentsRetrieved) return;
 
-        new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle("Delete Post")
                 .setMessage("Are you sure you want to delete this post?")
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -730,7 +843,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private void deletePost() {
         if (getActivity() == null) return;
-        if(!mViewId.equals(mFeedDetail.getPostUserId())) return;
+        if (!mViewId.equals(mFeedDetail.getPostUserId())) return;
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true);
 
@@ -785,9 +898,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     public void showRevealConfirm() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || !mCommentsRetrieved) return;
         boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
-        new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(isAnon ? "Reveal" : "Hide")
                 .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -807,9 +920,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     public void showMuteConfirmation() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || !mCommentsRetrieved) return;
 
-        new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(mFeedDetail.getPost().isPostMuted() ? "Unsilence" : "Silence")
                 .setMessage(mFeedDetail.getPost().isPostMuted() ? "This will turn on future notifications for this post." : "This will turn off future notifications for any activity on this post.")
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
@@ -859,9 +972,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     public void showHideConfirmation() {
-        if (getActivity() == null) return;
-        new AlertDialog.Builder(getActivity())
-                .setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide it"  )
+        if (getActivity() == null || !mCommentsRetrieved) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide it")
                 .setMessage(mFeedDetail.getPost().isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed. Still want to go ahead with it?")
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
                     @Override
@@ -892,7 +1005,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final boolean isHidden = mFeedDetail.getPost().isPostHidden();
         mFeedDetail.getPost().setPostHidden(!isHidden);
 
-        mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(isHidden ? "Hide post" : "Unhide post" );
+        mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(isHidden ? "Hide post" : "Unhide post");
 
         JSONObject emit = new JSONObject();
         try {
@@ -910,7 +1023,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void revealPost() {
-        if(!mViewId.equals(mFeedDetail.getPostUserId())) return;
+        if (!mViewId.equals(mFeedDetail.getPostUserId())) return;
 
         final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
 
@@ -1152,9 +1265,14 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         @Override
         public void call(Object... args) {
 
-            if (!mCommentsRetrieved || !mOtherHasUpdated) return;
+            if (!mCommentsRetrieved /*|| !mOtherHasUpdated*/) return; //// TODO: 4/4/16
 
             JSONObject object = (JSONObject) args[0];
+
+            //will check if we can scroll down
+            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
+            //neg is scroll up, positive is scroll down
+            final boolean mCanScrollDown = recList.canScrollVertically(1);
 
             if (object == null) {
                 Log.i(TAG, "call: Error retrieving new comment");
@@ -1162,7 +1280,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             try {
-
                 Date myDate;
                 SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
@@ -1180,6 +1297,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     );
                 }
 
+                //if NoComments View is showing, remove it
                 if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
                     mFeedDetail.getComments().clear();
                 }
@@ -1217,7 +1335,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                             //because of header we can use size, change if decide to add it to array
                             mFeedDetailAdapter.notifyDataSetChanged();
-                            if (smoothScroll)
+                            if (smoothScroll || !mCanScrollDown)
                                 recList.smoothScrollToPosition(mFeedDetail.getComments().size());
 
                         }
@@ -1271,7 +1389,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             setCommentViewEditable(false);
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
-
 
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException e) {

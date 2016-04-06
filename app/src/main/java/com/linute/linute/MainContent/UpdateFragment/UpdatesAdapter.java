@@ -129,8 +129,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     @Override
     public int getItemViewType(int section, int relativePosition, int absolutePosition) {
-
-
         return super.getItemViewType(section, relativePosition, absolutePosition);
     }
 
