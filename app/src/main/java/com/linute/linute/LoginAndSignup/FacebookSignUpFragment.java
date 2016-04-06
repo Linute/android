@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,12 +26,11 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
-import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,7 +42,6 @@ import java.util.Map;
 import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.Request;
 import okhttp3.Response;
 
 /**
@@ -121,7 +118,8 @@ public class FacebookSignUpFragment extends Fragment {
         rootView.findViewById(R.id.fb_create_privacy_policy).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL,"https://www.tapt.io/privacy-policy");
                 startActivity(intent);
             }
         });
@@ -129,7 +127,8 @@ public class FacebookSignUpFragment extends Fragment {
         rootView.findViewById(R.id.fb_create_terms_of_services).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL,"https://www.tapt.io/terms-of-service");
                 startActivity(intent);
             }
         });

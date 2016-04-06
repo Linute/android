@@ -89,14 +89,6 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".MainContent.Settings.TermsOfServiceActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-        <activity
-            android:name=".MainContent.Settings.PrivacyPolicyActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-        <activity
             android:name=".MainContent.Settings.ChangeEmailActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
@@ -150,6 +142,11 @@
             android:theme="@style/AppTheme"/>
 
         <activity android:name=".SquareCamera.CropActivity"
+                  android:configChanges="orientation"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/AppTheme"/>
+
+        <activity android:name=".UtilsAndHelpers.WebViewActivity"
                   android:configChanges="orientation"
                   android:screenOrientation="portrait"
                   android:theme="@style/AppTheme"/>

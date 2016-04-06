@@ -9,12 +9,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -29,23 +26,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.API.QuickstartPreferences;
-import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
-import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
@@ -110,7 +103,7 @@ public class LinuteSignUpFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_linute_sign_up, container, false);
 
 
@@ -136,7 +129,8 @@ public class LinuteSignUpFragment extends Fragment {
         rootView.findViewById(R.id.create_privacy_policy).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
                 startActivity(intent);
             }
         });
@@ -144,7 +138,8 @@ public class LinuteSignUpFragment extends Fragment {
         rootView.findViewById(R.id.create_terms_of_services).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
                 startActivity(intent);
             }
         });
@@ -786,13 +781,11 @@ public class LinuteSignUpFragment extends Fragment {
 
 
     private boolean hasWritePermission() {
-        if (getActivity() == null) return false;
-        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return getActivity() != null && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean hasCameraPermissions() {
-        if (getActivity() == null) return false;
-        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return getActivity() != null && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
 
     }
 
@@ -806,7 +799,6 @@ public class LinuteSignUpFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
         if (mFirstNameTextView.hasFocus()){
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);

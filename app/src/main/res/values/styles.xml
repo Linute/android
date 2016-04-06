@@ -24,8 +24,18 @@
         <item name="android:windowAnimationStyle">@null</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="AppTheme.AppBarOverlay" parent="@style/ThemeOverlay.AppCompat.Dark">
+        <item name="android:popupMenuStyle">@style/Base.Widget.AppCompat.Light.PopupMenu</item>
+        <item name="android:dropDownListViewStyle">@style/Widget.AppCompat.Light.ListView.DropDown</item>
+        </style>
 
+
+
+    <style name="MyDarkToolbarStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:colorBackground">@color/pure_white</item>
+        <item name="android:textColor">@color/pure_black</item>
+    </style>
+    
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
     <style name="AppTheme.BlackBackground" parent="Theme.AppCompat.Light.NoActionBar">

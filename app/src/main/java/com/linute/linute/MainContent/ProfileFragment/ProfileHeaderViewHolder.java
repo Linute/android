@@ -22,6 +22,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 
 import org.json.JSONException;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -41,7 +41,7 @@ import okhttp3.Response;
  */
 public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ProfileHeaderViewHolder.class.getSimpleName();
-    protected CircleImageView vProfilePicture;
+    protected RoundedImageView vProfilePicture;
     protected TextView vStatusText;
     protected TextView vPosts;
     //protected TextView vFollowing;
@@ -71,7 +71,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         mUserid = sharedPreferences.getString("userID", "");
         mImageSignature = sharedPreferences.getString("imageSigniture", "000");
 
-        vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
+        vProfilePicture = (RoundedImageView) itemView.findViewById(R.id.profilefrag_prof_image);
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
         vPosts = (TextView) itemView.findViewById(R.id.profilefrag_num_posts);
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
@@ -247,7 +247,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers.setText(String.valueOf(user.getFollowers()));
         vCollegeName.setText(user.getCollegeName());
 
-        if (!mUser.equals(user.getUserID())) {
+        if (!mUser.getUserID().equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
                 mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.follow_grey));
                 mFollowingButtonText.setText("follow");

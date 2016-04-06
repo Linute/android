@@ -702,9 +702,9 @@ public class FindFriendsFragment extends UpdatableFragment {
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i(TAG, "onClick: clicked fb");
                 loginFacebook();
                 mFindFriendsRationale.setVisibility(View.GONE);
+                mInRationalText = false;
             }
         });
     }

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -22,9 +21,7 @@ import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
 import java.net.URISyntaxException;
 
@@ -154,7 +151,6 @@ public class SettingActivity extends AppCompatActivity {
                     if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                         LoginManager.getInstance().logOut();
 
-
                     //start new
                     Intent i = new Intent(getActivity(), PreLoginActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
@@ -197,7 +193,8 @@ public class SettingActivity extends AppCompatActivity {
             mPrivacyPolicy.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                    Intent i = new Intent(getActivity(), WebViewActivity.class);
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
                     startActivity(i);
                     return true;
                 }
@@ -217,7 +214,8 @@ public class SettingActivity extends AppCompatActivity {
             mTermsOfService.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), TermsOfServiceActivity.class);
+                    Intent i = new Intent(getActivity(), WebViewActivity.class);
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
                     startActivity(i);
                     return true;
                 }
