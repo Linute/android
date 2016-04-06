@@ -7,6 +7,10 @@ import android.view.MotionEvent;
 /**
  * Created by QiFeng on 3/9/16.
  */
+
+/**
+ * Frame layout that can be clicked on
+ */
 public class ClickableSquareFrameLayout extends  SquareFrameLayout {
 
 

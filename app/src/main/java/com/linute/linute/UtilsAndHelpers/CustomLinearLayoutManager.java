@@ -11,6 +11,11 @@ import android.util.Log;
 /**
  * Created by QiFeng on 2/15/16.
  */
+
+
+/**
+ * Changes smooth scroll speed
+ */
 public class CustomLinearLayoutManager extends LinearLayoutManager {
 
     public CustomLinearLayoutManager(Context context) {
@@ -32,6 +37,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
                     @Override
                     protected float calculateSpeedPerPixel
                             (DisplayMetrics displayMetrics) {
+                        // speed depends on position currently on
                         float num = MILLISECONDS_PER_INCH / getItemCount() / displayMetrics.densityDpi;
 
                         return num > MAX_SPEED ? MAX_SPEED : num;
