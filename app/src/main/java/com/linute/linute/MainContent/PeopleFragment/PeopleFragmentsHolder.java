@@ -250,7 +250,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
 
     private void scrollViewRecListUp(int position) {
-        PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
+        PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.getItem(position);
         if (fragment != null) {
             fragment.scrollUp();
         }

@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -33,6 +34,9 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -402,30 +406,24 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             //if viewer is not the owner of the comment, return
             // exception : anon comments can be deleted by post owner
-            if (!com.getCommentUserId().equals(mViewerUserId) && !com.isAnon()) return;
+            if (!com.getCommentPostId().equals(mCommentId) || (!com.getCommentUserId().equals(mViewerUserId) && !com.isAnon())) return;
 
-            mItemManger.removeShownLayouts(mSwipeLayout);
-            mFeedDetail.getComments().remove(pos);
-            notifyItemRemoved(pos + 1);
-            notifyItemRangeChanged(pos + 1, mFeedDetail.getComments().size() + 1);
-            mFeedDetail.refreshCommentCount();
+            mDenySwipe = true;
+            final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Deleting comment...", true, false);
 
             new LSDKEvents(context).deleteComment(mCommentId, new Callback() {
 
-                final int position = pos;
-                final Comment comment = com;
-
                 @Override
                 public void onFailure(Call call, IOException e) {
+                    mDenySwipe = false;
+                    progressDialog.dismiss();
+
                     final BaseTaptActivity act = (BaseTaptActivity) context;
                     if (act != null) {
                         act.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(act, "Failed to delete comment. Could not find connection.", Toast.LENGTH_SHORT).show();
-                                mFeedDetail.getComments().add(position, comment);
-                                notifyItemInserted(position + 1);
-                                mFeedDetail.refreshCommentCount();
                             }
                         });
                     }
@@ -435,20 +433,39 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
                         response.body().close();
+
+                        final BaseTaptActivity act = (BaseTaptActivity) context;
+
+                        if (act != null){
+                            act.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mItemManger.removeShownLayouts(mSwipeLayout);
+                                    mFeedDetail.getComments().remove(pos);
+                                    notifyItemRemoved(pos + 1);
+                                    notifyItemRangeChanged(pos + 1, mFeedDetail.getComments().size() + 1);
+                                    mFeedDetail.refreshCommentCount();
+
+                                    Toast.makeText(context, "Comment deleted", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
                     } else {
                         Log.i("Comment item delete", "onResponse: " + response.body().string());
                         final BaseTaptActivity act = (BaseTaptActivity) context;
+
                         if (act != null) {
                             act.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mFeedDetail.getComments().add(position, comment);
-                                    notifyItemInserted(position + 1);
-                                    mFeedDetail.refreshCommentCount();
+                                    Utils.showServerErrorToast(context);
                                 }
                             });
                         }
                     }
+
+                    progressDialog.dismiss();
+                    mDenySwipe = false;
                 }
             });
         }
@@ -480,29 +497,29 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             if (mDenySwipe) return;
 
             final int pos = in - 1;
-            Comment comment = (Comment) mFeedDetail.getComments().get(pos);
+            final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
 
             //safe check
             //double check that they are revealing their own comment
-            if (!comment.getCommentUserId().equals(mViewerUserId)) return;
+            if (!comment.getCommentUserId().equals(mViewerUserId) || !comment.getCommentPostId().equals(mCommentId)) return;
 
-            comment.setIsAnon(!mIsAnon);
-            notifyItemChanged(pos + 1);
+            final ProgressDialog progressDialog = ProgressDialog.show(context, null, mIsAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
+            mDenySwipe = true;
 
             new LSDKEvents(context).revealComment(mCommentId, !mIsAnon, new Callback() {
-                final int position = pos;
                 final boolean anon = mIsAnon;
 
                 @Override
                 public void onFailure(Call call, IOException e) {
                     final BaseTaptActivity act = (BaseTaptActivity) context;
+                    progressDialog.dismiss();
+                    mDenySwipe = false;
+
                     if (act != null) {
                         act.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Toast.makeText(act, "Failed to change comment. Could not find connection.", Toast.LENGTH_SHORT).show();
-                                ((Comment) mFeedDetail.getComments().get(position)).setIsAnon(anon);
-                                notifyItemChanged(position + 1);
                             }
                         });
                     }
@@ -510,9 +527,41 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        response.body().close();
 
+                    String res = response.body().string();
+
+                    if (response.isSuccessful()) {
+
+                        try {
+
+                            if (!mIsAnon) { //set new anon image
+                                comment.setAnonImage(new JSONObject(res).getString("anonymousImage"));
+                            }
+
+                            BaseTaptActivity activity = (BaseTaptActivity) context;
+
+                            if (activity != null) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        comment.setIsAnon(!anon);
+                                        notifyItemChanged(pos + 1);
+                                        Toast.makeText(context, anon ? "Comment revealed" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                        }catch (JSONException e){
+                            final BaseTaptActivity act = (BaseTaptActivity) context;
+                            if (act != null) {
+                                act.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(act, "An error occurred. Please try again later.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        }
                     } else {
                         Log.i("Comment item reveal", "onResponse: " + response.body().string());
                         final BaseTaptActivity act = (BaseTaptActivity) context;
@@ -521,12 +570,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                                 @Override
                                 public void run() {
                                     Toast.makeText(act, "Failed to change comment. Please try again later.", Toast.LENGTH_SHORT).show();
-                                    ((Comment) mFeedDetail.getComments().get(position)).setIsAnon(anon);
-                                    notifyItemChanged(position + 1);
                                 }
                             });
                         }
                     }
+
+                    progressDialog.dismiss();
+                    mDenySwipe = false;
                 }
             });
         }
@@ -637,7 +687,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
-            if (!mLoadMoreItem.isLoading() && mLoadMoreCommentsRunnable != null) {
+            if (!mDenySwipe && !mLoadMoreItem.isLoading() && mLoadMoreCommentsRunnable != null) {
                 closeAllDialogs();
                 vLoadMoreProgressBar.setVisibility(View.VISIBLE);
                 vLoadMoreText.setVisibility(View.INVISIBLE);

@@ -96,6 +96,9 @@ public class Comment {
         return mDateLong == 0 ? "" : Utils.getTimeAgoString(mDateLong);
     }
 
+    public void setAnonImage(String image){
+        mAnonImage = image;
+    }
 
     public static class MentionedPersonLight{
 
@@ -121,5 +124,6 @@ public class Comment {
         public String getFormatedFullName(){
             return mFormattedName;
         }
+
     }
 }

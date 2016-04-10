@@ -252,7 +252,7 @@ public class UpdatesFragment extends UpdatableFragment {
                             return;
                         }
 
-                        Log.i(TAG, "onResponse: "+activities.getJSONObject(activities.length()-1).toString());
+                        //Log.i(TAG, "onResponse: "+activities.getJSONObject(activities.length()-1).toString());
 
                         ArrayList<Update> oldItems = new ArrayList<>();
                         ArrayList<Update> newItems = new ArrayList<>();

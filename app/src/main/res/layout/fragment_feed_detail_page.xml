@@ -11,22 +11,22 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
+
     <android.support.v7.widget.Toolbar android:id="@+id/feed_detail_toolbar"
                                        android:layout_width="match_parent"
                                        android:layout_height="?android:attr/actionBarSize"
                                        android:background="@color/colorPrimary"
                                        android:elevation="4dp"
-                                       app:theme="@style/ThemeOverlay.AppCompat.Dark"
-                                       app:popupTheme="@style/MyDarkToolbarStyle"
-    />
+                                       android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                                       app:popupTheme="@style/MyDarkToolbarStyle"/>
+
 
     <LinearLayout android:id="@+id/comment_container"
                   android:layout_width="match_parent"
                   android:layout_height="50dp"
                   android:layout_alignParentBottom="true"
                   android:background="#FFFFFF"
-                  android:orientation="vertical"
-    >
+                  android:orientation="vertical">
 
         <View android:layout_width="match_parent"
               android:layout_height="1dp"
@@ -41,8 +41,7 @@
             <RelativeLayout android:id="@+id/comment_checkbox_container"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:layout_gravity="center_vertical"
-            >
+                            android:layout_gravity="center_vertical">
 
                 <CheckBox android:id="@+id/comment_anon_checkbox"
                           android:layout_width="wrap_content"

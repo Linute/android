@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -14,12 +13,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,13 +29,10 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -64,19 +58,19 @@ import okhttp3.Response;
 
 public class FindFriendsFragment extends UpdatableFragment {
 
+    public static final int SEARCH_TYPE_NAME = 0;
+    public static final int SEARCH_TYPE_FACEBOOK = 1;
+
     public static final String TAG = FindFriendsFragment.class.getSimpleName();
 
     public static final String SEARCH_TYPE_KEY = "search_type";
 
-    public static final String FACEBOOK_TOKEN_KEY = "facebook_token";
-
     private int mSearchType = 0; // 0 for search, 1 for facebook, 2 for contacts
 
     private RecyclerView mRecyclerView;
-    private SearchView mSearchView;
     private FriendSearchAdapter mFriendSearchAdapter;
     private String mQueryString; //what's in the search view
-    private TextView mDescriptionText;
+
 
     private List<FriendSearchUser> mFriendFoundList = new ArrayList<>();
 
@@ -84,15 +78,14 @@ public class FindFriendsFragment extends UpdatableFragment {
     //private String mFbToken;
 
     private CallbackManager mCallbackManager;
-
     private ProgressBar mProgressBar;
-
     private View mFindFriendsRationale;
 
-    private Button mReloadButton;
+    private View mEmptyText;
 
     private GetContactsInBackground mGetContactsInBackground;
 
+    private Handler mMainHandler = new Handler();
 
     public static FindFriendsFragment newInstance(int searchType) {
         FindFriendsFragment fragment = new FindFriendsFragment();
@@ -116,22 +109,14 @@ public class FindFriendsFragment extends UpdatableFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_find_friends, container, false);
 
-        mDescriptionText = (TextView) rootView.findViewById(R.id.findFriends_text);
+        TextView rationaleText = (TextView) rootView.findViewById(R.id.findFriends_rat_text);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
-        mSearchView = (SearchView) rootView.findViewById(R.id.findFriends_search_view);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
         mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
-        mReloadButton = (Button) rootView.findViewById(R.id.findFriends_reload_button);
 
-        mSearchView.setIconified(false);
-        mSearchView.setIconifiedByDefault(false);
+        Button reloadButton = (Button) rootView.findViewById(R.id.findFriends_turn_on);
 
-        mReloadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                reload();
-            }
-        });
+        mEmptyText = rootView.findViewById(R.id.findFriends_text);
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -143,74 +128,52 @@ public class FindFriendsFragment extends UpdatableFragment {
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
 
-        setupSearchViewHandler();
-
         if (fragmentNeedsUpdating()) {
-            if (mSearchType == 0) { //if search by name, we need init text
-                mDescriptionText.setText("Enter your friend's name in the search bar");
-                mDescriptionText.setVisibility(View.VISIBLE);
-            } else if (mSearchType == 1) { //facebook
-                FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
+            if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
+                rationaleText.setText("Enter your friend's name in the search bar");
+                reloadButton.setVisibility(View.GONE);
+                mRecievedList = true;
+            } else if (mSearchType == SEARCH_TYPE_FACEBOOK) { //facebook
+                rationaleText.setText(R.string.facebook_rationale);
+                reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.facebook_blue));
+                reloadButton.setOnClickListener(new View.OnClickListener() {
+                    private boolean loaded = false;
+                    @Override
+                    public void onClick(View v) {
 
-                //facebook
-                mCallbackManager = CallbackManager.Factory.create();
+                        if (!loaded) {
+                            FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
+                            mCallbackManager = CallbackManager.Factory.create();
+                            setUpFacebookCallback();
+                            loaded = true;
+                        }
 
-                setUpFacebookCallback();
-
-                loginFacebook();
-
+                        mFindFriendsRationale.setVisibility(View.GONE);
+                        loginFacebook();
+                    }
+                });
             } else { //contacts. This process takes forever to get emails. We will use async task
-                mGetContactsInBackground = new GetContactsInBackground();
-                setUpContactsList();
-            }
+                rationaleText.setText(R.string.need_contant_permission);
+                reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.yellow_color));
+                reloadButton.setText("Search contacts");
+                reloadButton.setOnClickListener(new View.OnClickListener() {
+                    private boolean loaded = false;
 
+                    @Override
+                    public void onClick(View v) {
+                        if (!loaded) {
+                            mGetContactsInBackground = new GetContactsInBackground();
+                        }
+
+                        setUpContactsList();
+                    }
+                });
+            }
             setFragmentNeedUpdating(false);
         }
-
+        mFindFriendsRationale.setVisibility(View.VISIBLE);
 
         return rootView;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        //analytics
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.setTitle("Find Friends");
-            activity.lowerAppBarElevation();
-            activity.resetToolbar();
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
-                obj.put("action", "active");
-                obj.put("screen", "Friend List");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        //analytics
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Friend List");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -219,20 +182,9 @@ public class FindFriendsFragment extends UpdatableFragment {
         if (mGetContactsInBackground != null) { //cancel task
             mGetContactsInBackground.cancel(true);
         }
-
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.raiseAppBarLayoutElevation();
-        }
-
-        if (mSearchView.hasFocus() && getActivity() != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-
-        }
     }
 
-    private Handler mSearchHandler; //handles filtering and searchign
+    private Handler mSearchHandler = new Handler(); //handles filtering and searchign
 
     //Search my name inputted in searchbar
     private Runnable mSearchByNameRunnable = new Runnable() {
@@ -282,12 +234,19 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 public void run() {
 
                                     if (mFriendFoundList.isEmpty()) { //show no results found if empty
-                                        mDescriptionText.setText("No results found");
-                                        mDescriptionText.setVisibility(View.VISIBLE);
-                                    } else if (mDescriptionText.getVisibility() == View.VISIBLE) {
-                                        mDescriptionText.setVisibility(View.GONE);
+                                        mEmptyText.setVisibility(View.VISIBLE);
+                                    } else if (mEmptyText.getVisibility() == View.VISIBLE) {
+                                        mEmptyText.setVisibility(View.GONE);
                                     }
-                                    mFriendSearchAdapter.notifyDataSetChanged();
+
+                                    //so notify isn't called repeadedly if they don't have to be
+                                    mMainHandler.removeCallbacks(null);
+                                    mMainHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFriendSearchAdapter.notifyDataSetChanged();
+                                        }
+                                    });
                                 }
                             });
 
@@ -307,7 +266,6 @@ public class FindFriendsFragment extends UpdatableFragment {
         }
     };
 
-
     //filters list
     private Runnable mFilterFacebookAndContactsRunnable = new Runnable() {
         @Override
@@ -315,22 +273,33 @@ public class FindFriendsFragment extends UpdatableFragment {
             ArrayList<FriendSearchUser> tempFriend = new ArrayList<>();
 
             if (mQueryString.trim().isEmpty()) {
-                for (FriendSearchUser user : mUnfilteredList)
-                    tempFriend.add(user);
+                    tempFriend.addAll(mUnfilteredList);
             } else {
                 for (FriendSearchUser user : mUnfilteredList)
                     if (user.nameContains(mQueryString)) {
                         tempFriend.add(user);
                     }
 
-                if (tempFriend.isEmpty() && mDescriptionText.getVisibility() == View.INVISIBLE) { //empty, show empty text
-                    mDescriptionText.setVisibility(View.VISIBLE);
+                if (tempFriend.isEmpty() && mEmptyText.getVisibility() == View.GONE) { //empty, show empty text
+                    mEmptyText.setVisibility(View.VISIBLE);
                 }
             }
             mFriendFoundList.clear();
             mFriendFoundList.addAll(tempFriend);
 
-            mFriendSearchAdapter.notifyDataSetChanged();
+            if (mFriendFoundList.isEmpty()){
+                mEmptyText.setVisibility(View.VISIBLE);
+            }else if (mEmptyText.getVisibility() == View.VISIBLE){
+                mEmptyText.setVisibility(View.GONE);
+            }
+
+            mMainHandler.removeCallbacks(null);
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFriendSearchAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 
@@ -338,65 +307,33 @@ public class FindFriendsFragment extends UpdatableFragment {
     private boolean mCancelLoad = false;
 
     //searching by name
-    private SearchView.OnQueryTextListener mSearchListener = new SearchView.OnQueryTextListener() {
-        @Override
-        public boolean onQueryTextSubmit(String query) {
-            return false;
+    private void searchByName(String newText) {
+        mQueryString = newText;
+
+        //stop current handler
+        //we will wait to see if user inputs more before running search
+        mSearchHandler.removeCallbacks(mSearchByNameRunnable);
+        if (newText.isEmpty()) { //no text in search bar
+            mFriendFoundList.clear();
+            mFriendSearchAdapter.notifyDataSetChanged();
+            mCancelLoad = true;
+            mFindFriendsRationale.setVisibility(View.VISIBLE);
+            if (mEmptyText.getVisibility() == View.VISIBLE) mEmptyText.setVisibility(View.GONE);
+        } else {
+            if (mFindFriendsRationale.getVisibility() == View.VISIBLE)
+                mFindFriendsRationale.setVisibility(View.GONE);
+
+            mCancelLoad = false;
+            mSearchHandler.postDelayed(mSearchByNameRunnable, 300);
         }
-
-        @Override
-        public boolean onQueryTextChange(String newText) {
-            mQueryString = newText;
-
-            //stop current handler
-            //we will wait to see if user inputs more before running search
-            mSearchHandler.removeCallbacks(mSearchByNameRunnable);
-
-            if (newText.isEmpty()) { //no text in search bar
-                mFriendFoundList.clear();
-                mFriendSearchAdapter.notifyDataSetChanged();
-                mCancelLoad = true;
-                mDescriptionText.setText("Enter your friend's name in the search bar");
-                mDescriptionText.setVisibility(View.VISIBLE);
-            } else {
-                if (mDescriptionText.getVisibility() == View.VISIBLE)
-                    mDescriptionText.setVisibility(View.INVISIBLE);
-
-                mCancelLoad = false;
-                mSearchHandler.postDelayed(mSearchByNameRunnable, 300);
-            }
-
-            return false;
-        }
-    };
+    }
 
     //Filter or search TextChangeListners
-    private SearchView.OnQueryTextListener mFilterListener = new SearchView.OnQueryTextListener() {
-        @Override
-        public boolean onQueryTextSubmit(String query) {
-            return false;
-        }
-
-        @Override
-        public boolean onQueryTextChange(String newText) {
-            if (mInRationalText) return false;
-
-            mQueryString = newText;
-            mSearchHandler.removeCallbacks(mFilterFacebookAndContactsRunnable);
-            mSearchHandler.postDelayed(mFilterFacebookAndContactsRunnable, 300);
-            return false;
-        }
-    };
-
-
-    private void setupSearchViewHandler() {
-
-        mSearchHandler = new Handler(); //searchs or filters as you type
-
-        if (mSearchType == 0) { //search
-            mSearchView.setOnQueryTextListener(mSearchListener);
-        } else //filter
-            mSearchView.setOnQueryTextListener(mFilterListener);
+    private void filterList(String newText) {
+        if (mInRationalText) return;
+        mQueryString = newText;
+        mSearchHandler.removeCallbacks(mFilterFacebookAndContactsRunnable);
+        mSearchHandler.postDelayed(mFilterFacebookAndContactsRunnable, 300);
     }
 
 
@@ -410,6 +347,7 @@ public class FindFriendsFragment extends UpdatableFragment {
     }
 
 
+    private boolean mRecievedList = false;
     private void setUpFacebookList(String token) {
 
         mProgressBar.setVisibility(View.VISIBLE);
@@ -423,7 +361,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                     @Override
                     public void run() {
                         Utils.showBadConnectionToast(getActivity());
-                        showRetryButton(true);
+                        //showRetryButton(true);
                     }
                 });
             }
@@ -449,16 +387,15 @@ public class FindFriendsFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showRetryButton(false);
+                                //showRetryButton(false);
                                 mProgressBar.setVisibility(View.GONE);
                                 if (mFriendFoundList.isEmpty()) {
-                                    mDescriptionText.setText("No results found");
-                                    mDescriptionText.setVisibility(View.VISIBLE);
+                                    mEmptyText.setVisibility(View.VISIBLE);
                                 }
                                 mFriendSearchAdapter.notifyDataSetChanged();
+                                mRecievedList = true;
                             }
                         });
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                         if (getActivity() == null) return;
@@ -598,7 +535,8 @@ public class FindFriendsFragment extends UpdatableFragment {
                     public void run() {
                         Utils.showBadConnectionToast(getActivity());
                         mProgressBar.setVisibility(View.GONE);
-                        showRetryButton(true);
+                        mFindFriendsRationale.setVisibility(View.VISIBLE);
+                        //showRetryButton(true);
                     }
                 });
 
@@ -625,14 +563,14 @@ public class FindFriendsFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                showRetryButton(false);
+                                //showRetryButton(false);
                                 mProgressBar.setVisibility(View.GONE);
                                 mInRationalText = false;
                                 if (mFriendFoundList.isEmpty()) {
-                                    mDescriptionText.setText("No results found");
-                                    mDescriptionText.setVisibility(View.VISIBLE);
+                                    mEmptyText.setVisibility(View.VISIBLE);
                                 }
                                 mFriendSearchAdapter.notifyDataSetChanged();
+                                mRecievedList = true;
                             }
                         });
 
@@ -739,29 +677,25 @@ public class FindFriendsFragment extends UpdatableFragment {
         }
     }
 
-    public void reload() {
-        if (mSearchType == 0) {
-            mSearchByNameRunnable.run();
-        } else if (mSearchType == 1) {
-            loginFacebook();
-        } else {
-            mGetContactsInBackground.execute();
-        }
-    }
-
-    public void showRetryButton(boolean show) {
-        mReloadButton.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
     private void showServerErrorWithRetryButton() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mProgressBar.setVisibility(View.GONE);
                 Utils.showServerErrorToast(getActivity());
-                showRetryButton(true);
+                mFindFriendsRationale.setVisibility(View.VISIBLE);
+                //showRetryButton(true);
             }
         });
+    }
+
+    public void searchWithQuery(String query) {
+        if (!mRecievedList) return;
+        if (mSearchType == SEARCH_TYPE_NAME){
+            searchByName(query);
+        }else {
+            filterList(query);
+        }
     }
 }
 

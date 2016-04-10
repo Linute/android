@@ -18,6 +18,7 @@
             app:tabIndicatorColor="@color/white"
             app:tabSelectedTextColor="@color/white"
             app:tabTextColor="@color/white"/>
+
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.view.ViewPager android:id="@+id/discover_hostViewPager"

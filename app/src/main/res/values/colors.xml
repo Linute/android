@@ -60,5 +60,9 @@
 
     <color name="notification_color">#CC2786BB</color>
 
+    <color name="facebook_blue">#8A9BC3</color>
+
+    <color name="yellow_color">#FBB72E</color>
+
 </resources>
 

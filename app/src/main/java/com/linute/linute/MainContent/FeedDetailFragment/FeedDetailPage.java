@@ -78,6 +78,7 @@ import okhttp3.Response;
 
 public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
+    private static final SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
@@ -91,8 +92,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private View mSendButtonContainer;
 
     private RecyclerView mMentionedList;
-
-    //private SharedPreferences mSharedPreferences;
 
     private MentionedPersonAdapter mMentionedPersonAdapter;
 
@@ -231,7 +230,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
         mMentionedList.setAdapter(mMentionedPersonAdapter);
 
-
         mSendButtonContainer = rootView.findViewById(R.id.comment_send_button_container);
         mSendButtonContainer.setEnabled(false);
 
@@ -327,7 +325,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             activity.setTitle("Comments");
-            activity.resetToolbar();
             activity.enableBarScrolling(false);
             activity.showMainToolbar(false);
             //user -- user Id
@@ -489,8 +486,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
 
-
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     Date myDate;
 
                     if (mSkip > 0) {
@@ -502,7 +497,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                         //get date
                         try {
-                            myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = fm.parse(comments.getJSONObject(i).getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
@@ -636,7 +631,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                             comments = jsonObject.getJSONArray("comments");
 
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             Date myDate;
 
                             if (mSkip != 0) {
@@ -648,7 +642,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                                 //get date
                                 try {
-                                    myDate = simpleDateFormat.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = fm.parse(comments.getJSONObject(i).getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
@@ -842,20 +836,19 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     }
 
     private void deletePost() {
-        if (getActivity() == null) return;
-        if (!mViewId.equals(mFeedDetail.getPostUserId())) return;
+        if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
 
-        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true);
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
 
         new LSDKEvents(getActivity()).deleteEvent(mFeedDetail.getPostId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
-                            progressDialog.dismiss();
                         }
                     });
                 }
@@ -873,7 +866,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.dismiss();
                             Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
                             activity.setFragmentOfIndexNeedsUpdating(true, MainActivity.FRAGMENT_INDEXES.FEED);
                             getFragmentManager().popBackStack();
@@ -887,11 +879,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
-                                progressDialog.dismiss();
                             }
                         });
                     }
                 }
+
+                progressDialog.dismiss();
             }
         });
     }
@@ -1023,25 +1016,21 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
     private void revealPost() {
-        if (!mViewId.equals(mFeedDetail.getPostUserId())) return;
+        if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
 
         final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
 
-        mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-        mFeedDetailAdapter.notifyItemChanged(0);
-
-        mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(isAnon ? "Make anonymous" : "Reveal post");
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
 
         new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
-                            mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                            mFeedDetailAdapter.notifyItemChanged(0);
                         }
                     });
                 }
@@ -1049,25 +1038,54 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                String res = response.body().string();
+
                 if (response.isSuccessful()) {
-                    response.body().close();
+                    try {
+
+                        if (!isAnon) {
+                            JSONObject obj = new JSONObject(res);
+                            mFeedDetail.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));
+                        }
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(isAnon ? "Make anonymous" : "Reveal post");
+                                    mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
+                                    mFeedDetailAdapter.notifyItemChanged(0);
+                                    Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onResponse: " + res);
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
                 } else {
-                    Log.e(TAG, "onResponse: " + response.body().string());
+                    Log.e(TAG, "onResponse: " + res);
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
-                                mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                                mFeedDetailAdapter.notifyItemChanged(0);
                             }
                         });
                     }
                 }
+                progressDialog.dismiss();
             }
         });
     }
-
 
 
     /* MENTIONS CODE */
@@ -1176,6 +1194,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 mSearchHandler.postDelayed(mSearchRunnable, 350);
             }
         }
+
         return Collections.singletonList(BUCKET);
     }
 
@@ -1281,8 +1300,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             try {
                 Date myDate;
-                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
                 myDate = fm.parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
