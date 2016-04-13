@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -86,7 +85,6 @@ public class MainActivity extends BaseTaptActivity {
         public static final short FEED = 1;
         public static final short PEOPLE = 2;
         public static final short ACTIVITY = 3;
-
         public static final short SETTINGS = 5;
     }
 
@@ -773,7 +771,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     }
 
-
     @Override
     public void showMainToolbar(boolean show) {
         mAppBarLayout.setVisibility(show ? View.VISIBLE : View.GONE);
@@ -822,4 +819,8 @@ public class MainActivity extends BaseTaptActivity {
             });
         }
     };
+
+    public void openDrawer(){
+        mDrawerLayout.openDrawer(GravityCompat.START);
+    }
 }

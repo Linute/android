@@ -3,14 +3,23 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.MainActivity;
@@ -40,11 +49,13 @@ public class Profile extends UpdatableFragment {
     private ProfileAdapter mProfileAdapter;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ImageView vProfileImage;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
+    private String mImageSignature;
 
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
@@ -75,7 +86,6 @@ public class Profile extends UpdatableFragment {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -85,10 +95,11 @@ public class Profile extends UpdatableFragment {
         mUser = new LSDKUser(getContext());
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
+        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
-        GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
+        final GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
@@ -127,6 +138,60 @@ public class Profile extends UpdatableFragment {
             }
         });
 
+        Toolbar mToolbar  = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((MainActivity)getActivity()).openDrawer();
+            }
+        });
+        mToolbar.inflateMenu(R.menu.my_profile_action_bar);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.add_friend){
+                    return true;
+                } else if (item.getItemId() == R.id.settings) {
+                    return true;
+                }
+                return false;
+            }
+        });
+        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
+
+        vProfileImage = (ImageView) rootView.findViewById(R.id.toolbar_image);
+        Glide.with(this)
+                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
+                .asBitmap()
+                .placeholder(R.drawable.image_loading_background)
+                .signature(new StringSignature(mImageSignature))
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                .into(vProfileImage);
+
+        final CollapsingToolbarLayout layout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsed_toolbar);
+        layout.setTitle("");
+
+        AppBarLayout appBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            boolean isShow = false;
+            int scrollRange = -1;
+
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (scrollRange == -1) {
+                    scrollRange = appBarLayout.getTotalScrollRange();
+                }
+                if (scrollRange + verticalOffset == 0) {
+                    layout.setTitle(user.getFirstName() + " " +user.getLastName());
+                    isShow = true;
+                } else if(isShow) {
+                    layout.setTitle("");
+                    isShow = false;
+                }
+            }
+        });
+
         return rootView;
     }
 
@@ -137,17 +202,11 @@ public class Profile extends UpdatableFragment {
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
             String name = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
-            mainActivity.setTitle(name);
-            mainActivity.resetToolbar();
+            //mainActivity.setTitle(name);
+            mainActivity.showMainToolbar(false);
+            mainActivity.enableBarScrolling(false);
 
             //scroll to top of list
-            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (recList != null)
-                        recList.smoothScrollToPosition(0);
-                }
-            });
 
             JSONObject obj = new JSONObject();
             try {
@@ -200,7 +259,8 @@ public class Profile extends UpdatableFragment {
 
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            activity.setToolbarOnClickListener(null);
+            activity.showMainToolbar(true);
+            activity.enableBarScrolling(true);
         }
 
     }
@@ -243,6 +303,8 @@ public class Profile extends UpdatableFragment {
                     }
                     user.updateUserInformation(jsonObject); //container for new information
 //                    Log.d(TAG, "onResponse: " + jsonObject);
+
+
 
                     savePreferences(user);
 //                    Log.d(TAG, body);
@@ -465,5 +527,4 @@ public class Profile extends UpdatableFragment {
             }
         });
     }
-
 }

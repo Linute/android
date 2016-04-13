@@ -122,8 +122,12 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     public void onClick(View v) {
 
                         if (mFollowed){
-                            //TODO: GO TO MESSANGER
-                            Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
+                            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                            if (activity != null) {
+                                Intent enterRooms = new Intent(activity, RoomsActivity.class);
+                                enterRooms.putExtra("CHATICON", true);
+                                activity.startActivity(enterRooms);
+                            }
                         }
 
                         mFollowed = true;

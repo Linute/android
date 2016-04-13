@@ -11,9 +11,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
@@ -22,7 +19,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.makeramen.roundedimageview.RoundedImageView;
 
 
 import org.json.JSONException;
@@ -32,7 +28,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -42,7 +37,7 @@ import okhttp3.Response;
  */
 public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private static final String TAG = ProfileHeaderViewHolder.class.getSimpleName();
-    protected CircleImageView vProfilePicture;
+    //protected CircleImageView vProfilePicture;
     protected TextView vStatusText;
     protected TextView vPosts;
     //protected TextView vFollowing;
@@ -59,9 +54,9 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
     private LinuteUser mUser;
 
     private String mUserid;
-    private String mImageSignature;
+    //private String mImageSignature;
 
-    private String mProfileImageUrl;
+    //private String mProfileImageUrl;
 
 
     public ProfileHeaderViewHolder(View itemView, Context context) {
@@ -70,9 +65,9 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         mContext = context;
         SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserid = sharedPreferences.getString("userID", "");
-        mImageSignature = sharedPreferences.getString("imageSigniture", "000");
+        //mImageSignature = sharedPreferences.getString("imageSigniture", "000");
 
-        vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
+        //vProfilePicture = (CircleImageView) itemView.findViewById(R.id.profilefrag_prof_image);
         vStatusText = (TextView) itemView.findViewById(R.id.profilefrag_status);
         vPosts = (TextView) itemView.findViewById(R.id.profilefrag_num_posts);
         vFollowers = (TextView) itemView.findViewById(R.id.profilefrag_num_followers);
@@ -87,18 +82,18 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
 
 
         //when tapped, enlarges image
-        vProfilePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                BaseTaptActivity activity = (BaseTaptActivity) mContext;
-
-                if (mProfileImageUrl != null && activity != null) {
-                    EnlargePhotoViewer
-                            .newInstance(mProfileImageUrl)
-                            .show(activity.getSupportFragmentManager(), "enlarged_image");
-                }
-            }
-        });
+//        vProfilePicture.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+//
+//                if (mProfileImageUrl != null && activity != null) {
+//                    EnlargePhotoViewer
+//                            .newInstance(mProfileImageUrl)
+//                            .show(activity.getSupportFragmentManager(), "enlarged_image");
+//                }
+//            }
+//        });
 
         //goes to roomfragment
         mChatButton.setOnClickListener(new View.OnClickListener() {
@@ -235,6 +230,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
                 }
             }
         });
+
     }
 
     void bindModel(final LinuteUser user) {
@@ -248,7 +244,7 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         vFollowers.setText(String.valueOf(user.getFollowers()));
         vCollegeName.setText(user.getCollegeName());
 
-        if (!mUser.equals(user.getUserID())) {
+        if (!mUser.getUserID().equals(user.getUserID())) {
             if (user.getFriend() != null && user.getFriend().equals("")) {
                 mFollowButton.setBackgroundColor(ContextCompat.getColor(mContext, R.color.follow_grey));
                 mFollowingButtonText.setText("follow");
@@ -259,15 +255,15 @@ public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
             mActionBarContainer.setVisibility(View.VISIBLE);
         }
 
-        mProfileImageUrl = user.getProfileImage();
-
-        Glide.with(mContext)
-                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                .asBitmap()
-                .signature(new StringSignature(mImageSignature))
-                .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into(vProfilePicture);
+//        mProfileImageUrl = user.getProfileImage();
+//
+//        Glide.with(mContext)
+//                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
+//                .asBitmap()
+//                .signature(new StringSignature(mImageSignature))
+//                .placeholder(R.drawable.image_loading_background)
+//                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+//                .into(vProfilePicture);
     }
 
 }
