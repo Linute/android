@@ -8,10 +8,9 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +18,12 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -47,7 +48,6 @@ import okhttp3.Response;
 public class TaptUserProfileFragment extends UpdatableFragment {
     public static final String TAG = TaptUserProfileFragment.class.getSimpleName();
 
-    private RecyclerView recList;
     private ProfileAdapter mProfileAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
@@ -60,20 +60,22 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private String mUserName;
     private String mTaptUserId;
 
+    private Toolbar mToolbar;
+
     private boolean mOtherSectionUpdated = false;
 
     private int mSkip;
     private boolean mCanLoadMore = false;
 
+    private boolean mOwnerIsViewer; //viewer viewing own profile
 
     public TaptUserProfileFragment() {
         // Required empty public constructor
     }
 
     /**
-     *
-     * @param userName     - full name of user. this is used to set the actionbar
-     * @param taptUserId   - id of the user
+     * @param userName   - full name of user. this is used to set the actionbar
+     * @param taptUserId - id of the user
      * @return
      */
 
@@ -101,20 +103,19 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
-        setHasOptionsMenu(true);
-
         mUser = new LSDKUser(getActivity());
         mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
+        final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
 
-        GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
+        final GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if (position == 0) return 3;
-                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem) return 3;
+                if (position == 0 || position == 1) return 3;
+                else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
+                    return 3;
                 else return 1;
             }
         });
@@ -122,6 +123,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         recList.setLayoutManager(llm);
 
         mLinuteUser.setUserID(mTaptUserId);
+        mLinuteUser.setFirstName(mUserName);
+        mLinuteUser.setLastName("");
         mProfileAdapter = new ProfileAdapter(mUserActivityItems, mLinuteUser, getActivity());
         recList.setAdapter(mProfileAdapter);
 
@@ -134,6 +137,85 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 setActivities(); //get activities
             }
         });
+        mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
+
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() != null)
+                    getActivity().onBackPressed();
+            }
+        });
+
+        mOwnerIsViewer = mTaptUserId.equals(mSharedPreferences.getString("userID", ""));
+        if (mOwnerIsViewer) {
+            mToolbar.inflateMenu(R.menu.my_profile_action_bar);
+        } else {
+            mToolbar.inflateMenu(R.menu.tapt_user_profile_menu);
+            if (mProfileInfoHasLoaded) {
+                mToolbar.getMenu()
+                        .findItem(R.id.feed_detail_subscribe)
+                        .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+            }
+        }
+
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                MainActivity activity = (MainActivity) getActivity();
+                switch (item.getItemId()) {
+                    case R.id.add_friend:
+                        if (activity != null)
+                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                        return true;
+                    case R.id.settings:
+                        if (activity != null)
+                            activity.startEditProfileActivity(SettingActivity.class);
+                        return true;
+                    case R.id.feed_detail_subscribe:
+                        subscribeConfirmation();
+                        return true;
+                }
+                return false;
+            }
+        });
+
+        mToolbar.setTitle(mUserName);
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recList.scrollToPosition(0);
+            }
+        });
+        if (fragmentNeedsUpdating()) {
+            mToolbar.getBackground().mutate().setAlpha(0);
+        }
+
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                                        @Override
+                                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                                            super.onScrolled(recyclerView, dx, dy);
+
+                                            if (llm.findFirstVisibleItemPosition() == 0) {
+                                                View view = recyclerView.getChildAt(0);
+                                                if (view != null) {
+                                                    //doing the maths
+                                                    int alpha = (int) ((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight()))) * 255);
+                                                    if (alpha > 255) {
+                                                        alpha = 255;
+                                                    }
+                                                    if (alpha < 0) {
+                                                        alpha = 0;
+                                                    }
+                                                    mToolbar.getBackground().mutate().setAlpha(alpha);
+                                                }
+                                            }
+                                        }
+                                    }
+        );
 
         mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts() {
             @Override
@@ -147,38 +229,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         return rootView;
     }
 
-    private Menu mProfileMenu;
-
     private boolean mProfileInfoHasLoaded = false;
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-
-        if (getActivity() != null) {
-            if (!mTaptUserId.equals(mSharedPreferences.getString("userID", ""))){
-                inflater.inflate(R.menu.tapt_user_profile_menu, menu);
-
-                mProfileMenu = menu;
-
-                if (mProfileInfoHasLoaded && mProfileMenu != null){
-                    MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
-                    i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                }
-            }
-        }
-
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.feed_detail_subscribe){
-            subscribeConfirmation();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onResume() {
@@ -187,16 +238,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null) { //changes app bar title to user's name
-
-            activity.setTitle(mUserName);
-            activity.resetToolbar();
-            activity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (recList != null)
-                        recList.smoothScrollToPosition(0);
-                }
-            });
+            activity.showMainToolbar(false);
+            activity.enableBarScrolling(false);
 
 //            if (mProfileInfoHasLoaded && mProfileMenu != null){
 //                MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
@@ -205,7 +248,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "active");
                 obj.put("screen", "Visitor");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -234,7 +277,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         if (activity != null) {
             JSONObject obj = new JSONObject();
             try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
+                obj.put("owner", mSharedPreferences.getString("userID", ""));
                 obj.put("action", "inactive");
                 obj.put("screen", "Visitor");
                 activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
@@ -248,8 +291,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void onStop() {
         super.onStop();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null){
-            activity.setToolbarOnClickListener(null);
+        if (activity != null) {
+            activity.showMainToolbar(true);
+            activity.enableBarScrolling(true);
         }
     }
 
@@ -272,6 +316,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                     JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
+                        Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                         mLinuteUser.updateUserInformation(jsonObject); //container for new information
                         mProfileInfoHasLoaded = true;
                     } catch (JSONException e) {
@@ -282,21 +327,22 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    if (!mOtherSectionUpdated){
+                    if (!mOtherSectionUpdated) {
                         mOtherSectionUpdated = true;
-                    }else {
+                    } else {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                mToolbar.setTitle(mLinuteUser.getFirstName() + " "+mLinuteUser.getLastName());
                                 mOtherSectionUpdated = false;
                                 mSwipeRefreshLayout.setRefreshing(false);
                                 mProfileAdapter.notifyDataSetChanged();
-                                if (mProfileMenu != null) {
-                                    MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
-                                    if (i != null) {
-                                        i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                                    }
+                                if (!mOwnerIsViewer) {
+                                    mToolbar.getMenu()
+                                            .findItem(R.id.feed_detail_subscribe)
+                                            .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
                                 }
+
                             }
                         });
                     }
@@ -310,112 +356,119 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void setActivities() {
         LSDKUser user = new LSDKUser(getActivity());
         user.getUserActivities(mTaptUserId, -1, 24, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
-                    public void run() {
-                        Utils.showBadConnectionToast(getActivity());
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) { //got response
-                    try { //try to grab needed information from response
-                        String body = response.body().string();
-
-                        JSONObject jsonObject = new JSONObject(body);
-
-                        mSkip = jsonObject.getInt("skip");
-
-                        final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-//                        Log.d(TAG, body);
-
-                        if (activities == null) return;
-
-                        ArrayList<UserActivityItem> tempActivies = new ArrayList<>();
-
-                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
-                            try {
-                                tempActivies.add(
-                                        new UserActivityItem(
-                                                activities.getJSONObject(i)
-                                        )); //create activity objects and add to array
-                            }catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                        }
-
-                        mUserActivityItems.clear();
-                        mUserActivityItems.addAll(tempActivies);
-
-                        //can load more if skip isn't 0 yet
-                        mCanLoadMore = mSkip > 0;
-                        mSkip -= 24;
-
-                        if (mUserActivityItems.isEmpty()) {
-                            mUserActivityItems.add(new EmptyUserActivityItem());
-                        }
-
+                    public void onFailure(Call call, IOException e) {
                         if (getActivity() == null) return;
-
-                        //turn refresh off if it's on and notify ListView we might have updated information
-                        if (!mOtherSectionUpdated){
-                            mOtherSectionUpdated = true;
-                        }else {
-                            mOtherSectionUpdated = false;
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() { //update view
-                                    mSwipeRefreshLayout.setRefreshing(false);
-                                    mProfileAdapter.notifyDataSetChanged();
-                                    if (mProfileMenu != null) {
-                                        mProfileMenu.findItem(R.id.feed_detail_subscribe).setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                                    }
-                                }
-                            });
-                        }
-
-                    } catch (JSONException e) { //unable to grab needed info
-                        e.printStackTrace();
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(getActivity());
-                                    mSwipeRefreshLayout.setRefreshing(false);
-                                }
-                            });
-                        }
-                    }
-                } else { //unable to connect with DB
-                    Log.v(TAG, response.body().string());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                             @Override
                             public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                                mSwipeRefreshLayout.setRefreshing(false);
+                                Utils.showBadConnectionToast(getActivity());
+                                if (mSwipeRefreshLayout.isRefreshing())
+                                    mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
                     }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (response.isSuccessful()) { //got response
+                            try { //try to grab needed information from response
+                                String body = response.body().string();
+
+                                JSONObject jsonObject = new JSONObject(body);
+
+                                mSkip = jsonObject.getInt("skip");
+
+                                final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
+//                        Log.d(TAG, body);
+
+                                if (activities == null) return;
+
+                                ArrayList<UserActivityItem> tempActivies = new ArrayList<>();
+
+                                for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
+                                    try {
+                                        tempActivies.add(
+                                                new UserActivityItem(
+                                                        activities.getJSONObject(i)
+                                                )); //create activity objects and add to array
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+
+                                mUserActivityItems.clear();
+                                mUserActivityItems.addAll(tempActivies);
+
+                                //can load more if skip isn't 0 yet
+                                mCanLoadMore = mSkip > 0;
+                                mSkip -= 24;
+
+                                if (mUserActivityItems.isEmpty()) {
+                                    mUserActivityItems.add(new EmptyUserActivityItem());
+                                }
+
+                                if (getActivity() == null) return;
+
+                                //turn refresh off if it's on and notify ListView we might have updated information
+                                if (!mOtherSectionUpdated) {
+                                    mOtherSectionUpdated = true;
+                                } else {
+                                    mOtherSectionUpdated = false;
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() { //update view
+                                            mSwipeRefreshLayout.setRefreshing(false);
+                                            mProfileAdapter.notifyDataSetChanged();
+                                            if (!mOwnerIsViewer) {
+                                                mToolbar.getMenu()
+                                                        .findItem(R.id.feed_detail_subscribe)
+                                                        .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
+                                            }
+
+                                        }
+                                    });
+                                }
+
+                            } catch (JSONException e) { //unable to grab needed info
+                                e.printStackTrace();
+                                if (getActivity() != null) {
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Utils.showServerErrorToast(getActivity());
+                                            mSwipeRefreshLayout.setRefreshing(false);
+                                        }
+                                    });
+                                }
+                            }
+                        } else
+
+                        { //unable to connect with DB
+                            Log.v(TAG, response.body().string());
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getActivity());
+                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    }
+                                });
+                            }
+                        }
+                    }
                 }
-            }
-        });
+
+        );
     }
 
 
-    private void subscribeConfirmation(){
-        if (getActivity() == null || mProfileMenu == null) return;
+    private void subscribeConfirmation() {
+        if (getActivity() == null || mOwnerIsViewer) return;
         new AlertDialog.Builder(getActivity())
                 .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe")
-                .setMessage(mLinuteUser.isSubscribed() ? "Disabling this removes you from future updates when "+mLinuteUser.getFirstName() + " posts something"
-                        : "Enabling this gives you updates when "+mLinuteUser.getFirstName()+" posts something")
+                .setMessage(mLinuteUser.isSubscribed() ? "Disabling this removes you from future updates when " + mLinuteUser.getFirstName() + " posts something"
+                        : "Enabling this gives you updates when " + mLinuteUser.getFirstName() + " posts something")
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -432,11 +485,10 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     }
 
 
-
     private void toggleSubscribe() {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity == null) return;
+        if (activity == null || mOwnerIsViewer) return;
 
         if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
             Utils.showBadConnectionToast(activity);
@@ -446,10 +498,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         final boolean isSubscribed = mLinuteUser.isSubscribed();
         mLinuteUser.setSubscribed(!isSubscribed);
 
-        MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
-        if (i != null) {
-            i.setTitle(isSubscribed ? "Subscribe" : "Unsubscribe" );
-        }
+        mToolbar.getMenu().findItem(R.id.feed_detail_subscribe)
+                .setTitle(isSubscribed ? "Subscribe" : "Unsubscribe");
+
 
         JSONObject emit = new JSONObject();
         try {
@@ -457,7 +508,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             emit.put("user", mTaptUserId);
             activity.emitSocket(API_Methods.VERSION + ":users:subscribe", emit);
             Toast.makeText(activity,
-                    isSubscribed ? "Unsubscribed from " + mLinuteUser.getFirstName() : "Subscribed to "+ mLinuteUser.getFirstName(),
+                    isSubscribed ? "Unsubscribed from " + mLinuteUser.getFirstName() : "Subscribed to " + mLinuteUser.getFirstName(),
                     Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
@@ -470,7 +521,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         int limit = 24;
 
-        if (mSkip < 0){
+        if (mSkip < 0) {
             limit += mSkip;
             mSkip = 0;
         }

@@ -3,9 +3,6 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,14 +12,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -45,17 +39,17 @@ public class Profile extends UpdatableFragment {
 
     //public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
 
-    private RecyclerView recList;
     private ProfileAdapter mProfileAdapter;
 
+    private Toolbar mToolbar;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private ImageView vProfileImage;
+    //private ImageView vProfileImage;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
-    private String mImageSignature;
 
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
@@ -95,17 +89,15 @@ public class Profile extends UpdatableFragment {
         mUser = new LSDKUser(getContext());
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
-
-        recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
+        final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
         final GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if (position == 0) return 3; //header is size 3
-                else if (position == 1 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
+                if (position == 0 || position == 1) return 3; //header is size 3
+                else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
                     return 3; //empty view size 3
 
                 else return 1;
@@ -138,60 +130,68 @@ public class Profile extends UpdatableFragment {
             }
         });
 
-        Toolbar mToolbar  = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recList.scrollToPosition(0);
+            }
+        });
+
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity)getActivity()).openDrawer();
+                if (getActivity() != null)
+                    ((MainActivity) getActivity()).openDrawer();
             }
         });
         mToolbar.inflateMenu(R.menu.my_profile_action_bar);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.add_friend){
+                if (item.getItemId() == R.id.add_friend) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null)
+                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
                     return true;
                 } else if (item.getItemId() == R.id.settings) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null)
+                        activity.startEditProfileActivity(SettingActivity.class);
                     return true;
                 }
                 return false;
             }
         });
         mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
+        if (fragmentNeedsUpdating()) {
+            mToolbar.getBackground().mutate().setAlpha(0);
+        }
 
-        vProfileImage = (ImageView) rootView.findViewById(R.id.toolbar_image);
-        Glide.with(this)
-                .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                .asBitmap()
-                .placeholder(R.drawable.image_loading_background)
-                .signature(new StringSignature(mImageSignature))
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .into(vProfileImage);
+        mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
-        final CollapsingToolbarLayout layout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsed_toolbar);
-        layout.setTitle("");
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                                        @Override
+                                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                                            super.onScrolled(recyclerView, dx, dy);
 
-        AppBarLayout appBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar);
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            boolean isShow = false;
-            int scrollRange = -1;
-
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (scrollRange == -1) {
-                    scrollRange = appBarLayout.getTotalScrollRange();
-                }
-                if (scrollRange + verticalOffset == 0) {
-                    layout.setTitle(user.getFirstName() + " " +user.getLastName());
-                    isShow = true;
-                } else if(isShow) {
-                    layout.setTitle("");
-                    isShow = false;
-                }
-            }
-        });
-
+                                            if (llm.findFirstVisibleItemPosition() == 0) {
+                                                View view = recyclerView.getChildAt(0);
+                                                if (view != null) {
+                                                    int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
+                                                    if (alpha > 255) {
+                                                        alpha = 255;
+                                                    }
+                                                    if (alpha < 0) {
+                                                        alpha = 0;
+                                                    }
+                                                    mToolbar.getBackground().mutate().setAlpha(alpha);
+                                                }
+                                            }
+                                        }
+                                    }
+        );
         return rootView;
     }
 
@@ -201,11 +201,8 @@ public class Profile extends UpdatableFragment {
 
         MainActivity mainActivity = (MainActivity) getActivity();
         if (mainActivity != null) {
-            String name = mSharedPreferences.getString("firstName", "") + " " + mSharedPreferences.getString("lastName", "");
-            //mainActivity.setTitle(name);
             mainActivity.showMainToolbar(false);
             mainActivity.enableBarScrolling(false);
-
             //scroll to top of list
 
             JSONObject obj = new JSONObject();
@@ -255,8 +252,6 @@ public class Profile extends UpdatableFragment {
     @Override
     public void onStop() {
         super.onStop();
-
-
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
             activity.showMainToolbar(true);
@@ -304,8 +299,6 @@ public class Profile extends UpdatableFragment {
                     user.updateUserInformation(jsonObject); //container for new information
 //                    Log.d(TAG, "onResponse: " + jsonObject);
 
-
-
                     savePreferences(user);
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
@@ -317,6 +310,8 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                String full = user.getFirstName() + " " +user.getLastName();
+                                mToolbar.setTitle(full);
                                 mProfileAdapter.notifyDataSetChanged();
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
@@ -414,6 +409,8 @@ public class Profile extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() { //update view
+                                    String full = user.getFirstName() + " " +user.getLastName();
+                                    mToolbar.setTitle(full);
                                     mOtherCompotentHasUpdated = false;
                                     mProfileAdapter.notifyDataSetChanged();
                                     mSwipeRefreshLayout.setRefreshing(false);
@@ -447,7 +444,7 @@ public class Profile extends UpdatableFragment {
 
         int limit = 24;
 
-        if (mSkip < 0){
+        if (mSkip < 0) {
             limit += mSkip;
             mSkip = 0;
         }

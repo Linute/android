@@ -49,7 +49,6 @@ import okhttp3.Response;
  * create an instance of this fragment.
  */
 public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListener {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String ROOM_ID = "room";
@@ -64,7 +63,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     //private static final String CHAT_HEADS = "chatheads";
     //private static final int TYPING_TIMER_LENGTH = 600;
 
-    // TODO: Rename and change types of parameters
     private String mRoomId;
 
     private String mOtherPersonId;

@@ -76,9 +76,8 @@ public class FindFriendsChoiceFragment extends Fragment {
             public void onPageSelected(int position) {
                 //changed fragments. if that fragment has already updated, then search using new query string
                 //else do nothing
-                FindFriendsFragment frag = (FindFriendsFragment) mFragmentPagerAdapter.getItem(position);
-                if (frag != null && !frag.fragmentNeedsUpdating()) {
-                    frag.searchWithQuery(mSearchView.getText().toString());
+                if (mFindFriendsFragments[position] != null && !mFindFriendsFragments[position].fragmentNeedsUpdating()) {
+                    mFindFriendsFragments[position].searchWithQuery(mSearchView.getText().toString());
                 }
             }
 

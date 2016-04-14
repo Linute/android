@@ -61,7 +61,7 @@
             android:inputType="textMultiLine|textNoSuggestions|textCapSentences"
             android:maxLines="9"
             android:textColor="#000000"
-            android:textSize="30sp"
+            android:textSize="24sp"
             android:textStyle="italic"
         />
 

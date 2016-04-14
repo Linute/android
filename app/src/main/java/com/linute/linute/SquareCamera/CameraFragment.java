@@ -348,8 +348,11 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                                 }
                                 mMediaRecorder.stop();
                                 releaseMediaRecorder();
+
+                                mRecordProgress.setVisibility(View.GONE);
                                 if (mRecordStartTime == 0 || System.currentTimeMillis() - mRecordStartTime < 2000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
                                     showVideoTooShortDialog();
+
                                 } else {  //go to edit video screen
                                     if (mVideoUri != null) {
                                         goToVideoEditFragment(mVideoUri, mVideoDimen);
@@ -357,6 +360,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                                 }
                             } catch (RuntimeException e) {
                                 e.printStackTrace();
+                                mRecordProgress.setVisibility(View.GONE);
                                 releaseMediaRecorder();
                                 showVideoTooShortDialog();
                             }

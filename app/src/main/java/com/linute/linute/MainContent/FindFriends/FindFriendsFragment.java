@@ -67,7 +67,6 @@ public class FindFriendsFragment extends UpdatableFragment {
 
     private int mSearchType = 0; // 0 for search, 1 for facebook, 2 for contacts
 
-    private RecyclerView mRecyclerView;
     private FriendSearchAdapter mFriendSearchAdapter;
     private String mQueryString; //what's in the search view
 
@@ -110,7 +109,7 @@ public class FindFriendsFragment extends UpdatableFragment {
         View rootView = inflater.inflate(R.layout.fragment_find_friends, container, false);
 
         TextView rationaleText = (TextView) rootView.findViewById(R.id.findFriends_rat_text);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
         mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
 
@@ -120,12 +119,12 @@ public class FindFriendsFragment extends UpdatableFragment {
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(llm);
+        recyclerView.setLayoutManager(llm);
 
         mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList, false);
 
-        mRecyclerView.setAdapter(mFriendSearchAdapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        recyclerView.setAdapter(mFriendSearchAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
 
         if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
@@ -142,6 +141,7 @@ public class FindFriendsFragment extends UpdatableFragment {
             }else {
                 mFindFriendsRationale.setVisibility(View.GONE);
             }
+            setFragmentNeedUpdating(false);
         } else if (mSearchType == SEARCH_TYPE_FACEBOOK) { //facebook
             rationaleText.setText(R.string.facebook_rationale);
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.facebook_blue));
@@ -405,6 +405,7 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 mUnfilteredList.add(user);
                             }
                         }
+                        setFragmentNeedUpdating(false);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -452,13 +453,6 @@ public class FindFriendsFragment extends UpdatableFragment {
     }
 
     private boolean mInRationalText = false; //basically determines if we can type in searchbar
-
-    private void showRationaleTextContacts() {
-        if (mInRationalText) return; //already in rationale text
-
-        mInRationalText = true;
-        mFindFriendsRationale.setVisibility(View.VISIBLE);
-    }
 
     private void loadContacts() {
         JSONArray phoneNumbers = new JSONArray();
@@ -553,6 +547,8 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 mUnfilteredList.add(user);
                             }
                         }
+
+                        setFragmentNeedUpdating(false);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriends;
@@ -48,7 +49,9 @@ public class FriendsListFragment extends UpdatableFragment {
     private boolean mFollowing;
     private String mUserId;
 
-    private RecyclerView mRecyclerView;
+    private TextView mEmptyView;
+
+    private View mProgressBar;
 
     public FriendsListFragment() {
 
@@ -79,13 +82,22 @@ public class FriendsListFragment extends UpdatableFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_friends_list, container, false);
 
-        //TODO: progressbar and reload button
+        mProgressBar = rootView.findViewById(R.id.progress_bar);
+        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.friendsList_recycler_view);
+        mEmptyView = (TextView) rootView.findViewById(R.id.friendsList_no_res);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.friendsList_recycler_view);
+        mEmptyView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEmptyView.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
+                getFriendsList();
+            }
+        });
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(llm);
+        recyclerView.setLayoutManager(llm);
 
         mFriendsListAdapter = new FriendsListAdapter(mFriendList, getActivity(), mFollowing);
         mFriendsListAdapter.setOnLoadMoreListener(new FriendsListAdapter.OnLoadMoreListener() {
@@ -95,8 +107,8 @@ public class FriendsListFragment extends UpdatableFragment {
             }
         });
 
-        mRecyclerView.setAdapter(mFriendsListAdapter);
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        recyclerView.setAdapter(mFriendsListAdapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
 
         if (fragmentNeedsUpdating()) {
@@ -156,8 +168,9 @@ public class FriendsListFragment extends UpdatableFragment {
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
-
-                            //TODO: show empty
+                            mProgressBar.setVisibility(View.GONE);
+                            mEmptyView.setText("Tap to reload");
+                            mEmptyView.setVisibility(View.VISIBLE);
                         }
                     });
                 }
@@ -185,9 +198,11 @@ public class FriendsListFragment extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    mProgressBar.setVisibility(View.GONE);
                                     mFriendsListAdapter.notifyDataSetChanged();
                                     if (mFriendList.isEmpty()){
-                                        getActivity().findViewById(R.id.friendsList_no_res).setVisibility(View.VISIBLE);
+                                        mEmptyView.setText("No results found");
+                                        mEmptyView.setVisibility(View.VISIBLE);
                                     }
                                 }
                             });
@@ -200,6 +215,7 @@ public class FriendsListFragment extends UpdatableFragment {
                                 @Override
                                 public void run() {
                                     Utils.showServerErrorToast(getActivity());
+                                    mProgressBar.setVisibility(View.GONE);
                                 }
                             });
                         }
@@ -210,8 +226,10 @@ public class FriendsListFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                mProgressBar.setVisibility(View.GONE);
                                 Utils.showServerErrorToast(getActivity());
-                                //TODO: show empty
+                                mEmptyView.setText("Tap to reload");
+                                mEmptyView.setVisibility(View.VISIBLE);
                             }
                         });
                     }

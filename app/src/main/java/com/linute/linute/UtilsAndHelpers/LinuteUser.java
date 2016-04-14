@@ -48,13 +48,14 @@ public class LinuteUser {
     //NOTE: new stuff
     private String mPoints;
     private String mUserToken;
-
+    private boolean mInformationLoaded;
 
     public LinuteUser() {
         mFriend = "";
         mFriendship = "";
         mFirstName = "";
         mIsSubscribed = false;
+        mInformationLoaded = false;
     }
 
 
@@ -77,7 +78,7 @@ public class LinuteUser {
         user.setPoints(sharedPreferences.getString("points", "0"));
 
         user.setSubscribed(false);
-
+        user.setInformationLoaded(true);
 
         return user;
     }
@@ -117,7 +118,7 @@ public class LinuteUser {
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
-
+        mInformationLoaded = true;
 
 
         //NOTE: NEW STUFF
@@ -193,8 +194,7 @@ public class LinuteUser {
             mCollegeName = getStringFromJson("name", college);
             mCollegeId = getStringFromJson("id", college);
         }
-
-
+        mInformationLoaded = true;
         //NOTE: NEW
 
         mPoints = getStringFromJson("points", userInfo);
@@ -541,5 +541,13 @@ public class LinuteUser {
 
     public void setPoints(String points) {
         mPoints = points;
+    }
+
+    public boolean isInformationLoaded() {
+        return mInformationLoaded;
+    }
+
+    public void setInformationLoaded(boolean informationLoaded) {
+        mInformationLoaded = informationLoaded;
     }
 }

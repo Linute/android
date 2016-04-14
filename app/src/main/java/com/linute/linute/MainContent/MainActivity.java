@@ -248,11 +248,10 @@ public class MainActivity extends BaseTaptActivity {
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
 
         Intent intent = getIntent();
+        clearBackStack();
 
         //came in from notification
         if (intent != null && intent.getBooleanExtra("NOTIFICATION", false)) {
-
-            clearBackStack();
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
@@ -322,7 +321,7 @@ public class MainActivity extends BaseTaptActivity {
         });
     }
 
-    private static final int SETTINGS_REQUEST_CODE = 13;
+    public static final int SETTINGS_REQUEST_CODE = 13;
 
     public void startActivityForResults(final Class activity, final int requestCode) {
         mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
@@ -332,6 +331,11 @@ public class MainActivity extends BaseTaptActivity {
                 startActivityForResult(i, requestCode);
             }
         });
+    }
+
+    public void startEditProfileActivity(Class activity){
+        Intent i = new Intent(MainActivity.this, activity);
+        startActivityForResult(i, SETTINGS_REQUEST_CODE);
     }
 
     @Override
