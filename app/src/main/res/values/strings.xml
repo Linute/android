@@ -112,6 +112,19 @@
     <string name="data_saved">Saved</string>
     <string name="describe_event">Enter your status here…</string>
 
+    <string name="block_user_android">
+        You and the person you block will not be able to:\n
+        \u2022 Follow each other\n
+        \u2022 See each other on the campus feed\n
+        \u2022 Mention each other in comments\n
+    </string>
+
+    <string name="unblock_user">
+        You and the person you unblock will be able to:\n
+        \u2022 Follow each other\n
+        \u2022 See each other on the campus feed\n
+        \u2022 Mention each other in comments\n
+    </string>
 
     <!--Square Camera-->
     <string name="squarecamera__app_name">SquareCamera</string>

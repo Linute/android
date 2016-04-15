@@ -63,9 +63,9 @@ public class MainActivity extends BaseTaptActivity {
 
     public static final int PHOTO_STATUS_POSTED = 19;
 
-    private AppBarLayout mAppBarLayout;
+    //private AppBarLayout mAppBarLayout;
     //private ActionBar mActionBar;
-    private Toolbar mToolbar;
+    //private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
@@ -89,7 +89,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private int mAppBarElevation;
+    //private int mAppBarElevation;
     private MenuItem mPreviousItem;
 
     private Socket mSocket;
@@ -101,8 +101,8 @@ public class MainActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
-        mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
+        //mAppBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+       // mAppBarElevation = getResources().getDimensionPixelSize(R.dimen.main_app_bar_elevation);
 
         mFragments = new UpdatableFragment[4];
 
@@ -114,49 +114,49 @@ public class MainActivity extends BaseTaptActivity {
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
         //get toolbar
-        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
-        mToolbar.inflateMenu(R.menu.people_fragment_menu);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-                    getSupportFragmentManager().popBackStack();
-                else mDrawerLayout.openDrawer(GravityCompat.START);
-
-            }
-        });
-
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (mSafeForFragmentTransaction) {
-                    int id = item.getItemId();
-
-                    switch (id) {
-                        case R.id.people_fragment_menu_chat:
-                            Intent enterRooms = new Intent(MainActivity.this, RoomsActivity.class);
-                            enterRooms.putExtra("CHATICON", true);
-                            startActivity(enterRooms);
-                            return true;
-                        case R.id.menu_find_friends:
-                            addFragmentToContainer(new FindFriendsChoiceFragment());
-                            //Toast.makeText(MainActivity.this, "Currently working on this", Toast.LENGTH_SHORT).show();
-                            return true;
-                    }
-                }
-
-                return false;
-            }
-        });
+//        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
+//        mToolbar.inflateMenu(R.menu.people_fragment_menu);
+//        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+//                    getSupportFragmentManager().popBackStack();
+//                else mDrawerLayout.openDrawer(GravityCompat.START);
+//
+//            }
+//        });
+//
+//        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                if (mSafeForFragmentTransaction) {
+//                    int id = item.getItemId();
+//
+//                    switch (id) {
+//                        case R.id.people_fragment_menu_chat:
+//                            Intent enterRooms = new Intent(MainActivity.this, RoomsActivity.class);
+//                            enterRooms.putExtra("CHATICON", true);
+//                            startActivity(enterRooms);
+//                            return true;
+//                        case R.id.menu_find_friends:
+//                            addFragmentToContainer(new FindFriendsChoiceFragment());
+//                            //Toast.makeText(MainActivity.this, "Currently working on this", Toast.LENGTH_SHORT).show();
+//                            return true;
+//                    }
+//                }
+//
+//                return false;
+//            }
+//        });
 
         //this arrow changes from navigation to back arrow
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
-                mToolbar.setNavigationIcon(drawer ? R.drawable.ic_action_navigation_menu : R.drawable.ic_action_navigation_arrow_back_inverted);
-            }
-        });
+//        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+//            @Override
+//            public void onBackStackChanged() {
+//                boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
+//                mToolbar.setNavigationIcon(drawer ? R.drawable.ic_action_navigation_menu : R.drawable.ic_action_navigation_arrow_back_inverted);
+//            }
+//        });
 
         //floating action button setup
         fam = (FloatingActionsMenu) findViewById(R.id.fabmenu);
@@ -245,7 +245,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+//        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
 
         Intent intent = getIntent();
         clearBackStack();
@@ -378,10 +378,10 @@ public class MainActivity extends BaseTaptActivity {
         }
     }
 
-    @Override
-    public void setTitle(String title) {
-        mToolbar.setTitle(title);
-    }
+//    @Override
+//    public void setTitle(String title) {
+//        mToolbar.setTitle(title);
+//    }
 
     //loads the header of our drawer
     public void loadDrawerHeader() {
@@ -410,32 +410,32 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     //pops back toolbar back out
-    @Override
-    public void resetToolbar() {
-//        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
-//        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+//    @Override
+//    public void resetToolbar() {
+////        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) mAppBarLayout.getLayoutParams();
+////        AppBarLayout.Behavior behavior = (AppBarLayout.Behavior) params.getBehavior();
+////
+////        if (behavior == null) return;
 //
-//        if (behavior == null) return;
-
-        mAppBarLayout.setExpanded(true, true);
-//        behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
-    }
+//        mAppBarLayout.setExpanded(true, true);
+////        behavior.onNestedFling(parentView, mAppBarLayout, null, 0, -1000, true);
+//    }
 
     //raise and lower appBar
     //we have to lower appBar in fragments that have tablayouts or there will be a shadow above the tabs
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public void raiseAppBarLayoutElevation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            mAppBarLayout.setElevation(mAppBarElevation);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    @Override
-    public void lowerAppBarElevation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-            mAppBarLayout.setElevation(0);
-    }
+//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//    @Override
+//    public void raiseAppBarLayoutElevation() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//            mAppBarLayout.setElevation(mAppBarElevation);
+//    }
+//
+//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//    @Override
+//    public void lowerAppBarElevation() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//            mAppBarLayout.setElevation(0);
+//    }
 
     public void noInternet() {
         CustomSnackbar sn = CustomSnackbar.make(parentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
@@ -758,35 +758,35 @@ public class MainActivity extends BaseTaptActivity {
 
 
     //hiding toolbar / showing toolbar
-    @Override
-    public void enableBarScrolling(boolean enable) {
-        if (enable) {
-            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-                    .getLayoutParams())
-                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
-            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-        } else {
-            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-                    .getLayoutParams())
-                    .setBehavior(null);
-            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-                    .setScrollFlags(0);
-        }
-    }
+//    @Override
+//    public void enableBarScrolling(boolean enable) {
+//        if (enable) {
+//            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+//                    .getLayoutParams())
+//                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
+//            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+//                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+//        } else {
+//            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
+//                    .getLayoutParams())
+//                    .setBehavior(null);
+//            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
+//                    .setScrollFlags(0);
+//        }
+//    }
 
-    @Override
-    public void showMainToolbar(boolean show) {
-        mAppBarLayout.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
+//    @Override
+//    public void showMainToolbar(boolean show) {
+//        mAppBarLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+//    }
 
     //activity
 
     //when tap toolbar
-    @Override
-    public void setToolbarOnClickListener(View.OnClickListener listener) {
-        mToolbar.setOnClickListener(listener);
-    }
+//    @Override
+//    public void setToolbarOnClickListener(View.OnClickListener listener) {
+//        mToolbar.setOnClickListener(listener);
+//    }
 
     //when notification is pressed, takes you to updates fragment
     @Override
@@ -812,15 +812,15 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             final boolean newMessage = (boolean) args[0];
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mToolbar != null)
-                        mToolbar.getMenu()
-                                .findItem(R.id.people_fragment_menu_chat)
-                                .setIcon(newMessage ? R.drawable.notify_mess_icon : R.drawable.ic_chat81);
-                }
-            });
+//            runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (mToolbar != null)
+//                        mToolbar.getMenu()
+//                                .findItem(R.id.people_fragment_menu_chat)
+//                                .setIcon(newMessage ? R.drawable.notify_mess_icon : R.drawable.ic_chat81);
+//                }
+//            });
         }
     };
 

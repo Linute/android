@@ -62,6 +62,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     private Toolbar mToolbar;
 
+    private AlertDialog mDialog;
+
     private boolean mOtherSectionUpdated = false;
 
     private int mSkip;
@@ -150,16 +152,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         });
 
         mOwnerIsViewer = mTaptUserId.equals(mSharedPreferences.getString("userID", ""));
-        if (mOwnerIsViewer) {
-            mToolbar.inflateMenu(R.menu.my_profile_action_bar);
-        } else {
-            mToolbar.inflateMenu(R.menu.tapt_user_profile_menu);
-            if (mProfileInfoHasLoaded) {
-                mToolbar.getMenu()
-                        .findItem(R.id.feed_detail_subscribe)
-                        .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-            }
-        }
+        mToolbar.inflateMenu(mOwnerIsViewer ? R.menu.my_profile_action_bar : R.menu.tapt_user_profile_menu);
 
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -167,6 +160,37 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
                 MainActivity activity = (MainActivity) getActivity();
                 switch (item.getItemId()) {
+
+                    case R.id.more_options:
+                        if (mProfileInfoHasLoaded && activity != null) {
+
+                            String[] options = new String[]{
+                                    mLinuteUser.isBlocked() ? "Unblock user" : "Block User",
+                                    "Report",
+                                    mLinuteUser.isSubscribed() ? "Unsubscribe from user" : "Subscribe to user"
+                            };
+
+                            mDialog = new AlertDialog
+                                    .Builder(getActivity())
+                                    .setItems(options, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which) {
+                                                case 0:
+                                                    blockConfirmation();
+                                                    return;
+                                                case 1:
+                                                    reportUserConfirmation();
+                                                    return;
+                                                default:
+                                                    subscribeConfirmation();
+                                            }
+                                        }
+                                    })
+                                    .show();
+
+                        }
+                        return true;
                     case R.id.add_friend:
                         if (activity != null)
                             activity.addFragmentToContainer(new FindFriendsChoiceFragment());
@@ -175,10 +199,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);
                         return true;
-                    case R.id.feed_detail_subscribe:
-                        subscribeConfirmation();
-                        return true;
+
                 }
+
                 return false;
             }
         });
@@ -241,11 +264,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             activity.showMainToolbar(false);
             activity.enableBarScrolling(false);
 
-//            if (mProfileInfoHasLoaded && mProfileMenu != null){
-//                MenuItem i = mProfileMenu.findItem(R.id.feed_detail_subscribe);
-//                i.setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-//            }
-
             JSONObject obj = new JSONObject();
             try {
                 obj.put("owner", mSharedPreferences.getString("userID", ""));
@@ -272,6 +290,11 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        if (mDialog != null) {
+            mDialog.dismiss();
+            mDialog = null;
+        }
 
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
@@ -316,7 +339,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                     JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
-                        Log.i(TAG, "onResponse: "+jsonObject.toString(4));
+                        Log.i(TAG, "onResponse: " + jsonObject.toString(4));
                         mLinuteUser.updateUserInformation(jsonObject); //container for new information
                         mProfileInfoHasLoaded = true;
                     } catch (JSONException e) {
@@ -333,15 +356,10 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mToolbar.setTitle(mLinuteUser.getFirstName() + " "+mLinuteUser.getLastName());
+                                mToolbar.setTitle(mLinuteUser.getFirstName() + " " + mLinuteUser.getLastName());
                                 mOtherSectionUpdated = false;
                                 mSwipeRefreshLayout.setRefreshing(false);
                                 mProfileAdapter.notifyDataSetChanged();
-                                if (!mOwnerIsViewer) {
-                                    mToolbar.getMenu()
-                                            .findItem(R.id.feed_detail_subscribe)
-                                            .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                                }
 
                             }
                         });
@@ -420,11 +438,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                         public void run() { //update view
                                             mSwipeRefreshLayout.setRefreshing(false);
                                             mProfileAdapter.notifyDataSetChanged();
-                                            if (!mOwnerIsViewer) {
-                                                mToolbar.getMenu()
-                                                        .findItem(R.id.feed_detail_subscribe)
-                                                        .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe");
-                                            }
 
                                         }
                                     });
@@ -464,8 +477,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
 
     private void subscribeConfirmation() {
-        if (getActivity() == null || mOwnerIsViewer) return;
-        new AlertDialog.Builder(getActivity())
+        if (getActivity() == null || mOwnerIsViewer || !mProfileInfoHasLoaded) return;
+        mDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe")
                 .setMessage(mLinuteUser.isSubscribed() ? "Disabling this removes you from future updates when " + mLinuteUser.getFirstName() + " posts something"
                         : "Enabling this gives you updates when " + mLinuteUser.getFirstName() + " posts something")
@@ -498,10 +511,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         final boolean isSubscribed = mLinuteUser.isSubscribed();
         mLinuteUser.setSubscribed(!isSubscribed);
 
-        mToolbar.getMenu().findItem(R.id.feed_detail_subscribe)
-                .setTitle(isSubscribed ? "Subscribe" : "Unsubscribe");
-
-
         JSONObject emit = new JSONObject();
         try {
             emit.put("subscribe", !isSubscribed);
@@ -510,6 +519,119 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             Toast.makeText(activity,
                     isSubscribed ? "Unsubscribed from " + mLinuteUser.getFirstName() : "Subscribed to " + mLinuteUser.getFirstName(),
                     Toast.LENGTH_SHORT).show();
+        } catch (JSONException e) {
+            Utils.showServerErrorToast(activity);
+            e.printStackTrace();
+        }
+    }
+
+    private void reportUserConfirmation() {
+        if (!mProfileInfoHasLoaded || getActivity() == null) return;
+
+        String[] reasons = new String[]{
+                "Spam",
+                "Inappropriate",
+                "Harassment",
+                "Suspected parent",
+                "Suspected professor"
+        };
+
+        mDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Report as")
+                .setItems(reasons, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        reportUser(which);
+                    }
+                })
+                .show();
+    }
+
+
+    private void reportUser(int reason) {
+        if (getActivity() != null) {
+            new LSDKUser(getActivity()).reportUser(reason, mLinuteUser.getUserID(), new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(getActivity());
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        response.body().close();
+                        if (getActivity() != null)
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getActivity(), "User has been reported", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+
+                    } else {
+                        Log.i(TAG, "onResponse: " + response.body().string());
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(getActivity());
+                            }
+                        });
+                    }
+
+                }
+            });
+        }
+
+    }
+
+    private void blockConfirmation() {
+        if (getActivity() == null || mOwnerIsViewer || !mProfileInfoHasLoaded) return;
+        mDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(mLinuteUser.isBlocked() ? "Unblock user?" : "Block user?")
+                .setMessage(mLinuteUser.isBlocked() ? R.string.unblock_user : R.string.block_user_android)
+                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleBlock();
+                    }
+                })
+                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void toggleBlock() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity == null || mOwnerIsViewer) return;
+
+        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
+
+        JSONObject emit = new JSONObject();
+        try {
+            emit.put("block", !mLinuteUser.isBlocked());
+            emit.put("user", mTaptUserId);
+            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+            Toast.makeText(activity,
+                    mLinuteUser.isBlocked() ? "You will now see this user, and they will see you"
+                            : "You will no longer see this user and they won't be able to see you",
+                    Toast.LENGTH_SHORT).show();
+            getFragmentManager().popBackStack();
+
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
             e.printStackTrace();

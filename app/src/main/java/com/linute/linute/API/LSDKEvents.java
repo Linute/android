@@ -65,12 +65,12 @@ public class LSDKEvents {
 //        return API_Methods.post("likes", header, param, callback);
 //    }
 
-    public Call updateLike(Map<String, Object> param, String eventId,
-                           Callback callback) {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        return API_Methods.delete("likes/" + eventId, header, param, callback);
-    }
+//    public Call updateLike(Map<String, Object> param, String eventId,
+//                           Callback callback) {
+//        Map<String, String> header = API_Methods.getMainHeader(mToken);
+//
+//        return API_Methods.delete("likes/" + eventId, header, param, callback);
+//    }
 
     public Call reportEvent(int reason, String postID, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);

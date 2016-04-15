@@ -231,6 +231,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         if (mUser.getFriend().equals("")) {
                             Map<String, Object> postData = new HashMap<>();
                             postData.put("user", mUser.getUserID());
+                            mFollowingButtonText.setText("loading");
 
                             new LSDKPeople(context).postFollow(postData, new Callback() {
                                 @Override
@@ -241,6 +242,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                             @Override
                                             public void run() {
                                                 Utils.showBadConnectionToast(activity);
+                                                mFollowingButtonText.setText("follow");
                                             }
                                         });
                                     }
@@ -250,6 +252,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 public void onResponse(Call call, Response response) throws IOException {
                                     if (!response.isSuccessful()) {
                                         Log.d(TAG, response.body().string());
+                                        mFollowingButtonText.setText("follow");
                                         return;
                                     }
 //                                Log.d(TAG, "onResponse: " + response.body().string());
@@ -280,6 +283,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
+                                                mFollowingButtonText.setText("follow");
                                                 Utils.showServerErrorToast(activity);
                                             }
                                         });
@@ -289,6 +293,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         } else {
                             Map<String, Object> putData = new HashMap<>();
                             putData.put("isDeleted", true);
+                            mFollowingButtonText.setText("loading");
 
                             new LSDKPeople(context).putUnfollow(putData, mUser.getFriendship(), new Callback() {
                                 @Override
@@ -298,6 +303,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
+                                                mFollowingButtonText.setText("following");
                                                 Utils.showBadConnectionToast(activity);
                                             }
                                         });
@@ -306,11 +312,21 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
+                                    final BaseTaptActivity activity1 = (BaseTaptActivity) context;
+
                                     if (!response.isSuccessful()) {
                                         Log.d(TAG, response.body().string());
+                                        if (activity1 != null){
+                                            activity1.runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    Utils.showServerErrorToast(activity1);
+                                                    mFollowingButtonText.setText("following");
+                                                }
+                                            });
+                                        }
                                     } else {
                                         response.body().close();
-                                        BaseTaptActivity activity1 = (BaseTaptActivity) context;
 
                                         if (activity1 == null) return;
 
@@ -388,5 +404,3 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 }
-
-

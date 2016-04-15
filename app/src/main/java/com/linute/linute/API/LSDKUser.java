@@ -205,4 +205,14 @@ public class LSDKUser {
 
         return API_Methods.post("users/reset-password-email", header, params, callback);
     }
+
+
+    public Call reportUser(int reason, String user, Callback callback){
+        Map<String, String> header =  API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>();
+        params.put("user", user);
+        params.put("reason", reason);
+
+        return API_Methods.post("reports", header, params, callback);
+    }
 }

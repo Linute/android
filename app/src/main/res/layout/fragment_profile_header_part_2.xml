@@ -61,7 +61,7 @@
               android:layout_height="wrap_content"
               android:background="@color/colorPrimary"
               android:ellipsize="end"
-              android:maxLines="3"
+              android:maxLines="5"
               android:paddingBottom="@dimen/activity_horizontal_margin"
               android:paddingEnd="@dimen/activity_horizontal_margin"
               android:paddingStart="@dimen/activity_horizontal_margin"

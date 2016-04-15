@@ -15,36 +15,36 @@ import io.socket.emitter.Emitter;
 public abstract class BaseTaptActivity extends AppCompatActivity {
 
 
-    public void resetToolbar() {
-
-    }
+//    public void resetToolbar() {
+//
+//    }
 
 
     //actionbar elevation looks weird when tabs are added
     //raise and lower it when needed
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void raiseAppBarLayoutElevation() {
-        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
-        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public void lowerAppBarElevation() {
-        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
-        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-    }
+//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//    public void raiseAppBarLayoutElevation() {
+//        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
+//        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//    }
+//
+//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+//    public void lowerAppBarElevation() {
+//        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
+//        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+//    }
 
 
     /*
         so action bar can move with scrolling
      */
 
-    public void enableBarScrolling(boolean enabled){
-    }
-
-    public void showMainToolbar(boolean show){
-
-    }
+//    public void enableBarScrolling(boolean enabled){
+//    }
+//
+//    public void showMainToolbar(boolean show){
+//
+//    }
 
     /* MainActivity has tabs of Updatable fragments
      *  use this function to tell tab it needs to reload
@@ -54,7 +54,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
 
 
     /*setting toolbar title*/
-    public abstract void setTitle(String title);
+    //public abstract void setTitle(String title);
 
     /* fragment stuff */
     public abstract void addFragmentToContainer(final Fragment fragment);
@@ -62,7 +62,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
 
 
     /* action when toolbar is pressed */
-    public abstract void setToolbarOnClickListener(View.OnClickListener listener);
+    //public abstract void setToolbarOnClickListener(View.OnClickListener listener);
 
     /* socket stuff */
     public abstract void connectSocket(String event, Emitter.Listener emitter);

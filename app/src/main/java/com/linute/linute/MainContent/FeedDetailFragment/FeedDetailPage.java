@@ -324,9 +324,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onResume();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            activity.setTitle("Comments");
-            activity.enableBarScrolling(false);
-            activity.showMainToolbar(false);
+//            activity.setTitle("Comments");
+//            activity.enableBarScrolling(false);
+//            activity.showMainToolbar(false);
             //user -- user Id
             //room -- id of event
 
@@ -417,10 +417,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.enableBarScrolling(true);
-            activity.showMainToolbar(true);
-        }
+//        if (activity != null) {
+//            activity.enableBarScrolling(true);
+//            activity.showMainToolbar(true);
+//        }
     }
 
     private void displayCommentsAndPost() {
