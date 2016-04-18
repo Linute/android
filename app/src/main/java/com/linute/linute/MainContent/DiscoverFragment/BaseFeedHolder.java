@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -22,9 +23,6 @@ import com.makeramen.roundedimageview.RoundedImageView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
 /**
  * Created by QiFeng on 3/8/16.
  */
@@ -40,7 +38,6 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected CheckBox vLikesHeart; //toggle heart
 
     protected RoundedImageView vUserImage;
-
     protected Context mContext;
 
     private String mUserId;
@@ -90,6 +87,8 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText("Like (" + post.getNumLike() + ")");
         vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
+        ((ImageView)vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
+                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
     }
 
 

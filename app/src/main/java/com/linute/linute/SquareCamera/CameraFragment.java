@@ -245,21 +245,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             }
         });
 
-//        mTakePhotoBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                    takePicture();
-//            }
-//        });
-//
-//        mTakePhotoBtn.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public boolean onLongClick(View v) {
-//                return false;
-//            }
-//        });
-
-
         mTakePhotoBtn.setOnTouchListener(new View.OnTouchListener() {
 
             private boolean mIsRecording = false;
@@ -350,7 +335,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                                 releaseMediaRecorder();
 
                                 mRecordProgress.setVisibility(View.GONE);
-                                if (mRecordStartTime == 0 || System.currentTimeMillis() - mRecordStartTime < 2000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
+                                if (mRecordStartTime == 0 || System.currentTimeMillis() - mRecordStartTime < 3000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
                                     showVideoTooShortDialog();
 
                                 } else {  //go to edit video screen
@@ -402,7 +387,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         if (getActivity() == null) return;
         new AlertDialog.Builder(getActivity())
                 .setTitle("Video is too short")
-                .setMessage("Videos must be 2 seconds or longer.")
+                .setMessage("Videos must be 3 seconds or longer.")
                 .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

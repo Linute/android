@@ -1,23 +1,26 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKActivity;
+import com.linute.linute.MainContent.Chat.NewChatEvent;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -30,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -51,6 +56,10 @@ public class UpdatesFragment extends UpdatableFragment {
     private View mEmptyView;
 
     private boolean mSafeToAddToTop = false;
+    private boolean mHasMessage;
+    private AppBarLayout mAppBarLayout;
+
+    private Toolbar mToolbar;
 
     //private boolean mCanLoadMore = false;
     //private int mSkip = 0;
@@ -64,12 +73,50 @@ public class UpdatesFragment extends UpdatableFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_updates, container, false);
 
-        setHasOptionsMenu(true);
-
         mUpdatesRecyclerView = (RecyclerView) rootView.findViewById(R.id.updatesFragment_recycler_view);
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.updatesFragment_swipe_refresh);
+        mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
 
-        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mUpdatesRecyclerView.scrollToPosition(0);
+            }
+        });
+        mToolbar .setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v){
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) activity.openDrawer();
+            }
+        });
+
+        MainActivity activity = (MainActivity) getActivity();
+        mHasMessage = activity.hasMessage();
+        mToolbar .inflateMenu(activity.hasMessage() ? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu);
+        mToolbar .setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_find_friends:
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null){
+                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                        }
+                        return true;
+                    case R.id.people_fragment_menu_chat:
+                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                        enterRooms.putExtra("CHATICON", true);
+                        startActivity(enterRooms);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mUpdatesRecyclerView.setLayoutManager(llm);
         mUpdatesRecyclerView.setHasFixedSize(true);
@@ -77,7 +124,7 @@ public class UpdatesFragment extends UpdatableFragment {
         mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
-        mEmptyView = rootView.findViewById(R.id.updateFragment_empty);
+        mEmptyView = rootView.findViewById(R.id.empty_view);
 
         //NOTE: Code for load more
         /*
@@ -110,34 +157,8 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.setTitle("Updates");
-            mainActivity.resetToolbar();
-            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mUpdatesRecyclerView != null) {
-                        mUpdatesRecyclerView.smoothScrollToPosition(0);
-                    }
-                }
-            });
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mainActivity
-                        .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                        .getString("userID", ""));
-                obj.put("action", "active");
-                obj.put("screen", "Updates");
-                mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
+        EventBus.getDefault().register(this);
         if (fragmentNeedsUpdating()) {
-
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -153,42 +174,16 @@ public class UpdatesFragment extends UpdatableFragment {
                     mEmptyView.setVisibility(View.VISIBLE);
                 }
             }
-//            if (mainActivity != null) {
-//                mainActivity.setUpdateNotification(0);
-//                mainActivity.setNumNewActivities(0);
-//
-//            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null) {
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", activity
-                        .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                        .getString("userID", ""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Updates");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        EventBus.getDefault().unregister(this);
+        mAppBarLayout.setExpanded(true,false);
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null) {
-            activity.setToolbarOnClickListener(null);
-        }
-    }
 
     private void updateUpdatesInformation() {
 
@@ -357,6 +352,18 @@ public class UpdatesFragment extends UpdatableFragment {
                     }
                 }
             });
+        }
+    }
+
+    @Subscribe
+    public void onEvent(NewChatEvent event){
+        // your implementation
+        if (event.hasNewMessage() != mHasMessage){
+            mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                    R.drawable.notify_mess_icon :
+                    R.drawable.ic_chat81
+            );
+            mHasMessage = event.hasNewMessage();
         }
     }
 }

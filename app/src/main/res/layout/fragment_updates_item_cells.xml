@@ -4,20 +4,20 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:background="@android:color/holo_red_light">
+                android:background="?android:selectableItemBackground">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/updatesFragment_profile_picture"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         app:civ_border_color="@color/seperator_color"
         app:civ_border_width="1dp"
         tools:background="@android:color/darker_gray"
-        />
+    />
 
     <ImageView
         android:id="@+id/updatesFragment_icon_image"
@@ -26,7 +26,7 @@
         android:layout_alignBottom="@id/updatesFragment_profile_picture"
         android:layout_alignRight="@id/updatesFragment_profile_picture"
         tools:background="@android:color/holo_green_light"
-        />
+    />
 
 
     <ImageView
@@ -34,40 +34,55 @@
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:scaleType="centerCrop"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:background="@color/seperator_color"
         android:padding="1px"
-        android:background="@color/seperator_color"/>
+        android:scaleType="centerCrop"/>
 
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_centerVertical="true"
-                  android:layout_toStartOf="@id/updatesFragment_update_picture"
                   android:layout_toEndOf="@id/updatesFragment_profile_picture"
+                  android:layout_toStartOf="@id/updatesFragment_update_picture"
                   android:orientation="vertical">
 
-        <TextView android:id="@+id/updatesFragment_name_text"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginBottom="5dp"
-                  android:singleLine="true"
-                  android:textColor="@color/user_name_blue"
-                  android:textSize="@dimen/header_font_size"
-                  tools:text="FIRST LAST"/>
+
+        <LinearLayout android:layout_width="match_parent"
+                      android:layout_height="wrap_content">
+
+            <TextView android:id="@+id/updatesFragment_name_text"
+                      android:layout_width="0px"
+                      android:layout_height="wrap_content"
+                      android:layout_marginBottom="5dp"
+                      android:layout_weight="1"
+                      android:singleLine="true"
+                      android:textColor="@color/user_name_blue"
+                      android:textSize="@dimen/header_font_size"
+                      tools:text="FIRST LAST"/>
+
+            <TextView android:id="@+id/time"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="@color/twentyfive_black"
+                      android:textSize="@dimen/sub_font_size"
+                      tools:text="123h"
+
+            />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/updatesFragment_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:maxLines="2"
             android:textColor="@color/fifty_black"
-            android:ellipsize="end"
             android:textSize="@dimen/sub_font_size"
             tools:text="Test text. This est text. This est text. This est text. This is what it will looking like test test test test tedfs "
-            />
+        />
 
     </LinearLayout>
 

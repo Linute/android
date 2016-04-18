@@ -6,7 +6,6 @@
     android:background="#ECF0F2">
 
 
-
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/profilefrag2_swipe_refresh"
         android:layout_width="match_parent"
@@ -20,11 +19,17 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+
+    <View android:layout_width="match_parent"
+          android:layout_height="?android:attr/actionBarSize"
+          android:background="@drawable/toolbar_gradient_background"
+    />
+
     <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
                                        android:layout_width="match_parent"
                                        android:layout_height="?android:attr/actionBarSize"
-                                       android:theme="@style/ThemeOverlay.AppCompat.Dark"
                                        android:background="@color/toolbar_color"
+                                       android:theme="@style/ThemeOverlay.AppCompat.Dark"
                                        app:popupTheme="@style/MyDarkToolbarStyle"/>
 
 </FrameLayout>

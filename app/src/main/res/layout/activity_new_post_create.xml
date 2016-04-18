@@ -17,8 +17,8 @@
 
         <RelativeLayout android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
                         android:layout_centerVertical="true"
                         android:layout_marginEnd="16dp"
         >
@@ -189,35 +189,33 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
-                  android:orientation="horizontal">
-        <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
-        <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
-        <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
+                  android:gravity="center_horizontal"
+                  android:orientation="horizontal"
+                  android:weightSum="8">
 
-        <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/post_create_anon_switch"
-                                                        android:layout_width="0px"
-                                                        android:layout_height="wrap_content"
-                                                        android:layout_marginEnd="16dp"
-                                                        android:layout_marginStart="16dp"
-                                                        android:layout_weight="1"
-                                                        android:scaleType="centerCrop"
-                                                        android:src="@drawable/ic_anon_off"/>
+        <com.linute.linute.UtilsAndHelpers.SquareCheckbox android:id="@+id/anon_comments"
+                                                          android:layout_width="0px"
+                                                          android:layout_height="match_parent"
+                                                          android:layout_margin="8dp"
+                                                          android:layout_weight="1"
+                                                          android:background="@drawable/turn_anon_comments_off"
+                                                          android:button="@null"
+                                                          android:checked="true"
+        />
 
         <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
-        <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
-        <View android:layout_width="0px"
-              android:layout_height="0px"
-              android:layout_weight="1"/>
+              android:layout_height="wrap_content"
+              android:layout_weight="2"/>
+
+
+        <com.linute.linute.UtilsAndHelpers.SquareCheckbox android:id="@+id/anon_post"
+                                                          android:layout_width="0px"
+                                                          android:layout_height="match_parent"
+                                                          android:layout_margin="8dp"
+                                                          android:layout_weight="1"
+                                                          android:background="@drawable/post_as_anon_checkbox"
+                                                          android:button="@null"
+        />
 
     </LinearLayout>
 

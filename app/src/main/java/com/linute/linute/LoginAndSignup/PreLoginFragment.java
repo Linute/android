@@ -14,9 +14,6 @@ import com.linute.linute.R;
  */
 public class PreLoginFragment extends Fragment {
 
-    private View mFacebookLogin;
-    private View mTaptLogin;
-
     public PreLoginFragment(){
 
     }
@@ -32,10 +29,10 @@ public class PreLoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_prelogin, container, false);
 
-        mFacebookLogin =  rootView.findViewById(R.id.preLogin_facebook_login);
-        mTaptLogin = rootView.findViewById(R.id.prelogin_linute_login);
+        View facebookLogin = rootView.findViewById(R.id.preLogin_facebook_login);
+        View taptLogin = rootView.findViewById(R.id.prelogin_linute_login);
 
-        mFacebookLogin.setOnClickListener(new View.OnClickListener() {
+        facebookLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
@@ -45,7 +42,7 @@ public class PreLoginFragment extends Fragment {
             }
         });
 
-        mTaptLogin.setOnClickListener(new View.OnClickListener() {
+        taptLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();

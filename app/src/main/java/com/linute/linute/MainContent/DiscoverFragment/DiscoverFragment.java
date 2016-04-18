@@ -119,7 +119,7 @@ public class DiscoverFragment extends UpdatableFragment {
         recList.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                ((MainActivity) getActivity()).toggleFam();
+                ((DiscoverHolderFragment) getParentFragment()).toggleFab();
                 return false;
             }
         });

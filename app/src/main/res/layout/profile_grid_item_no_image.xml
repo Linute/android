@@ -2,7 +2,6 @@
 
 <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     > <!--TODO: diff color? -->
@@ -11,6 +10,7 @@
           android:layout_height="match_parent"
           android:background="@drawable/profile_item_no_image"
           android:layout_margin="4dp"
+          android:foreground="?android:selectableItemBackground"
     />
 
     <TextView android:id="@+id/profile_grid_item_no_image_text"

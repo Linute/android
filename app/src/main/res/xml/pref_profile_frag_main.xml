@@ -15,6 +15,10 @@
         android:title="SUPPORT">
         <Preference android:key="give_feedback"
                     android:title="Give Feedback"/>
+        <Preference android:key="notifications"
+                    android:title="Notification Settings"
+        />
+
     </PreferenceCategory>
 
     <PreferenceCategory

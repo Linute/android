@@ -4,32 +4,33 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground"
               android:orientation="vertical"
-    >
+>
 
     <RelativeLayout android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
         <!--<com.mikhaellopez.circularimageview.CircularImageView-->
-            <!--android:id="@+id/people_user_image"-->
-            <!--android:layout_width="@dimen/profile_image_radius"-->
-            <!--android:layout_height="@dimen/profile_image_radius"-->
-            <!--android:layout_marginStart="@dimen/activity_horizontal_margin"-->
-            <!--android:layout_marginEnd="@dimen/activity_horizontal_margin"-->
-            <!--android:layout_marginTop="@dimen/activity_horizontal_margin"-->
-            <!--android:layout_marginBottom="10dp"-->
-            <!--app:civ_border_color="@color/seperator_color"-->
-            <!--app:civ_border_width="1dp"-->
-            <!--/>-->
+        <!--android:id="@+id/people_user_image"-->
+        <!--android:layout_width="@dimen/profile_image_radius"-->
+        <!--android:layout_height="@dimen/profile_image_radius"-->
+        <!--android:layout_marginStart="@dimen/activity_horizontal_margin"-->
+        <!--android:layout_marginEnd="@dimen/activity_horizontal_margin"-->
+        <!--android:layout_marginTop="@dimen/activity_horizontal_margin"-->
+        <!--android:layout_marginBottom="10dp"-->
+        <!--app:civ_border_color="@color/seperator_color"-->
+        <!--app:civ_border_width="1dp"-->
+        <!--/>-->
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/people_user_image"
             android:layout_width="@dimen/profile_image_radius"
             android:layout_height="@dimen/profile_image_radius"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
             android:layout_marginBottom="10dp"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
             app:civ_border_color="@color/seperator_color"
             app:civ_border_width="1dp"
         />
@@ -75,16 +76,16 @@
     </RelativeLayout>
 
     <TextView android:id="@+id/people_status"
-        android:layout_width="match_parent"
+              android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginBottom="@dimen/activity_horizontal_margin"
-              android:layout_marginStart="@dimen/activity_horizontal_margin"
               android:layout_marginEnd="@dimen/activity_horizontal_margin"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
               android:lines="3"
               android:textSize="@dimen/sub_font_size"
               android:visibility="gone"
-              tools:text = "TEST TESTT TEST ETSTE TWETSDG GF DGDF GFDG FDG DG FD GDF"
-        />
+              tools:text="TEST TESTT TEST ETSTE TWETSDG GF DGDF GFDG FDG DG FD GDF"
+    />
 
 
 </LinearLayout>

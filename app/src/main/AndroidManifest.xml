@@ -141,12 +141,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
-        <activity android:name=".SquareCamera.CropActivity"
+        <activity android:name=".UtilsAndHelpers.WebViewActivity"
                   android:configChanges="orientation"
                   android:screenOrientation="portrait"
                   android:theme="@style/AppTheme"/>
 
-        <activity android:name=".UtilsAndHelpers.WebViewActivity"
+        <activity android:name=".MainContent.Settings.NotificationSettingsActivity"
                   android:configChanges="orientation"
                   android:screenOrientation="portrait"
                   android:theme="@style/AppTheme"/>

@@ -3,11 +3,8 @@
               android:layout_width="match_parent" android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
-                                                android:layout_height="wrap_content">
         <include android:id="@+id/settingactivity_toolbar"
                  layout="@layout/tool_bar"/>
-    </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/setting_fragment"

@@ -152,44 +152,14 @@ public class RoomsActivityFragment extends Fragment {
         getRooms();
 
         RoomsActivity activity = (RoomsActivity) getActivity();
-
         if (activity != null){
-
-            //hideFab(false);
             activity.setTitle("Inbox");
-
-            JSONObject obj = new JSONObject();
-
-            //send tracking info
-            try {
-                obj.put("owner", mUserId);
-                obj.put("action", "active");
-                obj.put("screen", "Inbox");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        RoomsActivity activity = (RoomsActivity) getActivity();
-
-        if (activity != null){
-            //hideFab(true);
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mUserId);
-                obj.put("action", "inactive");
-                obj.put("screen", "Inbox");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void getRooms() {

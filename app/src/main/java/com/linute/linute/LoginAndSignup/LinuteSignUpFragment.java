@@ -97,7 +97,7 @@ public class LinuteSignUpFragment extends Fragment {
 
     private String mCurrentPhotoPath; //the path of photo we take
 
-    public LinuteSignUpFragment(){
+    public LinuteSignUpFragment() {
 
     }
 
@@ -170,11 +170,10 @@ public class LinuteSignUpFragment extends Fragment {
             }
         }
 
-        if (mProfilePictureBitmap != null){
+        if (mProfilePictureBitmap != null) {
             mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
         }
     }
-
 
 
     @Override
@@ -362,9 +361,7 @@ public class LinuteSignUpFragment extends Fragment {
             mEmailView.setError(getString(R.string.error_invalid_email));
             mEmailView.requestFocus();
             return false;
-        }
-
-        else if (!emailString.endsWith(".edu")){
+        } else if (!emailString.endsWith(".edu")) {
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
@@ -406,7 +403,7 @@ public class LinuteSignUpFragment extends Fragment {
             isGood = false;
         }
 
-        if(need != null) need.requestFocus();
+        if (need != null) need.requestFocus();
         return isGood;
     }
 
@@ -455,7 +452,6 @@ public class LinuteSignUpFragment extends Fragment {
 
         mCredentialCheckInProgress = show;
     }
-
 
 
     public void verifyCode() {
@@ -515,7 +511,7 @@ public class LinuteSignUpFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     PreLoginActivity activity = (PreLoginActivity) getActivity();
-                                    if (activity != null){
+                                    if (activity != null) {
                                         activity.goToNextActivity();
                                     }
                                 }
@@ -532,7 +528,7 @@ public class LinuteSignUpFragment extends Fragment {
                     }
                 }
             });
-        }else {
+        } else {
             showProgress(false, 1);
             mViewFlipper.showPrevious();
             mCurrentViewFlipperIndex--;
@@ -566,6 +562,14 @@ public class LinuteSignUpFragment extends Fragment {
         sharedPreferences.putString("points", user.getPoints());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
+
+        sharedPreferences.putBoolean("notif_follow", true);
+        sharedPreferences.putBoolean("notif_message", true);
+        sharedPreferences.putBoolean("notif_mention", true);
+        sharedPreferences.putBoolean("notif_alsoComment", true);
+        sharedPreferences.putBoolean("notif_comment", true);
+        sharedPreferences.putBoolean("notif_like", true);
+
         sharedPreferences.apply();
 
         Utils.testLog(getActivity(), TAG);
@@ -799,16 +803,16 @@ public class LinuteSignUpFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (mFirstNameTextView.hasFocus()){
+        if (mFirstNameTextView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);
-        }else if (mLastNameTextView.hasFocus()){
+        } else if (mLastNameTextView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mLastNameTextView.getWindowToken(), 0);
-        }else if (mEmailView.hasFocus()){
+        } else if (mEmailView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-        }else if (mPasswordView.hasFocus()){
+        } else if (mPasswordView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
         }

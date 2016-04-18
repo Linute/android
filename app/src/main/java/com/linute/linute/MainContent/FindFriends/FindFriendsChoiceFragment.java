@@ -107,38 +107,6 @@ public class FindFriendsChoiceFragment extends Fragment {
         return rootView;
     }
 
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        //analytics
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.showMainToolbar(false);
-            activity.enableBarScrolling(false);
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
-                obj.put("action", "active");
-                obj.put("screen", "Friend List");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.showMainToolbar(true);
-            activity.enableBarScrolling(true);
-        }
-    }
-
     @Override
     public void onPause() {
         super.onPause();
@@ -150,17 +118,6 @@ public class FindFriendsChoiceFragment extends Fragment {
             if (mSearchView.hasFocus()) {
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            }
-
-            //analytics
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", activity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", ""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Friend List");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
         }
     }

@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -269,7 +268,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                             public void run() {
                                                 mFollowingButtonText.setText("following");
                                                 vMessageButton.show();
-                                                Toast.makeText(context, "You got a new friend!", Toast.LENGTH_SHORT).show();
                                                 try {
                                                     mUser.setFriendship(jsonObject.getString("id"));
                                                     mUser.setFriend("NotEmpty");
@@ -335,7 +333,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                             public void run() {
                                                 mFollowingButtonText.setText("follow");
                                                 vMessageButton.hide();
-                                                Toast.makeText(context, "You've lost friend!", Toast.LENGTH_SHORT).show();
                                                 mUser.setFriend("");
                                             }
                                         });

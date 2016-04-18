@@ -1,21 +1,16 @@
 package com.linute.linute.MainContent;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,20 +20,16 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.getbase.floatingactionbutton.FloatingActionButton;
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.Chat.NewChatEvent;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -51,6 +42,7 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
+import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -70,8 +62,8 @@ public class MainActivity extends BaseTaptActivity {
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
 
-    private CoordinatorLayout parentView;
-    private FloatingActionsMenu fam;
+    //private CoordinatorLayout parentView;
+    //private FloatingActionsMenu fam;
     private UpdatableFragment[] mFragments; //holds our fragments
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
@@ -79,6 +71,8 @@ public class MainActivity extends BaseTaptActivity {
     private boolean mConnecting;
 
     private SocketErrorResponse mSocketErrorResponse;
+
+    private boolean mHasMessage = false;
 
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
@@ -106,7 +100,7 @@ public class MainActivity extends BaseTaptActivity {
 
         mFragments = new UpdatableFragment[4];
 
-        parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
+        //parentView = (CoordinatorLayout) findViewById(R.id.coordinator);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
@@ -159,25 +153,6 @@ public class MainActivity extends BaseTaptActivity {
 //        });
 
         //floating action button setup
-        fam = (FloatingActionsMenu) findViewById(R.id.fabmenu);
-        FloatingActionButton fabImage = (FloatingActionButton) findViewById(R.id.fabImage);
-        fabImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fam.toggle();
-                Intent i = new Intent(MainActivity.this, CameraActivity.class);
-                startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
-        FloatingActionButton fabText = (FloatingActionButton) findViewById(R.id.fabText);
-        fabText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fam.toggle();
-                Intent i = new Intent(MainActivity.this, PostCreatePage.class);
-                startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
 
         //profile image and header setup
         loadDrawerHeader();
@@ -405,9 +380,9 @@ public class MainActivity extends BaseTaptActivity {
                 .into((CircleImageView) header.findViewById(R.id.navigation_header_profile_image));
     }
 
-    public void showFAB(boolean show) {
-        fam.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
+    //public void showFAB(boolean show) {
+        //fam.setVisibility(show ? View.VISIBLE : View.GONE);
+    //}
 
     //pops back toolbar back out
 //    @Override
@@ -438,7 +413,7 @@ public class MainActivity extends BaseTaptActivity {
 //    }
 
     public void noInternet() {
-        CustomSnackbar sn = CustomSnackbar.make(parentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
+        CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         sn.getView().setAlpha(0.8f);
 
@@ -456,10 +431,10 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    public void toggleFam() {
-        if (fam.isExpanded())
-            fam.toggle();
-    }
+//    public void toggleFam() {
+//        if (fam.isExpanded())
+//            fam.toggle();
+//    }
 
     //the items in navigation view
     //this sets the number to the right of it
@@ -586,6 +561,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         }
     }
+
 
     @Override
     protected void onPause() {
@@ -714,7 +690,7 @@ public class MainActivity extends BaseTaptActivity {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
 
-                //Log.i(TAG, "call: "+activity.toString());
+                Log.i(TAG, "call: "+activity.toString(4));
 
                 final Update update = new Update(activity);
 
@@ -737,7 +713,7 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private void newActivitySnackbar(String text) {
-        final CustomSnackbar sn = CustomSnackbar.make(parentView, text, CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -756,37 +732,6 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-
-    //hiding toolbar / showing toolbar
-//    @Override
-//    public void enableBarScrolling(boolean enable) {
-//        if (enable) {
-//            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-//                    .getLayoutParams())
-//                    .setBehavior(new AppBarLayout.ScrollingViewBehavior());
-//            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-//                    .setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-//        } else {
-//            ((CoordinatorLayout.LayoutParams) findViewById(R.id.mainActivity_fragment_holder)
-//                    .getLayoutParams())
-//                    .setBehavior(null);
-//            ((AppBarLayout.LayoutParams) mToolbar.getLayoutParams())
-//                    .setScrollFlags(0);
-//        }
-//    }
-
-//    @Override
-//    public void showMainToolbar(boolean show) {
-//        mAppBarLayout.setVisibility(show ? View.VISIBLE : View.GONE);
-//    }
-
-    //activity
-
-    //when tap toolbar
-//    @Override
-//    public void setToolbarOnClickListener(View.OnClickListener listener) {
-//        mToolbar.setOnClickListener(listener);
-//    }
 
     //when notification is pressed, takes you to updates fragment
     @Override
@@ -811,20 +756,17 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            final boolean newMessage = (boolean) args[0];
-//            runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mToolbar != null)
-//                        mToolbar.getMenu()
-//                                .findItem(R.id.people_fragment_menu_chat)
-//                                .setIcon(newMessage ? R.drawable.notify_mess_icon : R.drawable.ic_chat81);
-//                }
-//            });
+            mHasMessage = (boolean) args[0];
+            EventBus.getDefault().post(new NewChatEvent(mHasMessage));
         }
     };
+
+    public  boolean hasMessage(){
+        return mHasMessage;
+    }
 
     public void openDrawer(){
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
 }
+

@@ -41,8 +41,28 @@ public class Post implements Parcelable {
     private boolean mPostHidden;    //post hidden from user
     private boolean mPostMuted;     //post muted from user
 
+    private boolean mCommentAnonDisabled;
+
     public Post() {
 
+    }
+
+    public Post(String image, String id, String user, String userName){
+        mImage  = image;
+        mPostId = id;
+        mPostTime = 0;
+        mUserId = user;
+        mUserName = userName;
+        mUserImage = "";
+        mTitle="";
+        mPrivacy = 0;
+        mCommentAnonDisabled = true;
+        mAnonImage = "";
+        mNumLikes = 0;
+        mNumOfComments = 0;
+        mPostLiked = false;
+        mPostHidden = false;
+        mPostMuted = false;
     }
 
     /**
@@ -85,6 +105,73 @@ public class Post implements Parcelable {
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
 
+        mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
+        mPostId = jsonObject.getString("id");
+
+        String anonImage = jsonObject.getString("anonymousImage");
+        mAnonImage = anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage);
+
+        try {
+            mNumLikes = jsonObject.getInt("numberOfLikes");
+            mNumOfComments = jsonObject.getInt("numberOfComments");
+            mPostLiked = jsonObject.getBoolean("isLiked");
+        } catch (JSONException e) {
+            mNumLikes = 0;
+            mNumOfComments = 0;
+            mPostLiked = false;
+        }
+
+        try {
+            mPostHidden = jsonObject.getBoolean("isHidden");
+        } catch (JSONException e) {
+            mPostHidden = false;
+        }
+
+        try {
+            mPostMuted = jsonObject.getBoolean("isMuted");
+        } catch (JSONException e) {
+            mPostMuted = false;
+        }
+    }
+
+
+    public void updateInfo(JSONObject jsonObject) throws JSONException{
+        int type = jsonObject.getInt("type");
+
+        if (jsonObject.getJSONArray("images").length() > 0)
+            mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
+
+        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+            mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
+
+        Date myDate;
+
+        try {
+            myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+        } catch (ParseException w) {
+            w.printStackTrace();
+            myDate = null;
+        }
+
+        mPostTime = (myDate == null ? 0 : myDate.getTime());
+
+        try {
+            JSONObject owner = jsonObject.getJSONObject("owner");
+
+            mUserId = owner.getString("id");
+            mUserName = owner.getString("fullName");
+            mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+        } catch (JSONException e) {
+            mUserId = jsonObject.getString("owner");
+            mUserName = "";
+            mUserImage = "";
+        }
+
+
+        mTitle = jsonObject.getString("title");
+        mPrivacy = jsonObject.getInt("privacy");
+
+        mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
         mPostId = jsonObject.getString("id");
 
         String anonImage = jsonObject.getString("anonymousImage");
@@ -286,4 +373,11 @@ public class Post implements Parcelable {
         }
     };
 
+    public boolean isCommentAnonDisabled() {
+        return mCommentAnonDisabled;
+    }
+
+    public void setCommentAnonDisabled(boolean commentAnonDisabled) {
+        mCommentAnonDisabled = commentAnonDisabled;
+    }
 }

@@ -257,17 +257,26 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             if (mViewerUserId.equals(mCommenterUserId)) {
                 mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
-                mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.VISIBLE);
+                mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(
+                        mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.GONE);
             } else {
-                mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
+                //mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.VISIBLE);
 
-                if (mIsAnon) {
+                if (mIsAnon) { //comment is anonymous
                     mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
+
+                    //viewer is owner of post? then can delete anon comments
+                    if (mFeedDetail.getPost().getUserId().equals(mViewerUserId)){
+                        mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
+                    }else {
+                        mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
+                    }
                 } else {
                     mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.VISIBLE);
+                    mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
                 }
             }
 

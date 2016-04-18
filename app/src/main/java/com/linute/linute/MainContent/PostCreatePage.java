@@ -18,7 +18,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,15 +44,16 @@ import io.socket.engineio.client.transports.WebSocket;
 public class PostCreatePage extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = PostCreatePage.class.getSimpleName();
 
-    private  CustomBackPressedEditText mPostEditText;
+    private CustomBackPressedEditText mPostEditText;
     private View mTextFrame;
-
-    private boolean mSwitchOn = false;
 
     private View mPostButton;
     private View mProgressbar;
 
     private boolean mPostInProgress = false;
+
+    private CheckBox vAnonPost;
+    private CheckBox vAnonComments;
 
     private SharedPreferences mSharedPreferences;
 
@@ -118,7 +119,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (mPostEditText.getLineCount() > maxLines){
+                if (mPostEditText.getLineCount() > maxLines) {
                     mPostEditText.setText(beforeText);
                     mPostEditText.setSelection(mPostEditText.getText().length());
                 }
@@ -129,19 +130,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        final ImageView mAnonymousSwitch = (ImageView) findViewById(R.id.post_create_anon_switch);
-        mAnonymousSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSwitchOn){
-                    mSwitchOn = false;
-                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_off);
-                }else {
-                    mSwitchOn = true;
-                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_on);
-                }
-            }
-        });
+        vAnonComments = (CheckBox) findViewById(R.id.anon_comments);
+        vAnonPost = (CheckBox) findViewById(R.id.anon_post);
 
         mTextFrame = findViewById(R.id.post_create_frame);
 
@@ -152,7 +142,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         findViewById(R.id.post_create_4).setOnClickListener(this);
         findViewById(R.id.post_create_5).setOnClickListener(this);
     }
-
 
 
     private Socket mSocket;
@@ -172,12 +161,12 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                     DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
                     op.query =
                             "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken="+device.getDeviceToken() +
-                                    "&udid="+device.getUdid()+
-                                    "&version="+device.getVersonName()+
-                                    "&build="+device.getVersionCode()+
-                                    "&os="+device.getOS()+
-                                    "&type="+device.getType() +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
                     op.reconnectionDelay = 5;
@@ -198,16 +187,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             mSocket.on("new post", newPost);
             mSocket.connect();
             mConnecting = false;
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "active");
-                obj.put("screen", "Create");
-                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -216,16 +195,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         super.onPause();
 
         if (mSocket != null) {
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Create");
-                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -240,7 +209,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
         if (mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
 
-        if (!Utils.isNetworkAvailable(this) || !mSocket.connected()){
+        if (!Utils.isNetworkAvailable(this) || !mSocket.connected()) {
             Utils.showBadConnectionToast(this);
             return;
         }
@@ -253,7 +222,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         try {
             JSONObject postData = new JSONObject();
             postData.put("college", mSharedPreferences.getString("collegeId", ""));
-            postData.put("privacy", (mSwitchOn ? 1 : 0) + "");
+            postData.put("privacy", (vAnonPost.isChecked() ? 1 : 0) + "");
+            postData.put("isAnonymousCommentsDisabled", vAnonComments.isChecked() ? 0 : 1);
             postData.put("title", mPostEditText.getText().toString());
 
             JSONArray coord = new JSONArray();
@@ -270,7 +240,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 1080, 1080, true)));
             postData.put("images", imageArray);
 
-            mSocket.emit(API_Methods.VERSION+":posts:new post", postData);
+            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(this);
@@ -309,7 +279,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         @Override
         public void call(Object... args) {
             JSONObject t = (JSONObject) args[0];
-            if (t != null){
+            if (t != null) {
                 try {
                     if (t.getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", "1"))) {
                         runOnUiThread(new Runnable() {
@@ -321,7 +291,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                             }
                         });
                     }
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -335,7 +305,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         int backgroundColor;
         int textColor;
 
-        switch (viewId){
+        switch (viewId) {
             case R.id.post_create_0:
                 backgroundColor = R.color.post_color_0;
                 textColor = R.color.pure_black;

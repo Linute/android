@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.UpdateFragment;
 
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -15,6 +16,10 @@ import org.json.JSONObject;
 public class Update {
 
     private static final String TAG = Update.class.getSimpleName();
+
+    public long getActionTime() {
+        return mActionTime;
+    }
 
     //enum of update types
     public enum UpdateType {
@@ -65,8 +70,8 @@ public class Update {
 
 
 
-    //time stamp -- uncomment if we decide to use it
-    //private long mActionTime; //i.e. when someone liked/commented on/etc post
+    //time stamp
+    private long mActionTime; //i.e. when someone liked/commented on/etc post
 
 
     /**
@@ -81,7 +86,7 @@ public class Update {
         mIsRead = getBooleanFromJson(json, "isRead");
 
         //uncomment if we decide to use it
-        //mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
+        mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
 
         mActionID = getStringFromJson(json,"id");
 
@@ -242,15 +247,6 @@ public class Update {
         return mPost.isImagePost();
     }
 
-    /*
-    public String getTimeString() {
-        if (mActionTime == 0) return "";
-
-        return DateUtils.getRelativeTimeSpanString(mActionTime,
-                new Date().getTime(),  //time now
-                DateUtils.SECOND_IN_MILLIS).toString();
-
-    }*/
 
     public boolean isRead() {
         return mIsRead;

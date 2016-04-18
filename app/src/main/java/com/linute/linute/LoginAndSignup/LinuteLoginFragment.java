@@ -29,6 +29,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,7 +53,6 @@ public class LinuteLoginFragment extends Fragment {
     private EditText mPasswordView;
     private ProgressBar mProgressBar;
     private View mSigninButton;
-    private View mCreateAccount;
 
     private boolean mSafeForButtonAction = true;
 
@@ -82,8 +82,8 @@ public class LinuteLoginFragment extends Fragment {
             }
         });
 
-        mCreateAccount =  rootView.findViewById(R.id.signin_create_button);
-        mCreateAccount.setOnClickListener(new OnClickListener() {
+        View createAccount = rootView.findViewById(R.id.signin_create_button);
+        createAccount.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
@@ -344,6 +344,25 @@ public class LinuteLoginFragment extends Fragment {
         JSONObject response = new JSONObject(responseString);
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
 
+        try {
+            JSONObject settings = response.getJSONObject("notificationSettings");
+            sharedPreferences.putBoolean("notif_follow", getBooleanFromJSONObj("follow", settings));
+            sharedPreferences.putBoolean("notif_message",getBooleanFromJSONObj("message", settings));
+            sharedPreferences.putBoolean("notif_mention", getBooleanFromJSONObj("mention", settings));
+            sharedPreferences.putBoolean("notif_alsoComment", getBooleanFromJSONObj("alsoComment", settings));
+            sharedPreferences.putBoolean("notif_comment", getBooleanFromJSONObj("comment", settings));
+            sharedPreferences.putBoolean("notif_like", getBooleanFromJSONObj("like", settings));
+        }catch (JSONException e){
+            e.printStackTrace();
+            sharedPreferences.putBoolean("notif_follow", true);
+            sharedPreferences.putBoolean("notif_message", true);
+            sharedPreferences.putBoolean("notif_mention", true);
+            sharedPreferences.putBoolean("notif_alsoComment", true);
+            sharedPreferences.putBoolean("notif_comment", true);
+            sharedPreferences.putBoolean("notif_like", true);
+        }
+
+
         LinuteUser user = new LinuteUser(response);
 
         sharedPreferences.putString("profileImage", user.getProfileImage());
@@ -358,7 +377,6 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("email", user.getEmail());
-
 
         sharedPreferences.putString("lastLoginEmail", user.getEmail());
 
@@ -378,61 +396,15 @@ public class LinuteLoginFragment extends Fragment {
 
     }
 
+    public boolean getBooleanFromJSONObj(String key, JSONObject obj){
+        try {
+           return obj.getBoolean(key);
+        }catch (JSONException e){
+            e.printStackTrace();
+            return true;
+        }
+    }
 
-//    //used to registere device if somehow device wasn't registered
-//    private void sendRegistrationDevice(String token, final String email, final String password) {
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Content-Type", "application/json");
-//
-//        String versionName = "";
-//        String versionCode = "";
-//        if (getActivity() == null) return;
-//        try {
-//            PackageInfo pInfo = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0);
-//            versionName = pInfo.versionName;
-//            versionCode = pInfo.versionCode + "";
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        Map<String, Object> device = new HashMap<>();
-//        device.put("token", token);
-//        device.put("version", versionName);
-//        device.put("build", versionCode);
-//        device.put("os", Build.VERSION.SDK_INT + "");
-//        device.put("type", "android");
-//
-//        Device.createDevice(headers, device, new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                Log.e(TAG, "failed registration");
-//                if (getActivity() == null) return;
-//                getActivity().runOnUiThread(rFailedConnectionAction);
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                if (!response.isSuccessful()) {
-//                    Log.e(TAG, response.body().string());
-//                    if (getActivity() == null) return;
-//                    getActivity().runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Utils.showServerErrorToast(getActivity());
-//                            showProgress(false);
-//                        }
-//                    });
-//                } else {
-//                    Log.v(TAG, response.body().string());
-//                    if (getActivity() == null) return;
-//                    getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-//                            .edit()
-//                            .putBoolean("deviceRegistered", true)
-//                            .apply();
-//                    checkCredentialsWithDB(email, password);
-//                }
-//            }
-//        });
-//    }
 
     @Override
     public void onStop() {
@@ -444,7 +416,6 @@ public class LinuteLoginFragment extends Fragment {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
         }
-
     }
 }
 

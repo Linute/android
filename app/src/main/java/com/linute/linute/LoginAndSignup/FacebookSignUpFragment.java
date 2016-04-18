@@ -86,7 +86,7 @@ public class FacebookSignUpFragment extends Fragment {
         setUpViewSwitcher(rootView);
         bindViews(rootView);
 
-        if(getActivity() != null) {
+        if (getActivity() != null) {
             mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, Context.MODE_PRIVATE);
 
             mFirstNameEditText.append(mSharedPreferences.getString("firstName", ""));
@@ -105,11 +105,11 @@ public class FacebookSignUpFragment extends Fragment {
         rootView.findViewById(R.id.fbSignUp_back_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mViewSwitcher.getDisplayedChild() != 0){
+                if (mViewSwitcher.getDisplayedChild() != 0) {
                     goBackAnimation(true);
                     mViewSwitcher.showPrevious();
                     goBackAnimation(false);
-                }else {
+                } else {
                     getFragmentManager().popBackStack();
                 }
             }
@@ -119,7 +119,7 @@ public class FacebookSignUpFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), WebViewActivity.class);
-                intent.putExtra(WebViewActivity.LOAD_URL,"https://www.tapt.io/privacy-policy");
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
                 startActivity(intent);
             }
         });
@@ -128,7 +128,7 @@ public class FacebookSignUpFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), WebViewActivity.class);
-                intent.putExtra(WebViewActivity.LOAD_URL,"https://www.tapt.io/terms-of-service");
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
                 startActivity(intent);
             }
         });
@@ -235,7 +235,7 @@ public class FacebookSignUpFragment extends Fragment {
         newInfo.put("sex", mSharedPreferences.getInt("sex", 0));
 
         String dob = mSharedPreferences.getString("dob", "");
-        if (!dob.equals("") && !dob.equals("null")){
+        if (!dob.equals("") && !dob.equals("null")) {
             newInfo.put("dob", dob);
         }
         newInfo.put("registrationType", mSharedPreferences.getString("registrationType", ""));
@@ -279,7 +279,7 @@ public class FacebookSignUpFragment extends Fragment {
                         //Log.i(TAG, "onResponse: " + responseString);
                         persistData(new LinuteUser(new JSONObject(responseString))); //save data
                         PreLoginActivity activity = (PreLoginActivity) getActivity();
-                        if (activity != null){
+                        if (activity != null) {
                             activity.goToNextActivity();
                         }
 
@@ -356,11 +356,11 @@ public class FacebookSignUpFragment extends Fragment {
 
 
     private void getPinCode(String email) {
-        if(getActivity() == null) return;
+        if (getActivity() == null) return;
         final String fName = mFirstNameEditText.getText().toString().trim();
         final String lName = mLastNameEditText.getText().toString().trim();
 
-        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName,new Callback() {
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 failedInternetConnection(0);
@@ -372,7 +372,7 @@ public class FacebookSignUpFragment extends Fragment {
                     try {
                         mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
 
-                        Log.i(TAG, "onResponse: "+mPinCode);
+                        Log.i(TAG, "onResponse: " + mPinCode);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -410,10 +410,7 @@ public class FacebookSignUpFragment extends Fragment {
             mEmailEditText.setError(getString(R.string.error_invalid_email));
             mEmailEditText.requestFocus();
             return false;
-        }
-
-
-        else if (!emailString.endsWith(".edu")){
+        } else if (!emailString.endsWith(".edu")) {
             mEmailEditText.setError("This must be an edu email");
             mEmailEditText.requestFocus();
             return false;
@@ -518,6 +515,7 @@ public class FacebookSignUpFragment extends Fragment {
     private void persistData(LinuteUser user) {
         if (getActivity() == null) return;
 
+
         SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
@@ -538,6 +536,15 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putString("points", user.getPoints());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
+
+        sharedPreferences.putBoolean("notif_follow", true);
+        sharedPreferences.putBoolean("notif_message", true);
+        sharedPreferences.putBoolean("notif_mention", true);
+        sharedPreferences.putBoolean("notif_alsoComment", true);
+        sharedPreferences.putBoolean("notif_comment", true);
+        sharedPreferences.putBoolean("notif_like", true);
+
+
         sharedPreferences.apply();
 
         Utils.deleteTempSharedPreference(mSharedPreferences.edit());
@@ -549,15 +556,15 @@ public class FacebookSignUpFragment extends Fragment {
 
         View v = null;
         //hide keyboard
-        if (mFirstNameEditText.isFocused()){
+        if (mFirstNameEditText.isFocused()) {
             v = mFirstNameEditText;
-        }else if (mLastNameEditText.hasFocus()){
+        } else if (mLastNameEditText.hasFocus()) {
             v = mLastNameEditText;
-        }else if (mEmailEditText.hasFocus()){
+        } else if (mEmailEditText.hasFocus()) {
             v = mEmailEditText;
         }
 
-        if (v != null){
+        if (v != null) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }

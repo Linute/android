@@ -162,10 +162,10 @@ public class RoomsActivity extends BaseTaptActivity {
 
 
     //change toolbar title
-    @Override
-    public void setTitle(String title) {
-
-    }
+//    @Override
+//    public void setTitle(String title) {
+//
+//    }
 
     @Override
     public void addFragmentToContainer(Fragment fragment) {
@@ -185,9 +185,9 @@ public class RoomsActivity extends BaseTaptActivity {
                 .commit();
     }
 
-    @Override
-    public void setToolbarOnClickListener(View.OnClickListener listener) {
-    }
+//    @Override
+//    public void setToolbarOnClickListener(View.OnClickListener listener) {
+//    }
 
     @Override
     public void connectSocket(String event, Emitter.Listener emitter) {

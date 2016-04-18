@@ -115,9 +115,10 @@ public class PeopleFragment extends UpdatableFragment {
         llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                true, true));
 
+        if (mNearMe)
+            recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                    true, true));
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.peoplefrag_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -303,8 +304,11 @@ public class PeopleFragment extends UpdatableFragment {
             });
         }
 
+        Map<String, String> params = new HashMap<>();
+        params.put("limit", 8 + "");
+
         LSDKPeople people = new LSDKPeople(getActivity());
-        people.getPeople(new HashMap<String, String>(), new Callback() {
+        people.getPeople(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -349,7 +353,7 @@ public class PeopleFragment extends UpdatableFragment {
                         jsonObject = (JSONObject) jsonArray.get(i);
                         friend = jsonObject.getString("friend");
 
-
+                        //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                         userOwner = jsonObject.getJSONObject("owner");
 
                         //Start
@@ -381,6 +385,7 @@ public class PeopleFragment extends UpdatableFragment {
                                 userOwner.getString("status")
                         );
 
+                        people.setRank(i);
                         tempPeople.add(people);
                     }
 
@@ -532,9 +537,11 @@ public class PeopleFragment extends UpdatableFragment {
                 try {
                     JSONObject obj = new JSONObject(responseString);
                     JSONArray jsonArray = obj.getJSONArray("geo");
-
                     People people;
                     JSONObject jsonObject;
+                    JSONArray posts;
+                    JSONObject post;
+                    JSONArray images;
 
                     String friend;
 
@@ -546,7 +553,6 @@ public class PeopleFragment extends UpdatableFragment {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jsonObject = (JSONObject) jsonArray.get(i);
                         friend = jsonObject.getString("friend");
-
 
                         //Start
                         boolean areFriends = false;
@@ -570,12 +576,10 @@ public class PeopleFragment extends UpdatableFragment {
                         double distance = jsonObject.getDouble("disInMiles");
 
                         if (distance < 0.05) {
-                            distanceString = "right next to you";
+                            distanceString = "NEARBY";
                         } else {
-                            distanceString = twoDForm.format(distance) + " miles away";
+                            distanceString = twoDForm.format(distance) + " Mi AWAY";
                         }
-
-                        //End
 
                         people = new People(
                                 userOwner.getString("profileImage"),
@@ -584,6 +588,25 @@ public class PeopleFragment extends UpdatableFragment {
                                 distanceString,
                                 areFriends,
                                 userOwner.getString("status"));
+
+                        try {
+                            people.setSchoolName(userOwner.getJSONObject("college").getString("name"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            people.setSchoolName("");
+                        }
+
+                        ArrayList<People.PersonRecentPost> recentPosts = new ArrayList<>();
+
+                        posts = jsonObject.getJSONArray("posts");
+                        for (int k = 0; k < posts.length(); k++) {
+                            post = posts.getJSONObject(k); //look at each post
+                            images = post.getJSONArray("images"); //get image array
+
+                            if (images.length() > 0) //if image array has image
+                                recentPosts.add(new People.PersonRecentPost(images.getString(0), post.getString("id")));
+                        }
+                        people.setPersonRecentPosts(recentPosts);
                         tempPeople.add(people);
                     }
 
@@ -592,7 +615,6 @@ public class PeopleFragment extends UpdatableFragment {
                     mPeopleList.addAll(tempPeople);
 
                     if (getActivity() == null) {
-                        Log.d("TAG", "Null");
                         return;
                     }
                     getActivity().runOnUiThread(new Runnable() {
@@ -667,7 +689,7 @@ public class PeopleFragment extends UpdatableFragment {
 
     public void scrollUp() {
         if (recList != null) {
-            recList.smoothScrollToPosition(0);
+            recList.scrollToPosition(0);
         }
     }
 }

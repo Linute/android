@@ -258,23 +258,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
-        if (activity != null) { //changes app bar title to user's name
-            activity.showMainToolbar(false);
-            activity.enableBarScrolling(false);
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
-                obj.put("action", "active");
-                obj.put("screen", "Visitor");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
         //if first time creating this fragment
         //won't be loaded again is user gets here using onBack
         if (fragmentNeedsUpdating()) {
@@ -294,29 +277,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         if (mDialog != null) {
             mDialog.dismiss();
             mDialog = null;
-        }
-
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null) {
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Visitor");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            activity.showMainToolbar(true);
-            activity.enableBarScrolling(true);
         }
     }
 
@@ -339,7 +299,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                     JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
-                        Log.i(TAG, "onResponse: " + jsonObject.toString(4));
+                        //Log.i(TAG, "onResponse: " + jsonObject.toString(4));
                         mLinuteUser.updateUserInformation(jsonObject); //container for new information
                         mProfileInfoHasLoaded = true;
                     } catch (JSONException e) {

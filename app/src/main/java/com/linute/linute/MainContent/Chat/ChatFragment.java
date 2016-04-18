@@ -225,17 +225,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
             delivered.put("user", mUserId);
             delivered.put("room", mRoomId);
             activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
-
-            //tracking info
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mUserId);
-                obj.put("action", "active");
-                obj.put("screen", "Chat");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(activity);
@@ -327,16 +316,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
         if (activity != null && mUserId != null) {
             activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mUserId);
-                obj.put("action", "inactive");
-                obj.put("screen", "Chat");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
             activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
             activity.disconnectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);

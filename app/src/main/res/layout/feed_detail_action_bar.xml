@@ -2,9 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="44dp"
-              android:divider="@drawable/divider_horizontal"
               android:orientation="vertical"
-              android:showDividers="beginning">
+>
+
+    <View android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:background="@drawable/divider_horizontal"/>
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="match_parent"
@@ -14,73 +17,57 @@
                   android:showDividers="middle"
                   android:weightSum="2">
 
-        <RelativeLayout android:id="@+id/feed_control_bar_like_button"
-                        android:layout_width="0px"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-            <RelativeLayout android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_centerHorizontal="true"
-                            android:layout_centerInParent="true">
+        <LinearLayout android:id="@+id/feed_control_bar_like_button"
+                      android:layout_width="0px"
+                      android:layout_height="match_parent"
+                      android:layout_gravity="center"
+                      android:layout_weight="1"
+                      android:background="?android:selectableItemBackground"
+                      android:gravity="center">
 
 
-                <CheckBox
-                    android:id="@+id/postHeart"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_centerVertical="true"
-                    android:button="@null"
-                    android:background="@drawable/post_likes_selector"
-                    android:checked="false"
-                    />
+            <CheckBox
+                android:id="@+id/postHeart"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/post_likes_selector"
+                android:button="@null"
+                android:checked="false"
+            />
 
-                <TextView android:id="@+id/postNumHearts"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_marginStart="8dp"
-                          android:layout_centerVertical="true"
-                          android:layout_toEndOf="@id/postHeart"
-                          android:textSize="@dimen/sub_font_size"
-                          android:text="Like (0)"
-                          android:textColor="@color/twentyfive_black"/>
+            <TextView android:id="@+id/postNumHearts"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:text="Like (0)"
+                      android:textColor="@color/twentyfive_black"
+                      android:textSize="@dimen/sub_font_size"/>
 
+        </LinearLayout>
 
-            </RelativeLayout>
-
-        </RelativeLayout>
-
-        <RelativeLayout android:id="@+id/feed_control_bar_comments_button"
-                        android:layout_width="0px"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1">
-
-            <RelativeLayout android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_centerInParent="true"
-                >
-
-                <ImageView android:id="@+id/postComments"
-                           android:layout_width="20dp"
-                           android:layout_height="20dp"
-                           android:layout_centerVertical="true"
-                           android:src="@drawable/ic_oval19"
-                    />
-
-                <TextView android:id="@+id/postNumComments"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_centerVertical="true"
-                          android:layout_marginStart="8dp"
-                          android:layout_toEndOf="@id/postComments"
-                          android:text="Comment (0)"
-                          android:textColor="@color/twentyfive_black"
-                          android:textSize="@dimen/sub_font_size"/>
-
-            </RelativeLayout>
+        <LinearLayout android:id="@+id/feed_control_bar_comments_button"
+                      android:layout_width="0px"
+                      android:layout_height="match_parent"
+                      android:layout_gravity="center"
+                      android:layout_weight="1"
+                      android:background="?android:selectableItemBackground"
+                      android:gravity="center">
 
 
-        </RelativeLayout>
+            <ImageView android:id="@+id/postComments"
+                       android:layout_width="20dp"
+                       android:layout_height="20dp"
+                       android:src="@drawable/ic_oval19"
+            />
+
+            <TextView android:id="@+id/postNumComments"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:text="Comment (0)"
+                      android:textColor="@color/twentyfive_black"
+                      android:textSize="@dimen/sub_font_size"/>
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -14,7 +14,7 @@
     />
 
 
-    <RelativeLayout android:id="@+id/tool_bar_container"
+    <FrameLayout android:id="@+id/tool_bar_container"
                     android:layout_width="match_parent"
                     android:layout_height="?android:attr/actionBarSize">
 
@@ -27,11 +27,12 @@
             android:id="@+id/save_photo"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_action_check83"/>
+            android:rotation="180"
+            android:src="@drawable/ic_action_navigation_arrow_back_inverted"/>
 
-    </RelativeLayout>
+    </FrameLayout>
 
 </RelativeLayout>

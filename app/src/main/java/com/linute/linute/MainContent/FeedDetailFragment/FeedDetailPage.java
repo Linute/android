@@ -169,6 +169,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
         boolean isOwner = mFeedDetail.getPostUserId().equals(mViewId);
+
         mToolbar.inflateMenu(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar);
         if (isOwner) {
             mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
@@ -284,8 +285,11 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
         });
 
-
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
+        mAnonCheckBoxContainer.setVisibility(
+                mFeedDetail.getPost().isCommentAnonDisabled() ?
+                        View.GONE :
+                        View.VISIBLE);
 
         mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
 
@@ -324,9 +328,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onResume();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-//            activity.setTitle("Comments");
-//            activity.enableBarScrolling(false);
-//            activity.showMainToolbar(false);
             //user -- user Id
             //room -- id of event
 
@@ -351,16 +352,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     mSendButton.setVisibility(View.VISIBLE);
                 }
             });
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mViewId);
-                obj.put("action", "active");
-                obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
 
         //only updates first time it is created
@@ -395,16 +386,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 e.printStackTrace();
             }
 
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mViewId);
-                obj.put("action", "inactive");
-                obj.put("screen", "Details");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
             activity.disconnectSocket("new comment", newComment);
             activity.setSocketErrorResponse(null);
         }
@@ -415,12 +396,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         super.onStop();
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-//        if (activity != null) {
-//            activity.enableBarScrolling(true);
-//            activity.showMainToolbar(true);
-//        }
     }
 
     private void displayCommentsAndPost() {
@@ -467,21 +442,23 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                     //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
 
-                    int numOfComments = jsonObject.getInt("numberOfComments");
+                    mFeedDetail.getPost().updateInfo(jsonObject);
 
-                    mFeedDetail.setPostPrivacy(jsonObject.getInt("privacy"));
-                    mFeedDetail.setIsPostLiked(jsonObject.getBoolean("isLiked"));
-                    mFeedDetail.setNumComments(numOfComments);
-                    mFeedDetail.setPostLikeNum(jsonObject.getInt("numberOfLikes") + "");
-                    String anonImage = jsonObject.getString("anonymousImage");
-                    mFeedDetail.setAnonImage(anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage));
+//                    int numOfComments = jsonObject.getInt("numberOfComments");
+//
+//                    mFeedDetail.setPostPrivacy(jsonObject.getInt("privacy"));
+//                    mFeedDetail.setIsPostLiked(jsonObject.getBoolean("isLiked"));
+//                    mFeedDetail.setNumComments(numOfComments);
+//                    mFeedDetail.setPostLikeNum(jsonObject.getInt("numberOfLikes") + "");
+//                    String anonImage = jsonObject.getString("anonymousImage");
+//                    mFeedDetail.setAnonImage(anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage));
+//
+//                    //JSONObject owner = jsonObject.getJSONObject("owner");
+//
+//                    mFeedDetail.getPost().setUserName(owner.getString("fullName"));
+//                    mFeedDetail.getPost().setProfileImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
 
-                    JSONObject owner = jsonObject.getJSONObject("owner");
-
-                    mFeedDetail.getPost().setUserName(owner.getString("fullName"));
-                    mFeedDetail.getPost().setProfileImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
-
-                    mSkip = numOfComments - 20;
+                    mSkip = mFeedDetail.getPost().getNumOfComments() - 20;
 
                     ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
@@ -547,6 +524,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 public void run() {
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
+                                    mAnonCheckBoxContainer.setVisibility(
+                                            mFeedDetail.getPost().isCommentAnonDisabled() ?
+                                                    View.GONE :
+                                                    View.VISIBLE);
                                 }
                             });
                         }
@@ -733,26 +714,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         }
     }
 
-//    private Menu mFeedDetailMenu;
-//
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        if (getActivity() != null) {
-//
-//            boolean isOwner = mFeedDetail.getPostUserId().equals(mSharedPreferences.getString("userID", ""));
-//            inflater.inflate(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar, menu);
-//            mFeedDetailMenu = menu;
-//
-//            if (isOwner) { //set correct titles
-//                menu.findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
-//            }else {
-//                menu.findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
-//                menu.findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
-//            }
-//        }
-//
-//        super.onCreateOptionsMenu(menu, inflater);
-//    }
 
     private void showReportOptionsDialog() {
         if (getActivity() == null || !mCommentsRetrieved) return;
@@ -767,7 +728,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 })
                 .create();
         mAlertDialog.show();
-
     }
 
 
@@ -883,7 +843,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         });
                     }
                 }
-
                 progressDialog.dismiss();
             }
         });
@@ -1117,7 +1076,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         try {
 
                             String res = response.body().string();
-                            Log.i(TAG, "onResponse: " + res);
+                            //Log.i(TAG, "onResponse: " + res);
 
                             JSONArray friends = new JSONObject(res).getJSONArray("friends");
 
@@ -1337,7 +1296,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
 
                 if (getActivity() != null) {
-
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1351,9 +1309,15 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             }
 
                             //because of header we can use size, change if decide to add it to array
-                            mFeedDetailAdapter.notifyDataSetChanged();
-                            if (smoothScroll || !mCanScrollDown)
-                                recList.smoothScrollToPosition(mFeedDetail.getComments().size());
+                            final boolean finalSmoothScroll = smoothScroll;
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mFeedDetailAdapter.notifyDataSetChanged();
+                                    if (finalSmoothScroll || !mCanScrollDown)
+                                        recList.scrollToPosition(mFeedDetail.getComments().size());
+                                }
+                            });
 
                         }
                     });
@@ -1386,7 +1350,11 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             comment.put("user", mViewId);
             comment.put("text", commentText);
             comment.put("room", mFeedDetail.getPostId());
-            comment.put("privacy", mCheckBox.isChecked() ? 1 : 0);
+
+            comment.put("privacy", mFeedDetail.getPost().isCommentAnonDisabled() ?
+                    0 :
+                    mCheckBox.isChecked() ? 1 : 0
+            );
 
             //add people mentioned in comment
             List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
@@ -1402,7 +1370,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-
             setCommentViewEditable(false);
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
@@ -1412,5 +1379,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
         }
+
     }
 }

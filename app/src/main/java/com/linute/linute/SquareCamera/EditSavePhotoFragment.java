@@ -65,6 +65,7 @@ public class EditSavePhotoFragment extends Fragment {
     private ProgressBar mProgressBar;
     private View mButtonLayer;
     private CheckBox mAnonSwitch;
+    private CheckBox mAnonComments;
 
     private String mCollegeId;
     private String mUserId;
@@ -131,6 +132,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
         mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+        mAnonComments = (CheckBox) view.findViewById(R.id.anon_comments);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -279,6 +281,7 @@ public class EditSavePhotoFragment extends Fragment {
 
             postData.put("college", mCollegeId);
             postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+            postData.put("isAnonymousCommentsDisabled", mAnonComments.isChecked() ? 0 : 1);
             postData.put("title", mText.getText().toString());
             JSONArray imageArray = new JSONArray();
             imageArray.put(Utils.encodeImageBase64(bitmap));
@@ -392,18 +395,6 @@ public class EditSavePhotoFragment extends Fragment {
             mSocket.connect();
             mConnecting = false;
 
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "active");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
     }
 
@@ -413,18 +404,6 @@ public class EditSavePhotoFragment extends Fragment {
         super.onPause();
 
         if (mSocket != null) {
-
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "inactive");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
 
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);

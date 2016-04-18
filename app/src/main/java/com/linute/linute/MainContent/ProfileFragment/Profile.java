@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
@@ -199,23 +198,6 @@ public class Profile extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.showMainToolbar(false);
-            mainActivity.enableBarScrolling(false);
-            //scroll to top of list
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
-                obj.put("action", "active");
-                obj.put("screen", "Profile");
-                mainActivity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
             mOtherCompotentHasUpdated = false;
@@ -232,48 +214,6 @@ public class Profile extends UpdatableFragment {
         }
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null) {
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID", ""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Profile");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        MainActivity activity = (MainActivity) getActivity();
-        if (activity != null) {
-            activity.showMainToolbar(true);
-            activity.enableBarScrolling(true);
-        }
-
-    }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) { //saves fragment state
-//        outState.putParcelableArrayList(PARCEL_DATA_KEY, mUserActivityItems); //list of activities is saved
-//        super.onSaveInstanceState(outState);
-//    }
-//
-//    @Override
-//    public void onViewStateRestored(Bundle savedInstanceState) { //gets saved frament state
-//        if (savedInstanceState != null) {
-//            mUserActivityItems = savedInstanceState.getParcelableArrayList(PARCEL_DATA_KEY);
-//        }
-//
-//        super.onViewStateRestored(savedInstanceState);
-//    }
 
     //get user information from server
     public void updateAndSetHeader() {

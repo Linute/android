@@ -1,34 +1,38 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.API.API_Methods;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.linute.linute.MainContent.Chat.NewChatEvent;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
-import io.socket.emitter.Emitter;
+import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
+
 
 /**
  * Created by QiFeng on 1/20/16.
@@ -42,6 +46,12 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
     private DiscoverFragment[] mDiscoverFragments;
 
+    private FloatingActionsMenu mFloatingActionsMenu;
+    private AppBarLayout mAppBarLayout;
+
+    private Toolbar mToolbar;
+    private boolean mHasMessage;
+
     //makes sure only one video is playing at a time
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
@@ -54,6 +64,47 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
+
+        mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
+
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) activity.openDrawer();
+            }
+        });
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+            }
+        });
+
+        MainActivity activity = (MainActivity) getActivity();
+        mHasMessage = activity.hasMessage();
+        mToolbar.inflateMenu(activity.hasMessage() ? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_find_friends:
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null){
+                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                        }
+                        return true;
+                    case R.id.people_fragment_menu_chat:
+                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                        enterRooms.putExtra("CHATICON", true);
+                        startActivity(enterRooms);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -86,28 +137,31 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         tabLayout.setupWithViewPager(mViewPager);
 
+
+        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabmenu);
+        FloatingActionButton fabImage = (FloatingActionButton) rootView.findViewById(R.id.fabImage);
+        fabImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() == null) return;
+                toggleFab();
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+            }
+        });
+        FloatingActionButton fabText = (FloatingActionButton) rootView.findViewById(R.id.fabText);
+        fabText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() == null) return;
+                toggleFab();
+                Intent i = new Intent(getActivity(), PostCreatePage.class);
+                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+            }
+        });
+
         return rootView;
     }
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        outState.putBoolean("campusNeedsUpdate", mCampusFeedNeedsUpdating);
-//        outState.putBoolean("friendsNeedsUpdate", mFriendsFeedNeedsUpdating);
-//        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
-//    }
-//
-//    @Override
-//    public void onViewStateRestored(Bundle savedInstanceState) {
-//        super.onViewStateRestored(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            int index = savedInstanceState.getInt("viewPagerIndex",0);
-//            mInitiallyPresentedFragmentWasCampus = index == 0;
-//            mCampusFeedNeedsUpdating = savedInstanceState.getBoolean("campusNeedsUpdate", true);
-//            mFriendsFeedNeedsUpdating = savedInstanceState.getBoolean("friendsNeedsUpdate", true);
-//            if (mViewPager != null) mViewPager.setCurrentItem(index);
-//        }
-//    }
 
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
@@ -152,97 +206,71 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
         }
-
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.setTitle("Feed");
-            mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
-            mainActivity.showFAB(true); //show the floating button
-            mainActivity.resetToolbar();
-
-            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
-                }
-            });
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
-                obj.put("action", "active");
-                obj.put("screen", "Discover");
-                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
+        EventBus.getDefault().unregister(this);
+        toggleFab();
+        mAppBarLayout.setExpanded(true, false);
         mSingleVideoPlaybackManager.stopPlayback();
-
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Discover");
-                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.raiseAppBarLayoutElevation();
-            mainActivity.showFAB(false);
-            mainActivity.setToolbarOnClickListener(null);
-        }
     }
 
 
     //returns if success
-    public boolean addPostToFeed(Object post){
+    public boolean addPostToFeed(Object post) {
 
         JSONObject obj = (JSONObject) post;
 
-        if (obj != null && getActivity() != null &&  mDiscoverFragments[0] != null){
+        if (obj != null && getActivity() != null && mDiscoverFragments[0] != null) {
             try {
                 Post post1 = new Post(obj);
 
                 return mDiscoverFragments[0].addPostToTop(post1);
 
-            }catch (JSONException e){
+            } catch (JSONException e) {
                 e.printStackTrace();
                 return false;
             }
-        }else {
+        } else {
             Log.i(TAG, "addPostToFeed: obj was null");
             return false;
         }
     }
 
+    public void toggleFab() {
+        if (mFloatingActionsMenu.isExpanded()) {
+            mFloatingActionsMenu.collapse();
+        }
+    }
 
-    public SingleVideoPlaybackManager getSinglePlaybackManager(){
+
+    public SingleVideoPlaybackManager getSinglePlaybackManager() {
         return mSingleVideoPlaybackManager;
+    }
+
+    @Subscribe
+    public void onEvent(final NewChatEvent event){
+        // your implementation
+        if (event.hasNewMessage() != mHasMessage && getActivity() != null){
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                            R.drawable.notify_mess_icon :
+                            R.drawable.ic_chat81
+                    );
+                    mHasMessage = event.hasNewMessage();
+                }
+            });
+        }
     }
 }
