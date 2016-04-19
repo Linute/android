@@ -607,9 +607,21 @@ public class PeopleFragment extends UpdatableFragment {
                                 recentPosts.add(new People.PersonRecentPost(images.getString(0), post.getString("id")));
                         }
                         people.setPersonRecentPosts(recentPosts);
+
+                        //set up ratings
+                        post = jsonObject.getJSONObject("rates");
+                        people.setAlreadyRated(!post.isNull("userChoice"));
+                        ArrayList<People.RatingObject> ratingObjs = new ArrayList<>();
+                        ratingObjs.add(getObjectFromJSON(post.getJSONObject("rateOne")));
+                        ratingObjs.add(getObjectFromJSON(post.getJSONObject("rateTwo")));
+                        ratingObjs.add(getObjectFromJSON(post.getJSONObject("rateThree")));
+                        ratingObjs.add(getObjectFromJSON(post.getJSONObject("rateFour")));
+                        people.setRatingObjects(ratingObjs);
+
                         tempPeople.add(people);
                     }
 
+                    //Log.i(TAG, "onResponse: size -- "+ tempPeople.size());
 
                     mPeopleList.clear();
                     mPeopleList.addAll(tempPeople);
@@ -685,6 +697,10 @@ public class PeopleFragment extends UpdatableFragment {
         } catch (SecurityException e) {
             e.printStackTrace();
         }
+    }
+
+    private People.RatingObject getObjectFromJSON(JSONObject object) throws JSONException {
+        return new People.RatingObject(object.getString("key"), object.getString("name"), object.getInt("value"));
     }
 
     public void scrollUp() {

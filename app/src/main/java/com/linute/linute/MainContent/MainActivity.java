@@ -24,9 +24,12 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.MainContent.Chat.NewChatEvent;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
@@ -107,53 +110,6 @@ public class MainActivity extends BaseTaptActivity {
         mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
-        //get toolbar
-//        mToolbar = (Toolbar) findViewById(R.id.mainactivity_toolbar);
-//        mToolbar.inflateMenu(R.menu.people_fragment_menu);
-//        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-//                    getSupportFragmentManager().popBackStack();
-//                else mDrawerLayout.openDrawer(GravityCompat.START);
-//
-//            }
-//        });
-//
-//        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                if (mSafeForFragmentTransaction) {
-//                    int id = item.getItemId();
-//
-//                    switch (id) {
-//                        case R.id.people_fragment_menu_chat:
-//                            Intent enterRooms = new Intent(MainActivity.this, RoomsActivity.class);
-//                            enterRooms.putExtra("CHATICON", true);
-//                            startActivity(enterRooms);
-//                            return true;
-//                        case R.id.menu_find_friends:
-//                            addFragmentToContainer(new FindFriendsChoiceFragment());
-//                            //Toast.makeText(MainActivity.this, "Currently working on this", Toast.LENGTH_SHORT).show();
-//                            return true;
-//                    }
-//                }
-//
-//                return false;
-//            }
-//        });
-
-        //this arrow changes from navigation to back arrow
-//        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-//            @Override
-//            public void onBackStackChanged() {
-//                boolean drawer = getSupportFragmentManager().getBackStackEntryCount() == 0;
-//                mToolbar.setNavigationIcon(drawer ? R.drawable.ic_action_navigation_menu : R.drawable.ic_action_navigation_arrow_back_inverted);
-//            }
-//        });
-
-        //floating action button setup
-
         //profile image and header setup
         loadDrawerHeader();
 
@@ -221,25 +177,9 @@ public class MainActivity extends BaseTaptActivity {
         });
 
 //        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
-
-        Intent intent = getIntent();
         clearBackStack();
-
-        //came in from notification
-        if (intent != null && intent.getBooleanExtra("NOTIFICATION", false)) {
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
-                    .commit();
-
-            //mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
-
-            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
-            mPreviousItem.setChecked(true);
-        }
-
         //regular start
-        else if (savedInstanceState == null) {
+        if (savedInstanceState == null) {
             //only loads one fragment
             mFragments[FRAGMENT_INDEXES.FEED] = new DiscoverHolderFragment();
             getSupportFragmentManager().beginTransaction()
@@ -249,6 +189,10 @@ public class MainActivity extends BaseTaptActivity {
             mPreviousItem.setChecked(true);
         }
 
+        Intent intent = getIntent();
+        if (intent != null){
+            onNewIntent(intent);
+        }
     }
 
 
@@ -689,22 +633,33 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
-
-                Log.i(TAG, "call: "+activity.toString(4));
+                //// TODO: 4/19/16  check action
 
                 final Update update = new Update(activity);
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                            ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
-                        }
-
-                        newActivitySnackbar(update.getDescription());
-                        setUpdateNotification(++mNumNewActivities);
+                if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
+                    if (update.hasEventInformation()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+                                }
+                                newEventSnackbar(update.getDescription(), update.getPost());
+                            }
+                        });
+                    } else {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+                                }
+                                newProfileSnackBar(update);
+                            }
+                        });
                     }
-                });
+                    setUpdateNotification(++mNumNewActivities);
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -712,20 +667,26 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
-    private void newActivitySnackbar(String text) {
+    private void newEventSnackbar(String text, final Post post) {
         final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                clearBackStack();
+                addFragmentToContainer(FeedDetailPage.newInstance(post));
+                sn.dismiss();
+            }
+        });
+        sn.show();
+    }
 
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
-                        .commit();
-
-                mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
-                mPreviousItem.setChecked(true);
+    private void newProfileSnackBar(final Update update){
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
+        sn.getView().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addFragmentToContainer(TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId()));
                 sn.dismiss();
             }
         });
@@ -737,19 +698,21 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
-        if (intent.getBooleanExtra("NOTIFICATION", false)) {
-
-            clearBackStack();
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.ACTIVITY))
-                    .commit();
-
-            mFragments[FRAGMENT_INDEXES.ACTIVITY].setFragmentNeedUpdating(true);
-
-            mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_activity);
-            mPreviousItem.setChecked(true);
+        int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
+        if (type == LinuteConstants.FEED_DETAIL) {
+            String id = intent.getStringExtra("event");
+            if (id != null) {
+                mSafeForFragmentTransaction = true;
+                addFragmentToContainer(FeedDetailPage.newInstance(
+                        new Post("", id, null, "")
+                ));
+            }
+        }else if (type == LinuteConstants.PROFILE){
+            String id = intent.getStringExtra("user");
+            if (id != null){
+                mSafeForFragmentTransaction = true;
+                addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
+            }
         }
     }
 

@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@color/facebook_blue"
+                android:foreground="?android:selectableItemBackground"
                 android:text="Facebook"
                 android:textColor="@color/pure_white"
         />
@@ -56,6 +57,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@color/secondaryColor"
+            android:foreground="?android:selectableItemBackground"
             android:text="signin"
             android:textColor="@color/pure_white"
         />

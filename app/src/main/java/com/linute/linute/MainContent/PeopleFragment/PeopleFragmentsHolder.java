@@ -47,12 +47,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mPeopleFragments = new PeopleFragment[] {PeopleFragment.newInstance(true), PeopleFragment.newInstance(false)};
-        mPeopleHolderPagerAdapter = new PeopleHolderPagerAdapter(getChildFragmentManager(), mPeopleFragments);
-    }
 
     @Nullable
     @Override
@@ -61,6 +55,13 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
 
         mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.people_sliding_tabs);
+
+
+        if (mPeopleFragments == null || mPeopleFragments.length != 2) {
+            mPeopleFragments = new PeopleFragment[]{PeopleFragment.newInstance(true), PeopleFragment.newInstance(false)};
+        }
+
+        mPeopleHolderPagerAdapter = new PeopleHolderPagerAdapter(getChildFragmentManager(), mPeopleFragments);
 
         mViewPager = (CustomViewPager) rootView.findViewById(R.id.people_hostViewPager);
         mViewPager.setPagingEnabled(false);

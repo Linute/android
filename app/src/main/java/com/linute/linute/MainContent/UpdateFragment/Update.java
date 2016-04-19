@@ -194,35 +194,6 @@ public class Update {
         return mAnonImage;
     }
 
-    private static String getActionDescription(UpdateType type) {
-        switch (type){
-            case LIKED_STATUS:
-                return "Liked your status";
-            case LIKED_PHOTO:
-                return "Liked your photo";
-            case COMMENTED_PHOTO:
-                return  "Commented on your photo";
-            case COMMENTED_STATUS:
-                return "Commented on your status";
-            case FOLLOWER:
-                return "Started Following you";
-            case FRIEND_JOINED:
-                return  "Has joined Tapt";
-            case MENTIONED:
-                return "Mentioned you in a post";
-            case POSTED_PHOTO:
-                return "Posted a photo";
-            case POSTED_STATUS:
-                return "Posted a status";
-            case ALSO_COMMENTED_IMAGE:
-                return "Also commented on a photo";
-            case AlSO_COMMENTED_STATUS:
-                return "Also commented on a status";
-            default:
-                return  "";
-        }
-    }
-
     public String getUserFullName() {
         return mUserFullName;
     }

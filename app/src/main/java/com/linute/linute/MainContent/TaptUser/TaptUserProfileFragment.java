@@ -310,20 +310,21 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 //                    Log.d(TAG, body);
                     if (getActivity() == null) return;
 
-                    if (!mOtherSectionUpdated) {
-                        mOtherSectionUpdated = true;
-                    } else {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mToolbar.setTitle(mLinuteUser.getFirstName() + " " + mLinuteUser.getLastName());
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mToolbar.setTitle(mLinuteUser.getFirstName() + " " + mLinuteUser.getLastName());
+
+                            if (!mOtherSectionUpdated) {
+                                mOtherSectionUpdated = true;
+                            } else {
                                 mOtherSectionUpdated = false;
                                 mSwipeRefreshLayout.setRefreshing(false);
                                 mProfileAdapter.notifyDataSetChanged();
-
                             }
-                        });
-                    }
+                        }
+                    });
+
                 } else {//else something went
                     Log.v(TAG, response.code() + response.body().string());
                 }

@@ -46,8 +46,9 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ((PeopleViewHolder) holder).bindModel(mPeopleList.get(position));
         else
             ((NearbyViewHolder) holder).bindView(mPeopleList.get(position));
-
     }
+
+    
 
     @Override
     public int getItemCount() {

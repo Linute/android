@@ -29,17 +29,11 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
-import com.linute.linute.MainContent.Chat.ChatHead;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class MyGcmListenerService extends GcmListenerService {
 
@@ -92,8 +86,8 @@ public class MyGcmListenerService extends GcmListenerService {
      * @param data GCM Bundle received.
      */
     private void sendNotification(Bundle data, String action) {
-        Intent intent = null;
-        PendingIntent pendingIntent = null;
+        Intent intent;
+        PendingIntent pendingIntent;
         String message = data.getString("message");
 
         //Log.i(TAG, "action : "  + action);
@@ -102,7 +96,6 @@ public class MyGcmListenerService extends GcmListenerService {
 
         //// TODO: 3/21/16  fix
         if (action != null && action.equals("messager")) { //<---
-
             Intent parent = new Intent(this, MainActivity.class);
             parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
 
@@ -110,15 +103,20 @@ public class MyGcmListenerService extends GcmListenerService {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
             pendingIntent = PendingIntent.getActivities(this, 0, new Intent[] {parent, intent}, PendingIntent.FLAG_ONE_SHOT);
-
         } else {
             boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
             intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-            intent.putExtra("NOTIFICATION", true);
+            int type = gettNotificationType(data.getString("action"));
+            intent.putExtra("NOTIFICATION", type);
 
-            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+            if (type == LinuteConstants.FEED_DETAIL)
+                intent.putExtra("event", data.getString("event"));
+            else if (type == LinuteConstants.PROFILE)
+                intent.putExtra("user", data.getString("user"));
+
+            pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
@@ -136,5 +134,43 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
         Notification notifications = notificationBuilder.build();
         NotificationManagerCompat.from(this).notify(0, notifications);
+    }
+
+
+    private int gettNotificationType(String action){
+        switch (action){
+            case "commented status":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked status":
+                return LinuteConstants.FEED_DETAIL;
+            case "commented photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "commented video":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked video":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented status":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented video":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "mentioned":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted status":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted video":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "friend joined":
+                return LinuteConstants.PROFILE;
+            case "follower":
+                return LinuteConstants.PROFILE;
+            default:
+                return LinuteConstants.MISC;
+        }
     }
 }

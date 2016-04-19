@@ -113,12 +113,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private AlertDialog mAlertDialog;
 
-
-    // feedDetail is divided into 2 parts, the header and the comments. We load them seperatly so one might
-    // load before the other. i will call notifydataset changed after both have loaded
-    //private boolean mOtherHasUpdated = false;
-
-
     public FeedDetailPage() {
     }
 
@@ -168,37 +162,35 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         });
 
 
-        boolean isOwner = mFeedDetail.getPostUserId().equals(mViewId);
+        mToolbar.inflateMenu(R.menu.feed_detail_toolbar);
 
-        mToolbar.inflateMenu(isOwner ? R.menu.feed_detail_delete_toolbar : R.menu.feed_detail_report_toolbar);
-        if (isOwner) {
-            mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous");
-        } else {
-            mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post");
-            mToolbar.getMenu().findItem(R.id.feed_detail_mute_post).setTitle(mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post");
-        }
 
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                int id = item.getItemId();
-
-                switch (id) {
-                    case R.id.feed_detail_report:
-                        showReportOptionsDialog();
-                        return true;
-                    case R.id.feed_detail_delete:
-                        showConfirmDeleteDialog();
-                        return true;
-                    case R.id.feed_detail_reveal:
-                        showRevealConfirm();
-                        return true;
-                    case R.id.feed_detail_mute_post:
-                        showMuteConfirmation();
-                        return true;
-                    case R.id.feed_detail_hide_post:
-                        showHideConfirmation();
-                        return true;
+//                int id = item.getItemId();
+//
+//                switch (id) {
+//                    case R.id.feed_detail_report:
+//                        showReportOptionsDialog();
+//                        return true;
+//                    case R.id.feed_detail_delete:
+//                        showConfirmDeleteDialog();
+//                        return true;
+//                    case R.id.feed_detail_reveal:
+//                        showRevealConfirm();
+//                        return true;
+//                    case R.id.feed_detail_mute_post:
+//                        showMuteConfirmation();
+//                        return true;
+//                    case R.id.feed_detail_hide_post:
+//                        showHideConfirmation();
+//                        return true;
+//                }
+                if (item.getItemId() == R.id.feed_detail_options){
+                    if (mCommentsRetrieved)
+                        showOptionsDialog();
+                    return true;
                 }
                 return false;
             }
@@ -367,7 +359,11 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     public void onPause() {
         super.onPause();
 
-        if (mAlertDialog != null && mAlertDialog.isShowing()) mAlertDialog.dismiss();
+        if (mAlertDialog != null){
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
+
         mFeedDetailAdapter.closeAllDialogs();
         mFeedDetailAdapter.closeAllItems();
 
@@ -443,20 +439,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
 
                     mFeedDetail.getPost().updateInfo(jsonObject);
-
-//                    int numOfComments = jsonObject.getInt("numberOfComments");
-//
-//                    mFeedDetail.setPostPrivacy(jsonObject.getInt("privacy"));
-//                    mFeedDetail.setIsPostLiked(jsonObject.getBoolean("isLiked"));
-//                    mFeedDetail.setNumComments(numOfComments);
-//                    mFeedDetail.setPostLikeNum(jsonObject.getInt("numberOfLikes") + "");
-//                    String anonImage = jsonObject.getString("anonymousImage");
-//                    mFeedDetail.setAnonImage(anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage));
-//
-//                    //JSONObject owner = jsonObject.getJSONObject("owner");
-//
-//                    mFeedDetail.getPost().setUserName(owner.getString("fullName"));
-//                    mFeedDetail.getPost().setProfileImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
 
                     mSkip = mFeedDetail.getPost().getNumOfComments() - 20;
 
@@ -673,19 +655,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                     });
                                 }
                             });
-
-//                            if (mOtherHasUpdated) {
-//                                getActivity().runOnUiThread(
-//                                        new Runnable() {
-//                                            @Override
-//                                            public void run() {
-//                                                mFeedDetailAdapter.notifyDataSetChanged();
-//                                            }
-//                                        }
-//                                );
-//                            } else {
-//                                mOtherHasUpdated = true;
-//                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                             mFeedDetailAdapter.setDenySwipe(false);
@@ -711,6 +680,48 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         } else {
             mCommentEditText.setFocusable(false);
             mAnonCheckBoxContainer.setEnabled(false);
+        }
+    }
+
+    private void showOptionsDialog(){
+        if (mFeedDetail.getPostUserId() == null || getActivity() == null) return;
+
+        if (mFeedDetail.getPostUserId().equals(mViewId)){ //is the viewers post
+            String[] ops = new String[]{"Delete post", mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous"};
+
+            mAlertDialog = new AlertDialog.Builder(getActivity())
+                    .setItems(ops, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (which == 0){
+                                showConfirmDeleteDialog();
+                            }else {
+                                showRevealConfirm();
+                            }
+                        }
+                    }).show();
+        }else {
+            String[] ops = new String[]{
+                    mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post",
+                    mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post",
+                    "Report post"
+            };
+            mAlertDialog = new AlertDialog.Builder(getActivity())
+                    .setItems(ops, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which){
+                                case 0:
+                                    showMuteConfirmation();
+                                    break;
+                                case 1:
+                                    showHideConfirmation();
+                                    break;
+                                default:
+                                    showReportOptionsDialog();
+                            }
+                        }
+                    }).show();
         }
     }
 
@@ -906,8 +917,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final boolean isMuted = mFeedDetail.getPost().isPostMuted();
         mFeedDetail.getPost().setPostMuted(!isMuted);
 
-        mToolbar.getMenu().findItem(R.id.feed_detail_mute_post).setTitle(isMuted ? "Mute post" : "Unmute post");
-
         JSONObject emit = new JSONObject();
         try {
             emit.put("mute", !isMuted);
@@ -956,8 +965,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         final boolean isHidden = mFeedDetail.getPost().isPostHidden();
         mFeedDetail.getPost().setPostHidden(!isHidden);
-
-        mToolbar.getMenu().findItem(R.id.feed_detail_hide_post).setTitle(isHidden ? "Hide post" : "Unhide post");
 
         JSONObject emit = new JSONObject();
         try {
@@ -1011,7 +1018,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mToolbar.getMenu().findItem(R.id.feed_detail_reveal).setTitle(isAnon ? "Make anonymous" : "Reveal post");
                                     mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
                                     mFeedDetailAdapter.notifyItemChanged(0);
                                     Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
@@ -1334,6 +1340,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
+        if (mMentionedList.getVisibility() == View.VISIBLE) {
+            mMentionedList.setVisibility(View.GONE);
+        }
 
         String commentText = mCommentEditText.getText().toString().trim();
 

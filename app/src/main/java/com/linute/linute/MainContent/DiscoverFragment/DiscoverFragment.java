@@ -134,68 +134,11 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-//        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            private boolean stoppedVideos = false;
-//            private int deltaY = 0;
-//
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                if (!stoppedVideos && (deltaY > 100 || deltaY < -100)) {
-//                    mVideoPlayerManager.stopAnyPlayback();
-//                    stoppedVideos = true;
-//                }else {
-//                    deltaY += dy;
-//                }
-//            }
-//
-//            @Override
-//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-//                super.onScrollStateChanged(recyclerView, newState);
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
-//                    stoppedVideos = false;
-//                    deltaY = 0;
-//                }
-//            }
-//        });
 
 
         return rootView;
     }
 
-
-    //public static final String POST_PARCEL_KEY = "post_parcel_items";
-
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        //outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
-//        outState.putBoolean("friendsOnly", mFriendsOnly);
-//        outState.putBoolean("feedDone", feedDone);
-//        super.onSaveInstanceState(outState);
-//    }
-
-//    @Override
-//    public void onViewStateRestored(Bundle savedInstanceState) {
-//        super.onViewStateRestored(savedInstanceState);
-//        if (savedInstanceState != null) {
-//            mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
-//            feedDone = savedInstanceState.getBoolean("feedDone");
-//            //mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
-//
-////            DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
-////            if (fragment == null) return;
-////
-////            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), fragment.getSinglePlaybackManager());
-////            mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
-////                @Override
-////                public void getMoreFeed() {
-////                    loadMoreFeed();
-////                }
-////            });
-////
-////            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
-//        }
-    //}
 
 
     @Override
@@ -296,7 +239,6 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         refreshLayout.setRefreshing(false);
                                         mRefreshing = false;
-                                        Log.i(TAG, "run: 5"+mRefreshing);
                                         Utils.showServerErrorToast(getActivity());
                                     }
                                 });

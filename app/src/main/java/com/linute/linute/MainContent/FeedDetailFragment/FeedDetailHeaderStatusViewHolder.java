@@ -24,7 +24,7 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
 
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
-        if (activity == null || mPost == null) return;
+        if (activity == null || mPost == null || mPost.getUserId() == null) return;
 
         //tap image or name
         if ((v == vUserImage || v == vPostUserName) && mPost.getPrivacy() == 0) {

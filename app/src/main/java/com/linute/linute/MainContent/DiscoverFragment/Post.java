@@ -47,11 +47,11 @@ public class Post implements Parcelable {
 
     }
 
-    public Post(String image, String id, String user, String userName){
-        mImage  = image;
-        mPostId = id;
+    public Post(String imageurl, String postid, String userid, String userName){
+        mImage  = imageurl;
+        mPostId = postid;
         mPostTime = 0;
-        mUserId = user;
+        mUserId = userid;
         mUserName = userName;
         mUserImage = "";
         mTitle="";

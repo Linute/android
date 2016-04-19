@@ -17,6 +17,12 @@ public class People {
     private int mRank = -1;
     private String mSchoolName;
 
+    //default to true, if something happens, it's better if the user can't rate, then having the
+    // abilty to rate again
+    private boolean mAlreadyRated = true;
+    private int mTotalRatings;
+    private List<RatingObject> mRatingObjects;
+
     private List<PersonRecentPost> mPersonRecentPosts;
 
     public People(String profileImage, String name, String ID, String date, boolean friend, String status) {
@@ -80,6 +86,35 @@ public class People {
         mSchoolName = schoolName;
     }
 
+    public boolean isAlreadyRated() {
+        return mAlreadyRated;
+    }
+
+    public void setAlreadyRated(boolean alreadyRated) {
+        mAlreadyRated = alreadyRated;
+    }
+
+    public List<RatingObject> getRatingObjects() {
+        return mRatingObjects;
+    }
+
+    public void incrementRateAtPosition(int pos){
+        mRatingObjects.get(pos).incrementNumOfRates();
+        mTotalRatings++;
+    }
+
+    public void setRatingObjects(List<RatingObject> ratingObjects) {
+        mRatingObjects = ratingObjects;
+        mTotalRatings = 0;
+        for (RatingObject obj : ratingObjects){
+            mTotalRatings += obj.getNumOfRates();
+        }
+    }
+
+    public int getTotalRatings(){
+        return mTotalRatings;
+    }
+
     public static class PersonRecentPost {
         private String mImage;
         private String mPostId;
@@ -95,6 +130,34 @@ public class People {
 
         public String getPostId() {
             return mPostId;
+        }
+    }
+
+    public static class RatingObject {
+        private String mKey;
+        private int mNumOfRates;
+        private String mName;
+
+        public RatingObject(String key, String name, int ratings){
+            mKey = key;
+            mNumOfRates = ratings;
+            mName = name;
+        }
+
+        public int getNumOfRates() {
+            return mNumOfRates;
+        }
+
+        public void incrementNumOfRates() {
+            mNumOfRates++;
+        }
+
+        public String getKey() {
+            return mKey;
+        }
+
+        public String getName() {
+            return mName;
         }
     }
 }
