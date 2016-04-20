@@ -13,7 +13,8 @@
     <LinearLayout android:id="@+id/comment_bottom_wrapper"
                   android:layout_width="wrap_content"
                   android:layout_height="match_parent"
-                  android:orientation="horizontal">
+                  android:orientation="horizontal"
+    >
 
         <RelativeLayout android:id="@+id/comment_delete"
                         android:layout_width="60dp"
@@ -71,13 +72,14 @@
     </LinearLayout>
 
     <RelativeLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/pure_white"
     >
 
         <LinearLayout android:id="@+id/feed_detail_main"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="horizontal">
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/comment_user_image"
@@ -126,6 +128,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/eighty_black"
                     android:textSize="@dimen/sub_font_size"
+                    android:autoLink="web|email"
                     tools:text="test test test testtest test test testtest "/>
 
             </LinearLayout>
@@ -138,8 +141,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/feed_detail_main"
-            android:visibility="gone"
-            android:indeterminateOnly="true"/>
+            android:indeterminateOnly="true"
+            android:visibility="gone"/>
 
     </RelativeLayout>
 

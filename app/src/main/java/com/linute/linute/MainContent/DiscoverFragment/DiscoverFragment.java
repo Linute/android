@@ -25,6 +25,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,11 +102,14 @@ public class DiscoverFragment extends UpdatableFragment {
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment)getParentFragment()).getSinglePlaybackManager());
+        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager());
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
-                loadMoreFeed();
+                if(!mRefreshing) {
+                    mRefreshing = true;
+                    loadMoreFeed();
+                }
             }
         });
 
@@ -115,11 +119,10 @@ public class DiscoverFragment extends UpdatableFragment {
         recList.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                ((MainActivity) getActivity()).toggleFam();
+                ((DiscoverHolderFragment) getParentFragment()).toggleFab();
                 return false;
             }
         });
-
 
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
@@ -127,73 +130,15 @@ public class DiscoverFragment extends UpdatableFragment {
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                feedDone = false;
                 refreshFeed();
             }
         });
 
-//        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            private boolean stoppedVideos = false;
-//            private int deltaY = 0;
-//
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                super.onScrolled(recyclerView, dx, dy);
-//                if (!stoppedVideos && (deltaY > 100 || deltaY < -100)) {
-//                    mVideoPlayerManager.stopAnyPlayback();
-//                    stoppedVideos = true;
-//                }else {
-//                    deltaY += dy;
-//                }
-//            }
-//
-//            @Override
-//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-//                super.onScrollStateChanged(recyclerView, newState);
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
-//                    stoppedVideos = false;
-//                    deltaY = 0;
-//                }
-//            }
-//        });
 
 
         return rootView;
     }
 
-
-    public static final String POST_PARCEL_KEY = "post_parcel_items";
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(POST_PARCEL_KEY, mPosts);
-        outState.putBoolean("friendsOnly", mFriendsOnly);
-        outState.putBoolean("feedDone", feedDone);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            mFriendsOnly = savedInstanceState.getBoolean("friendsOnly");
-            feedDone = savedInstanceState.getBoolean("feedDone");
-            mPosts = savedInstanceState.getParcelableArrayList(POST_PARCEL_KEY);
-
-            DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
-            if (fragment == null) return;
-
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), fragment.getSinglePlaybackManager());
-            mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
-                @Override
-                public void getMoreFeed() {
-                    loadMoreFeed();
-                }
-            });
-
-            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
-        }
-    }
 
 
     @Override
@@ -219,14 +164,12 @@ public class DiscoverFragment extends UpdatableFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mFriendsOnly && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.campus);
-                ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
+                ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
 
             } else if (mFriendsOnly && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.loser_512);
-                ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_friends);
+                ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_friends);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
 
@@ -237,15 +180,24 @@ public class DiscoverFragment extends UpdatableFragment {
     private int mSkip = 0;
 
     public void loadMoreFeed() {
+
         if (feedDone) {
             Toast.makeText(getActivity(), "Sorry Bro, feed is done", Toast.LENGTH_SHORT).show();
+            mRefreshing = false;
         } else {
             loadMoreFeedFromServer();
         }
     }
 
     public void loadMoreFeedFromServer() {
-        mSkip += 25;
+
+        mSkip -= 25;
+        int limit = 25;
+
+        if (mSkip < 0) {
+            limit += mSkip;
+            mSkip = 0;
+        }
 
         final int skip = mSkip;
 
@@ -265,8 +217,9 @@ public class DiscoverFragment extends UpdatableFragment {
         if (!mFriendsOnly) {
             events.put("college", mCollegeId);
         }
+
         events.put("skip", skip + "");
-        events.put("limit", "25");
+        events.put("limit", limit + "");
         LSDKEvents events1 = new LSDKEvents(getActivity());
         events1.getEvents(mFriendsOnly, events, new Callback() {
                     @Override
@@ -283,6 +236,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     @Override
                                     public void run() {
                                         refreshLayout.setRefreshing(false);
+                                        mRefreshing = false;
                                         Utils.showServerErrorToast(getActivity());
                                     }
                                 });
@@ -298,12 +252,13 @@ public class DiscoverFragment extends UpdatableFragment {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (jsonArray.length() != 25) feedDone = true; //no more feed to load
+                            if (mSkip == 0)
+                                feedDone = true; //no more feed to load
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
+                            for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                 try {
                                     mPosts.add(new Post(jsonArray.getJSONObject(i)));
-                                }catch (JSONException e){
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -314,18 +269,18 @@ public class DiscoverFragment extends UpdatableFragment {
                                     new Runnable() {
                                         @Override
                                         public void run() {
-                                            cancelRefresh();
-
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
-                                                    ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
+                                                    ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {
                                                 mEmptyView.setVisibility(View.GONE);
                                             }
                                             mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                            mRefreshing = false;
+                                            cancelRefresh();
                                         }
                                     }
 
@@ -339,6 +294,7 @@ public class DiscoverFragment extends UpdatableFragment {
                                     public void run() {
                                         Utils.showServerErrorToast(getActivity());
                                         refreshLayout.setRefreshing(false);
+                                        mRefreshing = false;
                                     }
                                 });
                             }
@@ -366,11 +322,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
         mRefreshing = true;
 
-        mSkip = 0;
-
         Map<String, String> events = new HashMap<>();
         events.put("college", mCollegeId);
-        events.put("skip", "0");
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
 
@@ -407,16 +360,19 @@ public class DiscoverFragment extends UpdatableFragment {
                         try {
 
                             jsonObject = new JSONObject(json);
+                            mSkip = jsonObject.getInt("skip");
+
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (jsonArray.length() != 25) feedDone = true; //no more feed to load
+                            if (mSkip == 0)
+                                feedDone = true; //no more feed to load
 
                             ArrayList<Post> refreshedPosts = new ArrayList<>();
 
-                            for (int i = 0; i < jsonArray.length(); i++) {
+                            for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                 try {
                                     refreshedPosts.add(new Post(jsonArray.getJSONObject(i)));
-                                }catch (JSONException e){
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -437,8 +393,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    ((ImageView)mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
-                                                    ((TextView)mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
+                                                    ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
+                                                    ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {
@@ -502,15 +458,14 @@ public class DiscoverFragment extends UpdatableFragment {
         }
     }
 
-    public boolean addPostToTop(final Post post){
+    public boolean addPostToTop(final Post post) {
         if (mRefreshing) return false;
 
-         new Handler().post(new Runnable() {
+        new Handler().post(new Runnable() {
             @Override
             public void run() {
                 mPosts.add(0, post);
                 mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
-                mSkip++;
                 if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
             }
         });

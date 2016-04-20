@@ -263,9 +263,8 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     String responseString = response.body().string();
-                    Log.i(TAG, "onResponse: " + responseString);
+                    //Log.i(TAG, "onResponse: " + responseString);
                     try {
-
                         boolean saved = saveCollege(LinuteUser.getCollegeFromJson(new JSONObject(responseString)));
 
                         if (saved) //we saved college

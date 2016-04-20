@@ -9,11 +9,12 @@ import java.util.List;
 /**
  * Created by Arman on 1/13/16.
  */
+
 public class FeedDetail {
     private static final String TAG = FeedDetail.class.getSimpleName();
     private Post mPost;
 
-    private List<Comment> mComments = new ArrayList<>();
+    private List<Object> mComments = new ArrayList<>();
 
     public FeedDetail(Post post) {
         mPost = post;
@@ -64,7 +65,7 @@ public class FeedDetail {
         mPost.setNumLike(Integer.parseInt(postLikeNum));
     }
 
-    public List<Comment> getComments() {
+    public List<Object> getComments() {
         return mComments;
     }
 

@@ -13,8 +13,8 @@ public class Comment {
     private String mCommentUserId;
     private String mCommentUserProfileImage;
     private String mCommentUserName;
-    private String mCommentUserPostText;
-    private String mCommentUserPostId;
+    private String mCommentPostText;
+    private String mCommentPostId;
     private long mDateLong;
     private boolean mIsAnon;
     private String mAnonImage;
@@ -27,8 +27,8 @@ public class Comment {
         mCommentUserId = "";
         mCommentUserProfileImage = "";
         mCommentUserName = "";
-        mCommentUserPostText = "";
-        mCommentUserPostId = "";
+        mCommentPostText = "";
+        mCommentPostId = "";
         mAnonImage = "";
         mMentionedPeople = new ArrayList<>();
         mDateLong = 0;
@@ -37,8 +37,9 @@ public class Comment {
     public Comment(String commentUserId,
                    String commentUserProfileImage,
                    String commentUserName,
-                   String commentUserPostText,
-                   String commentUserPostId, boolean isAnon,
+                   String commentPostText,
+                   String commentPostId,
+                   boolean isAnon,
                    String anonImage,
                    List<MentionedPersonLight> mentionedPeople,
                    long date
@@ -46,8 +47,8 @@ public class Comment {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
         mCommentUserName = commentUserName;
-        mCommentUserPostText = commentUserPostText;
-        mCommentUserPostId = commentUserPostId;
+        mCommentPostText = commentPostText;
+        mCommentPostId = commentPostId;
         mIsAnon = isAnon;
         mAnonImage = anonImage;
         mMentionedPeople = mentionedPeople;
@@ -67,12 +68,12 @@ public class Comment {
         return mCommentUserName;
     }
 
-    public String getCommentUserPostText() {
-        return mCommentUserPostText;
+    public String getCommentPostText() {
+        return mCommentPostText;
     }
 
-    public String getCommentUserPostId() {
-        return mCommentUserPostId;
+    public String getCommentPostId() {
+        return mCommentPostId;
     }
 
     public boolean isAnon(){
@@ -95,6 +96,9 @@ public class Comment {
         return mDateLong == 0 ? "" : Utils.getTimeAgoString(mDateLong);
     }
 
+    public void setAnonImage(String image){
+        mAnonImage = image;
+    }
 
     public static class MentionedPersonLight{
 
@@ -106,9 +110,8 @@ public class Comment {
         public MentionedPersonLight(String fullName, String id){
             mFullname = fullName;
             mId = id;
-            mFormattedName = "@"+fullName.replace(" ", "");
+            mFormattedName = "@"+fullName.replaceAll("[^a-zA-Z]", "");
         }
-
 
         public String getId(){
             return mId;
@@ -121,5 +124,6 @@ public class Comment {
         public String getFormatedFullName(){
             return mFormattedName;
         }
+
     }
 }

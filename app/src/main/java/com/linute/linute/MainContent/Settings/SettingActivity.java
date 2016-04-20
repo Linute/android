@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -22,8 +21,8 @@ import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
@@ -35,8 +34,6 @@ import io.socket.engineio.client.transports.WebSocket;
 
 
 public class SettingActivity extends AppCompatActivity {
-
-    private Toolbar mToolBar;
 
     //use a variable to keep track of if user made changes to account info
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
@@ -65,12 +62,11 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private void setUpToolbar() {
-        mToolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
-        mToolBar.setTitle("Settings");
-        mToolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        setSupportActionBar(mToolBar);
+        Toolbar toolBar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
+        toolBar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolBar.setTitle("Settings");
+        setSupportActionBar(toolBar);
     }
-
 
     //override up button to go back
     @Override
@@ -97,10 +93,72 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == LinutePreferenceFragment.NEED_UPDATE_REQUEST && resultCode == RESULT_OK){
+        if (requestCode == LinutePreferenceFragment.NEED_UPDATE_REQUEST && resultCode == RESULT_OK) {
             mUpdateNeeded = true;
         }
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mSocket == null || !mSocket.connected() && !mConnecting) {
+            mConnecting = true;
+            {
+                try {
+                    IO.Options op = new IO.Options();
+
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    op.query =
+                            "token=" + mSharedPreferences.getString("userToken", "") +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION
+                    ;
+
+                    op.forceNew = true;
+                    op.reconnectionDelay = 5;
+                    op.transports = new String[]{WebSocket.NAME};
+
+                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.connect();
+            mConnecting = false;
+        }
+    }
+
+    public void emitSocket(String key, Object obj) {
+        if (mSocket != null) {
+            mSocket.emit(key, obj);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSocket.disconnect();
+        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+    }
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i(TAG, "call: failed socket connection");
+        }
+    };
 
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment {
@@ -112,6 +170,8 @@ public class SettingActivity extends AppCompatActivity {
         Preference mTermsOfService;
         Preference mLogOut;
         Preference mAttributions;
+        Preference mNotification;
+        Preference mAbout;
 
         @Override
         public void onCreate(final Bundle savedInstanceState) {
@@ -131,6 +191,11 @@ public class SettingActivity extends AppCompatActivity {
             mTermsOfService = findPreference("terms_of_service");
             mLogOut = findPreference("logout");
             mAttributions = findPreference("attributions");
+            mNotification = findPreference("notifications");
+            mAbout = findPreference("version");
+
+            DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
+            mAbout.setSummary("v"+info.getVersionCode()+"api"+API_Methods.VERSION);
         }
 
         /* TODO: still need to add the following on click listeners:
@@ -146,14 +211,15 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     //clear saved information
+                    ((SettingActivity) getActivity()).emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
+
                     Utils.resetUserInformation(getActivity()
-                            .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit());
+                            .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                     Utils.deleteTempSharedPreference(getActivity()
-                            .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit());
+                            .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
 
                     if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                         LoginManager.getInstance().logOut();
-
 
                     //start new
                     Intent i = new Intent(getActivity(), PreLoginActivity.class);
@@ -197,7 +263,8 @@ public class SettingActivity extends AppCompatActivity {
             mPrivacyPolicy.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                    Intent i = new Intent(getActivity(), WebViewActivity.class);
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
                     startActivity(i);
                     return true;
                 }
@@ -217,7 +284,8 @@ public class SettingActivity extends AppCompatActivity {
             mTermsOfService.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), TermsOfServiceActivity.class);
+                    Intent i = new Intent(getActivity(), WebViewActivity.class);
+                    i.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
                     startActivity(i);
                     return true;
                 }
@@ -237,67 +305,15 @@ public class SettingActivity extends AppCompatActivity {
                     return true;
                 }
             });
-        }
-    }
-
-
-    // TODO: Copy below to other settings activities; related to "user online"
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
-            {
-                try {
-                    IO.Options op = new IO.Options();
-
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
-                    op.query =
-                            "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken="+device.getDeviceToken() +
-                                    "&udid="+device.getUdid()+
-                                    "&version="+device.getVersonName()+
-                                    "&build="+device.getVersionCode()+
-                                    "&os="+device.getOS()+
-                                    "&type="+device.getType() +
-                                    "&api="+ API_Methods.VERSION
-                    ;
-
-                    op.forceNew = true;
-                    op.reconnectionDelay = 5;
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+            mNotification.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent i = new Intent(getActivity(), NotificationSettingsActivity.class);
+                    startActivity(i);
+                    return true;
                 }
-            }
-
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.connect();
-            mConnecting = false;
+            });
         }
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSocket.disconnect();
-
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-    }
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
-
-    // TODO: stop copy here
 }
 

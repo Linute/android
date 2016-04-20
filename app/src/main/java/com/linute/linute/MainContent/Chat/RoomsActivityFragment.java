@@ -1,12 +1,13 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,8 +26,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -34,21 +40,33 @@ import okhttp3.Response;
 
 /**
  * A placeholder fragment containing a simple view.
+ *
+ * the rooms you have with people.
+ *
+ * i.e. chatroom with max, chat room with nabeel.
+ * You can click to see your convo with max or convo with nabeel
+ *
  */
 public class RoomsActivityFragment extends Fragment {
 
     //make sure this always gets called: getRoom
 
     private static final String TAG = RoomsActivityFragment.class.getSimpleName();
+    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private RecyclerView recList;
-    private LinearLayoutManager llm;
     private RoomsAdapter mRoomsAdapter;
 
     private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
-    private SharedPreferences mSharedPreferences;
+    private String mUserId;
 
     private View mEmptyText;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private int mSkip = 0;
+
+    private boolean mCanLoadMore = false;
 
     public RoomsActivityFragment() {
     }
@@ -63,28 +81,7 @@ public class RoomsActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        if (getActivity().getIntent().getStringExtra("ROOMS") != null) { //make sure not null
-
-            // start chat fragment
-            // use same procedure unless found better
-            ArrayList<ChatHead> chatHeads = getActivity().getIntent().getParcelableArrayListExtra("chatHeads");
-            ChatFragment newFragment = ChatFragment.newInstance(
-                    getActivity().getIntent().getStringExtra("roomId"),
-                    getActivity().getIntent().getStringExtra("ownerName"),
-                    getActivity().getIntent().getStringExtra("ownerId"),
-                    Integer.parseInt(getActivity().getIntent().getStringExtra("roomCnt")), //2
-                    chatHeads);
-            Log.d(TAG, "onClick: " + newFragment.getArguments().getString("username"));
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            // Replace whatever is in the fragment_container view with this fragment,
-            // and add the transaction to the back stack so the user can navigate back
-            transaction.replace(R.id.chat_container, newFragment);
-            transaction.addToBackStack(null);
-            // Commit the transaction
-            transaction.commit();
-        }
-
+        mUserId = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
 
         return inflater.inflate(R.layout.fragment_rooms, container, false);
     }
@@ -93,62 +90,95 @@ public class RoomsActivityFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.rooms_toolbar);
+        toolbar.setTitle("Inbox");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() != null)
+                    getActivity().onBackPressed();
+            }
+        });
+
+        FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
+        fab.setImageResource(R.drawable.ic_action_new_message);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                // Create fragment and give it an argument specifying the article it should show
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    activity.addFragmentToContainer(new SearchUsers());
+                }
+            }
+        });
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_rooms);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                getRooms();
+            }
+        });
+
+        mRoomsAdapter.setLoadMore(new Runnable() {
+            @Override
+            public void run() {
+                if (mCanLoadMore){
+                    getMoreRooms();
+                }
+            }
+        });
+
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         recList = (RecyclerView) view.findViewById(R.id.rooms_list);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mRoomsAdapter);
-
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
         getRooms();
 
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
+        RoomsActivity activity = (RoomsActivity) getActivity();
         if (activity != null){
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "active");
-                obj.put("screen", "Inbox");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            activity.setTitle("Inbox");
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
-        if (activity != null){
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Inbox");
-                activity.emitSocket(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void getRooms() {
         if (getActivity() == null) return;
-        final String userID = mSharedPreferences.getString("userID", "");
 
-        final LSDKChat chat = new LSDKChat(getActivity());
-        chat.getRooms(null, new Callback() {
+        if (!mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
+
+
+        Map<String, String> params = new HashMap<>();
+        params.put("limit", "20");
+
+        new LSDKChat(getActivity()).getRooms(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -164,60 +194,100 @@ public class RoomsActivityFragment extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+
                 String resString = response.body().string();
+
+                //Log.i(TAG, "onResponse: "+resString);
 
                 if (response.isSuccessful()) {
                     try {
+
                         JSONObject jsonObj = new JSONObject(resString);
+
+                        mSkip = jsonObj.getInt("skip");
+
                         JSONArray rooms = jsonObj.getJSONArray("rooms");
 
-                        ArrayList<ChatHead> chatHeads = new ArrayList<>();
+                        //ArrayList<ChatHead> chatHeads = new ArrayList<>();
                         String lastMessage = "";
+                        boolean hasUnreadMessage;
 
                         JSONObject room;
-                        JSONArray users;
+                        JSONObject user;
                         JSONArray messages;
 
-//                        mRoomsList.clear();
+                        JSONObject message;
+                        JSONArray readArray;
+
+                        Date date;
+
                         ArrayList<Rooms> tempRooms = new ArrayList<>();
 
-                        for (int i = 0; i < rooms.length(); i++) {
+                        for (int i = rooms.length() - 1; i >= 0; i--) {
+                            hasUnreadMessage = true;
+
                             room = rooms.getJSONObject(i);
-                            users = room.getJSONArray("users");
+                            user = room.getJSONArray("users").getJSONObject(0);
 
-                            for (int j = 0; j < users.length(); j++) {
-                                chatHeads.add(new ChatHead(
-                                                users.getJSONObject(j).getString("fullName"),
-                                                users.getJSONObject(j).getString("profileImage"),
-                                                users.getJSONObject(j).getString("id")
-                                        )
-                                );
-                            }
+                            messages = room.getJSONArray("messages"); //list of messages in room
 
-                            messages = room.getJSONArray("messages");
+
+                            //if messages not empty or null
                             if (messages.length() > 0 && !messages.isNull(0)) {
-                                if (messages.getJSONObject(0).getJSONObject("owner").getString("id").equals(userID)) {
+                                message = messages.getJSONObject(messages.length() - 1);
+                                readArray = message.getJSONArray("read");
+
+                                try {
+                                    date = simpleDateFormat.parse(message.getString("date"));
+                                }catch (ParseException e){
+                                    date = null;
+                                }
+
+                                //check last message. check if we already read it
+                                for (int k = 0; k < readArray.length() ;  k++){
+                                    if (readArray.getString(k).equals(mUserId)){
+                                        hasUnreadMessage = false;
+                                        break;
+                                    }
+                                }
+
+                                //if you sent last message : show  "You: <text>"
+                                if (message.getJSONObject("owner").getString("id").equals(mUserId)) {
                                     lastMessage = "You: " + messages.getJSONObject(0).getString("text");
-                                } else {
+                                }
+
+                                //the other person sent last message : show <message>
+                                else {
                                     lastMessage = messages.getJSONObject(0).getString("text");
                                 }
-                            }else {
-                                lastMessage = "...";
                             }
 
-                            //Log.i("ROOM_TEST", "onResponse: "+room.toString());
+                            else { //no messages show "..."
+                                lastMessage = "...";
+                                hasUnreadMessage = false;
+                                date = null;
+                            }
+
 
                             //Throws error but still runs correctly... weird
-                            tempRooms.add(new Rooms(getStringFromObj(room, "owner"),
-                                    getStringFromObj(room, "id"),
-                                    getStringFromObj(users.getJSONObject(0), "id"),
-                                    getStringFromObj(users.getJSONObject(0), "fullName"),
+                            tempRooms.add(new Rooms(
+                                    room.getString("id"),
+                                    user.getString("id"),
+                                    user.getString("fullName"),
                                     lastMessage,
-                                    getStringFromObj(users.getJSONObject(0), "profileImage"),
-                                    users.length() + 1,  // add yourself
-                                    chatHeads
+                                    user.getString("profileImage"),
+                                    hasUnreadMessage,
+                                    date == null ? 0 : date.getTime()
                             ));
+                           // ,
+//                                    users.length() + 1,  // add yourself
+//                                    chatHeads
                         }
+
+
+                        mCanLoadMore = mSkip > 0;
+
+                        mSkip -= 20;
 
                         mRoomsList.clear();
                         mRoomsList.addAll(tempRooms);
@@ -226,6 +296,9 @@ public class RoomsActivityFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    if (mSwipeRefreshLayout.isRefreshing()){
+                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    }
                                     if (mRoomsList.isEmpty()){
                                         if (mEmptyText.getVisibility() == View.GONE)
                                             mEmptyText.setVisibility(View.VISIBLE);
@@ -246,6 +319,7 @@ public class RoomsActivityFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     Utils.showServerErrorToast(getActivity());
+                                    mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
                         }
@@ -257,6 +331,7 @@ public class RoomsActivityFragment extends Fragment {
                             @Override
                             public void run() {
                                 Utils.showServerErrorToast(getActivity());
+                                mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
                     }
@@ -266,13 +341,175 @@ public class RoomsActivityFragment extends Fragment {
     }
 
 
-    public static String getStringFromObj(JSONObject oobj, String key) {
-        try {
-            return oobj.getString(key);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Log.e(TAG, "getStringFromObj: " + key);
-            return "";
+
+    private void getMoreRooms(){
+
+        if (getActivity() == null || mSwipeRefreshLayout.isRefreshing()) return;
+
+        if (!mSwipeRefreshLayout.isRefreshing()){
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
         }
+
+        int limit = 20;
+
+        if (mSkip < 0){
+            limit += mSkip;
+            mSkip = 0;
+        }
+
+        Map<String, String> params = new HashMap<>();
+        params.put("skip", mSkip + "");
+        params.put("limit", limit+"");
+
+        new LSDKChat(getActivity()).getRooms(params, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                String resString = response.body().string();
+
+                //Log.i(TAG, "onResponse: "+resString);
+
+                if (response.isSuccessful()) {
+                    try {
+
+                        JSONObject jsonObj = new JSONObject(resString);
+
+                        JSONArray rooms = jsonObj.getJSONArray("rooms");
+
+                        //ArrayList<ChatHead> chatHeads = new ArrayList<>();
+                        String lastMessage = "";
+                        boolean hasUnreadMessage;
+
+                        JSONObject room;
+                        JSONObject user;
+                        JSONArray messages;
+
+                        JSONObject message;
+                        JSONArray readArray;
+
+                        Date date;
+
+                        ArrayList<Rooms> tempRooms = new ArrayList<>();
+
+                        for (int i = rooms.length() - 1; i >= 0; i--) {
+                            hasUnreadMessage = true;
+
+                            room = rooms.getJSONObject(i);
+                            user = room.getJSONArray("users").getJSONObject(0);
+
+                            messages = room.getJSONArray("messages"); //list of messages in room
+
+
+                            //if messages not empty or null
+                            if (messages.length() > 0 && !messages.isNull(0)) {
+                                message = messages.getJSONObject(messages.length() - 1);
+                                readArray = message.getJSONArray("read");
+
+                                try {
+                                    date = simpleDateFormat.parse(message.getString("date"));
+                                }catch (ParseException e){
+                                    date = null;
+                                }
+
+                                //check last message. check if we already read it
+                                for (int k = 0; k < readArray.length() ;  k++){
+                                    if (readArray.getString(k).equals(mUserId)){
+                                        hasUnreadMessage = false;
+                                        break;
+                                    }
+                                }
+
+                                //if you sent last message : show  "You: <text>"
+                                if (message.getJSONObject("owner").getString("id").equals(mUserId)) {
+                                    lastMessage = "You: " + messages.getJSONObject(0).getString("text");
+                                }
+
+                                //the other person sent last message : show <message>
+                                else {
+                                    lastMessage = messages.getJSONObject(0).getString("text");
+                                }
+                            }
+
+                            else { //no messages show "..."
+                                lastMessage = "...";
+                                hasUnreadMessage = false;
+                                date = null;
+                            }
+
+
+                            //Throws error but still runs correctly... weird
+                            tempRooms.add(new Rooms(
+                                    room.getString("id"),
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    lastMessage,
+                                    user.getString("profileImage"),
+                                    hasUnreadMessage,
+                                    date == null ? 0 : date.getTime()
+                            ));
+                            // ,
+//                                    users.length() + 1,  // add yourself
+//                                    chatHeads
+                        }
+                        mCanLoadMore = mSkip > 0;
+                        mSkip -= 20;
+
+                        mRoomsList.clear();
+                        mRoomsList.addAll(tempRooms);
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + resString);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 }

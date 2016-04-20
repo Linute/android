@@ -99,7 +99,8 @@ public class Utils {
 
     //clears user information
     //NOTE: RESET OTHER THINGS WHEN THEY COME UP
-    public static void resetUserInformation(SharedPreferences.Editor pref) {
+    public static void resetUserInformation(SharedPreferences pref1) {
+        SharedPreferences.Editor pref = pref1.edit();
         pref.putString("profileImage", null);
         pref.putString("userID", null);
         pref.putString("firstName", null);
@@ -125,12 +126,11 @@ public class Utils {
         pref.putString("userToken", null);
         pref.putString("points", "0");
         pref.putString("userName", null);
-
-
-        pref.commit();
+        pref.apply();
     }
 
-    public static void deleteTempSharedPreference(SharedPreferences.Editor temp) {
+    public static void deleteTempSharedPreference(SharedPreferences temp1) {
+        SharedPreferences.Editor temp = temp1.edit();
         temp.putString("tempCode", null);
         temp.putString("tempPhone", null);
 

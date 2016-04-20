@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Notify me when someone...">
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_like"
+                          android:title="Likes my post"/>
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_comment"
+                          android:title="Comments on my post"/>
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_alsoComment"
+                          android:title="Comments on a post after me"/>
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_mention"
+                          android:title="Mentions me"/>
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_follow"
+                          android:title="Follows me"/>
+        <SwitchPreference android:defaultValue="true"
+                          android:key="notif_message"
+                          android:title="Messages me"
+        />
+    </PreferenceCategory>
+
+</PreferenceScreen>

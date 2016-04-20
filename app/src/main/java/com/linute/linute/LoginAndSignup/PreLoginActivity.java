@@ -89,7 +89,27 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
+        Intent intent = getIntent();
+        if (intent != null){
+            String text = intent.getStringExtra("BANNED");
+            if (text != null){
+                new AlertDialog.Builder(this)
+                        .setTitle("Banned")
+                        .setMessage(text)
+                        .setPositiveButton("okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
+            intent.removeExtra("BANNED");
+        }
+    }
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -197,6 +217,7 @@ public class PreLoginActivity extends AppCompatActivity {
                         else {
                             Log.i(TAG, "onResponse: going to college picker or logging in");
                             persistData(user); //save data
+                            saveNotificationPreferences(object);
                             //if no college id or name, go to colleg picker activity
                             //else go to main
                             runOnUiThread(new Runnable() {
@@ -305,6 +326,31 @@ public class PreLoginActivity extends AppCompatActivity {
         sharedPreferences.apply();
     }
 
+
+    private void saveNotificationPreferences(JSONObject object){
+        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
+
+        try {
+            JSONObject settings = object.getJSONObject("notificationSettings");
+            sharedPreferences.putBoolean("notif_follow", getBooleanFromJSONObj("follow", settings));
+            sharedPreferences.putBoolean("notif_message",getBooleanFromJSONObj("message", settings));
+            sharedPreferences.putBoolean("notif_mention", getBooleanFromJSONObj("mention", settings));
+            sharedPreferences.putBoolean("notif_alsoComment", getBooleanFromJSONObj("alsoComment", settings));
+            sharedPreferences.putBoolean("notif_comment", getBooleanFromJSONObj("comment", settings));
+            sharedPreferences.putBoolean("notif_like", getBooleanFromJSONObj("like", settings));
+        }catch (JSONException e){
+            e.printStackTrace();
+            sharedPreferences.putBoolean("notif_follow", true);
+            sharedPreferences.putBoolean("notif_message", true);
+            sharedPreferences.putBoolean("notif_mention", true);
+            sharedPreferences.putBoolean("notif_alsoComment", true);
+            sharedPreferences.putBoolean("notif_comment", true);
+            sharedPreferences.putBoolean("notif_like", true);
+        }
+
+        sharedPreferences.apply();
+    }
+
     private void persistTempData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
 
@@ -344,58 +390,14 @@ public class PreLoginActivity extends AppCompatActivity {
         });
     }
 
-
-//    //used to registere device if somehow device wasn't registered
-//    private void sendRegistrationDevice(String token, final String fbToken, final ProgressDialog progress) {
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Content-Type", "application/json");
-//
-//        String versionName = "";
-//        String versionCode = "";
-//        try {
-//            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-//            versionName = pInfo.versionName;
-//            versionCode = pInfo.versionCode + "";
-//        } catch (PackageManager.NameNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        Map<String, Object> device = new HashMap<>();
-//        device.put("token", token);
-//        device.put("version", versionName);
-//        device.put("build", versionCode);
-//        device.put("os", Build.VERSION.SDK_INT + "");
-//        device.put("type", "android");
-//
-//        Device.createDevice(headers, device, new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        progress.dismiss();
-//                        Utils.showBadConnectionToast(PreLoginActivity.this);
-//                    }
-//                });
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                if (!response.isSuccessful()) {
-//                    Log.e(TAG, response.body().string());
-//                    showServerErrorToast(progress);
-//                } else {
-//                    Log.v(TAG, response.body().string());
-//                    getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE)
-//                            .edit()
-//                            .putBoolean("deviceRegistered", true)
-//                            .apply();
-//                    loginOrSignUpWithFacebook(fbToken, progress);
-//
-//                }
-//            }
-//        });
-//
-//    }
+    public boolean getBooleanFromJSONObj(String key, JSONObject obj){
+        try {
+            return obj.getBoolean(key);
+        }catch (JSONException e){
+            e.printStackTrace();
+            return true;
+        }
+    }
 
     public void goToNextActivity() {
         Class nextActivity;

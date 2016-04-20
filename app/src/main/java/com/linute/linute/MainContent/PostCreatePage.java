@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -18,7 +20,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,15 +46,16 @@ import io.socket.engineio.client.transports.WebSocket;
 public class PostCreatePage extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = PostCreatePage.class.getSimpleName();
 
-    private  CustomBackPressedEditText mPostEditText;
+    private CustomBackPressedEditText mPostEditText;
     private View mTextFrame;
-
-    private boolean mSwitchOn = false;
 
     private View mPostButton;
     private View mProgressbar;
 
     private boolean mPostInProgress = false;
+
+    private CheckBox vAnonPost;
+    private CheckBox vAnonComments;
 
     private SharedPreferences mSharedPreferences;
 
@@ -70,8 +73,13 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
+                hideKeyboard();
+                if (mPostEditText.getText().toString().isEmpty()) {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                } else {
+                    showConfirmDialog();
+                }
             }
         });
         toolbar.setTitle("Status");
@@ -118,7 +126,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (mPostEditText.getLineCount() > maxLines){
+                if (mPostEditText.getLineCount() > maxLines) {
                     mPostEditText.setText(beforeText);
                     mPostEditText.setSelection(mPostEditText.getText().length());
                 }
@@ -129,19 +137,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        final ImageView mAnonymousSwitch = (ImageView) findViewById(R.id.post_create_anon_switch);
-        mAnonymousSwitch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mSwitchOn){
-                    mSwitchOn = false;
-                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_off);
-                }else {
-                    mSwitchOn = true;
-                    mAnonymousSwitch.setImageResource(R.drawable.ic_anon_on);
-                }
-            }
-        });
+        vAnonComments = (CheckBox) findViewById(R.id.anon_comments);
+        vAnonPost = (CheckBox) findViewById(R.id.anon_post);
 
         mTextFrame = findViewById(R.id.post_create_frame);
 
@@ -154,10 +151,27 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
     }
 
 
-
     private Socket mSocket;
     private boolean mConnecting = false;
 
+    private void showConfirmDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setResult(RESULT_CANCELED);
+                        finish();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
 
     @Override
     protected void onResume() {
@@ -172,12 +186,12 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                     DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
                     op.query =
                             "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken="+device.getDeviceToken() +
-                                    "&udid="+device.getUdid()+
-                                    "&version="+device.getVersonName()+
-                                    "&build="+device.getVersionCode()+
-                                    "&os="+device.getOS()+
-                                    "&type="+device.getType() +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
                     op.reconnectionDelay = 5;
@@ -198,16 +212,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             mSocket.on("new post", newPost);
             mSocket.connect();
             mConnecting = false;
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "active");
-                obj.put("screen", "Create");
-                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
         }
     }
 
@@ -216,16 +220,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         super.onPause();
 
         if (mSocket != null) {
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mSharedPreferences.getString("userID",""));
-                obj.put("action", "inactive");
-                obj.put("screen", "Create");
-                mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
 
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -240,7 +234,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
         if (mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
 
-        if (!Utils.isNetworkAvailable(this) || !mSocket.connected()){
+        if (!Utils.isNetworkAvailable(this) || !mSocket.connected()) {
             Utils.showBadConnectionToast(this);
             return;
         }
@@ -253,7 +247,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         try {
             JSONObject postData = new JSONObject();
             postData.put("college", mSharedPreferences.getString("collegeId", ""));
-            postData.put("privacy", (mSwitchOn ? 1 : 0) + "");
+            postData.put("privacy", (vAnonPost.isChecked() ? 1 : 0) + "");
+            postData.put("isAnonymousCommentsDisabled", vAnonComments.isChecked() ? 0 : 1);
             postData.put("title", mPostEditText.getText().toString());
 
             JSONArray coord = new JSONArray();
@@ -270,7 +265,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 1080, 1080, true)));
             postData.put("images", imageArray);
 
-            mSocket.emit(API_Methods.VERSION+":posts:new post", postData);
+            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(this);
@@ -309,7 +304,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         @Override
         public void call(Object... args) {
             JSONObject t = (JSONObject) args[0];
-            if (t != null){
+            if (t != null) {
                 try {
                     if (t.getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", "1"))) {
                         runOnUiThread(new Runnable() {
@@ -321,7 +316,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                             }
                         });
                     }
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
@@ -335,7 +330,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         int backgroundColor;
         int textColor;
 
-        switch (viewId){
+        switch (viewId) {
             case R.id.post_create_0:
                 backgroundColor = R.color.post_color_0;
                 textColor = R.color.pure_black;
@@ -372,9 +367,9 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
 
     private void hideKeyboard() {
-        mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
+        mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
     }
 
 

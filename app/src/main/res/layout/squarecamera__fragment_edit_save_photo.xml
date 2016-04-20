@@ -41,8 +41,8 @@
     <RelativeLayout android:id="@+id/frame"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:focusableInTouchMode="true"
-                    android:background="@android:color/white">
+                    android:background="@android:color/white"
+                    android:focusableInTouchMode="true">
 
         <com.linute.linute.SquareCamera.SquareImageView
             android:id="@+id/photo"
@@ -53,40 +53,57 @@
 
         <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
             android:id="@+id/editFragment_title_text"
-              android:layout_width="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:alpha="0.6"
+            android:background="@android:color/black"
+            android:gravity="center"
+            android:imeOptions="actionDone"
+            android:inputType="textCapSentences|textNoSuggestions"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+        />
+
+    </RelativeLayout>
+
+    <LinearLayout android:id="@+id/editFragment_button_layer"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:background="@color/colorPrimary"
+                  android:gravity="center"
+                  android:weightSum="8">
+
+
+        <com.linute.linute.UtilsAndHelpers.SquareCheckbox android:id="@+id/anon_comments"
+                                                          android:layout_width="0px"
+                                                          android:layout_height="match_parent"
+                                                          android:layout_margin="8dp"
+                                                          android:layout_weight="1"
+                                                          android:background="@drawable/turn_anon_comments_off"
+                                                          android:button="@null"
+                                                          android:checked="true"
+        />
+
+        <View android:layout_width="0px"
               android:layout_height="wrap_content"
-              android:layout_marginTop="80dp"
-              android:alpha="0.6"
-              android:background="@android:color/black"
-              android:gravity="center"
-              android:imeOptions="actionDone"
-              android:inputType="textCapSentences|textNoSuggestions"
-              android:paddingBottom="5dp"
-              android:paddingTop="5dp"
-              android:singleLine="true"
-              android:textColor="@android:color/white"
-              android:textSize="14sp"
-              android:visibility="gone"
-        />
-
-    </RelativeLayout>
-
-    <RelativeLayout android:id="@+id/editFragment_button_layer"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/colorPrimary"
-    >
+              android:layout_weight="2"/>
 
 
-        <CheckBox android:id="@+id/editFragment_switch"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_centerInParent="true"
-                  android:background="@drawable/post_as_anon_checkbox"
-                  android:button="@null"
-        />
+        <com.linute.linute.UtilsAndHelpers.SquareCheckbox android:id="@+id/editFragment_switch"
+                                                          android:layout_width="0px"
+                                                          android:layout_height="match_parent"
+                                                          android:layout_marginEnd="16dp"
+                                                          android:layout_marginStart="16dp"
+                                                          android:layout_weight="1"
+                                                          android:background="@drawable/post_as_anon_checkbox"
+                                                          android:button="@null"/>
 
-    </RelativeLayout>
+    </LinearLayout>
 
 
 </LinearLayout>

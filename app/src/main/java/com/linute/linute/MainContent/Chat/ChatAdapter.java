@@ -1,55 +1,53 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/20/16.
  */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
-    private Context aContext;
+    //private Context aContext;
     private List<Chat> aChatList;
-    private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
-    private SharedPreferences aSharedPreferences;
+    private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
+
+    private LoadMoreListener mLoadMoreListener;
+
+    //private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
+    //private SharedPreferences aSharedPreferences;
 
     public ChatAdapter(Context aContext, List<Chat> aChatList) {
-        this.aContext = aContext;
+        //this.aContext = aContext;
         this.aChatList = aChatList;
-        aSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        //aSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout = -1;
         switch (viewType) {
-            case Chat.TYPE_MESSAGE:
-                layout = R.layout.fragment_chat_list_item;
+            case Chat.TYPE_MESSAGE_ME:
+                layout = R.layout.fragment_chat_list_item_me;
                 break;
-            case Chat.TYPE_ACTION:
-                layout = R.layout.item_action;
+            case Chat.TYPE_MESSAGE_OTHER_PERSON:
+                layout = R.layout.fragment_chat_list_item_you;
                 break;
-            case Chat.TYPE_CHAT_HEAD:
+            case Chat.TYPE_ACTION_TYPING:
+                layout = R.layout.fragment_chat_list_item_action_typing;
                 break;
+            //case Chat.TYPE_CHAT_HEAD:
+            //break;
         }
 
         return new ChatViewHolder(
@@ -60,6 +58,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
         holder.bindModel(aChatList.get(position));
+        if (position == 0){
+            if (mLoadMoreListener != null){
+                mLoadMoreListener.loadMore();
+            }
+        }
+    }
+
+    public void setLoadMoreListener(LoadMoreListener l){
+        mLoadMoreListener = l;
     }
 
     @Override
@@ -73,78 +80,35 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
-        protected LinearLayout vOwnerLinear;
-        protected RelativeLayout vUserRelative;
-        protected CircleImageView vOwnerImage;
-        protected CircleImageView vUserImage;
-        protected TextView vOwnerMessage;
         protected TextView vUserMessage;
-        protected TextView vOwnerTime;
         protected TextView vUserTime;
-
-        protected TextView vUsernameView;
-        protected TextView vMessageView;
-
-        protected LinearLayout vChatHeadLinear;
-
-        private ArrayList<ChatHead> tempList;
+        protected ImageView vActionImage;
 
         public ChatViewHolder(View itemView) {
             super(itemView);
-
-            vOwnerLinear = (LinearLayout) itemView.findViewById(R.id.chat_owner);
-            vUserRelative = (RelativeLayout) itemView.findViewById(R.id.chat_user);
-            vOwnerImage = (CircleImageView) itemView.findViewById(R.id.chat_owner_image);
-            vUserImage = (CircleImageView) itemView.findViewById(R.id.chat_user_image);
-            vOwnerMessage = (TextView) itemView.findViewById(R.id.chat_owner_message);
             vUserMessage = (TextView) itemView.findViewById(R.id.chat_user_message);
-            vOwnerTime = (TextView) itemView.findViewById(R.id.chat_owner_time);
             vUserTime = (TextView) itemView.findViewById(R.id.chat_user_time);
-
-            vUsernameView = (TextView) itemView.findViewById(R.id.username);
-            vMessageView = (TextView) itemView.findViewById(R.id.action);
-
-            vChatHeadLinear = (LinearLayout) itemView.findViewById(R.id.chat_head_container);
+            vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
         }
 
         void bindModel(Chat chat) {
-            if (null != vUsernameView && null != vMessageView) {
-                vUsernameView.setText(chat.getUserName());
-            } else if (null != vChatHeadLinear) {
-                tempList = aChatHeadsMap.get(getAdapterPosition());
-                for (int i = 0; i < tempList.size(); i++) {
-                }
-            } else {
-                if (aChatList.get(getAdapterPosition()).getOwnerId().equals(aSharedPreferences.getString("userID", null))) {
-                    vOwnerLinear.setVisibility(View.VISIBLE);
-                    vUserRelative.setVisibility(View.GONE);
 
-                    Glide.with(aContext)
-                            .load(Utils.getImageUrlOfUser(chat.getUserImage()))
-                            .asBitmap()
-                            .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                            .placeholder(R.drawable.image_loading_background)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                            .into(vOwnerImage);
+            if (chat.getType() == Chat.TYPE_ACTION_TYPING) return; //if typing action, do nothing
 
-                    vOwnerMessage.setText(chat.getMessage());
-                    vOwnerTime.setText(chat.getShortDate());
-                } else {
-                    vOwnerLinear.setVisibility(View.GONE);
-                    vUserRelative.setVisibility(View.VISIBLE);
+            if (chat.getType() == Chat.TYPE_MESSAGE_ME) //set icons for read and delivered if it's our message
+                vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat );
 
-                    Glide.with(aContext)
-                            .load(Utils.getImageUrlOfUser(chat.getUserImage()))
-                            .asBitmap()
-                            .signature(new StringSignature(aSharedPreferences.getString("imageSigniture", "000")))
-                            .placeholder(R.drawable.image_loading_background)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                            .into(vUserImage);
+            vUserMessage.setText(chat.getMessage());
 
-                    vUserMessage.setText(chat.getMessage());
-                    vUserTime.setText(chat.getShortDate());
-                }
-            }
+            if (chat.getDate() != 0)
+                vUserTime.setText(mDateFormat.format(new Date(chat.getDate())));
+
         }
     }
+
+
+    public interface LoadMoreListener{
+        void loadMore();
+    }
+
 }

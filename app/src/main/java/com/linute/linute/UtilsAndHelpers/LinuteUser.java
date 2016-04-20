@@ -42,19 +42,21 @@ public class LinuteUser {
     private String mFriendship;
 
     private boolean mIsSubscribed;
+    private boolean mIsBlocked;
     //private String mPointsNumber;
     //private Map<String,String> mFriendships;
 
     //NOTE: new stuff
     private String mPoints;
     private String mUserToken;
-
+    private boolean mInformationLoaded;
 
     public LinuteUser() {
         mFriend = "";
         mFriendship = "";
         mFirstName = "";
         mIsSubscribed = false;
+        mInformationLoaded = false;
     }
 
 
@@ -77,7 +79,8 @@ public class LinuteUser {
         user.setPoints(sharedPreferences.getString("points", "0"));
 
         user.setSubscribed(false);
-
+        user.setBlocked(false);
+        user.setInformationLoaded(true);
 
         return user;
     }
@@ -117,7 +120,8 @@ public class LinuteUser {
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
-
+        mIsBlocked = getBooleon("isBlocked", userInfo);
+        mInformationLoaded = true;
 
 
         //NOTE: NEW STUFF
@@ -193,8 +197,7 @@ public class LinuteUser {
             mCollegeName = getStringFromJson("name", college);
             mCollegeId = getStringFromJson("id", college);
         }
-
-
+        mInformationLoaded = true;
         //NOTE: NEW
 
         mPoints = getStringFromJson("points", userInfo);
@@ -216,12 +219,19 @@ public class LinuteUser {
         mCampus = getStringFromJson("campus", userInfo);
     }
 
+    private static boolean getBooleon(String key, JSONObject object){
+        try {
+            return object.getBoolean(key);
+        }catch (JSONException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     private static JSONObject getJsonObjectFromJson(String key, JSONObject json) {
         try {
             return json.getJSONObject(key);
         } catch (JSONException e) {
-            Log.i(TAG, "getJsonObjectFromJson: " + key);
             e.printStackTrace();
             return null;
         }
@@ -232,7 +242,6 @@ public class LinuteUser {
         try {
             value = userInfo.getString(key);
         } catch (JSONException e) {
-            Log.i(TAG, "getStringFromJson: " + key);
             value = null;
         }
         return value;
@@ -243,7 +252,6 @@ public class LinuteUser {
         try {
             value = userInfo.getInt(key);
         } catch (JSONException e) {
-            Log.i(TAG, "getIntFromJson: " + key);
             value = 0;
         }
         return value;
@@ -467,6 +475,14 @@ public class LinuteUser {
         mIsSubscribed = subscribed;
     }
 
+    public boolean isBlocked() {
+        return mIsBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        mIsBlocked = blocked;
+    }
+
 
     /*TODO: SEARCH
         searchUserByName
@@ -541,5 +557,13 @@ public class LinuteUser {
 
     public void setPoints(String points) {
         mPoints = points;
+    }
+
+    public boolean isInformationLoaded() {
+        return mInformationLoaded;
+    }
+
+    public void setInformationLoaded(boolean informationLoaded) {
+        mInformationLoaded = informationLoaded;
     }
 }

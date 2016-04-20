@@ -112,6 +112,19 @@
     <string name="data_saved">Saved</string>
     <string name="describe_event">Enter your status here…</string>
 
+    <string name="block_user_android">
+        You and the person you block will not be able to:\n
+        \u2022 Follow each other\n
+        \u2022 See each other on the campus feed\n
+        \u2022 Mention each other in comments\n
+    </string>
+
+    <string name="unblock_user">
+        You and the person you unblock will be able to:\n
+        \u2022 Follow each other\n
+        \u2022 See each other on the campus feed\n
+        \u2022 Mention each other in comments\n
+    </string>
 
     <!--Square Camera-->
     <string name="squarecamera__app_name">SquareCamera</string>
@@ -135,8 +148,8 @@
     <string name="title_activity_rooms">RoomsActivity</string>
 
 
-    <string name="SOCKET_URL">https://api.tapt.io/</string>
-    <!--<string name="SOCKET_URL">https://devapi.tapt.io/</string>-->
+    <!--<string name="SOCKET_URL">https://api.tapt.io/</string>-->
+    <string name="SOCKET_URL">https://devapi2.tapt.io/</string>
 
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
@@ -151,7 +164,7 @@
 
     <string name="action_send">Send</string>
     <string name="prompt_message">Message</string>
-    <string name="error_connect">Failed to connect</string>
+    <string name="error_connect">Failed to connect with server. Make sure you have internet!</string>
     <string name="user_action_typing">is typing</string>
     <string name="find_people_near_you">Tapt needs access to your location so we can find friends
         that are near you.
@@ -159,7 +172,7 @@
     <string name="need_location">Tapt needs your location to find friends near you</string>
     <string name="no_comment">Share your opinions publicly or anonymously below…</string>
 
-    <string name="no_results">No results found.</string>
+    <string name="no_results">No results found</string>
 
     <string name="discover_no_posts_campus">Is anybody out there?!\n\n Looks like you\'re the first
         one here. Make a post so the rest of the campus can recognize

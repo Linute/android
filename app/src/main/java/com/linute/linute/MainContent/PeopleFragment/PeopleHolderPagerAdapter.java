@@ -9,16 +9,16 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
 
-    public PeopleHolderPagerAdapter(FragmentManager fm) {
+    private PeopleFragment[] mPeopleFragments;
+
+    public PeopleHolderPagerAdapter(FragmentManager fm, PeopleFragment[] fragments) {
         super(fm);
+        mPeopleFragments = fragments;
     }
 
     @Override
     public Fragment getItem(int position) {
-        if (position == 0){
-            return PeopleFragment.newInstance(true);
-        }else
-            return PeopleFragment.newInstance(false);
+        return mPeopleFragments[position];
     }
 
     @Override
@@ -28,7 +28,7 @@ public class PeopleHolderPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position){
+        switch (position) {
             case 0:
                 return "Nearby";
             case 1:

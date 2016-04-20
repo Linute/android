@@ -30,9 +30,9 @@ public class API_Methods {
 
     // API ENPOINT URL
     public static final String SCHEME = "https";
-    private static String HOST = "api.tapt.io";
-    //public static final String HOST = "devapi.tapt.io";
-    public static final String VERSION = "v1.3.5";
+    //private static String HOST = "api.tapt.io";
+    public static final String HOST = "devapi2.tapt.io";
+    public static final String VERSION = "v1.3.6";
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -157,17 +157,6 @@ public class API_Methods {
         return SCHEME + "://" + HOST + "/" + VERSION + "/" + path + "/";
     }
 
-
-    public static Map<String, String> getHeaderWithAuthUser(String email, String password, String authDeviceToken) {
-        Map<String, String> header = getMainHeader(authDeviceToken);
-
-        String encodedUserInfo = Utils.encode_base64(email + ":" +
-                password);
-
-        header.put("authorizationUser", "Basic " + encodedUserInfo);
-
-        return header;
-    }
 
     // returns main header containing: Content-Type and authorizationDevice
     public static Map<String, String> getMainHeader(String token) {

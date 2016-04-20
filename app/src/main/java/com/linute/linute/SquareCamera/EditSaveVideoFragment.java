@@ -67,8 +67,8 @@ public class EditSaveVideoFragment extends Fragment {
     //private View mFrame; //frame where we put edittext and picture
 
     //private CustomBackPressedEditText mText; //text
-    private View mButtonLayer;
     private CheckBox mAnonSwitch;
+    private CheckBox mCommentsAnon;
 
     private String mCollegeId;
     private String mUserId;
@@ -150,9 +150,9 @@ public class EditSaveVideoFragment extends Fragment {
         });
 
         //shows the text strip when image touched
-        mButtonLayer = view.findViewById(R.id.editFragment_switch);
 
-        mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
+        mCommentsAnon = (CheckBox) view.findViewById(R.id.anon_comments);
+        mAnonSwitch = (CheckBox) view.findViewById(R.id.anon_post);
         mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
@@ -161,7 +161,7 @@ public class EditSaveVideoFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity) getActivity()).clearBackStack();
+                showConfirmDialog();
             }
         });
 
@@ -218,6 +218,25 @@ public class EditSaveVideoFragment extends Fragment {
         }
     }
 
+    private void showConfirmDialog() {
+        if (getActivity() == null) return;
+        new AlertDialog.Builder(getActivity())
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((CameraActivity) getActivity()).clearBackStack();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
 
     @Override
     public void onDestroy() {
@@ -244,16 +263,16 @@ public class EditSaveVideoFragment extends Fragment {
 
         String cmd = "-i " + mVideoLink + " "; //input file
 
-        String crop;
-
-        crop = String.format(Locale.US, "-vf crop=%d:%d:%d:0 ",
+        String crop = String.format(Locale.US,
+                "-vf crop=%d:%d:%d:0 ",
                 mVideoDimen.height,
                 mVideoDimen.height,
                 (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
 
         cmd += crop; //crop
         cmd += "-preset superfast ";
-        cmd += "-strict -2 "; //audio
+        //cmd += "-strict -2 "; //audio
+        cmd += "-c:a copy "; //copy instead of re-encoding audio
         cmd += outputFile; //output file;
 
         try {
@@ -263,7 +282,10 @@ public class EditSaveVideoFragment extends Fragment {
 
                 @Override
                 public void onSuccess(String message) {
-                    new sendVideoAsync().execute(outputFile, mAnonSwitch.isChecked() ? "1" : "0");
+                    mProgressDialog.setMessage("Sending video...");
+                    new sendVideoAsync().execute(outputFile,
+                            mAnonSwitch.isChecked() ? "1" : "0",
+                            mCommentsAnon.isChecked() ? "0" : "1");
                 }
 
                 @Override
@@ -296,7 +318,8 @@ public class EditSaveVideoFragment extends Fragment {
 
     private void showProgress(final boolean show) {
         if (getActivity() == null) return;
-        mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+        mAnonSwitch.setVisibility(show ? View.GONE : View.VISIBLE);
+        mCommentsAnon.setVisibility(show ? View.GONE : View.VISIBLE);
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
 
         if (show) {
@@ -355,18 +378,6 @@ public class EditSaveVideoFragment extends Fragment {
             mSocket.connect();
             mConnecting = false;
 
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "active");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
     }
 
@@ -379,19 +390,6 @@ public class EditSaveVideoFragment extends Fragment {
         vPlayIcon.setVisibility(View.VISIBLE);
 
         if (mSocket != null) {
-
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "inactive");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -457,7 +455,8 @@ public class EditSaveVideoFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
 
-            if (getActivity() == null || params[0] == null || params[1] == null) return null;
+            if (getActivity() == null || params[0] == null || params[1] == null || params[2] == null)
+                return null;
 
             String outputFile = params[0];
 
@@ -476,6 +475,7 @@ public class EditSaveVideoFragment extends Fragment {
 
                 postData.put("college", mCollegeId);
                 postData.put("privacy", params[1]);
+                postData.put("isAnonymousCommentsDisabled", params[2]);
                 postData.put("title", ""); //todo title
                 JSONArray imageArray = new JSONArray();
                 imageArray.put(Utils.encodeImageBase64(map));

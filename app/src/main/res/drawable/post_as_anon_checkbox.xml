@@ -4,5 +4,4 @@
     <item android:drawable="@drawable/ic_anon_off" android:state_checked="false"/>
     <item android:drawable="@drawable/ic_anon_on" android:state_checked="true"/>
     <item android:drawable="@drawable/ic_anon_off"/>
-    <!-- default state -->
 </selector>

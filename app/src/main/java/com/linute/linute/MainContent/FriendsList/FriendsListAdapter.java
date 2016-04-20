@@ -126,8 +126,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             super(itemView);
 
             mProfilePicture = (CircleImageView) itemView.findViewById(R.id.friend_user_image);
-            //mStateImage = (ImageView) itemView.findViewById(R.id.friend_image_state);
             mUserName = (TextView) itemView.findViewById(R.id.friend_name);
+            itemView.setOnClickListener(this);
         }
 
         public void bindView(Friend friend) {
@@ -148,16 +148,12 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 mFriendId = friend.getUserId();
                 mFriendName = friend.getUserName();
             }
-
-            mUserName.setOnClickListener(this);
-            mProfilePicture.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             BaseTaptActivity activity = (BaseTaptActivity) aContext;
-            if (activity != null) {
-                Log.i("test", "onClick: "+mFriendName+mFriendId);
+            if (activity != null && mFriendId != null && mFriendName != null) {
                 activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendName, mFriendId));
             }
         }

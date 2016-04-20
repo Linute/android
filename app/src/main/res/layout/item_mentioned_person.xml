@@ -4,18 +4,19 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground"
               android:orientation="horizontal">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/mentioned_person_profile_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        app:civ_border_width="1dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="8dp"
         app:civ_border_color="@color/seperator_color"
+        app:civ_border_width="1dp"
     />
 
     <TextView android:id="@+id/mentioned_person_name"

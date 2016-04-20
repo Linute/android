@@ -1,41 +1,30 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.Chat.NewChatEvent;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.CustomViewPager;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.List;
-
-import io.socket.emitter.Emitter;
+import de.greenrobot.event.EventBus;
+import de.greenrobot.event.Subscribe;
 
 /**
  * Created by QiFeng on 1/27/16.
@@ -43,31 +32,39 @@ import io.socket.emitter.Emitter;
 public class PeopleFragmentsHolder extends UpdatableFragment {
 
     public static final String TAG = PeopleFragmentsHolder.class.getSimpleName();
-    private ViewPager mViewPager;
+    private CustomViewPager mViewPager;
     private PeopleHolderPagerAdapter mPeopleHolderPagerAdapter;
 
+    private AppBarLayout mAppBarLayout;
+
+    private Toolbar mToolbar;
+
+    private boolean mHasMessage;
+
+    private PeopleFragment[] mPeopleFragments;
 
     public PeopleFragmentsHolder() {
 
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mPeopleHolderPagerAdapter = new PeopleHolderPagerAdapter(getChildFragmentManager());
-    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_people_holder, container, false);
 
+        mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.people_sliding_tabs);
 
-        setHasOptionsMenu(true);
 
-        mViewPager = (ViewPager) rootView.findViewById(R.id.people_hostViewPager);
+        if (mPeopleFragments == null || mPeopleFragments.length != 2) {
+            mPeopleFragments = new PeopleFragment[]{PeopleFragment.newInstance(true), PeopleFragment.newInstance(false)};
+        }
 
+        mPeopleHolderPagerAdapter = new PeopleHolderPagerAdapter(getChildFragmentManager(), mPeopleFragments);
+
+        mViewPager = (CustomViewPager) rootView.findViewById(R.id.people_hostViewPager);
+        mViewPager.setPagingEnabled(false);
         mViewPager.setAdapter(mPeopleHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -89,9 +86,48 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         });
         tabLayout.setupWithViewPager(mViewPager);
 
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null){
+                    activity.openDrawer();
+                }
+            }
+        });
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scrollViewRecListUp(mViewPager.getCurrentItem());
+            }
+        });
+
+        MainActivity activity = (MainActivity) getActivity();
+        mHasMessage = activity.hasMessage();
+        mToolbar.inflateMenu(activity.hasMessage() ? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_find_friends:
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null){
+                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                        }
+                        return true;
+                    case R.id.people_fragment_menu_chat:
+                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                        startActivity(enterRooms);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
         return rootView;
     }
-
 
     private boolean mActiveNeedsUpdating = true;
     private boolean mNearMeNeedsUpdating = true;
@@ -102,7 +138,7 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         super.onSaveInstanceState(outState);
         outState.putBoolean("activeNeedsUpdate", mActiveNeedsUpdating);
         outState.putBoolean("nearMeNeedsUpdate", mNearMeNeedsUpdating);
-        outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
+        if (mViewPager != null) outState.putInt("viewPagerIndex", mViewPager.getCurrentItem());
     }
 
 
@@ -110,11 +146,11 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            int index = savedInstanceState.getInt("viewPagerIndex");
+            int index = savedInstanceState.getInt("viewPagerIndex", 0);
             mInitiallyPresentedFragmentWasNearby = index == 0;
-            mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate");
-            mNearMeNeedsUpdating = savedInstanceState.getBoolean("nearMeNeedsUpdate");
-            mViewPager.setCurrentItem(index);
+            mActiveNeedsUpdating = savedInstanceState.getBoolean("activeNeedsUpdate", true);
+            mNearMeNeedsUpdating = savedInstanceState.getBoolean("nearMeNeedsUpdate", true);
+            if (mViewPager != null) mViewPager.setCurrentItem(index);
         }
     }
 
@@ -152,7 +188,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     //checks the fragment at a position in the viewpager and checks if it needs to be updated
     //if it needs to be updated, update it
     private void loadFragmentAtPositionIfNeeded(int position) {
-
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
 
         if (fragment == null) return;
@@ -171,63 +206,14 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        MainActivity mainActivity = (MainActivity) getActivity();
-
-        if (mainActivity != null) {
-            mainActivity.setTitle("People");
-            mainActivity.lowerAppBarElevation(); //app bars elevation must be 0 or there will be a shadow on top of the tabs
-            mainActivity.resetToolbar();
-            mainActivity.setToolbarOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    scrollViewRecListUp(mViewPager.getCurrentItem());
-                }
-            });
-
-            mainActivity.connectSocket("unread", haveUnread);
-
-            JSONObject object = new JSONObject();
-            mainActivity.emitSocket(API_Methods.VERSION+":messages:unread", object);
-
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
-                obj.put("action", "active");
-                obj.put("screen", "People");
-                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        EventBus.getDefault().register(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.disconnectSocket("unread", haveUnread);
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("owner", mainActivity.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID",""));
-                obj.put("action", "inactive");
-                obj.put("screen", "People");
-                mainActivity.emitSocket(API_Methods.VERSION+":users:tracking", obj);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void onStop() {
-        super.onStop();
-        setFragmentNeedUpdating(true);
-        MainActivity mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.raiseAppBarLayoutElevation();
-            mainActivity.setToolbarOnClickListener(null);
-        }
+        EventBus.getDefault().unregister(this);
+        mAppBarLayout.setExpanded(true,false);
     }
 
     //there's problems with nested fragments
@@ -254,37 +240,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         }
     }
 
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(mHasMessages? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu, menu);
-        mCreateActionMenu = true;
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        if (getActivity() != null) {
-            switch (item.getItemId()) {
-                case R.id.people_fragment_menu_chat:
-                    Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                    enterRooms.putExtra("CHATICON", true);
-                    startActivity(enterRooms);
-                    return true;
-                case R.id.menu_find_friends:
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity != null){
-                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                    }
-                    return true;
-            }
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     private void scrollViewRecListUp(int position) {
         PeopleFragment fragment = (PeopleFragment) mPeopleHolderPagerAdapter.instantiateItem(mViewPager, position);
         if (fragment != null) {
@@ -292,25 +247,15 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
         }
     }
 
-    private boolean mCreateActionMenu = false;
-    private boolean mHasMessages = false;
-
-    private Emitter.Listener haveUnread = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mHasMessages = (boolean) args[0];
-            //Log.i(TAG, "call: "+mHasMessages);
-            if (mCreateActionMenu){
-                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
-                if (act != null) {
-                    act.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            act.invalidateOptionsMenu();
-                        }
-                    });
-                }
-            }
+    @Subscribe
+    public void onEvent(NewChatEvent event){
+        // your implementation
+        if (event.hasNewMessage() != mHasMessage){
+            mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                    R.drawable.notify_mess_icon :
+                    R.drawable.ic_chat81
+            );
+            mHasMessage = event.hasNewMessage();
         }
-    };
+    }
 }

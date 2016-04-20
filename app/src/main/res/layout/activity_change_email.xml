@@ -4,17 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/changeemail_appBar"
-                                                android:layout_width="match_parent"
-                                                android:layout_height="wrap_content">
-        <include android:id="@+id/changeemail_toolbar"
-                 layout="@layout/tool_bar"/>
-    </android.support.design.widget.AppBarLayout>
+    <include android:id="@+id/changeemail_toolbar"
+             layout="@layout/tool_bar"/>
 
     <ViewFlipper android:id="@+id/changeemail_view_flipper"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:layout_below="@id/changeemail_appBar">
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:layout_below="@id/changeemail_toolbar">
 
         <RelativeLayout android:layout_width="match_parent"
                         android:layout_height="match_parent">
@@ -48,8 +44,8 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:layout_margin="@dimen/activity_horizontal_margin"
-                      android:inputType="number"
                       android:hint="Validation Code"
+                      android:inputType="number"
             />
 
             <Button android:id="@+id/changeemail_check_verify"

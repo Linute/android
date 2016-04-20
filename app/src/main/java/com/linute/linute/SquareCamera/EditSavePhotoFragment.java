@@ -2,6 +2,7 @@ package com.linute.linute.SquareCamera;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,9 +10,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -65,6 +66,7 @@ public class EditSavePhotoFragment extends Fragment {
     private ProgressBar mProgressBar;
     private View mButtonLayer;
     private CheckBox mAnonSwitch;
+    private CheckBox mAnonComments;
 
     private String mCollegeId;
     private String mUserId;
@@ -99,8 +101,6 @@ public class EditSavePhotoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Log.i(TAG, "onViewCreated: photo");
-
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID","");
@@ -110,6 +110,8 @@ public class EditSavePhotoFragment extends Fragment {
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
         photoImageView.setImageURI(imageUri);
+
+        //photoImageView.setImageURI(imageUri);
 
         //shows the text strip when image touched
         photoImageView.setOnClickListener(new View.OnClickListener() {
@@ -131,6 +133,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
         mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+        mAnonComments = (CheckBox) view.findViewById(R.id.anon_comments);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -138,7 +141,7 @@ public class EditSavePhotoFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity) getActivity()).clearBackStack();
+                showConfirmDialog();
             }
         });
 
@@ -153,6 +156,27 @@ public class EditSavePhotoFragment extends Fragment {
         });
 
         setUpEditText();
+    }
+
+
+    private void showConfirmDialog(){
+        if (getActivity() == null) return;
+        hideKeyboard();
+        new AlertDialog.Builder(getActivity())
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((CameraActivity) getActivity()).clearBackStack();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     //text strip can move or not
@@ -256,6 +280,12 @@ public class EditSavePhotoFragment extends Fragment {
 
         if (getActivity() == null) return;
 
+        if(mText.getText().toString().trim().isEmpty()){
+            mText.setVisibility(View.GONE);
+        }
+
+        hideKeyboard();
+
         mFrame.requestFocus();
 
         if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
@@ -273,6 +303,7 @@ public class EditSavePhotoFragment extends Fragment {
 
             postData.put("college", mCollegeId);
             postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+            postData.put("isAnonymousCommentsDisabled", mAnonComments.isChecked() ? 0 : 1);
             postData.put("title", mText.getText().toString());
             JSONArray imageArray = new JSONArray();
             imageArray.put(Utils.encodeImageBase64(bitmap));
@@ -386,18 +417,6 @@ public class EditSavePhotoFragment extends Fragment {
             mSocket.connect();
             mConnecting = false;
 
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "active");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
         }
     }
 
@@ -407,18 +426,6 @@ public class EditSavePhotoFragment extends Fragment {
         super.onPause();
 
         if (mSocket != null) {
-
-            if (getActivity() != null) {
-                JSONObject obj = new JSONObject();
-                try {
-                    obj.put("owner", mUserId);
-                    obj.put("action", "inactive");
-                    obj.put("screen", "Create");
-                    mSocket.emit(API_Methods.VERSION + ":users:tracking", obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
 
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);

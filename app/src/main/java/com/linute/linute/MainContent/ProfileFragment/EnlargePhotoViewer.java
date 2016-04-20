@@ -47,6 +47,12 @@ public class EnlargePhotoViewer extends DialogFragment {
     }
 
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (isVisible()) dismiss();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

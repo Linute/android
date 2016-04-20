@@ -9,12 +9,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -29,23 +26,18 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.API.QuickstartPreferences;
-import com.linute.linute.MainContent.Settings.PrivacyPolicyActivity;
-import com.linute.linute.MainContent.Settings.TermsOfServiceActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
@@ -85,14 +77,16 @@ public class LinuteSignUpFragment extends Fragment {
     private EditText mPasswordView;
     private EditText mPinCodeView;
 
-    private ProgressBar mProgressBar1;
-    private ProgressBar mProgressBar2;
+    private View mProgressBar1;
+    private View mProgressBar2;
+    private View mProgressBar3;
 
     private EditText mFirstNameTextView;
     private EditText mLastNameTextView;
 
-    private View mSubmitLayer;
+    private View mSubmitButton;
     private View mVerifyLayer;
+    private View mResendButton;
 
     private Bitmap mProfilePictureBitmap;
 
@@ -104,13 +98,13 @@ public class LinuteSignUpFragment extends Fragment {
 
     private String mCurrentPhotoPath; //the path of photo we take
 
-    public LinuteSignUpFragment(){
+    public LinuteSignUpFragment() {
 
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_linute_sign_up, container, false);
 
 
@@ -136,7 +130,8 @@ public class LinuteSignUpFragment extends Fragment {
         rootView.findViewById(R.id.create_privacy_policy).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), PrivacyPolicyActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/privacy-policy");
                 startActivity(intent);
             }
         });
@@ -144,7 +139,8 @@ public class LinuteSignUpFragment extends Fragment {
         rootView.findViewById(R.id.create_terms_of_services).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TermsOfServiceActivity.class);
+                Intent intent = new Intent(getActivity(), WebViewActivity.class);
+                intent.putExtra(WebViewActivity.LOAD_URL, "https://www.tapt.io/terms-of-service");
                 startActivity(intent);
             }
         });
@@ -175,11 +171,10 @@ public class LinuteSignUpFragment extends Fragment {
             }
         }
 
-        if (mProfilePictureBitmap != null){
+        if (mProfilePictureBitmap != null) {
             mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
         }
     }
-
 
 
     @Override
@@ -202,8 +197,8 @@ public class LinuteSignUpFragment extends Fragment {
         mLastNameTextView = (EditText) root.findViewById(R.id.signup_lname_text);
         mProfilePictureView = (CircleImageView) root.findViewById(R.id.signup_profile_pic_view);
 
-        mProgressBar1 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar1);
-        mProgressBar2 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar2);
+        mProgressBar1 =  root.findViewById(R.id.signUp_progress_bar1);
+        mProgressBar2 =  root.findViewById(R.id.signUp_progress_bar2);
 
 //        mEmailSignUpButton = root.findViewById(R.id.signup_get_verify_code_button);
 //        mGetPinCodeButton = root.findViewById(R.id.signUp_submit_butt);
@@ -211,7 +206,10 @@ public class LinuteSignUpFragment extends Fragment {
         mPinCodeView = (EditText) root.findViewById(R.id.signUp_verify_code);
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
 
-        mSubmitLayer = root.findViewById(R.id.signUp_submit_layer);
+        mResendButton = root.findViewById(R.id.resend);
+        mProgressBar3 = root.findViewById(R.id.resend_progress);
+
+        mSubmitButton = root.findViewById(R.id.signUp_submit_butt);
         mVerifyLayer = root.findViewById(R.id.signup_verify_layer);
 
         mEmailConfirmTextView = (TextView) root.findViewById(R.id.signUp_email_confirm_text_view);
@@ -227,7 +225,7 @@ public class LinuteSignUpFragment extends Fragment {
         });
 
         //attempt to sign up when button pressed
-        mSubmitLayer.findViewById(R.id.signUp_submit_butt).setOnClickListener(new OnClickListener() {
+        mSubmitButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 verifyCode();
@@ -243,6 +241,13 @@ public class LinuteSignUpFragment extends Fragment {
                 String[] options = {"Camera", "Photo Gallery", "Cancel"};
                 builder.setItems(options, actionListener);
                 builder.create().show();
+            }
+        });
+
+        mResendButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resendPincode();
             }
         });
     }
@@ -353,6 +358,75 @@ public class LinuteSignUpFragment extends Fragment {
         });
     }
 
+    private void resendPincode() {
+        if (getActivity() == null) return;
+
+        final String fName = mFirstNameTextView.getText().toString().trim();
+        final String lName = mLastNameTextView.getText().toString().trim();
+        mResendButton.setVisibility(View.GONE);
+        mProgressBar3.setVisibility(View.VISIBLE);
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if(getActivity() != null){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mResendButton.setVisibility(View.VISIBLE);
+                            mProgressBar3.setVisibility(View.GONE);
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        String stringResp = response.body().string();
+                        mPinCode = (new JSONObject(stringResp).getString("pinCode"));
+                        //Log.i(TAG, "onResponse: " + stringResp);
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mResendButton.setVisibility(View.VISIBLE);
+                                mProgressBar3.setVisibility(View.GONE);
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if(getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mResendButton.setVisibility(View.VISIBLE);
+                                    mProgressBar3.setVisibility(View.GONE);
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if(getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mResendButton.setVisibility(View.VISIBLE);
+                                mProgressBar3.setVisibility(View.GONE);
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
 
     private boolean checkEmail(String emailString) {
         //if empty return false
@@ -367,9 +441,7 @@ public class LinuteSignUpFragment extends Fragment {
             mEmailView.setError(getString(R.string.error_invalid_email));
             mEmailView.requestFocus();
             return false;
-        }
-
-        else if (!emailString.endsWith(".edu")){
+        } else if (!emailString.endsWith(".edu")) {
             mEmailView.setError("Must be a valid edu email");
             mEmailView.requestFocus();
             return false;
@@ -411,7 +483,7 @@ public class LinuteSignUpFragment extends Fragment {
             isGood = false;
         }
 
-        if(need != null) need.requestFocus();
+        if (need != null) need.requestFocus();
         return isGood;
     }
 
@@ -434,7 +506,7 @@ public class LinuteSignUpFragment extends Fragment {
                 break;
             case 1:
                 progressBar = mProgressBar2;
-                button = mSubmitLayer;
+                button = mSubmitButton;
                 break;
             default:
                 return;
@@ -460,7 +532,6 @@ public class LinuteSignUpFragment extends Fragment {
 
         mCredentialCheckInProgress = show;
     }
-
 
 
     public void verifyCode() {
@@ -520,7 +591,7 @@ public class LinuteSignUpFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     PreLoginActivity activity = (PreLoginActivity) getActivity();
-                                    if (activity != null){
+                                    if (activity != null) {
                                         activity.goToNextActivity();
                                     }
                                 }
@@ -537,7 +608,7 @@ public class LinuteSignUpFragment extends Fragment {
                     }
                 }
             });
-        }else {
+        } else {
             showProgress(false, 1);
             mViewFlipper.showPrevious();
             mCurrentViewFlipperIndex--;
@@ -571,6 +642,14 @@ public class LinuteSignUpFragment extends Fragment {
         sharedPreferences.putString("points", user.getPoints());
 
         sharedPreferences.putBoolean("isLoggedIn", true);
+
+        sharedPreferences.putBoolean("notif_follow", true);
+        sharedPreferences.putBoolean("notif_message", true);
+        sharedPreferences.putBoolean("notif_mention", true);
+        sharedPreferences.putBoolean("notif_alsoComment", true);
+        sharedPreferences.putBoolean("notif_comment", true);
+        sharedPreferences.putBoolean("notif_like", true);
+
         sharedPreferences.apply();
 
         Utils.testLog(getActivity(), TAG);
@@ -786,13 +865,11 @@ public class LinuteSignUpFragment extends Fragment {
 
 
     private boolean hasWritePermission() {
-        if (getActivity() == null) return false;
-        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        return getActivity() != null && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
     private boolean hasCameraPermissions() {
-        if (getActivity() == null) return false;
-        return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return getActivity() != null && ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
 
     }
 
@@ -806,17 +883,16 @@ public class LinuteSignUpFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-
-        if (mFirstNameTextView.hasFocus()){
+        if (mFirstNameTextView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);
-        }else if (mLastNameTextView.hasFocus()){
+        } else if (mLastNameTextView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mLastNameTextView.getWindowToken(), 0);
-        }else if (mEmailView.hasFocus()){
+        } else if (mEmailView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-        }else if (mPasswordView.hasFocus()){
+        } else if (mPasswordView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
         }

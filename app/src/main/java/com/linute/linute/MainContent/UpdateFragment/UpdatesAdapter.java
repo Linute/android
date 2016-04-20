@@ -100,8 +100,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int section, int relativePosition, int absolutePosition) {
 
 
-
-        if(absolutePosition == 0) {
+        if (absolutePosition == 0) {
             MainActivity activity = (MainActivity) mContext;
             if (activity != null) {
                 activity.setUpdateNotification(0);
@@ -129,8 +128,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     @Override
     public int getItemViewType(int section, int relativePosition, int absolutePosition) {
-
-
         return super.getItemViewType(section, relativePosition, absolutePosition);
     }
 
@@ -168,13 +165,14 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
     }
 
-    public class UpdateItemViewHolder extends RecyclerView.ViewHolder {
+    public class UpdateItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private CircleImageView mProfileImage;
         private ImageView mIconImage;
         private ImageView mEventPicture;
         private TextView mNameText;
         private TextView mDescriptionText;
+        private TextView mTimeView;
 
         private Update mUpdate;
 
@@ -188,6 +186,29 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mIconImage = (ImageView) itemView.findViewById((R.id.updatesFragment_icon_image));
             mNameText = (TextView) itemView.findViewById(R.id.updatesFragment_name_text);
             mDescriptionText = (TextView) itemView.findViewById(R.id.updatesFragment_description);
+            mTimeView = (TextView) itemView.findViewById(R.id.time);
+
+            //clicking name or profile image takes person to user's profile
+            mProfileImage.setOnClickListener(this);
+            mNameText.setOnClickListener(this);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mUpdate != null) {
+                        if (mUpdate.getUpdateType() == Update.UpdateType.MATCHED
+                                || mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
+                            ((MainActivity) mContext).addFragmentToContainer(
+                                    TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
+                            );
+                        }else if (mUpdate.getPost() != null) {
+                            ((MainActivity) mContext).addFragmentToContainer(
+                                    FeedDetailPage.newInstance(mUpdate.getPost())
+                            );
+                        }
+                    }
+                }
+            });
         }
 
         //sets up view
@@ -198,14 +219,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
 
             mDescriptionText.setText(update.getDescription());
+            mTimeView.setText(Utils.getTimeAgoString(update.getActionTime()));
 
             setUpPictures(update); //profile and event image
 
-            if (!mUpdate.isAnon()) {
-                setUpProfileOnClickListeners(update.getUserFullName(), update.getUserId());
-            }
-
-            setUpEventPictureTouchListener(update);
         }
 
 
@@ -248,7 +265,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             .into(mEventPicture);
                 }
 
-                if (mEventPicture.getVisibility() == View.GONE) {
+                if (mEventPicture.getVisibility() == View.INVISIBLE) {
                     mEventPicture.setVisibility(View.VISIBLE);
                 }
             }
@@ -256,42 +273,19 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             //FOLLOWER or FRIEND JOIN - give option to follow back
             else if (update.hasFriendShipInformation()) {
                 setUpFollowButton(update);
+            }else {
+                mEventPicture.setVisibility(View.INVISIBLE);
             }
         }
 
-        private void setUpProfileOnClickListeners(final String name, final String id) {
-            View.OnClickListener goToProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!mUpdate.isAnon()) {
-                        //show profile fragment
-                        ((MainActivity) mContext)
-                                .addFragmentToContainer(
-                                        TaptUserProfileFragment.newInstance(name, id)
-                                );
-                    }
-                }
-            };
-
-            //clicking name or profile image takes person to user's profile
-            mProfileImage.setOnClickListener(goToProfile);
-            mNameText.setOnClickListener(goToProfile);
-        }
-
-
-        private void setUpEventPictureTouchListener(final Update update) {
-
-            //if it was LIKE or COMMENT, it was either a status or photo
-            //take them to the post
-            if (update.hasEventInformation()) {
-                mEventPicture.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ((MainActivity) mContext).addFragmentToContainer(
-                                FeedDetailPage.newInstance(update.getPost())
+        @Override
+        public void onClick(View v) {
+            if (!mUpdate.isAnon()) {
+                //show profile fragment
+                ((MainActivity) mContext)
+                        .addFragmentToContainer(
+                                TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
                         );
-                    }
-                });
             }
         }
 
@@ -303,7 +297,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
                 mEventPicture.setImageResource(R.drawable.follow_back); //plus icon
 
-                if (mEventPicture.getVisibility() == View.GONE) {
+                if (mEventPicture.getVisibility() == View.INVISIBLE) {
                     mEventPicture.setVisibility(View.VISIBLE);
                 }
 
@@ -364,7 +358,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //are following person so hide button
             else {
-                mEventPicture.setVisibility(View.GONE);
+                mEventPicture.setVisibility(View.INVISIBLE);
             }
         }
 
@@ -399,13 +393,13 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case FRIEND_JOINED:
                     drawable = R.drawable.icon_user;
                     break;
-                case POSTED_PHOTO:
+                case FRIEND_POSTED_PHOTO:
                     drawable = R.drawable.icon_comment;
                     break;
-                case POSTED_STATUS:
+                case FRIEND_POSTED_STATUS:
                     drawable = R.drawable.icon_comment;
                     break;
-                case POSTED_VIDEO:
+                case FRIEND_POSTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
                 case ALSO_COMMENTED_IMAGE:
@@ -417,6 +411,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case ALSO_COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
+                case MATCHED:
+                    drawable = R.drawable.icon_user;
+                    break;
                 default:
                     drawable = R.drawable.icon_user;
                     break;
@@ -425,7 +422,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             return ContextCompat.getDrawable(mContext, drawable);
         }
     }
-
 
 
 }

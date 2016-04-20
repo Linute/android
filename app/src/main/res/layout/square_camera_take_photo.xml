@@ -37,21 +37,31 @@
                           android:orientation="vertical"
             >
 
-                <RelativeLayout android:id="@+id/camera_ops"
-                                android:layout_width="match_parent"
+                <RelativeLayout android:layout_width="match_parent"
                                 android:layout_height="0px"
-                                android:layout_weight="1"
-                >
+                                android:layout_weight="1">
 
-                    <RelativeLayout android:id="@+id/flash"
-                                    android:layout_width="wrap_content"
+                    <ProgressBar android:id="@+id/record_progress"
+                                 style="?android:attr/progressBarStyleHorizontal"
+                                 android:layout_width="match_parent"
+                                 android:layout_height="6dp"
+                                 android:max="7000"
+                                 android:visibility="gone"
+                    />
+
+                    <RelativeLayout android:id="@+id/camera_ops"
+                                    android:layout_width="match_parent"
                                     android:layout_height="match_parent">
+
+                        <RelativeLayout android:id="@+id/flash"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="match_parent">
 
                             <ImageView android:id="@+id/flash_icon"
                                        android:layout_width="wrap_content"
                                        android:layout_height="match_parent"
-                                       android:paddingStart="@dimen/activity_horizontal_margin"
                                        android:paddingEnd="8dp"
+                                       android:paddingStart="@dimen/activity_horizontal_margin"
                                        android:src="@drawable/ic_form1"
                             />
 
@@ -60,25 +70,26 @@
                                       android:layout_height="wrap_content"
                                       android:layout_alignBottom="@id/flash_icon"
                                       android:layout_alignEnd="@id/flash_icon"
-                                      android:textColor="@color/fifty_white"
-                                      android:textSize="@dimen/sub_font_size"
                                       android:layout_marginBottom="8dp"
                                       android:layout_marginStart="4dp"
                                       android:text="ON"
+                                      android:textColor="@color/fifty_white"
+                                      android:textSize="@dimen/sub_font_size"
                             />
 
+                        </RelativeLayout>
+
+
+                        <ImageView android:id="@+id/change_camera"
+                                   android:layout_width="wrap_content"
+                                   android:layout_height="match_parent"
+                                   android:layout_alignParentEnd="true"
+                                   android:paddingEnd="16dp"
+                                   android:paddingStart="16dp"
+                                   android:src="@drawable/ic_icon_reverse_camera"
+                        />
+
                     </RelativeLayout>
-
-
-                    <ImageView android:id="@+id/change_camera"
-                               android:layout_width="wrap_content"
-                               android:layout_height="match_parent"
-                               android:layout_alignParentEnd="true"
-                               android:paddingEnd="16dp"
-                               android:paddingStart="16dp"
-                               android:src="@drawable/ic_icon_reverse_camera"
-                    />
-
                 </RelativeLayout>
 
 

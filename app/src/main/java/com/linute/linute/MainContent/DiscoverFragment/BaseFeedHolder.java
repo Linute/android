@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -17,14 +18,10 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by QiFeng on 3/8/16.
@@ -40,8 +37,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
 
-    protected CircleImageView vUserImage;
-
+    protected RoundedImageView vUserImage;
     protected Context mContext;
 
     private String mUserId;
@@ -65,11 +61,9 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentText = (TextView) itemView.findViewById(R.id.postNumComments);
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
-        vUserImage = (CircleImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (RoundedImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 
         //vLikesHeart.setClickable(false);
-        vLikesHeart.setOnCheckedChangeListener(this);
-
         vLikesHeart.setOnCheckedChangeListener(this);
 
         vLikeButton.setOnClickListener(this);
@@ -93,6 +87,8 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText("Like (" + post.getNumLike() + ")");
         vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
+        ((ImageView)vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
+                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
     }
 
 

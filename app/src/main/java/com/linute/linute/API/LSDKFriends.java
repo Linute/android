@@ -4,9 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
-
-import org.json.JSONArray;
 
 import java.util.HashMap;
 import java.util.Map;

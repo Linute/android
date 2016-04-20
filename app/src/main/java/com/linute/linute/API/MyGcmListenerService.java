@@ -29,17 +29,11 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
-import com.linute.linute.MainContent.Chat.ChatHead;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class MyGcmListenerService extends GcmListenerService {
 
@@ -55,18 +49,18 @@ public class MyGcmListenerService extends GcmListenerService {
     // [START receive_message]
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String message = data.getString("message");
+        //String message = data.getString("message");
         String action = data.getString("action");
-        Log.d(TAG, "From: " + from);
-        Log.d(TAG, "Message: " + message);
-        for (String key : data.keySet()) {
-            Log.d(TAG, key + " is a key in the bundle");
-        }
-        if (from.startsWith("/topics/")) {
-            // message received from some topic.
-        } else {
-            // normal downstream message.
-        }
+//        Log.d(TAG, "From: " + from);
+//        Log.d(TAG, "Message: " + message);
+//        for (String key : data.keySet()) {
+//            Log.d(TAG, key + " is a key in the bundle");
+//        }
+//        if (from.startsWith("/topics/")) {
+//            // message received from some topic.
+//        } else {
+//            // normal downstream message.
+//        }
 
         // [START_EXCLUDE]
         /**
@@ -92,51 +86,57 @@ public class MyGcmListenerService extends GcmListenerService {
      * @param data GCM Bundle received.
      */
     private void sendNotification(Bundle data, String action) {
-        Intent intent = null;
-        PendingIntent pendingIntent = null;
+        Intent intent;
+        PendingIntent pendingIntent;
         String message = data.getString("message");
 
+        //Log.i(TAG, "action : "  + action);
+        Log.i(TAG, "sendNotification: " + data.toString());
 
-        if (action != null && action.equals("messages")) { //<---
-            intent = new Intent(this, RoomsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("ROOMS", "SOMEMESSAGE");
-            intent.putExtra("roomId", data.getString("room"));
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject(data.getString("user"));
-                intent.putExtra("ownerName", jsonObject.getString("fullName"));
-                intent.putExtra("ownerId", jsonObject.getString("id"));
-
-                JSONArray jsonArray = null;
-                jsonArray = new JSONArray(data.getString("users"));
-                intent.putExtra("roomCnt", jsonArray.length() + "");
-
-                ArrayList<ChatHead> chatHeadList = new ArrayList<>();
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    chatHeadList.add(new ChatHead(
-                            ((JSONObject) jsonArray.get(i)).getString("fullName"),
-                            ((JSONObject) jsonArray.get(i)).getString("profileImage"),
-                            ((JSONObject) jsonArray.get(i)).getString("id")));
+        //// TODO: 3/21/16  fix
+        boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
+        if (action != null) { //<---
+            if (isLoggedIn) {
+                int type = gettNotificationType(data.getString("action"));
+                if (type == LinuteConstants.MESSAGE) {
+                    Intent parent = new Intent(this, MainActivity.class);
+                    parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
+                    intent = new Intent(this, RoomsActivity.class);
+                    intent.putExtra("NOTIFICATION", type);
+                    intent.putExtra("ownerID", data.getString("ownerID"));
+                    intent.putExtra("ownerFullName", data.getString("ownerFullName"));
+                    intent.putExtra("room", data.getString("room") );
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    pendingIntent = PendingIntent.getActivities(this, 0, new Intent[]{parent, intent}, PendingIntent.FLAG_ONE_SHOT);
+                } else if (type == LinuteConstants.FEED_DETAIL || type == LinuteConstants.PROFILE) {
+                    intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("NOTIFICATION", type);
+                    if (type == LinuteConstants.FEED_DETAIL)
+                        intent.putExtra("event", data.getString("event"));
+                    else intent.putExtra("user", data.getString("user"));
+                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                            PendingIntent.FLAG_ONE_SHOT);
+                } else {
+                    intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                            PendingIntent.FLAG_ONE_SHOT);
                 }
-                intent.putParcelableArrayListExtra("chatHeads", chatHeadList);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } else {
+                intent = new Intent(this, PreLoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                        PendingIntent.FLAG_ONE_SHOT);
             }
-            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
-        }else{
-            boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
-            intent = new Intent(this,isLoggedIn ? MainActivity.class : PreLoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-            intent.putExtra("NOTIFICATION", true);
-
-            pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
+        } else {
+            intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
 
-        Log.d(TAG, message);
+        //Log.d(TAG, message);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
@@ -146,8 +146,51 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
         Notification notifications = notificationBuilder.build();
         NotificationManagerCompat.from(this).notify(0, notifications);
+    }
+
+
+    private int gettNotificationType(String action) {
+        switch (action) {
+            case "commented status":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked status":
+                return LinuteConstants.FEED_DETAIL;
+            case "commented photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "commented video":
+                return LinuteConstants.FEED_DETAIL;
+            case "liked video":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented status":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented video":
+                return LinuteConstants.FEED_DETAIL;
+            case "also commented photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "mentioned":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted status":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted video":
+                return LinuteConstants.FEED_DETAIL;
+            case "posted photo":
+                return LinuteConstants.FEED_DETAIL;
+            case "friend joined":
+                return LinuteConstants.PROFILE;
+            case "follower":
+                return LinuteConstants.PROFILE;
+            case "matched":
+                return LinuteConstants.PROFILE;
+            case "messager":
+                return LinuteConstants.MESSAGE;
+            default:
+                return LinuteConstants.MISC;
+        }
     }
 }

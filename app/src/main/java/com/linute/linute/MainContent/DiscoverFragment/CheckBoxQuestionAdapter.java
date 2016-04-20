@@ -40,7 +40,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     private SingleVideoPlaybackManager mVideoPlayerManager;
 
-
     public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager) {
         super(new MultiChoiceMode());
         mPosts = posts;
@@ -88,7 +87,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
         }
 
-
+//position + 1 == mPosts.size()
         if (position + 1 == mPosts.size()) {
             mGetMoreFeed.getMoreFeed();
         }else if (position == 0){
@@ -103,7 +102,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
         if (!mSendImpressions){ //scrolled back to the top
             if (position == 0)
                 mSendImpressions = true;
-        }else {
+        }else{
             sendImpressionsAsync(mPosts.get(position).getPostId());
         }
     }

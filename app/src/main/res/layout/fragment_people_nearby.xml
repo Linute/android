@@ -1,78 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:background="@color/pure_white"
               android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
+                                                         android:layout_height="match_parent">
 
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/peopleNearby_profile_image"
-            android:layout_width="@dimen/profile_image_radius"
-            android:layout_height="@dimen/profile_image_radius"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-            android:layout_marginStart="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_horizontal_margin"
-            android:layout_marginBottom="10dp"
-            app:civ_border_color="@color/light_grey"
-            app:civ_border_width="1dp"/>
+        <android.support.v4.view.ViewPager android:id="@+id/images"
+                                           android:layout_width="match_parent"
+                                           android:layout_height="match_parent"
+                                           android:background="@color/seperator_color"/>
 
-        <ImageView android:id="@+id/peopleNearby_action_button"
-                   android:layout_width="40dp"
-                   android:layout_height="40dp"
-                   android:layout_alignParentEnd="true"
-                   android:layout_alignParentTop="true"
-                   android:layout_margin="@dimen/activity_horizontal_margin"
-                   tools:src="@drawable/add_friend"
-            />
-
-
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_centerVertical="true"
-                      android:layout_toEndOf="@id/peopleNearby_profile_image"
-                      android:layout_toStartOf="@id/peopleNearby_action_button"
-                      android:orientation="vertical">
-
-            <TextView android:id="@+id/peopleNearby_person_name"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:singleLine="true"
-                      android:textColor="@color/user_name_blue"
-                      android:textStyle="bold"
-                      android:textSize="@dimen/header_font_size"
-                      tools:text="Person Name"
-                />
-
-            <TextView android:id="@+id/peopleNearby_distance"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginTop="5dp"
-                      android:textColor="@color/fifty_black"
-                      android:textSize="@dimen/sub_font_size"
-                      tools:text="1.2 miles away"/>
-
-        </LinearLayout>
-
-    </RelativeLayout>
-
-    <TextView android:id="@+id/peopleNearby_status"
-              android:layout_width="wrap_content"
-              android:layout_height="match_parent"
-              android:layout_marginEnd="@dimen/activity_horizontal_margin"
-              android:layout_marginStart="@dimen/activity_horizontal_margin"
-              android:layout_marginBottom="@dimen/activity_vertical_margin"
-              android:visibility="gone"
-              android:maxLines="3"
-              tools:text = "TEST TESTT TEST ETSTE TWETSDG GF DGDF GFDG FDG DG FD GDF"
-
+        <TextView android:id="@+id/distance"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="top|end"
+                  android:layout_margin="@dimen/activity_horizontal_margin"
+                  android:background="@drawable/rounded_corner_button"
+                  android:paddingBottom="8dp"
+                  android:paddingEnd="20dp"
+                  android:paddingStart="20dp"
+                  android:paddingTop="8dp"
+                  android:textColor="@color/pure_white"
+                  android:textSize="@dimen/body_font_size"
+                  android:textStyle="bold"
+                  tools:text="nearby"
         />
 
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
+    <View android:layout_width="match_parent"
+          android:layout_height="1dp"
+          android:background="@color/pure_white"
+    />
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="-24dp"
+                  android:orientation="horizontal">
+
+        <TextView android:id="@+id/name"
+                  android:layout_width="0px"
+                  android:layout_height="wrap_content"
+                  android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                  android:layout_marginStart="@dimen/activity_horizontal_margin"
+                  android:layout_marginTop="40dp"
+                  android:layout_weight="1"
+                  android:ellipsize="end"
+                  android:textAllCaps="true"
+                  android:textColor="@color/secondaryColor"
+                  android:textSize="20sp"
+                  android:textStyle="bold"
+                  tools:text="MIKE HAWK"
+        />
+
+        <ImageView android:id="@+id/action_button"
+                   android:layout_width="48dp"
+                   android:layout_height="48dp"
+                   android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                   android:src="@drawable/message_friend"
+        />
+    </LinearLayout>
+
+    <TextView android:id="@+id/school"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginEnd="@dimen/activity_horizontal_margin"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:ellipsize="end"
+              android:textColor="@color/secondaryColor"
+              android:textSize="@dimen/body_font_size"
+              tools:text="City college of new york"
+    />
+
+    <TextView android:id="@+id/status"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="12dp"
+              android:layout_marginEnd="@dimen/activity_horizontal_margin"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:layout_marginTop="4dp"
+              android:maxLines="5"
+              android:textColor="@color/fifty_black"
+              android:textSize="@dimen/body_font_size"
+              tools:text="test test test testtest test test test "
+    />
+
+    <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="30dp"
+                  android:weightSum="100">
+
+        <TextView android:id="@+id/first"
+                  android:layout_width="0px"
+                  android:layout_height="match_parent"
+                  android:layout_weight="25"
+                  android:background="@color/twentyfive_black"
+                  android:gravity="center"
+                  android:lines="1"
+                  android:textColor="@color/pure_white"
+                  tools:text="first"
+        />
+
+        <TextView android:id="@+id/second"
+                  android:layout_width="0px"
+                  android:layout_height="match_parent"
+                  android:layout_weight="25"
+                  android:background="@color/fifty_black"
+                  android:gravity="center"
+                  android:lines="1"
+                  android:textColor="@color/pure_white"
+                  tools:text="second"
+        />
+
+        <TextView android:id="@+id/third"
+                  android:layout_width="0px"
+                  android:layout_height="match_parent"
+                  android:layout_weight="25"
+                  android:background="@color/twentyfive_black"
+                  android:gravity="center"
+                  android:lines="1"
+                  android:textColor="@color/pure_white"
+                  tools:text="third"
+        />
+
+        <TextView android:id="@+id/fourth"
+                  android:layout_width="0px"
+                  android:layout_height="match_parent"
+                  android:layout_weight="25"
+                  android:background="@color/fifty_black"
+                  android:gravity="center"
+                  android:lines="1"
+                  android:textColor="@color/pure_white"
+                  tools:text="fourth"
+        />
+
+    </LinearLayout>
 </LinearLayout>

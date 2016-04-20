@@ -5,18 +5,14 @@ import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.MainContent.FeedDetailFragment.FeedDetail;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
  * Created by Arman on 12/30/15.
@@ -30,6 +26,10 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
     private UserActivityItem mUserActivityItem;
 
+    private View vAnonIcon;
+    private View vGradient;
+    private View vMovieIcon;
+
 
     public ProfileViewHolder(View itemView, Context context) {
         super(itemView);
@@ -38,7 +38,9 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         vEventImage = (ImageView) itemView.findViewById(R.id.profile_grid_item_image);
-
+        vGradient = itemView.findViewById(R.id.gradient);
+        vAnonIcon = itemView.findViewById(R.id.anon_icon);
+        vMovieIcon = itemView.findViewById(R.id.movie_icon);
         itemView.setOnClickListener(this);
     }
 
@@ -51,6 +53,24 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
+
+        if (userActivityItem.isAnon()) {
+            vAnonIcon.setVisibility(View.VISIBLE);
+            vGradient.setVisibility(View.VISIBLE);
+            vMovieIcon.setVisibility(userActivityItem.hasVideo() ? View.VISIBLE : View.GONE);
+
+        } else {
+            vAnonIcon.setVisibility(View.GONE);
+
+            if (userActivityItem.hasVideo()){
+                vMovieIcon.setVisibility(View.VISIBLE);
+                vGradient.setVisibility(View.VISIBLE);
+            }
+            else {
+                vGradient.setVisibility(View.GONE);
+                vMovieIcon.setVisibility(View.GONE);
+            }
+        }
 
 
         mUserActivityItem = userActivityItem;

@@ -57,58 +57,6 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_CANCELED) { //cancelled gallery pick or crop
-            clearBackStack(); //remove gallery fragment
-            Log.i(TAG, "onActivityResult: cancelled");
-        }
-
-        else if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) { //got image from gallery
-            if(data != null) {
-                beginCrop(data.getData()); //crop image
-            }
-        }
-
-        else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
-            if (resultCode == RESULT_OK) {
-
-
-                if (data != null) {
-                    Uri imageUri = Crop.getOutput(data);
-                    if (imageUri != null) {
-                        ImageUtils.normalizeImageForUri(this, imageUri);
-                        launchEditAndSaveFragment(imageUri);
-                    }
-                }
-
-            } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
-                if (data != null) {
-                    Toast.makeText(this, Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    }
-
-    private void beginCrop(Uri source) { //begin crop activity
-        Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
-        Crop.of(source, destination).asSquare().start(this);
-    }
-
-    //Permissions
-    private boolean hasPermission(String permission) {
-        return ContextCompat.checkSelfPermission(this, permission)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean hasCameraAndWritePermission() {
-        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                && hasPermission(Manifest.permission.CAMERA) && hasPermission(Manifest.permission.RECORD_AUDIO);
-    }
-
-
     private static final int REQUEST_PERMISSIONS = 21;
 
     public void requestPermissions() {
@@ -173,7 +121,7 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void launchEditAndSaveFragment(Uri uri) {
+    public void launchEditAndSaveFragment(Uri uri) {
         Log.i(TAG, "launchEditAndSaveFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
@@ -192,7 +140,6 @@ public class CameraActivity extends AppCompatActivity {
     public static final String EDIT_AND_GALLERY_STACK_NAME = "edit_and_gallery_stack_name";
 
     public void launchGalleryFragment() {
-        Log.i(TAG, "launchGalleryFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -201,8 +148,6 @@ public class CameraActivity extends AppCompatActivity {
                         GalleryFragment.TAG)
                 .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
-
-        goToGalleryAndCrop();
     }
 
     @Override
@@ -212,10 +157,6 @@ public class CameraActivity extends AppCompatActivity {
             setResult(RESULT_CANCELED);
             super.onBackPressed();
         }
-    }
-
-    private void goToGalleryAndCrop() {
-        Crop.pickImage(this);
     }
 
 }

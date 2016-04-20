@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -87,11 +86,10 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
             mNameView = (TextView) itemView.findViewById(R.id.friendSearchItem_full_name);
             mProfileImage = (ImageView) itemView.findViewById(R.id.friendSearchItem_profile_image);
             mAddButton = (ImageView) itemView.findViewById(R.id.friendSearchItem_add_button);
-
         }
 
 
-        public void bindViews(FriendSearchUser user){
+        public void bindViews(FriendSearchUser user) {
             mNameView.setText(user.getFullName());
 
             Glide.with(mContext)
@@ -103,12 +101,12 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
 
-            setUpFollowButton(user.isFollowing(), user.getUserId());
+            setUpFollowButton(user.isFollowing(), user.getUserId(), user.getFullName());
             setUpOnClickListeners(user.getFullName(), user.getUserId());
         }
 
 
-        private void setUpFollowButton(boolean areFriends, final String userID){
+        private void setUpFollowButton(boolean areFriends, final String userID, final String name) {
 
             if (!areFriends) {
 
@@ -121,9 +119,16 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     @Override
                     public void onClick(View v) {
 
-                        if (mFollowed){
-                            //TODO: GO TO MESSANGER
-                            Toast.makeText(mContext, "Coming soon", Toast.LENGTH_SHORT).show();
+                        if (mFollowed) {
+                            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                            if (activity != null) {
+                                Intent enterRooms = new Intent(activity, RoomsActivity.class);
+                                enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+                                enterRooms.putExtra("ownerID", userID);
+                                enterRooms.putExtra("ownerFullName", name);
+                                enterRooms.putExtra("room", "");
+                                activity.startActivity(enterRooms);
+                            }
                         }
 
                         mFollowed = true;
@@ -178,7 +183,10 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                         BaseTaptActivity activity = (BaseTaptActivity) mContext;
                         if (activity != null) {
                             Intent enterRooms = new Intent(activity, RoomsActivity.class);
-                            enterRooms.putExtra("CHATICON", true);
+                            enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+                            enterRooms.putExtra("ownerID", userID);
+                            enterRooms.putExtra("ownerFullName", name);
+                            enterRooms.putExtra("room", "");
                             activity.startActivity(enterRooms);
                         }
                     }
@@ -186,13 +194,13 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
             }
         }
 
-        private void setUpOnClickListeners(final String name, final String userId){
+        private void setUpOnClickListeners(final String name, final String userId) {
             View.OnClickListener goToProfile = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //TODO: fix
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                    if (activity != null){
+                    if (activity != null) {
                         activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(name, userId));
                     }
                 }

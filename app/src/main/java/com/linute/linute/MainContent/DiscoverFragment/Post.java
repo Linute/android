@@ -5,7 +5,6 @@ import android.os.Parcelable;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,72 +17,57 @@ import java.util.Date;
  */
 public class Post implements Parcelable {
 
-    public static int POST_TYPE_STATUS = 0;
-    public static int POST_TYPE_IMAGE = 1;
-    public static int POST_TYPE_VIDEO = 2;
+    public final static int POST_TYPE_STATUS = 0;
+    public final static int POST_TYPE_IMAGE = 1;
+    public final static int POST_TYPE_VIDEO = 2;
 
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    private String mUserId;
-    private String mUserName;
-    private String mUserImage;
-    private String mTitle;
-    private String mImage = "";
-    private int mPrivacy;
-    private int mNumLikes;
-    private boolean mUserLiked;
-    private long mPostTime;
-    private String mPostId;
-    private int mNumOfComments;
-    private String mAnonImage;
+    private String mUserId;         // id of post owner
+    private String mUserName;       // post owner's full name
+    private String mUserImage;      // post owner's profile image
+    private String mAnonImage;      // anon image of user
 
-    private boolean mPostLiked;
+    private String mPostId;         // id of post
+    private String mVideoURL = "";  // video url
+    private String mTitle;          // text on image or status
+    private String mImage = "";     // image url
+    private int mPrivacy;           // 1 for anon, 0 for public
+    private int mNumLikes;          // num likes on post
+    private long mPostTime;         // post time. millisec since 1970
+    private int mNumOfComments;     // num of comments
 
-    private String mVideoURL = "";
+    private boolean mPostLiked;     //did viewer like the image
+    private boolean mPostHidden;    //post hidden from user
+    private boolean mPostMuted;     //post muted from user
 
-    //horrible hack -- regret doing this..
-    private boolean mPostHidden;
-    private boolean mPostMuted;
+    private boolean mCommentAnonDisabled;
 
     public Post() {
 
     }
 
-//    public Post(String userId,
-//                String userName,
-//                String userImage,
-//                String title,
-//                String image,
-//                int privacy,
-//                int numLike,
-//                boolean userLiked,
-//                long postTime,
-//                String postId,
-//                int numComments,
-//                String anonImage,
-//                String video
-//    ) {
-//
-//        mUserId = userId;
-//        mUserName = userName;
-//        mImage = "";
-//        mUserImage = userImage;
-//        mTitle = title;
-//        mImage = image;
-//        mPrivacy = privacy;
-//        mNumLikes = numLike;
-//        mUserLiked = userLiked;
-//        mPostTime = postTime;
-//        mPostId = postId;
-//        mNumOfComments = numComments;
-//        mAnonImage = anonImage;
-//
-//        mPostLiked = mUserLiked;
-//        mVideoURL = video;
-//
-//    }
+    public Post(String imageurl, String postid, String userid, String userName){
+        mImage  = imageurl;
+        mPostId = postid;
+        mPostTime = 0;
+        mUserId = userid;
+        mUserName = userName;
+        mUserImage = "";
+        mTitle="";
+        mPrivacy = 0;
+        mCommentAnonDisabled = true;
+        mAnonImage = "";
+        mNumLikes = 0;
+        mNumOfComments = 0;
+        mPostLiked = false;
+        mPostHidden = false;
+        mPostMuted = false;
+    }
 
-    //@param currentId -- the id of the person using phone
+    /**
+     * @param jsonObject  - post json object
+     */
     public Post(JSONObject jsonObject) throws JSONException {
 
         int type = jsonObject.getInt("type");
@@ -121,6 +105,73 @@ public class Post implements Parcelable {
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
 
+        mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
+        mPostId = jsonObject.getString("id");
+
+        String anonImage = jsonObject.getString("anonymousImage");
+        mAnonImage = anonImage == null || anonImage.equals("") ? "" : Utils.getAnonImageUrl(anonImage);
+
+        try {
+            mNumLikes = jsonObject.getInt("numberOfLikes");
+            mNumOfComments = jsonObject.getInt("numberOfComments");
+            mPostLiked = jsonObject.getBoolean("isLiked");
+        } catch (JSONException e) {
+            mNumLikes = 0;
+            mNumOfComments = 0;
+            mPostLiked = false;
+        }
+
+        try {
+            mPostHidden = jsonObject.getBoolean("isHidden");
+        } catch (JSONException e) {
+            mPostHidden = false;
+        }
+
+        try {
+            mPostMuted = jsonObject.getBoolean("isMuted");
+        } catch (JSONException e) {
+            mPostMuted = false;
+        }
+    }
+
+
+    public void updateInfo(JSONObject jsonObject) throws JSONException{
+        int type = jsonObject.getInt("type");
+
+        if (jsonObject.getJSONArray("images").length() > 0)
+            mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
+
+        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+            mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
+
+        Date myDate;
+
+        try {
+            myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+        } catch (ParseException w) {
+            w.printStackTrace();
+            myDate = null;
+        }
+
+        mPostTime = (myDate == null ? 0 : myDate.getTime());
+
+        try {
+            JSONObject owner = jsonObject.getJSONObject("owner");
+
+            mUserId = owner.getString("id");
+            mUserName = owner.getString("fullName");
+            mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+        } catch (JSONException e) {
+            mUserId = jsonObject.getString("owner");
+            mUserName = "";
+            mUserImage = "";
+        }
+
+
+        mTitle = jsonObject.getString("title");
+        mPrivacy = jsonObject.getInt("privacy");
+
+        mCommentAnonDisabled = jsonObject.getBoolean("isAnonymousCommentsDisabled");
         mPostId = jsonObject.getString("id");
 
         String anonImage = jsonObject.getString("anonymousImage");
@@ -286,7 +337,6 @@ public class Post implements Parcelable {
         dest.writeString(mImage);
         dest.writeInt(mPrivacy);
         dest.writeInt(mNumLikes);
-        dest.writeByte((byte) (mUserLiked ? 1 : 0)); //boolean
         dest.writeLong(mPostTime);
         dest.writeString(mPostId);
         dest.writeInt(mNumOfComments);
@@ -303,7 +353,6 @@ public class Post implements Parcelable {
         mImage = in.readString();
         mPrivacy = in.readInt();
         mNumLikes = in.readInt();
-        mUserLiked = in.readByte() != 0; //true if byte != 0
         mPostTime = in.readLong();
         mPostId = in.readString();
         mNumOfComments = in.readInt();
@@ -324,4 +373,11 @@ public class Post implements Parcelable {
         }
     };
 
+    public boolean isCommentAnonDisabled() {
+        return mCommentAnonDisabled;
+    }
+
+    public void setCommentAnonDisabled(boolean commentAnonDisabled) {
+        mCommentAnonDisabled = commentAnonDisabled;
+    }
 }

@@ -18,30 +18,25 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private Context aContext;
 
-//    private boolean mIsNearbyFragment;
-//
-//    public static final int TYPE_NEARBY = 3;
-//    public static final int TYPE_ACTIVE = 2;
+    private boolean mIsNearbyFragment;
 
     public PeopleAdapter(List<People> peopleList, Context context, boolean isNearbyFragment) {
         this.aContext = context;
         mPeopleList = peopleList;
-        //mIsNearbyFragment = isNearbyFragment;
+        mIsNearbyFragment = isNearbyFragment;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-//        if (viewType == TYPE_NEARBY)
-//            return new NearbyViewHolder(LayoutInflater
-//                    .from(parent.getContext())
-//                    .inflate(R.layout.fragment_people_nearby, parent, false)
-//            , aContext);
-
-//        else
-            return new PeopleViewHolder(LayoutInflater
+        if (mIsNearbyFragment) return new NearbyViewHolder(LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_people_list_item2, parent, false), aContext, mPeopleList);
+                    .inflate(R.layout.fragment_people_nearby, parent, false)
+            , aContext);
+
+        else return new PeopleViewHolder(LayoutInflater
+                .from(parent.getContext())
+                .inflate(R.layout.fragment_people_popular_item_cell, parent, false), aContext);
 
     }
 
@@ -49,20 +44,16 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof PeopleViewHolder)
             ((PeopleViewHolder) holder).bindModel(mPeopleList.get(position));
-//        else
-//            ((NearbyViewHolder) holder).bindView(mPeopleList.get(position));
-
+        else
+            ((NearbyViewHolder) holder).bindView(mPeopleList.get(position));
     }
+
+    
 
     @Override
     public int getItemCount() {
         return mPeopleList.size();
     }
 
-
-//    @Override
-//    public int getItemViewType(int position) {
-//        return mIsNearbyFragment ? TYPE_NEARBY : TYPE_ACTIVE;
-//    }
 
 }

@@ -3,9 +3,9 @@
     <color name="colorPrimary">#142029</color>
     <color name="secondaryColor">#67CDC9</color>
 
+    <color name="toolbar_color">#142029</color>
     <color name="colorPrimaryDark">#0f181e</color>
     <color name="colorAccent">#1d4261</color>
-    <color name="tabsScrollColor">#8a140e</color>
     <color name="light_grey">#d3d3d3</color>
 
     <color name="follow_grey">#B2B2B2</color>
@@ -18,30 +18,19 @@
     <color name="twentyfive_black">#40000000</color>
     <color name="user_name_blue">#17607d</color>
 
+    <color name="messanger_blue">#009eea</color>
+    <color name="messanger_blue_dark">#0592d6</color>
+
     <color name="feed_action_bar_grey">#b2b2b2</color>
 
     <color name="seperator_color">#d3d6db</color>
 
-
-
-    <color name="primary_material_light">#b2aead</color>
-    <color name="background_material_light">#d7a5a5</color>
-
-    <!-- square camera attributes-->
-    <color name="squarecamera__red">#F0001D</color>
-    <color name="squarecamera__pressed_red">#B3F0001D</color>
-    <color name="squarecamera__white">#FFFFFF</color>
-    <color name="squarecamera__pressed_white">#99FFFFFF</color>
-
     <color name="grey_color">#505050</color>
 
-
-    <color name="white">#fafafa</color>
+    <color name="white">#FFFFFF</color>
     <color name="white_pressed">#f1f1f1</color>
 
-
     <color name="search_layover_bg">#50000000</color>
-
 
     <color name="post_color_0">#FFFFFF</color>
     <color name="post_color_1">#3B4854</color>
@@ -54,11 +43,12 @@
     <color name="pure_black">#000000</color>
 
     <color name="user_comment_color">#56bb1d</color>
-
-
     <color name="snackbar_background_color">#323232</color>
-
     <color name="notification_color">#CC2786BB</color>
+    <color name="facebook_blue">#8A9BC3</color>
+    <color name="yellow_color">#FBB72E</color>
+    <color name="green_color">#239F85</color>
+    <color name="blue_color">#84CFDF</color>
 
 </resources>
 

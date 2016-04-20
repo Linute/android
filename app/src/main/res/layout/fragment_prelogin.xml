@@ -41,23 +41,26 @@
                   android:layout_alignParentBottom="true"
                   android:weightSum="2">
 
-        <ImageView android:id="@+id/preLogin_facebook_login"
-                   android:layout_width="0px"
-                   android:layout_height="wrap_content"
-                   android:layout_weight="1"
-                   android:scaleType="centerCrop"
-                   android:src="@drawable/facebook_login_button"
-                   android:layout_gravity="bottom"
-            />
+        <Button android:id="@+id/preLogin_facebook_login"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/facebook_blue"
+                android:foreground="?android:selectableItemBackground"
+                android:text="Facebook"
+                android:textColor="@color/pure_white"
+        />
 
-        <ImageView
+        <Button
             android:id="@+id/prelogin_linute_login"
             android:layout_width="0px"
             android:layout_height="wrap_content"
-            android:scaleType="centerCrop"
-            android:src="@drawable/tapt_login_button"
-            android:layout_gravity="bottom"
-            android:layout_weight="1"/>
+            android:layout_weight="1"
+            android:background="@color/secondaryColor"
+            android:foreground="?android:selectableItemBackground"
+            android:text="signin"
+            android:textColor="@color/pure_white"
+        />
 
     </LinearLayout>
 

@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.UpdateFragment;
 
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,6 +17,11 @@ public class Update {
 
     private static final String TAG = Update.class.getSimpleName();
 
+    public long getActionTime() {
+        return mActionTime;
+    }
+
+    //enum of update types
     public enum UpdateType {
         UNDEFINED,
         LIKED_STATUS,
@@ -27,47 +33,51 @@ public class Update {
         FOLLOWER,
         MENTIONED, //need icon
         FRIEND_JOINED, //need icon
-        POSTED_STATUS,
-        POSTED_PHOTO,
-        POSTED_VIDEO,
+        FRIEND_POSTED_STATUS,
+        FRIEND_POSTED_PHOTO,
+        FRIEND_POSTED_VIDEO,
         AlSO_COMMENTED_STATUS,
         ALSO_COMMENTED_IMAGE,
-        ALSO_COMMENTED_VIDEO
+        ALSO_COMMENTED_VIDEO,
+        MATCHED
     }
 
-    private String mDescription;
-    private UpdateType mUpdateType;
+    private String mActionID;           // id of action
+    private String mDescription;        // description of action. ie - "max liked your status;
+    private UpdateType mUpdateType;     // type of update
 
-    //time stamp -- uncomment if we decide to use it
-    //private long mActionTime; //i.e. when someone liked/commented on/etc post
-    private boolean mIsRead;
+    private boolean mIsRead;            //determine if viewer has seen this update before
 
-    private String mActionID;
 
     //'User' refers to the person performing the action
     // i.e. if 'max liked your picture' -> user = max
-    private String mUserId;
-    private String mUserFullName;
-    private String mUserProfileImageName;
+    private String mUserId;                 // if of user
+    private String mUserFullName;           // full name
+    private String mUserProfileImageName;   // profile image of user
+    private String mAnonImage;              // anon image of user
+    private boolean mIsAnon;                // determine if user is anon
 
-//    private String mEventImageName;
-//    private String mEventID;
-//    private String mEventTitle;
-//    private String mEventUserId;
-//    private boolean mIsPicturePost;
-
-
-    private Post mPost; //Post object will contain event info
 
     //will not be empty if you are following person
+    //used for FOLLOWER action
+    //will be null if not a FOLLOWER action
     private String mFriendshipID;
     private boolean mFollowedBack;
 
-    private boolean mIsAnon;
-    private String mAnonImage;
+
+    // Post object will contain event info.
+    // ie. "Max liked your image." Post will contain the image url and other information
+    private Post mPost;
+
+    //time stamp
+    private long mActionTime; //i.e. when someone liked/commented on/etc post
 
 
-
+    /**
+     *
+     * @param json   - update json object retrieved from backend
+     * @throws JSONException
+     */
     public Update(JSONObject json) throws JSONException {
 
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json,"action"));
@@ -75,7 +85,7 @@ public class Update {
         mIsRead = getBooleanFromJson(json, "isRead");
 
         //uncomment if we decide to use it
-        //mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
+        mActionTime = Utils.getTimeFromString(getStringFromJson(json, "date"));
 
         mActionID = getStringFromJson(json,"id");
 
@@ -96,6 +106,7 @@ public class Update {
         mDescription = getStringFromJson(json, "text");
     }
 
+    //parse action String and return UpdateType
     private static UpdateType getUpdateTypeFromString(String action) {
         switch (action) {
             case "liked status":
@@ -116,18 +127,20 @@ public class Update {
                 return UpdateType.MENTIONED;
             case "friend joined":
                 return UpdateType.FRIEND_JOINED;
-            case "posted status":
-                return UpdateType.POSTED_STATUS;
-            case "posted photo":
-                return UpdateType.POSTED_PHOTO;
-            case "posted video":
-                return UpdateType.POSTED_VIDEO;
+            case "friend posted status":
+                return UpdateType.FRIEND_POSTED_STATUS;
+            case "friend posted photo":
+                return UpdateType.FRIEND_POSTED_PHOTO;
+            case "friend posted video":
+                return UpdateType.FRIEND_POSTED_VIDEO;
             case "also commented status":
                 return UpdateType.AlSO_COMMENTED_STATUS;
             case "also commented photo":
                 return UpdateType.ALSO_COMMENTED_IMAGE;
             case "also commented video":
                 return UpdateType.ALSO_COMMENTED_VIDEO;
+            case "matched":
+                return UpdateType.MATCHED;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -146,12 +159,18 @@ public class Update {
 
     //following activities will have event info
     public final boolean hasEventInformation(){
-        return mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS ||
-                mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
-                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS || mUpdateType == UpdateType.MENTIONED
-                || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS ||
-                mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO || mUpdateType == UpdateType.POSTED_VIDEO ||
-                mUpdateType == UpdateType.LIKED_VIDEO || mUpdateType == UpdateType.COMMENTED_VIDEO;
+//        return  mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS
+//                || mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
+//                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS
+//                || mUpdateType == UpdateType.MENTIONED || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE
+//                || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS || mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO
+//                || mUpdateType == UpdateType.POSTED_VIDEO || mUpdateType == UpdateType.LIKED_VIDEO
+//                || mUpdateType == UpdateType.COMMENTED_VIDEO;
+
+        return mUpdateType != UpdateType.UNDEFINED &&
+                mUpdateType != UpdateType.FOLLOWER &&
+                mUpdateType != UpdateType.FRIEND_JOINED &&
+                mUpdateType != UpdateType.MATCHED;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -179,35 +198,6 @@ public class Update {
         return mAnonImage;
     }
 
-    private static String getActionDescription(UpdateType type) {
-        switch (type){
-            case LIKED_STATUS:
-                return "Liked your status";
-            case LIKED_PHOTO:
-                return "Liked your photo";
-            case COMMENTED_PHOTO:
-                return  "Commented on your photo";
-            case COMMENTED_STATUS:
-                return "Commented on your status";
-            case FOLLOWER:
-                return "Started Following you";
-            case FRIEND_JOINED:
-                return  "Has joined Tapt";
-            case MENTIONED:
-                return "Mentioned you in a post";
-            case POSTED_PHOTO:
-                return "Posted a photo";
-            case POSTED_STATUS:
-                return "Posted a status";
-            case ALSO_COMMENTED_IMAGE:
-                return "Also commented on a photo";
-            case AlSO_COMMENTED_STATUS:
-                return "Also commented on a status";
-            default:
-                return  "";
-        }
-    }
-
     public String getUserFullName() {
         return mUserFullName;
     }
@@ -232,15 +222,6 @@ public class Update {
         return mPost.isImagePost();
     }
 
-    /*
-    public String getTimeString() {
-        if (mActionTime == 0) return "";
-
-        return DateUtils.getRelativeTimeSpanString(mActionTime,
-                new Date().getTime(),  //time now
-                DateUtils.SECOND_IN_MILLIS).toString();
-
-    }*/
 
     public boolean isRead() {
         return mIsRead;

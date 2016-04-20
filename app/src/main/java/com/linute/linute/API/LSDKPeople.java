@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,9 +26,7 @@ public class LSDKPeople {
 
     public Call getPeople(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
         String[] path = {"people"};
-
         return API_Methods.get(path, header, param, callback);
     }
 
@@ -45,19 +42,6 @@ public class LSDKPeople {
         return API_Methods.put("friends/" + friendshipID, header, param, callback);
     }
 
-//    public Call getPeoplNearMe(JSONObject array, Callback callback){
-//        Map<String, String> header = API_Methods.getHeaderWithAuthUser(
-//                mSharedPreferences.getString("email", null),
-//                mSharedPreferences.getString("password", null),
-//                mEncodedToken);
-//
-//        Map<String, String> param = new HashMap<>();
-//        param.put("skip", "0");
-//        param.put("limit", "20");
-//        param.put("coordinates", array.toString());
-//
-//        return API_Methods.get(new String[] {"geo"},header, param, callback);
-//    }
 
     public Call getPeoplNearMe(Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
