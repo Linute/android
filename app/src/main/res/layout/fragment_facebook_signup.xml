@@ -5,7 +5,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                tools:background="@drawable/background">
+                tools:background="@color/pure_black">
 
     <ViewSwitcher android:id="@+id/fbSignUp_view_switcher"
                   android:layout_width="match_parent"
@@ -22,16 +22,16 @@
                         android:orientation="vertical">
 
 
-            <RelativeLayout android:id="@+id/fbsignup_profile_image"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginBottom="16dp"
-                            android:layout_marginTop="16dp">
+            <FrameLayout android:id="@+id/fbsignup_profile_image"
+                         android:layout_width="wrap_content"
+                         android:layout_height="wrap_content"
+                         android:layout_centerHorizontal="true"
+                         android:layout_marginBottom="16dp"
+                         android:layout_marginTop="16dp">
 
                 <ImageView android:layout_width="116dp"
                            android:layout_height="116dp"
-                           android:layout_centerInParent="true"
+                           android:layout_gravity="center"
                            android:src="@drawable/photo_rad"
                 />
 
@@ -39,13 +39,13 @@
                     android:id="@+id/fbSignUp_profile_pic_view"
                     android:layout_width="110dp"
                     android:layout_height="110dp"
-                    android:layout_centerInParent="true"
+                    android:layout_gravity="center"
                     android:alpha="0.5"
                     android:src="@drawable/image_loading_background"
                     app:civ_border_color="@color/seperator_color"
                     app:civ_border_width="1dp"/>
 
-            </RelativeLayout>
+            </FrameLayout>
 
             <LinearLayout android:id="@+id/fbsignup_name"
                           android:layout_width="match_parent"
@@ -111,11 +111,9 @@
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:layout_below="@id/fbSignUp_email"
-                          android:orientation="horizontal">
-
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="2"/>
+                          android:gravity="center"
+                          android:orientation="horizontal"
+                          android:weightSum="9">
 
                 <ImageView android:id="@+id/fbSignUp_next_button"
                            android:layout_width="0px"
@@ -123,18 +121,15 @@
                            android:layout_weight="3"
                            android:src="@drawable/create_sign_up_button"/>
 
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="2"/>
             </LinearLayout>
 
 
             <ProgressBar
                 android:id="@+id/fbSignUp_progress_bar1"
-                android:layout_below="@id/fbSignUp_email"
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/fbSignUp_email"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="32dp"
                 android:visibility="gone"
@@ -147,7 +142,7 @@
                       android:layout_below="@id/fb_signup_button_layer"
                       android:layout_marginEnd="8dp"
                       android:layout_marginStart="8dp"
-                      android:layout_marginTop="64dp"
+                      android:layout_marginTop="56dp"
                       android:gravity="center"
                       android:text="@string/create_account_agree"
                       android:textColor="@color/fifty_white"
@@ -157,10 +152,10 @@
             <LinearLayout android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:layout_below="@id/fb_agree_text"
+                          android:layout_marginBottom="16dp"
                           android:layout_marginEnd="@dimen/activity_horizontal_margin"
                           android:layout_marginStart="@dimen/activity_horizontal_margin"
                           android:layout_marginTop="4dp"
-                          android:layout_marginBottom="8dp"
                           android:orientation="horizontal"
             >
                 <TextView android:id="@+id/fb_create_privacy_policy"
@@ -198,7 +193,7 @@
         <LinearLayout android:id="@+id/fbSignUp_verify_form"
                       android:layout_width="match_parent"
                       android:layout_height="match_parent"
-                      android:gravity="center"
+                      android:layout_marginTop="160dp"
                       android:orientation="vertical">
 
             <TextView android:layout_width="match_parent"
@@ -247,37 +242,56 @@
                 android:textSize="14sp"
                 android:theme="@style/MyEditTextTheme"/>
 
-            <LinearLayout android:id="@+id/fbSignUp_code_verify_buttons"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:orientation="horizontal">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="1"/>
 
                 <ImageView android:id="@+id/fbSignUp_update_info_button"
-                           android:layout_width="0px"
-                           android:layout_height="wrap_content"
-                           android:layout_weight="1"
+                           android:layout_width="120dp"
+                           android:layout_height="60dp"
+                           android:layout_gravity="center"
                            android:src="@drawable/verify_button"
                 />
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="1"/>
 
-            </LinearLayout>
+                <ProgressBar
+                    android:id="@+id/fbSignUp_progress_bar2"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                />
+            </FrameLayout>
 
-            <ProgressBar
-                android:id="@+id/fbSignUp_progress_bar2"
-                style="?android:attr/progressBarStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-            />
+            <FrameLayout android:layout_width="match_parent"
+                         android:layout_height="72dp"
+                         android:layout_margin="@dimen/activity_horizontal_margin"
+            >
 
+                <TextView
+                    android:id="@+id/resend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:padding="16dp"
+                    android:text="Resend"
+                    android:textColor="@color/fifty_white"
+                    android:textSize="@dimen/header_font_size"/>
+
+                <ProgressBar
+                    android:id="@+id/resend_progress"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                />
+            </FrameLayout>
         </LinearLayout>
-
     </ViewSwitcher>
 
     <ImageView android:id="@+id/fbSignUp_back_button"

@@ -158,17 +158,6 @@ public class API_Methods {
     }
 
 
-    public static Map<String, String> getHeaderWithAuthUser(String email, String password, String authDeviceToken) {
-        Map<String, String> header = getMainHeader(authDeviceToken);
-
-        String encodedUserInfo = Utils.encode_base64(email + ":" +
-                password);
-
-        header.put("authorizationUser", "Basic " + encodedUserInfo);
-
-        return header;
-    }
-
     // returns main header containing: Content-Type and authorizationDevice
     public static Map<String, String> getMainHeader(String token) {
         Map<String, String> header = new HashMap<>();

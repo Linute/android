@@ -124,12 +124,9 @@
             <LinearLayout android:id="@+id/signup_verify_layer"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
-                          android:layout_below="@id/signup_password">
-
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="2"/>
-
+                          android:layout_below="@id/signup_password"
+                          android:gravity="center"
+                          android:weightSum="9">
 
                 <ImageView android:id="@+id/signup_get_verify_code_button"
                            android:layout_width="0px"
@@ -137,10 +134,6 @@
                            android:layout_weight="3"
                            android:src="@drawable/create_sign_up_button"
                 />
-
-                <View android:layout_width="0px"
-                      android:layout_height="0px"
-                      android:layout_weight="2"/>
             </LinearLayout>
 
 
@@ -159,9 +152,10 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:layout_below="@id/signup_verify_layer"
+                      android:layout_marginBottom="8dp"
                       android:layout_marginEnd="8dp"
                       android:layout_marginStart="8dp"
-                      android:layout_marginTop="32dp"
+                      android:layout_marginTop="8dp"
                       android:gravity="center"
                       android:text="@string/create_account_agree"
                       android:textColor="@color/fifty_white"
@@ -171,6 +165,7 @@
             <LinearLayout android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:layout_below="@id/agree_text"
+                          android:layout_marginBottom="8dp"
                           android:layout_marginEnd="@dimen/activity_horizontal_margin"
                           android:layout_marginStart="@dimen/activity_horizontal_margin"
                           android:layout_marginTop="4dp"
@@ -293,7 +288,7 @@
                           android:layout_height="wrap_content"
                           android:layout_gravity="center_horizontal|bottom"
                           android:layout_marginBottom="16dp"
-                          android:padding="@dimen/activity_horizontal_margin"
+                          android:padding="16dp"
                           android:text="Resend"
                           android:textColor="@color/fifty_white"
                           android:textSize="@dimen/header_font_size"

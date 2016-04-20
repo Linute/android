@@ -57,7 +57,7 @@ public class FacebookSignUpFragment extends Fragment {
     private SharedPreferences mSharedPreferences;
 
     private View mLayer1Buttons;
-    private View mLayer2Buttons; //layer 2
+    private View mLayer2Button; //layer 2
 
     private TextView mEmailConfirmText;
 
@@ -68,14 +68,17 @@ public class FacebookSignUpFragment extends Fragment {
 
     private CircleImageView mProfileImage;
 
-    private ProgressBar mProgressBar1;
-    private ProgressBar mProgressBar2;
+    private View mProgressBar1;
+    private View mProgressBar2;
 
     private ViewSwitcher mViewSwitcher;
 
     private boolean mCheckInProgress = false;
 
     private boolean mImageIsFBLink;
+
+    private View mResendPinButton;
+    private View mProgressbar3;
 
     @Nullable
     @Override
@@ -181,7 +184,7 @@ public class FacebookSignUpFragment extends Fragment {
     private void bindViews(View root) {
 
         mLayer1Buttons = root.findViewById(R.id.fb_signup_button_layer);
-        mLayer2Buttons = root.findViewById(R.id.fbSignUp_code_verify_buttons);
+        mLayer2Button = root.findViewById(R.id.fbSignUp_update_info_button);
 
         mEmailConfirmText = (TextView) root.findViewById(R.id.fbSignUp_email_confirm_text_view);
 
@@ -193,14 +196,15 @@ public class FacebookSignUpFragment extends Fragment {
         mEmailEditText = (EditText) root.findViewById(R.id.fbSignUp_email);
 
         mProfileImage = (CircleImageView) root.findViewById(R.id.fbSignUp_profile_pic_view);
-        mProgressBar1 = (ProgressBar) root.findViewById(R.id.fbSignUp_progress_bar1);
-        mProgressBar2 = (ProgressBar) root.findViewById(R.id.fbSignUp_progress_bar2);
+        mProgressBar1 = root.findViewById(R.id.fbSignUp_progress_bar1);
+        mProgressBar2 = root.findViewById(R.id.fbSignUp_progress_bar2);
 
-        mLayer2Buttons = root.findViewById(R.id.fbSignUp_code_verify_buttons);
+        mProgressbar3 = root.findViewById(R.id.resend_progress);
+        mResendPinButton = root.findViewById(R.id.resend);
     }
 
     private void setOnClickListener() {
-        mLayer2Buttons.findViewById(R.id.fbSignUp_update_info_button).setOnClickListener(new View.OnClickListener() {
+        mLayer2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 updateInformation();
@@ -211,6 +215,12 @@ public class FacebookSignUpFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 checkEmailAndGetPinCode();
+            }
+        });
+        mResendPinButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resendPin(mEmailEditText.getText().toString().trim().toLowerCase());
             }
         });
     }
@@ -239,9 +249,6 @@ public class FacebookSignUpFragment extends Fragment {
             newInfo.put("dob", dob);
         }
         newInfo.put("registrationType", mSharedPreferences.getString("registrationType", ""));
-        //newInfo.put("passwordFacebook", mSharedPreferences.getString("passwordFacebook", ""));
-        //newInfo.put("password", mSharedPreferences.getString("password", ""));
-
 
         showProgress(true, 1);
 
@@ -372,7 +379,7 @@ public class FacebookSignUpFragment extends Fragment {
                     try {
                         mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
 
-                        Log.i(TAG, "onResponse: " + mPinCode);
+                        //Log.i(TAG, "onResponse: " + mPinCode);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -391,6 +398,75 @@ public class FacebookSignUpFragment extends Fragment {
                 } else {
                     Log.e(TAG, "onResponse: " + response.body().string());
                     serverError(0);
+                }
+            }
+        });
+    }
+
+
+    private void resendPin(String email) {
+        if (getActivity() == null) return;
+        final String fName = mFirstNameEditText.getText().toString().trim();
+        final String lName = mLastNameEditText.getText().toString().trim();
+
+        mProgressbar3.setVisibility(View.VISIBLE);
+        mResendPinButton.setVisibility(View.GONE);
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(email, fName, lName, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() == null){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mProgressbar3.setVisibility(View.GONE);
+                            mResendPinButton.setVisibility(View.VISIBLE);
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        mPinCode = (new JSONObject(response.body().string())).getString("pinCode");
+                        //Log.i(TAG, "onResponse: " + mPinCode);
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressbar3.setVisibility(View.GONE);
+                                mResendPinButton.setVisibility(View.VISIBLE);
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() == null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProgressbar3.setVisibility(View.GONE);
+                                    mResendPinButton.setVisibility(View.VISIBLE);
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() == null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressbar3.setVisibility(View.GONE);
+                                mResendPinButton.setVisibility(View.VISIBLE);
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
                 }
             }
         });
@@ -453,7 +529,7 @@ public class FacebookSignUpFragment extends Fragment {
             buttons = mLayer1Buttons;
         } else {
             progressBar = mProgressBar2;
-            buttons = mLayer2Buttons;
+            buttons = mLayer2Button;
         }
 
         buttons.setVisibility(show ? View.INVISIBLE : View.VISIBLE);

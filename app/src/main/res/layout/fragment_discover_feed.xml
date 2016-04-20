@@ -19,7 +19,7 @@
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:layout_centerHorizontal="true"
-                   tools:src="@drawable/campus"
+                   android:src="@drawable/campus"
         />
 
         <TextView android:id="@+id/dicover_no_posts_text"

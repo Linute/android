@@ -164,13 +164,11 @@ public class DiscoverFragment extends UpdatableFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mFriendsOnly && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.campus);
                 ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
 
             } else if (mFriendsOnly && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(R.drawable.loser_512);
                 ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_friends);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);

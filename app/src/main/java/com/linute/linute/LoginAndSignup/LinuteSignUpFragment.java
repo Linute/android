@@ -27,7 +27,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -78,14 +77,16 @@ public class LinuteSignUpFragment extends Fragment {
     private EditText mPasswordView;
     private EditText mPinCodeView;
 
-    private ProgressBar mProgressBar1;
-    private ProgressBar mProgressBar2;
+    private View mProgressBar1;
+    private View mProgressBar2;
+    private View mProgressBar3;
 
     private EditText mFirstNameTextView;
     private EditText mLastNameTextView;
 
-    private View mSubmitLayer;
+    private View mSubmitButton;
     private View mVerifyLayer;
+    private View mResendButton;
 
     private Bitmap mProfilePictureBitmap;
 
@@ -196,8 +197,8 @@ public class LinuteSignUpFragment extends Fragment {
         mLastNameTextView = (EditText) root.findViewById(R.id.signup_lname_text);
         mProfilePictureView = (CircleImageView) root.findViewById(R.id.signup_profile_pic_view);
 
-        mProgressBar1 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar1);
-        mProgressBar2 = (ProgressBar) root.findViewById(R.id.signUp_progress_bar2);
+        mProgressBar1 =  root.findViewById(R.id.signUp_progress_bar1);
+        mProgressBar2 =  root.findViewById(R.id.signUp_progress_bar2);
 
 //        mEmailSignUpButton = root.findViewById(R.id.signup_get_verify_code_button);
 //        mGetPinCodeButton = root.findViewById(R.id.signUp_submit_butt);
@@ -205,7 +206,10 @@ public class LinuteSignUpFragment extends Fragment {
         mPinCodeView = (EditText) root.findViewById(R.id.signUp_verify_code);
         mFirstNameTextView.setNextFocusDownId(R.id.signup_lname_text);
 
-        mSubmitLayer = root.findViewById(R.id.signUp_submit_layer);
+        mResendButton = root.findViewById(R.id.resend);
+        mProgressBar3 = root.findViewById(R.id.resend_progress);
+
+        mSubmitButton = root.findViewById(R.id.signUp_submit_butt);
         mVerifyLayer = root.findViewById(R.id.signup_verify_layer);
 
         mEmailConfirmTextView = (TextView) root.findViewById(R.id.signUp_email_confirm_text_view);
@@ -221,7 +225,7 @@ public class LinuteSignUpFragment extends Fragment {
         });
 
         //attempt to sign up when button pressed
-        mSubmitLayer.setOnClickListener(new OnClickListener() {
+        mSubmitButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 verifyCode();
@@ -237,6 +241,13 @@ public class LinuteSignUpFragment extends Fragment {
                 String[] options = {"Camera", "Photo Gallery", "Cancel"};
                 builder.setItems(options, actionListener);
                 builder.create().show();
+            }
+        });
+
+        mResendButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resendPincode();
             }
         });
     }
@@ -347,6 +358,75 @@ public class LinuteSignUpFragment extends Fragment {
         });
     }
 
+    private void resendPincode() {
+        if (getActivity() == null) return;
+
+        final String fName = mFirstNameTextView.getText().toString().trim();
+        final String lName = mLastNameTextView.getText().toString().trim();
+        mResendButton.setVisibility(View.GONE);
+        mProgressBar3.setVisibility(View.VISIBLE);
+        new LSDKUser(getActivity()).getConfirmationCodeForEmail(mEmailString, fName, lName, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if(getActivity() != null){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mResendButton.setVisibility(View.VISIBLE);
+                            mProgressBar3.setVisibility(View.GONE);
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        String stringResp = response.body().string();
+                        mPinCode = (new JSONObject(stringResp).getString("pinCode"));
+                        //Log.i(TAG, "onResponse: " + stringResp);
+
+                        if (getActivity() == null) return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mResendButton.setVisibility(View.VISIBLE);
+                                mProgressBar3.setVisibility(View.GONE);
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if(getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mResendButton.setVisibility(View.VISIBLE);
+                                    mProgressBar3.setVisibility(View.GONE);
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if(getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mResendButton.setVisibility(View.VISIBLE);
+                                mProgressBar3.setVisibility(View.GONE);
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
 
     private boolean checkEmail(String emailString) {
         //if empty return false
@@ -426,7 +506,7 @@ public class LinuteSignUpFragment extends Fragment {
                 break;
             case 1:
                 progressBar = mProgressBar2;
-                button = mSubmitLayer;
+                button = mSubmitButton;
                 break;
             default:
                 return;

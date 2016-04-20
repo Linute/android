@@ -18,6 +18,7 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
+import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.EditProfileInfoActivity;
 import com.linute.linute.R;
@@ -353,12 +354,11 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             });
 
             final BaseTaptActivity activity = (BaseTaptActivity) context;
-
             itemView.findViewById(R.id.prof_header_followers_container).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (activity != null && mUser.isInformationLoaded()) {
-                        activity.addFragmentToContainer(FriendsListFragment.newInstance(false, mUser.getUserID()));
+                        activity.addFragmentToContainer(FriendsListHolder.newInstance(mUser.getUserID()));
                     }
                 }
             });

@@ -308,7 +308,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         rootView.findViewById(R.id.comment_send_button_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendComment();
+                if (mSendButton.getVisibility() == View.VISIBLE) {
+                    sendComment();
+                }
             }
         });
 
@@ -670,17 +672,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     }
                 }
         );
-    }
-
-
-    private void setCommentViewEditable(boolean editable) {
-        if (editable) {
-            mCommentEditText.setFocusableInTouchMode(true);
-            mAnonCheckBoxContainer.setEnabled(true);
-        } else {
-            mCommentEditText.setFocusable(false);
-            mAnonCheckBoxContainer.setEnabled(false);
-        }
     }
 
     private void showOptionsDialog(){
@@ -1308,10 +1299,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         public void run() {
                             boolean smoothScroll = false;
                             if (com.getCommentUserId().equals(mViewId)) { //was the user that posted the comment
-                                mCommentEditText.setText("");
                                 mSendButton.setVisibility(View.VISIBLE);
                                 mProgressbar.setVisibility(View.GONE);
-                                setCommentViewEditable(true);
                                 smoothScroll = true;
                             }
 
@@ -1377,13 +1366,9 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             comment.put("mentions", mentions);
-
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
-            setCommentViewEditable(false);
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
-
+            mCommentEditText.setText("");
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException e) {
             e.printStackTrace();

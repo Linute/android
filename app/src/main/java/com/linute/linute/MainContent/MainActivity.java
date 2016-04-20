@@ -78,6 +78,7 @@ public class MainActivity extends BaseTaptActivity {
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
     private SharedPreferences mSharedPreferences;
     private boolean mConnecting;
+    private View mParentView;
 
     private SocketErrorResponse mSocketErrorResponse;
 
@@ -103,13 +104,12 @@ public class MainActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new UpdatableFragment[4];
-
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
         mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
+        mParentView = findViewById(R.id.mainActivity_fragment_holder);
         //profile image and header setup
         loadDrawerHeader();
 
@@ -316,7 +316,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void noInternet() {
-        CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
+        CustomSnackbar sn = CustomSnackbar.make(mParentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         sn.getView().setAlpha(0.8f);
 
@@ -634,7 +634,7 @@ public class MainActivity extends BaseTaptActivity {
         final String ownerFullName = object.getString("ownerFullName");
         final String message = object.getString("text");
 
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, message, CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mParentView, message, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -653,7 +653,7 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private void newEventSnackbar(String text, final Post post) {
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mParentView, text, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -667,7 +667,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void newProfileSnackBar(final Update update) {
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mParentView, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -764,7 +764,7 @@ public class MainActivity extends BaseTaptActivity {
     };
 
     private void showUpdateSnackbar(String text){
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);
+        final CustomSnackbar sn = CustomSnackbar.make(mParentView, text, CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
