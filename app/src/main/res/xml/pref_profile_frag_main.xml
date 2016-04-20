@@ -29,13 +29,16 @@
                     android:title="Terms of Service"/>
         <Preference android:key="attributions"
                     android:title="Attributions"
-                    />
+        />
     </PreferenceCategory>
 
     <PreferenceCategory>
         <Preference android:key="logout"
                     android:title="Log Out"
-            />
+        />
+        <Preference android:key="version"
+                    android:title="About"
+        />
     </PreferenceCategory>
 
 </PreferenceScreen>

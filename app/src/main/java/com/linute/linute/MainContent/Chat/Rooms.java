@@ -93,11 +93,15 @@ public class Rooms {
         mTime = time;
     }
 
-    //    public int getUsersCount() {
-//        return mUsersCount;
-//    }
-//
-//    public ArrayList<ChatHead> getChatHeadList() {
-//        return mChatHeadList;
-//    }
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Rooms))
+            return false;
+        return mRoomId.equals(((Rooms) o).mRoomId);
+    }
+
+    @Override
+    public int hashCode() {
+        return mRoomId.hashCode();
+    }
 }

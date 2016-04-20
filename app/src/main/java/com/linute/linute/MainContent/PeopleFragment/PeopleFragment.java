@@ -144,13 +144,6 @@ public class PeopleFragment extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-//        MainActivity mainActivity = (MainActivity) getActivity();
-//        if (mainActivity != null) {
-//            mainActivity.setTitle("People");
-//            mainActivity.resetToolbar();
-//        }
-
-
         PeopleFragmentsHolder fragment = (PeopleFragmentsHolder) getParentFragment();
 
         if (fragment == null) return;
@@ -706,6 +699,17 @@ public class PeopleFragment extends UpdatableFragment {
     public void scrollUp() {
         if (recList != null) {
             recList.scrollToPosition(0);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mNearMe && mRationaleLayer.getVisibility() == View.VISIBLE){
+            PeopleFragmentsHolder fragment = (PeopleFragmentsHolder) getParentFragment();
+            if (fragment != null){
+                fragment.setNearMeNeedsUpdating(true);
+            }
         }
     }
 }

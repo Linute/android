@@ -167,21 +167,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         void bindModel(final LinuteUser user) {
 
-//            vMessageButton.hide();
-//
-//            if (mUser.getFriend() != null && !mUser.getFriend().equals("")) {
-//                vMessageButton.show(); //show message button
-//                vMessageButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        if (mUser.getUserID() == null || mUser.getUserID().equals(mUserid)) return;
-//                        Intent enterRooms = new Intent(context, RoomsActivity.class);
-//                        enterRooms.putExtra("CHATICON", false);
-//                        enterRooms.putExtra("USERID", mUser.getUserID());
-//                        context.startActivity(enterRooms);
-//                    }
-//                });
-//            }
 
             Glide.with(mContext)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
@@ -219,6 +204,24 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             vUserName = (TextView) itemView.findViewById(R.id.username);
             vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
+
+            vMessageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mUser == null ||
+                            mUser.getUserID() == null ||
+                            mUser.getUserID().equals(mUserid) ||
+                            mUser.getFriend().equals(""))
+                        return;
+
+                    Intent enterRooms = new Intent(context, RoomsActivity.class);
+                    enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+                    enterRooms.putExtra("ownerID", mUser.getUserID());
+                    enterRooms.putExtra("ownerFullName", mUser.getFirstName() + " " + mUser.getLastName());
+                    enterRooms.putExtra("room", "");
+                    context.startActivity(enterRooms);
+                }
+            });
 
             //follow someone
             mFollowButton.setOnClickListener(new View.OnClickListener() {
@@ -314,7 +317,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                     if (!response.isSuccessful()) {
                                         Log.d(TAG, response.body().string());
-                                        if (activity1 != null){
+                                        if (activity1 != null) {
                                             activity1.runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
@@ -384,17 +387,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     } else {
                         mFollowingButtonText.setText("following");
                         vMessageButton.show(); //show message button
-                        vMessageButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (mUser.getUserID() == null || mUser.getUserID().equals(mUserid))
-                                    return;
-                                Intent enterRooms = new Intent(context, RoomsActivity.class);
-                                enterRooms.putExtra("CHATICON", false);
-                                enterRooms.putExtra("USERID", mUser.getUserID());
-                                context.startActivity(enterRooms);
-                            }
-                        });
                     }
                 }
             }

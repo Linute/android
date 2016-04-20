@@ -86,7 +86,6 @@ public class EditSaveVideoFragment extends Fragment {
     private VideoDimen mVideoDimen;
 
 
-
     public static Fragment newInstance(Uri imageUri, boolean makeAnon, VideoDimen videoDimen) {
         Fragment fragment = new EditSaveVideoFragment();
 
@@ -162,7 +161,7 @@ public class EditSaveVideoFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity) getActivity()).clearBackStack();
+                showConfirmDialog();
             }
         });
 
@@ -219,6 +218,25 @@ public class EditSaveVideoFragment extends Fragment {
         }
     }
 
+    private void showConfirmDialog() {
+        if (getActivity() == null) return;
+        new AlertDialog.Builder(getActivity())
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((CameraActivity) getActivity()).clearBackStack();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
+
 
     @Override
     public void onDestroy() {
@@ -246,10 +264,10 @@ public class EditSaveVideoFragment extends Fragment {
         String cmd = "-i " + mVideoLink + " "; //input file
 
         String crop = String.format(Locale.US,
-                                    "-vf crop=%d:%d:%d:0 ",
-                                    mVideoDimen.height,
-                                    mVideoDimen.height,
-                                    (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+                "-vf crop=%d:%d:%d:0 ",
+                mVideoDimen.height,
+                mVideoDimen.height,
+                (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
 
         cmd += crop; //crop
         cmd += "-preset superfast ";
@@ -437,7 +455,8 @@ public class EditSaveVideoFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
 
-            if (getActivity() == null || params[0] == null || params[1] == null || params[2] == null) return null;
+            if (getActivity() == null || params[0] == null || params[1] == null || params[2] == null)
+                return null;
 
             String outputFile = params[0];
 

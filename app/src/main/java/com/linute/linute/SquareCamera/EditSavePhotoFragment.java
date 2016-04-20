@@ -2,6 +2,7 @@ package com.linute.linute.SquareCamera;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -27,7 +29,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
@@ -140,7 +141,7 @@ public class EditSavePhotoFragment extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity) getActivity()).clearBackStack();
+                showConfirmDialog();
             }
         });
 
@@ -155,6 +156,27 @@ public class EditSavePhotoFragment extends Fragment {
         });
 
         setUpEditText();
+    }
+
+
+    private void showConfirmDialog(){
+        if (getActivity() == null) return;
+        hideKeyboard();
+        new AlertDialog.Builder(getActivity())
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((CameraActivity) getActivity()).clearBackStack();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     //text strip can move or not

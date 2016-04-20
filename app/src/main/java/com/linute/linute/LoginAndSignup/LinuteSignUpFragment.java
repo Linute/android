@@ -221,7 +221,7 @@ public class LinuteSignUpFragment extends Fragment {
         });
 
         //attempt to sign up when button pressed
-        mSubmitLayer.findViewById(R.id.signUp_submit_butt).setOnClickListener(new OnClickListener() {
+        mSubmitLayer.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 verifyCode();

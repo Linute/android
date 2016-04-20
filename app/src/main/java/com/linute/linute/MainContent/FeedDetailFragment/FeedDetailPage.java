@@ -1256,7 +1256,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             //will check if we can scroll down
             //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
             //neg is scroll up, positive is scroll down
-            final boolean mCanScrollDown = recList.canScrollVertically(1);
+
+            final boolean mCanScrollDown = recList != null && recList.canScrollVertically(1);
 
             if (object == null) {
                 Log.i(TAG, "call: Error retrieving new comment");

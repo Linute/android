@@ -171,6 +171,7 @@ public class SettingActivity extends AppCompatActivity {
         Preference mLogOut;
         Preference mAttributions;
         Preference mNotification;
+        Preference mAbout;
 
         @Override
         public void onCreate(final Bundle savedInstanceState) {
@@ -191,6 +192,10 @@ public class SettingActivity extends AppCompatActivity {
             mLogOut = findPreference("logout");
             mAttributions = findPreference("attributions");
             mNotification = findPreference("notifications");
+            mAbout = findPreference("version");
+
+            DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
+            mAbout.setSummary("v"+info.getVersionCode()+"api"+API_Methods.VERSION);
         }
 
         /* TODO: still need to add the following on click listeners:
@@ -209,9 +214,9 @@ public class SettingActivity extends AppCompatActivity {
                     ((SettingActivity) getActivity()).emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
 
                     Utils.resetUserInformation(getActivity()
-                            .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit());
+                            .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                     Utils.deleteTempSharedPreference(getActivity()
-                            .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit());
+                            .getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
 
                     if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                         LoginManager.getInstance().logOut();

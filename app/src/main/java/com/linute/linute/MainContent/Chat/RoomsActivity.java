@@ -1,11 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -24,10 +23,6 @@ import io.socket.engineio.client.transports.WebSocket;
 public class RoomsActivity extends BaseTaptActivity {
 
     private static final String TAG = RoomsActivity.class.getSimpleName();
-    //private TextView mTitle;
-    //Handler mHandler = new Handler(Looper.getMainLooper());
-    //private EventBus mEventBus = EventBus.getDefault();
-    //private FloatingActionButton mFab;
     private Socket mSocket;
     private SharedPreferences mSharedPreferences;
     private boolean mConnecting; //socket is trying to connect
@@ -43,57 +38,15 @@ public class RoomsActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        if (savedInstanceState == null){
-           getSupportFragmentManager()
-                   .beginTransaction()
-                   .replace(R.id.chat_container, new RoomsActivityFragment())
-                   .commit();
+        Intent i = getIntent();
+        if (i != null && i.getIntExtra("NOTIFICATION", LinuteConstants.UNDEFINED) == LinuteConstants.MESSAGE) {
+            replaceWithChatFragment(i);
+        } else if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.chat_container, new RoomsActivityFragment())
+                    .commit();
         }
-
-
-    }
-
-//    @Subscribe
-//    public void onEvent(final JSONObject object) {
-//        mHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Toast.makeText(RoomsActivity.this, object.getString("username") + " " + object.getString("message"), Toast.LENGTH_SHORT).show();
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//    }
-
-
-//    @Override
-//    public void onBackPressed() {
-//        int count = getSupportFragmentManager().getBackStackEntryCount();
-//        if (count == 0) {
-//            super.onBackPressed();
-//        } else {
-//            if (count == 1){
-//                toggleFab(true);
-//            }
-//            getSupportFragmentManager().popBackStack();
-//        }
-//    }
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-
-        if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -109,12 +62,12 @@ public class RoomsActivity extends BaseTaptActivity {
                     DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
                     op.query =
                             "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken="+device.getDeviceToken() +
-                                    "&udid="+device.getUdid()+
-                                    "&version="+device.getVersonName()+
-                                    "&build="+device.getVersionCode()+
-                                    "&os="+device.getOS()+
-                                    "&type="+device.getType() +
+                                    "&deviceToken=" + device.getDeviceToken() +
+                                    "&udid=" + device.getUdid() +
+                                    "&version=" + device.getVersonName() +
+                                    "&build=" + device.getVersionCode() +
+                                    "&os=" + device.getOS() +
+                                    "&type=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
 
@@ -161,12 +114,6 @@ public class RoomsActivity extends BaseTaptActivity {
     };
 
 
-    //change toolbar title
-//    @Override
-//    public void setTitle(String title) {
-//
-//    }
-
     @Override
     public void addFragmentToContainer(Fragment fragment) {
         if (!mSafeForFragmentTransaction) return;
@@ -184,10 +131,6 @@ public class RoomsActivity extends BaseTaptActivity {
                 .replace(R.id.chat_container, fragment)
                 .commit();
     }
-
-//    @Override
-//    public void setToolbarOnClickListener(View.OnClickListener listener) {
-//    }
 
     @Override
     public void connectSocket(String event, Emitter.Listener emitter) {
@@ -214,10 +157,26 @@ public class RoomsActivity extends BaseTaptActivity {
         }
     }
 
-
     @Override
     public boolean socketConnected() {
         return mSocket != null && mSocket.connected();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (intent != null && intent.getIntExtra("NOTIFICATION", LinuteConstants.UNDEFINED) == LinuteConstants.MESSAGE) {
+            replaceWithChatFragment(intent);
+        }
+    }
+
+    private void replaceWithChatFragment(Intent intent) {
+        String room = intent.getStringExtra("room");
+        String userId = intent.getStringExtra("ownerID");
+        String userName = intent.getStringExtra("ownerFullName");
+        mSafeForFragmentTransaction = true;
+        replaceContainerWithFragment(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
+                userName, userId.isEmpty() ? null : userId));
+
+    }
 }

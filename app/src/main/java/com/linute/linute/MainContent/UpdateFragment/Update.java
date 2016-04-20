@@ -33,12 +33,13 @@ public class Update {
         FOLLOWER,
         MENTIONED, //need icon
         FRIEND_JOINED, //need icon
-        POSTED_STATUS,
-        POSTED_PHOTO,
-        POSTED_VIDEO,
+        FRIEND_POSTED_STATUS,
+        FRIEND_POSTED_PHOTO,
+        FRIEND_POSTED_VIDEO,
         AlSO_COMMENTED_STATUS,
         ALSO_COMMENTED_IMAGE,
-        ALSO_COMMENTED_VIDEO
+        ALSO_COMMENTED_VIDEO,
+        MATCHED
     }
 
     private String mActionID;           // id of action
@@ -67,8 +68,6 @@ public class Update {
     // Post object will contain event info.
     // ie. "Max liked your image." Post will contain the image url and other information
     private Post mPost;
-
-
 
     //time stamp
     private long mActionTime; //i.e. when someone liked/commented on/etc post
@@ -128,18 +127,20 @@ public class Update {
                 return UpdateType.MENTIONED;
             case "friend joined":
                 return UpdateType.FRIEND_JOINED;
-            case "posted status":
-                return UpdateType.POSTED_STATUS;
-            case "posted photo":
-                return UpdateType.POSTED_PHOTO;
-            case "posted video":
-                return UpdateType.POSTED_VIDEO;
+            case "friend posted status":
+                return UpdateType.FRIEND_POSTED_STATUS;
+            case "friend posted photo":
+                return UpdateType.FRIEND_POSTED_PHOTO;
+            case "friend posted video":
+                return UpdateType.FRIEND_POSTED_VIDEO;
             case "also commented status":
                 return UpdateType.AlSO_COMMENTED_STATUS;
             case "also commented photo":
                 return UpdateType.ALSO_COMMENTED_IMAGE;
             case "also commented video":
                 return UpdateType.ALSO_COMMENTED_VIDEO;
+            case "matched":
+                return UpdateType.MATCHED;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -166,7 +167,10 @@ public class Update {
 //                || mUpdateType == UpdateType.POSTED_VIDEO || mUpdateType == UpdateType.LIKED_VIDEO
 //                || mUpdateType == UpdateType.COMMENTED_VIDEO;
 
-        return mUpdateType != UpdateType.UNDEFINED &&  mUpdateType != UpdateType.FOLLOWER && mUpdateType != UpdateType.FRIEND_JOINED;
+        return mUpdateType != UpdateType.UNDEFINED &&
+                mUpdateType != UpdateType.FOLLOWER &&
+                mUpdateType != UpdateType.FRIEND_JOINED &&
+                mUpdateType != UpdateType.MATCHED;
     }
 
     public final boolean hasFriendShipInformation(){

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -103,8 +102,10 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
             public void onClick(View v) {
                 if (mPerson.isFriend()) {
                     Intent enterRooms = new Intent(mContext, RoomsActivity.class);
-                    enterRooms.putExtra("CHATICON", false);
-                    enterRooms.putExtra("USERID", mPerson.getID());
+                    enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+                    enterRooms.putExtra("ownerID", mPerson.getID());
+                    enterRooms.putExtra("ownerFullName", mPerson.getName());
+                    enterRooms.putExtra("room", "");
                     mContext.startActivity(enterRooms);
                 } else {
 
@@ -131,7 +132,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
                             Activity activity = ((Activity) mContext);
 
                             if (!response.isSuccessful()) {
-                                Log.d("NearbyViewHolder", response.body().string());
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -186,6 +186,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         } else {
             position = 3;
         }
+        Toast.makeText(activity, position+"", Toast.LENGTH_SHORT).show();
 
         try {
             JSONObject result = new JSONObject();
@@ -200,7 +201,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
             Toast.makeText(activity, "An error occurred. Please try again later", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void calculateAndShowNewView(boolean calculate) {
         if (calculate) {

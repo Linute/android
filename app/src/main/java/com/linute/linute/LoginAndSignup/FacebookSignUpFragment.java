@@ -547,7 +547,7 @@ public class FacebookSignUpFragment extends Fragment {
 
         sharedPreferences.apply();
 
-        Utils.deleteTempSharedPreference(mSharedPreferences.edit());
+        Utils.deleteTempSharedPreference(mSharedPreferences);
     }
 
     @Override

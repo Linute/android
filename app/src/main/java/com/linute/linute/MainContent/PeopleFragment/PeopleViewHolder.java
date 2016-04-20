@@ -115,8 +115,10 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                 });
             } else {
                 Intent enterRooms = new Intent(vContext, RoomsActivity.class);
-                enterRooms.putExtra("CHATICON", false);
-                enterRooms.putExtra("USERID", mPerson.getID());
+                enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+                enterRooms.putExtra("ownerID", mPerson.getID());
+                enterRooms.putExtra("ownerFullName", mPerson.getName());
+                enterRooms.putExtra("room", "");
                 vContext.startActivity(enterRooms);
             }
             return;

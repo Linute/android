@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -71,8 +73,13 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(RESULT_CANCELED);
-                finish();
+                hideKeyboard();
+                if (mPostEditText.getText().toString().isEmpty()) {
+                    setResult(RESULT_CANCELED);
+                    finish();
+                } else {
+                    showConfirmDialog();
+                }
             }
         });
         toolbar.setTitle("Status");
@@ -147,6 +154,24 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
     private Socket mSocket;
     private boolean mConnecting = false;
 
+    private void showConfirmDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("you sure?")
+                .setMessage("would you like to throw away what you have currently?")
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setResult(RESULT_CANCELED);
+                        finish();
+                    }
+                })
+                .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).show();
+    }
 
     @Override
     protected void onResume() {
@@ -342,9 +367,9 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
 
     private void hideKeyboard() {
-        mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
+        mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
     }
 
 

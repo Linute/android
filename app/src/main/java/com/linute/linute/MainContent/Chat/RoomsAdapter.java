@@ -1,9 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +13,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -40,7 +45,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
 
-    public void setLoadMore(Runnable load){
+    public void setLoadMore(Runnable load) {
         mLoadMore = load;
     }
 
@@ -56,7 +61,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         ((RoomsViewHolder) holder).bindModel(mRoomsList.get(position));
 
         //load more
-        if (position == mRoomsList.size() - 1 && mLoadMore != null){
+        if (position == mRoomsList.size() - 1 && mLoadMore != null) {
             mLoadMore.run();
         }
     }
@@ -67,7 +72,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     class RoomsViewHolder extends RecyclerView.ViewHolder {
-        protected View vRoomsListLinear;
         protected CircleImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
@@ -78,20 +82,18 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public RoomsViewHolder(View itemView) {
             super(itemView);
 
-            vRoomsListLinear = itemView.findViewById(R.id.rooms_list_linear);
             vUserImage = (CircleImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
             vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
             vTimeStamp = (TextView) itemView.findViewById(R.id.room_time_stamp);
 
-            vRoomsListLinear.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         mRooms.setHasUnread(false);
-
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
                                         mRooms.getRoomId(),
@@ -100,6 +102,58 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                                 )
                         );
                     }
+                }
+            });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    final Rooms room = mRooms;
+                    final int pos = getAdapterPosition();
+                    new AlertDialog.Builder(aContext).setTitle("Messages")
+                            .setItems(new String[]{"Delete"}, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    if (which == 0) {
+                                        if (mRooms != null) {
+                                            final RoomsActivity activity = (RoomsActivity) aContext;
+                                            if (activity != null) {
+                                                JSONObject object = new JSONObject();
+                                                try {
+                                                    if (activity.socketConnected()) {
+                                                        object.put("room", room.getRoomId());
+                                                        activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
+                                                        activity.runOnUiThread(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                int newPos = getAdapterPosition();
+                                                                if (!mRoomsList.get(newPos).equals(room)) {
+                                                                    newPos = mRoomsList.indexOf(room);
+                                                                }
+                                                                if (newPos == -1) return;
+
+                                                                mRoomsList.remove(newPos);
+                                                                notifyItemRemoved(newPos);
+                                                                notifyItemRangeChanged(newPos, getItemCount());
+                                                            }
+                                                        });
+                                                    } else {
+                                                        activity.runOnUiThread(new Runnable() {
+                                                            @Override
+                                                            public void run() {
+                                                                Utils.showBadConnectionToast(activity);
+                                                            }
+                                                        });
+                                                    }
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }).show();
+                    return true;
                 }
             });
         }
@@ -125,6 +179,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE)
                 vHasUnreadIcon.setVisibility(View.INVISIBLE);
         }
+
     }
 
 

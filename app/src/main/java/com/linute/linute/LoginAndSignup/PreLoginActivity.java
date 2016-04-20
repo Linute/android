@@ -89,7 +89,27 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
+        Intent intent = getIntent();
+        if (intent != null){
+            String text = intent.getStringExtra("BANNED");
+            if (text != null){
+                new AlertDialog.Builder(this)
+                        .setTitle("Banned")
+                        .setMessage(text)
+                        .setPositiveButton("okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        }).show();
+            }
+            intent.removeExtra("BANNED");
+        }
+    }
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

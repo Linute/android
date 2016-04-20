@@ -266,7 +266,7 @@ public class ChangePhoneActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     try {
                         persistData(new LinuteUser(new JSONObject(response.body().string()))); //save phone number
-                        Utils.deleteTempSharedPreference(mTempSharedPref.edit()); //delete temp info
+                        Utils.deleteTempSharedPreference(mTempSharedPref); //delete temp info
 
                         runOnUiThread(new Runnable() {
                             @Override

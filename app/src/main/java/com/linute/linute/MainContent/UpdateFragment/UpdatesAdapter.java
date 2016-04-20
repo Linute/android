@@ -195,10 +195,17 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mUpdate != null && mUpdate.getPost() != null) {
-                        ((MainActivity) mContext).addFragmentToContainer(
-                                FeedDetailPage.newInstance(mUpdate.getPost())
-                        );
+                    if (mUpdate != null) {
+                        if (mUpdate.getUpdateType() == Update.UpdateType.MATCHED
+                                || mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
+                            ((MainActivity) mContext).addFragmentToContainer(
+                                    TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
+                            );
+                        }else if (mUpdate.getPost() != null) {
+                            ((MainActivity) mContext).addFragmentToContainer(
+                                    FeedDetailPage.newInstance(mUpdate.getPost())
+                            );
+                        }
                     }
                 }
             });
@@ -266,6 +273,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             //FOLLOWER or FRIEND JOIN - give option to follow back
             else if (update.hasFriendShipInformation()) {
                 setUpFollowButton(update);
+            }else {
+                mEventPicture.setVisibility(View.INVISIBLE);
             }
         }
 
@@ -384,13 +393,13 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case FRIEND_JOINED:
                     drawable = R.drawable.icon_user;
                     break;
-                case POSTED_PHOTO:
+                case FRIEND_POSTED_PHOTO:
                     drawable = R.drawable.icon_comment;
                     break;
-                case POSTED_STATUS:
+                case FRIEND_POSTED_STATUS:
                     drawable = R.drawable.icon_comment;
                     break;
-                case POSTED_VIDEO:
+                case FRIEND_POSTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
                 case ALSO_COMMENTED_IMAGE:
@@ -401,6 +410,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     break;
                 case ALSO_COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
+                    break;
+                case MATCHED:
+                    drawable = R.drawable.icon_user;
                     break;
                 default:
                     drawable = R.drawable.icon_user;

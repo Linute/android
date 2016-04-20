@@ -118,7 +118,6 @@ public class PeopleFragmentsHolder extends UpdatableFragment {
                         return true;
                     case R.id.people_fragment_menu_chat:
                         Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                        enterRooms.putExtra("CHATICON", true);
                         startActivity(enterRooms);
                         return true;
                     default:

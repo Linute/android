@@ -93,29 +93,45 @@ public class MyGcmListenerService extends GcmListenerService {
         //Log.i(TAG, "action : "  + action);
         Log.i(TAG, "sendNotification: " + data.toString());
 
-
         //// TODO: 3/21/16  fix
-        if (action != null && action.equals("messager")) { //<---
-            Intent parent = new Intent(this, MainActivity.class);
-            parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
-
-            intent = new Intent(this, RoomsActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-            pendingIntent = PendingIntent.getActivities(this, 0, new Intent[] {parent, intent}, PendingIntent.FLAG_ONE_SHOT);
+        boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
+        if (action != null) { //<---
+            if (isLoggedIn) {
+                int type = gettNotificationType(data.getString("action"));
+                if (type == LinuteConstants.MESSAGE) {
+                    Intent parent = new Intent(this, MainActivity.class);
+                    parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
+                    intent = new Intent(this, RoomsActivity.class);
+                    intent.putExtra("NOTIFICATION", type);
+                    intent.putExtra("ownerID", data.getString("ownerID"));
+                    intent.putExtra("ownerFullName", data.getString("ownerFullName"));
+                    intent.putExtra("room", data.getString("room") );
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    pendingIntent = PendingIntent.getActivities(this, 0, new Intent[]{parent, intent}, PendingIntent.FLAG_ONE_SHOT);
+                } else if (type == LinuteConstants.FEED_DETAIL || type == LinuteConstants.PROFILE) {
+                    intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    intent.putExtra("NOTIFICATION", type);
+                    if (type == LinuteConstants.FEED_DETAIL)
+                        intent.putExtra("event", data.getString("event"));
+                    else intent.putExtra("user", data.getString("user"));
+                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                            PendingIntent.FLAG_ONE_SHOT);
+                } else {
+                    intent = new Intent(this, MainActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                            PendingIntent.FLAG_ONE_SHOT);
+                }
+            } else {
+                intent = new Intent(this, PreLoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                pendingIntent = PendingIntent.getActivity(this, 0, intent,
+                        PendingIntent.FLAG_ONE_SHOT);
+            }
         } else {
-            boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
             intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-            int type = gettNotificationType(data.getString("action"));
-            intent.putExtra("NOTIFICATION", type);
-
-            if (type == LinuteConstants.FEED_DETAIL)
-                intent.putExtra("event", data.getString("event"));
-            else if (type == LinuteConstants.PROFILE)
-                intent.putExtra("user", data.getString("user"));
-
             pendingIntent = PendingIntent.getActivity(this, 0, intent,
                     PendingIntent.FLAG_ONE_SHOT);
         }
@@ -137,8 +153,8 @@ public class MyGcmListenerService extends GcmListenerService {
     }
 
 
-    private int gettNotificationType(String action){
-        switch (action){
+    private int gettNotificationType(String action) {
+        switch (action) {
             case "commented status":
                 return LinuteConstants.FEED_DETAIL;
             case "liked status":
@@ -169,6 +185,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 return LinuteConstants.PROFILE;
             case "follower":
                 return LinuteConstants.PROFILE;
+            case "matched":
+                return LinuteConstants.PROFILE;
+            case "messager":
+                return LinuteConstants.MESSAGE;
             default:
                 return LinuteConstants.MISC;
         }

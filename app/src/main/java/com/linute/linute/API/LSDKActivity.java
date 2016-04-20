@@ -57,10 +57,11 @@ public class LSDKActivity {
         params.put("action[11]", "friend joined");
 
 //
-//        params.put("action[6]", "posted status");
-//        params.put("action[7]", "posted photo");
-//        params.put("action[8]", "posted video");
+        params.put("action[12]", "friend posted status");
+        params.put("action[13]", "friend posted photo");
+        params.put("action[14]", "friend posted video");
 
+        params.put("action[15]", "matched");
 
         params.put("owner", mSharedPreferences.getString("userID", ""));
 

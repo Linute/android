@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -95,6 +96,8 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private View mLoadmoreProgressBar;
     private View mProgressBar;
 
+    private Toolbar mToolbar;
+
     //private SharedPreferences mSharedPreferences;
 
     //private int mRoomUsersCnt;
@@ -154,21 +157,18 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
             //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
         }
-
-        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
-        toolbar.setTitle(mOtherPersonName);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
+        mToolbar.setTitle(mOtherPersonName);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() != null)
@@ -183,7 +183,8 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         mProgressBar = view.findViewById(R.id.chat_load_progress);
 
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
-        getChat(); //note : move to onResume ?
+        if (mRoomId == null) getRoomAndChat();
+        else getChat(); //note : move to onResume ?
 
         return view;
     }
@@ -193,12 +194,17 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         super.onResume();
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
         if (activity == null) return;
+
         if (mUserId == null) {
             Utils.showServerErrorToast(activity);
             return;
         }
+
+        if (mRoomId != null) joinRoom(activity);
+    }
+
+    public void joinRoom(BaseTaptActivity activity) {
 
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
         activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -314,7 +320,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity != null && mUserId != null) {
+        if (activity != null && mUserId != null && mRoomId != null) {
             activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
 
             activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -333,7 +339,160 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mInputMessageView.hasFocus() && getActivity() != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mInputMessageView.getWindowToken(), 0);
+        }
+    }
+
+
+    private void getRoomAndChat() {
+        if (getActivity() == null || mUserId == null || mOtherPersonId == null) return;
+
+        JSONArray users = new JSONArray();
+        users.put(mUserId);
+        users.put(mOtherPersonId);
+
+        new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                            mProgressBar.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject object = new JSONObject(response.body().string());
+                        //Log.i(TAG, "onResponse: " + object.toString(4));
+                        mRoomId = object.getString("id");
+                        JSONArray messages = object.getJSONArray("messages");
+                        mSkip = object.getInt("totalCount") - 20;
+
+                        final ArrayList<Chat> tempChatList = new ArrayList<>();
+                        JSONObject message;
+                        Chat chat;
+                        String owner;
+                        long time;
+
+                        boolean viewerIsOwnerOfMessage;
+                        boolean messageBeenRead;
+
+                        JSONArray listOfUnreadMessages = new JSONArray();
+
+                        for (int i = 0; i < messages.length(); i++) {
+                            try {
+                                message = messages.getJSONObject(i);
+                                owner = message.getJSONObject("owner").getString("id");
+                                viewerIsOwnerOfMessage = owner.equals(mUserId);
+
+                                messageBeenRead = true;
+
+                                if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
+                                    messageBeenRead = haveRead(message.getJSONArray("read"));
+                                }
+
+                                try {
+                                    time = simpleDateFormat.parse(message.getString("date")).getTime();
+                                } catch (ParseException | JSONException e) {
+                                    time = 0;
+                                }
+
+                                chat = new Chat(
+                                        message.getString("room"),
+                                        time,
+                                        owner,
+                                        message.getString("id"),
+                                        message.getString("text"),
+                                        messageBeenRead,
+                                        viewerIsOwnerOfMessage
+                                );
+
+                                if (!messageBeenRead) {
+                                    listOfUnreadMessages.put(chat.getMessageId());
+                                }
+
+                                tempChatList.add(chat);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (mSkip <= 0) mCanLoadMore = false;
+
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                        if (activity != null) {
+                            joinRoom(activity);
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    mChatList.clear();
+                                    mChatList.addAll(tempChatList);
+                                    mLoadingMessages = false;
+                                    mSkip -= 20;
+
+                                    //show empty view
+                                    if (mChatList.isEmpty()) {
+                                        vEmptyChatView.setVisibility(View.VISIBLE);
+                                    }
+
+                                    mProgressBar.setVisibility(View.GONE);
+                                    mChatAdapter.notifyDataSetChanged();
+                                    scrollToBottom();
+                                }
+                            });
+
+                            //there were messages we need to mark as read
+                            if (listOfUnreadMessages.length() > 0) {
+                                JSONObject obj = new JSONObject();
+                                obj.put("room", mRoomId);
+                                obj.put("messages", listOfUnreadMessages);
+                                activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                    mProgressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mProgressBar.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
     private void getChat() {
+
         if (getActivity() == null) return;
 
         Map<String, String> chat = new HashMap<>();
@@ -358,7 +517,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        //Log.i(TAG, "onResponse: "+object);
+                        //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -457,6 +616,16 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                 }
                             });
                         }
+                    }
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                                mProgressBar.setVisibility(View.GONE);
+                            }
+                        });
                     }
                 }
             }
@@ -558,7 +727,8 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private void attemptSend() {
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !activity.socketConnected() || mUserId == null) return;
+        if (activity == null || !activity.socketConnected() || mUserId == null || mRoomId == null)
+            return;
 
         String message = mInputMessageView.getText().toString().trim();
         if (TextUtils.isEmpty(message)) {
@@ -770,11 +940,11 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         Map<String, String> chat = new HashMap<>();
         chat.put(ROOM_ID, mRoomId);
 
-        if (mSkip < 0){
+        if (mSkip < 0) {
             chat.put("skip", "0");
             chat.put("limit", (20 + mSkip) + "");
             mSkip = 0;
-        }else {
+        } else {
             chat.put("skip", mSkip + "");
         }
 
