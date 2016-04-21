@@ -13,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -271,7 +270,6 @@ public class DiscoverFragment extends UpdatableFragment {
                                         public void run() {
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
                                                     ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }
@@ -393,7 +391,6 @@ public class DiscoverFragment extends UpdatableFragment {
 
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
-                                                    ((ImageView) mEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(mFriendsOnly ? R.drawable.loser_512 : R.drawable.campus);
                                                     ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mFriendsOnly ? R.string.discover_no_posts_friends : R.string.discover_no_posts_campus);
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                                 }

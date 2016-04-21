@@ -33,7 +33,6 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
@@ -46,12 +45,12 @@ import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
-import de.greenrobot.event.EventBus;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -192,8 +191,7 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("how are we doing?")
                 .setRateText("wasup! we see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
-                .showAfter(1);
-
+                .showAfter(10);
     }
 
 
@@ -588,6 +586,7 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
+                Log.i(TAG, "call: "+activity);
                 //message
                 if (activity.getString("action").equals("messager")) {
                     newMessageSnackbar(activity);

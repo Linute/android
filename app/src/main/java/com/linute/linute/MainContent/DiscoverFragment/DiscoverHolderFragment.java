@@ -25,11 +25,10 @@ import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
 
 import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 

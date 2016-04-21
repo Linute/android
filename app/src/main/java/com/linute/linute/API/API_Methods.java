@@ -131,7 +131,6 @@ public class API_Methods {
         return call;
     }
 
-
     //API DELETE
     public static Call delete(String path,
                               Map<String, String> headers,

@@ -18,3 +18,15 @@
 
 -dontwarn okio.**
 -dontwarn com.makeramen.roundedimageview.**
+-dontwarn sun.misc.Unsafe
+
+## GreenRobot EventBus specific rules ##
+# http://greenrobot.org/eventbus/documentation/proguard/
+
+-keepattributes *Annotation*
+
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }

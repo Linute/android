@@ -175,11 +175,11 @@ public class MyGcmListenerService extends GcmListenerService {
                 return LinuteConstants.FEED_DETAIL;
             case "mentioned":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted status":
+            case "friend posted status":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted video":
+            case "friend posted video":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted photo":
+            case "friend posted photo":
                 return LinuteConstants.FEED_DETAIL;
             case "friend joined":
                 return LinuteConstants.PROFILE;

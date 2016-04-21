@@ -461,7 +461,12 @@ public class EditSaveVideoFragment extends Fragment {
             String outputFile = params[0];
 
             if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()) {
-                Utils.showBadConnectionToast(getActivity());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(getActivity());
+                    }
+                });
                 return null;
             }
 

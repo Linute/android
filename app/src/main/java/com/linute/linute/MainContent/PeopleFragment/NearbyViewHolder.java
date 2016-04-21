@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -158,6 +159,16 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
             }
         });
 
+        vName.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                if(activity != null && mPerson != null){
+                    activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mPerson.getName(), mPerson.getID()));
+                }
+            }
+        });
+
         vRating1.setText(getNameForRatingObjectAtPosition(0));
         vRating2.setText(getNameForRatingObjectAtPosition(1));
         vRating3.setText(getNameForRatingObjectAtPosition(2));
@@ -186,7 +197,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         } else {
             position = 3;
         }
-        Toast.makeText(activity, position+"", Toast.LENGTH_SHORT).show();
 
         try {
             JSONObject result = new JSONObject();

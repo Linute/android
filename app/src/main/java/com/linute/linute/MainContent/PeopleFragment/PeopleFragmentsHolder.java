@@ -23,8 +23,8 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomViewPager;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 /**
  * Created by QiFeng on 1/27/16.
