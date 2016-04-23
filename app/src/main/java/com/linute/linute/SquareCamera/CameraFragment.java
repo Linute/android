@@ -475,7 +475,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         setupCamera();
 
         try {
-            //mCamera.setPreviewDisplay(mSurfaceHolder);
             mCamera.setPreviewTexture(mSurfaceHolder);
             mCamera.startPreview();
             setSafeToTakePhoto(true);
@@ -570,16 +569,22 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         Size bestPreviewSize = determineBestPreviewSize(parameters);
         Size bestPictureSize = determineBestPictureSize(parameters);
 
+        int bPrevWid = bestPreviewSize.width;
+        int bPrevHei = bestPreviewSize.height;
 
-        parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
-        parameters.setPictureSize(bestPictureSize.width, bestPictureSize.height);
+        int bPicWid = bestPictureSize.width;
+        int bPicHei = bestPictureSize.height;
+
+        parameters.setPreviewSize(bPrevWid, bPrevHei);
+        parameters.setPictureSize(bPicWid, bPicHei);
+
+        List<String> focusmodes = parameters.getSupportedFocusModes();
 
         // Set continuous picture focus, if it's supported
-        if (parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+        if (focusmodes != null && focusmodes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
-        //We don't have an auto flash
         if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_AUTO)) {
             mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
         }
@@ -766,28 +771,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
      */
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        //int rotation = getPhotoRotation();
-
-        //crop image correctly. todo make more efficient by adding this to rotatePicture
-//        int x = 0;
-//        int y = 0;
-//        if (!usingFrontFaceCamera()) {
-//            if (rotation == 180) {
-//                x += map.getWidth() - map.getHeight();
-//            } else if (rotation == 270) {
-//                y += map.getHeight() - map.getWidth();
-//            }
-//        } else {
-//            if (rotation == 180) {
-//                if (map.getWidth() - map.getHeight() > 0) {
-//                    x += map.getWidth() - map.getHeight();
-//                }
-//            } else if (rotation == 90) {
-//                if (map.getHeight() - map.getWidth() > 0) {
-//                    y += map.getHeight() - map.getWidth();
-//                }
-//            }
-//        }
         Uri uri = ImageUtility.savePicture(getActivity(), rotatePicture(displayOrientation, data));
 
         getFragmentManager()
@@ -858,20 +841,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         return (info.facing == CameraInfo.CAMERA_FACING_FRONT);
     }
 
-//    private int getPhotoRotation() {
-//        int rotation;
-//        int orientation = mOrientationListener.getRememberedNormalOrientation();
-//        CameraInfo info = new CameraInfo();
-//        Camera.getCameraInfo(mCameraID, info);
-//
-//        if (info.facing == CameraInfo.CAMERA_FACING_FRONT) {
-//            rotation = (info.orientation - orientation + 360) % 360;
-//        } else {
-//            rotation = (info.orientation + orientation) % 360;
-//        }
-//
-//        return rotation;
-//    }
 
     /**
      * When orientation changes, onOrientationChanged(int) of the listener will be called
