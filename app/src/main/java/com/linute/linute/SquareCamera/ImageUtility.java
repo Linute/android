@@ -78,11 +78,11 @@ public class ImageUtility {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             display.getSize(point);
-            reqWidth = point.x;
-            reqHeight = point.y;
+            reqWidth = point.x * 2;
+            reqHeight = point.y * 2;
         } else {
-            reqWidth = display.getWidth();
-            reqHeight = display.getHeight();
+            reqWidth = display.getWidth() * 2;
+            reqHeight = display.getHeight() * 2;
         }
 
 

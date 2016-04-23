@@ -44,7 +44,13 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//implements SurfaceHolder.Callback,
+import rx.Observable;
+import rx.functions.Action1;
+import rx.subscriptions.CompositeSubscription;
+
+import static rx.schedulers.Schedulers.io;
+import static rx.android.schedulers.AndroidSchedulers.mainThread;
+
 public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     public static final String TAG = CameraFragment.class.getSimpleName();
@@ -71,17 +77,13 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     private boolean mSurfaceAlreadyCreated = false;
 
-
     private ImageView mSwapCameraBtn;
     private View mChangeCameraFlashModeBtn;
     private ImageView mTakePhotoBtn;
 
     private CheckBox mAnonCheckbox;
 
-    private Toolbar mToolbar;
-
     private EditSaveVideoFragment.VideoDimen mVideoDimen;
-
 
     private View mCameraOps;
     private View mGalleryButton;
@@ -93,6 +95,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     private ProgressBar mRecordProgress;
 
     private Timer mProgressBarTimer;
+
+    CompositeSubscription mSubscriptions;
 
 
     public static Fragment newInstance() {
@@ -131,15 +135,15 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
         View root = inflater.inflate(R.layout.square_camera_take_photo, container, false);
 
-        mToolbar = (Toolbar) root.findViewById(R.id.square_cam_tool_bar);
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) root.findViewById(R.id.square_cam_tool_bar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().finish();
             }
         });
-        mToolbar.setTitle("Camera");
+        toolbar.setTitle("Camera");
 
         mAnonCheckbox = (CheckBox) root.findViewById(R.id.anon_checkbox);
 
@@ -161,7 +165,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mGalleryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CameraActivity) getActivity()).launchGalleryFragment();
+                if (mIsSafeToTakePhoto)
+                    ((CameraActivity) getActivity()).launchGalleryFragment();
             }
         });
 
@@ -222,26 +227,30 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mSwapCameraBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCameraID == CameraInfo.CAMERA_FACING_FRONT) {
-                    mCameraID = getBackCameraID();
-                } else {
-                    mCameraID = getFrontCameraID();
+                if (mIsSafeToTakePhoto) {
+                    if (mCameraID == CameraInfo.CAMERA_FACING_FRONT) {
+                        mCameraID = getBackCameraID();
+                    } else {
+                        mCameraID = getFrontCameraID();
+                    }
+                    restartPreview();
                 }
-                restartPreview();
             }
         });
 
         mChangeCameraFlashModeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON)) {
-                    mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
-                } else if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)) {
-                    mFlashMode = Camera.Parameters.FLASH_MODE_ON;
-                }
+                if (mIsSafeToTakePhoto) {
+                    if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_ON)) {
+                        mFlashMode = Camera.Parameters.FLASH_MODE_OFF;
+                    } else if (mFlashMode.equalsIgnoreCase(Camera.Parameters.FLASH_MODE_OFF)) {
+                        mFlashMode = Camera.Parameters.FLASH_MODE_ON;
+                    }
 
-                setupFlashMode();
-                setupCamera();
+                    setupFlashMode();
+                    setupCamera();
+                }
             }
         });
 
@@ -287,7 +296,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                             }
                         };
                         mFileObserver.startWatching();
-
+                        setSafeToTakePhoto(false);
                         setSafeToTakePhoto(false);
                         mMediaRecorder.start();
                         mIsRecording = true;
@@ -297,8 +306,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                if (!mIsSafeToTakePhoto) return true;
                 int action = event.getAction();
-
                 switch (action) {
                     case MotionEvent.ACTION_DOWN: //press down
                         mIsRecording = false;
@@ -653,8 +662,10 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
      * Take a picture
      */
     private void takePicture() {
+
         if (mIsSafeToTakePhoto) {
             setSafeToTakePhoto(false);
+            Log.i(TAG, "takePicture: safe");
 
             mOrientationListener.rememberOrientation();
             // Shutter callback occurs after the image is captured. This can
@@ -677,6 +688,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                 //if we call take picture before camera preview has started: will throw runtime exception
                 e.printStackTrace();
             }
+        } else {
+            Log.i(TAG, "takePicture: not safe");
         }
     }
 
@@ -723,6 +736,9 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             mCamera.release();
             mCamera = null;
         }
+        if (mSubscriptions != null) {
+            mSubscriptions.unsubscribe();
+        }
 
         CameraSettingPreferences.saveCameraFlashMode(getActivity(), mFlashMode);
     }
@@ -734,55 +750,37 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mPreviewView.setBackgroundColor(Color.parseColor("#000000"));
     }
 
-//    @Override
-//    public void surfaceCreated(SurfaceHolder holder) {
-//        mSurfaceHolder = holder;
-//
-//        if (hasCameraAndWritePermission()) {
-//            mSurfaceAlreadyCreated = true;
-//            //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
-//            mShowCameraHandler.postDelayed(mShowPreview, 250);
-//        }
-//    }
-//
-//    @Override
-//    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-//
-//    }
-//
-//    @Override
-//    public void surfaceDestroyed(SurfaceHolder holder) {
-//        mSurfaceAlreadyCreated = false;
-//        // stop the preview
-//        if (mCamera != null) {
-//            mShowCameraHandler.removeCallbacks(mShowPreview);
-//            releaseMediaRecorder();
-//            stopCameraPreview();
-//            mCamera.release();
-//            mCamera = null;
-//        }
-//    }
 
     /**
      * A picture has been taken
      *
-     * @param data
-     * @param camera
+     * @param data   -- data from camera
+     * @param camera -- camera used
      */
     @Override
     public void onPictureTaken(byte[] data, Camera camera) {
-        Uri uri = ImageUtility.savePicture(getActivity(), rotatePicture(displayOrientation, data));
 
-        getFragmentManager()
-                .beginTransaction()
-                .replace(
-                        R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri, mAnonCheckbox.isChecked()),
-                        EditSavePhotoFragment.TAG)
-                .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
-                .commit();
+        mSubscriptions = new CompositeSubscription();
+        Observable<Uri> onSave = Observable.just(
+                ImageUtility.savePicture(getActivity(), rotatePicture(displayOrientation, data)))
+                .subscribeOn(io())
+                .observeOn(mainThread());
 
-        setSafeToTakePhoto(true);
+        mSubscriptions.add(onSave.subscribe(new Action1<Uri>() {
+            @Override
+            public void call(Uri uri) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .replace(
+                                R.id.fragment_container,
+                                EditSavePhotoFragment.newInstance(uri, mAnonCheckbox.isChecked()),
+                                EditSavePhotoFragment.TAG)
+                        .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
+                        .commit();
+
+                setSafeToTakePhoto(true);
+            }
+        }));
     }
 
 

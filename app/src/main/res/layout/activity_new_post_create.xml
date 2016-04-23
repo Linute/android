@@ -59,9 +59,9 @@
             android:hint="Enter your text here"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textNoSuggestions|textCapSentences"
-            android:maxLines="9"
+            android:maxLines="8"
             android:textColor="#000000"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="italic"
         />
 

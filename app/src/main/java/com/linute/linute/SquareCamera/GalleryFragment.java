@@ -27,9 +27,6 @@ import rx.subscriptions.CompositeSubscription;
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
 import static rx.schedulers.Schedulers.io;
 
-/* At the moment this is just a dummy fragment so our CameraFragment isn't continuously
- * resumed for no reason. Maybe in the future we can create our own gallery
- * */
 
 public class GalleryFragment extends Fragment {
     public static final String TAG = GalleryFragment.class.getSimpleName();

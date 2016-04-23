@@ -75,7 +75,7 @@ public class RoomsActivity extends BaseTaptActivity {
                     op.reconnectionDelay = 5;
                     op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
