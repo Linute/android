@@ -3,8 +3,9 @@ package com.linute.linute.MainContent.PeopleFragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,6 +18,7 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.SnappingRecyclerView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
@@ -37,7 +39,6 @@ import static com.linute.linute.API.API_Methods.VERSION;
  */
 public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    private ViewPager vImages;
     private TextView vName;
     private TextView vDistance;
     private TextView vStatus;
@@ -49,19 +50,18 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
     private TextView vRating4;
 
     private ImageView mActionButton;
-    private String mImageSignature;
     private People mPerson;
     private Context mContext;
+    private NearbyImagesAdapter mNearbyImagesAdapter;
+    private SnappingRecyclerView vRecyclerView;
+
+    private View vPrevImage;
+    private View vNextImage;
 
     public NearbyViewHolder(View itemView, Context context) {
         super(itemView);
         mContext = context;
-        mImageSignature = mContext
-                .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                .getString("imageSigniture", "000");
 
-        vImages = (ViewPager) itemView.findViewById(R.id.images);
-        vImages.setOffscreenPageLimit(3);
         vName = (TextView) itemView.findViewById(R.id.name);
         vDistance = (TextView) itemView.findViewById(R.id.distance);
         vStatus = (TextView) itemView.findViewById(R.id.status);
@@ -77,25 +77,58 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         vRating3.setOnClickListener(this);
         vRating4.setOnClickListener(this);
 
+        vPrevImage = itemView.findViewById(R.id.arrow_back);
+        vNextImage = itemView.findViewById(R.id.arrow_next);
+
+        vRecyclerView = (SnappingRecyclerView) itemView.findViewById(R.id.images);
+        vRecyclerView.setNestedScrollingEnabled(false);
+        final LinearLayoutManager llm = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);
+        vRecyclerView.setLayoutManager(llm);
+        mNearbyImagesAdapter = new NearbyImagesAdapter(context);
+        vRecyclerView.setAdapter(mNearbyImagesAdapter);
+
+        vRecyclerView.setIndicatorControllers(new SnappingRecyclerView.OnPositionChanged() {
+            @Override
+            public void positionChanged(int newPosition) {
+                mPerson.setCurrentRecyPosition(newPosition);
+                hideLeft(newPosition == 0);
+
+                //reminder: user image counts as one
+                hideRight(newPosition == mPerson.getPersonRecentPosts().size());
+            }
+        });
+
+        vPrevImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vRecyclerView.previousImage();
+            }
+        });
+
+        vNextImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vRecyclerView.nextImage();
+            }
+        });
     }
 
+
     public void bindView(People people) {
+        mNearbyImagesAdapter.setPerson(people);
+        vRecyclerView.scrollToPosition(people.getCurrentRecyPosition());
+        mNearbyImagesAdapter.notifyDataSetChanged();
+
+        hideLeft(people.getCurrentRecyPosition() == 0);
+        hideRight(people.getCurrentRecyPosition() == people.getPersonRecentPosts().size());
+
         mPerson = people;
         vName.setText(people.getName());
         vStatus.setText(people.getStatus());
         vSchool.setText(people.getSchoolName());
 
         //setting new adapter everytime. maybe there is a better idea?
-        vImages.setAdapter(
-                new NearbyImagesAdapter(
-                        mContext,
-                        people.getPersonRecentPosts(),
-                        mPerson.getProfileImage(),
-                        mPerson.getName(),
-                        mPerson.getID(),
-                        mImageSignature
-                )
-        );
+
         vDistance.setText(people.getDate());
         mActionButton.setImageResource(people.isFriend() ? R.drawable.message_friend : R.drawable.add_friend);
         mActionButton.setOnClickListener(new View.OnClickListener() {
@@ -142,7 +175,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
                                 return;
                             }
                             response.body().close();
-//                        Log.d(TAG, response.body().string());
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -163,7 +195,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
             @Override
             public void onClick(View v) {
                 BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                if(activity != null && mPerson != null){
+                if (activity != null && mPerson != null) {
                     activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mPerson.getName(), mPerson.getID()));
                 }
             }
@@ -175,6 +207,7 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         vRating4.setText(getNameForRatingObjectAtPosition(3));
         calculateAndShowNewView(mPerson.isAlreadyRated());
     }
+
 
 
     @Override
@@ -274,5 +307,12 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         return mPerson.getRatingObjects().get(pos).getName();
     }
 
+    public void hideLeft(boolean hide) {
+        vPrevImage.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
+
+    public void hideRight(boolean hide) {
+        vNextImage.setVisibility(hide ? View.GONE : View.VISIBLE);
+    }
 
 }

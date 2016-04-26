@@ -8,33 +8,34 @@
 
     <LinearLayout android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:background="@drawable/chat_item_you"
                   android:layout_alignParentStart="true"
-                  android:layout_marginStart="12dp"
-                  android:layout_marginEnd="48dp"
-                  android:layout_marginTop="4dp"
                   android:layout_marginBottom="4dp"
-                  android:padding="12dp"
-                  android:orientation="vertical">
+                  android:layout_marginEnd="48dp"
+                  android:layout_marginStart="12dp"
+                  android:layout_marginTop="4dp"
+                  android:background="@drawable/chat_item_you"
+                  android:orientation="vertical"
+                  android:padding="12dp">
 
         <TextView android:id="@+id/chat_user_message"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:textSize="@dimen/body_font_size"
+                  android:autoLink="web|email|map"
                   android:textColor="@color/eighty_black"
+                  android:textSize="@dimen/body_font_size"
                   tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
         />
 
         <LinearLayout android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:orientation="horizontal"
                       android:layout_marginTop="4dp"
+                      android:orientation="horizontal"
         >
             <TextView android:id="@+id/chat_user_time"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
-                      android:textSize="@dimen/sub_font_size"
                       android:textColor="@color/twentyfive_black"
+                      android:textSize="@dimen/sub_font_size"
                       tools:text="3:00AM"/>
 
         </LinearLayout>

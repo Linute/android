@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -32,6 +33,10 @@ public class RoomsActivity extends BaseTaptActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE);
+        
         setContentView(R.layout.activity_rooms);
 
         mSafeForFragmentTransaction = false;

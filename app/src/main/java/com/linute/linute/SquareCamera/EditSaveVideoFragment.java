@@ -63,9 +63,7 @@ public class EditSaveVideoFragment extends Fragment {
 
     public static final String VIDEO_DIMEN = "video_dimen";
 
-
     //private View mFrame; //frame where we put edittext and picture
-
     //private CustomBackPressedEditText mText; //text
     private CheckBox mAnonSwitch;
     private CheckBox mCommentsAnon;
@@ -258,7 +256,6 @@ public class EditSaveVideoFragment extends Fragment {
 
         FFmpeg ffmpeg = FFmpeg.getInstance(getActivity());
         final String outputFile = ImageUtility.getVideoUri();
-
         showProgress(true);
 
         String cmd = "-i " + mVideoLink + " "; //input file
@@ -271,7 +268,6 @@ public class EditSaveVideoFragment extends Fragment {
 
         cmd += crop; //crop
         cmd += "-preset superfast ";
-        //cmd += "-strict -2 "; //audio
         cmd += "-c:a copy "; //copy instead of re-encoding audio
         cmd += outputFile; //output file;
 

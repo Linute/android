@@ -24,6 +24,7 @@ public class People {
     private List<RatingObject> mRatingObjects;
 
     private List<PersonRecentPost> mPersonRecentPosts;
+    private int mCurrentRecyPosition = 0;
 
     public People(String profileImage, String name, String ID, String date, boolean friend, String status) {
         mProfileImage = profileImage;
@@ -109,6 +110,14 @@ public class People {
         for (RatingObject obj : ratingObjects){
             mTotalRatings += obj.getNumOfRates();
         }
+    }
+
+    public int getCurrentRecyPosition() {
+        return mCurrentRecyPosition;
+    }
+
+    public void setCurrentRecyPosition(int currentRecyPosition) {
+        mCurrentRecyPosition = currentRecyPosition;
     }
 
     public int getTotalRatings(){

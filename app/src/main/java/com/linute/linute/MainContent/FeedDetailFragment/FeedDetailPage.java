@@ -1240,20 +1240,20 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         @Override
         public void call(Object... args) {
 
-            if (!mCommentsRetrieved /*|| !mOtherHasUpdated*/) return; //// TODO: 4/4/16
+            if (!mCommentsRetrieved) return;
 
             JSONObject object = (JSONObject) args[0];
-
-            //will check if we can scroll down
-            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
-            //neg is scroll up, positive is scroll down
-
-            final boolean mCanScrollDown = recList != null && recList.canScrollVertically(1);
-
             if (object == null) {
                 Log.i(TAG, "call: Error retrieving new comment");
                 return;
             }
+            //will check if we can scroll down
+            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
+            //neg is scroll up, positive is scroll down
+
+            final boolean mCanScrollDown = recList != null &&
+                    recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
+                    recList.canScrollVertically(1);
 
             try {
                 Date myDate;

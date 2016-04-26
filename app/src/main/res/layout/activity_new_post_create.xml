@@ -60,8 +60,9 @@
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textNoSuggestions|textCapSentences"
             android:maxLines="8"
+            tools:text = "HELLO THEREHELLO THEREHELLO THEREHELLO THERE "
             android:textColor="#000000"
-            android:textSize="26sp"
+            android:textSize="28sp"
             android:textStyle="italic"
         />
 

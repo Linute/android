@@ -9,10 +9,10 @@
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:layout_width="match_parent"
                                                          android:layout_height="match_parent">
 
-        <android.support.v4.view.ViewPager android:id="@+id/images"
-                                           android:layout_width="match_parent"
-                                           android:layout_height="match_parent"
-                                           android:background="@color/seperator_color"/>
+        <com.linute.linute.UtilsAndHelpers.SnappingRecyclerView android:id="@+id/images"
+                                                                android:layout_width="match_parent"
+                                                                android:layout_height="match_parent"
+                                                                android:background="@color/pure_white"/>
 
         <TextView android:id="@+id/distance"
                   android:layout_width="wrap_content"
@@ -28,6 +28,23 @@
                   android:textSize="@dimen/body_font_size"
                   android:textStyle="bold"
                   tools:text="nearby"
+        />
+
+        <ImageView android:id="@+id/arrow_back"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical|start"
+                   android:padding="8dp"
+                   android:src="@drawable/ic_arrow"
+        />
+
+        <ImageView android:id="@+id/arrow_next"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_vertical|end"
+                   android:padding="8dp"
+                   android:rotation="180"
+                   android:src="@drawable/ic_arrow"
         />
 
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
