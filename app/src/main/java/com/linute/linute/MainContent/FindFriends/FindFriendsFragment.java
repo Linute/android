@@ -131,14 +131,14 @@ public class FindFriendsFragment extends UpdatableFragment {
             rationaleText.setText("Enter your friend's name in the search bar");
             reloadButton.setVisibility(View.GONE);
             mRecievedList = true;
-            if (mFriendFoundList.isEmpty()){
+            if (mFriendFoundList.isEmpty()) {
                 if ((mQueryString == null || mQueryString.equals(""))) {
                     mFindFriendsRationale.setVisibility(View.VISIBLE);
-                }else {
+                } else {
                     mEmptyText.setVisibility(View.VISIBLE);
                     mFindFriendsRationale.setVisibility(View.GONE);
                 }
-            }else {
+            } else {
                 mFindFriendsRationale.setVisibility(View.GONE);
             }
             setFragmentNeedUpdating(false);
@@ -163,10 +163,10 @@ public class FindFriendsFragment extends UpdatableFragment {
                 }
             });
 
-            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()){
+            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()) {
                 mFindFriendsRationale.setVisibility(View.GONE);
                 mEmptyText.setVisibility(View.VISIBLE);
-            }else if (mUnfilteredList.isEmpty()){
+            } else if (mUnfilteredList.isEmpty()) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
             }
         } else { //contacts. This process takes forever to get emails. We will use async task
@@ -174,23 +174,18 @@ public class FindFriendsFragment extends UpdatableFragment {
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.yellow_color));
             reloadButton.setText("Search contacts");
             reloadButton.setOnClickListener(new View.OnClickListener() {
-                private boolean loaded = false;
 
                 @Override
                 public void onClick(View v) {
-                    if (!loaded) {
-                        loaded = true;
-                        mGetContactsInBackground = new GetContactsInBackground();
-                    }
-
+                    mGetContactsInBackground = new GetContactsInBackground();
                     setUpContactsList();
                 }
             });
 
-            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()){
+            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()) {
                 mFindFriendsRationale.setVisibility(View.GONE);
                 mEmptyText.setVisibility(View.VISIBLE);
-            }else if (mUnfilteredList.isEmpty()){
+            } else if (mUnfilteredList.isEmpty()) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
             }
         }

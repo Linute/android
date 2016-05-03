@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -109,8 +107,8 @@ public class FriendsListFragment extends UpdatableFragment {
             getFriendsList();
             setFragmentNeedUpdating(false);
         }else {
-            if (!mInfoSuccessfullyRetrieved && mFriendList.isEmpty()){
-                mEmptyView.setText("Tap to reload");
+            if (mFriendList.isEmpty()){
+                mEmptyView.setText("No results found");
                 mEmptyView.setVisibility(View.VISIBLE);
             }
         }

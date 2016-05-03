@@ -375,6 +375,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
     //cuts a bitmap from our RelativeLayout
     public static Bitmap getBitmapFromView(View view) {
+
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
         Drawable bgDrawable = view.getBackground();

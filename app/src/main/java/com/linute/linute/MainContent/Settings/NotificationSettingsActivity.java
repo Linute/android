@@ -90,9 +90,10 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION
-                    ;
+                                    "&platform=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
+
 
                     op.forceNew = true;
                     op.reconnectionDelay = 5;

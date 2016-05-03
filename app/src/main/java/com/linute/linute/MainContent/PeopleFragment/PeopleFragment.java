@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -8,13 +9,17 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,12 +27,19 @@ import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.Chat.NewChatEvent;
+import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
+import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.Manifest;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,13 +64,10 @@ import okhttp3.Response;
 public class PeopleFragment extends UpdatableFragment {
     private static final String TAG = PeopleFragment.class.getSimpleName();
     private RecyclerView recList;
-    private LinearLayoutManager llm;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private PeopleAdapter mPeopleAdapter;
 
     private View mRationaleLayer;
-
-    private boolean mNearMe = false;
 
     private List<People> mPeopleList = new ArrayList<>();
 
@@ -66,38 +75,12 @@ public class PeopleFragment extends UpdatableFragment {
 
     public static final long TIME_DIFFERENCE = 600000; //10 minutes
 
+    private AppBarLayout mAppBarLayout;
+    private Toolbar mToolbar;
+    private boolean mHasMessage;
+
     public PeopleFragment() {
         // Required empty public constructor
-    }
-
-    public static PeopleFragment newInstance(boolean nearMe) {
-        PeopleFragment people = new PeopleFragment();
-        Bundle args = new Bundle();
-        args.putBoolean("NEAR_ME", nearMe);
-        people.setArguments(args);
-        return people;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mNearMe = getArguments().getBoolean("NEAR_ME");
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean("NEAR_ME", mNearMe);
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null) {
-            mNearMe = savedInstanceState.getBoolean("NEAR_ME");
-        }
     }
 
     @Override
@@ -110,30 +93,66 @@ public class PeopleFragment extends UpdatableFragment {
 
         setHasOptionsMenu(true);
 
-        recList = (RecyclerView) rootView.findViewById(R.id.people_frag_rec);
+        //recList = (RecyclerView) rootView.findViewById(R.id.people_action_icon);
         recList.setHasFixedSize(true);
-        llm = new CustomLinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        if (mNearMe)
-            recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                    true, true));
+
+        mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null){
+                    activity.openDrawer();
+                }
+            }
+        });
+        mToolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recList.scrollToPosition(0);
+            }
+        });
+
+        MainActivity activity = (MainActivity) getActivity();
+        mHasMessage = activity.hasMessage();
+        mToolbar.inflateMenu(activity.hasMessage() ? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu);
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.menu_find_friends:
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null){
+                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
+                        }
+                        return true;
+                    case R.id.people_fragment_menu_chat:
+                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
+                        startActivity(enterRooms);
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.peoplefrag_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //mSwipeRefreshLayout.setRefreshing(true);
-                if (!mNearMe)
-                    getPeople();
-                else {
-                    getPeopleNearMe();
-                }
+                getPeopleNearMe();
             }
         });
 
-        mPeopleAdapter = new PeopleAdapter(mPeopleList, getActivity(), mNearMe);
+        mPeopleAdapter = new PeopleAdapter(mPeopleList, getActivity());
         recList.setAdapter(mPeopleAdapter);
 
         mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -144,26 +163,19 @@ public class PeopleFragment extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-        PeopleFragmentsHolder fragment = (PeopleFragmentsHolder) getParentFragment();
-
-        if (fragment == null) return;
-
-        //initially presented fragment by discoverHolderFragment doesn't get loaded by discoverholderfragment
-        //do it in on resume
-        //if initial fragment was campus feed, we are in campus feed, and it needs to be updated
-        if (fragment.getInitiallyPresentedFragmentWasNearby()
-                && mNearMe
-                && fragment.nearMeFragmentNeedsUpdating()) {
+        if (fragmentNeedsUpdating()) {
             getPeopleNearMe();
-            fragment.setNearMeNeedsUpdating(false);
-        } else if (!fragment.getInitiallyPresentedFragmentWasNearby()
-                && !mNearMe
-                && fragment.activeNeedsUpdating()) {
-            getPeople();
-            fragment.setActiveNeedsUpdating(false);
+            setFragmentNeedUpdating(false);
         }
+        EventBus.getDefault().register(this);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        EventBus.getDefault().unregister(this);
+        mAppBarLayout.setExpanded(true,false);
+    }
 
     public void getPeopleNearMe() {
         if (getActivity() == null) return;
@@ -284,139 +296,6 @@ public class PeopleFragment extends UpdatableFragment {
             }
         });
         getPermissions.setText("Turn on");
-    }
-
-    public void getPeople() {
-
-        if (!mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-        }
-
-        Map<String, String> params = new HashMap<>();
-        params.put("limit", 8 + "");
-
-        LSDKPeople people = new LSDKPeople(getActivity());
-        people.getPeople(params, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                        Utils.showBadConnectionToast(getActivity());
-                    }
-                });
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-
-                String responsString = response.body().string();
-
-                if (!response.isSuccessful()) {
-                    Log.d("TAG", responsString);
-                    return;
-                }
-
-                //Log.i(TAG, "onResponse: " + responsString);
-                JSONObject jsonObject;
-                JSONArray jsonArray;
-                try {
-                    jsonObject = new JSONObject(responsString);
-                    jsonArray = jsonObject.getJSONArray("people");
-
-
-                    People people;
-                    String friend;
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                    Date myDate;
-                    String dateString;
-
-                    JSONObject userOwner;
-
-                    ArrayList<People> tempPeople = new ArrayList<>();
-
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        jsonObject = (JSONObject) jsonArray.get(i);
-                        friend = jsonObject.getString("friend");
-
-                        //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
-                        userOwner = jsonObject.getJSONObject("owner");
-
-                        //Start
-                        boolean areFriends = false;
-                        String personId = userOwner.getString("id");
-
-                        if (!friend.equals("")) {
-                            JSONObject friendsJson = jsonObject.getJSONObject("friend");
-                            String owner = friendsJson.getString("owner");
-                            if (owner.equals(personId)) {
-                                if (friendsJson.getBoolean("followedBack"))
-                                    areFriends = true;
-                            } else {
-                                areFriends = true;
-                            }
-                        }
-
-                        //End
-
-                        myDate = simpleDateFormat.parse(jsonObject.getString("date"));
-                        dateString = Utils.getTimeAgoString(myDate.getTime());
-
-                        people = new People(
-                                userOwner.getString("profileImage"),
-                                userOwner.getString("fullName"),
-                                personId,
-                                dateString,
-                                areFriends,
-                                userOwner.getString("status")
-                        );
-
-                        people.setRank(i);
-                        tempPeople.add(people);
-                    }
-
-                    mPeopleList.clear();
-                    mPeopleList.addAll(tempPeople);
-
-                    if (getActivity() == null) {
-                        return;
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mSwipeRefreshLayout.isRefreshing()) {
-                                mSwipeRefreshLayout.setRefreshing(false);
-                            }
-
-                            mPeopleAdapter.notifyDataSetChanged();
-
-                        }
-                    });
-
-                } catch (JSONException | ParseException e) {
-                    e.printStackTrace();
-                    if (getActivity() == null) {
-                        return;
-                    }
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSwipeRefreshLayout.setRefreshing(false);
-
-                            Utils.showServerErrorToast(getActivity());
-
-                        }
-                    });
-                }
-            }
-        });
     }
 
 
@@ -653,9 +532,10 @@ public class PeopleFragment extends UpdatableFragment {
     public static final int LOCATION_REQUEST = 1;
 
     private void requestLocation() {
-        PeopleFragmentsHolder holder = (PeopleFragmentsHolder) getParentFragment();
-        if (holder == null) return;
-        if (holder.hasLocationPermissions()) {
+        if (ContextCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST);
+        }else {
             gotPermissionResults();
         }
     }
@@ -696,20 +576,37 @@ public class PeopleFragment extends UpdatableFragment {
         return new People.RatingObject(object.getString("key"), object.getString("name"), object.getInt("value"));
     }
 
-    public void scrollUp() {
-        if (recList != null) {
-            recList.scrollToPosition(0);
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == LOCATION_REQUEST ){
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                gotPermissionResults();
+            }else {
+                showRationalLayer();
+            }
         }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mNearMe && mRationaleLayer.getVisibility() == View.VISIBLE){
-            PeopleFragmentsHolder fragment = (PeopleFragmentsHolder) getParentFragment();
-            if (fragment != null){
-                fragment.setNearMeNeedsUpdating(true);
-            }
+        if (mRationaleLayer.getVisibility() == View.VISIBLE) {
+            setFragmentNeedUpdating(true);
+        }
+    }
+
+    @Subscribe
+    public void onEvent(NewChatEvent event){
+        // your implementation
+        if (event.hasNewMessage() != mHasMessage){
+            mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                    R.drawable.notify_mess_icon :
+                    R.drawable.ic_chat81
+            );
+            mHasMessage = event.hasNewMessage();
         }
     }
 }

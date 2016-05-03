@@ -37,21 +37,22 @@
                           android:orientation="vertical"
             >
 
-                <RelativeLayout android:layout_width="match_parent"
-                                android:layout_height="0px"
-                                android:layout_weight="1">
+                <FrameLayout android:layout_width="match_parent"
+                             android:layout_height="0px"
+                             android:layout_weight="1">
 
                     <ProgressBar android:id="@+id/record_progress"
                                  style="?android:attr/progressBarStyleHorizontal"
                                  android:layout_width="match_parent"
                                  android:layout_height="6dp"
                                  android:max="7000"
+                                 android:progressDrawable="@drawable/camera_progress_red"
                                  android:visibility="gone"
                     />
 
-                    <RelativeLayout android:id="@+id/camera_ops"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent">
+                    <FrameLayout android:id="@+id/camera_ops"
+                                 android:layout_width="match_parent"
+                                 android:layout_height="match_parent">
 
                         <RelativeLayout android:id="@+id/flash"
                                         android:layout_width="wrap_content"
@@ -83,14 +84,14 @@
                         <ImageView android:id="@+id/change_camera"
                                    android:layout_width="wrap_content"
                                    android:layout_height="match_parent"
-                                   android:layout_alignParentEnd="true"
+                                   android:layout_gravity="end"
                                    android:paddingEnd="16dp"
                                    android:paddingStart="16dp"
                                    android:src="@drawable/ic_icon_reverse_camera"
                         />
 
-                    </RelativeLayout>
-                </RelativeLayout>
+                    </FrameLayout>
+                </FrameLayout>
 
 
                 <LinearLayout android:layout_width="match_parent"
@@ -109,12 +110,12 @@
                     />
 
 
-                    <RelativeLayout android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content">
+                    <FrameLayout android:layout_width="wrap_content"
+                                 android:layout_height="wrap_content">
 
                         <ImageView android:layout_width="wrap_content"
                                    android:layout_height="wrap_content"
-                                   android:layout_centerInParent="true"
+                                   android:layout_gravity="center"
                                    android:src="@drawable/square_camera_surround"
                         />
 
@@ -122,19 +123,18 @@
                             android:id="@+id/capture_image_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
+                            android:layout_gravity="center"
                             android:contentDescription="Camera"
                             android:src="@drawable/square_camera_unselected"
                         />
 
-                    </RelativeLayout>
+                    </FrameLayout>
 
                     <CheckBox android:id="@+id/anon_checkbox"
                               android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:layout_marginStart="50dp"
-                              android:background="@drawable/post_as_anon_checkbox"
-                              android:button="@null"
+                              android:button="@drawable/post_as_anon_checkbox"
                     />
 
 

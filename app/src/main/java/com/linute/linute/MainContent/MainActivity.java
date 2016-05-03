@@ -32,7 +32,7 @@ import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
+import com.linute.linute.MainContent.PeopleFragment.PeopleFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
@@ -64,15 +64,9 @@ public class MainActivity extends BaseTaptActivity {
 
     public static final int PHOTO_STATUS_POSTED = 19;
 
-    //private AppBarLayout mAppBarLayout;
-    //private ActionBar mActionBar;
-    //private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
-
-    //private CoordinatorLayout parentView;
-    //private FloatingActionsMenu fam;
     private UpdatableFragment[] mFragments; //holds our fragments
 
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
@@ -213,7 +207,7 @@ public class MainActivity extends BaseTaptActivity {
                     fragment = new Profile();
                     break;
                 case FRAGMENT_INDEXES.PEOPLE:
-                    fragment = new PeopleFragmentsHolder();
+                    fragment = new PeopleFragment();
                     break;
                 default:
                     fragment = null;
@@ -288,11 +282,6 @@ public class MainActivity extends BaseTaptActivity {
             mFragments[index].setFragmentNeedUpdating(needsUpdating);
         }
     }
-
-//    @Override
-//    public void setTitle(String title) {
-//        mToolbar.setTitle(title);
-//    }
 
     //loads the header of our drawer
     public void loadDrawerHeader() {
@@ -389,7 +378,6 @@ public class MainActivity extends BaseTaptActivity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
                 }
-
             }
         }
 
@@ -432,7 +420,7 @@ public class MainActivity extends BaseTaptActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
+                                    "&platform=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
 

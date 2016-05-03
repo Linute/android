@@ -144,6 +144,8 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 if (getActivity() == null) return;
                 toggleFab();
                 Intent i = new Intent(getActivity(), CameraActivity.class);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });

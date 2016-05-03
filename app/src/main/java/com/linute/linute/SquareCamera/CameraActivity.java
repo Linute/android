@@ -24,17 +24,43 @@ import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
+    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11;
+    public final static int JUST_CAMERA = 12;
+
+    public final static int SEND_POST = 14;
+    public final static int RETURN_URI = 15;
+
+    public final static int IMAGE = 1;
+    public final static int VIDEO = 2;
+
+    //if we get send url, we will send result to url,
+    //    else, we'll send back a uri
+    public final static String RETURN_TYPE = "send_to_url";
+    public final static String CAMERA_TYPE = "camera_type";
+
+    private int mCameraType;
+    private int mReturnType;
+
+
     public static final String TAG = CameraActivity.class.getSimpleName();
 
-    private boolean mHasWriteAndCameraPermission = false;
+    protected boolean mHasWriteAndCameraPermission = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.squarecamera__activity_camera);
-
         requestPermissions();
+
+        Intent i = getIntent();
+        if (i != null){
+            mCameraType = i.getIntExtra(CAMERA_TYPE, JUST_CAMERA);
+            mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
+        }else {
+            mCameraType = JUST_CAMERA;
+            mReturnType = RETURN_URI;
+        }
 
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {
             getSupportFragmentManager()
@@ -56,8 +82,21 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("returnType", mReturnType);
+        outState.putInt("cameraType", mCameraType);
+        super.onSaveInstanceState(outState);
+    }
 
-    private static final int REQUEST_PERMISSIONS = 21;
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCameraType = savedInstanceState.getInt("cameraType");
+        mReturnType = savedInstanceState.getInt("returnType");
+    }
+
+    protected static final int REQUEST_PERMISSIONS = 21;
 
     public void requestPermissions() {
         List<String> permissions = new ArrayList<>();
@@ -69,9 +108,13 @@ public class CameraActivity extends AppCompatActivity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED){
-            permissions.add(Manifest.permission.RECORD_AUDIO);
+
+        if (mCameraType == CAMERA_AND_VIDEO_AND_GALLERY) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.RECORD_AUDIO);
+            }
         }
+
         //we need permissions
         if (!permissions.isEmpty()) {
             ActivityCompat.requestPermissions(this,
@@ -84,7 +127,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    private boolean mRecievedRequestPermissionResults = false;
+    protected boolean mRecievedRequestPermissionResults = false;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -107,14 +150,14 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    private void launchCameraFragment() {
+    protected void launchCameraFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
                 .commit();
     }
 
-    private void launchPermissionNeededFragment() {
+    protected void launchPermissionNeededFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.fragment_container, new NeedPermissionsFragment(), NeedPermissionsFragment.TAG)
@@ -122,7 +165,6 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     public void launchEditAndSaveFragment(Uri uri) {
-        Log.i(TAG, "launchEditAndSaveFragment: ");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(
@@ -159,4 +201,11 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
+    public int getCameraType(){
+        return mCameraType;
+    }
+
+    public int getReturnType(){
+        return mReturnType;
+    }
 }

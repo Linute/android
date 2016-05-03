@@ -2,8 +2,11 @@ package com.linute.linute.MainContent.Chat;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -30,19 +34,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.schedulers.Schedulers;
+
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -56,6 +69,10 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
     public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    static {
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -96,7 +113,11 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private View mLoadmoreProgressBar;
     private View mProgressBar;
 
-    private Toolbar mToolbar;
+    private static final int ATTACH_PHOTO_OR_IMAGE = 32;
+    private Uri mVideoUri;
+    private Uri mImageUri;
+    private String mMessageText;
+    private int mAttachType = -1;
 
     //private SharedPreferences mSharedPreferences;
 
@@ -165,10 +186,10 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        mToolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
-        mToolbar.setTitle(mOtherPersonName);
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
+        toolbar.setTitle(mOtherPersonName);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() != null)
@@ -183,59 +204,22 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         mProgressBar = view.findViewById(R.id.chat_load_progress);
 
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
-        if (mRoomId == null) getRoomAndChat();
-        else getChat(); //note : move to onResume ?
+//        if (mRoomId == null) getRoomAndChat();
+//        else getChat();
+
+        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+                startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
+            }
+        });
 
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null) return;
-
-        if (mUserId == null) {
-            Utils.showServerErrorToast(activity);
-            return;
-        }
-
-        if (mRoomId != null) joinRoom(activity);
-    }
-
-    public void joinRoom(BaseTaptActivity activity) {
-
-        activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-        activity.connectSocket("new message", onNewMessage);
-        activity.connectSocket("typing", onTyping);
-        activity.connectSocket("stop typing", onStopTyping);
-        activity.connectSocket("read", onRead);
-        activity.connectSocket("joined", onJoin);
-        activity.connectSocket("left", onLeave);
-        activity.connectSocket("error", onError);
-        activity.connectSocket("delivered", onDelivered);
-
-        typingJson = new JSONObject();
-        joinLeft = new JSONObject();
-        delivered = new JSONObject();
-
-        try {
-            typingJson.put("room", mRoomId);
-            typingJson.put("user", mUserId);
-
-            joinLeft.put("room", mRoomId);
-            joinLeft.put("user", mUserId);
-
-            delivered.put("user", mUserId);
-            delivered.put("room", mRoomId);
-            activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Utils.showServerErrorToast(activity);
-        }
-    }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -312,11 +296,191 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                 else vSendButton.setAlpha(0.25f);
             }
         });
+
+        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() == null) return;
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+                startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == ATTACH_PHOTO_OR_IMAGE) {
+            if (resultCode == RESULT_OK) {
+                mAttachType = data.getIntExtra("type", -1);
+                mImageUri = data.getParcelableExtra("image");
+                mMessageText = data.getStringExtra("title");
+                if (mAttachType == CameraActivity.VIDEO) {
+                    mVideoUri = data.getParcelableExtra("video");
+                }
+            } else {
+                mAttachType = -1;
+                mImageUri = null;
+                mVideoUri = null;
+                mMessageText = "";
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        Log.i(TAG, "onResume: ");
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity == null) return;
+
+        if (mUserId == null) {
+            Utils.showServerErrorToast(activity);
+            return;
+        }
+
+        if (mRoomId != null) joinRoom(activity);
+    }
+
+    public void joinRoom(BaseTaptActivity activity) {
+
+        activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        activity.connectSocket("new message", onNewMessage);
+        activity.connectSocket("typing", onTyping);
+        activity.connectSocket("stop typing", onStopTyping);
+        activity.connectSocket("read", onRead);
+        activity.connectSocket("joined", onJoin);
+        activity.connectSocket("left", onLeave);
+        activity.connectSocket("error", onError);
+        activity.connectSocket("delivered", onDelivered);
+        activity.connectSocket("refresh", onRefresh);
+
+        typingJson = new JSONObject();
+        joinLeft = new JSONObject();
+        delivered = new JSONObject();
+
+        try {
+            typingJson.put("room", mRoomId);
+            typingJson.put("user", mUserId);
+
+            joinLeft.put("room", mRoomId);
+            joinLeft.put("user", mUserId);
+
+            delivered.put("user", mUserId);
+            delivered.put("room", mRoomId);
+            activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
+
+            if (mRoomId == null){
+                getRoomAndChat();
+            }else {
+                JSONObject refresh = new JSONObject();
+                refresh.put("room", mRoomId);
+                activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
+            }
+
+
+            if (mAttachType == CameraActivity.IMAGE) {
+                sendImage(activity);
+            } else if (mAttachType == CameraActivity.VIDEO) {
+                sendVideo(activity);
+            }
+//
+//            mAttachType = -1;
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Utils.showServerErrorToast(activity);
+        }
+    }
+
+
+    private void sendVideo(final BaseTaptActivity activity) {
+        Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                try {
+                    JSONObject postData = new JSONObject();
+                    postData.put("message", mMessageText);
+                    JSONArray images = new JSONArray();
+                    images.put(Utils.encodeImageBase64(
+                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
+                                    , Uri.fromFile(new File(mImageUri.getPath())))));
+
+                    postData.put("images", images);
+
+                    JSONArray video = new JSONArray();
+                    video.put(Utils.encodeFileBase64(new File(mVideoUri.getPath())));
+
+                    postData.put("videos", video);
+                    postData.put("type", "2");
+                    postData.put("owner", mUserId);
+
+                    JSONArray coord = new JSONArray();
+                    JSONObject jsonObject = new JSONObject();
+                    coord.put(0);
+                    coord.put(0);
+                    jsonObject.put("coordinates", coord);
+
+                    postData.put("geo", jsonObject);
+                    postData.put("room", mRoomId);
+
+                    activity.emitSocket(API_Methods.VERSION + ":messages:new message", postData);
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                }
+
+                mAttachType = -1;
+                mImageUri = null;
+            }
+        }).subscribeOn(Schedulers.newThread())
+                .subscribe();
+    }
+
+
+    private void sendImage(final BaseTaptActivity activity) {
+        Observable.create(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                try {
+                    JSONObject postData = new JSONObject();
+                    postData.put("message", mMessageText);
+                    JSONArray images = new JSONArray();
+                    images.put(Utils.encodeImageBase64(
+                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
+                                    , Uri.fromFile(new File(mImageUri.getPath())))));
+
+                    postData.put("images", images);
+                    postData.put("type", "1");
+                    postData.put("owner", mUserId);
+
+                    JSONArray coord = new JSONArray();
+                    JSONObject jsonObject = new JSONObject();
+                    coord.put(0);
+                    coord.put(0);
+                    jsonObject.put("coordinates", coord);
+
+                    postData.put("geo", jsonObject);
+                    postData.put("room", mRoomId);
+
+                    activity.emitSocket(API_Methods.VERSION + ":messages:new message", postData);
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                }
+
+                mAttachType = -1;
+                mImageUri = null;
+            }
+        }).subscribeOn(Schedulers.newThread())
+                .subscribe();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        Log.i(TAG, "onPause: ");
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
@@ -385,7 +549,8 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                         JSONObject message;
                         Chat chat;
                         String owner;
-                        long time;
+                        Date date;
+                        JSONArray imageAndVideo;
 
                         boolean viewerIsOwnerOfMessage;
                         boolean messageBeenRead;
@@ -405,14 +570,14 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                 }
 
                                 try {
-                                    time = simpleDateFormat.parse(message.getString("date")).getTime();
+                                    date = simpleDateFormat.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
-                                    time = 0;
+                                    date = null;
                                 }
 
                                 chat = new Chat(
                                         message.getString("room"),
-                                        time,
+                                        date,
                                         owner,
                                         message.getString("id"),
                                         message.getString("text"),
@@ -424,8 +589,19 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                     listOfUnreadMessages.put(chat.getMessageId());
                                 }
 
-                                tempChatList.add(chat);
+                                imageAndVideo = message.getJSONArray("images");
+                                if (imageAndVideo.length() > 0) {
+                                    chat.setImageId(imageAndVideo.getString(0));
+                                    imageAndVideo = message.getJSONArray("videos");
+                                    if (imageAndVideo.length() > 0) {
+                                        chat.setVideoId(imageAndVideo.getString(0));
+                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
+                                    } else {
+                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
+                                    }
+                                }
 
+                                tempChatList.add(chat);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -519,6 +695,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                         JSONObject object = new JSONObject(response.body().string());
                         //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
+                        JSONArray imageAndVideo;
 
                         mSkip = object.getInt("skip");
 
@@ -526,7 +703,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                         JSONObject message;
                         Chat chat;
                         String owner;
-                        long time;
+                        Date time;
 
                         boolean viewerIsOwnerOfMessage;
                         boolean messageBeenRead;
@@ -546,9 +723,9 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                 }
 
                                 try {
-                                    time = simpleDateFormat.parse(message.getString("date")).getTime();
+                                    time = simpleDateFormat.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
-                                    time = 0;
+                                    time = null;
                                 }
 
                                 chat = new Chat(
@@ -563,6 +740,18 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
                                 if (!messageBeenRead) {
                                     listOfUnreadMessages.put(chat.getMessageId());
+                                }
+
+                                imageAndVideo = message.getJSONArray("images");
+                                if (imageAndVideo.length() > 0) {
+                                    chat.setImageId(imageAndVideo.getString(0));
+                                    imageAndVideo = message.getJSONArray("videos");
+                                    if (imageAndVideo.length() > 0) {
+                                        chat.setVideoId(imageAndVideo.getString(0));
+                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
+                                    } else {
+                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
+                                    }
                                 }
 
                                 tempChatList.add(chat);
@@ -651,16 +840,19 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        long time;
+        Date time;
 
         try {
-            time = simpleDateFormat.parse(data.getString("date")).getTime();
+            time = simpleDateFormat.parse(data.getString("date"));
         } catch (ParseException | JSONException e) {
-            time = 0;
+            time = null;
         }
 
         String owner = data.getJSONObject("owner").getString("id");
         String messageId = data.getString("id");
+
+
+
         Chat chat = new Chat(
                 mRoomId,
                 time,
@@ -670,6 +862,18 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                 false,
                 owner.equals(mUserId)
         );
+
+        JSONArray imageAndVideo = data.getJSONArray("images");
+        if (imageAndVideo.length() > 0) {
+            chat.setImageId(imageAndVideo.getString(0));
+            imageAndVideo = data.getJSONArray("videos");
+            if (imageAndVideo.length() > 0) {
+                chat.setVideoId(imageAndVideo.getString(0));
+                chat.setMessageType(Chat.MESSAGE_VIDEO);
+            } else {
+                chat.setMessageType(Chat.MESSAGE_IMAGE);
+            }
+        }
 
         mChatList.add(chat);
         mChatAdapter.notifyItemInserted(mChatList.size() - 1);
@@ -909,6 +1113,21 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         }
     };
 
+
+    private Emitter.Listener onRefresh = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject jsonObject = new JSONObject(args[0].toString());
+
+//                if ()
+//                    getChat();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
     private Emitter.Listener onDelivered = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
@@ -977,7 +1196,8 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                         JSONObject message;
                         Chat chat;
                         String owner;
-                        long time;
+                        Date time;
+                        JSONArray imageAndVideo;
 
                         boolean viewerIsOwnerOfMessage;
                         boolean messageBeenRead;
@@ -997,9 +1217,9 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                 }
 
                                 try {
-                                    time = simpleDateFormat.parse(message.getString("date")).getTime();
+                                    time = simpleDateFormat.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
-                                    time = 0;
+                                    time = null;
                                 }
 
                                 chat = new Chat(
@@ -1014,6 +1234,18 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
                                 if (!messageBeenRead) {
                                     listOfUnreadMessages.put(chat.getMessageId());
+                                }
+
+                                imageAndVideo = message.getJSONArray("images");
+                                if (imageAndVideo.length() > 0) {
+                                    chat.setImageId(imageAndVideo.getString(0));
+                                    imageAndVideo = message.getJSONArray("videos");
+                                    if (imageAndVideo.length() > 0) {
+                                        chat.setVideoId(imageAndVideo.getString(0));
+                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
+                                    } else {
+                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
+                                    }
                                 }
 
                                 tempChatList.add(chat);

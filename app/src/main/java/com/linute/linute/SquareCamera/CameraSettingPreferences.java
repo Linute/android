@@ -26,7 +26,7 @@ public class CameraSettingPreferences {
         }
     }
 
-    protected static String getCameraFlashMode(@NonNull final Context context) {
+    public static String getCameraFlashMode(@NonNull final Context context) {
         final SharedPreferences preferences = getCameraSettingPreferences(context);
 
         if (preferences != null) {

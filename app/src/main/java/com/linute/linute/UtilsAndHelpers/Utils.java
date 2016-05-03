@@ -156,6 +156,14 @@ public class Utils {
         return "http://images.linute.com/events/original/" + jpegName;
     }
 
+    public static String getMessageImageURL(String jpegName) {
+        return "http://images.linute.com/messages/original/" + jpegName;
+    }
+
+    public static String getMessageVideoURL(String jpegName) {
+        return "http://images.linute.com/messages/video/" + jpegName;
+    }
+
     public static String getVideoURL(String videoEnd){
         return "http://images.linute.com/events/video/" + videoEnd;
     }

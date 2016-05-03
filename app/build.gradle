@@ -63,8 +63,10 @@ dependencies {
     compile "com.daimajia.swipelayout:library:1.2.0@aar"
     compile 'com.github.hiteshsondhi88.libffmpeg:FFmpegAndroid:0.2.5'
     compile 'commons-io:commons-io:2.4'
-    //new
     compile 'com.lyft:scissors:1.0.3'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
+
+    //new
+    compile 'com.daprlabs.aaron:cardstack:0.3.0'
 }

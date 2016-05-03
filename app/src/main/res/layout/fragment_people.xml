@@ -1,25 +1,127 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+                                       android:layout_width="match_parent"
+                                       android:layout_height="wrap_content"
+                                       android:background="@color/colorPrimary"
+                                       app:layout_scrollFlags="scroll|enterAlways|snap"
+                                       app:navigationIcon="@drawable/ic_action_navigation_menu"
+                                       app:title="People"
+                                       app:titleTextColor="@color/pure_white"/>
+
 
     <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/peoplefrag_swipe_refresh"
                                                   android:layout_width="match_parent"
-                                                  android:layout_height="match_parent">
+                                                  android:layout_height="match_parent"
+                                                  android:layout_below="@id/toolbar">
 
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/people_frag_rec"
+        <com.daprlabs.cardstack.SwipeLinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="64dp"
+                          android:layout_marginStart="64dp"
+                          android:layout_marginTop="32dp"
+                          android:orientation="horizontal">
+                <TextView android:id="@+id/name"
+                          android:layout_width="0px"
+                          android:layout_height="wrap_content"
+                          android:layout_weight="1"
+                          android:text="John Dow"
+                          android:textAllCaps="true"
+                          android:textSize="24sp"
+                          android:textStyle="bold"
+
+                />
+
+                <TextView android:id="@+id/location"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:layout_gravity="center"
+                          android:background="@color/colorPrimary"
+                          android:padding="4dp"
+                          android:text="nearby"
+                          android:textColor="@color/white"
+                          android:textSize="@dimen/sub_font_size"
+                />
+            </LinearLayout>
+
+            <TextView android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_marginEnd="64dp"
+                      android:layout_marginStart="64dp"
+                      android:text="CITY college"
+                      android:textAllCaps="true"
+                      android:textColor="@color/secondaryColor"
+                      android:textSize="@dimen/body_font_size"
+            />
+
+            <com.daprlabs.cardstack.SwipeDeck
+                android:id="@+id/swipe_deck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="64dp"
+                android:layout_marginStart="64dp"
+                android:layout_marginTop="16dp"
+                app:card_spacing="-8dp"
+                app:max_visible="3"
+                app:opacity_end="0.33"
+                app:render_above="true"/>
+
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:layout_marginEnd="64dp"
+                          android:layout_marginStart="64dp"
+                          android:layout_marginTop="16dp"
+                          android:orientation="horizontal">
+
+                <Button android:id="@+id/squad"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="squad"
+                        android:textAllCaps="true"
+                />
+
+                <Button android:id="@+id/tapt"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="tapt"
+                        android:textAllCaps="true"
+                />
+            </LinearLayout>
+
+            <TextView android:id="@+id/not_interested"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_gravity="center_horizontal"
+                      android:padding="16dp"
+                      android:text="not interested :("
+            />
+
+
+        </com.daprlabs.cardstack.SwipeLinearLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <RelativeLayout android:id="@+id/peopleFragment_rationale_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="100dp"
-                    android:visibility="gone">
+    <LinearLayout
+        android:id="@+id/peopleFragment_rationale_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"
+        android:layout_marginTop="100dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+    >
 
         <TextView android:id="@+id/rationale_text"
                   android:layout_width="wrap_content"
@@ -29,27 +131,15 @@
                   android:layout_marginStart="64dp"
                   android:gravity="center"
                   android:text="@string/need_location"
-            />
+        />
 
         <Button android:id="@+id/peopleFragment_get_location_permissions_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/rationale_text"
-                android:layout_centerHorizontal="true"
+                android:layout_gravity="center_horizontal"
                 android:text="Turn on"
-            />
-    </RelativeLayout>
+        />
 
-
-
-    <ProgressBar
-        android:id="@+id/peopleFragment_progressbar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:visibility="gone"/>
-
+    </LinearLayout>
 
 </RelativeLayout>
