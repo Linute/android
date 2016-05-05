@@ -332,7 +332,15 @@ public class FindFriendsFragment extends UpdatableFragment {
         mSearchHandler.removeCallbacks(mSearchByNameRunnable);
         if (newText.isEmpty()) { //no text in search bar
             mFriendFoundList.clear();
-            mFriendSearchAdapter.notifyDataSetChanged();
+
+            mMainHandler.removeCallbacksAndMessages(null);
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mFriendSearchAdapter.notifyDataSetChanged();
+                }
+            });
+
             mCancelLoad = true;
             mFindFriendsRationale.setVisibility(View.VISIBLE);
             if (mEmptyText.getVisibility() == View.VISIBLE) mEmptyText.setVisibility(View.GONE);
@@ -411,7 +419,15 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 if (mFriendFoundList.isEmpty()) {
                                     mEmptyText.setVisibility(View.VISIBLE);
                                 }
-                                mFriendSearchAdapter.notifyDataSetChanged();
+
+                                mMainHandler.removeCallbacksAndMessages(null);
+                                mMainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mFriendSearchAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mRecievedList = true;
                             }
                         });
@@ -555,7 +571,15 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 if (mFriendFoundList.isEmpty()) {
                                     mEmptyText.setVisibility(View.VISIBLE);
                                 }
-                                mFriendSearchAdapter.notifyDataSetChanged();
+
+                                mMainHandler.removeCallbacksAndMessages(null);
+                                mMainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mFriendSearchAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mRecievedList = true;
                             }
                         });

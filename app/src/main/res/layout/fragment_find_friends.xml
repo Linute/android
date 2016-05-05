@@ -65,6 +65,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/activity_horizontal_margin"
                 android:background="@color/facebook_blue"
+                android:foreground="?attr/selectableItemBackground"
                 android:padding="@dimen/activity_horizontal_margin"
                 android:text="connect with facebook"
                 android:textColor="@color/pure_white"

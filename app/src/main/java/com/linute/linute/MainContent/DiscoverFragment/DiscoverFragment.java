@@ -58,6 +58,8 @@ public class DiscoverFragment extends UpdatableFragment {
 
     private String mCollegeId;
 
+    private Handler mHandler = new Handler();
+
     public static DiscoverFragment newInstance(boolean friendsOnly) {
         DiscoverFragment fragment = new DiscoverFragment();
         Bundle args = new Bundle();
@@ -276,7 +278,12 @@ public class DiscoverFragment extends UpdatableFragment {
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {
                                                 mEmptyView.setVisibility(View.GONE);
                                             }
-                                            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                            mHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                                }
+                                            });
                                             mRefreshing = false;
                                             cancelRefresh();
                                         }
@@ -397,7 +404,14 @@ public class DiscoverFragment extends UpdatableFragment {
                                             } else if (mEmptyView.getVisibility() == View.VISIBLE) {
                                                 mEmptyView.setVisibility(View.GONE);
                                             }
-                                            mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+
+                                            mHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                                }
+                                            });
+
 
                                             mRefreshing = false;
                                         }
@@ -462,7 +476,13 @@ public class DiscoverFragment extends UpdatableFragment {
             @Override
             public void run() {
                 mPosts.add(0, post);
-                mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                    }
+                });
+
                 if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
             }
         });

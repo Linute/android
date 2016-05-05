@@ -1010,7 +1010,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 @Override
                                 public void run() {
                                     mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                                    mFeedDetailAdapter.notifyItemChanged(0);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFeedDetailAdapter.notifyItemChanged(0);
+                                        }
+                                    });
                                     Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
                                 }
                             });

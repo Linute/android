@@ -907,7 +907,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                 }
             });
 
-            mMediaRecorder.setMaxDuration(7000); //7 sec
+            mMediaRecorder.setMaxDuration(15000); //15 sec
             mMediaRecorder.setMaxFileSize(50000000); //50mb
             mMediaRecorder.prepare();
 
@@ -978,7 +978,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                 mRecordProgress.setVisibility(View.VISIBLE);
                 mToolbar.setTitle("Recording");
                 mProgressAnimator =
-                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 7000);
+                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 15000);
 
                 mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     boolean updated = false;
@@ -995,7 +995,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                     }
                 });
 
-                mProgressAnimator.setDuration(7000);
+                mProgressAnimator.setDuration(15000);
                 mProgressAnimator.setInterpolator(new LinearInterpolator());
                 mProgressAnimator.start();
 

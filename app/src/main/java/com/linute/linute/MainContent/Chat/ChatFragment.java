@@ -119,6 +119,9 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private String mMessageText;
     private int mAttachType = -1;
 
+
+    private Handler mHandler = new Handler();
+
     //private SharedPreferences mSharedPreferences;
 
     //private int mRoomUsersCnt;
@@ -332,7 +335,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     public void onResume() {
         super.onResume();
 
-        Log.i(TAG, "onResume: ");
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
@@ -356,7 +358,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         activity.connectSocket("left", onLeave);
         activity.connectSocket("error", onError);
         activity.connectSocket("delivered", onDelivered);
-        activity.connectSocket("refresh", onRefresh);
+        activity.connectSocket("messages refresh", onRefresh);
 
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
@@ -373,14 +375,15 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
             delivered.put("room", mRoomId);
             activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
 
-            if (mRoomId == null){
+            if (mRoomId == null) {
                 getRoomAndChat();
-            }else {
+                Log.i(TAG, "joinRoom: ");
+            } else {
                 JSONObject refresh = new JSONObject();
                 refresh.put("room", mRoomId);
+                Log.i(TAG, "joinRoom: refresh");
                 activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
             }
-
 
             if (mAttachType == CameraActivity.IMAGE) {
                 sendImage(activity);
@@ -500,6 +503,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
             activity.disconnectSocket("left", onLeave);
             activity.disconnectSocket("error", onError);
             activity.disconnectSocket("delivered", onDelivered);
+            activity.disconnectSocket("messages refresh", onRefresh);
         }
     }
 
@@ -780,8 +784,15 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
-                                    mChatAdapter.notifyDataSetChanged();
-                                    scrollToBottom();
+
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mChatAdapter.notifyDataSetChanged();
+                                            scrollToBottom();
+                                        }
+                                    });
+
                                 }
                             });
 
@@ -852,7 +863,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         String messageId = data.getString("id");
 
 
-
         Chat chat = new Chat(
                 mRoomId,
                 time,
@@ -876,8 +886,14 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         }
 
         mChatList.add(chat);
-        mChatAdapter.notifyItemInserted(mChatList.size() - 1);
-        scrollToBottom();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                scrollToBottom();
+            }
+        });
+
 
         if (!owner.equals(mUserId)) {//not our message, then mark as read
             JSONObject read = new JSONObject();
@@ -894,10 +910,16 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     private void addTyping() {
         if (mOtherUserTyping) return;
 
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                scrollToBottom();
+            }
+        });
+
         mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
-        mChatAdapter.notifyItemInserted(mChatList.size() - 1);
         mOtherUserTyping = true;
-        scrollToBottom();
     }
 
     private void removeTyping() {
@@ -905,11 +927,17 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
         mOtherUserTyping = false;
 
-        int pos = mChatList.size() - 1;
-        if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
-            mChatList.remove(pos);
-            mChatAdapter.notifyItemRemoved(pos);
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int pos = mChatList.size() - 1;
+
+                if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
+                    mChatList.remove(pos);
+                    mChatAdapter.notifyItemRemoved(pos);
+                }
+            }
+        });
     }
 
 //    private void removeChatHead(String username) {
@@ -1098,16 +1126,25 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         @Override
         public void call(final Object... args) {
             if (getActivity() == null) return;
+
+            for (int i = mChatList.size() - 1 ; i >= 0 ; i --) {
+                if (!mChatList.get(i).isRead()) {
+                    mChatList.get(i).setIsRead(true);
+                } else { //stop when reached one already marked as read
+                    break;
+                }
+            }
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    try {
-                        Log.d(TAG, "runRead: " + data.toString(4));
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mChatAdapter.notifyDataSetChanged();
+                        }
+                    });
 //                        removeChatHead(data.getOwner)
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
                 }
             });
         }
@@ -1118,10 +1155,10 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
         @Override
         public void call(Object... args) {
             try {
-                JSONObject jsonObject = new JSONObject(args[0].toString());
 
-//                if ()
-//                    getChat();
+                if (new JSONObject(args[0].toString()).getBoolean("reload"))
+                    getChat();
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1138,7 +1175,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                     if (args.length != 0) {
                         try {
                             Log.d(TAG, "runDelivered: " + ((JSONObject) args[0]).toString(4));
-//                            if(mLastid == id setcheck message)
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -1263,7 +1299,7 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
                                 @Override
                                 public void run() {
 
-                                    new Handler().post(new Runnable() {
+                                    mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             mChatList.addAll(0, tempChatList);

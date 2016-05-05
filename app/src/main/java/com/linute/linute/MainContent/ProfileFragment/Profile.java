@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
@@ -53,6 +55,8 @@ public class Profile extends UpdatableFragment {
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
     private boolean mOtherCompotentHasUpdated = false;
+
+    private Handler mHandler = new Handler();
 
     private Runnable rServerErrorAction = new Runnable() {
         @Override
@@ -250,9 +254,17 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                String full = user.getFirstName() + " " +user.getLastName();
+                                String full = user.getFirstName() + " " + user.getLastName();
                                 mToolbar.setTitle(full);
-                                mProfileAdapter.notifyDataSetChanged();
+
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProfileAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
@@ -349,10 +361,18 @@ public class Profile extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() { //update view
-                                    String full = user.getFirstName() + " " +user.getLastName();
+                                    String full = user.getFirstName() + " " + user.getLastName();
                                     mToolbar.setTitle(full);
                                     mOtherCompotentHasUpdated = false;
-                                    mProfileAdapter.notifyDataSetChanged();
+
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mProfileAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
                                     mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
@@ -438,7 +458,14 @@ public class Profile extends UpdatableFragment {
                             @Override
                             public void run() { //update view
 
-                                mProfileAdapter.notifyDataSetChanged();
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProfileAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });

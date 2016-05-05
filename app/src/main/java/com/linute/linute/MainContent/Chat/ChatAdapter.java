@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,7 @@ import java.util.TimeZone;
 /**
  * Created by Arman on 1/20/16.
  */
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
+public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context aContext;
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
@@ -44,30 +43,31 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     }
 
     @Override
-    public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int layout = -1;
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
-                layout = R.layout.fragment_chat_list_item_me;
-                break;
+                return new ChatViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                layout = R.layout.fragment_chat_list_item_you;
-                break;
+                return new ChatViewHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.fragment_chat_list_item_you, parent, false));
             case Chat.TYPE_ACTION_TYPING:
-                layout = R.layout.fragment_chat_list_item_action_typing;
-                break;
-            //case Chat.TYPE_CHAT_HEAD:
-            //break;
+                return new ChatActionHolder(
+                        LayoutInflater.from(parent.getContext())
+                                .inflate(R.layout.fragment_chat_list_item_action_typing, parent, false));
         }
 
-        return new ChatViewHolder(
-                LayoutInflater.from(parent.getContext())
-                        .inflate(layout, parent, false));
+        return null;
     }
 
     @Override
-    public void onBindViewHolder(ChatViewHolder holder, int position) {
-        holder.bindModel(aChatList.get(position));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof ChatViewHolder) {
+            ((ChatViewHolder)holder).bindModel(aChatList.get(position));
+        }
+
         if (position == 0){
             if (mLoadMoreListener != null){
                 mLoadMoreListener.loadMore();
@@ -120,18 +120,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                             EnlargePhotoViewer.newInstance(EnlargePhotoViewer.VIDEO, mUrl)
                                     .show(activity.getSupportFragmentManager(), "ImageOrVideo");
                         }
-                        Log.i("test", "onClick: "+mType);
+                       // Log.i("test", "onClick: "+mType);
                     }
                 }
             });
         }
 
         void bindModel(Chat chat) {
-            if (chat.getType() == Chat.TYPE_ACTION_TYPING){
-                mType = -1;
-                return; //if typing action, do nothing
-            }
-
             mType = chat.getMessageType();
 
             switch (chat.getMessageType()){
@@ -157,6 +152,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                     break;
             }
 
+
+            if (chat.getType() == Chat.TYPE_MESSAGE_ME){
+                vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat);
+            }
+
             if (chat.getDate() != null) {
                 vUserTime.setText(new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
                         mLongFormat.format(chat.getDate()) :
@@ -172,6 +172,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                     .asBitmap()
                     .placeholder(R.drawable.chat_backgrounds)
                     .into(vImage);
+        }
+    }
+
+
+
+    public class ChatActionHolder extends RecyclerView.ViewHolder {
+
+        public ChatActionHolder(View itemView) {
+            super(itemView);
         }
     }
 
