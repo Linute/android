@@ -24,6 +24,8 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,8 +35,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
-import de.greenrobot.event.Subscribe;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;

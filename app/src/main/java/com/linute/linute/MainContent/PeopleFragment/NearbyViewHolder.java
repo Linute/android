@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -186,7 +187,6 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
         } else {
             position = 3;
         }
-        Toast.makeText(activity, position+"", Toast.LENGTH_SHORT).show();
 
         try {
             JSONObject result = new JSONObject();

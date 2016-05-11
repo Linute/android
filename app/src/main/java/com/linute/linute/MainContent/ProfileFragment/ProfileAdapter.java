@@ -253,16 +253,24 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
-                                    if (!response.isSuccessful()) {
-                                        Log.d(TAG, response.body().string());
-                                        mFollowingButtonText.setText("follow");
-                                        return;
-                                    }
-//                                Log.d(TAG, "onResponse: " + response.body().string());
 
                                     final BaseTaptActivity activity = (BaseTaptActivity) context;
 
                                     if (activity == null) return;
+
+                                    if (!response.isSuccessful()) {
+                                        Log.d(TAG, response.body().string());
+
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mFollowingButtonText.setText("follow");
+                                            }
+                                        });
+                                        return;
+                                    }
+//                                Log.d(TAG, "onResponse: " + response.body().string());
+
 
                                     try {
                                         final JSONObject jsonObject = new JSONObject(response.body().string());
