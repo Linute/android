@@ -16,7 +16,8 @@ import android.view.ViewGroup;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.NewChatEvent;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.Chat.NewMessageBus;
+import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.PostCreatePage;
@@ -25,10 +26,13 @@ import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 
@@ -87,16 +91,17 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                MainActivity activity = (MainActivity) getActivity();
                 switch (item.getItemId()) {
                     case R.id.menu_find_friends:
-                        MainActivity activity = (MainActivity) getActivity();
                         if (activity != null){
                             activity.addFragmentToContainer(new FindFriendsChoiceFragment());
                         }
                         return true;
                     case R.id.people_fragment_menu_chat:
-                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                        startActivity(enterRooms);
+                        if (activity != null){
+                            activity.addFragmentToContainer(new RoomsActivityFragment());
+                        }
                         return true;
                     default:
                         return false;
@@ -211,14 +216,20 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-        EventBus.getDefault().register(this);
+        mChatSubscription = NewMessageBus.getInstance().getObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mNewMessageSubscriber);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        EventBus.getDefault().unregister(this);
+        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()){
+            mChatSubscription.unsubscribe();
+        }
+
         toggleFab();
         mAppBarLayout.setExpanded(true, false);
         mSingleVideoPlaybackManager.stopPlayback();
@@ -259,20 +270,18 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
 
 
-    @Subscribe
-    public void onEvent(final NewChatEvent event){
-        // your implementation
-        if (event.hasNewMessage() != mHasMessage && getActivity() != null){
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
-                            R.drawable.notify_mess_icon :
-                            R.drawable.ic_chat81
-                    );
-                    mHasMessage = event.hasNewMessage();
-                }
-            });
+    private Subscription mChatSubscription;
+
+    private Action1<NewChatEvent> mNewMessageSubscriber = new Action1<NewChatEvent>() {
+        @Override
+        public void call(NewChatEvent event) {
+            if (event.hasNewMessage() != mHasMessage){
+                mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                        R.drawable.notify_mess_icon :
+                        R.drawable.ic_chat81
+                );
+                mHasMessage = event.hasNewMessage();
+            }
         }
-    }
+    };
 }

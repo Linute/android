@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
@@ -111,7 +112,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    RoomsActivity activity = (RoomsActivity) aContext;
+                    BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         if (mType == Chat.MESSAGE_IMAGE) {
                             EnlargePhotoViewer.newInstance(EnlargePhotoViewer.IMAGE, mUrl)

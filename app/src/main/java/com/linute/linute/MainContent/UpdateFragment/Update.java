@@ -17,10 +17,6 @@ public class Update {
 
     private static final String TAG = Update.class.getSimpleName();
 
-    public long getActionTime() {
-        return mActionTime;
-    }
-
     //enum of update types
     public enum UpdateType {
         UNDEFINED,
@@ -159,14 +155,6 @@ public class Update {
 
     //following activities will have event info
     public final boolean hasEventInformation(){
-//        return  mUpdateType == UpdateType.LIKED_PHOTO || mUpdateType == UpdateType.LIKED_STATUS
-//                || mUpdateType == UpdateType.COMMENTED_PHOTO || mUpdateType == UpdateType.COMMENTED_STATUS
-//                || mUpdateType == UpdateType.POSTED_PHOTO || mUpdateType == UpdateType.POSTED_STATUS
-//                || mUpdateType == UpdateType.MENTIONED || mUpdateType == UpdateType.ALSO_COMMENTED_IMAGE
-//                || mUpdateType == UpdateType.AlSO_COMMENTED_STATUS || mUpdateType == UpdateType.ALSO_COMMENTED_VIDEO
-//                || mUpdateType == UpdateType.POSTED_VIDEO || mUpdateType == UpdateType.LIKED_VIDEO
-//                || mUpdateType == UpdateType.COMMENTED_VIDEO;
-
         return mUpdateType != UpdateType.UNDEFINED &&
                 mUpdateType != UpdateType.FOLLOWER &&
                 mUpdateType != UpdateType.FRIEND_JOINED &&
@@ -257,6 +245,10 @@ public class Update {
 
     public String getEventUserId() {
         return mPost.getUserId();
+    }
+
+    public long getActionTime() {
+        return mActionTime;
     }
 
     public Post getPost(){

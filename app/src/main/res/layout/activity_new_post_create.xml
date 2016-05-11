@@ -8,37 +8,38 @@
     tools:context=".MainContent.PostCreatePage">
 
 
-    <RelativeLayout android:layout_width="match_parent" android:layout_height="?attr/actionBarSize">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="?attr/actionBarSize">
         <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
                                            android:layout_width="match_parent"
                                            android:layout_height="?attr/actionBarSize"
                                            android:background="@color/colorPrimary"
                                            android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
-        <RelativeLayout android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_alignParentEnd="true"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginEnd="16dp"
+        <FrameLayout android:layout_width="wrap_content"
+                     android:layout_height="match_parent"
+                     android:layout_gravity="end|center_vertical"
+                     android:layout_marginEnd="16dp"
         >
 
-            <ImageView android:id="@+id/create_page_post_button"
-                       android:layout_width="wrap_content"
-                       android:layout_height="match_parent"
-                       android:src="@drawable/ic_action_check83"
+            <com.linute.linute.SquareCamera.SquareImageView
+                android:id="@+id/create_page_post_button"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:foreground="?selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_action_check83"
             />
 
             <ProgressBar android:id="@+id/create_page_progress_bar"
                          style="?android:attr/progressBarStyleSmall"
                          android:layout_width="wrap_content"
                          android:layout_height="wrap_content"
-                         android:layout_centerInParent="true"
+                         android:layout_gravity="center"
                          android:visibility="gone"
             />
-        </RelativeLayout>
+        </FrameLayout>
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_frame"
                                                          android:layout_width="match_parent"

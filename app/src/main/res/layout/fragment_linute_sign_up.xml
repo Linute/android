@@ -1,11 +1,10 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                tools:background="@color/eighty_black"
-                tools:context=".LoginAndSignup.LinuteSignUpFragment">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:background="@color/eighty_black"
+             tools:context=".LoginAndSignup.LinuteSignUpFragment">
 
     <ViewFlipper android:id="@+id/signUp_view_flipper"
                  android:layout_width="match_parent"
@@ -316,5 +315,6 @@
                android:alpha="0.35"
                android:padding="@dimen/activity_horizontal_margin"
                android:src="@drawable/ic_action_navigation_arrow_back_inverted"
+               android:foreground="?selectableItemBackgroundBorderless"
     />
-</RelativeLayout>
+</FrameLayout>

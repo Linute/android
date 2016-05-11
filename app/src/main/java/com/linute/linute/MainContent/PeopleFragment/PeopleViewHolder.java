@@ -14,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -114,12 +113,12 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
                     }
                 });
             } else {
-                Intent enterRooms = new Intent(vContext, RoomsActivity.class);
-                enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                enterRooms.putExtra("ownerID", mPerson.getID());
-                enterRooms.putExtra("ownerFullName", mPerson.getName());
-                enterRooms.putExtra("room", "");
-                vContext.startActivity(enterRooms);
+//                Intent enterRooms = new Intent(vContext, RoomsActivity.class);
+//                enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+//                enterRooms.putExtra("ownerID", mPerson.getID());
+//                enterRooms.putExtra("ownerFullName", mPerson.getName());
+//                enterRooms.putExtra("room", "");
+//                vContext.startActivity(enterRooms);
             }
             return;
         }

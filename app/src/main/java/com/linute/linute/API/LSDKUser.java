@@ -2,12 +2,8 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
-
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
-
 
 import java.util.HashMap;
 import java.util.Map;

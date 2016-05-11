@@ -110,6 +110,7 @@ public class Chat {
         return mMessage;
     }
 
+
     public int getType() {
         return mType;
     }

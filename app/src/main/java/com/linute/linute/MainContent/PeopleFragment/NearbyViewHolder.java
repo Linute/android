@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -135,12 +134,12 @@ public class NearbyViewHolder extends RecyclerView.ViewHolder implements View.On
             @Override
             public void onClick(View v) {
                 if (mPerson.isFriend()) {
-                    Intent enterRooms = new Intent(mContext, RoomsActivity.class);
-                    enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                    enterRooms.putExtra("ownerID", mPerson.getID());
-                    enterRooms.putExtra("ownerFullName", mPerson.getName());
-                    enterRooms.putExtra("room", "");
-                    mContext.startActivity(enterRooms);
+//                    Intent enterRooms = new Intent(mContext, RoomsActivity.class);
+//                    enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
+//                    enterRooms.putExtra("ownerID", mPerson.getID());
+//                    enterRooms.putExtra("ownerFullName", mPerson.getName());
+//                    enterRooms.putExtra("room", "");
+//                    mContext.startActivity(enterRooms);
                 } else {
 
                     final Map<String, Object> postData = new HashMap<>();

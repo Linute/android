@@ -78,7 +78,6 @@ import okhttp3.Response;
 
 public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
-    private static final SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
@@ -88,7 +87,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private MentionsEditText mCommentEditText;
 
     private View mAnonCheckBoxContainer;
-
     private View mSendButtonContainer;
 
     private RecyclerView mMentionedList;
@@ -97,8 +95,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private View mProgressbar;
     private View mSendButton;
-
-    private Toolbar mToolbar;
 
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
@@ -144,16 +140,16 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
         mViewId = pref.getString("userID", "");
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
-        mToolbar.setTitle("Comments");
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
+        toolbar.setTitle("Comments");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getFragmentManager().popBackStack();
             }
         });
-        mToolbar.setOnClickListener(new View.OnClickListener() {
+        toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
@@ -162,31 +158,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         });
 
 
-        mToolbar.inflateMenu(R.menu.feed_detail_toolbar);
+        toolbar.inflateMenu(R.menu.feed_detail_toolbar);
 
 
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-//                int id = item.getItemId();
-//
-//                switch (id) {
-//                    case R.id.feed_detail_report:
-//                        showReportOptionsDialog();
-//                        return true;
-//                    case R.id.feed_detail_delete:
-//                        showConfirmDeleteDialog();
-//                        return true;
-//                    case R.id.feed_detail_reveal:
-//                        showRevealConfirm();
-//                        return true;
-//                    case R.id.feed_detail_mute_post:
-//                        showMuteConfirmation();
-//                        return true;
-//                    case R.id.feed_detail_hide_post:
-//                        showHideConfirmation();
-//                        return true;
-//                }
                 if (item.getItemId() == R.id.feed_detail_options){
                     if (mCommentsRetrieved)
                         showOptionsDialog();
@@ -458,7 +435,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                         //get date
                         try {
-                            myDate = fm.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
@@ -607,7 +584,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                                 //get date
                                 try {
-                                    myDate = fm.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
@@ -1262,7 +1239,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             try {
                 Date myDate;
-                myDate = fm.parse(object.getString("date"));
+                myDate = Utils.DATE_FORMAT.parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
                 JSONArray mentionedPeople = object.getJSONArray("mentions");

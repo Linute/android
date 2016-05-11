@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,14 +44,14 @@ public class SearchUsers extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = SearchUsers.class.getSimpleName();
 
-    private RecyclerView recList;
-    private LinearLayoutManager llm;
     private SearchAdapter mSearchAdapter;
 
     private List<SearchUser> mSearchUserList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
 
     private EditText editText;
+
+    private Handler mHandler = new Handler();
 
     public SearchUsers() {
         // Required empty public constructor
@@ -87,9 +88,9 @@ public class SearchUsers extends Fragment {
             }
         });
 
-        recList = (RecyclerView) view.findViewById(R.id.search_users);
+        RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -128,9 +129,11 @@ public class SearchUsers extends Fragment {
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, String> newChat = new HashMap<>();
         newChat.put("owner", mSharedPreferences.getString("userID", null));
+
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
         }
+
         users.getUsers(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -148,6 +151,14 @@ public class SearchUsers extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
+                    if (getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
                 } else {
 //                    mSearchUserList.clear();
                     ArrayList<SearchUser> tempUsers = new ArrayList<>();
@@ -172,13 +183,27 @@ public class SearchUsers extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mSearchAdapter.notifyDataSetChanged();
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSearchAdapter.notifyDataSetChanged();
+                                        }
+                                    });
                                 }
                             });
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        if (getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
                     }
                 }
             }

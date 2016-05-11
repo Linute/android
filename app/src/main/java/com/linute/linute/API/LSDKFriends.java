@@ -1,7 +1,6 @@
 package com.linute.linute.API;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
@@ -16,14 +15,11 @@ import okhttp3.Callback;
  */
 public class LSDKFriends {
 
-    private static SharedPreferences mSharedPreferences;
-
     private static String mToken;
 
 
     public LSDKFriends(Context context) {
-        mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mToken = mSharedPreferences.getString("userToken","");
+        mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
 

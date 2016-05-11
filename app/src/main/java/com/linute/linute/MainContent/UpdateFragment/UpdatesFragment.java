@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -17,15 +16,14 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.MainContent.Chat.NewChatEvent;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.Chat.NewMessageBus;
+import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,6 +36,10 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by QiFeng on 1/6/16.
@@ -98,16 +100,18 @@ public class UpdatesFragment extends UpdatableFragment {
         mToolbar .setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                MainActivity activity = (MainActivity) getActivity();
+
                 switch (item.getItemId()) {
                     case R.id.menu_find_friends:
-                        MainActivity activity = (MainActivity) getActivity();
                         if (activity != null){
                             activity.addFragmentToContainer(new FindFriendsChoiceFragment());
                         }
                         return true;
                     case R.id.people_fragment_menu_chat:
-                        Intent enterRooms = new Intent(getActivity(), RoomsActivity.class);
-                        startActivity(enterRooms);
+                        if (activity != null){
+                            activity.addFragmentToContainer(new RoomsActivityFragment());
+                        }
                         return true;
                     default:
                         return false;
@@ -156,7 +160,13 @@ public class UpdatesFragment extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
-        EventBus.getDefault().register(this);
+
+         mChatSubscription = NewMessageBus.getInstance()
+                 .getObservable()
+                 .subscribeOn(Schedulers.io())
+                 .observeOn(AndroidSchedulers.mainThread())
+                 .subscribe(mNewMessageSubscriber);
+
         if (fragmentNeedsUpdating()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -179,7 +189,10 @@ public class UpdatesFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
-        EventBus.getDefault().unregister(this);
+        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()){
+            mChatSubscription.unsubscribe();
+        }
+
         mAppBarLayout.setExpanded(true,false);
     }
 
@@ -354,15 +367,20 @@ public class UpdatesFragment extends UpdatableFragment {
         }
     }
 
-    @Subscribe
-    public void onEvent(NewChatEvent event){
-        // your implementation
-        if (event.hasNewMessage() != mHasMessage){
-            mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
-                    R.drawable.notify_mess_icon :
-                    R.drawable.ic_chat81
-            );
-            mHasMessage = event.hasNewMessage();
+
+    private Subscription mChatSubscription;
+
+    private Action1 <NewChatEvent> mNewMessageSubscriber = new Action1<NewChatEvent>() {
+        @Override
+        public void call(NewChatEvent event) {
+            if (event.hasNewMessage() != mHasMessage){
+                mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
+                        R.drawable.notify_mess_icon :
+                        R.drawable.ic_chat81
+                );
+                mHasMessage = event.hasNewMessage();
+            }
         }
-    }
+    };
+
 }

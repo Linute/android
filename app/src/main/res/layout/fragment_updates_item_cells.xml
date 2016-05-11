@@ -1,52 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:selectableItemBackground">
-
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/updatesFragment_profile_picture"
-        android:layout_width="@dimen/profile_image_radius"
-        android:layout_height="@dimen/profile_image_radius"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        app:civ_border_color="@color/seperator_color"
-        app:civ_border_width="1dp"
-        tools:background="@android:color/darker_gray"
-    />
-
-    <ImageView
-        android:id="@+id/updatesFragment_icon_image"
-        android:layout_width="@dimen/updatefragment_icon_size"
-        android:layout_height="@dimen/updatefragment_icon_size"
-        android:layout_alignBottom="@id/updatesFragment_profile_picture"
-        android:layout_alignRight="@id/updatesFragment_profile_picture"
-        tools:background="@android:color/holo_green_light"
-    />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground">
 
 
-    <ImageView
-        android:id="@+id/updatesFragment_update_picture"
-        android:layout_width="@dimen/profile_image_radius"
-        android:layout_height="@dimen/profile_image_radius"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:background="@color/seperator_color"
-        android:padding="1px"
-        android:scaleType="centerCrop"/>
+    <FrameLayout android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_margin="@dimen/activity_horizontal_margin"
+    >
 
-    <LinearLayout android:layout_width="wrap_content"
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/updatesFragment_profile_picture"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            app:civ_border_color="@color/seperator_color"
+            app:civ_border_width="1dp"
+            tools:background="@android:color/darker_gray"
+        />
+
+        <ImageView
+            android:id="@+id/updatesFragment_icon_image"
+            android:layout_width="@dimen/updatefragment_icon_size"
+            android:layout_height="@dimen/updatefragment_icon_size"
+            android:layout_gravity="bottom|end"
+            tools:background="@android:color/holo_green_light"
+        />
+
+    </FrameLayout>
+
+    <LinearLayout android:layout_width="0px"
+                  android:layout_weight="1"
                   android:layout_height="wrap_content"
-                  android:layout_centerVertical="true"
-                  android:layout_toEndOf="@id/updatesFragment_profile_picture"
-                  android:layout_toStartOf="@id/updatesFragment_update_picture"
+                  android:layout_marginTop="@dimen/activity_horizontal_margin"
+                  android:layout_marginBottom="@dimen/activity_horizontal_margin"
                   android:orientation="vertical">
 
 
@@ -78,7 +67,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="2"
+            android:maxLines="3"
             android:textColor="@color/fifty_black"
             android:textSize="@dimen/sub_font_size"
             tools:text="Test text. This est text. This est text. This est text. This is what it will looking like test test test test tedfs "
@@ -87,4 +76,14 @@
     </LinearLayout>
 
 
-</RelativeLayout>
+    <ImageView
+        android:id="@+id/updatesFragment_update_picture"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:background="@color/seperator_color"
+        android:padding="1px"
+        android:scaleType="centerCrop"/>
+
+
+</LinearLayout>

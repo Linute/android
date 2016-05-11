@@ -10,6 +10,7 @@
                android:layout_height="wrap_content"
                android:alpha="0.35"
                android:padding="@dimen/activity_horizontal_margin"
+               android:foreground="?selectableItemBackgroundBorderless"
                android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 

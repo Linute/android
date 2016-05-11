@@ -21,7 +21,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:navigationIcon="@drawable/ic_action_navigation_menu"
-            app:title="Feed"
+            app:title="Campus"
         />
 
     </android.support.design.widget.AppBarLayout>
@@ -57,13 +57,14 @@
                                                           app:fab_addButtonColorPressed="#a3e1de"
                                                           app:fab_expandDirection="up"
                                                           app:fab_labelsPosition="left"
+                                                          app:fab_labelStyle="@style/fab_label"
     >
 
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabImage"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/fab_camera"
-                                                               app:fabSize="mini"
+                                                               android:src="@drawable/ic_action_editor_format_quote"
+                                                               app:fab_size="mini"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
                                                                app:fab_title="Photo"/>
@@ -71,8 +72,8 @@
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabText"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/fab_quote"
-                                                               app:fabSize="mini"
+                                                               android:src="@drawable/ic_action_image_photo_camera"
+                                                               app:fab_size="mini"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
                                                                app:fab_title="Status"/>

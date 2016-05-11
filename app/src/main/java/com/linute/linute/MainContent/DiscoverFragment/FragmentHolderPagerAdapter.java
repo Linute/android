@@ -34,7 +34,7 @@ public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position){
             case 0:
-                return "Campus";
+                return "New";
             case 1:
                 return "Hot";
             default:

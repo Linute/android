@@ -54,7 +54,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
     private LSDKUser mUser;
-    private SharedPreferences mSharedPreferences;
 
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
@@ -106,7 +105,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         final View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
         mUser = new LSDKUser(getActivity());
-        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
@@ -151,7 +150,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             }
         });
 
-        mOwnerIsViewer = mTaptUserId.equals(mSharedPreferences.getString("userID", ""));
+        mOwnerIsViewer = mTaptUserId.equals(sharedPreferences.getString("userID", ""));
         mToolbar.inflateMenu(mOwnerIsViewer ? R.menu.my_profile_action_bar : R.menu.tapt_user_profile_menu);
 
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {

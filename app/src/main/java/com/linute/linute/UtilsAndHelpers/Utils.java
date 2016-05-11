@@ -31,6 +31,11 @@ import java.util.TimeZone;
 public class Utils {
     public static String CONTENT_TYPE = "application/json";
 
+    public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    static {
+        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
     //encodes input String
     //returns empty if can't encode (should never happen)
     public static String encode_base64(String input) {
@@ -180,31 +185,28 @@ public class Utils {
 
 
     public static String formatDateToReadableString(String date) {
-        SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
-            return SimpleDateFormat.getDateInstance().format(fm.parse(date));
+            return SimpleDateFormat.getDateInstance().format(DATE_FORMAT.parse(date));
         } catch (ParseException e) {
             e.printStackTrace();
             return "";
         }
     }
 
-    public static int getToolbarHeight(Context context) {
-        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
-                new int[]{R.attr.actionBarSize});
-        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
-        styledAttributes.recycle();
-
-        return toolbarHeight;
-    }
+//    public static int getToolbarHeight(Context context) {
+//        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
+//                new int[]{R.attr.actionBarSize});
+//        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
+//        styledAttributes.recycle();
+//
+//        return toolbarHeight;
+//    }
 
     //returns a nicely formated string about when event occurred
     public static String getTimeAgoString(long beforeTime) {
         if (beforeTime == 0) return "";
-        //DateFormat df = DateFormat.getTimeInstance();
-        //df.setTimeZone(TimeZone.getTimeZone("gmt"));
 
-        long timeDifference = getUTCdatetimeAsDate().getTime() - beforeTime;
+        long timeDifference = new Date().getTime() - beforeTime;
 
         if (timeDifference < 0){ //time less than 0
             return 0 + "s";
@@ -224,14 +226,12 @@ public class Utils {
             return ((int) (timeDifference / DateUtils.MINUTE_IN_MILLIS)) + "m";
         else
             return ((int) (timeDifference / DateUtils.SECOND_IN_MILLIS))+"s";
-
     }
 
     //returns millisecond of date
     public static long getTimeFromString(String date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
-            return dateFormat.parse(date).getTime();
+            return DATE_FORMAT.parse(date).getTime();
         } catch (ParseException e) {
             e.printStackTrace();
             return 0;
@@ -240,35 +240,35 @@ public class Utils {
     }
 
 
-    static final String DATEFORMAT = "yyyy-MM-dd HH:mm:ss";
-
-    public static Date getUTCdatetimeAsDate()
-    {
-        return StringDateToDate(GetUTCdatetimeAsString());
-    }
-
-    public static String GetUTCdatetimeAsString()
-    {
-        final SimpleDateFormat sdf = new SimpleDateFormat(DATEFORMAT);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        return sdf.format(new Date());
-    }
-
-    public static Date StringDateToDate(String StrDate)
-    {
-        Date dateToReturn = null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-
-        try
-        {
-            dateToReturn = dateFormat.parse(StrDate);
-        }
-        catch (ParseException e)
-        {
-            e.printStackTrace();
-        }
-
-        return dateToReturn;
-    }
+//    static final String DATEFORMAT = "yyyy-MM-dd HH:mm:ss";
+//
+//    public static Date getUTCdatetimeAsDate()
+//    {
+//        return StringDateToDate(GetUTCdatetimeAsString());
+//    }
+//
+//    public static String GetUTCdatetimeAsString()
+//    {
+//        final SimpleDateFormat sdf = new SimpleDateFormat(DATEFORMAT);
+//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+//
+//        return sdf.format(new Date());
+//    }
+//
+//    public static Date StringDateToDate(String StrDate)
+//    {
+//        Date dateToReturn = null;
+//        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+//
+//        try
+//        {
+//            dateToReturn = dateFormat.parse(StrDate);
+//        }
+//        catch (ParseException e)
+//        {
+//            e.printStackTrace();
+//        }
+//
+//        return dateToReturn;
+//    }
 }

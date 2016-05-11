@@ -24,10 +24,12 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -62,7 +64,7 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link ChatFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListener {
+public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadMoreListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String ROOM_ID = "room";
@@ -377,11 +379,12 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
 
             if (mRoomId == null) {
                 getRoomAndChat();
-                Log.i(TAG, "joinRoom: ");
-            } else {
+            } else if (fragmentNeedsUpdating()){
+                getChat();
+                setFragmentNeedUpdating(false);
+            } else{
                 JSONObject refresh = new JSONObject();
                 refresh.put("room", mRoomId);
-                Log.i(TAG, "joinRoom: refresh");
                 activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
             }
 
@@ -483,8 +486,6 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
     public void onPause() {
         super.onPause();
 
-        Log.i(TAG, "onPause: ");
-
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null && mUserId != null && mRoomId != null) {
@@ -515,6 +516,11 @@ public class ChatFragment extends Fragment implements ChatAdapter.LoadMoreListen
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mInputMessageView.getWindowToken(), 0);
         }
+
+        MainActivity activity = (MainActivity) getActivity();
+
+        if (activity != null)
+            activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
     }
 
 

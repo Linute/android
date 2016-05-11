@@ -34,8 +34,7 @@ public class NeedPermissionsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        TextView turnOn = (TextView) view.findViewById(R.id.needPermission_text_button);
-        turnOn.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.needPermission_text_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 CameraActivity main = (CameraActivity) getActivity();

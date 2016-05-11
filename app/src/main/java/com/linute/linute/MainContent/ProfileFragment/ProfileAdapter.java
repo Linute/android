@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
@@ -16,8 +15,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
-import com.linute.linute.MainContent.FriendsList.FriendsListFragment;
+import com.linute.linute.MainContent.Chat.Chat;
+import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.EditProfileInfoActivity;
@@ -215,12 +214,14 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             mUser.getFriend().equals(""))
                         return;
 
-                    Intent enterRooms = new Intent(context, RoomsActivity.class);
-                    enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                    enterRooms.putExtra("ownerID", mUser.getUserID());
-                    enterRooms.putExtra("ownerFullName", mUser.getFirstName() + " " + mUser.getLastName());
-                    enterRooms.putExtra("room", "");
-                    context.startActivity(enterRooms);
+                    BaseTaptActivity activity = (BaseTaptActivity) context;
+                    if (activity != null){
+                        activity.addFragmentToContainer(ChatFragment
+                                .newInstance(
+                                        null
+                                        , mUser.getFirstName() + " " + mUser.getLastName()
+                                        , mUser.getUserID()));
+                    }
                 }
             });
 
@@ -239,7 +240,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             new LSDKPeople(context).postFollow(postData, new Callback() {
                                 @Override
                                 public void onFailure(Call call, IOException e) {
-                                    final Activity activity = (Activity) context;
+                                    final BaseTaptActivity activity = (BaseTaptActivity) context;
                                     if (activity != null) {
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
@@ -253,16 +254,23 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                 @Override
                                 public void onResponse(Call call, Response response) throws IOException {
-                                    if (!response.isSuccessful()) {
-                                        Log.d(TAG, response.body().string());
-                                        mFollowingButtonText.setText("follow");
-                                        return;
-                                    }
-//                                Log.d(TAG, "onResponse: " + response.body().string());
 
                                     final BaseTaptActivity activity = (BaseTaptActivity) context;
 
                                     if (activity == null) return;
+
+                                    if (!response.isSuccessful()) {
+                                        Log.d(TAG, response.body().string());
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mFollowingButtonText.setText("follow");
+                                            }
+                                        });
+                                        return;
+                                    }
+//                                Log.d(TAG, "onResponse: " + response.body().string());
+
 
                                     try {
                                         final JSONObject jsonObject = new JSONObject(response.body().string());
@@ -300,7 +308,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             new LSDKPeople(context).putUnfollow(putData, mUser.getFriendship(), new Callback() {
                                 @Override
                                 public void onFailure(Call call, IOException e) {
-                                    final Activity activity = (Activity) context;
+                                    final BaseTaptActivity activity = (BaseTaptActivity) context;
                                     if (activity != null) {
                                         activity.runOnUiThread(new Runnable() {
                                             @Override

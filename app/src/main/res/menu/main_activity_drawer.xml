@@ -2,12 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
     <group>
         <item
             android:id="@+id/navigation_item_feed"
             android:icon="@drawable/ic_action_college"
-            android:title="Feed"
+            android:title="Campus"
             android:checkable="true"
             android:checked="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"
@@ -25,10 +24,6 @@
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
-        <!--<item android:id="@+id/navigation_item_find_friends"-->
-              <!--android:icon="@drawable/ic_action_add99"-->
-              <!--android:title="Add Friends"-->
-              <!--/>-->
     </group>
 
 

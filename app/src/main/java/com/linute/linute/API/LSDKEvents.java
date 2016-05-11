@@ -1,10 +1,9 @@
 package com.linute.linute.API;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +18,7 @@ public class LSDKEvents {
     private static String mToken;
 
     public LSDKEvents(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mToken = sharedPreferences.getString("userToken","");
+        mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
     public Call getEvents(boolean hot, Map<String, String> param, Callback callback) {

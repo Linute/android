@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,11 +14,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -27,7 +26,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +35,9 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -51,7 +52,6 @@ public class RoomsActivityFragment extends Fragment {
     //make sure this always gets called: getRoom
 
     private static final String TAG = RoomsActivityFragment.class.getSimpleName();
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private RoomsAdapter mRoomsAdapter;
 
@@ -65,6 +65,10 @@ public class RoomsActivityFragment extends Fragment {
     private int mSkip = 0;
 
     private boolean mCanLoadMore = false;
+
+    private Handler mHandler = new Handler();
+
+    private boolean mRoomsRetrieved;
 
     public RoomsActivityFragment() {
     }
@@ -110,7 +114,7 @@ public class RoomsActivityFragment extends Fragment {
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    activity.addFragmentToContainer(new SearchUsers());
+                    activity.replaceContainerWithFragment(new SearchUsers());
                 }
             }
         });
@@ -145,32 +149,30 @@ public class RoomsActivityFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         getRooms();
-
-        RoomsActivity activity = (RoomsActivity) getActivity();
-        if (activity != null) {
-            activity.setTitle("Inbox");
-        }
+        mChatSubscription = NewMessageBus.getInstance().getObservable()
+                .observeOn(Schedulers.io())
+                .subscribe(mNewMessageSubscriber);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
+            mChatSubscription.unsubscribe();
+        }
     }
 
     private void getRooms() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || mSwipeRefreshLayout.isRefreshing()) return;
 
-        if (!mSwipeRefreshLayout.isRefreshing()) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-        }
-
+        mRoomsRetrieved = false;
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
 
         Map<String, String> params = new HashMap<>();
         params.put("limit", "20");
@@ -236,7 +238,7 @@ public class RoomsActivityFragment extends Fragment {
                                 readArray = message.getJSONArray("read");
 
                                 try {
-                                    date = simpleDateFormat.parse(message.getString("date"));
+                                    date = Utils.DATE_FORMAT.parse(message.getString("date"));
                                 } catch (ParseException e) {
                                     date = null;
                                 }
@@ -256,11 +258,11 @@ public class RoomsActivityFragment extends Fragment {
 
                                 if (tempArray.length() > 0) {
                                     lastMessage = isOwner ? "You: sent a video" : "sent you a video";
-                                }else {
+                                } else {
                                     tempArray = message.getJSONArray("images");
-                                    if (tempArray.length() > 0){
+                                    if (tempArray.length() > 0) {
                                         lastMessage = isOwner ? "You: sent an image" : "sent you an image";
-                                    }else {
+                                    } else {
                                         lastMessage = isOwner ? "You: " + message.getString("text") :
                                                 message.getString("text");
                                     }
@@ -311,7 +313,13 @@ public class RoomsActivityFragment extends Fragment {
                                             mEmptyText.setVisibility(View.GONE);
                                     }
 
-                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mRoomsAdapter.notifyDataSetChanged();
+                                            mRoomsRetrieved = true;
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -427,7 +435,7 @@ public class RoomsActivityFragment extends Fragment {
                                 readArray = message.getJSONArray("read");
 
                                 try {
-                                    date = simpleDateFormat.parse(message.getString("date"));
+                                    date = Utils.DATE_FORMAT.parse(message.getString("date"));
                                 } catch (ParseException e) {
                                     date = null;
                                 }
@@ -480,7 +488,13 @@ public class RoomsActivityFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mRoomsAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
                                     mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
@@ -513,4 +527,46 @@ public class RoomsActivityFragment extends Fragment {
             }
         });
     }
+
+    private Subscription mChatSubscription;
+
+    private Action1<NewChatEvent> mNewMessageSubscriber = new Action1<NewChatEvent>() {
+        @Override
+        public void call(NewChatEvent event) {
+            if (mRoomsRetrieved && event.getRoomId() != null && getActivity() != null ) {
+
+                Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
+                final int pos = mRoomsList.indexOf(tempRoom);
+
+                if (pos >= 0) {
+                    mRoomsList.get(pos).merge(tempRoom);
+                    mRoomsList.add(0, mRoomsList.remove(pos));
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyItemChanged(pos);
+                                }
+                            });
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyItemMoved(pos, 0);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getRooms();
+                        }
+                    });
+                }
+            }
+        }
+    };
 }

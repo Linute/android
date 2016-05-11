@@ -8,9 +8,9 @@
 
     <include layout="@layout/feed_detail_header"/>
 
-    <RelativeLayout android:id="@+id/feedDetail_status_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+    <FrameLayout android:id="@+id/feedDetail_status_container"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content">
 
         <TextView android:id="@+id/feedDetail_status_post"
                   android:layout_width="match_parent"
@@ -24,7 +24,7 @@
                   android:textSize="@dimen/body_font_size"
                   tools:text="Suck my ass.Suck my ass.Suck my ass.Suck my ass."/>
 
-    </RelativeLayout>
+    </FrameLayout>
 
     <include layout="@layout/feed_detail_action_bar"/>
 

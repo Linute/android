@@ -6,7 +6,7 @@
                                         android:layout_height="match_parent">
 
 
-    <android.support.design.widget.CoordinatorLayout
+    <FrameLayout
         android:id="@+id/mainActivity_fragment_holder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
@@ -20,8 +20,6 @@
                                                   app:headerLayout="@layout/drawer_header"
                                                   app:itemIconTint="@color/white"
                                                   app:itemTextAppearance="@style/NavDrawerTextStyle"
-                                                  app:menu="@menu/main_activity_drawer">
-    </android.support.design.widget.NavigationView>
-
+                                                  app:menu="@menu/main_activity_drawer"/>
 
 </android.support.v4.widget.DrawerLayout>
