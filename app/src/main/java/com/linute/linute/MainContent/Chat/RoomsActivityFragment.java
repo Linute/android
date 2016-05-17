@@ -14,7 +14,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -51,7 +54,7 @@ public class RoomsActivityFragment extends Fragment {
 
     //make sure this always gets called: getRoom
 
-    private static final String TAG = RoomsActivityFragment.class.getSimpleName();
+    public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
     private RoomsAdapter mRoomsAdapter;
 
@@ -109,12 +112,10 @@ public class RoomsActivityFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                if (activity != null) {
-                    activity.replaceContainerWithFragment(new SearchUsers());
+                if (activity != null){
+                    activity.addFragmentToContainer(new SearchUsers());
                 }
             }
         });
@@ -160,6 +161,15 @@ public class RoomsActivityFragment extends Fragment {
         super.onPause();
         if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
             mChatSubscription.unsubscribe();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        if (activity!=null){
+            activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
         }
     }
 
@@ -530,9 +540,9 @@ public class RoomsActivityFragment extends Fragment {
 
     private Subscription mChatSubscription;
 
-    private Action1<NewChatEvent> mNewMessageSubscriber = new Action1<NewChatEvent>() {
+    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
-        public void call(NewChatEvent event) {
+        public void call(NewMessageEvent event) {
             if (mRoomsRetrieved && event.getRoomId() != null && getActivity() != null ) {
 
                 Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());

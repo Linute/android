@@ -48,7 +48,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         //profile image on the right
         Glide.with(mContext)
                 .load(userActivityItem.getEventImagePath())
-                .asBitmap()
+                .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
                 .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)

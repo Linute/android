@@ -1,59 +1,21 @@
 package com.linute.linute.MainContent.PeopleFragment;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
-import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.API.LSDKUser;
-import com.linute.linute.MainContent.Chat.NewChatEvent;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
-import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.Manifest;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
-import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -596,7 +558,7 @@ public class PeopleFragment extends UpdatableFragment {
 //    }
 //
 //    @Subscribe
-//    public void onEvent(NewChatEvent event){
+//    public void onEvent(NewMessageEvent event){
 //        // your implementation
 //        if (event.hasNewMessage() != mHasMessage){
 //            mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?

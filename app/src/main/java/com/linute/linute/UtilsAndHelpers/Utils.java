@@ -161,6 +161,10 @@ public class Utils {
         return "http://images.linute.com/events/original/" + jpegName;
     }
 
+    public static String getTrendsImageURL(String jpegName) {
+        return "http://images.linute.com/trends/" + jpegName;
+    }
+
     public static String getMessageImageURL(String jpegName) {
         return "http://images.linute.com/messages/original/" + jpegName;
     }
@@ -192,15 +196,6 @@ public class Utils {
             return "";
         }
     }
-
-//    public static int getToolbarHeight(Context context) {
-//        final TypedArray styledAttributes = context.getTheme().obtainStyledAttributes(
-//                new int[]{R.attr.actionBarSize});
-//        int toolbarHeight = (int) styledAttributes.getDimension(0, 0);
-//        styledAttributes.recycle();
-//
-//        return toolbarHeight;
-//    }
 
     //returns a nicely formated string about when event occurred
     public static String getTimeAgoString(long beforeTime) {
@@ -239,36 +234,4 @@ public class Utils {
 
     }
 
-
-//    static final String DATEFORMAT = "yyyy-MM-dd HH:mm:ss";
-//
-//    public static Date getUTCdatetimeAsDate()
-//    {
-//        return StringDateToDate(GetUTCdatetimeAsString());
-//    }
-//
-//    public static String GetUTCdatetimeAsString()
-//    {
-//        final SimpleDateFormat sdf = new SimpleDateFormat(DATEFORMAT);
-//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-//
-//        return sdf.format(new Date());
-//    }
-//
-//    public static Date StringDateToDate(String StrDate)
-//    {
-//        Date dateToReturn = null;
-//        SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
-//
-//        try
-//        {
-//            dateToReturn = dateFormat.parse(StrDate);
-//        }
-//        catch (ParseException e)
-//        {
-//            e.printStackTrace();
-//        }
-//
-//        return dateToReturn;
-//    }
 }

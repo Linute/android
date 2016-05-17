@@ -19,9 +19,9 @@
     />
 
     <View android:id="@+id/icon"
-          android:layout_width="56dp"
-          android:layout_height="56dp"
-          android:layout_gravity="end|top"
+          android:layout_width="72dp"
+          android:layout_height="72dp"
+          android:layout_gravity="center"
           android:layout_margin="16dp"
           android:background="@drawable/ic_cinema"
     />

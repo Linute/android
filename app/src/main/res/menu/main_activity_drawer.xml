@@ -12,9 +12,9 @@
             app:actionLayout="@layout/main_activity_nav_action_counter"
             />
         <item
-            android:id="@+id/navigation_item_people"
-            android:icon="@drawable/ic_action_people"
-            android:title="People"
+            android:id="@+id/navigation_item_global"
+            android:icon="@drawable/ic_action_trending"
+            android:title="Global"
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
         <item

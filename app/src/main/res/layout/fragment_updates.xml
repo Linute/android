@@ -8,7 +8,7 @@
     <android.support.design.widget.AppBarLayout android:id="@+id/appbar_layout"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="wrap_content"
-                                                app:elevation="0dp"
+                                                app:elevation="4dp"
     >
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -17,7 +17,6 @@
             android:background="@color/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:navigationIcon="@drawable/ic_action_navigation_menu"
             app:title="Updates"
         />
     </android.support.design.widget.AppBarLayout>

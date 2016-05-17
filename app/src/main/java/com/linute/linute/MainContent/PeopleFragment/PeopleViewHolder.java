@@ -149,12 +149,12 @@ public class PeopleViewHolder extends RecyclerView.ViewHolder implements View.On
             case 0:
                 vCrownImage.setVisibility(View.VISIBLE);
                 vRibbon.setVisibility(View.INVISIBLE);
-                vCrownImage.setImageResource(R.drawable.ic_best_crown);
+                //vCrownImage.setImageResource(R.drawable.ic_best_crown);
                 break;
             case 1:
                 vCrownImage.setVisibility(View.VISIBLE);
                 vRibbon.setVisibility(View.INVISIBLE);
-                vCrownImage.setImageResource(R.drawable.ic_second_crown);
+                //vCrownImage.setImageResource(R.drawable.ic_second_crown);
                 break;
             default:
                 vCrownImage.setVisibility(View.INVISIBLE);

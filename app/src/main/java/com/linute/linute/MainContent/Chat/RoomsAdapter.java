@@ -163,7 +163,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(room.getUserImage()))
-                    .asBitmap()
+                    .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

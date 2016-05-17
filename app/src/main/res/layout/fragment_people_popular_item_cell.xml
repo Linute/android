@@ -33,7 +33,6 @@
                    android:layout_gravity="top|start"
                    android:layout_marginStart="4dp"
                    android:scaleType="centerCrop"
-                   android:src="@drawable/ic_best_crown"
         />
 
         <ImageView android:id="@+id/ribbon"
@@ -42,7 +41,6 @@
                    android:layout_gravity="end|bottom"
                    android:layout_marginBottom="4dp"
                    android:layout_marginEnd="8dp"
-                   android:src="@drawable/ic_ribbon"
         />
 
     </FrameLayout>

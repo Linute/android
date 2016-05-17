@@ -60,9 +60,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     public static final String CAMERA_FLASH_KEY = "flash_mode";
     public static final String IMAGE_INFO = "image_info";
 
-    private static final int PICTURE_SIZE_MAX_WIDTH = 2560;
-    private static final int PREVIEW_SIZE_MAX_WIDTH = 1280;
-
     private int mCameraID;
     private String mFlashMode;
     private Camera mCamera;
@@ -89,6 +86,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     private boolean mVideoProcessing = false;
 
     private int mCameraType;
+    private int mReturnType;
 
     public static Fragment newInstance() {
         return new CameraFragment();
@@ -120,6 +118,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         }
 
         mCameraType = ((CameraActivity) getActivity()).getCameraType();
+        mReturnType = ((CameraActivity) getActivity()).getReturnType();
     }
 
     @Override
@@ -144,11 +143,15 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mAnonCheckbox = (CheckBox) root.findViewById(R.id.anon_checkbox);
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
 
+        if (mReturnType == CameraActivity.SEND_POST){
+            root.findViewById(R.id.anon).setVisibility(View.VISIBLE);
+        }else {
+            root.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
+        }
 
         if (mCameraType == CameraActivity.JUST_CAMERA) {
-            mAnonCheckbox.setVisibility(View.INVISIBLE);
             mGalleryButton.setVisibility(View.INVISIBLE);
-        }else {
+        } else {
             mGalleryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -177,7 +180,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
                 mSurfaceHolder = surface;
-
                 if (hasCameraAndWritePermission()) {
                     mSurfaceAlreadyCreated = true;
                     //start camera after slight delay. Without delay, there is huge lag time between active and inactive app state
@@ -258,7 +260,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                 }
             });
 
-        }else {
+        } else {
             mTakePhotoBtn.setOnTouchListener(new View.OnTouchListener() {
 
                 Handler mRecordHandler = new Handler();
@@ -537,14 +539,14 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     }
 
     private Size determineBestPreviewSize(Camera.Parameters parameters) {
-        return determineBestSize(parameters.getSupportedPreviewSizes(), PREVIEW_SIZE_MAX_WIDTH);
+        return determineBestSize(parameters.getSupportedPreviewSizes());
     }
 
     private Size determineBestPictureSize(Camera.Parameters parameters) {
-        return determineBestSize(parameters.getSupportedPictureSizes(), PICTURE_SIZE_MAX_WIDTH);
+        return determineBestSize(parameters.getSupportedPictureSizes());
     }
 
-    private Size determineBestSize(List<Size> sizes, int widthThreshold) {
+    private Size determineBestSize(List<Size> sizes) {
 
         Size bestSize = null;
         Size size;
@@ -840,44 +842,64 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         if (getActivity() == null) return null;
 
         //profile might not exist
+        // if 480 doesnt exist, use lowest possible
         CamcorderProfile camcorderProfile = CamcorderProfile.hasProfile(CamcorderProfile.QUALITY_480P) ?
                 CamcorderProfile.get(CamcorderProfile.QUALITY_480P) :
                 CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
 
-        //height has to be 480. try to find width that'll keep aspect ratio 4:3
+        //the profile might not be 4:3
+        //is that is the case, use the height to find 4:3 ratio
+        //remark: width is the longer side of the phone
+        //        height is the shorter side
+
         //Log.i(TAG, "prepareMediaRecorder: h:" + camcorderProfile.videoFrameHeight + "W: " + camcorderProfile.videoFrameWidth);
         int bestWidth = camcorderProfile.videoFrameWidth;
+
         Size betterSize = getVideoSize(camcorderProfile.videoFrameHeight);
 
-        if (betterSize != null) {
-            bestWidth = betterSize.width;
-        }
+        // couldn't find a 4:3 ratio so set it to the profiles values
+        if (betterSize != null) bestWidth = betterSize.width;
 
         //sent to EditSaveVideoFragment dimensions so we know how much to crop
-        mVideoDimen = new EditSaveVideoFragment.VideoDimen(camcorderProfile.videoFrameHeight, bestWidth, mCameraID == CameraInfo.CAMERA_FACING_FRONT);
+        mVideoDimen = new EditSaveVideoFragment.VideoDimen(
+                camcorderProfile.videoFrameHeight,
+                bestWidth, mCameraID == CameraInfo.CAMERA_FACING_FRONT
+        );
 
         //Log.i(TAG, "prepareMediaRecorder: "+bestWidth +" "+camcorderProfile.videoFrameHeight);
 
-        //stop and restart
 
+        // stop and restart
+        // must stop and reset camera when params are changed
+        // must set preview size to same size as video size or it will record green on some phones
         mCamera.cancelAutoFocus();
         Camera.Parameters param = mCamera.getParameters();
-        param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
-        mCamera.stopPreview(); // must stop and reset camera when params are changed
-        mCamera.setParameters(param); //must set preview size to same size and video size or it will record green on some phones
+
+        // video size and preview size might be different
+        // if they are, just fine a 4:3 preview size
+        if (param.getSupportedVideoSizes() != null){
+            Log.i(TAG, "prepareMediaRecorder: not null");
+            Camera.Size size = getVideoPreviewSize(camcorderProfile.videoFrameHeight);
+            param.setPreviewSize(size.width, size.height);
+        }else {
+            Log.i(TAG, "prepareMediaRecorder: null");
+            param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
+        }
+
+        mCamera.stopPreview();
+        mCamera.setParameters(param);
         mCamera.startPreview();
 
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT); //default ?
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT); //default ?
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
 
         mMediaRecorder.setProfile(camcorderProfile);
         mMediaRecorder.setVideoSize(bestWidth, camcorderProfile.videoFrameHeight);
 
         mMediaRecorder.setOrientationHint(mCameraID == CameraInfo.CAMERA_FACING_FRONT ? 270 : 90);
-
 
         final Uri imageUri;
 
@@ -925,11 +947,37 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     }
 
 
+    private Size getVideoPreviewSize(int heightThreshold) {
+
+        List<Camera.Size> sizes = mCamera.getParameters().getSupportedPreviewSizes();
+
+        Size bestSize = null;
+
+        for (Camera.Size size : sizes) {
+            boolean isDesireRatio = (size.width / 4) == (size.height / 3);
+            boolean isBetterSize = (bestSize == null) || (size.height > bestSize.height && size.height <= heightThreshold);
+
+            if (isDesireRatio && isBetterSize) {
+                bestSize = size;
+            }
+        }
+        if (bestSize == null) {
+            return sizes.get(sizes.size() - 1);
+        }
+
+        return bestSize;
+    }
+
+
     private Camera.Size getVideoSize(int sizePref) {
+        //will be null if same sizes as preview
+        List<Camera.Size> supportedSizes = mCamera.getParameters().getSupportedVideoSizes();
 
-        List<Camera.Size> supportedSizes = mCamera.getParameters().getSupportedPreviewSizes();
+        //if null, use preview sizes
+        if (supportedSizes == null) supportedSizes = mCamera.getParameters().getSupportedPreviewSizes();
 
-        for (Camera.Size size : supportedSizes) { //need size with 4 : 3 ratio
+        //get size that has 4:3 ratio
+        for (Camera.Size size : supportedSizes) {
             if (size.height == sizePref && size.width / 4 == size.height / 3) {
                 return size;
             }
@@ -940,6 +988,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //delete the cached video if  we can. Takes up a lot of space
         ImageUtility.deleteCachedVideo(mVideoUri);
     }
 

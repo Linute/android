@@ -170,7 +170,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             Glide.with(mContext)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                    .asBitmap()
+                    .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

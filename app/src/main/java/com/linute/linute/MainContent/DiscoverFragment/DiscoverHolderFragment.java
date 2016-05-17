@@ -9,15 +9,18 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 
-import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
-import com.linute.linute.MainContent.Chat.NewChatEvent;
-import com.linute.linute.MainContent.Chat.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.PostCreatePage;
@@ -45,6 +48,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     public static final String TAG = DiscoverHolderFragment.class.getSimpleName();
 
     private ViewPager mViewPager;
+    private Toolbar mToolbar;
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
     private DiscoverFragment[] mDiscoverFragments;
@@ -52,14 +56,16 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private FloatingActionsMenu mFloatingActionsMenu;
     private AppBarLayout mAppBarLayout;
 
-    private Toolbar mToolbar;
+    private View mBackgroundView;
     private boolean mHasMessage;
+    private boolean mHasNotification;
+
+    private View mNotificationIndicator;
 
     //makes sure only one video is playing at a time
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
-
     }
 
 
@@ -69,6 +75,14 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
 
         mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
+
+        mBackgroundView = rootView.findViewById(R.id.background);
+        mBackgroundView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFab();
+            }
+        });
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -85,29 +99,39 @@ public class DiscoverHolderFragment extends UpdatableFragment {
             }
         });
 
-        MainActivity activity = (MainActivity) getActivity();
-        mHasMessage = activity.hasMessage();
-        mToolbar.inflateMenu(activity.hasMessage() ? R.menu.people_fragment_menu_noti : R.menu.people_fragment_menu);
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                MainActivity activity = (MainActivity) getActivity();
-                switch (item.getItemId()) {
-                    case R.id.menu_find_friends:
-                        if (activity != null){
+        mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
+        mToolbar.inflateMenu(R.menu.people_fragment_menu);
+
+        mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
+        mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+
+        View chatActionView = mToolbar.getMenu().getItem(1).getActionView();
+
+        mNotificationIndicator = chatActionView.findViewById(R.id.notification);
+        mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+
+        mToolbar.getMenu()
+                .getItem(0)
+                .getActionView()
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null) {
                             activity.addFragmentToContainer(new FindFriendsChoiceFragment());
                         }
-                        return true;
-                    case R.id.people_fragment_menu_chat:
-                        if (activity != null){
-                            activity.addFragmentToContainer(new RoomsActivityFragment());
+                    }
+                });
+
+        chatActionView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null) {
+                            activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
                         }
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
+                    }
+                });
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -142,8 +166,19 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
 
         mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabmenu);
-        FloatingActionButton fabImage = (FloatingActionButton) rootView.findViewById(R.id.fabImage);
-        fabImage.setOnClickListener(new View.OnClickListener() {
+        mFloatingActionsMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+            @Override
+            public void onMenuExpanded() {
+                fadeInBackground(true);
+            }
+
+            @Override
+            public void onMenuCollapsed() {
+                fadeInBackground(false);
+            }
+        });
+
+        rootView.findViewById(R.id.fabImage).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
@@ -154,8 +189,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
-        FloatingActionButton fabText = (FloatingActionButton) rootView.findViewById(R.id.fabText);
-        fabText.setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.fabText).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
@@ -220,19 +254,29 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mNewMessageSubscriber);
+
+        mNotificationSubscription = NotificationEventBus.getInstance().getObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mNotificationEventAction1);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()){
+        mSingleVideoPlaybackManager.stopPlayback();
+
+        if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
+        }
+
+        if (mNotificationSubscription != null){
+            mNotificationSubscription.unsubscribe();
         }
 
         toggleFab();
         mAppBarLayout.setExpanded(true, false);
-        mSingleVideoPlaybackManager.stopPlayback();
     }
 
 
@@ -269,18 +313,50 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     }
 
 
+    private void fadeInBackground(final boolean show) {
+        mBackgroundView.clearAnimation();
+
+        AlphaAnimation alphaAnimation = show ?
+                new AlphaAnimation(0f, 1f) : new AlphaAnimation(1f, 0f);
+
+        alphaAnimation.setDuration(200);
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mBackgroundView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        mBackgroundView.startAnimation(alphaAnimation);
+    }
 
     private Subscription mChatSubscription;
 
-    private Action1<NewChatEvent> mNewMessageSubscriber = new Action1<NewChatEvent>() {
+    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
-        public void call(NewChatEvent event) {
-            if (event.hasNewMessage() != mHasMessage){
-                mToolbar.getMenu().findItem(R.id.people_fragment_menu_chat).setIcon(event.hasNewMessage() ?
-                        R.drawable.notify_mess_icon :
-                        R.drawable.ic_chat81
-                );
+        public void call(NewMessageEvent event) {
+            if (event.hasNewMessage() != mHasMessage) {
+                mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
                 mHasMessage = event.hasNewMessage();
+            }
+        }
+    };
+
+    private Subscription mNotificationSubscription;
+
+    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+        @Override
+        public void call(NotificationEvent notificationEvent) {
+            if (notificationEvent.hasNotification() != mHasNotification){
+                mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+                mHasNotification = notificationEvent.hasNotification();
             }
         }
     };

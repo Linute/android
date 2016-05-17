@@ -139,11 +139,11 @@ public class EditSavePhotoFragment extends Fragment {
 
         if (mReturnType == CameraActivity.SEND_POST) {
             mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
-            mAnonSwitch.setVisibility(View.VISIBLE);
-            mAnonComments.setVisibility(View.VISIBLE);
+            view.findViewById(R.id.comments).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.anon).setVisibility(View.VISIBLE);
         } else {
-            mAnonComments.setVisibility(View.INVISIBLE);
-            mAnonSwitch.setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
         }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
@@ -165,8 +165,6 @@ public class EditSavePhotoFragment extends Fragment {
                 sendPicture();
             }
         });
-
-
         setUpEditText();
     }
 

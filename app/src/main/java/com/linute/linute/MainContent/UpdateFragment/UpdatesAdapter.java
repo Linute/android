@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -17,6 +16,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -100,13 +101,17 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int section, int relativePosition, int absolutePosition) {
 
 
-        if (absolutePosition == 0) {
-            MainActivity activity = (MainActivity) mContext;
-            if (activity != null) {
-                activity.setUpdateNotification(0);
-                activity.setNumNewActivities(0);
-            }
-        }
+//        if (absolutePosition == 0) {
+//            MainActivity activity = (MainActivity) mContext;
+//            if (activity != null && activity.hasNewActivities()) {
+//                activity.setUpdateNotification(0);
+//                activity.setNumNewActivities(0);
+//
+//                if (!activity.hasNotifications()){
+//                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
+//                }
+//            }
+//        }
 
         UpdateItemViewHolder tHolder = (UpdateItemViewHolder) holder;
         if (holder == null) { //error
@@ -253,17 +258,27 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 if (update.getEventImageName() == null || update.getEventImageName().equals("")) { //not a picture post; status post
                     Glide.with(mContext)
                             .load(R.drawable.quotation2)
+                            .dontAnimate()
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(mEventPicture);
                 } else { //picture post
                     //set event image
                     Glide.with(mContext)
                             .load(update.getEventImageName())
-                            .asBitmap()
+                            .dontAnimate()
                             .placeholder(R.drawable.image_loading_background)
                             .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                             .into(mEventPicture);
                 }
+
+                mEventPicture.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ((MainActivity) mContext).addFragmentToContainer(
+                                FeedDetailPage.newInstance(mUpdate.getPost())
+                        );
+                    }
+                });
 
                 if (mEventPicture.getVisibility() == View.INVISIBLE) {
                     mEventPicture.setVisibility(View.VISIBLE);
@@ -272,7 +287,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
             //FOLLOWER or FRIEND JOIN - give option to follow back
             else if (update.hasFriendShipInformation()) {
-                setUpFollowButton(update);
+                setUpFollowButton(update.getFollowedBack());
             }else {
                 mEventPicture.setVisibility(View.INVISIBLE);
             }
@@ -284,25 +299,20 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 //show profile fragment
                 ((MainActivity) mContext)
                         .addFragmentToContainer(
-                                TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
-                        );
+                                TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId()));
             }
         }
 
 
-        private void setUpFollowButton(final Update update) {
+        private void setUpFollowButton(boolean followedBack) {
             //you are not following person
-
-            if (!update.getFollowedBack()) {
-
+            if (!followedBack) {
                 mEventPicture.setImageResource(R.drawable.follow_back); //plus icon
-
                 if (mEventPicture.getVisibility() == View.INVISIBLE) {
                     mEventPicture.setVisibility(View.VISIBLE);
                 }
 
                 mEventPicture.setOnClickListener(new View.OnClickListener() { //when pressed
-
                     boolean mFollowed = false; //if we are following other person
 
                     @Override
@@ -313,49 +323,60 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                         mFollowed = true;
                         mEventPicture.setImageResource(R.drawable.done); //change icon
                         Map<String, Object> params = new HashMap<>();
-                        params.put("user", update.getUserId());
-
-                        final Activity activity = ((Activity) mContext);
+                        params.put("user", mUpdate.getUserId());
 
                         new LSDKPeople(mContext).postFollow(params, new Callback() {
+                            final String temp = mUpdate.getActionID();
+
                             @Override
                             public void onFailure(Call call, IOException e) {
-                                Log.e("UpdatesAdapter", "No internet connection");
+                                mFollowed = false;
+
+                                final MainActivity activity = ((MainActivity) mContext);
+                                if (activity == null) return;
+
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mFollowed = false;
                                         Utils.showBadConnectionToast(activity);
-                                        mEventPicture.setImageResource(R.drawable.follow_back);
-                                        mUpdate.setFollowedBack(false);
 
+                                        if (temp.equals(mUpdate.getActionID())) {
+                                            mEventPicture.setImageResource(R.drawable.follow_back);
+                                            mUpdate.setFollowedBack(false);
+                                        }
                                     }
                                 });
-
                             }
 
                             @Override
-                            public void onResponse(Call call, Response response) throws IOException {
+                            public void onResponse(Call call, final Response response) throws IOException {
                                 response.body().close();
+
+                                final MainActivity activity  = (MainActivity) mContext;
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             mFollowed = false;
-                                            Utils.showServerErrorToast(activity);
-                                            mEventPicture.setImageResource(R.drawable.follow_back);
-                                            mUpdate.setFollowedBack(false);
+                                            if (activity != null) {
+                                                Utils.showServerErrorToast(activity);
+
+                                                if (temp.equals(mUpdate.getActionID())) {
+                                                    mEventPicture.setImageResource(R.drawable.follow_back);
+                                                    mUpdate.setFollowedBack(false);
+                                                }
+                                            }
                                         }
                                     });
                                 } else {
-                                    mUpdate.setFollowedBack(true);
+                                    if (temp.equals(mUpdate.getActionID())) mUpdate.setFollowedBack(true);
                                 }
                             }
                         });
                     }
                 });
-            }
 
+            }
             //are following person so hide button
             else {
                 mEventPicture.setVisibility(View.INVISIBLE);

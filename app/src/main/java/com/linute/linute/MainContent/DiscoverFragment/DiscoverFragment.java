@@ -10,13 +10,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
@@ -103,11 +105,11 @@ public class DiscoverFragment extends UpdatableFragment {
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager());
+        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager(), mFriendsOnly);
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new CheckBoxQuestionAdapter.GetMoreFeed() {
             @Override
             public void getMoreFeed() {
-                if(!mRefreshing) {
+                if (!mRefreshing) {
                     mRefreshing = true;
                     loadMoreFeed();
                 }
@@ -115,16 +117,6 @@ public class DiscoverFragment extends UpdatableFragment {
         });
 
         recList.setAdapter(mCheckBoxChoiceCapableAdapters);
-
-        //if floating button expanded, collapse it
-        recList.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                ((DiscoverHolderFragment) getParentFragment()).toggleFab();
-                return false;
-            }
-        });
-
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setColorSchemeColors(Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW);
@@ -135,11 +127,8 @@ public class DiscoverFragment extends UpdatableFragment {
             }
         });
 
-
-
         return rootView;
     }
-
 
 
     @Override
@@ -191,18 +180,18 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
     public void loadMoreFeedFromServer() {
+        if (getActivity() == null) return;
 
-        mSkip -= 25;
+        int skip = mSkip;
+        skip -= 25;
         int limit = 25;
 
-        if (mSkip < 0) {
-            limit += mSkip;
-            mSkip = 0;
+        if (skip < 0) {
+            limit += skip;
+            skip = 0;
         }
 
-        final int skip = mSkip;
-
-        if (getActivity() == null) return;
+        final int skip1 = skip;
 
         if (!refreshLayout.isRefreshing()) {
             refreshLayout.post(new Runnable() {
@@ -253,7 +242,7 @@ public class DiscoverFragment extends UpdatableFragment {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("events");
 
-                            if (mSkip == 0)
+                            if (skip1 == 0)
                                 feedDone = true; //no more feed to load
 
                             for (int i = jsonArray.length() - 1; i >= 0; i--) {
@@ -263,6 +252,8 @@ public class DiscoverFragment extends UpdatableFragment {
                                     e.printStackTrace();
                                 }
                             }
+
+                            mSkip = skip1;
 
                             if (getActivity() == null) return;
 
@@ -386,15 +377,15 @@ public class DiscoverFragment extends UpdatableFragment {
                             mPosts.clear();
                             mPosts.addAll(refreshedPosts);
 
-                            if (getActivity() == null) {
+                            final MainActivity activity = (MainActivity) getActivity();
+                            if (activity == null) {
                                 return;
                             }
 
-                            getActivity().runOnUiThread(
+                            activity.runOnUiThread(
                                     new Runnable() {
                                         @Override
                                         public void run() {
-                                            cancelRefresh();
 
                                             if (mPosts.isEmpty()) {
                                                 if (mEmptyView.getVisibility() == View.GONE) {
@@ -412,14 +403,21 @@ public class DiscoverFragment extends UpdatableFragment {
                                                 }
                                             });
 
-
+                                            NotificationsCounterSingleton t = NotificationsCounterSingleton.getInstance();
+                                            t.setDiscoverNeedsRefreshing(false);
+                                            if (t.hasNewPosts()) {
+                                                t.setNumOfNewPosts(0);
+                                                activity.setFeedNotification(0);
+                                                if (!t.hasNotifications()) {
+                                                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
+                                                }
+                                            }
                                             mRefreshing = false;
+                                            cancelRefresh();
                                         }
                                     }
 
                             );
-
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                             if (getActivity() != null) {
@@ -463,29 +461,26 @@ public class DiscoverFragment extends UpdatableFragment {
     }
 
     public void scrollUp() {
-        if (recList != null) {
-            mCheckBoxChoiceCapableAdapters.setSendImpressions(false);
-            recList.scrollToPosition(0);
+        mCheckBoxChoiceCapableAdapters.setSendImpressions(false);
+        recList.scrollToPosition(0);
+
+        if (!mFriendsOnly && NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing() && !refreshLayout.isRefreshing()) {
+            refreshLayout.setRefreshing(true);
+            refreshFeed();
         }
     }
 
     public boolean addPostToTop(final Post post) {
-        if (mRefreshing) return false;
+        if (mRefreshing) return true;
 
-        new Handler().post(new Runnable() {
+        mPosts.add(0, post);
+        mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mPosts.add(0, post);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
-                    }
-                });
-
-                if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+                mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
             }
         });
+        if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
 
         return true;
     }

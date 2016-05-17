@@ -10,14 +10,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.ImageUtils;
-import com.soundcloud.android.crop.Crop;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,8 +46,6 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.squarecamera__activity_camera);
-        requestPermissions();
-
         Intent i = getIntent();
         if (i != null){
             mCameraType = i.getIntExtra(CAMERA_TYPE, JUST_CAMERA);
@@ -61,6 +54,8 @@ public class CameraActivity extends AppCompatActivity {
             mCameraType = JUST_CAMERA;
             mReturnType = RETURN_URI;
         }
+
+        requestPermissions();
 
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {
             getSupportFragmentManager()
@@ -74,11 +69,11 @@ public class CameraActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mRecievedRequestPermissionResults) { //only runs if we have updated permissions information
+        if (mReceivedRequestPermissionResults) { //only runs if we have updated permissions information
             clearBackStack(); //clears gallery or camera fragment
             if (mHasWriteAndCameraPermission) launchCameraFragment();
             else launchPermissionNeededFragment();
-            mRecievedRequestPermissionResults = false;
+            mReceivedRequestPermissionResults = false;
         }
     }
 
@@ -127,14 +122,14 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    protected boolean mRecievedRequestPermissionResults = false;
+    protected boolean mReceivedRequestPermissionResults = false;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
 
-                mRecievedRequestPermissionResults = true;
+                mReceivedRequestPermissionResults = true;
 
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
                     if (result != PackageManager.PERMISSION_GRANTED) {

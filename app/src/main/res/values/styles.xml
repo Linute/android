@@ -1,6 +1,4 @@
 <resources>
-
-
     <style name="fab_label">
         <item name="android:background">@drawable/label_background</item>
         <item name="android:textColor">@color/pure_black</item>

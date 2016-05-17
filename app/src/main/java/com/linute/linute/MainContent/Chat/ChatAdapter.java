@@ -66,17 +66,17 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
-            ((ChatViewHolder)holder).bindModel(aChatList.get(position));
+            ((ChatViewHolder) holder).bindModel(aChatList.get(position));
         }
 
-        if (position == 0){
-            if (mLoadMoreListener != null){
+        if (position == 0) {
+            if (mLoadMoreListener != null) {
                 mLoadMoreListener.loadMore();
             }
         }
     }
 
-    public void setLoadMoreListener(LoadMoreListener l){
+    public void setLoadMoreListener(LoadMoreListener l) {
         mLoadMoreListener = l;
     }
 
@@ -121,7 +121,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             EnlargePhotoViewer.newInstance(EnlargePhotoViewer.VIDEO, mUrl)
                                     .show(activity.getSupportFragmentManager(), "ImageOrVideo");
                         }
-                       // Log.i("test", "onClick: "+mType);
+                        // Log.i("test", "onClick: "+mType);
                     }
                 }
             });
@@ -130,7 +130,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat) {
             mType = chat.getMessageType();
 
-            switch (chat.getMessageType()){
+            switch (chat.getMessageType()) {
                 case Chat.MESSAGE_IMAGE:
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
                     vFrame.setVisibility(View.VISIBLE);
@@ -154,7 +154,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
 
-            if (chat.getType() == Chat.TYPE_MESSAGE_ME){
+            if (chat.getType() == Chat.TYPE_MESSAGE_ME) {
                 vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat);
             }
 
@@ -170,23 +170,21 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private void setImage(String image) {
             Glide.with(aContext)
                     .load(Utils.getMessageImageURL(image))
-                    .asBitmap()
+                    .dontAnimate()
                     .placeholder(R.drawable.chat_backgrounds)
                     .into(vImage);
         }
     }
 
 
-
     public class ChatActionHolder extends RecyclerView.ViewHolder {
-
         public ChatActionHolder(View itemView) {
             super(itemView);
         }
     }
 
 
-    public interface LoadMoreListener{
+    public interface LoadMoreListener {
         void loadMore();
     }
 

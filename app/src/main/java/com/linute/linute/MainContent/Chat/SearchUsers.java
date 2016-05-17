@@ -40,7 +40,6 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class SearchUsers extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = SearchUsers.class.getSimpleName();
 
@@ -57,19 +56,12 @@ public class SearchUsers extends Fragment {
         // Required empty public constructor
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mSearchAdapter = new SearchAdapter(context, mSearchUserList);
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        getUsers("");
         return inflater.inflate(R.layout.fragment_search_users, container, false);
     }
 
@@ -88,12 +80,13 @@ public class SearchUsers extends Fragment {
             }
         });
 
+        mSearchAdapter = new SearchAdapter(getActivity(), mSearchUserList);
+
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
         recList.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mSearchAdapter);
 
         editText = (EditText) view.findViewById(R.id.search_users_entry);
@@ -113,6 +106,8 @@ public class SearchUsers extends Fragment {
 
             }
         });
+
+        getUsers("");
     }
 
     @Override
@@ -162,12 +157,12 @@ public class SearchUsers extends Fragment {
                 } else {
 //                    mSearchUserList.clear();
                     ArrayList<SearchUser> tempUsers = new ArrayList<>();
-                    JSONObject jsonObject = null;
-                    JSONArray friends = null;
+                    JSONObject jsonObject;
+                    JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
                         friends = jsonObject.getJSONArray("friends");
-                        JSONObject user = null;
+                        JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
                             tempUsers.add(new SearchUser(

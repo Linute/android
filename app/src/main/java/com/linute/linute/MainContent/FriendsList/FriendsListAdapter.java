@@ -133,7 +133,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         public void bindView(Friend friend) {
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(mFollowing ? friend.getOwnerProfile() : friend.getUserProfile()))
-                    .asBitmap()
+                    .dontAnimate()
                     .placeholder(R.drawable.image_loading_background)
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

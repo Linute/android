@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView android:id="@+id/nav_item_notification_counter"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_centerInParent="true"
-          android:background="@drawable/circle_secondary"
-          android:gravity="center"
-          android:textColor="@color/white"
-/>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="gone"
+>
+
+    <ImageView android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="center"
+               android:src="@drawable/circle_secondary"
+    />
+
+    <TextView android:id="@+id/text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
+              android:gravity="center"
+              android:textColor="@color/white"
+    />
+
+</FrameLayout>
 

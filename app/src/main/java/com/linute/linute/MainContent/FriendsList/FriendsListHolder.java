@@ -3,7 +3,7 @@ package com.linute.linute.MainContent.FriendsList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,9 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
@@ -23,10 +21,8 @@ import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
  */
 public class FriendsListHolder extends UpdatableFragment {
 
-    private Spinner mSpinner;
     private String mUserId;
     private int currentFragment = 0;
-    private String[] mFragments;
     private FriendsListFragment[] mFriendsListFragments = new FriendsListFragment[2];
 
     public FriendsListHolder() {
@@ -34,7 +30,7 @@ public class FriendsListHolder extends UpdatableFragment {
     }
     /**
      * @param userId - id of the user who you want the friends list of
-     * @return
+     * @return holder
      */
     public static FriendsListHolder newInstance(String userId) {
         FriendsListHolder friendsListFragment = new FriendsListHolder();
@@ -61,21 +57,21 @@ public class FriendsListHolder extends UpdatableFragment {
                 .getString("userID", "")
                 .equals(mUserId);
 
-        mFragments = viewIsOwner ? new String[]{"Followers", "Following"} : new String[]{"Followers"};
+        String[] fragments = viewIsOwner ? new String[]{"Followers", "Following"} : new String[]{"Followers"};
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        mSpinner = (Spinner) rootView.findViewById(R.id.spinner);
+        AppCompatSpinner spinner = (AppCompatSpinner) rootView.findViewById(R.id.spinner);
 
-        mSpinner.setVisibility(View.VISIBLE);
+        spinner.setVisibility(View.VISIBLE);
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(
                         getActivity(),
                         R.layout.spinner_text,
-                        mFragments
+                        fragments
                 );
         adapter.setDropDownViewResource(R.layout.spinner_dropdown);
-        mSpinner.setAdapter(adapter);
-        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != currentFragment) {

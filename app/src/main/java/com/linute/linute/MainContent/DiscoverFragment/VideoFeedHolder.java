@@ -63,7 +63,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.GONE);
                 vCinemaIcon.clearAnimation();
-                vCinemaIcon.setAlpha(0.2f);
+                vCinemaIcon.setAlpha(0);
                 sendImpressionsAsync(mPostId);
             }
         });
@@ -109,7 +109,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                         vCinemaIcon.setAlpha(1);
                     }else {
                         mSquareVideoView.start();
-                        vCinemaIcon.setAlpha(0.2f);
+                        vCinemaIcon.setAlpha(0);
                     }
                 }
             }

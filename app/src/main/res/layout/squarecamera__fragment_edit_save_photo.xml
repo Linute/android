@@ -72,26 +72,60 @@
 
     </FrameLayout>
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
         android:gravity="center">
 
 
-        <CheckBox android:id="@+id/anon_comments"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginEnd="50dp"
-                  android:button="@drawable/turn_anon_comments_off"
-                  android:checked="true"
-        />
+        <RelativeLayout android:id="@+id/comments"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent">
 
-        <CheckBox android:id="@+id/editFragment_switch"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginStart="50dp"
-                  android:button="@drawable/post_as_anon_checkbox"/>
-    </LinearLayout>
+
+            <CheckBox android:id="@+id/anon_comments"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerInParent="true"
+                      android:button="@drawable/turn_anon_comments_off"
+                      android:checked="true"
+            />
+
+            <TextView android:layout_width="60dp"
+                      android:layout_height="wrap_content"
+                      android:layout_above="@id/anon_comments"
+                      android:layout_centerHorizontal="true"
+                      android:gravity="center"
+                      android:text="anon comments"
+                      android:textColor="@color/pure_white"
+                      android:textSize="12sp"
+            />
+
+        </RelativeLayout>
+
+        <RelativeLayout android:id="@+id/anon"
+                        android:layout_width="120dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end"
+        >
+            <CheckBox android:id="@+id/editFragment_switch"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_centerInParent="true"
+                      android:button="@drawable/post_as_anon_checkbox"
+            />
+
+            <TextView android:layout_width="24dp"
+                      android:layout_height="wrap_content"
+                      android:layout_above="@id/editFragment_switch"
+                      android:layout_centerHorizontal="true"
+                      android:gravity="center"
+                      android:text="post as"
+                      android:textColor="@color/pure_white"
+                      android:textSize="12sp"
+            />
+        </RelativeLayout>
+    </FrameLayout>
 
 </LinearLayout>

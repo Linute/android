@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout style="@android:style/Widget.ActionButton"
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             tools:background="@color/pure_black">
+
+    <ImageView android:layout_width="match_parent"
+               android:layout_height="match_parent"
+               android:layout_gravity="center"
+               android:src="@drawable/ic_action_chat"/>
+
+    <ImageView android:id="@+id/notification"
+               android:layout_width="16dp"
+               android:layout_height="16dp"
+               android:layout_gravity="top|right"
+               android:layout_marginEnd="1dp"
+               android:layout_marginTop="12dp"
+               android:src="@drawable/circle_indicator"
+               android:visibility="gone"/>
+</FrameLayout>

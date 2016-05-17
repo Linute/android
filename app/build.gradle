@@ -22,8 +22,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 1
-        versionName "0.1"
+        versionCode 28
+        versionName "1.7.5.0.0"
     }
     buildTypes {
         release {
@@ -41,13 +41,13 @@ dependencies {
     compile('io.socket:socket.io-client:0.7.0') {
         exclude group: 'org.json', module: 'json'
     }
-    compile 'com.android.support:appcompat-v7:23.2.1'
-    compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:design:23.4.0'
     compile 'com.squareup.okhttp3:okhttp:3.2.0'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
-    compile 'com.android.support:support-v4:23.2.1'
-    compile 'com.android.support:recyclerview-v7:23.2.1'
+    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:recyclerview-v7:23.4.0'
     compile 'com.getbase:floatingactionbutton:1.10.1'
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.facebook.android:facebook-android-sdk:4.9.0'
@@ -63,9 +63,6 @@ dependencies {
     compile 'com.lyft:scissors:1.0.3'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
-
-    //new
-    compile 'com.daprlabs.aaron:cardstack:0.3.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -70,11 +71,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     private static final String ROOM_ID = "room";
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-
-    static {
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -159,7 +155,10 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
      * @return A new instance of fragment ChatFragment.
      */
     //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
-    public static ChatFragment newInstance(String roomId, String otherPersonName, String otherPersonId) {
+    public static ChatFragment newInstance(String roomId,
+                                           String otherPersonName,
+                                           String otherPersonId) {
+
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
 
@@ -199,6 +198,16 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             public void onClick(View v) {
                 if (getActivity() != null)
                     getActivity().onBackPressed();
+            }
+        });
+
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if(activity != null){
+                    activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mOtherPersonName, mOtherPersonId));
+                }
             }
         });
 
@@ -345,7 +354,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             return;
         }
 
-        if (mRoomId != null) joinRoom(activity);
+        joinRoom(activity);
     }
 
     public void joinRoom(BaseTaptActivity activity) {
@@ -379,10 +388,10 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
 
             if (mRoomId == null) {
                 getRoomAndChat();
-            } else if (fragmentNeedsUpdating()){
+            } else if (fragmentNeedsUpdating()) {
                 getChat();
                 setFragmentNeedUpdating(false);
-            } else{
+            } else {
                 JSONObject refresh = new JSONObject();
                 refresh.put("room", mRoomId);
                 activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
@@ -527,6 +536,8 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     private void getRoomAndChat() {
         if (getActivity() == null || mUserId == null || mOtherPersonId == null) return;
 
+        mProgressBar.setVisibility(View.VISIBLE);
+
         JSONArray users = new JSONArray();
         users.put(mUserId);
         users.put(mOtherPersonId);
@@ -580,7 +591,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                                 }
 
                                 try {
-                                    date = simpleDateFormat.parse(message.getString("date"));
+                                    date = Utils.DATE_FORMAT.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
                                     date = null;
                                 }
@@ -684,6 +695,9 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         Map<String, String> chat = new HashMap<>();
         chat.put(ROOM_ID, mRoomId);
 
+
+        if (mChatList.isEmpty()) mProgressBar.setVisibility(View.VISIBLE);
+
         new LSDKChat(getActivity()).getChat(chat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -733,7 +747,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                                 }
 
                                 try {
-                                    time = simpleDateFormat.parse(message.getString("date"));
+                                    time = Utils.DATE_FORMAT.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
                                     time = null;
                                 }
@@ -860,7 +874,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         Date time;
 
         try {
-            time = simpleDateFormat.parse(data.getString("date"));
+            time = Utils.DATE_FORMAT.parse(data.getString("date"));
         } catch (ParseException | JSONException e) {
             time = null;
         }
@@ -869,7 +883,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         String messageId = data.getString("id");
 
 
-        Chat chat = new Chat(
+        final Chat chat = new Chat(
                 mRoomId,
                 time,
                 owner,
@@ -891,10 +905,11 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             }
         }
 
-        mChatList.add(chat);
+
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size() - 1);
                 scrollToBottom();
             }
@@ -919,12 +934,12 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
                 mChatAdapter.notifyItemInserted(mChatList.size() - 1);
                 scrollToBottom();
             }
         });
 
-        mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
         mOtherUserTyping = true;
     }
 
@@ -1018,17 +1033,15 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         @Override
         public void call(final Object... args) {
             final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
             if (activity == null || mLoadingMessages) return;
 
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    final JSONObject data = (JSONObject) args[0];
-
-                    new Handler().post(new Runnable() {
+            activity.runOnUiThread(
+                    new Runnable() {
                         @Override
                         public void run() {
+
+                            final JSONObject data = (JSONObject) args[0];
                             removeTyping();
 
                             try {
@@ -1038,15 +1051,13 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
 
                                 if (vEmptyChatView.getVisibility() == View.VISIBLE)
                                     vEmptyChatView.setVisibility(View.GONE);
-
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                    });
-                }
 
-            });
+                    }
+            );
         }
     };
 
@@ -1133,7 +1144,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         public void call(final Object... args) {
             if (getActivity() == null) return;
 
-            for (int i = mChatList.size() - 1 ; i >= 0 ; i --) {
+            for (int i = mChatList.size() - 1; i >= 0; i--) {
                 if (!mChatList.get(i).isRead()) {
                     mChatList.get(i).setIsRead(true);
                 } else { //stop when reached one already marked as read
@@ -1190,6 +1201,18 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         }
     };
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (getFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null){
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity!=null){
+                activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
+            }
+        }  Log.i(TAG, "onDestroy: false");
+    }
+
     private boolean mLoadingMoreMessages = false;
 
     @Override
@@ -1231,7 +1254,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                     try {
                         JSONObject object = new JSONObject(response.body().string());
 
-                        //Log.i(TAG, "onResponse: "+object);
+//Log.i(TAG, "onResponse: "+object);
                         final JSONArray messages = object.getJSONArray("messages");
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
@@ -1259,7 +1282,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                                 }
 
                                 try {
-                                    time = simpleDateFormat.parse(message.getString("date"));
+                                    time = Utils.DATE_FORMAT.parse(message.getString("date"));
                                 } catch (ParseException | JSONException e) {
                                     time = null;
                                 }

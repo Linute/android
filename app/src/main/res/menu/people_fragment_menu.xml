@@ -6,16 +6,15 @@
     tools:contex=".MainActivity">
 
     <item android:id="@+id/menu_find_friends"
-          android:icon="@drawable/ic_action_add_light"
+          app:actionLayout="@layout/toolbar_friend_icon"
           android:orderInCategory="100"
           android:title="Find friends"
           app:showAsAction="ifRoom"
           />
 
-
     <item
-        android:id="@+id/people_fragment_menu_chat"
-        android:icon="@drawable/ic_chat81"
+        android:id="@+id/menu_chat"
+        app:actionLayout="@layout/toolbar_message_icon"
         android:orderInCategory="100"
         android:title="Chat"
         app:showAsAction="always"/>

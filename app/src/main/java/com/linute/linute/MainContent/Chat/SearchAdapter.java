@@ -82,7 +82,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         void bindModel(SearchUser user) {
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(user.getUserImage()))
-                    .asBitmap()
+                    .dontAnimate()
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

@@ -187,12 +187,12 @@ public class EditSaveVideoFragment extends Fragment {
         mAnonSwitch = (CheckBox) view.findViewById(R.id.anon_post);
 
         if (mReturnType == CameraActivity.SEND_POST) {
-            mCommentsAnon.setVisibility(View.VISIBLE);
-            mAnonSwitch.setVisibility(View.VISIBLE);
+            view.findViewById(R.id.comments).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.anon).setVisibility(View.VISIBLE);
             mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
         } else {
-            mCommentsAnon.setVisibility(View.INVISIBLE);
-            mAnonSwitch.setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
         }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
@@ -351,6 +351,8 @@ public class EditSaveVideoFragment extends Fragment {
 
     private void showConfirmDialog() {
         if (getActivity() == null) return;
+
+        hideKeyboard();
         new AlertDialog.Builder(getActivity())
                 .setTitle("you sure?")
                 .setMessage("would you like to throw away what you have currently?")

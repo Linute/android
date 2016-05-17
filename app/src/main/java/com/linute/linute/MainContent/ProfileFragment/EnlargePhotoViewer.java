@@ -131,7 +131,7 @@ public class EnlargePhotoViewer extends DialogFragment {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mVideoLoadingIndicator.clearAnimation();
-                    mVideoLoadingIndicator.setAlpha(0.2f);
+                    mVideoLoadingIndicator.setAlpha(0);
                     mp.start();
                 }
             });
@@ -153,7 +153,7 @@ public class EnlargePhotoViewer extends DialogFragment {
                         mVideoLoadingIndicator.setAlpha(1);
                         mTextureVideoView.pause();
                     }else {
-                        mVideoLoadingIndicator.setAlpha(0.2f);
+                        mVideoLoadingIndicator.setAlpha(0);
                         mTextureVideoView.start();
                     }
                 }

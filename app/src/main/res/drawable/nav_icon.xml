@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:gravity="center">
+        <bitmap android:src="@drawable/ic_action_navigation_menu"/>
+    </item>
+
+    <item android:height="16dp"
+          android:width="16dp"
+          android:top="2dp"
+          android:right="2dp"
+          android:bottom="16dp"
+          android:left="16dp"
+          android:drawable="@drawable/circle_indicator"
+          android:gravity="top|end"
+    />
+
+</layer-list>

@@ -15,6 +15,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -34,6 +37,10 @@ import java.util.ArrayList;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class Profile extends UpdatableFragment {
     public static final String TAG = Profile.class.getSimpleName();
@@ -51,6 +58,8 @@ public class Profile extends UpdatableFragment {
 
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
+
+    private boolean mHasNotification;
 
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
@@ -141,7 +150,9 @@ public class Profile extends UpdatableFragment {
             }
         });
 
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+
+        mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
+        mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -149,6 +160,7 @@ public class Profile extends UpdatableFragment {
                     ((MainActivity) getActivity()).openDrawer();
             }
         });
+
         mToolbar.inflateMenu(R.menu.my_profile_action_bar);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -202,6 +214,13 @@ public class Profile extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
+        mNotificationSubscription = NotificationEventBus
+                .getInstance()
+                .getObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mNotificationEventAction1);
+
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
             mOtherCompotentHasUpdated = false;
@@ -218,6 +237,13 @@ public class Profile extends UpdatableFragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mNotificationSubscription != null){
+            mNotificationSubscription.unsubscribe();
+        }
+    }
 
     //get user information from server
     public void updateAndSetHeader() {
@@ -491,4 +517,17 @@ public class Profile extends UpdatableFragment {
             }
         });
     }
+
+
+    private Subscription mNotificationSubscription;
+
+    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+        @Override
+        public void call(NotificationEvent notificationEvent) {
+            if (notificationEvent.hasNotification() != mHasNotification){
+                mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+                mHasNotification = notificationEvent.hasNotification();
+            }
+        }
+    };
 }

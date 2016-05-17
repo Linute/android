@@ -64,17 +64,6 @@
                       android:textSize="@dimen/body_font_size"
             />
 
-            <com.daprlabs.cardstack.SwipeDeck
-                android:id="@+id/swipe_deck"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="64dp"
-                android:layout_marginStart="64dp"
-                android:layout_marginTop="16dp"
-                app:card_spacing="-8dp"
-                app:max_visible="3"
-                app:opacity_end="0.33"
-                app:render_above="true"/>
 
             <LinearLayout android:layout_width="match_parent"
                           android:layout_height="wrap_content"

@@ -94,8 +94,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
             Glide.with(mContext)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                    .asBitmap()
-                    //.override(mImageSize, mImageSize)
+                    .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

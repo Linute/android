@@ -58,6 +58,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
 
     /* fragment stuff */
     public abstract void addFragmentToContainer(final Fragment fragment);
+    public abstract void addFragmentToContainer(final Fragment fragment, String tag);
     public abstract void replaceContainerWithFragment(final Fragment fragment);
 
 

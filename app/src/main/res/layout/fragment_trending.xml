@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:background="@color/pure_black"
+>
+
+
+    <ProgressBar android:id="@+id/progress_bar"
+                 style="?android:attr/progressBarStyleLarge"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"
+                 android:layout_gravity="center"
+                 android:visibility="gone"
+    />
+
+    <com.linute.linute.UtilsAndHelpers.VerticalSnappingRecyclerView android:id="@+id/recycler_view"
+                                                                    android:layout_width="match_parent"
+                                                                    android:layout_height="match_parent"/>
+
+    <TextView android:id="@+id/retry"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_gravity="center"
+              android:gravity="center"
+              android:text="Error loading page. Tap to retry"
+              android:textColor="@color/pure_white"
+              android:textSize="@dimen/header_font_size"
+              android:visibility="gone"
+    />
+
+    <ImageView android:id="@+id/back_button"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="end|top"
+               android:foreground="?selectableItemBackgroundBorderless"
+               android:padding="12dp"
+               android:src="@drawable/ic_action_action_done"
+    />
+
+</FrameLayout>
