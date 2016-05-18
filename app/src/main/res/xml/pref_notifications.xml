@@ -3,22 +3,22 @@
     <PreferenceCategory android:title="Notify me when someone...">
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_like"
-                          android:title="Likes my post"/>
+                          android:summary="Likes my post"/>
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_comment"
-                          android:title="Comments on my post"/>
+                          android:summary="Comments on my post"/>
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_alsoComment"
-                          android:title="Comments on a post after me"/>
+                          android:summary="Comments on a post after me"/>
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_mention"
-                          android:title="Mentions me"/>
+                          android:summary="Mentions me"/>
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_follow"
-                          android:title="Follows me"/>
+                          android:summary="Follows me"/>
         <SwitchPreference android:defaultValue="true"
                           android:key="notif_message"
-                          android:title="Messages me"
+                          android:summary="Messages me"
         />
     </PreferenceCategory>
 

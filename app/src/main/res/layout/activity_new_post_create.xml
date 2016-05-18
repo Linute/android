@@ -26,7 +26,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:foreground="?selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:background="?selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_action_check83"
             />
 
@@ -85,7 +86,9 @@
                                                              android:layout_height="wrap_content"
                                                              android:layout_margin="@dimen/post_create_button_space"
                                                              android:layout_weight="1"
-                                                             android:background="@drawable/post_color_0">
+                                                             android:background="@drawable/post_color_0"
+                                                             android:clickable="true"
+                                                             android:foreground="?android:attr/selectableItemBackground">
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center"
@@ -102,6 +105,8 @@
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
             android:background="@drawable/post_color_1"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
         >
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -119,6 +124,8 @@
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
             android:background="@drawable/post_color_2"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -137,7 +144,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_3">
+            android:background="@drawable/post_color_3"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground">
 
             <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
@@ -157,6 +166,8 @@
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
             android:background="@drawable/post_color_4"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -176,6 +187,8 @@
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
             android:background="@drawable/post_color_5"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
         >
 
             <TextView android:layout_width="wrap_content"
@@ -191,7 +204,8 @@
     </LinearLayout>
 
 
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout android:id="@+id/options"
+                  android:layout_width="match_parent"
                   android:layout_height="match_parent"
                   android:gravity="center"
                   android:orientation="horizontal"
@@ -199,19 +213,18 @@
     >
 
 
-        <LinearLayout android:id="@+id/comments"
-                      android:layout_width="0px"
+        <LinearLayout android:layout_width="0px"
                       android:layout_height="match_parent"
                       android:layout_weight="1"
                       android:gravity="center"
                       android:orientation="vertical"
         >
 
-            <TextView android:layout_width="64dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center_horizontal"
                       android:gravity="center"
-                      android:text="anon comments"
+                      android:text="anon\ncomments"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />
@@ -229,15 +242,15 @@
 
         <LinearLayout android:layout_width="0px"
                       android:layout_height="match_parent"
-                      android:gravity="center"
                       android:layout_weight="1"
+                      android:gravity="center"
                       android:orientation="vertical">
 
-            <TextView android:layout_width="30dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_gravity="center_horizontal"
                       android:gravity="center"
-                      android:text="post as"
+                      android:text="post\nas"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />

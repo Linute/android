@@ -75,7 +75,8 @@ public class EditSavePhotoFragment extends Fragment {
     private View mUploadButton;
 
     private int mReturnType;
-    private int mCameraType;
+
+    private View vBottom;
 
     public static Fragment newInstance(Uri imageUri, boolean makeAnon) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -98,7 +99,6 @@ public class EditSavePhotoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mReturnType = ((CameraActivity) getActivity()).getReturnType();
-        mCameraType = ((CameraActivity) getActivity()).getCameraType();
         return inflater.inflate(R.layout.squarecamera__fragment_edit_save_photo, container, false);
     }
 
@@ -133,17 +133,18 @@ public class EditSavePhotoFragment extends Fragment {
         mText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mProgressBar = (ProgressBar) view.findViewById(R.id.editFragment_progress_bar);
 
+        vBottom = view.findViewById(R.id.bottom);
 
         mAnonComments = (CheckBox) view.findViewById(R.id.anon_comments);
         mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
 
         if (mReturnType == CameraActivity.SEND_POST) {
             mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
-            view.findViewById(R.id.comments).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.anon).setVisibility(View.VISIBLE);
+            vBottom.findViewById(R.id.comments).setVisibility(View.VISIBLE);
+            vBottom.findViewById(R.id.anon).setVisibility(View.VISIBLE);
         } else {
-            view.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
-            view.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
+            vBottom.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
+            vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
         }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
@@ -386,8 +387,7 @@ public class EditSavePhotoFragment extends Fragment {
 
     private void showProgress(final boolean show) {
         if (mReturnType == CameraActivity.SEND_POST) {
-            mAnonComments.setVisibility(show ? View.GONE : View.VISIBLE);
-            mAnonSwitch.setVisibility(show ? View.GONE : View.VISIBLE);
+            vBottom.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         }
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);

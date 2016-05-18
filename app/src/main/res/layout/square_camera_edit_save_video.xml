@@ -87,12 +87,12 @@
                       android:checked="true"
             />
 
-            <TextView android:layout_width="64dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_above="@id/anon_comments"
                       android:layout_centerHorizontal="true"
                       android:gravity="center"
-                      android:text="anon comments"
+                      android:text="anon\ncomments"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />
@@ -122,12 +122,12 @@
                       android:layout_marginStart="50dp"
                       android:button="@drawable/post_as_anon_checkbox"/>
 
-            <TextView android:layout_width="30dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_above="@id/anon_post"
                       android:layout_centerHorizontal="true"
                       android:gravity="center"
-                      android:text="post as"
+                      android:text="post\nas"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />

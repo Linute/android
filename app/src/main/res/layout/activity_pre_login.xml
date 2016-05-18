@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <ImageView android:layout_width="match_parent"
                android:layout_height="match_parent"
@@ -13,11 +13,18 @@
           android:alpha="0.8"
           android:background="@color/colorPrimary"/>
 
-
-
     <FrameLayout android:id="@+id/login_activity_fragment_frame"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent"/>
+
+    <ImageView android:id="@+id/chat_button"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_gravity="top|right"
+               android:foreground="?android:attr/selectableItemBackground"
+               android:padding="@dimen/half_margin"
+               android:src="@drawable/ic_conversation"
+    />
 
 
 </FrameLayout>

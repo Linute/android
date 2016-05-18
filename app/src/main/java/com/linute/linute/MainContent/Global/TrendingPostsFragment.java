@@ -79,7 +79,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
                             loadMoreFeedFromServer();
                         }
                     }
-                });
+                }, mTrendId);
     }
 
     @Nullable
@@ -183,7 +183,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
         new LSDKGlobal(getActivity()).getPosts(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null) return;
+                if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

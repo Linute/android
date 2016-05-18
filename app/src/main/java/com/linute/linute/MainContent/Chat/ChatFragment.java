@@ -205,7 +205,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
-                if(activity != null){
+                if (activity != null) {
                     activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mOtherPersonName, mOtherPersonId));
                 }
             }
@@ -321,6 +321,16 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                 startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
             }
         });
+
+
+        mInputMessageView.requestFocus();
+        mInputMessageView.post(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager keyboard = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                keyboard.showSoftInput(mInputMessageView, 0);
+            }
+        });
     }
 
     @Override
@@ -354,10 +364,19 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             return;
         }
 
-        joinRoom(activity);
+        if (mRoomId == null) {
+            getRoomAndChat();
+            setFragmentNeedUpdating(false);
+        } else if (fragmentNeedsUpdating()) {
+            getChat();
+            joinRoom(activity, false);
+            setFragmentNeedUpdating(false);
+        } else {
+            joinRoom(activity, true);
+        }
     }
 
-    public void joinRoom(BaseTaptActivity activity) {
+    public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
 
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
         activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
@@ -386,12 +405,8 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             delivered.put("room", mRoomId);
             activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
 
-            if (mRoomId == null) {
-                getRoomAndChat();
-            } else if (fragmentNeedsUpdating()) {
-                getChat();
-                setFragmentNeedUpdating(false);
-            } else {
+
+            if (emitRefresh){
                 JSONObject refresh = new JSONObject();
                 refresh.put("room", mRoomId);
                 activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
@@ -402,8 +417,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             } else if (mAttachType == CameraActivity.VIDEO) {
                 sendVideo(activity);
             }
-//
-//            mAttachType = -1;
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(activity);
@@ -527,7 +540,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         }
 
         MainActivity activity = (MainActivity) getActivity();
-
         if (activity != null)
             activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
     }
@@ -632,7 +644,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
 
                         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                         if (activity != null) {
-                            joinRoom(activity);
+                            joinRoom(activity, false);
 
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -980,7 +992,8 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     private void attemptSend() {
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !activity.socketConnected() || mUserId == null || mRoomId == null)
+        if (activity == null || !activity.socketConnected() || mUserId == null
+                || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE)
             return;
 
         String message = mInputMessageView.getText().toString().trim();
@@ -1205,12 +1218,13 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     public void onDestroy() {
         super.onDestroy();
 
-        if (getFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null){
+        if (getFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null) {
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-            if (activity!=null){
+            if (activity != null) {
                 activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
             }
-        }  Log.i(TAG, "onDestroy: false");
+        }
+        Log.i(TAG, "onDestroy: false");
     }
 
     private boolean mLoadingMoreMessages = false;

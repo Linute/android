@@ -180,7 +180,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         recList.setLayoutManager(llm);
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
-
         recList.setAdapter(mFeedDetailAdapter);
 
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -327,7 +326,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
-            //mOtherHasUpdated = false; // TODO: 4/4/16
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
         }
@@ -369,6 +367,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     @Override
     public void onStop() {
         super.onStop();
+        if (getActivity() == null) return;
+
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
     }
@@ -1233,9 +1233,17 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
             //neg is scroll up, positive is scroll down
 
-            final boolean mCanScrollDown = recList != null &&
-                    recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
-                    recList.canScrollVertically(1);
+            boolean canScrollDown = false;
+            try {
+                canScrollDown = recList != null &&
+                        recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
+                        recList.canScrollVertically(1);
+
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+
+            final boolean mCanScrollDown = canScrollDown;
 
             try {
                 Date myDate;

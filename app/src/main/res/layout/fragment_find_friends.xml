@@ -38,23 +38,19 @@
     <LinearLayout android:id="@+id/findFriends_rationale_text"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_marginTop="@dimen/activity_horizontal_margin"
+                  android:layout_marginTop="64dp"
                   android:orientation="vertical"
-                  android:visibility="gone"
     >
 
-        <ImageView android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center_horizontal"
-                   android:src="@drawable/help23"
-        />
 
         <TextView android:id="@+id/findFriends_rat_text"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_gravity="center_horizontal"
-                  android:layout_marginEnd="32dp"
-                  android:layout_marginStart="32dp"
+                  android:layout_marginEnd="48dp"
+                  android:drawableTop="@drawable/help23"
+                  android:drawablePadding="16dp"
+                  android:layout_marginStart="48dp"
                   android:layout_marginTop="@dimen/activity_horizontal_margin"
                   android:gravity="center"
                   android:text="@string/need_contant_permission"/>
@@ -67,6 +63,7 @@
                 android:background="@color/facebook_blue"
                 android:foreground="?attr/selectableItemBackground"
                 android:padding="@dimen/activity_horizontal_margin"
+                android:alpha="0.75"
                 android:text="connect with facebook"
                 android:textColor="@color/pure_white"
         />

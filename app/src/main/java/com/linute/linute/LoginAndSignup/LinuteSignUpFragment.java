@@ -585,7 +585,9 @@ public class LinuteSignUpFragment extends Fragment {
                     if (response.isSuccessful()) { //got response
 
                         try {
-                            saveSuccessInformation(response.body().string());
+                            String res = response.body().string();
+                            Log.i(TAG, "onResponse: "+res);
+                            saveSuccessInformation(res);
                             if (getActivity() == null) return;
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override

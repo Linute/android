@@ -72,11 +72,11 @@
 
     </FrameLayout>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorPrimary"
-        android:gravity="center">
+    <FrameLayout android:id="@+id/bottom"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:background="@color/colorPrimary"
+                 android:gravity="center">
 
 
         <RelativeLayout android:id="@+id/comments"
@@ -92,12 +92,12 @@
                       android:checked="true"
             />
 
-            <TextView android:layout_width="60dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_above="@id/anon_comments"
                       android:layout_centerHorizontal="true"
                       android:gravity="center"
-                      android:text="anon comments"
+                      android:text="anon\ncomments"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />
@@ -116,12 +116,12 @@
                       android:button="@drawable/post_as_anon_checkbox"
             />
 
-            <TextView android:layout_width="24dp"
+            <TextView android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:layout_above="@id/editFragment_switch"
                       android:layout_centerHorizontal="true"
                       android:gravity="center"
-                      android:text="post as"
+                      android:text="post\nas"
                       android:textColor="@color/pure_white"
                       android:textSize="12sp"
             />

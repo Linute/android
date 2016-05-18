@@ -160,7 +160,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
                     }else {
                         Log.i(TAG, "impression not sent: no activity");
                     }
-
                 }catch (JSONException e){
                     e.printStackTrace();
                 }

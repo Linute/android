@@ -290,7 +290,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                         if (!mIsRecording && !mVideoProcessing) {
                             mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
                             mRecordHandler.removeCallbacks(mRunnable);
-                            mRecordHandler.postDelayed(mRunnable, 1000);
+                            mRecordHandler.postDelayed(mRunnable, 2000);
                         }
                     }
                     return true;
@@ -1025,7 +1025,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             if (aBoolean) {
                 hideCameraButtons(true);
                 mRecordProgress.setVisibility(View.VISIBLE);
-                mToolbar.setTitle("Recording");
+                mToolbar.setTitle("Recording...");
                 mProgressAnimator =
                         ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 15000);
 

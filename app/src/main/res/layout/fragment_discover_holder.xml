@@ -7,7 +7,6 @@
     android:background="@color/seperator_color"
     android:orientation="vertical">
 
-
     <android.support.design.widget.AppBarLayout android:id="@+id/appbar_layout"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="wrap_content"
@@ -58,7 +57,7 @@
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:alpha="0.8"
-          android:background="@color/pure_black"
+          android:background="@color/colorPrimary"
           android:visibility="gone"
     />
 
@@ -77,16 +76,16 @@
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabImage"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/ic_action_image_photo_camera"
+                                                               app:fab_icon="@drawable/ic_action_image_photo_camera"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
                                                                app:fab_size="mini"
-                                                               app:fab_title="Photo"/>
+                                                               app:fab_title="Camera"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabText"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/ic_action_editor_format_quote"
+                                                               app:fab_icon="@drawable/ic_action_editor_format_quote"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
                                                                app:fab_size="mini"

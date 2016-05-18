@@ -75,6 +75,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public void onClick(View v) {
             BaseTaptActivity activity = (BaseTaptActivity) aContext;
             if (activity != null) {
+                activity.getSupportFragmentManager().popBackStack();
                 activity.addFragmentToContainer(ChatFragment.newInstance(null, mUserName, mUserId));
             }
         }

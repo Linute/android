@@ -76,6 +76,8 @@ public class EditSaveVideoFragment extends Fragment {
 
     //private View mFrame; //frame where we put edittext and picture
     //private CustomBackPressedEditText mText; //text
+    private View mAnonParent;
+    private View mCommentParent;
     private CheckBox mAnonSwitch;
     private CheckBox mCommentsAnon;
     private CheckBox mPlaying;
@@ -96,7 +98,6 @@ public class EditSaveVideoFragment extends Fragment {
 
     private VideoDimen mVideoDimen;
 
-    private int mCameraType;
     private int mReturnType;
 
 
@@ -129,7 +130,6 @@ public class EditSaveVideoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mCameraType = ((CameraActivity) getActivity()).getCameraType();
         mReturnType = ((CameraActivity) getActivity()).getReturnType();
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -182,17 +182,19 @@ public class EditSaveVideoFragment extends Fragment {
         });
 
         //shows the text strip when image touched
+        mAnonParent = view.findViewById(R.id.anon);
+        mCommentParent = view.findViewById(R.id.comments);
 
-        mCommentsAnon = (CheckBox) view.findViewById(R.id.anon_comments);
-        mAnonSwitch = (CheckBox) view.findViewById(R.id.anon_post);
+        mCommentsAnon = (CheckBox) mCommentParent.findViewById(R.id.anon_comments);
+        mAnonSwitch = (CheckBox) mAnonParent.findViewById(R.id.anon_post);
 
         if (mReturnType == CameraActivity.SEND_POST) {
-            view.findViewById(R.id.comments).setVisibility(View.VISIBLE);
-            view.findViewById(R.id.anon).setVisibility(View.VISIBLE);
+            mAnonParent.setVisibility(View.VISIBLE);
+            mCommentParent.setVisibility(View.VISIBLE);
             mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
         } else {
-            view.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
-            view.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
+            mAnonParent.setVisibility(View.INVISIBLE);
+            mCommentParent.setVisibility(View.INVISIBLE);
         }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
@@ -512,8 +514,8 @@ public class EditSaveVideoFragment extends Fragment {
         if (getActivity() == null) return;
 
         if (mReturnType == CameraActivity.SEND_POST) {
-            mAnonSwitch.setVisibility(show ? View.GONE : View.VISIBLE);
-            mCommentsAnon.setVisibility(show ? View.GONE : View.VISIBLE);
+            mAnonParent.setVisibility(show ? View.GONE : View.VISIBLE);
+            mCommentParent.setVisibility(show ? View.GONE : View.VISIBLE);
         }
 
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);

@@ -2,6 +2,7 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
@@ -130,7 +131,7 @@ public class LSDKUser {
                                String tempEmail,
                                Callback callback) {
 
-        Map<String, String> header = API_Methods.getMainHeader(mToken);;
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         //get appropriate header
         //if there is a tempEmail (new email we want to change to) we use the temp email as the header

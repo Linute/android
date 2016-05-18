@@ -144,12 +144,12 @@
                               android:button="@drawable/post_as_anon_checkbox"
                     />
 
-                    <TextView android:layout_width="24dp"
+                    <TextView android:layout_width="wrap_content"
                               android:layout_height="wrap_content"
                               android:layout_above="@id/anon_checkbox"
                               android:layout_centerHorizontal="true"
                               android:gravity="center"
-                              android:text="post as"
+                              android:text="post\nas"
                               android:textColor="@color/pure_white"
                               android:textSize="12sp"
                     />

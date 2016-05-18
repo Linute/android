@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +25,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -32,6 +34,7 @@ import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 import com.makeramen.roundedimageview.RoundedImageView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,6 +53,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     String mUserId;
     String mImageSignature;
+    String mCollege;
+    String mTrendId;
 
     ScrollToPosition mScrollToPosition;
 
@@ -59,14 +64,16 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
 
-    TrendingItemAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager manager, LoadMoreViewHolder.OnLoadMore o) {
+    TrendingItemAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager manager, LoadMoreViewHolder.OnLoadMore o, String trendId) {
         mContext = context;
         mPosts = posts;
         mSingleVideoPlaybackManager = manager;
         mOnLoadMore = o;
+        mTrendId = trendId;
 
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
+        mCollege = mSharedPreferences.getString("collegeId", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
     }
 
@@ -78,12 +85,12 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return new VideoTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item_video, parent, false));
         } else if (viewType == Post.POST_TYPE_IMAGE) {
             return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false));
-        } else if (viewType == LoadMoreViewHolder.FOOTER){
+        } else if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
                     mOnLoadMore,
                     "",
                     "Come back later for more!"
-                    );
+            );
         }
 
         return null;
@@ -93,7 +100,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof BaseTrendViewHolder) {
             ((BaseTrendViewHolder) holder).bindView(mPosts.get(position));
-        }else if (holder instanceof LoadMoreViewHolder){
+        } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
         }
     }
@@ -101,7 +108,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemViewType(int position) {
-        if (position == mPosts.size()){
+        if (position == mPosts.size()) {
             return LoadMoreViewHolder.FOOTER;
         } else if (mPosts.get(position).isVideoPost()) {
             return Post.POST_TYPE_VIDEO;
@@ -121,7 +128,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return false;
     }
 
-    public short getFooterState(){
+    public short getFooterState() {
         return mFooterState;
     }
 
@@ -131,7 +138,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemCount() {
-        return mPosts.size() == 0 ? 0 : mPosts.size()+1;
+        return mPosts.size() == 0 ? 0 : mPosts.size() + 1;
     }
 
 
@@ -191,13 +198,15 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         public void doubleClick() {
             animateView();
-            like();
+            if (!mPost.isPostLiked()) {
+                like();
+            }
         }
 
         public void gainedFocus() {
         }
 
-        public void lostFocus(){
+        public void lostFocus() {
             deactivate();
         }
 
@@ -218,7 +227,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         public void bindView(Post post) {
             mPost = post;
-
             if (post.getPrivacy() == 0) {
                 Glide.with(mContext)
                         .load(post.getUserImage())
@@ -251,6 +259,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             vTop.setVisibility(View.GONE);
             vBottom.setVisibility(View.GONE);
+
+            sendImpressionsAsync(mPost.getPostId());
         }
 
         @Override
@@ -422,7 +432,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             if (videoProcessing) {
                 activate();
                 mSingleVideoPlaybackManager.stopPlayback();
-            } else if (!mSingleVideoPlaybackManager.hasVideo()){
+            } else if (!mSingleVideoPlaybackManager.hasVideo()) {
                 deactivate();
                 videoProcessing = true;
                 vSquareVideoView.setVisibility(View.VISIBLE);
@@ -450,7 +460,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
 
         @Override
-        public void lostFocus(){
+        public void lostFocus() {
             deactivate();
             mSingleVideoPlaybackManager.stopPlayback();
         }
@@ -460,7 +470,36 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         void scrollToPosition(int position);
     }
 
-    //// TODO: 5/14/16 impression
+
+    private void sendImpressionsAsync(final String id) {
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject body = new JSONObject();
+
+                    body.put("college", mCollege);
+                    body.put("user", mUserId);
+
+                    JSONArray mEventIds = new JSONArray();
+                    mEventIds.put(id);
+                    body.put("events", mEventIds);
+                    body.put("trend",mTrendId);
+
+                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
+
+                    if (activity != null) {
+                        activity.emitSocket(API_Methods.VERSION + ":posts:impressions", body);
+                        //Log.i(TAG, "run: impression sent");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 
 
 }

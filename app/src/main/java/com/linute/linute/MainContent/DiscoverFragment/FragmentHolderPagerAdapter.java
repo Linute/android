@@ -36,7 +36,7 @@ public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return "New";
             case 1:
-                return "Hot";
+                return null;
             default:
                 return super.getPageTitle(position);
         }

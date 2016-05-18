@@ -163,7 +163,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         });
 
         tabLayout.setupWithViewPager(mViewPager);
-
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
 
         mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabmenu);
         mFloatingActionsMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {

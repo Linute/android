@@ -139,8 +139,6 @@ public class Utils {
         temp.putString("tempCode", null);
         temp.putString("tempPhone", null);
 
-
-
         temp.putString("userID", null);
         temp.putString("password", null);
         temp.putString("socialFacebook", null);

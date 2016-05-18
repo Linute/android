@@ -186,26 +186,27 @@ public class Profile extends UpdatableFragment {
 
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                                        @Override
-                                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                                            super.onScrolled(recyclerView, dx, dy);
+        recList.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
 
-                                            if (llm.findFirstVisibleItemPosition() == 0) {
-                                                View view = recyclerView.getChildAt(0);
-                                                if (view != null) {
-                                                    int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
-                                                    if (alpha > 255) {
-                                                        alpha = 255;
-                                                    }
-                                                    if (alpha < 0) {
-                                                        alpha = 0;
-                                                    }
-                                                    mToolbar.getBackground().mutate().setAlpha(alpha);
-                                                }
-                                            }
-                                        }
-                                    }
+                        if (llm.findFirstVisibleItemPosition() == 0) {
+                            View view = recyclerView.getChildAt(0);
+                            if (view != null) {
+                                int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
+                                if (alpha > 255) {
+                                    alpha = 255;
+                                } else if (alpha < 0) {
+                                    alpha = 0;
+                                }
+
+                                mToolbar.getBackground().mutate().setAlpha(alpha);
+                            }
+                        }
+                    }
+                }
         );
         return rootView;
     }
@@ -240,7 +241,7 @@ public class Profile extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mNotificationSubscription != null){
+        if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
         }
     }
@@ -524,7 +525,7 @@ public class Profile extends UpdatableFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotification){
+            if (notificationEvent.hasNotification() != mHasNotification) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
                 mHasNotification = notificationEvent.hasNotification();
             }

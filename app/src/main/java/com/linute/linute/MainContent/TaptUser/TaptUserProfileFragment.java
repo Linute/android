@@ -477,7 +477,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             emit.put("user", mTaptUserId);
             activity.emitSocket(API_Methods.VERSION + ":users:subscribe", emit);
             Toast.makeText(activity,
-                    isSubscribed ? "Unsubscribed from " + mLinuteUser.getFirstName() : "Subscribed to " + mLinuteUser.getFirstName(),
+                    isSubscribed ? "Get post notifications" : "Stop post notifications",
                     Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);

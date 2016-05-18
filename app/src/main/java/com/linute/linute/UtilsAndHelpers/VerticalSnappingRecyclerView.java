@@ -62,6 +62,8 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
                 }
             } else {
                 LinearLayoutManager llm = (LinearLayoutManager) getLayoutManager();
+                if(llm == null) return;
+
                 int first = llm.findFirstVisibleItemPosition();
 
                 View firstItem = llm.findViewByPosition(first);
@@ -98,6 +100,8 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
                 if (!mCanBeTouched ) return true;
                 if (e.getAction() == MotionEvent.ACTION_UP && !mDragged) {
                     LinearLayoutManager llm = (LinearLayoutManager) getLayoutManager();
+
+                    if (llm == null) return false;
                     int f = llm.findFirstCompletelyVisibleItemPosition();
 
                     if (f == NO_POSITION){
@@ -139,6 +143,8 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
         if (!mCanBeTouched) return true;
 
         LinearLayoutManager llm = (LinearLayoutManager) getLayoutManager();
+        if (llm == null) return true;
+
         int first = llm.findFirstVisibleItemPosition();
 
         if (first == NO_POSITION) return true;
