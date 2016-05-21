@@ -1,16 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:layout_gravity="center">
 
-
-    <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/enlarge_photo_photo"
+    <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/photo"
                                                     android:layout_width="match_parent"
                                                     android:layout_height="match_parent"
-                                                    android:scaleType="centerCrop"
-                                                    tools:src="@drawable/image_loading_background"
+                                                    android:layout_gravity="center"
+                                                    android:src="@color/pure_black"
     />
 
-</LinearLayout>
+    <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView android:id="@+id/video"
+                                                                    android:layout_width="match_parent"
+                                                                    android:layout_height="match_parent"
+                                                                    android:layout_gravity="center"
+                                                                    android:background="@color/seperator_color"
+    />
+
+    <View android:id="@+id/icon"
+          android:layout_width="72dp"
+          android:layout_height="72dp"
+          android:layout_gravity="center"
+          android:layout_margin="16dp"
+          android:background="@drawable/ic_cinema"
+    />
+
+</FrameLayout>

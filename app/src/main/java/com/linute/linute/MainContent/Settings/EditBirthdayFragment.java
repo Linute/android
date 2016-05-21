@@ -7,10 +7,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -28,7 +26,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,8 +73,7 @@ public class EditBirthdayFragment extends Fragment {
         //try to set date picker to person's birthday
         try {
             if (!dob.equals("null")) {
-                SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                c.setTime(fm.parse(dob));
+                c.setTime(Utils.DATE_FORMAT.parse(dob));
             }
         } catch (ParseException e) {
             e.printStackTrace();

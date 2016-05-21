@@ -532,8 +532,10 @@ public final class CustomSnackbar {
     }
 
     private void animateViewIn() {
+
+        ViewCompat.setTranslationY(mView, -mView.getHeight());
         ViewCompat.animate(mView)
-                .alpha(1f)
+                .translationY(0)
                 .setInterpolator(FAST_OUT_SLOW_IN)
                 .setDuration(ANIMATION_DURATION)
                 .setListener(new ViewPropertyAnimatorListenerAdapter() {
@@ -556,7 +558,7 @@ public final class CustomSnackbar {
 
     private void animateViewOut(final int event) {
         ViewCompat.animate(mView)
-                .alpha(0f)
+                .translationY(-mView.getHeight())
                 .setInterpolator(FAST_OUT_SLOW_IN)
                 .setDuration(ANIMATION_DURATION)
                 .setListener(new ViewPropertyAnimatorListenerAdapter() {

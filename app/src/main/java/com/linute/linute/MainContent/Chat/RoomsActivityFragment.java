@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,9 +16,10 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -27,7 +29,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,24 +38,24 @@ import java.util.Map;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Subscription;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * A placeholder fragment containing a simple view.
- *
+ * <p/>
  * the rooms you have with people.
- *
+ * <p/>
  * i.e. chatroom with max, chat room with nabeel.
  * You can click to see your convo with max or convo with nabeel
- *
  */
 public class RoomsActivityFragment extends Fragment {
 
     //make sure this always gets called: getRoom
 
-    private static final String TAG = RoomsActivityFragment.class.getSimpleName();
-    public static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
-    private RecyclerView recList;
     private RoomsAdapter mRoomsAdapter;
 
     private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
@@ -67,6 +68,10 @@ public class RoomsActivityFragment extends Fragment {
     private int mSkip = 0;
 
     private boolean mCanLoadMore = false;
+
+    private Handler mHandler = new Handler();
+
+    private boolean mRoomsRetrieved;
 
     public RoomsActivityFragment() {
     }
@@ -107,11 +112,9 @@ public class RoomsActivityFragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                if (activity != null) {
+                if (activity != null){
                     activity.addFragmentToContainer(new SearchUsers());
                 }
             }
@@ -129,51 +132,57 @@ public class RoomsActivityFragment extends Fragment {
         mRoomsAdapter.setLoadMore(new Runnable() {
             @Override
             public void run() {
-                if (mCanLoadMore){
+                if (mCanLoadMore) {
                     getMoreRooms();
                 }
             }
         });
 
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
-        recList = (RecyclerView) view.findViewById(R.id.rooms_list);
+        RecyclerView recList = (RecyclerView) view.findViewById(R.id.rooms_list);
         recList.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mRoomsAdapter);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         getRooms();
-
-        RoomsActivity activity = (RoomsActivity) getActivity();
-        if (activity != null){
-            activity.setTitle("Inbox");
-        }
+        mChatSubscription = NewMessageBus.getInstance().getObservable()
+                .observeOn(Schedulers.io())
+                .subscribe(mNewMessageSubscriber);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
+            mChatSubscription.unsubscribe();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        if (activity!=null){
+            activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
+        }
     }
 
     private void getRooms() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || mSwipeRefreshLayout.isRefreshing()) return;
 
-        if (!mSwipeRefreshLayout.isRefreshing()){
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
-        }
-
+        mRoomsRetrieved = false;
+        mSwipeRefreshLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefreshLayout.setRefreshing(true);
+            }
+        });
 
         Map<String, String> params = new HashMap<>();
         params.put("limit", "20");
@@ -215,6 +224,7 @@ public class RoomsActivityFragment extends Fragment {
                         JSONObject room;
                         JSONObject user;
                         JSONArray messages;
+                        JSONArray tempArray;
 
                         JSONObject message;
                         JSONArray readArray;
@@ -238,31 +248,37 @@ public class RoomsActivityFragment extends Fragment {
                                 readArray = message.getJSONArray("read");
 
                                 try {
-                                    date = simpleDateFormat.parse(message.getString("date"));
-                                }catch (ParseException e){
+                                    date = Utils.DATE_FORMAT.parse(message.getString("date"));
+                                } catch (ParseException e) {
                                     date = null;
                                 }
 
                                 //check last message. check if we already read it
-                                for (int k = 0; k < readArray.length() ;  k++){
-                                    if (readArray.getString(k).equals(mUserId)){
+                                for (int k = 0; k < readArray.length(); k++) {
+                                    if (readArray.getString(k).equals(mUserId)) {
                                         hasUnreadMessage = false;
                                         break;
                                     }
                                 }
 
+                                boolean isOwner = message.getJSONObject("owner").getString("id").equals(mUserId);
                                 //if you sent last message : show  "You: <text>"
-                                if (message.getJSONObject("owner").getString("id").equals(mUserId)) {
-                                    lastMessage = "You: " + messages.getJSONObject(0).getString("text");
+
+                                tempArray = message.getJSONArray("videos");
+
+                                if (tempArray.length() > 0) {
+                                    lastMessage = isOwner ? "You: sent a video" : "sent you a video";
+                                } else {
+                                    tempArray = message.getJSONArray("images");
+                                    if (tempArray.length() > 0) {
+                                        lastMessage = isOwner ? "You: sent an image" : "sent you an image";
+                                    } else {
+                                        lastMessage = isOwner ? "You: " + message.getString("text") :
+                                                message.getString("text");
+                                    }
                                 }
 
-                                //the other person sent last message : show <message>
-                                else {
-                                    lastMessage = messages.getJSONObject(0).getString("text");
-                                }
-                            }
-
-                            else { //no messages show "..."
+                            } else { //no messages show "..."
                                 lastMessage = "...";
                                 hasUnreadMessage = false;
                                 date = null;
@@ -279,7 +295,7 @@ public class RoomsActivityFragment extends Fragment {
                                     hasUnreadMessage,
                                     date == null ? 0 : date.getTime()
                             ));
-                           // ,
+                            // ,
 //                                    users.length() + 1,  // add yourself
 //                                    chatHeads
                         }
@@ -296,18 +312,24 @@ public class RoomsActivityFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if (mSwipeRefreshLayout.isRefreshing()){
+                                    if (mSwipeRefreshLayout.isRefreshing()) {
                                         mSwipeRefreshLayout.setRefreshing(false);
                                     }
-                                    if (mRoomsList.isEmpty()){
+                                    if (mRoomsList.isEmpty()) {
                                         if (mEmptyText.getVisibility() == View.GONE)
                                             mEmptyText.setVisibility(View.VISIBLE);
-                                    }else {
+                                    } else {
                                         if (mEmptyText.getVisibility() == View.VISIBLE)
                                             mEmptyText.setVisibility(View.GONE);
                                     }
 
-                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mRoomsAdapter.notifyDataSetChanged();
+                                            mRoomsRetrieved = true;
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -341,12 +363,11 @@ public class RoomsActivityFragment extends Fragment {
     }
 
 
-
-    private void getMoreRooms(){
+    private void getMoreRooms() {
 
         if (getActivity() == null || mSwipeRefreshLayout.isRefreshing()) return;
 
-        if (!mSwipeRefreshLayout.isRefreshing()){
+        if (!mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -357,14 +378,14 @@ public class RoomsActivityFragment extends Fragment {
 
         int limit = 20;
 
-        if (mSkip < 0){
+        if (mSkip < 0) {
             limit += mSkip;
             mSkip = 0;
         }
 
         Map<String, String> params = new HashMap<>();
         params.put("skip", mSkip + "");
-        params.put("limit", limit+"");
+        params.put("limit", limit + "");
 
         new LSDKChat(getActivity()).getRooms(params, new Callback() {
             @Override
@@ -424,14 +445,14 @@ public class RoomsActivityFragment extends Fragment {
                                 readArray = message.getJSONArray("read");
 
                                 try {
-                                    date = simpleDateFormat.parse(message.getString("date"));
-                                }catch (ParseException e){
+                                    date = Utils.DATE_FORMAT.parse(message.getString("date"));
+                                } catch (ParseException e) {
                                     date = null;
                                 }
 
                                 //check last message. check if we already read it
-                                for (int k = 0; k < readArray.length() ;  k++){
-                                    if (readArray.getString(k).equals(mUserId)){
+                                for (int k = 0; k < readArray.length(); k++) {
+                                    if (readArray.getString(k).equals(mUserId)) {
                                         hasUnreadMessage = false;
                                         break;
                                     }
@@ -446,9 +467,7 @@ public class RoomsActivityFragment extends Fragment {
                                 else {
                                     lastMessage = messages.getJSONObject(0).getString("text");
                                 }
-                            }
-
-                            else { //no messages show "..."
+                            } else { //no messages show "..."
                                 lastMessage = "...";
                                 hasUnreadMessage = false;
                                 date = null;
@@ -479,7 +498,13 @@ public class RoomsActivityFragment extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mRoomsAdapter.notifyDataSetChanged();
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mRoomsAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
                                     mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
@@ -512,4 +537,46 @@ public class RoomsActivityFragment extends Fragment {
             }
         });
     }
+
+    private Subscription mChatSubscription;
+
+    private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
+        @Override
+        public void call(NewMessageEvent event) {
+            if (mRoomsRetrieved && event.getRoomId() != null && getActivity() != null ) {
+
+                Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
+                final int pos = mRoomsList.indexOf(tempRoom);
+
+                if (pos >= 0) {
+                    mRoomsList.get(pos).merge(tempRoom);
+                    mRoomsList.add(0, mRoomsList.remove(pos));
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyItemChanged(pos);
+                                }
+                            });
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mRoomsAdapter.notifyItemMoved(pos, 0);
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getRooms();
+                        }
+                    });
+                }
+            }
+        }
+    };
 }

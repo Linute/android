@@ -6,7 +6,7 @@
     <item android:id="@+id/add_friend"
           android:orderInCategory="1"
           android:title="Find friends"
-          android:icon="@drawable/ic_action_add_light"
+          android:icon="@drawable/ic_action_add"
           app:showAsAction="always"
     />
     <item android:id="@+id/settings"

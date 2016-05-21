@@ -19,7 +19,7 @@ public class ScrollingFAMBehavior extends CoordinatorLayout.Behavior<FloatingAct
 
     public ScrollingFAMBehavior(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.toolbarHeight = Utils.getToolbarHeight(context);
+        //this.toolbarHeight = Utils.getToolbarHeight(context);
     }
 
     @Override

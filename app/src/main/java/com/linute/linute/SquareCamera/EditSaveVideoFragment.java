@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
@@ -13,15 +14,23 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
@@ -32,6 +41,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
@@ -41,6 +51,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -63,12 +74,13 @@ public class EditSaveVideoFragment extends Fragment {
 
     public static final String VIDEO_DIMEN = "video_dimen";
 
-
     //private View mFrame; //frame where we put edittext and picture
-
     //private CustomBackPressedEditText mText; //text
+    private View mAnonParent;
+    private View mCommentParent;
     private CheckBox mAnonSwitch;
     private CheckBox mCommentsAnon;
+    private CheckBox mPlaying;
 
     private String mCollegeId;
     private String mUserId;
@@ -76,14 +88,17 @@ public class EditSaveVideoFragment extends Fragment {
     private View mUploadButton;
 
     private Uri mVideoLink;
-    //private String mTempVideoLink;
 
     private ProgressDialog mProgressDialog;
 
-    private View vPlayIcon;
     private TextureVideoView mSquareVideoView;
+    private CustomBackPressedEditText mTextView;
+    private View mFrame;
+    private View mTextContainer;
 
     private VideoDimen mVideoDimen;
+
+    private int mReturnType;
 
 
     public static Fragment newInstance(Uri imageUri, boolean makeAnon, VideoDimen videoDimen) {
@@ -115,49 +130,76 @@ public class EditSaveVideoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mReturnType = ((CameraActivity) getActivity()).getReturnType();
+
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
 
+        mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
+        mTextContainer = view.findViewById(R.id.text_container);
+
         //setup VideoView
         mVideoLink = getArguments().getParcelable(BITMAP_URI);
         mSquareVideoView = (TextureVideoView) view.findViewById(R.id.video_frame);
-        vPlayIcon = view.findViewById(R.id.play_icon);
-
-        mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
+        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
 
         mSquareVideoView.setVideoURI(mVideoLink);
-        mSquareVideoView.seekTo(0);
-
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onCompletion(MediaPlayer mp) {
+            public void onPrepared(MediaPlayer mp) {
                 mSquareVideoView.start();
             }
         });
 
-        view.findViewById(R.id.square_videoFrame).setOnClickListener(new View.OnClickListener() {
+        mFrame = view.findViewById(R.id.square_videoFrame);
+        mFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSquareVideoView.isPlaying()) {
-                    mSquareVideoView.pause();
-                    vPlayIcon.setVisibility(View.VISIBLE);
-                } else {
-                    mSquareVideoView.start();
-                    vPlayIcon.setVisibility(View.GONE);
+                if (mTextContainer.getVisibility() == View.GONE) {
+                    mTextContainer.setVisibility(View.VISIBLE);
+                    mTextView.requestFocus();
+                    showKeyboard();
+                    mCanMove = false; //can't mvoe strip while in edit
                 }
             }
         });
 
-        //shows the text strip when image touched
+        mPlaying = (CheckBox) view.findViewById(R.id.play);
+        mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) mSquareVideoView.start();
+                else mSquareVideoView.pause();
+            }
+        });
 
-        mCommentsAnon = (CheckBox) view.findViewById(R.id.anon_comments);
-        mAnonSwitch = (CheckBox) view.findViewById(R.id.anon_post);
-        mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mPlaying.isChecked()) mSquareVideoView.start();
+            }
+        });
+
+        //shows the text strip when image touched
+        mAnonParent = view.findViewById(R.id.anon);
+        mCommentParent = view.findViewById(R.id.comments);
+
+        mCommentsAnon = (CheckBox) mCommentParent.findViewById(R.id.anon_comments);
+        mAnonSwitch = (CheckBox) mAnonParent.findViewById(R.id.anon_post);
+
+        if (mReturnType == CameraActivity.SEND_POST) {
+            mAnonParent.setVisibility(View.VISIBLE);
+            mCommentParent.setVisibility(View.VISIBLE);
+            mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+        } else {
+            mAnonParent.setVisibility(View.INVISIBLE);
+            mCommentParent.setVisibility(View.INVISIBLE);
+        }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolbar.setTitle("Video");
+        toolbar.setTitle("Tap the video to add text");
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,9 +213,11 @@ public class EditSaveVideoFragment extends Fragment {
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                processVideo();
+                processVideo(); //// TODO: 4/30/16
             }
         });
+        mTextView = (CustomBackPressedEditText) view.findViewById(R.id.text);
+        setUpEditText();
 
         FFmpeg ffmpeg = FFmpeg.getInstance(getActivity());
         try {
@@ -218,8 +262,99 @@ public class EditSaveVideoFragment extends Fragment {
         }
     }
 
+
+    //text strip can move or not
+    //can't move during edit
+    private boolean mCanMove = true;
+
+    private void setUpEditText() {
+
+        //when back is pressed
+        mTextView.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+            @Override
+            public void backPressed() {
+                hideKeyboard();
+
+                mCanMove = true;
+
+                //if EditText is empty, hide it
+                if (mTextView.getText().toString().trim().isEmpty())
+                    mTextContainer.setVisibility(View.GONE);
+            }
+        });
+
+        //when done is pressed on keyboard
+        mTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    hideKeyboard();
+                    mCanMove = true;
+                    //if EditText is empty, hide it
+                    if (mTextView.getText().toString().trim().isEmpty())
+                        mTextContainer.setVisibility(View.GONE);
+                }
+                return false;
+            }
+        });
+
+        //movement
+        mTextView.setOnTouchListener(new View.OnTouchListener() {
+            float prevY;
+            private boolean stopped = true;
+            float totalMovement;
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (!mCanMove) return false; //can't move, so stop
+
+                switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                    case MotionEvent.ACTION_DOWN:
+                        prevY = event.getY();
+                        stopped = false;
+                        totalMovement = 0;
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        if (totalMovement <= 2) { //tapped and no movement
+                            mTextView.requestFocus(); //open edittext
+                            showKeyboard();
+                            mCanMove = false;
+                        }
+                        stopped = true;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        int change = (int) (event.getY() - prevY);
+                        totalMovement += Math.abs(change);
+                        if (!stopped) { //move the edittext around
+
+                            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mTextContainer.getLayoutParams();
+
+                            int newTop = params.topMargin + change; //new margintop
+
+                            if (newTop < 0) { //over the top edge
+                                newTop = 0;
+                                stopped = true;
+                            } else if (newTop > mFrame.getHeight() - v.getHeight()) { //under the bottom edge
+                                newTop = mFrame.getHeight() - v.getHeight();
+                                stopped = true;
+                            }
+
+                            params.setMargins(0, newTop, 0, 0); //set new margin
+                            mTextContainer.setLayoutParams(params);
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
+
+    }
+
     private void showConfirmDialog() {
         if (getActivity() == null) return;
+
+        hideKeyboard();
         new AlertDialog.Builder(getActivity())
                 .setTitle("you sure?")
                 .setMessage("would you like to throw away what you have currently?")
@@ -248,30 +383,66 @@ public class EditSaveVideoFragment extends Fragment {
     private void processVideo() {
         if (getActivity() == null || mVideoLink == null) return;
 
-        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()) {
+        if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
             Utils.showBadConnectionToast(getActivity());
             return;
         }
 
-        mSquareVideoView.stopPlayback();
-        vPlayIcon.setVisibility(View.VISIBLE);
+        if (mTextView.hasFocus()) {
+            mTextView.clearFocus();
+            hideKeyboard();
+        }
+        if (mTextView.getText().toString().trim().isEmpty()) {
+            mTextContainer.setVisibility(View.GONE);
+        }
+        mPlaying.setChecked(false);
 
         FFmpeg ffmpeg = FFmpeg.getInstance(getActivity());
         final String outputFile = ImageUtility.getVideoUri();
-
         showProgress(true);
+
 
         String cmd = "-i " + mVideoLink + " "; //input file
 
-        String crop = String.format(Locale.US,
-                "-vf crop=%d:%d:%d:0 ",
-                mVideoDimen.height,
-                mVideoDimen.height,
-                (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+        if (mTextContainer.getVisibility() == View.GONE) {
+            String crop = String.format(Locale.US,
+                    "-filter_complex crop=%d:%d:%d:0,",
+                    mVideoDimen.height,
+                    mVideoDimen.height,
+                    (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+            cmd += crop; //crop
+            cmd += String.format(Locale.US,
+                    "transpose=%d ", mVideoDimen.isFrontFacing ? 3 : 1);
+        } else {
+            String overlay = saveViewAsImage(mTextContainer);
 
-        cmd += crop; //crop
+            if (overlay != null) {
+                cmd += "-i " + overlay + " -filter_complex ";
+                cmd += String.format(Locale.US,
+                        "[0:v]crop=%d:%d:%d:0[t1];",
+                        mVideoDimen.height,
+                        mVideoDimen.height,
+                        (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+                cmd += String.format(Locale.US,
+                        "[t1]transpose=%d[t2];", mVideoDimen.isFrontFacing ? 3 : 1);
+
+                int overlayHeight = (int) Math.ceil((float) mVideoDimen.height * mTextContainer.getTop() / mFrame.getHeight());
+                cmd += String.format(Locale.US,
+                        "[t2][1:v]overlay=0:%d ", overlayHeight);
+
+            } else {
+                String crop = String.format(Locale.US,
+                        "-vf crop=%d:%d:%d:0 ",
+                        mVideoDimen.height,
+                        mVideoDimen.height,
+                        (mVideoDimen.isFrontFacing ? mVideoDimen.width - mVideoDimen.height : 0));
+                cmd += crop; //crop
+                cmd += String.format(Locale.US,
+                        "transpose=%d ", mVideoDimen.isFrontFacing ? 3 : 1);
+            }
+        }
+
         cmd += "-preset superfast ";
-        //cmd += "-strict -2 "; //audio
         cmd += "-c:a copy "; //copy instead of re-encoding audio
         cmd += outputFile; //output file;
 
@@ -282,10 +453,33 @@ public class EditSaveVideoFragment extends Fragment {
 
                 @Override
                 public void onSuccess(String message) {
-                    mProgressDialog.setMessage("Sending video...");
-                    new sendVideoAsync().execute(outputFile,
-                            mAnonSwitch.isChecked() ? "1" : "0",
-                            mCommentsAnon.isChecked() ? "0" : "1");
+
+                    //get first frame in video as bitmap
+                    MediaMetadataRetriever media = new MediaMetadataRetriever();
+                    media.setDataSource(outputFile);
+                    Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
+                    media.release();
+
+                    if (mReturnType == CameraActivity.RETURN_URI){
+                        Intent i = new Intent()
+                                .putExtra("video", Uri.parse(outputFile))
+                                .putExtra("image", image)
+                                .putExtra("type", CameraActivity.VIDEO)
+                                .putExtra("title", mTextView.getText().toString());
+
+                        mProgressDialog.dismiss();
+                        getActivity().setResult(Activity.RESULT_OK, i);
+                        getActivity().finish();
+                    } else {
+                        mProgressDialog.setMessage("Uploading video...");
+
+                        new sendVideoAsync().execute(outputFile,
+                                mAnonSwitch.isChecked() ? "1" : "0",
+                                mCommentsAnon.isChecked() ? "0" : "1",
+                                mTextView.getText().toString(),
+                                image.getPath()
+                        );
+                    }
                 }
 
                 @Override
@@ -318,8 +512,12 @@ public class EditSaveVideoFragment extends Fragment {
 
     private void showProgress(final boolean show) {
         if (getActivity() == null) return;
-        mAnonSwitch.setVisibility(show ? View.GONE : View.VISIBLE);
-        mCommentsAnon.setVisibility(show ? View.GONE : View.VISIBLE);
+
+        if (mReturnType == CameraActivity.SEND_POST) {
+            mAnonParent.setVisibility(show ? View.GONE : View.VISIBLE);
+            mCommentParent.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
 
         if (show) {
@@ -340,44 +538,43 @@ public class EditSaveVideoFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (mReturnType != CameraActivity.RETURN_URI) {
+            if (getActivity() == null) return;
+            if (mSocket == null || !mSocket.connected() && !mConnecting) {
+                mConnecting = true;
+                {
+                    try {
+                        IO.Options op = new IO.Options();
+                        DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
+                        op.query =
+                                "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
+                                        "&deviceToken=" + device.getDeviceToken() +
+                                        "&udid=" + device.getUdid() +
+                                        "&version=" + device.getVersonName() +
+                                        "&build=" + device.getVersionCode() +
+                                        "&os=" + device.getOS() +
+                                        "&platform=" + device.getType() +
+                                        "&api=" + API_Methods.VERSION +
+                                        "&model=" + device.getModel();
 
-        if (getActivity() == null) return;
+                        op.reconnectionDelay = 5;
+                        op.secure = true;
 
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
+                        op.transports = new String[]{WebSocket.NAME};
 
-            {
-                try {
-                    IO.Options op = new IO.Options();
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                    op.query =
-                            "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION;
-                    op.reconnectionDelay = 5;
-                    op.secure = true;
-
-
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+                        mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
+                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+                mSocket.on(Socket.EVENT_ERROR, eventError);
+                mSocket.on("new post", newPost);
+                mSocket.connect();
+                mConnecting = false;
             }
-
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on(Socket.EVENT_ERROR, eventError);
-            mSocket.on("new post", newPost);
-            mSocket.connect();
-            mConnecting = false;
-
         }
     }
 
@@ -387,14 +584,15 @@ public class EditSaveVideoFragment extends Fragment {
         super.onPause();
 
         mSquareVideoView.pause();
-        vPlayIcon.setVisibility(View.VISIBLE);
 
-        if (mSocket != null) {
-            mSocket.disconnect();
-            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off(Socket.EVENT_ERROR, eventError);
-            mSocket.off("new post", newPost);
+        if (mReturnType != CameraActivity.RETURN_URI) {
+            if (mSocket != null) {
+                mSocket.disconnect();
+                mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+                mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+                mSocket.off(Socket.EVENT_ERROR, eventError);
+                mSocket.off("new post", newPost);
+            }
         }
     }
 
@@ -403,7 +601,6 @@ public class EditSaveVideoFragment extends Fragment {
         @Override
         public void call(Object... args) {
             Log.i(TAG, "call: failed socket connection");
-
         }
     };
 
@@ -455,20 +652,21 @@ public class EditSaveVideoFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
 
-            if (getActivity() == null || params[0] == null || params[1] == null || params[2] == null)
+            if (getActivity() == null || params[0] == null || params[1] == null
+                    || params[2] == null || params[3] == null || params[4] == null)
                 return null;
 
             String outputFile = params[0];
 
-            if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()) {
-                Utils.showBadConnectionToast(getActivity());
+            if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showBadConnectionToast(getActivity());
+                    }
+                });
                 return null;
             }
-
-            //get first frame in video as bitmap
-            MediaMetadataRetriever media = new MediaMetadataRetriever();
-            media.setDataSource(outputFile);
-            Bitmap map = Bitmap.createScaledBitmap(media.getFrameAtTime(0), 1080, 1080, true);
 
             try {
                 JSONObject postData = new JSONObject();
@@ -476,9 +674,11 @@ public class EditSaveVideoFragment extends Fragment {
                 postData.put("college", mCollegeId);
                 postData.put("privacy", params[1]);
                 postData.put("isAnonymousCommentsDisabled", params[2]);
-                postData.put("title", ""); //todo title
+                postData.put("title", params[3]);
                 JSONArray imageArray = new JSONArray();
-                imageArray.put(Utils.encodeImageBase64(map));
+                imageArray.put(Utils.encodeImageBase64(
+                        MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
+                                , Uri.fromFile(new File(params[4])))));
 
                 JSONArray videoArray = new JSONArray();
                 videoArray.put(Utils.encodeFileBase64(new File(outputFile)));
@@ -514,10 +714,43 @@ public class EditSaveVideoFragment extends Fragment {
         }
     }
 
+
+    private void showKeyboard() { //show keyboard for EditText
+        InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        lManager.showSoftInput(mTextView, 0);
+    }
+
+    private void hideKeyboard() {
+        mTextView.clearFocus(); //release focus from EditText and hide keyboard
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
+    }
+
+    public String saveViewAsImage(View view) {
+        try {
+            File f = ImageUtility.getTempFile(getActivity(), "overlay", ".png");
+            FileOutputStream outputStream = new FileOutputStream(f);
+
+            //remark : videodimen height is the width in portrait mode
+            int height = (int) Math.ceil((float) mVideoDimen.height * view.getHeight() / view.getWidth());
+            view.setDrawingCacheEnabled(true);
+            view.buildDrawingCache();
+            Bitmap bm = Bitmap.createScaledBitmap(view.getDrawingCache(), 480, height, false);
+            view.destroyDrawingCache();
+            bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+            return f.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     public static class VideoDimen implements Parcelable {
 
-        int height; //480 or less
-        int width;
+        int height; //480 or less -- video will be cropped to height x height
+        int width;  //width is only used to determine where to start crop
         boolean isFrontFacing;
 
 

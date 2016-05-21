@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout android:id="@+id/discover_fragment_background"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
 
-    <RelativeLayout android:id="@+id/discover_no_posts_frame"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="50dp"
-                    android:visibility="gone"
-                    >
+    <LinearLayout android:id="@+id/discover_no_posts_frame"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:layout_marginTop="50dp"
+                  android:orientation="vertical"
+                  android:visibility="gone"
+    >
 
         <ImageView android:id="@+id/discover_no_posts"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
-                   android:layout_centerHorizontal="true"
+                   android:layout_gravity="center_horizontal"
                    android:src="@drawable/campus"
         />
 
         <TextView android:id="@+id/dicover_no_posts_text"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
-                  android:layout_below="@id/discover_no_posts"
-                  android:layout_centerHorizontal="true"
+                  android:layout_gravity="center_horizontal"
                   android:layout_marginEnd="@dimen/activity_horizontal_margin"
                   android:layout_marginStart="@dimen/activity_horizontal_margin"
                   android:layout_marginTop="16dp"
                   android:gravity="center"
                   tools:text="@string/discover_no_posts_campus"
         />
-    </RelativeLayout>
+    </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_layout"

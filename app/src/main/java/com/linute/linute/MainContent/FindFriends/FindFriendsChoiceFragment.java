@@ -10,19 +10,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Created by QiFeng on 1/25/16.
@@ -57,6 +54,18 @@ public class FindFriendsChoiceFragment extends Fragment {
         mSearchView = (EditText) rootView.findViewById(R.id.search_view);
         mViewPager = (ViewPager) rootView.findViewById(R.id.view_pager);
         mViewPager.setOffscreenPageLimit(2);
+
+        mSearchView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (getActivity() == null) return false;
+                (mFindFriendsFragments[mViewPager.getCurrentItem()]).searchWithQuery(mSearchView.getText().toString());
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+
+                return true;
+            }
+        });
 
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -103,6 +112,19 @@ public class FindFriendsChoiceFragment extends Fragment {
         });
 
         ((TabLayout) rootView.findViewById(R.id.tabs)).setupWithViewPager(mViewPager);
+
+        mSearchView.post(new Runnable() {
+            @Override
+            public void run() {
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    //hide keyboard
+                    mSearchView.requestFocus();
+                    InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(mSearchView, 0);
+                }
+            }
+        });
 
         return rootView;
     }

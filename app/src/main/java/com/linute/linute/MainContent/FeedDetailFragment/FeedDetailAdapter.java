@@ -104,10 +104,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         return new NoCommentsHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.no_comments_item, parent, false));
     }
 
+
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView((LoadMoreItem) mFeedDetail.getComments().get(0));
+
         } else if (holder instanceof FeedDetailViewHolder) {
             ((FeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
             mItemManger.bindView(holder.itemView, position);

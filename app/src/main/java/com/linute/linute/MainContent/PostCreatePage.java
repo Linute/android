@@ -200,7 +200,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
                     op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -375,6 +375,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
     //cuts a bitmap from our RelativeLayout
     public static Bitmap getBitmapFromView(View view) {
+
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
         Drawable bgDrawable = view.getBackground();

@@ -1,28 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-    <!--<android.support.v7.widget.Toolbar android:id="@id/toolbar"-->
-                                       <!--android:layout_width="match_parent"-->
-                                       <!--android:layout_height="wrap_content"-->
-                                       <!--android:background="@color/colorPrimary"-->
-                                       <!--app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"-->
-                                       <!--app:title="Followers"-->
-                                       <!--app:titleTextColor="@color/white"-->
-    <!--/>-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView android:id="@+id/friendsList_recycler_view"
                                             android:layout_width="match_parent"
                                             android:layout_height="match_parent"
-                                            android:layout_below="@id/toolbar"
     />
 
     <ProgressBar android:id="@+id/progress_bar"
                  style="?android:attr/progressBarStyleLarge"
                  android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
-                 android:layout_centerHorizontal="true"
+                 android:layout_gravity="center_horizontal"
                  android:layout_marginTop="150dp"
                  android:visibility="gone"
     />
@@ -30,11 +20,11 @@
     <TextView android:id="@+id/friendsList_no_res"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_centerHorizontal="true"
+              android:layout_gravity="center_horizontal"
               android:layout_marginTop="64dp"
               android:padding="50dp"
               android:text="@string/no_results"
               android:visibility="gone"
     />
 
-</RelativeLayout>
+</FrameLayout>

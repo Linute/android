@@ -26,14 +26,17 @@ import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
-import com.linute.linute.MainContent.Chat.NewChatEvent;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.PeopleFragment.PeopleFragmentsHolder;
+import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
-import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
@@ -45,8 +48,11 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+<<<<<<< HEAD
 
 import org.greenrobot.eventbus.EventBus;
+=======
+>>>>>>> qi
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -60,42 +66,37 @@ import io.socket.engineio.client.transports.WebSocket;
 
 public class MainActivity extends BaseTaptActivity {
 
-    public static String TAG = "MainActivity";
-
+    public static String TAG = MainActivity.class.getSimpleName();
     public static final int PHOTO_STATUS_POSTED = 19;
+    public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
-    //private AppBarLayout mAppBarLayout;
-    //private ActionBar mActionBar;
-    //private Toolbar mToolbar;
+
     private DrawerLayout mDrawerLayout;
+
+    //don't change fragment until the drawer is closed, or there will be slight lag
     private MainDrawerListener mMainDrawerListener;
     private NavigationView mNavigationView;
+    private MenuItem mPreviousItem;
 
-    //private CoordinatorLayout parentView;
-    //private FloatingActionsMenu fam;
+    // array of our fragments
+    // the fragment is not created until it is needed.
     private UpdatableFragment[] mFragments; //holds our fragments
 
-    public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
+
     private SharedPreferences mSharedPreferences;
-    private boolean mConnecting;
-    private View mParentView;
 
     private SocketErrorResponse mSocketErrorResponse;
-
-    private boolean mHasMessage = false;
 
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
         public static final short FEED = 1;
-        public static final short PEOPLE = 2;
+        public static final short GLOBAL = 2;
         public static final short ACTIVITY = 3;
     }
 
 
-    //private int mAppBarElevation;
-    private MenuItem mPreviousItem;
-
     private Socket mSocket;
+    private boolean mConnecting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,12 +105,14 @@ public class MainActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new UpdatableFragment[4];
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
         mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
 
-        mParentView = findViewById(R.id.mainActivity_fragment_holder);
+        //mParentView = findViewById(R.id.mainActivity_fragment_holder);
+
         //profile image and header setup
         loadDrawerHeader();
 
@@ -133,6 +136,7 @@ public class MainActivity extends BaseTaptActivity {
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
+
                 //if there are a lot of other user profile/ events in mainActivity, clear them
                 clearBackStack();
 
@@ -153,11 +157,11 @@ public class MainActivity extends BaseTaptActivity {
                         item.setChecked(true);
                         mPreviousItem = item;
                         break;
-                    case R.id.navigation_item_people:
+                    case R.id.navigation_item_global:
                         if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
                         }
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PEOPLE));
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.GLOBAL));
                         item.setChecked(true);
                         mPreviousItem = item;
                         break;
@@ -169,9 +173,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-//        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
         clearBackStack();
-        //regular start
 
         if (mPreviousItem != null) mPreviousItem.setChecked(false);
         mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
@@ -187,13 +189,15 @@ public class MainActivity extends BaseTaptActivity {
             checkIntent(intent);
         }
 
-
         new FiveStarsDialog(this, "support@tapt.io")
                 .setRateText("how are we doing?")
                 .setRateText("wasup! we see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
+<<<<<<< HEAD
 
+=======
+>>>>>>> qi
     }
 
 
@@ -211,8 +215,8 @@ public class MainActivity extends BaseTaptActivity {
                 case FRAGMENT_INDEXES.PROFILE:
                     fragment = new Profile();
                     break;
-                case FRAGMENT_INDEXES.PEOPLE:
-                    fragment = new PeopleFragmentsHolder();
+                case FRAGMENT_INDEXES.GLOBAL:
+                    fragment = new GlobalFragment();
                     break;
                 default:
                     fragment = null;
@@ -273,6 +277,16 @@ public class MainActivity extends BaseTaptActivity {
                 .commit();
     }
 
+    @Override
+    public void addFragmentToContainer(final Fragment fragment, String tag) {
+        if (!mSafeForFragmentTransaction) return;
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainActivity_fragment_holder, fragment, tag)
+                .addToBackStack(PROFILE_OR_EVENT_NAME)
+                .commit();
+    }
+
     public void clearBackStack() {
         //if there are a lot of other user profile/ events in mainActivity, clear them
         if (getSupportFragmentManager().getBackStackEntryCount() > 0)
@@ -288,11 +302,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     }
 
-//    @Override
-//    public void setTitle(String title) {
-//        mToolbar.setTitle(title);
-//    }
-
     //loads the header of our drawer
     public void loadDrawerHeader() {
         //profile image
@@ -307,7 +316,7 @@ public class MainActivity extends BaseTaptActivity {
 
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
-                .asBitmap()
+                .dontAnimate()
                 .signature(new StringSignature(sharedPreferences.getString("imageSigniture", "000")))
                 .override(size, size) //change image to the size we want
                 .placeholder(R.drawable.image_loading_background)
@@ -316,11 +325,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void noInternet() {
-        CustomSnackbar sn = CustomSnackbar.make(mParentView, "Could not find internet connection", CustomSnackbar.LENGTH_LONG);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
-        sn.getView().setAlpha(0.8f);
-
-        sn.show();
+        Utils.showBadConnectionToast(this);
     }
 
     @Override
@@ -332,33 +337,28 @@ public class MainActivity extends BaseTaptActivity {
         }
     }
 
-    //the items in navigation view
-    //this sets the number to the right of it
-    public void setNavItemNotification(@IdRes int itemId, int count, int oldCount) {
 
+    /**
+     * Stuff for drawer notification indicator
+     */
+
+    public void setNavItemNotification(@IdRes int itemId, int count) {
         View main = mNavigationView.getMenu().findItem(itemId).getActionView();
 
         if (count > 0) {
-            ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText(count > 99 ? "+" : String.valueOf(count));
-            (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.VISIBLE);
+            ((TextView) main.findViewById(R.id.text)).setText(count > 99 ? "+" : String.valueOf(count));
+            main.setVisibility(View.VISIBLE);
         } else {
-            if (oldCount != 0) {
-                ((TextView) main.findViewById(R.id.nav_item_notification_counter)).setText("");
-                (main.findViewById(R.id.nav_item_notification_background)).setVisibility(View.GONE);
-            }
+            main.setVisibility(View.GONE);
         }
     }
 
     public void setFeedNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_feed, count, mNumNewPostsInDiscover);
+        setNavItemNotification(R.id.navigation_item_feed, count);
     }
 
     public void setUpdateNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_activity, count, mNumNewActivities);
-    }
-
-    public void setNumNewPostsInDiscover(int count) {
-        mNumNewPostsInDiscover = count;
+        setNavItemNotification(R.id.navigation_item_activity, count);
     }
 
     //So we change fragments or activities only after the drawer closes
@@ -388,7 +388,6 @@ public class MainActivity extends BaseTaptActivity {
                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
                 }
-
             }
         }
 
@@ -401,7 +400,6 @@ public class MainActivity extends BaseTaptActivity {
         public void setChangeFragmentOrActivityAction(Runnable action) {
             mChangeFragmentOrActivityAction = action;
         }
-
     }
 
 
@@ -431,7 +429,7 @@ public class MainActivity extends BaseTaptActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
+                                    "&platform=" + device.getType() +
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
 
@@ -439,20 +437,22 @@ public class MainActivity extends BaseTaptActivity {
                     op.secure = true;
                     op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
 
                     mSocket.on("activity", newActivity);
                     mSocket.on("new post", newPostListener);
-                    mSocket.on("unread", haveUnread);
                     mSocket.on("user banned", userBanned);
                     mSocket.on("update", update);
+                    mSocket.on("badge", badge);
+                    mSocket.on("unread", haveUnread);
+                    mSocket.on("posts refresh", refresh);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
                     mConnecting = false;
 
-                    JSONObject object = new JSONObject();
-                    emitSocket(API_Methods.VERSION + ":messages:unread", object);
+                    mSocket.emit(API_Methods.VERSION + ":posts:refresh", new JSONObject());
+                    //emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -471,9 +471,11 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.disconnect();
             mSocket.off("activity", newActivity);
             mSocket.off("new post", newPostListener);
-            mSocket.off("unread", haveUnread);
             mSocket.off("user banned", userBanned);
             mSocket.off("update", update);
+            mSocket.off("badge", badge);
+            mSocket.off("unread", haveUnread);
+            mSocket.off("posts refresh", refresh);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -555,15 +557,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-
-    private int mNumNewPostsInDiscover = 0; //new posts in discover fragment
-    private int mNumNewActivities = 0;
-
-
-    public void setNumNewActivities(int num) {
-        mNumNewActivities = num;
-    }
-
     private Emitter.Listener newPostListener = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -572,13 +565,20 @@ public class MainActivity extends BaseTaptActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                            NotificationEventBus
+                                    .getInstance()
+                                    .setNotification(new NotificationEvent(true));
+                        }
+
+                        setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
+
+                        if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
                                 .addPostToFeed(post)) {
-                            setFeedNotification(++mNumNewPostsInDiscover);
+                            NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
                         }
                     }
                 });
-
             }
         }
     };
@@ -590,35 +590,48 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-                    newMessageSnackbar(activity);
-                    EventBus.getDefault().post(new NewChatEvent(true));
+
+                    NewMessageEvent chat = new NewMessageEvent(true);
+                    chat.setRoomId(activity.getString("room"));
+                    chat.setMessage(activity.getString("text"));
+                    chat.setOtherUserId(activity.getString("ownerID"));
+                    chat.setOtherUserName(activity.getString("ownerFullName"));
+                    newMessageSnackbar(chat);
+
+                    NewMessageBus.getInstance().setNewMessage(chat);
                 } else {
                     final Update update = new Update(activity);
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
-                        if (update.hasEventInformation()) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                                        ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
-                                    }
-                                    newEventSnackbar(update.getDescription(), update.getPost());
-                                    setUpdateNotification(++mNumNewActivities);
-                                }
-                            });
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                                        ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
-                                    }
-                                    newProfileSnackBar(update);
-                                    setUpdateNotification(++mNumNewActivities);
-                                }
-                            });
-                        }
 
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
+                                    if (!((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update)) {
+                                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                            NotificationEventBus
+                                                    .getInstance()
+                                                    .setNotification(new NotificationEvent(true));
+                                        }
+
+                                        setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
+                                    }
+                                } else {
+                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                        NotificationEventBus
+                                                .getInstance()
+                                                .setNotification(new NotificationEvent(true));
+                                    }
+                                    setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
+                                }
+
+                                if (update.hasEventInformation()) {
+                                    newEventSnackbar(update.getDescription(), update.getPost());
+                                } else {
+                                    newProfileSnackBar(update);
+                                }
+                            }
+                        });
                     }
                 }
             } catch (JSONException e) {
@@ -627,24 +640,15 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private void newMessageSnackbar(JSONObject object) throws JSONException {
-
-        final String room = object.getString("room");
-        final String ownerID = object.getString("ownerID");
-        final String ownerFullName = object.getString("ownerFullName");
-        final String message = object.getString("text");
-
-        final CustomSnackbar sn = CustomSnackbar.make(mParentView, message, CustomSnackbar.LENGTH_SHORT);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
+    private void newMessageSnackbar(final NewMessageEvent chatEvent) {
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, chatEvent.getMessage(), CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, RoomsActivity.class);
-                intent.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                intent.putExtra("room", room);
-                intent.putExtra("ownerID", ownerID);
-                intent.putExtra("ownerFullName", ownerFullName);
-                startActivity(intent);
+                addFragmentToContainer(ChatFragment.newInstance(chatEvent.getRoomId(),
+                        chatEvent.getOtherUserName(), chatEvent.getOtherUserId()));
+
                 sn.dismiss();
             }
         });
@@ -653,12 +657,11 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private void newEventSnackbar(String text, final Post post) {
-        final CustomSnackbar sn = CustomSnackbar.make(mParentView, text, CustomSnackbar.LENGTH_SHORT);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 addFragmentToContainer(FeedDetailPage.newInstance(post));
                 sn.dismiss();
             }
@@ -667,8 +670,8 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void newProfileSnackBar(final Update update) {
-        final CustomSnackbar sn = CustomSnackbar.make(mParentView, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
-        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.notification_color));
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
+        sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -688,6 +691,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void checkIntent(Intent intent) {
+
         int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
         if (type == LinuteConstants.FEED_DETAIL) {
             String id = intent.getStringExtra("event");
@@ -703,23 +707,22 @@ public class MainActivity extends BaseTaptActivity {
                 mSafeForFragmentTransaction = true;
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
+        } else if (type == LinuteConstants.MESSAGE) {
+            String room = intent.getStringExtra("room");
+            String userId = intent.getStringExtra("ownerID");
+            String userName = intent.getStringExtra("ownerFullName");
+            mSafeForFragmentTransaction = true;
+            addFragmentToContainer(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
+                    userName, userId.isEmpty() ? null : userId));
         }
     }
-
-    private Emitter.Listener haveUnread = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            mHasMessage = (boolean) args[0];
-            EventBus.getDefault().post(new NewChatEvent(mHasMessage));
-        }
-    };
 
     private Emitter.Listener userBanned = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             try {
                 JSONObject body = new JSONObject(args[0].toString());
-                Log.i(TAG, "call: "+body.toString(4));
+                Log.i(TAG, "call: " + body.toString(4));
                 final String text = body.getString("text");
 
                 emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
@@ -745,6 +748,68 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
+    //badge
+    private Emitter.Listener badge = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject badge = new JSONObject(args[0].toString());
+                NotificationsCounterSingleton.getInstance().setHasMessage(badge.getInt("messages") > 0);
+                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+
+                int activities = badge.getInt("activities");
+                if (activities > 0) {
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
+                }
+
+                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUpdateNotification(NotificationsCounterSingleton.getInstance().getNumOfNewActivities());
+                    }
+                });
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    //posts:refresh
+    private Emitter.Listener refresh = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                final int posts = new JSONObject(args[0].toString()).getInt("posts");
+
+                if (posts > 0) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
+                        }
+                    });
+
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+
+    private Emitter.Listener haveUnread = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            NotificationsCounterSingleton.getInstance().setHasMessage((boolean) args[0]);
+            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+        }
+    };
+
     private Emitter.Listener update = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -763,14 +828,14 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private void showUpdateSnackbar(String text){
-        final CustomSnackbar sn = CustomSnackbar.make(mParentView, text, CustomSnackbar.LENGTH_LONG);
+    private void showUpdateSnackbar(String text) {
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String url = "market://details?id="+getApplicationContext().getPackageName();
+                String url = "market://details?id=" + getApplicationContext().getPackageName();
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
             }
@@ -778,9 +843,6 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-    public boolean hasMessage() {
-        return mHasMessage;
-    }
 
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);

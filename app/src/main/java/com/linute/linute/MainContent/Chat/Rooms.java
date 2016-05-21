@@ -73,6 +73,11 @@ public class Rooms {
         return mLastMessage;
     }
 
+    public void setLastMessage(String message)
+    {
+        mLastMessage = message;
+    }
+
     public String getUserImage() {
         return mUserImage;
     }
@@ -93,12 +98,21 @@ public class Rooms {
         mTime = time;
     }
 
+    public void merge(Rooms rooms){
+        mLastMessage = rooms.getLastMessage();
+        mTime = rooms.getTime();
+        mHasUnread = rooms.hasUnread();
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Rooms))
+        if (!(o instanceof Rooms)) {
             return false;
+        }
+
         return mRoomId.equals(((Rooms) o).mRoomId);
     }
+
 
     @Override
     public int hashCode() {

@@ -1,11 +1,11 @@
 package com.linute.linute.LoginAndSignup;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -79,7 +79,6 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, null));
 
         setupSearchView();
-        Utils.testLog(this, TAG);
     }
 
     private void setupSearchView() {

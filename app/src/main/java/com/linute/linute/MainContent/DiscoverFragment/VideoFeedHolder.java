@@ -63,7 +63,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.GONE);
                 vCinemaIcon.clearAnimation();
-                vCinemaIcon.setAlpha(0.2f);
+                vCinemaIcon.setAlpha(0);
                 sendImpressionsAsync(mPostId);
             }
         });
@@ -72,8 +72,12 @@ public class VideoFeedHolder extends ImageFeedHolder {
         mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                mSquareVideoView.start();
-                sendImpressionsAsync(mPostId);
+                //if video is paused AND finishes at the same time, video won't pause
+                //if icon is showing, then user has paused video
+                if (vCinemaIcon.getAlpha() != 1) {
+                    mSquareVideoView.start();
+                    sendImpressionsAsync(mPostId);
+                }
             }
         });
 
@@ -105,7 +109,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                         vCinemaIcon.setAlpha(1);
                     }else {
                         mSquareVideoView.start();
-                        vCinemaIcon.setAlpha(0.2f);
+                        vCinemaIcon.setAlpha(0);
                     }
                 }
             }

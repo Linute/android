@@ -1,10 +1,8 @@
 package com.linute.linute.API;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 
@@ -18,12 +16,10 @@ import okhttp3.Callback;
  * Created by Arman on 1/16/16.
  */
 public class LSDKChat {
-    private static SharedPreferences mSharedPreferences;
     private static String mToken;
 
     public LSDKChat(Context context) {
-        mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mToken = mSharedPreferences.getString("userToken","");
+        mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
     public Call getRooms(Map<String, String> param, Callback callback) {

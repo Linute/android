@@ -8,6 +8,7 @@ import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -90,15 +92,16 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION
-                    ;
+                                    "&platform=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
+
 
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
                     op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -141,13 +144,10 @@ public class NotificationSettingsActivity extends AppCompatActivity {
     }
 
 
-    public static class NotificationFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
-        SwitchPreference like;
-        SwitchPreference comment;
-        SwitchPreference alsoComment;
-        SwitchPreference mention;
-        SwitchPreference follow;
-        SwitchPreference message;
+    public static class NotificationFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
+        HashMap<String, Boolean> mSettings = new HashMap<>();
+
+
 
         @Override
         public void onCreate(final Bundle savedInstanceState) {
@@ -155,49 +155,58 @@ public class NotificationSettingsActivity extends AppCompatActivity {
             getPreferenceManager().setSharedPreferencesName(LinuteConstants.SHARED_PREF_NAME);
             addPreferencesFromResource(R.xml.pref_notifications);
 
-            like = (SwitchPreference) findPreference("notif_like");
-            comment = (SwitchPreference) findPreference("notif_comment");
-            alsoComment = (SwitchPreference) findPreference("notif_alsoComment");
-            mention = (SwitchPreference) findPreference("notif_mention");
-            follow = (SwitchPreference) findPreference("notif_follow");
-            message = (SwitchPreference) findPreference("notif_message");
+            SwitchPreference t;
 
-            like.setOnPreferenceClickListener(this);
-            comment.setOnPreferenceClickListener(this);
-            alsoComment.setOnPreferenceClickListener(this);
-            mention.setOnPreferenceClickListener(this);
-            follow.setOnPreferenceClickListener(this);
-            message.setOnPreferenceClickListener(this);
+            t = ((SwitchPreference) findPreference("notif_like"));
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("like", t.isChecked());
+
+            t = (SwitchPreference) findPreference("notif_comment");
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("comment", t.isChecked());
+
+            t = (SwitchPreference) findPreference("notif_alsoComment");
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("alsoComment", t.isChecked());
+
+            t = (SwitchPreference) findPreference("notif_mention");
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("mention", t.isChecked());
+
+            t = (SwitchPreference) findPreference("notif_follow");
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("follow", t.isChecked());
+
+            t = (SwitchPreference) findPreference("notif_message");
+            t.setOnPreferenceChangeListener(this);
+            mSettings.put("message", t.isChecked());
         }
 
         @Override
-        public boolean onPreferenceClick(Preference preference) {
+        public boolean onPreferenceChange(Preference preference, Object newValue) {
             NotificationSettingsActivity activity = (NotificationSettingsActivity) getActivity();
             if (activity != null) {
                 try {
                     JSONObject object = new JSONObject();
 
-                    object.put(getKey(like.getKey()), like.isChecked());
-                    object.put(getKey(comment.getKey()), comment.isChecked());
-                    object.put(getKey(alsoComment.getKey()), alsoComment.isChecked());
-                    object.put(getKey(mention.getKey()), mention.isChecked());
-                    object.put(getKey(message.getKey()), message.isChecked());
-                    object.put(getKey(follow.getKey()), follow.isChecked());
+                    mSettings.put(getKey(preference.getKey()), (Boolean)newValue);
 
-                    if (activity.emitSocket(API_Methods.VERSION + ":users:notification settings", object)){
+                    for (HashMap.Entry<String, Boolean> entry : mSettings.entrySet()){
+                        object.put(entry.getKey(), entry.getValue());
+                    }
+
+                    if (activity.emitSocket(API_Methods.VERSION + ":users:notification settings", object)) {
                         return true;
                     }
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-
-            SwitchPreference pref = (SwitchPreference) preference;
-            pref.setChecked(!pref.isChecked());
             return false;
         }
 
 
+        //gets everything after 6th place
         public static String getKey(String key) {
             return key.substring(6);
         }

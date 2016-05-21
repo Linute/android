@@ -1,38 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:selectableItemBackground"
-    >
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground"
+>
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/friend_user_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
+        android:layout_marginBottom="10dp"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
         app:civ_border_color="@color/seperator_color"
         app:civ_border_width="1dp"
-        />
+    />
 
     <!--<ImageView-->
-        <!--android:id="@+id/friend_image_state"-->
-        <!--android:layout_width="@dimen/action_picture_size"-->
-        <!--android:layout_height="@dimen/action_picture_size"-->
-        <!--android:layout_alignParentEnd="true"-->
-        <!--android:layout_centerVertical="true"-->
-        <!--android:layout_margin="@dimen/activity_horizontal_margin"-->
-        <!--tools:src="@drawable/add_friend"/>-->
+    <!--android:id="@+id/friend_image_state"-->
+    <!--android:layout_width="@dimen/action_picture_size"-->
+    <!--android:layout_height="@dimen/action_picture_size"-->
+    <!--android:layout_alignParentEnd="true"-->
+    <!--android:layout_centerVertical="true"-->
+    <!--android:layout_margin="@dimen/activity_horizontal_margin"-->
+    <!--tools:src="@drawable/add_friend"/>-->
 
 
     <TextView
         android:id="@+id/friend_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/friend_user_image"
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:singleLine="true"
         android:textColor="@color/user_name_blue"
@@ -41,4 +40,4 @@
         tools:text="NAME"/>
 
 
-</RelativeLayout>
+</LinearLayout>

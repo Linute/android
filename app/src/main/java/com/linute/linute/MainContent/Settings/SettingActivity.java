@@ -117,15 +117,15 @@ public class SettingActivity extends AppCompatActivity {
                                     "&version=" + device.getVersonName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION
-                    ;
+                                    "&platform=" + device.getType() +
+                                    "&api=" + API_Methods.VERSION +
+                                    "&model=" + device.getModel();
 
                     op.forceNew = true;
                     op.reconnectionDelay = 5;
                     op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
+                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
                 }

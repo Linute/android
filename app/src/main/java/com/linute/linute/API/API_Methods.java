@@ -1,8 +1,6 @@
 package com.linute.linute.API;
 
 
-import android.util.Log;
-
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 
@@ -24,6 +22,9 @@ import okhttp3.RequestBody;
 /**
  * Created by QiFeng on 11/21/15.
  */
+
+//<!--<string name="SOCKET_URL">https://api.tapt.io/</string>-->
+
 public class API_Methods {
 
     public static String TAG = "API_METHODS";
@@ -32,7 +33,11 @@ public class API_Methods {
     public static final String SCHEME = "https";
     private static String HOST = "api.tapt.io";
     //public static final String HOST = "devapi2.tapt.io";
+<<<<<<< HEAD
     public static final String VERSION = "v1.3.6";
+=======
+    public static final String VERSION = "v1.3.7";
+>>>>>>> qi
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -40,6 +45,10 @@ public class API_Methods {
     //PlainText Type
     public static final MediaType EMPTY = MediaType.parse("text/plain; charset=utf-8");
 
+
+    public static String getURL(){
+        return SCHEME + "://" + HOST + "/";
+    }
 
     // API get method
     // Throw exception?
@@ -130,7 +139,6 @@ public class API_Methods {
 
         return call;
     }
-
 
     //API DELETE
     public static Call delete(String path,

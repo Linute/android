@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -39,12 +40,9 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class SearchUsers extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = SearchUsers.class.getSimpleName();
 
-    private RecyclerView recList;
-    private LinearLayoutManager llm;
     private SearchAdapter mSearchAdapter;
 
     private List<SearchUser> mSearchUserList = new ArrayList<>();
@@ -52,14 +50,10 @@ public class SearchUsers extends Fragment {
 
     private EditText editText;
 
+    private Handler mHandler = new Handler();
+
     public SearchUsers() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mSearchAdapter = new SearchAdapter(context, mSearchUserList);
     }
 
 
@@ -68,7 +62,6 @@ public class SearchUsers extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        getUsers("");
         return inflater.inflate(R.layout.fragment_search_users, container, false);
     }
 
@@ -87,12 +80,13 @@ public class SearchUsers extends Fragment {
             }
         });
 
-        recList = (RecyclerView) view.findViewById(R.id.search_users);
+        mSearchAdapter = new SearchAdapter(getActivity(), mSearchUserList);
+
+        RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
         recList.setHasFixedSize(true);
-        llm = new LinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
-        recList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         recList.setAdapter(mSearchAdapter);
 
         editText = (EditText) view.findViewById(R.id.search_users_entry);
@@ -112,6 +106,8 @@ public class SearchUsers extends Fragment {
 
             }
         });
+
+        getUsers("");
     }
 
     @Override
@@ -128,9 +124,11 @@ public class SearchUsers extends Fragment {
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, String> newChat = new HashMap<>();
         newChat.put("owner", mSharedPreferences.getString("userID", null));
+
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
         }
+
         users.getUsers(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -148,15 +146,23 @@ public class SearchUsers extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
+                    if (getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
                 } else {
 //                    mSearchUserList.clear();
                     ArrayList<SearchUser> tempUsers = new ArrayList<>();
-                    JSONObject jsonObject = null;
-                    JSONArray friends = null;
+                    JSONObject jsonObject;
+                    JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
                         friends = jsonObject.getJSONArray("friends");
-                        JSONObject user = null;
+                        JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
                             tempUsers.add(new SearchUser(
@@ -172,13 +178,27 @@ public class SearchUsers extends Fragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mSearchAdapter.notifyDataSetChanged();
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSearchAdapter.notifyDataSetChanged();
+                                        }
+                                    });
                                 }
                             });
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        if (getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
                     }
                 }
             }

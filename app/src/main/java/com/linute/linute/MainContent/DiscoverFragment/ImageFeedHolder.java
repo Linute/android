@@ -81,7 +81,7 @@ public class ImageFeedHolder extends BaseFeedHolder{
     private void getEventImage(String image) {
         Glide.with(mContext)
                 .load(image)
-                .asBitmap()
+                .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vPostImage);

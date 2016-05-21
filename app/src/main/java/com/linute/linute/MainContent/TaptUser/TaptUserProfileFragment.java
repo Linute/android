@@ -54,7 +54,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
     private LSDKUser mUser;
-    private SharedPreferences mSharedPreferences;
 
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
@@ -70,6 +69,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private boolean mCanLoadMore = false;
 
     private boolean mOwnerIsViewer; //viewer viewing own profile
+
+    private boolean mUserNameVisible = false;
 
     public TaptUserProfileFragment() {
         // Required empty public constructor
@@ -106,7 +107,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         final View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
         mUser = new LSDKUser(getActivity());
-        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         recList.setHasFixedSize(true);
@@ -151,7 +152,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             }
         });
 
-        mOwnerIsViewer = mTaptUserId.equals(mSharedPreferences.getString("userID", ""));
+        mOwnerIsViewer = mTaptUserId.equals(sharedPreferences.getString("userID", ""));
         mToolbar.inflateMenu(mOwnerIsViewer ? R.menu.my_profile_action_bar : R.menu.tapt_user_profile_menu);
 
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -165,9 +166,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         if (mProfileInfoHasLoaded && activity != null) {
 
                             String[] options = new String[]{
-                                    mLinuteUser.isBlocked() ? "Unblock user" : "Block User",
+                                    mLinuteUser.isBlocked() ? "Unblock user" : "Block user",
                                     "Report",
-                                    mLinuteUser.isSubscribed() ? "Unsubscribe from user" : "Subscribe to user"
+                                    mLinuteUser.isSubscribed() ? "Stop post notifications" : "Get post notifications"
                             };
 
                             mDialog = new AlertDialog
@@ -206,7 +207,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             }
         });
 
-        mToolbar.setTitle(mUserName);
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -215,40 +215,55 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         });
         if (fragmentNeedsUpdating()) {
             mToolbar.getBackground().mutate().setAlpha(0);
+        } else if (mUserNameVisible){
+            mToolbar.setTitle(mUserName);
         }
 
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                                        @Override
-                                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                                            super.onScrolled(recyclerView, dx, dy);
+        recList.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
+                        if (llm.findFirstVisibleItemPosition() == 0) {
+                            View view = recyclerView.getChildAt(0);
+                            if (view != null) {
+                                //doing the maths
+                                int alpha = (int) ((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight()))) * 255);
+                                if (alpha >= 255) {
+                                    alpha = 255;
 
-                                            if (llm.findFirstVisibleItemPosition() == 0) {
-                                                View view = recyclerView.getChildAt(0);
-                                                if (view != null) {
-                                                    //doing the maths
-                                                    int alpha = (int) ((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight()))) * 255);
-                                                    if (alpha > 255) {
-                                                        alpha = 255;
-                                                    }
-                                                    if (alpha < 0) {
-                                                        alpha = 0;
-                                                    }
-                                                    mToolbar.getBackground().mutate().setAlpha(alpha);
-                                                }
-                                            }
-                                        }
+                                    if (!mUserNameVisible) {
+                                        mUserNameVisible = true;
+                                        mToolbar.setTitle(mUserName);
                                     }
+                                } else {
+                                    if (alpha < 0) alpha = 0;
+
+                                    if (mUserNameVisible){
+                                        mUserNameVisible = false;
+                                        mToolbar.setTitle("");
+                                    }
+                                }
+                                mToolbar.getBackground().mutate().setAlpha(alpha);
+                            }
+                        }
+                    }
+                }
         );
 
-        mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts() {
-            @Override
-            public void loadMorePosts() {
-                if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing()) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                    getMoreActivities();
-                }
-            }
-        });
+        mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts()
+
+                                         {
+                                             @Override
+                                             public void loadMorePosts() {
+                                                 if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing()) {
+                                                     mSwipeRefreshLayout.setRefreshing(true);
+                                                     getMoreActivities();
+                                                 }
+                                             }
+                                         }
+
+        );
         return rootView;
     }
 
@@ -281,6 +296,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     }
 
     //get user information from server
+
     public void updateAndSetHeader() {
         mUser.getProfileInfo(mTaptUserId, new Callback() {
             @Override
@@ -313,7 +329,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            mToolbar.setTitle(mLinuteUser.getFirstName() + " " + mLinuteUser.getLastName());
+                            mUserName = (mLinuteUser.getFirstName() + " " + mLinuteUser.getLastName());
 
                             if (!mOtherSectionUpdated) {
                                 mOtherSectionUpdated = true;
@@ -478,7 +494,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             emit.put("user", mTaptUserId);
             activity.emitSocket(API_Methods.VERSION + ":users:subscribe", emit);
             Toast.makeText(activity,
-                    isSubscribed ? "Unsubscribed from " + mLinuteUser.getFirstName() : "Subscribed to " + mLinuteUser.getFirstName(),
+                    isSubscribed ? "Unsubscribed from user" : "Subscribed to user",
                     Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);

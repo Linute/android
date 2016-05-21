@@ -4,7 +4,6 @@
     <size android:width="20dp"
           android:height="20dp"/>
 
-    <solid android:color="@color/feed_action_bar_grey"/>
+    <solid android:color="@color/seperator_color"/>
 
-
-    </shape>
+</shape>

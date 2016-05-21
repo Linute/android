@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     android:id="@+id/rooms_list_linear"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="?android:selectableItemBackground"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="?android:selectableItemBackground">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/rooms_user_image"
@@ -19,42 +19,12 @@
 
     />
 
-    <RelativeLayout android:id="@+id/feed_end_layer"
-                    android:layout_width="32dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_margin="@dimen/activity_horizontal_margin"
-    >
-
-
-        <TextView android:id="@+id/room_time_stamp"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_centerHorizontal="true"
-                  android:text="now"
-                  android:textColor="@color/twentyfive_black"
-                  android:textSize="@dimen/sub_font_size"
-        />
-
-        <ImageView android:id="@+id/room_unread"
-                   android:layout_width="16dp"
-                   android:layout_height="16dp"
-                   android:layout_marginTop="8dp"
-                   android:layout_below="@id/room_time_stamp"
-                   android:layout_centerHorizontal="true"
-                   android:src="@drawable/unread_message_blue_circle"
-        />
-
-    </RelativeLayout>
-
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0px"
+        android:layout_weight="1"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:layout_toEndOf="@id/rooms_user_image"
-        android:layout_toStartOf="@id/feed_end_layer"
         android:orientation="vertical">
 
 
@@ -67,6 +37,7 @@
             android:maxLines="1"
             android:textColor="@color/user_comment_color"
             android:textSize="@dimen/body_font_size"
+            android:textStyle="bold"
             tools:text="Naomi Test"/>
 
 
@@ -82,4 +53,28 @@
     </LinearLayout>
 
 
-</RelativeLayout>
+    <LinearLayout android:id="@+id/feed_end_layer"
+                  android:layout_width="32dp"
+                  android:layout_height="wrap_content"
+                  android:layout_margin="@dimen/activity_horizontal_margin"
+                  android:orientation="vertical">
+
+        <TextView android:id="@+id/room_time_stamp"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="center_horizontal"
+                  android:text="now"
+                  android:textColor="@color/twentyfive_black"
+                  android:textSize="@dimen/sub_font_size"/>
+
+        <ImageView android:id="@+id/room_unread"
+                   android:layout_width="16dp"
+                   android:layout_height="16dp"
+                   android:layout_gravity="center_horizontal"
+                   android:layout_marginTop="8dp"
+                   android:src="@drawable/unread_message_blue_circle"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

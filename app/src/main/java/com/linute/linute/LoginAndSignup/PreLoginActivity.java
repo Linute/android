@@ -4,9 +4,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.os.Build;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
@@ -26,9 +24,7 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.linute.linute.API.Device;
 import com.linute.linute.API.LSDKUser;
-import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -40,8 +36,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -83,6 +77,24 @@ public class PreLoginActivity extends AppCompatActivity {
 
         setUpFacebookCallback();
 
+
+        View v = findViewById(R.id.chat_button);
+
+        if (v != null)
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@tapt.io"});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Help Me Plz");
+                    intent.putExtra(android.content.Intent.EXTRA_TEXT,
+                            "If you are having issues with your signin (ie. not receiving pincode, " +
+                                    "email not working), swap this text out with the problem you are having.");
+                    startActivity(intent);
+                }
+            });
+
         if (savedInstanceState == null)
             replaceFragment(new PreLoginFragment());
 
@@ -94,9 +106,9 @@ public class PreLoginActivity extends AppCompatActivity {
         super.onPostResume();
 
         Intent intent = getIntent();
-        if (intent != null){
+        if (intent != null) {
             String text = intent.getStringExtra("BANNED");
-            if (text != null){
+            if (text != null) {
                 new AlertDialog.Builder(this)
                         .setTitle("Banned")
                         .setMessage(text)
@@ -118,7 +130,7 @@ public class PreLoginActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    public void addFragment(Fragment fragment){
+    public void addFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.frag_fade_in, R.anim.frag_fade_out);
         transaction.replace(R.id.login_activity_fragment_frame, fragment).addToBackStack(null);
@@ -138,7 +150,7 @@ public class PreLoginActivity extends AppCompatActivity {
         addFragment(new LinuteSignUpFragment());
     }
 
-    public void selectForgotPassword(){
+    public void selectForgotPassword() {
         addFragment(new ForgotPasswordFragment());
     }
 
@@ -327,18 +339,18 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-    private void saveNotificationPreferences(JSONObject object){
+    private void saveNotificationPreferences(JSONObject object) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
         try {
             JSONObject settings = object.getJSONObject("notificationSettings");
             sharedPreferences.putBoolean("notif_follow", getBooleanFromJSONObj("follow", settings));
-            sharedPreferences.putBoolean("notif_message",getBooleanFromJSONObj("message", settings));
+            sharedPreferences.putBoolean("notif_message", getBooleanFromJSONObj("message", settings));
             sharedPreferences.putBoolean("notif_mention", getBooleanFromJSONObj("mention", settings));
             sharedPreferences.putBoolean("notif_alsoComment", getBooleanFromJSONObj("alsoComment", settings));
             sharedPreferences.putBoolean("notif_comment", getBooleanFromJSONObj("comment", settings));
             sharedPreferences.putBoolean("notif_like", getBooleanFromJSONObj("like", settings));
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
             sharedPreferences.putBoolean("notif_follow", true);
             sharedPreferences.putBoolean("notif_message", true);
@@ -390,10 +402,10 @@ public class PreLoginActivity extends AppCompatActivity {
         });
     }
 
-    public boolean getBooleanFromJSONObj(String key, JSONObject obj){
+    public boolean getBooleanFromJSONObj(String key, JSONObject obj) {
         try {
             return obj.getBoolean(key);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
             return true;
         }

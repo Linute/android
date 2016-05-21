@@ -3,6 +3,7 @@ package com.linute.linute.SquareCamera;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -23,9 +24,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
+import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -64,7 +66,6 @@ public class EditSavePhotoFragment extends Fragment {
 
     private CustomBackPressedEditText mText; //text
     private ProgressBar mProgressBar;
-    private View mButtonLayer;
     private CheckBox mAnonSwitch;
     private CheckBox mAnonComments;
 
@@ -73,6 +74,9 @@ public class EditSavePhotoFragment extends Fragment {
 
     private View mUploadButton;
 
+    private int mReturnType;
+
+    private View vBottom;
 
     public static Fragment newInstance(Uri imageUri, boolean makeAnon) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -94,6 +98,7 @@ public class EditSavePhotoFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        mReturnType = ((CameraActivity) getActivity()).getReturnType();
         return inflater.inflate(R.layout.squarecamera__fragment_edit_save_photo, container, false);
     }
 
@@ -103,15 +108,13 @@ public class EditSavePhotoFragment extends Fragment {
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
-        mUserId = sharedPreferences.getString("userID","");
+        mUserId = sharedPreferences.getString("userID", "");
 
         //setup ImageView
         Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
         photoImageView.setImageURI(imageUri);
-
-        //photoImageView.setImageURI(imageUri);
 
         //shows the text strip when image touched
         photoImageView.setOnClickListener(new View.OnClickListener() {
@@ -128,12 +131,21 @@ public class EditSavePhotoFragment extends Fragment {
 
         mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
         mText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
-        mButtonLayer = view.findViewById(R.id.editFragment_button_layer);
         mProgressBar = (ProgressBar) view.findViewById(R.id.editFragment_progress_bar);
 
-        mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
-        mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+        vBottom = view.findViewById(R.id.bottom);
+
         mAnonComments = (CheckBox) view.findViewById(R.id.anon_comments);
+        mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
+
+        if (mReturnType == CameraActivity.SEND_POST) {
+            mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
+            vBottom.findViewById(R.id.comments).setVisibility(View.VISIBLE);
+            vBottom.findViewById(R.id.anon).setVisibility(View.VISIBLE);
+        } else {
+            vBottom.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
+            vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
+        }
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -154,12 +166,11 @@ public class EditSavePhotoFragment extends Fragment {
                 sendPicture();
             }
         });
-
         setUpEditText();
     }
 
 
-    private void showConfirmDialog(){
+    private void showConfirmDialog() {
         if (getActivity() == null) return;
         hideKeyboard();
         new AlertDialog.Builder(getActivity())
@@ -243,16 +254,12 @@ public class EditSavePhotoFragment extends Fragment {
                         }
                         stopped = true;
                         break;
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                        break;
-                    case MotionEvent.ACTION_POINTER_UP:
-                        break;
                     case MotionEvent.ACTION_MOVE:
                         int change = (int) (event.getY() - prevY);
                         totalMovement += Math.abs(change);
                         if (!stopped) { //move the edittext around
 
-                            RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) v.getLayoutParams();
+                            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) v.getLayoutParams();
 
                             int newTop = params.topMargin + change; //new margintop
 
@@ -269,10 +276,8 @@ public class EditSavePhotoFragment extends Fragment {
                         }
                         break;
                 }
-
                 return true;
             }
-
         });
     }
 
@@ -280,7 +285,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         if (getActivity() == null) return;
 
-        if(mText.getText().toString().trim().isEmpty()){
+        if (mText.getText().toString().trim().isEmpty()) {
             mText.setVisibility(View.GONE);
         }
 
@@ -288,7 +293,7 @@ public class EditSavePhotoFragment extends Fragment {
 
         mFrame.requestFocus();
 
-        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()){
+        if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
             Utils.showBadConnectionToast(getActivity());
             return;
         }
@@ -296,36 +301,51 @@ public class EditSavePhotoFragment extends Fragment {
         Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
 
         showProgress(true);
-
         if (getActivity() == null) return;
-        try {
-            JSONObject postData = new JSONObject();
+        if (mReturnType == CameraActivity.RETURN_URI){
+            Uri image = ImageUtility.savePictureToCache(getActivity(), bitmap);
+            if (image != null){
+                Intent i =  new Intent()
+                        .putExtra("image", image)
+                        .putExtra("type", CameraActivity.IMAGE)
+                        .putExtra("title", mText.getText().toString());
+                getActivity().setResult(Activity.RESULT_OK, i);
+                getActivity().finish();
+            }else {
+                getActivity().setResult(Activity.RESULT_CANCELED);
+                getActivity().finish();
+            }
+        }
+        else {
+            try {
+                JSONObject postData = new JSONObject();
 
-            postData.put("college", mCollegeId);
-            postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
-            postData.put("isAnonymousCommentsDisabled", mAnonComments.isChecked() ? 0 : 1);
-            postData.put("title", mText.getText().toString());
-            JSONArray imageArray = new JSONArray();
-            imageArray.put(Utils.encodeImageBase64(bitmap));
-            postData.put("images", imageArray);
-            postData.put("type", "1");
-            postData.put("owner", mUserId);
+                postData.put("college", mCollegeId);
+                postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
+                postData.put("isAnonymousCommentsDisabled", mAnonComments.isChecked() ? 0 : 1);
+                postData.put("title", mText.getText().toString());
+                JSONArray imageArray = new JSONArray();
+                imageArray.put(Utils.encodeImageBase64(bitmap));
+                postData.put("images", imageArray);
+                postData.put("type", "1");
+                postData.put("owner", mUserId);
 
 
-            JSONArray coord = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-            coord.put(0);
-            coord.put(0);
-            jsonObject.put("coordinates", coord);
+                JSONArray coord = new JSONArray();
+                JSONObject jsonObject = new JSONObject();
+                coord.put(0);
+                coord.put(0);
+                jsonObject.put("coordinates", coord);
 
-            postData.put("geo", jsonObject);
+                postData.put("geo", jsonObject);
 
-            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
+                mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Utils.showServerErrorToast(getActivity());
-            showProgress(false);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Utils.showServerErrorToast(getActivity());
+                showProgress(false);
+            }
         }
     }
 
@@ -366,7 +386,9 @@ public class EditSavePhotoFragment extends Fragment {
 
 
     private void showProgress(final boolean show) {
-        mButtonLayer.setVisibility(show ? View.GONE : View.VISIBLE);
+        if (mReturnType == CameraActivity.SEND_POST) {
+            vBottom.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+        }
         mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
@@ -379,44 +401,45 @@ public class EditSavePhotoFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (getActivity() == null) return;
+        if (mReturnType != CameraActivity.RETURN_URI) { //don't connect if we don't have to
+            if (getActivity() == null) return;
 
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
+            if (mSocket == null || !mSocket.connected() && !mConnecting) {
+                mConnecting = true;
 
-            {
-                try {
-                    IO.Options op = new IO.Options();
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                    op.query =
-                            "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION +
-                                    "&model=" + device.getModel();
+                {
+                    try {
+                        IO.Options op = new IO.Options();
+                        DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
+                        op.query =
+                                "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
+                                        "&deviceToken=" + device.getDeviceToken() +
+                                        "&udid=" + device.getUdid() +
+                                        "&version=" + device.getVersonName() +
+                                        "&build=" + device.getVersionCode() +
+                                        "&os=" + device.getOS() +
+                                        "&platform=" + device.getType() +
+                                        "&api=" + API_Methods.VERSION +
+                                        "&model=" + device.getModel();
 
-                    op.reconnectionDelay = 5;
-                    op.secure = true;
+                        op.reconnectionDelay = 5;
+                        op.secure = true;
 
-                    op.transports = new String[]{WebSocket.NAME};
+                        op.transports = new String[]{WebSocket.NAME};
 
-                    mSocket = IO.socket(getString(R.string.SOCKET_URL), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
+                        mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+
+                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+                mSocket.on(Socket.EVENT_ERROR, eventError);
+                mSocket.on("new post", newPost);
+                mSocket.connect();
+                mConnecting = false;
             }
-
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on(Socket.EVENT_ERROR, eventError);
-            mSocket.on("new post", newPost);
-            mSocket.connect();
-            mConnecting = false;
-
         }
     }
 
@@ -425,13 +448,15 @@ public class EditSavePhotoFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (mSocket != null) {
+        if (mReturnType != CameraActivity.RETURN_URI) {
+            if (mSocket != null) {
 
-            mSocket.disconnect();
-            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off(Socket.EVENT_ERROR, eventError);
-            mSocket.off("new post", newPost);
+                mSocket.disconnect();
+                mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+                mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+                mSocket.off(Socket.EVENT_ERROR, eventError);
+                mSocket.off("new post", newPost);
+            }
         }
     }
 
@@ -479,7 +504,7 @@ public class EditSavePhotoFragment extends Fragment {
                         }
                     });
                 }
-            }catch (JSONException e){
+            } catch (JSONException e) {
                 Log.i(TAG, "call: error in newPost Listener");
             }
         }

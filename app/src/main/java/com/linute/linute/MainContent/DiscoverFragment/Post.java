@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by Arman on 12/27/15.
@@ -20,8 +21,6 @@ public class Post implements Parcelable {
     public final static int POST_TYPE_STATUS = 0;
     public final static int POST_TYPE_IMAGE = 1;
     public final static int POST_TYPE_VIDEO = 2;
-
-    public final static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     private String mUserId;         // id of post owner
     private String mUserName;       // post owner's full name
@@ -81,7 +80,7 @@ public class Post implements Parcelable {
         Date myDate;
 
         try {
-            myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+            myDate = Utils.DATE_FORMAT.parse(jsonObject.getString("date"));
         } catch (ParseException w) {
             w.printStackTrace();
             myDate = null;
@@ -147,7 +146,7 @@ public class Post implements Parcelable {
         Date myDate;
 
         try {
-            myDate = simpleDateFormat.parse(jsonObject.getString("date"));
+            myDate = Utils.DATE_FORMAT.parse(jsonObject.getString("date"));
         } catch (ParseException w) {
             w.printStackTrace();
             myDate = null;

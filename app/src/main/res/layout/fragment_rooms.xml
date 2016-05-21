@@ -9,6 +9,7 @@
                                        android:layout_width="match_parent"
                                        android:layout_height="wrap_content"
                                        android:background="@color/colorPrimary"
+                                       android:elevation="4dp"
                                        android:theme="@style/ThemeOverlay.AppCompat.Dark"
     />
 
@@ -23,9 +24,9 @@
     />
 
     <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh_rooms"
-                                                  android:layout_below="@id/rooms_toolbar"
                                                   android:layout_width="match_parent"
-                                                  android:layout_height="wrap_content">
+                                                  android:layout_height="wrap_content"
+                                                  android:layout_below="@id/rooms_toolbar">
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rooms_list"
             android:layout_width="match_parent"

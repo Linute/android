@@ -78,7 +78,6 @@ import okhttp3.Response;
 
 public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
-    private static final SimpleDateFormat fm = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
@@ -88,7 +87,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private MentionsEditText mCommentEditText;
 
     private View mAnonCheckBoxContainer;
-
     private View mSendButtonContainer;
 
     private RecyclerView mMentionedList;
@@ -97,8 +95,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
     private View mProgressbar;
     private View mSendButton;
-
-    private Toolbar mToolbar;
 
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
@@ -144,16 +140,16 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
         mViewId = pref.getString("userID", "");
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
-        mToolbar.setTitle("Comments");
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
+        toolbar.setTitle("Comments");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getFragmentManager().popBackStack();
             }
         });
-        mToolbar.setOnClickListener(new View.OnClickListener() {
+        toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
@@ -162,31 +158,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         });
 
 
-        mToolbar.inflateMenu(R.menu.feed_detail_toolbar);
+        toolbar.inflateMenu(R.menu.feed_detail_toolbar);
 
 
-        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-//                int id = item.getItemId();
-//
-//                switch (id) {
-//                    case R.id.feed_detail_report:
-//                        showReportOptionsDialog();
-//                        return true;
-//                    case R.id.feed_detail_delete:
-//                        showConfirmDeleteDialog();
-//                        return true;
-//                    case R.id.feed_detail_reveal:
-//                        showRevealConfirm();
-//                        return true;
-//                    case R.id.feed_detail_mute_post:
-//                        showMuteConfirmation();
-//                        return true;
-//                    case R.id.feed_detail_hide_post:
-//                        showHideConfirmation();
-//                        return true;
-//                }
                 if (item.getItemId() == R.id.feed_detail_options){
                     if (mCommentsRetrieved)
                         showOptionsDialog();
@@ -203,7 +180,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         recList.setLayoutManager(llm);
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
-
         recList.setAdapter(mFeedDetailAdapter);
 
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -350,7 +326,6 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         //only updates first time it is created
         if (fragmentNeedsUpdating()) {
-            //mOtherHasUpdated = false; // TODO: 4/4/16
             displayCommentsAndPost();
             setFragmentNeedUpdating(false);
         }
@@ -392,6 +367,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     @Override
     public void onStop() {
         super.onStop();
+        if (getActivity() == null) return;
+
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
     }
@@ -458,7 +435,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                         //get date
                         try {
-                            myDate = fm.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
@@ -607,7 +584,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                                 //get date
                                 try {
-                                    myDate = fm.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
@@ -1010,7 +987,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                                 @Override
                                 public void run() {
                                     mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                                    mFeedDetailAdapter.notifyItemChanged(0);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFeedDetailAdapter.notifyItemChanged(0);
+                                        }
+                                    });
                                     Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -1240,24 +1222,32 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         @Override
         public void call(Object... args) {
 
-            if (!mCommentsRetrieved /*|| !mOtherHasUpdated*/) return; //// TODO: 4/4/16
+            if (!mCommentsRetrieved) return;
 
             JSONObject object = (JSONObject) args[0];
-
-            //will check if we can scroll down
-            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
-            //neg is scroll up, positive is scroll down
-
-            final boolean mCanScrollDown = recList != null && recList.canScrollVertically(1);
-
             if (object == null) {
                 Log.i(TAG, "call: Error retrieving new comment");
                 return;
             }
+            //will check if we can scroll down
+            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
+            //neg is scroll up, positive is scroll down
+
+            boolean canScrollDown = false;
+            try {
+                canScrollDown = recList != null &&
+                        recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
+                        recList.canScrollVertically(1);
+
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
+
+            final boolean mCanScrollDown = canScrollDown;
 
             try {
                 Date myDate;
-                myDate = fm.parse(object.getString("date"));
+                myDate = Utils.DATE_FORMAT.parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
                 JSONArray mentionedPeople = object.getJSONArray("mentions");

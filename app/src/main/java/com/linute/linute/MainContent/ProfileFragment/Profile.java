@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,7 +13,11 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
@@ -32,6 +37,10 @@ import java.util.ArrayList;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class Profile extends UpdatableFragment {
     public static final String TAG = Profile.class.getSimpleName();
@@ -50,9 +59,13 @@ public class Profile extends UpdatableFragment {
     private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
 
+    private boolean mHasNotification;
+
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
     private boolean mOtherCompotentHasUpdated = false;
+
+    private Handler mHandler = new Handler();
 
     private Runnable rServerErrorAction = new Runnable() {
         @Override
@@ -74,6 +87,8 @@ public class Profile extends UpdatableFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = false;
+
+    private boolean mTitleIsVisible = false;
 
     public Profile() {
         // Required empty public constructor
@@ -137,7 +152,9 @@ public class Profile extends UpdatableFragment {
             }
         });
 
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_menu);
+
+        mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
+        mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,6 +162,7 @@ public class Profile extends UpdatableFragment {
                     ((MainActivity) getActivity()).openDrawer();
             }
         });
+
         mToolbar.inflateMenu(R.menu.my_profile_action_bar);
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
@@ -163,33 +181,43 @@ public class Profile extends UpdatableFragment {
                 return false;
             }
         });
-        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
+
         if (fragmentNeedsUpdating()) {
             mToolbar.getBackground().mutate().setAlpha(0);
+        }else if (mTitleIsVisible){
+            mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
         }
 
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-                                        @Override
-                                        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                                            super.onScrolled(recyclerView, dx, dy);
+        recList.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                        super.onScrolled(recyclerView, dx, dy);
 
-                                            if (llm.findFirstVisibleItemPosition() == 0) {
-                                                View view = recyclerView.getChildAt(0);
-                                                if (view != null) {
-                                                    int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
-                                                    if (alpha > 255) {
-                                                        alpha = 255;
-                                                    }
-                                                    if (alpha < 0) {
-                                                        alpha = 0;
-                                                    }
-                                                    mToolbar.getBackground().mutate().setAlpha(alpha);
-                                                }
-                                            }
-                                        }
+                        if (llm.findFirstVisibleItemPosition() == 0) {
+                            View view = recyclerView.getChildAt(0);
+                            if (view != null) {
+                                int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
+                                if (alpha >= 255) {
+                                    alpha = 255;
+                                    if (!mTitleIsVisible){
+                                        mTitleIsVisible = true;
+                                        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
                                     }
+                                } else {
+                                    if (alpha < 0) alpha = 0;
+                                    if (mTitleIsVisible){
+                                        mTitleIsVisible = false;
+                                        mToolbar.setTitle("");
+                                    }
+                                }
+                                mToolbar.getBackground().mutate().setAlpha(alpha);
+                            }
+                        }
+                    }
+                }
         );
         return rootView;
     }
@@ -197,6 +225,13 @@ public class Profile extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        mNotificationSubscription = NotificationEventBus
+                .getInstance()
+                .getObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mNotificationEventAction1);
 
         //only update this fragment when it is first created or set to reupdate from outside
         if (fragmentNeedsUpdating()) {
@@ -214,6 +249,13 @@ public class Profile extends UpdatableFragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mNotificationSubscription != null) {
+            mNotificationSubscription.unsubscribe();
+        }
+    }
 
     //get user information from server
     public void updateAndSetHeader() {
@@ -250,9 +292,14 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                String full = user.getFirstName() + " " +user.getLastName();
-                                mToolbar.setTitle(full);
-                                mProfileAdapter.notifyDataSetChanged();
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProfileAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
@@ -349,10 +396,16 @@ public class Profile extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() { //update view
-                                    String full = user.getFirstName() + " " +user.getLastName();
-                                    mToolbar.setTitle(full);
                                     mOtherCompotentHasUpdated = false;
-                                    mProfileAdapter.notifyDataSetChanged();
+
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mProfileAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
                                     mSwipeRefreshLayout.setRefreshing(false);
                                 }
                             });
@@ -438,7 +491,14 @@ public class Profile extends UpdatableFragment {
                             @Override
                             public void run() { //update view
 
-                                mProfileAdapter.notifyDataSetChanged();
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProfileAdapter.notifyDataSetChanged();
+                                    }
+                                });
+
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
@@ -464,4 +524,17 @@ public class Profile extends UpdatableFragment {
             }
         });
     }
+
+
+    private Subscription mNotificationSubscription;
+
+    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
+        @Override
+        public void call(NotificationEvent notificationEvent) {
+            if (notificationEvent.hasNotification() != mHasNotification) {
+                mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+                mHasNotification = notificationEvent.hasNotification();
+            }
+        }
+    };
 }

@@ -147,10 +147,6 @@
     <string name="facebook_app_id">900595913337243</string>
     <string name="title_activity_rooms">RoomsActivity</string>
 
-
-    <string name="SOCKET_URL">https://api.tapt.io/</string>
-    <!--<string name="SOCKET_URL">https://devapi2.tapt.io/</string>-->
-
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
     <string name="need_contant_permission">To find friends, Tapt needs permission to view your
@@ -170,7 +166,7 @@
         that are near you.
     </string>
     <string name="need_location">Tapt needs your location to find friends near you</string>
-    <string name="no_comment">Share your opinions publicly or anonymously below…</string>
+    <string name="no_comment">Start the conversation with a comment!</string>
 
     <string name="no_results">No results found</string>
 
@@ -1545,7 +1541,53 @@ the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 &lt;http://www.gnu.org/philosophy/why-not-lgpl.html&gt;.\n\n
 
+scissors\n\n
 
+Copyright © 2015 Lyft, Inc.\n
+\n
+Licensed under the Apache License, Version 2.0 (the "License");\n
+you may not use this file except in compliance with the License.\n
+You may obtain a copy of the License at\n
+
+   http://www.apache.org/licenses/LICENSE-2.0\n
+
+Unless required by applicable law or agreed to in writing, software\n
+distributed under the License is distributed on an "AS IS" BASIS,\n
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+See the License for the specific language governing permissions and\n
+limitations under the License.\n\n
+
+RxJava\n\n
+Copyright 2013 Netflix, Inc.\n\n
+
+Licensed under the Apache License, Version 2.0 (the "License"); \n
+you may not use this file except in compliance with the License. \n
+You may obtain a copy of the License at\n\n
+
+http://www.apache.org/licenses/LICENSE-2.0\n\n
+
+Unless required by applicable law or agreed to in writing, \n
+software distributed under the License is distributed on an \n
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, \n
+either express or implied. See the License for the specific \n
+language governing permissions and limitations under the License.\n\n
+
+RxAndroid\n\n
+Copyright 2015 The RxAndroid authors\n
+\n
+Licensed under the Apache License, Version 2.0 (the "License");\n
+you may not use this file except in compliance with the License.\n
+You may obtain a copy of the License at\n\n
+
+    http://www.apache.org/licenses/LICENSE-2.0\n\n
+
+Unless required by applicable law or agreed to in writing, software\n
+distributed under the License is distributed on an "AS IS" BASIS,\n
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+See the License for the specific language governing permissions and\n
+limitations under the License.\n\n
+
+Android-Five-Stars-Library by Angtrim \n\n
     ]]></string>
     <string name="create_account_agree">By tapping to continue, you are indicating that you have
         read and agreed to the following

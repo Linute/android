@@ -10,6 +10,7 @@
                android:layout_height="wrap_content"
                android:alpha="0.35"
                android:padding="@dimen/activity_horizontal_margin"
+               android:foreground="?selectableItemBackgroundBorderless"
                android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 
@@ -31,7 +32,6 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="16dp"
             android:scaleType="fitCenter"
-            android:background="?android:selectableItemBackground"
             android:src="@drawable/create_button"/>
 
 
@@ -85,7 +85,6 @@
             android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:background="?android:selectableItemBackground"
             android:scaleType="fitCenter"
             android:src="@drawable/login_button"
         />

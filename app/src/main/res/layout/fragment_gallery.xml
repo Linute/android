@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -25,14 +25,15 @@
 
         <ImageButton
             android:id="@+id/save_photo"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="?android:attr/actionBarSize"
+            android:layout_height="?android:attr/actionBarSize"
             android:layout_gravity="end"
             android:layout_marginEnd="16dp"
             android:background="@android:color/transparent"
+            android:foreground="?selectableItemBackgroundBorderless"
             android:rotation="180"
             android:src="@drawable/ic_action_navigation_arrow_back_inverted"/>
 
     </FrameLayout>
 
-</RelativeLayout>
+</FrameLayout>

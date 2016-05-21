@@ -109,14 +109,13 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 @Override
                 public boolean onLongClick(View v) {
                     final Rooms room = mRooms;
-                    final int pos = getAdapterPosition();
                     new AlertDialog.Builder(aContext).setTitle("Messages")
                             .setItems(new String[]{"Delete"}, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     if (which == 0) {
                                         if (mRooms != null) {
-                                            final RoomsActivity activity = (RoomsActivity) aContext;
+                                            final BaseTaptActivity activity = (BaseTaptActivity) aContext;
                                             if (activity != null) {
                                                 JSONObject object = new JSONObject();
                                                 try {
@@ -164,7 +163,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(room.getUserImage()))
-                    .asBitmap()
+                    .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image

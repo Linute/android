@@ -9,6 +9,9 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.EventBuses.NotificationEvent;
+import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -38,10 +41,13 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mCollege;
     private String mUserId;
 
+    private boolean mFriendOnly;
+
     private SingleVideoPlaybackManager mVideoPlayerManager;
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager) {
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager, boolean friendOnly) {
         super(new MultiChoiceMode());
+        mFriendOnly = friendOnly;
         mPosts = posts;
         this.context = context;
         mVideoPlayerManager = singleVideoPlaybackManager;
@@ -90,11 +96,15 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 //position + 1 == mPosts.size()
         if (position + 1 == mPosts.size()) {
             mGetMoreFeed.getMoreFeed();
-        }else if (position == 0){
+        }else if (!mFriendOnly && position == 0 && !NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing()){
             MainActivity activity = (MainActivity) context;
             if (activity != null){
                 activity.setFeedNotification(0);
-                activity.setNumNewPostsInDiscover(0);
+                NotificationsCounterSingleton.getInstance().setNumOfNewPosts(0);
+
+                if(!NotificationsCounterSingleton.getInstance().hasNotifications()){
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
+                }
             }
         }
 
@@ -150,7 +160,6 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
                     }else {
                         Log.i(TAG, "impression not sent: no activity");
                     }
-
                 }catch (JSONException e){
                     e.printStackTrace();
                 }

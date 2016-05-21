@@ -44,6 +44,4 @@ public class UpdatableFragment extends Fragment {
     public boolean fragmentNeedsUpdating(){
         return mFragmentNeedsUpdating;
     }
-
-
 }

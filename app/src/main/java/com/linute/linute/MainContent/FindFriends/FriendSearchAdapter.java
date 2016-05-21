@@ -16,7 +16,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
+import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -94,8 +94,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
             Glide.with(mContext)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
-                    .asBitmap()
-                    //.override(mImageSize, mImageSize)
+                    .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -122,12 +121,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                         if (mFollowed) {
                             BaseTaptActivity activity = (BaseTaptActivity) mContext;
                             if (activity != null) {
-                                Intent enterRooms = new Intent(activity, RoomsActivity.class);
-                                enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                                enterRooms.putExtra("ownerID", userID);
-                                enterRooms.putExtra("ownerFullName", name);
-                                enterRooms.putExtra("room", "");
-                                activity.startActivity(enterRooms);
+                                activity.addFragmentToContainer(ChatFragment.newInstance(null, name, userID));
                             }
                         }
 
@@ -182,12 +176,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     public void onClick(View v) {
                         BaseTaptActivity activity = (BaseTaptActivity) mContext;
                         if (activity != null) {
-                            Intent enterRooms = new Intent(activity, RoomsActivity.class);
-                            enterRooms.putExtra("NOTIFICATION", LinuteConstants.MESSAGE);
-                            enterRooms.putExtra("ownerID", userID);
-                            enterRooms.putExtra("ownerFullName", name);
-                            enterRooms.putExtra("room", "");
-                            activity.startActivity(enterRooms);
+                            activity.addFragmentToContainer(ChatFragment.newInstance(null, name, userID));
                         }
                     }
                 });

@@ -26,8 +26,6 @@ public class ImageUtility {
 
 
     public static Uri savePicture(Context context, Bitmap bitmap) {
-
-
         File mediaStorageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
                 "Tapt"
@@ -67,6 +65,25 @@ public class ImageUtility {
     }
 
 
+    public static Uri savePictureToCache(Context context, Bitmap bitmap) {
+        File image = new File(
+                context.getCacheDir() + File.separator + "temp.jpg");
+        // Saving the bitmap
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+            FileOutputStream stream = new FileOutputStream(image);
+            stream.write(out.toByteArray());
+            stream.close();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
+        return Uri.parse(image.getAbsolutePath());
+    }
+
     /**
      * Decode and sample down a bitmap from a byte stream
      */
@@ -78,11 +95,11 @@ public class ImageUtility {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             display.getSize(point);
-            reqWidth = point.x;
-            reqHeight = point.y;
+            reqWidth = point.x * 2;
+            reqHeight = point.y * 2;
         } else {
-            reqWidth = display.getWidth();
-            reqHeight = display.getHeight();
+            reqWidth = display.getWidth() * 2;
+            reqHeight = display.getHeight() * 2;
         }
 
 
@@ -164,13 +181,15 @@ public class ImageUtility {
         }
     }
 
-    public static String getTempFile(Context context, String url) throws IOException {
+    public static String getTempFilePath(Context context, String url, String end) throws IOException {
+        return getTempFile(context, url, end).getPath();
+    }
+
+    public static File getTempFile(Context context, String url, String end) throws IOException {
         File file;
-
         String fileName = Uri.parse(url).getLastPathSegment();
-        file = File.createTempFile(fileName, ".mp4", context.getCacheDir());
-
-        return file.getPath();
+        file = File.createTempFile(fileName, end, context.getCacheDir());
+        return file;
     }
 
     public static void deleteCachedVideo(Uri uri){

@@ -29,7 +29,6 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
-import com.linute.linute.MainContent.Chat.RoomsActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -98,21 +97,16 @@ public class MyGcmListenerService extends GcmListenerService {
         if (action != null) { //<---
             if (isLoggedIn) {
                 int type = gettNotificationType(data.getString("action"));
-                if (type == LinuteConstants.MESSAGE) {
-                    Intent parent = new Intent(this, MainActivity.class);
-                    parent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); //if already under, don't restart, already on top, dont do anything
-                    intent = new Intent(this, RoomsActivity.class);
-                    intent.putExtra("NOTIFICATION", type);
-                    intent.putExtra("ownerID", data.getString("ownerID"));
-                    intent.putExtra("ownerFullName", data.getString("ownerFullName"));
-                    intent.putExtra("room", data.getString("room") );
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    pendingIntent = PendingIntent.getActivities(this, 0, new Intent[]{parent, intent}, PendingIntent.FLAG_ONE_SHOT);
-                } else if (type == LinuteConstants.FEED_DETAIL || type == LinuteConstants.PROFILE) {
+                if (type != LinuteConstants.MISC) {
                     intent = new Intent(this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     intent.putExtra("NOTIFICATION", type);
-                    if (type == LinuteConstants.FEED_DETAIL)
+                    if (type == LinuteConstants.MESSAGE){
+                        intent.putExtra("NOTIFICATION", type);
+                        intent.putExtra("ownerID", data.getString("ownerID"));
+                        intent.putExtra("ownerFullName", data.getString("ownerFullName"));
+                        intent.putExtra("room", data.getString("room") );
+                    } else if (type == LinuteConstants.FEED_DETAIL)
                         intent.putExtra("event", data.getString("event"));
                     else intent.putExtra("user", data.getString("user"));
                     pendingIntent = PendingIntent.getActivity(this, 0, intent,
@@ -175,11 +169,11 @@ public class MyGcmListenerService extends GcmListenerService {
                 return LinuteConstants.FEED_DETAIL;
             case "mentioned":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted status":
+            case "friend posted status":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted video":
+            case "friend posted video":
                 return LinuteConstants.FEED_DETAIL;
-            case "posted photo":
+            case "friend posted photo":
                 return LinuteConstants.FEED_DETAIL;
             case "friend joined":
                 return LinuteConstants.PROFILE;

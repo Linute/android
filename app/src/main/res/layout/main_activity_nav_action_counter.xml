@@ -1,25 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:visibility="gone"
+>
 
-
-    <ImageView android:id="@+id/nav_item_notification_background"
-               android:layout_width="wrap_content"
+    <ImageView android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_centerVertical="true"
+               android:layout_gravity="center"
                android:src="@drawable/circle_secondary"
-               android:visibility="gone"
     />
 
-    <TextView android:id="@+id/nav_item_notification_counter"
+    <TextView android:id="@+id/text"
               android:layout_width="wrap_content"
-              android:layout_height="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center"
               android:gravity="center"
-              android:layout_centerInParent="true"
               android:textColor="@color/white"
     />
 
+</FrameLayout>
 
-</RelativeLayout>

@@ -7,7 +7,6 @@
     android:background="@color/seperator_color"
     android:orientation="vertical">
 
-
     <android.support.design.widget.AppBarLayout android:id="@+id/appbar_layout"
                                                 android:layout_width="match_parent"
                                                 android:layout_height="wrap_content"
@@ -20,8 +19,7 @@
             android:background="@color/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:navigationIcon="@drawable/ic_action_navigation_menu"
-            app:title="Feed"
+            app:title="Campus"
         />
 
     </android.support.design.widget.AppBarLayout>
@@ -33,20 +31,35 @@
                   app:layout_behavior="@string/appbar_scrolling_view_behavior"
     >
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/discover_sliding_tabs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabBackground="@color/colorPrimary"
-            app:tabIndicatorColor="@color/white"
-            app:tabSelectedTextColor="@color/white"
-            app:tabTextColor="@color/white"/>
+        <!--note: hack for time being. elevation on Tablayout doesn't work -->
+        <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    app:elevation="4dp">
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/discover_sliding_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:tabBackground="@color/colorPrimary"
+                app:tabIndicatorColor="@color/white"
+                app:tabSelectedTextColor="@color/white"
+                app:tabTextColor="@color/white"/>
+
+        </android.support.design.widget.AppBarLayout>
 
         <android.support.v4.view.ViewPager android:id="@+id/discover_hostViewPager"
                                            android:layout_width="match_parent"
                                            android:layout_height="match_parent"/>
 
     </LinearLayout>
+
+    <View android:id="@+id/background"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:alpha="0.8"
+          android:background="@color/pure_black"
+          android:visibility="gone"
+    />
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu android:id="@+id/fabmenu"
                                                           android:layout_width="wrap_content"
@@ -56,25 +69,26 @@
                                                           app:fab_addButtonColorNormal="@color/secondaryColor"
                                                           app:fab_addButtonColorPressed="#a3e1de"
                                                           app:fab_expandDirection="up"
+                                                          app:fab_labelStyle="@style/fab_label"
                                                           app:fab_labelsPosition="left"
     >
 
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabImage"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/fab_camera"
-                                                               app:fabSize="mini"
+                                                               app:fab_icon="@drawable/ic_action_image_photo_camera"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
-                                                               app:fab_title="Photo"/>
+                                                               app:fab_size="mini"
+                                                               app:fab_title="Camera"/>
 
         <com.getbase.floatingactionbutton.FloatingActionButton android:id="@+id/fabText"
                                                                android:layout_width="wrap_content"
                                                                android:layout_height="wrap_content"
-                                                               android:src="@drawable/fab_quote"
-                                                               app:fabSize="mini"
+                                                               app:fab_icon="@drawable/ic_action_editor_format_quote"
                                                                app:fab_colorNormal="@color/white"
                                                                app:fab_colorPressed="@color/white_pressed"
+                                                               app:fab_size="mini"
                                                                app:fab_title="Status"/>
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

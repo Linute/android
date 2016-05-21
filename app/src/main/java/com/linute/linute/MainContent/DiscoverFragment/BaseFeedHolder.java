@@ -141,7 +141,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected void getProfileImage(String image) {
         Glide.with(mContext)
                 .load(image)
-                .asBitmap()
+                .dontAnimate()
                 .signature(new StringSignature(mImageSignature))
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
@@ -151,7 +151,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected void getAnonImage(String image){
         Glide.with(mContext)
                 .load(image)
-                .asBitmap()
+                .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .into(vUserImage);
