@@ -480,6 +480,7 @@ public class DiscoverFragment extends UpdatableFragment {
                 mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
             }
         });
+
         if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
 
         return true;

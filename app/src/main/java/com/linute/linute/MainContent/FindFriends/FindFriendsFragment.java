@@ -189,8 +189,13 @@ public class FindFriendsFragment extends UpdatableFragment {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
             }
         }
-
         return rootView;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override

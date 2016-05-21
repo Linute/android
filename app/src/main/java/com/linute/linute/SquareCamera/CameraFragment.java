@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -47,6 +46,8 @@ import java.io.IOException;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscriber;
+import rx.Subscription;
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -80,6 +81,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     private Toolbar mToolbar;
     private ObjectAnimator mProgressAnimator;
 
+    Handler mRecordHandler = new Handler();
+
     private boolean mIsRecording = false;
     private boolean mSurfaceAlreadyCreated = false;
     private boolean mIsSafeToTakePhoto = false;
@@ -87,6 +90,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     private int mCameraType;
     private int mReturnType;
+
+    private Subscription mCam;
 
     public static Fragment newInstance() {
         return new CameraFragment();
@@ -143,9 +148,9 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mAnonCheckbox = (CheckBox) root.findViewById(R.id.anon_checkbox);
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
 
-        if (mReturnType == CameraActivity.SEND_POST){
+        if (mReturnType == CameraActivity.SEND_POST) {
             root.findViewById(R.id.anon).setVisibility(View.VISIBLE);
-        }else {
+        } else {
             root.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
         }
 
@@ -179,6 +184,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         mPreviewView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
+                //Log.i(TAG, "onSurfaceTextureAvailable: ");
                 mSurfaceHolder = surface;
                 if (hasCameraAndWritePermission()) {
                     mSurfaceAlreadyCreated = true;
@@ -196,13 +202,21 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             @Override
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
                 mSurfaceAlreadyCreated = false;
+                mShowCameraHandler.removeCallbacks(mShowPreview);
                 // stop the preview
                 if (mCamera != null) {
-                    mShowCameraHandler.removeCallbacks(mShowPreview);
-                    releaseMediaRecorder();
-                    stopCameraPreview();
-                    mCamera.release();
-                    mCamera = null;
+                    // we will get a runtime exception if camera had already been released, either by onpause
+                    // or when we switched cameras
+                    try {
+                        releaseMediaRecorder();
+                        stopCameraPreview();
+                        mCamera.release();
+                        mCamera = null;
+                    } catch (RuntimeException e) {
+                        Log.i(TAG, "onSurfaceTextureDestroyed: release error : ignore");
+                        mCamera.release();
+                        mCamera = null;
+                    }
                 }
                 return false;
             }
@@ -220,7 +234,9 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     }
 
     //buttons will only be set after camera view has appeared
-    private void setOnClickListeners(View view) {
+    private void setOnClickListeners(final View view) {
+        final View changeCameraFlashModeBtn = view.findViewById(R.id.flash);
+
         view.findViewById(R.id.change_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -235,7 +251,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             }
         });
 
-        View changeCameraFlashModeBtn = view.findViewById(R.id.flash);
         changeCameraFlashModeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -262,9 +277,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
         } else {
             mTakePhotoBtn.setOnTouchListener(new View.OnTouchListener() {
-
-                Handler mRecordHandler = new Handler();
-
                 Runnable mRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -276,7 +288,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if ((event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL)) {
+                    if ((event.getAction() == MotionEvent.ACTION_UP)) {
                         mRecordHandler.removeCallbacks(mRunnable);
                         mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
                         if (!mVideoProcessing) {
@@ -290,7 +302,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
                         if (!mIsRecording && !mVideoProcessing) {
                             mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
                             mRecordHandler.removeCallbacks(mRunnable);
-                            mRecordHandler.postDelayed(mRunnable, 2000);
+                            mRecordHandler.postDelayed(mRunnable, 1000);
                         }
                     }
                     return true;
@@ -319,7 +331,7 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     private void showVideoTooShortDialog() {
         if (getActivity() == null) return;
-        Log.i(TAG, "showVideoTooShortDialog: ");
+        ///Log.i(TAG, "showVideoTooShortDialog: ");
         new AlertDialog.Builder(getActivity())
                 .setTitle("Video is too short")
                 .setMessage("Videos must be 3 seconds or longer.")
@@ -334,14 +346,18 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
     private void goToVideoEditFragment(Uri uri, EditSaveVideoFragment.VideoDimen videoDimen) {
         if (getActivity() != null) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(
-                            R.id.fragment_container,
-                            EditSaveVideoFragment.newInstance(uri, mAnonCheckbox.isChecked(), videoDimen),
-                            EditSaveVideoFragment.TAG)
-                    .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
-                    .commit();
+            try {
+                getFragmentManager()
+                        .beginTransaction()
+                        .replace(
+                                R.id.fragment_container,
+                                EditSaveVideoFragment.newInstance(uri, mAnonCheckbox.isChecked(), videoDimen),
+                                EditSaveVideoFragment.TAG)
+                        .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
+                        .commit();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -390,18 +406,43 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
      * Restart the camera preview
      */
     private void restartPreview() {
-
         if (mCamera != null) {
-            stopCameraPreview();
-            mCamera.release();
-            mCamera = null;
-        }
 
-        if (getCamera(mCameraID)) { //were able to find a camera to use
+            mCam = Observable.create(new Observable.OnSubscribe<Void>() {
+                @Override
+                public void call(Subscriber<? super Void> subscriber) {
+                    stopCameraPreview();
+                    mCamera.release();
+                    mCamera = null;
+                    subscriber.onCompleted();
+                }
+            }).subscribeOn(io())
+                    .observeOn(mainThread())
+                    .subscribe(
+                            new Subscriber<Void>() {
+                                @Override
+                                public void onCompleted() {
+                                    if (getCamera(mCameraID)) { //were able to find a camera to use
+                                        startCameraPreview();
+                                        //mPreviewView.setBackgroundColor(Color.TRANSPARENT);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    e.printStackTrace();
+                                }
+
+                                @Override
+                                public void onNext(Void aVoid) {
+                                }
+                            });
+        } else if (getCamera(mCameraID)) { //were able to find a camera to use
             startCameraPreview();
-            mPreviewView.setBackgroundColor(Color.TRANSPARENT);
+            //mPreviewView.setBackgroundColor(Color.TRANSPARENT);
         }
     }
+
 
     /**
      * Start the camera preview
@@ -419,6 +460,22 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             Log.d(TAG, "Can't start camera preview due to IOException " + e);
             e.printStackTrace();
         }
+
+// Observable.create(new Observable.OnSubscribe<Void>() {
+//            @Override
+//            public void call(Subscriber<? super Void> subscriber) {
+//                try {
+//                    setupCamera();
+//                    mCamera.setPreviewTexture(mSurfaceHolder);
+//                    mCamera.startPreview();
+//                    setSafeToTakePhoto(true);
+//                    setCameraFocusReady(true);
+//                } catch (IOException e) {
+//                    Log.d(TAG, "Can't start camera preview due to IOException " + e);
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).subscribeOn(Schedulers.newThread()).subscribe();
     }
 
     /**
@@ -563,9 +620,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
             }
         }
 
-
         if (bestSize == null) {
-            Log.d(TAG, "cannot find the best camera size");
+            //Log.d(TAG, "cannot find the best camera size");
             return sizes.get(sizes.size() - 1);
         }
 
@@ -651,22 +707,62 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
     @Override
     public void onPause() {
         super.onPause();
-        if (mProgressAnimator != null) {
-            mProgressAnimator.removeAllListeners();
-            mProgressAnimator.end();
-            mProgressAnimator.cancel();
-        }
+
+        mRecordHandler.removeCallbacksAndMessages(null);
+
+//        if (mProgressAnimator != null) {
+//            mProgressAnimator.removeAllListeners();
+//            mProgressAnimator.end();
+//            mProgressAnimator.cancel();
+//        }
 
         mOrientationListener.disable();
 
         mShowCameraHandler.removeCallbacks(mShowPreview);
+
+        if (mCam != null) mCam.unsubscribe();
+
+        if (mIsRecording && !mVideoProcessing) {
+            mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
+            if (mProgressAnimator != null) {
+                mProgressAnimator.removeAllListeners();
+                mProgressAnimator.cancel();
+            }
+
+            mRecordProgress.setVisibility(View.GONE);
+            mRecordProgress.setProgress(0);
+            mRecordProgress.setProgressDrawable(ContextCompat.getDrawable(getContext(), R.drawable.camera_progress_red));
+
+            mToolbar.setTitle("Camera");
+            mTakePhotoBtn.setImageResource(R.drawable.square_camera_capture);
+
+            hideCameraButtons(false);
+            try {
+                mMediaRecorder.stop();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+            releaseMediaRecorder();
+            mIsRecording = false;
+        }
+
         // stop the preview
         if (mCamera != null) {
-            mCamera.cancelAutoFocus();
-            stopCameraPreview();
-            mCamera.release();
-            mCamera = null;
+            // we will get a runtime exception if camera had already been released, either by onpause
+            // or when we switched cameras
+            try {
+                //mTakePhotoBtn.onTouchEvent(T)
+                mCamera.cancelAutoFocus();
+                stopCameraPreview();
+                mCamera.release();
+                mCamera = null;
+            } catch (RuntimeException e) {
+                Log.i(TAG, "onPause: release error : ignore");
+                mCamera.release();
+                mCamera = null;
+            }
         }
+
         if (mSubscriptions != null) {
             mSubscriptions.unsubscribe();
         }
@@ -674,12 +770,6 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         CameraSettingPreferences.saveCameraFlashMode(getActivity(), mFlashMode);
     }
 
-
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        mPreviewView.setBackgroundColor(Color.parseColor("#000000"));
-//    }
 
 
     /**
@@ -877,12 +967,12 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
 
         // video size and preview size might be different
         // if they are, just fine a 4:3 preview size
-        if (param.getSupportedVideoSizes() != null){
-            Log.i(TAG, "prepareMediaRecorder: not null");
+        if (param.getSupportedVideoSizes() != null) {
+            //Log.i(TAG, "prepareMediaRecorder: not null");
             Camera.Size size = getVideoPreviewSize(camcorderProfile.videoFrameHeight);
             param.setPreviewSize(size.width, size.height);
-        }else {
-            Log.i(TAG, "prepareMediaRecorder: null");
+        } else {
+            // Log.i(TAG, "prepareMediaRecorder: null");
             param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
         }
 
@@ -974,7 +1064,8 @@ public class CameraFragment extends Fragment implements Camera.PictureCallback {
         List<Camera.Size> supportedSizes = mCamera.getParameters().getSupportedVideoSizes();
 
         //if null, use preview sizes
-        if (supportedSizes == null) supportedSizes = mCamera.getParameters().getSupportedPreviewSizes();
+        if (supportedSizes == null)
+            supportedSizes = mCamera.getParameters().getSupportedPreviewSizes();
 
         //get size that has 4:3 ratio
         for (Camera.Size size : supportedSizes) {

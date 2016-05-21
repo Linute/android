@@ -16,6 +16,8 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
     private boolean mCanBeTouched = true;
     private int mFocusedPosition = 0;
 
+    private RecyclerView.ViewHolder mHolder;
+
     private OnScrollStoppedListener mOnScrollStoppedListener;
 
 
@@ -30,7 +32,6 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
     public VerticalSnappingRecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
     }
-
 
     public void customScrollToPosition(int position) {
         if (!mCanBeTouched) return;
@@ -67,6 +68,8 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
                 int first = llm.findFirstVisibleItemPosition();
 
                 View firstItem = llm.findViewByPosition(first);
+
+                if (firstItem == null) return;
 
                 if ((firstItem.getBottom() > (firstItem.getHeight() / 2)) || first == llm.getItemCount() - 1) {
                     mCanBeTouched = false;
@@ -190,6 +193,14 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
         return true;
     }
 
+
+    public ViewHolder getHolder() {
+        return mHolder;
+    }
+
+    public void setHolder(ViewHolder holder) {
+        mHolder = holder;
+    }
 
     public interface OnScrollStoppedListener {
         void scrollStopped(int position);

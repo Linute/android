@@ -24,7 +24,7 @@ public class SingleVideoPlaybackManager {
     public void playNewVideo(TextureVideoView videoView, Uri link){
         if (mTextureVideoView != null && videoView != mTextureVideoView){
             mTextureVideoView.stopPlayback();
-            mTextureVideoView.runHideVideo(); //// TODO: 3/11/16 test without
+            mTextureVideoView.runHideVideo();
         }
 
         videoView.setVideoURI(link);
@@ -34,12 +34,9 @@ public class SingleVideoPlaybackManager {
 
     public void stopPlayback(){
         if (mTextureVideoView != null){
-            Log.i("vid", "stopPlayback: 1");
             mTextureVideoView.stopPlayback();
-            Log.i("vid", "stopPlayback: 3");
             mTextureVideoView.runHideVideo();
             mTextureVideoView = null;
-            Log.i("vid", "stopPlayback: 2");
         }
     }
 

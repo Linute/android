@@ -40,13 +40,11 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -1224,7 +1222,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                 activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
             }
         }
-        Log.i(TAG, "onDestroy: false");
     }
 
     private boolean mLoadingMoreMessages = false;

@@ -213,6 +213,7 @@ public class GlobalFragment extends UpdatableFragment {
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
 
+                        //Log.i(TAG, "onResponse: "+trends.toString(4));
                         ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
                         JSONObject trend;
 

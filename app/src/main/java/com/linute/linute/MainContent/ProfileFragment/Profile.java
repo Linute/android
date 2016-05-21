@@ -88,6 +88,8 @@ public class Profile extends UpdatableFragment {
     private int mSkip = 0;
     private boolean mCanLoadMore = false;
 
+    private boolean mTitleIsVisible = false;
+
     public Profile() {
         // Required empty public constructor
     }
@@ -179,9 +181,11 @@ public class Profile extends UpdatableFragment {
                 return false;
             }
         });
-        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
+
         if (fragmentNeedsUpdating()) {
             mToolbar.getBackground().mutate().setAlpha(0);
+        }else if (mTitleIsVisible){
+            mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
         }
 
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
@@ -196,12 +200,19 @@ public class Profile extends UpdatableFragment {
                             View view = recyclerView.getChildAt(0);
                             if (view != null) {
                                 int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
-                                if (alpha > 255) {
+                                if (alpha >= 255) {
                                     alpha = 255;
-                                } else if (alpha < 0) {
-                                    alpha = 0;
+                                    if (!mTitleIsVisible){
+                                        mTitleIsVisible = true;
+                                        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
+                                    }
+                                } else {
+                                    if (alpha < 0) alpha = 0;
+                                    if (mTitleIsVisible){
+                                        mTitleIsVisible = false;
+                                        mToolbar.setTitle("");
+                                    }
                                 }
-
                                 mToolbar.getBackground().mutate().setAlpha(alpha);
                             }
                         }
@@ -281,9 +292,6 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                String full = user.getFirstName() + " " + user.getLastName();
-                                mToolbar.setTitle(full);
-
                                 mHandler.removeCallbacksAndMessages(null);
                                 mHandler.post(new Runnable() {
                                     @Override
@@ -388,8 +396,6 @@ public class Profile extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() { //update view
-                                    String full = user.getFirstName() + " " + user.getLastName();
-                                    mToolbar.setTitle(full);
                                     mOtherCompotentHasUpdated = false;
 
                                     mHandler.removeCallbacksAndMessages(null);

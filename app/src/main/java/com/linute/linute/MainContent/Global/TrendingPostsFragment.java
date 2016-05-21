@@ -99,23 +99,21 @@ public class TrendingPostsFragment extends UpdatableFragment {
         });
 
         vRecView.setOnScrollStoppedListener(new VerticalSnappingRecyclerView.OnScrollStoppedListener() {
-            RecyclerView.ViewHolder mHolder;
-
             @Override
             public void scrollStarted() {
-                if (mHolder == null) {
-                    mHolder = vRecView.findViewHolderForAdapterPosition(0);
-                    if (mHolder == null) return;
+                if (vRecView.getHolder() == null) {
+                    vRecView.setHolder(vRecView.findViewHolderForAdapterPosition(0));
+                    if (vRecView.getHolder() == null) return;
                 }
-                if (mHolder instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                    ((TrendingItemAdapter.BaseTrendViewHolder)mHolder).lostFocus();
+                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder)
+                    ((TrendingItemAdapter.BaseTrendViewHolder)vRecView.getHolder()).lostFocus();
             }
 
             @Override
             public void scrollStopped(int position) {
                 RecyclerView.ViewHolder h = vRecView.findViewHolderForAdapterPosition(position);
                 if (h != null) {
-                    mHolder = h;
+                    vRecView.setHolder(h);
                     if (h instanceof TrendingItemAdapter.BaseTrendViewHolder)
                         ((TrendingItemAdapter.BaseTrendViewHolder)h).gainedFocus();
                 }
@@ -212,13 +210,13 @@ public class TrendingPostsFragment extends UpdatableFragment {
                     return;
                 }
 
-                String json = response.body().string();
-                //Log.i(TAG, "onResponse: "+json);
                 JSONObject jsonObject;
                 JSONArray jsonArray;
                 try {
 
-                    jsonObject = new JSONObject(json);
+                    jsonObject = new JSONObject(response.body().string());
+                    //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
+
                     mSkip = jsonObject.getInt("skip");
 
                     jsonArray = jsonObject.getJSONArray("posts");
@@ -261,7 +259,6 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                     mProgressBar.setVisibility(View.GONE);
                                 }
                             }
-
                     );
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -396,24 +393,5 @@ public class TrendingPostsFragment extends UpdatableFragment {
                 }
         );
     }
-//    public class SingleActiveViewHolderController {
-//        private TrendingItemAdapter.BaseTrendViewHolder mHolder;
-//
-//
-//        public void setNewHolder(TrendingItemAdapter.BaseTrendViewHolder holder) {
-//            if (mHolder != null) {
-//                if (mHolder instanceof TrendingItemAdapter.VideoTrendViewHolder)
-//                    ((TrendingItemAdapter.VideoTrendViewHolder) mHolder).lostFocus();
-//                else
-//                    mHolder.deactivate();
-//            }
-//
-//            mHolder = holder;
-//            if (mHolder != null) {
-//                if (mHolder instanceof TrendingItemAdapter.VideoTrendViewHolder)
-//                    mHolder.deactivate();
-//                else mHolder.activate();
-//            }
-//        }
-//    }
+
 }

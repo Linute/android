@@ -197,7 +197,7 @@ public class UpdatesFragment extends UpdatableFragment {
                 .subscribe(mNotificationEventAction1);
 
 
-        if (fragmentNeedsUpdating()) {
+        if (fragmentNeedsUpdating() || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
             setFragmentNeedUpdating(false);
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -210,6 +210,8 @@ public class UpdatesFragment extends UpdatableFragment {
         } else {
 
             MainActivity activity = (MainActivity) getActivity();
+
+            //Log.i(TAG, "onResume: ");
             if (activity != null && !NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing() && NotificationsCounterSingleton.getInstance().hasNewActivities()) {
 
                 activity.setUpdateNotification(0);

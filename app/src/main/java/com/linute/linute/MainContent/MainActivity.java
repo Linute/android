@@ -749,11 +749,10 @@ public class MainActivity extends BaseTaptActivity {
                 NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
 
                 int activities = badge.getInt("activities");
-                if (activities > 0 && !NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                if (activities > 0) {
                     NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
                 }
-
-                NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
 
                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
                 runOnUiThread(new Runnable() {
@@ -777,9 +776,6 @@ public class MainActivity extends BaseTaptActivity {
                 final int posts = new JSONObject(args[0].toString()).getInt("posts");
 
                 if (posts > 0) {
-                    if (NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
-                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -787,6 +783,7 @@ public class MainActivity extends BaseTaptActivity {
                         }
                     });
 
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
                     NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
                 }
             } catch (JSONException e) {
