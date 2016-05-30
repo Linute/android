@@ -16,11 +16,11 @@ import android.support.v4.app.Fragment;
 
 
  */
-public class UpdatableFragment extends Fragment {
+public class BaseFragment extends Fragment {
 
     private boolean mFragmentNeedsUpdating = true; //when initially created, they need to be updated
 
-    public UpdatableFragment() {
+    public BaseFragment() {
 
     }
 
