@@ -8,17 +8,22 @@ import android.support.v4.app.Fragment;
  * Created by QiFeng on 1/22/16.
  */
 
-/*
-
-    This will be a base class for all of our fragments
-    in their on resume, we will check if they need updating.
-    If they do, we update them.
-
-
+/**
+ * Base fragment that all our fragments will be based off of
  */
 public class BaseFragment extends Fragment {
 
-    private boolean mFragmentNeedsUpdating = true; //when initially created, they need to be updated
+    /*
+     * Our fragment has states to help us manage when we need to query server for info
+     */
+    public enum FragmentState {
+        NEEDS_UPDATING,   // needs to query for information ; when fragment first created
+        LOADING_DATA,     // currently querying for data ; that's so we don't query twice
+        FINISHED_UPDATING // we got a response. There could have been error so we will have to check that ourselves
+    }
+
+    private FragmentState mFragmentState = FragmentState.NEEDS_UPDATING;
+
 
     public BaseFragment() {
 
@@ -27,21 +32,21 @@ public class BaseFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("NEEDS_UPDATING", mFragmentNeedsUpdating);
+        outState.putSerializable("NEEDS_UPDATING", mFragmentState);
     }
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null)
-            mFragmentNeedsUpdating = savedInstanceState.getBoolean("NEEDS_UPDATING");
+            mFragmentState = (FragmentState) savedInstanceState.getSerializable("NEEDS_UPDATING");
     }
 
-    public void setFragmentNeedUpdating(boolean needsUpdating){
-        mFragmentNeedsUpdating = needsUpdating;
+    public void setFragmentState(FragmentState state){
+        mFragmentState = state;
     }
 
-    public boolean fragmentNeedsUpdating(){
-        return mFragmentNeedsUpdating;
+    public FragmentState getFragmentState(){
+        return mFragmentState;
     }
 }

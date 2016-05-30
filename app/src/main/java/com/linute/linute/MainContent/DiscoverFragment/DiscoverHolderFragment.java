@@ -26,7 +26,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
@@ -43,7 +43,7 @@ import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 /**
  * Created by QiFeng on 1/20/16.
  */
-public class DiscoverHolderFragment extends UpdatableFragment {
+public class DiscoverHolderFragment extends BaseFragment {
 
     public static final String TAG = DiscoverHolderFragment.class.getSimpleName();
 
@@ -206,14 +206,15 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private boolean mFriendsFeedNeedsUpdating = true;
 
     @Override
-    public void setFragmentNeedUpdating(boolean needsUpdating) {
-        mCampusFeedNeedsUpdating = needsUpdating;
-        mFriendsFeedNeedsUpdating = needsUpdating;
-    }
-
-    @Override
-    public boolean fragmentNeedsUpdating() {
-        return mCampusFeedNeedsUpdating && mFriendsFeedNeedsUpdating;
+    public void setFragmentState(FragmentState state) {
+        super.setFragmentState(state);
+        if (state == FragmentState.NEEDS_UPDATING) {
+            mCampusFeedNeedsUpdating = true;
+            mFriendsFeedNeedsUpdating = true;
+        }else{
+            mCampusFeedNeedsUpdating = false;
+            mFriendsFeedNeedsUpdating = false;
+        }
     }
 
     public boolean getCampusFeedNeedsUpdating() {

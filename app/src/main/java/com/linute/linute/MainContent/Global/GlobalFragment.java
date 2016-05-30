@@ -8,7 +8,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -44,7 +43,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class GlobalFragment extends UpdatableFragment {
+public class GlobalFragment extends BaseFragment {
 
     private static final String TAG = GlobalFragment.class.getSimpleName();
     private RecyclerView vRecycler;
@@ -148,8 +147,7 @@ public class GlobalFragment extends UpdatableFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (fragmentNeedsUpdating()){
-            setFragmentNeedUpdating(false);
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING){
             vSwipe.post(new Runnable() {
                 @Override
                 public void run() {
@@ -190,7 +188,10 @@ public class GlobalFragment extends UpdatableFragment {
     }
 
     public void getChoices(){
+
         if (getActivity() == null) return;
+
+        setFragmentState(FragmentState.LOADING_DATA);
 
         new LSDKGlobal(getActivity()).getTrending(new Callback() {
             @Override

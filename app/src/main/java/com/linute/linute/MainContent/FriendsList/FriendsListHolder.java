@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,12 +13,12 @@ import android.widget.ArrayAdapter;
 
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 
 /**
  * Created by QiFeng on 4/20/16.
  */
-public class FriendsListHolder extends UpdatableFragment {
+public class FriendsListHolder extends BaseFragment {
 
     private String mUserId;
     private int currentFragment = 0;
@@ -90,8 +89,8 @@ public class FriendsListHolder extends UpdatableFragment {
         });
 
 
-        if (fragmentNeedsUpdating()) {
-            setFragmentNeedUpdating(false);
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            setFragmentState(FragmentState.FINISHED_UPDATING);
             currentFragment = 0;
             getChildFragmentManager()
                     .beginTransaction()

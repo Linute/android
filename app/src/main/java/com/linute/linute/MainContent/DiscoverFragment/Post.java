@@ -80,7 +80,7 @@ public class Post implements Parcelable {
         Date myDate;
 
         try {
-            myDate = Utils.DATE_FORMAT.parse(jsonObject.getString("date"));
+            myDate = Utils.getDateFormat().parse(jsonObject.getString("date"));
         } catch (ParseException w) {
             w.printStackTrace();
             myDate = null;
@@ -146,7 +146,7 @@ public class Post implements Parcelable {
         Date myDate;
 
         try {
-            myDate = Utils.DATE_FORMAT.parse(jsonObject.getString("date"));
+            myDate = Utils.getDateFormat().parse(jsonObject.getString("date"));
         } catch (ParseException w) {
             w.printStackTrace();
             myDate = null;

@@ -31,10 +31,13 @@ import java.util.TimeZone;
 public class Utils {
     public static String CONTENT_TYPE = "application/json";
 
-    public final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    static {
-        DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+    public static SimpleDateFormat getDateFormat(){
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        f.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return f;
     }
+
 
     //encodes input String
     //returns empty if can't encode (should never happen)
@@ -188,7 +191,7 @@ public class Utils {
 
     public static String formatDateToReadableString(String date) {
         try {
-            return SimpleDateFormat.getDateInstance().format(DATE_FORMAT.parse(date));
+            return SimpleDateFormat.getDateInstance().format(getDateFormat().parse(date));
         } catch (ParseException e) {
             e.printStackTrace();
             return "";
@@ -224,7 +227,7 @@ public class Utils {
     //returns millisecond of date
     public static long getTimeFromString(String date) {
         try {
-            return DATE_FORMAT.parse(date).getTime();
+            return getDateFormat().parse(date).getTime();
         } catch (ParseException e) {
             e.printStackTrace();
             return 0;

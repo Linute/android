@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
@@ -29,7 +30,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
     private static final SimpleDateFormat mLongFormat = new SimpleDateFormat("M/dd h:mm a");
-    private LoadMoreListener mLoadMoreListener;
+    private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
+    private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
@@ -58,6 +60,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_action_typing, parent, false));
+            case LoadMoreViewHolder.FOOTER:
+                return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_light, parent, false),
+                        "", ""
+                );
         }
 
         return null;
@@ -66,28 +72,30 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
-            ((ChatViewHolder) holder).bindModel(aChatList.get(position));
-        }
-
-        if (position == 0) {
-            if (mLoadMoreListener != null) {
-                mLoadMoreListener.loadMore();
-            }
+            ((ChatViewHolder) holder).bindModel(aChatList.get(position - 1));
+        }else if (holder instanceof LoadMoreViewHolder){
+            if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
+            ((LoadMoreViewHolder) holder).bindView(mFooterState);
         }
     }
 
-    public void setLoadMoreListener(LoadMoreListener l) {
+    public void setLoadMoreListener(LoadMoreViewHolder.OnLoadMore l) {
         mLoadMoreListener = l;
     }
 
+    //+1 for load more loader
     @Override
     public int getItemCount() {
-        return aChatList.size();
+        return aChatList.size() == 0 ? 0 : aChatList.size()+1;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return aChatList.get(position).getType();
+        return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
+    }
+
+    public void setFooterState(short footerState) {
+        mFooterState = footerState;
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -182,11 +190,5 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(itemView);
         }
     }
-
-
-    public interface LoadMoreListener {
-        void loadMore();
-    }
-
 
 }

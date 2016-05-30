@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 /**
@@ -85,7 +86,7 @@ public class FindFriendsChoiceFragment extends Fragment {
             public void onPageSelected(int position) {
                 //changed fragments. if that fragment has already updated, then search using new query string
                 //else do nothing
-                if (mFindFriendsFragments[position] != null && !mFindFriendsFragments[position].fragmentNeedsUpdating()) {
+                if (mFindFriendsFragments[position] != null && mFindFriendsFragments[position].getFragmentState() != BaseFragment.FragmentState.NEEDS_UPDATING) {
                     mFindFriendsFragments[position].searchWithQuery(mSearchView.getText().toString());
                 }
             }

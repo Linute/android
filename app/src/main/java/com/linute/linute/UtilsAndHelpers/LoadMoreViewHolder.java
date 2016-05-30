@@ -17,33 +17,20 @@ public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
     public static final short STATE_ERROR = 1;
     public static final short STATE_END = 2;
 
-    private View vProgressbar;
-    private TextView vText;
-    private short mState;
+    protected View vProgressbar;
+    protected TextView vText;
+    protected short mState;
 
-    private OnLoadMore mOnLoadMore;
+    protected String mErrorText;
+    protected String mDoneText;
 
-    private String mErrorText;
-    private String mDoneText;
-
-    public LoadMoreViewHolder(View itemView, OnLoadMore o, String error, String done) {
+    public LoadMoreViewHolder(View itemView, String error, String done) {
         super(itemView);
 
         mErrorText = error;
         mDoneText = done;
-        mOnLoadMore = o;
         vProgressbar = itemView.findViewById(R.id.progress_bar);
         vText = (TextView) itemView.findViewById(R.id.textView);
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mState == STATE_ERROR && mOnLoadMore != null){
-                    mOnLoadMore.onLoadMore(true);
-                    vProgressbar.setVisibility(View.VISIBLE);
-                    vText.setVisibility(View.GONE);
-                }
-            }
-        });
     }
 
     public void bindView(short state){
@@ -53,9 +40,6 @@ public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
             case STATE_LOADING:
                 vProgressbar.setVisibility(View.VISIBLE);
                 vText.setVisibility(View.GONE);
-                if (mOnLoadMore != null){
-                    mOnLoadMore.onLoadMore(false);
-                }
                 break;
             case STATE_ERROR:
                 vProgressbar.setVisibility(View.GONE);
@@ -71,6 +55,17 @@ public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
     }
 
     public interface OnLoadMore{
-        void onLoadMore(boolean clicked);
+        void loadMore();
     }
+
+//    public static class LoaderState{
+//        private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
+//
+//        public LoaderState(){}
+//
+//        public void setLoadState(short state){
+//            mLoadState = state;
+//        }
+//    }
+
 }

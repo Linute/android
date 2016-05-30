@@ -45,7 +45,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
@@ -75,7 +75,7 @@ public class MainActivity extends BaseTaptActivity {
 
     // array of our fragments
     // the fragment is not created until it is needed.
-    private UpdatableFragment[] mFragments; //holds our fragments
+    private BaseFragment[] mFragments; //holds our fragments
 
 
     private SharedPreferences mSharedPreferences;
@@ -99,7 +99,7 @@ public class MainActivity extends BaseTaptActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mFragments = new UpdatableFragment[4];
+        mFragments = new BaseFragment[4];
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
@@ -194,7 +194,7 @@ public class MainActivity extends BaseTaptActivity {
 
     private Fragment getFragment(short index) {
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
-            UpdatableFragment fragment;
+            BaseFragment fragment;
 
             switch (index) {
                 case FRAGMENT_INDEXES.FEED:
@@ -246,10 +246,10 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
-            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
+            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
-            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
+            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.FEED);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -287,9 +287,9 @@ public class MainActivity extends BaseTaptActivity {
 
     //sets needsUpdating for fragment at index
     @Override
-    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index) {
+    public void setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState state, int index) {
         if (mFragments[index] != null) {
-            mFragments[index].setFragmentNeedUpdating(needsUpdating);
+            mFragments[index].setFragmentState(state);
         }
     }
 

@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.FindFriends;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -80,16 +78,22 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
         private ImageView mAddButton;
         private ImageView mProfileImage;
 
+        private FriendSearchUser mFriendSearchUser;
+
         public FriendSearchViewHolder(View itemView) {
             super(itemView);
 
             mNameView = (TextView) itemView.findViewById(R.id.friendSearchItem_full_name);
             mProfileImage = (ImageView) itemView.findViewById(R.id.friendSearchItem_profile_image);
             mAddButton = (ImageView) itemView.findViewById(R.id.friendSearchItem_add_button);
+            setUpOnClickListeners();
+
         }
 
 
         public void bindViews(FriendSearchUser user) {
+            mFriendSearchUser = user;
+
             mNameView.setText(user.getFullName());
 
             Glide.with(mContext)
@@ -100,49 +104,68 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
 
-            setUpFollowButton(user.isFollowing(), user.getUserId(), user.getFullName());
-            setUpOnClickListeners(user.getFullName(), user.getUserId());
+            mAddButton.setImageResource(mFriendSearchUser.isFollowing() ?
+                    R.drawable.message_friend : R.drawable.add_friend);
         }
 
 
-        private void setUpFollowButton(boolean areFriends, final String userID, final String name) {
+        private void setUpOnClickListeners() {
 
-            if (!areFriends) {
+            //setup profile pic and name
+            View.OnClickListener goToProfile = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mFriendSearchUser == null) return;
 
-                mAddButton.setImageResource(R.drawable.add_friend); //plus icon
+                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                    if (activity != null) {
+                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+                    }
+                }
+            };
 
-                mAddButton.setOnClickListener(new View.OnClickListener() { //when pressed
+            mNameView.setOnClickListener(goToProfile);
+            mProfileImage.setOnClickListener(goToProfile);
 
-                    boolean mFollowed = false; //if we are following other person
+            //the add or message button
+            mAddButton.setOnClickListener(new View.OnClickListener() { //when pressed
+                @Override
+                public void onClick(View v) {
 
-                    @Override
-                    public void onClick(View v) {
+                    if (mFriendSearchUser == null) return;
 
-                        if (mFollowed) {
-                            BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                            if (activity != null) {
-                                activity.addFragmentToContainer(ChatFragment.newInstance(null, name, userID));
-                            }
+                    //are friends: message them
+                    if (mFriendSearchUser.isFollowing()) {
+                        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                        if (activity != null) {
+                            activity.addFragmentToContainer(ChatFragment.newInstance(null, mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
                         }
+                    }
 
-                        mFollowed = true;
+                    //add them
+                    else {
+
+                        if (mContext == null) return;
+
                         mAddButton.setImageResource(R.drawable.message_friend); //change icon
+                        mFriendSearchUser.setFollowing(true);
                         Map<String, Object> params = new HashMap<>();
-                        params.put("user", userID);
-
-                        final Activity activity = ((Activity) mContext);
+                        params.put("user", mFriendSearchUser.getUserId());
 
                         new LSDKPeople(mContext).postFollow(params, new Callback() {
+                            FriendSearchUser user = mFriendSearchUser;
+
                             @Override
                             public void onFailure(Call call, IOException e) {
-                                Log.e("UpdatesAdapter", "No internet connection");
-
+                                user.setFollowing(false);
+                                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                                if (activity == null) return;
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mFollowed = false;
-                                        Utils.showBadConnectionToast(activity);
-                                        mAddButton.setImageResource(R.drawable.add_friend);
+                                        Utils.showBadConnectionToast(mContext);
+                                        if (mFriendSearchUser.getUserId().equals(user.getUserId()))
+                                            mAddButton.setImageResource(R.drawable.add_friend);
                                     }
                                 });
 
@@ -152,51 +175,24 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                             public void onResponse(Call call, Response response) throws IOException {
                                 Log.i("Update Adapter", "onResponse: " + response.body().string());
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
+                                    user.setFollowing(false);
+
+                                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                                    if (activity == null) return;
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mFollowed = false;
-                                            Utils.showServerErrorToast(activity);
-                                            mAddButton.setImageResource(R.drawable.add_friend);
+                                            Utils.showServerErrorToast(mContext);
+                                            if (mFriendSearchUser.getUserId().equals(user.getUserId()))
+                                                mAddButton.setImageResource(R.drawable.add_friend);
                                         }
                                     });
                                 }
                             }
                         });
                     }
-                });
-            }
-
-            //are following person so hide button
-            else {
-                mAddButton.setImageResource(R.drawable.message_friend);
-
-                mAddButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                        if (activity != null) {
-                            activity.addFragmentToContainer(ChatFragment.newInstance(null, name, userID));
-                        }
-                    }
-                });
-            }
-        }
-
-        private void setUpOnClickListeners(final String name, final String userId) {
-            View.OnClickListener goToProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO: fix
-                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                    if (activity != null) {
-                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(name, userId));
-                    }
                 }
-            };
-
-            mNameView.setOnClickListener(goToProfile);
-            mProfileImage.setOnClickListener(goToProfile);
+            });
         }
 
     }

@@ -24,7 +24,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -45,7 +45,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by QiFeng on 1/6/16.
  */
-public class UpdatesFragment extends UpdatableFragment {
+public class UpdatesFragment extends BaseFragment {
 
     public static final String TAG = UpdatesFragment.class.getSimpleName();
     private RecyclerView mUpdatesRecyclerView;
@@ -197,8 +197,7 @@ public class UpdatesFragment extends UpdatableFragment {
                 .subscribe(mNotificationEventAction1);
 
 
-        if (fragmentNeedsUpdating() || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
-            setFragmentNeedUpdating(false);
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -258,13 +257,15 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     private void getUpdatesInformation() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
+        setFragmentState(FragmentState.LOADING_DATA);
         mSafeToAddToTop = false;
 
         new LSDKActivity(getActivity()).getActivities(-1, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                setFragmentState(FragmentState.FINISHED_UPDATING);
                 showBadConnectiontToast();
             }
 
@@ -329,10 +330,11 @@ public class UpdatesFragment extends UpdatableFragment {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
                                 activity.setUpdateNotification(0);
                                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
+                                NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
 
+                                //if no updates or discover, remove indicator
                                 if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
                                     NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
                                 }
@@ -365,6 +367,8 @@ public class UpdatesFragment extends UpdatableFragment {
                     showServerErrorToast();
                     Log.e(TAG, "onResponse: " + response.body().string());
                 }
+
+                setFragmentState(FragmentState.FINISHED_UPDATING);
             }
         });
 

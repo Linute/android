@@ -47,7 +47,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
@@ -76,7 +76,7 @@ import okhttp3.Response;
  * Created by Arman on 1/11/16.
  */
 
-public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
+public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -325,9 +325,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         }
 
         //only updates first time it is created
-        if (fragmentNeedsUpdating()) {
+        if (!mCommentsRetrieved) {
             displayCommentsAndPost();
-            setFragmentNeedUpdating(false);
         }
     }
 
@@ -425,6 +424,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     comments = jsonObject.getJSONArray("comments");
 
                     Date myDate;
+                    SimpleDateFormat format = Utils.getDateFormat();
 
                     if (mSkip > 0) {
                         tempComments.add(new LoadMoreItem());
@@ -435,7 +435,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                         //get date
                         try {
-                            myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = format.parse(comments.getJSONObject(i).getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
@@ -574,6 +574,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             comments = jsonObject.getJSONArray("comments");
 
                             Date myDate;
+                            SimpleDateFormat format = Utils.getDateFormat();
 
                             if (mSkip != 0) {
                                 tempComments.add(new LoadMoreItem());
@@ -584,7 +585,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                                 //get date
                                 try {
-                                    myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = format.parse(comments.getJSONObject(i).getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
@@ -806,7 +807,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         @Override
                         public void run() {
                             Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
-                            activity.setFragmentOfIndexNeedsUpdating(true, MainActivity.FRAGMENT_INDEXES.FEED);
+                            activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
                             getFragmentManager().popBackStack();
                         }
                     });
@@ -1247,7 +1248,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             try {
                 Date myDate;
-                myDate = Utils.DATE_FORMAT.parse(object.getString("date"));
+                myDate = Utils.getDateFormat().parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
                 JSONArray mentionedPeople = object.getJSONArray("mentions");

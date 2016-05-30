@@ -32,6 +32,8 @@
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
 
 
+## rxjava
+
 -keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
     long producerIndex;
     long consumerIndex;

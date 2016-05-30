@@ -87,7 +87,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false));
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
-                    mOnLoadMore,
                     "",
                     "Come back later for more!"
             );
@@ -103,6 +102,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
         }
+
+        if (position == mPosts.size() - 1 && mOnLoadMore != null) mOnLoadMore.loadMore();
     }
 
 

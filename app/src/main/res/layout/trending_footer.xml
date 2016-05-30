@@ -16,7 +16,6 @@
               android:textSize="@dimen/header_font_size"
     />
 
-
     <ProgressBar
         android:id="@+id/progress_bar"
         style="?android:attr/progressBarStyleSmall"

@@ -79,17 +79,6 @@
               android:textColor="@color/pure_white"
               android:visibility="gone"/>
 
-
-    <ProgressBar android:id="@+id/load_more_progress_bar"
-                 style="?android:attr/progressBarStyleHorizontal"
-                 android:layout_width="match_parent"
-                 android:layout_height="4dp"
-                 android:layout_below="@id/chat_fragment_toolbar"
-                 android:indeterminateDrawable="@drawable/camera_progress"
-                 android:indeterminate="true"
-                 android:visibility="gone"
-    />
-
     <ProgressBar android:id="@+id/chat_load_progress"
                  style="?android:attr/progressBarStyleLarge"
                  android:layout_width="wrap_content"
