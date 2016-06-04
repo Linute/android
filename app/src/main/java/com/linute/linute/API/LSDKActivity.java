@@ -29,7 +29,7 @@ public class LSDKActivity {
     }
 
 
-    public Call getActivities(int skip, Callback callback) {
+    public Call getActivities(int skip, int limit, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> params = new HashMap<>();
@@ -38,7 +38,7 @@ public class LSDKActivity {
             params.put("skip", skip + "");
         }
 
-        params.put("limit", "50");
+        params.put("limit", limit+"");
 
         params.put("action[0]", "commented photo");
         params.put("action[1]", "commented status");
@@ -67,11 +67,5 @@ public class LSDKActivity {
 
         String[] path = {"activities"};
         return API_Methods.get(path, header, params, callback);
-    }
-
-    public Call readActivities(Map<String, Object> param, Callback callback) {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        return API_Methods.post("activities/read", header, param, callback);
     }
 }

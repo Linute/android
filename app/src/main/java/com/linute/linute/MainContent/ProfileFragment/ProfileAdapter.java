@@ -88,7 +88,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             //inflate your layout and pass it to view holder
             return new ProfileHeaderViewHolder(LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header3, parent, false), context);
+                    .inflate(R.layout.fragment_profile_header3, parent, false));
         } else if (viewType == TYPE_HEADER_ACTIONS) {
             return new ProfileHeaderActions(LayoutInflater
                     .from(parent.getContext())
@@ -145,11 +145,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         else {
             if (mUserActivityItems.get(position - 2).getEventImagePath() != null && !mUserActivityItems.get(position - 2).getEventImagePath().equals(""))
                 return TYPE_ITEM_WITH_IMAGE;
-
             else return TYPE_ITEM_WITHOUT_IMAGE;
         }
     }
-
 
     public void setLoadMorePosts(LoadMoreViewHolder.OnLoadMore loadMorePosts) {
         mLoadMorePosts = loadMorePosts;
@@ -190,25 +188,20 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         protected ImageView vProfilePicture;
 
-        private Context mContext;
-
-        public ProfileHeaderViewHolder(View itemView, Context context) {
+        public ProfileHeaderViewHolder(View itemView) {
             super(itemView);
-
-            mContext = context;
             vProfilePicture = (ImageView) itemView.findViewById(R.id.profile_image);
 //            vMessageButton = (FloatingActionButton) itemView.findViewById(R.id.chat_button);
         }
 
-        void bindModel(final LinuteUser user) {
-            Glide.with(mContext)
+        void bindModel(LinuteUser user) {
+            Glide.with(context)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                     .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vProfilePicture);
-
         }
     }
 
@@ -416,8 +409,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (mUser.getStatus() != null)
                     vStatusText.setText(mUser.getStatus().equals("") ? "No bio... :|" : mUser.getStatus());
 
-                vPosts.setText(String.valueOf(mUser.getPosts()));
-                vFollowers.setText(String.valueOf(mUser.getFollowers()));
+                vPosts.setText(mUser.getPosts()+"");
+                vFollowers.setText(mUser.getFollowers()+"");
                 vCollegeName.setText(mUser.getCollegeName());
 
                 if (mUser.getUserID().equals(mUserid)) { //viewer is viewing own profile

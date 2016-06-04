@@ -68,6 +68,9 @@ public class FriendsListFragment extends BaseFragment {
             mFollowing = getArguments().getBoolean(FOLLOWING_OR_FOLLOWER_KEY);
             mUserId = getArguments().getString(USER_ID_KEY);
         }
+
+        if (mFriendsListAdapter == null)
+            mFriendsListAdapter = new FriendsListAdapter(mFriendList, getActivity(), mFollowing);
     }
 
 
@@ -92,7 +95,6 @@ public class FriendsListFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendsListAdapter = new FriendsListAdapter(mFriendList, getActivity(), mFollowing);
         mFriendsListAdapter.setOnLoadMoreListener(new FriendsListAdapter.OnLoadMoreListener() {
             @Override
             public void loadMore() {

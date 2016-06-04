@@ -312,9 +312,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mInputMessageView.post(new Runnable() {
             @Override
             public void run() {
-                InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (keyboard == null) return;
-                keyboard.showSoftInput(mInputMessageView, 0);
+                if (getActivity() != null) {
+                    InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    keyboard.showSoftInput(mInputMessageView, 0);
+                }
             }
         });
     }

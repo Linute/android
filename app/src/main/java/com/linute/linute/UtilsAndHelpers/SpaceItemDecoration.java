@@ -21,6 +21,7 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration
     public SpaceItemDecoration(Context context, AttributeSet attrs) {
         mSpace = 0;
     }
+
     public SpaceItemDecoration(Context context, AttributeSet attrs, boolean showFirstDivider,
                                boolean showLastDivider) {
         this(context, attrs);
@@ -32,9 +33,9 @@ public class SpaceItemDecoration extends RecyclerView.ItemDecoration
     {
         mSpace = spaceInPx;
     }
+
     public SpaceItemDecoration(int spaceInPx, boolean showFirstDivider,
-                               boolean showLastDivider)
-    {
+                               boolean showLastDivider) {
         this(spaceInPx);
         mShowFirstDivider = showFirstDivider;
         mShowLastDivider = showLastDivider;

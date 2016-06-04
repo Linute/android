@@ -47,6 +47,11 @@ public class CustomBackPressedEditText extends EditText {
         return conn;
     }
 
+    @Override
+    public boolean isSuggestionsEnabled() {
+        return false;
+    }
+
     public interface BackButtonAction {
         public void backPressed();
     }

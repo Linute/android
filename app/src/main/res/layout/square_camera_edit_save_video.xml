@@ -52,7 +52,7 @@
                 android:background="#96000000"
                 android:gravity="center"
                 android:imeOptions="actionDone"
-                android:inputType="textCapSentences|textNoSuggestions"
+                android:inputType="textCapSentences"
                 android:lines="1"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"

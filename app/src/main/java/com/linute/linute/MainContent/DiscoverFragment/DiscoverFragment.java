@@ -53,7 +53,7 @@ public class DiscoverFragment extends BaseFragment {
     private SwipeRefreshLayout refreshLayout;
 
     private ArrayList<Post> mPosts = new ArrayList<>();
-    private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters = null;
+    private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters;
     private boolean feedDone;
 
     private boolean mSectionTwo = false;
@@ -80,6 +80,15 @@ public class DiscoverFragment extends BaseFragment {
         if (getArguments() != null) {
             mSectionTwo = getArguments().getBoolean(SECTION_KEY);
         }
+
+        if (mCheckBoxChoiceCapableAdapters == null) {
+            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
+                    mPosts,
+                    getContext(),
+                    ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager(),
+                    mSectionTwo
+            );
+        }
     }
 
     //called when fragment drawn the first time
@@ -105,7 +114,6 @@ public class DiscoverFragment extends BaseFragment {
         recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(mPosts, getContext(), ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager(), mSectionTwo);
         mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override
             public void loadMore() {

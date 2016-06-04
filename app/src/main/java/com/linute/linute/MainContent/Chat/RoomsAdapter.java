@@ -199,7 +199,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .load(Utils.getImageUrlOfUser(room.getUserImage()))
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                    .placeholder(R.drawable.image_loading_background)
+                    .placeholder(R.color.pure_black)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 

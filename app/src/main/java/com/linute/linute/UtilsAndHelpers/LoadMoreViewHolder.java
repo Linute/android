@@ -49,7 +49,12 @@ public class LoadMoreViewHolder extends RecyclerView.ViewHolder {
             case STATE_END:
                 vProgressbar.setVisibility(View.GONE);
                 vText.setVisibility(View.VISIBLE);
-                vText.setText(mDoneText);
+                if (!mDoneText.isEmpty()) {
+                    vText.setText(mDoneText);
+                    vText.setVisibility(View.VISIBLE);
+                }else {
+                    vText.setVisibility(View.GONE);
+                }
                 break;
         }
     }
