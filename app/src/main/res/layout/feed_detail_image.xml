@@ -22,7 +22,8 @@
         <com.linute.linute.SquareCamera.SquareImageView android:id="@+id/feedDetail_event_image"
                                                         android:layout_width="match_parent"
                                                         android:layout_height="wrap_content"
-                                                        android:scaleType="centerCrop"
+                                                        android:background="@color/seperator_color"
+                                                        android:scaleType="fitCenter"
                                                         android:src="@drawable/image_loading_background"/>
 
         <View android:id="@+id/feed_detail_hidden_animation"

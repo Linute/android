@@ -29,8 +29,10 @@ public class API_Methods {
 
     // API ENPOINT URL
     public static final String SCHEME = "https";
+
     //private static String HOST = "api.tapt.io";
     public static final String HOST = "devapi2.tapt.io";
+
     public static final String VERSION = "v1.3.7";
 
     //JSON TYPE
@@ -45,7 +47,6 @@ public class API_Methods {
     }
 
     // API get method
-    // Throw exception?
     public static Call get(String[] path,
                            Map<String, String> headers,
                            Map<String, String> parameters,
@@ -161,8 +162,8 @@ public class API_Methods {
 
 
     // returns main header containing: Content-Type and authorizationDevice
-    public static Map<String, String> getMainHeader(String token) {
-        Map<String, String> header = new HashMap<>();
+    public static HashMap<String, String> getMainHeader(String token) {
+        HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
         return header;

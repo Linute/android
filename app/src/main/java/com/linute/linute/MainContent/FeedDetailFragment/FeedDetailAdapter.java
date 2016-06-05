@@ -59,8 +59,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private Context context;
     private Dialog mDialog;
 
-    //private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
-
     private FeedDetail mFeedDetail;
 
     private SingleVideoPlaybackManager mSingleVideoPlaybackManager;
@@ -417,7 +415,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             final Comment com = (Comment) mFeedDetail.getComments().get(pos);
 
             //if viewer is not the owner of the comment, return
-            // exception : anon comments can be deleted by post owner
+            // exception: anon comments can be deleted by post owner
             if (!com.getCommentPostId().equals(mCommentId) || (!com.getCommentUserId().equals(mViewerUserId) && !com.isAnon())) return;
 
             mDenySwipe = true;

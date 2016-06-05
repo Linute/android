@@ -603,8 +603,6 @@ public class FindFriendsFragment extends BaseFragment {
         });
     }
 
-    //TODO: get rid of progress bar mIn = false, hide text
-
     private void setUpFacebookCallback() {
 
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {

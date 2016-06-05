@@ -8,7 +8,6 @@ import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -89,7 +88,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                             "token=" + mSharedPreferences.getString("userToken", "") +
                                     "&deviceToken=" + device.getDeviceToken() +
                                     "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
+                                    "&version=" + device.getVersionName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&platform=" + device.getType() +

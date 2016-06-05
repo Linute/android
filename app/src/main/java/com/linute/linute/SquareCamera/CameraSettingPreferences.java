@@ -2,7 +2,6 @@ package com.linute.linute.SquareCamera;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.hardware.Camera;
 import android.support.annotation.NonNull;
 
 /**
@@ -10,29 +9,25 @@ import android.support.annotation.NonNull;
  */
 public class CameraSettingPreferences {
 
-    private static final String FLASH_MODE = "squarecamera__flash_mode";
+    private static final String FLASH_ON = "squarecamera__flash_on";
 
     private static SharedPreferences getCameraSettingPreferences(@NonNull final Context context) {
         return context.getSharedPreferences("com.desmond.squarecamera", Context.MODE_PRIVATE);
     }
 
-    protected static void saveCameraFlashMode(@NonNull final Context context, @NonNull final String cameraFlashMode) {
+    protected static void saveCameraFlashMode(@NonNull final Context context, final boolean mFlashOn) {
         final SharedPreferences preferences = getCameraSettingPreferences(context);
 
         if (preferences != null) {
             final SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(FLASH_MODE, cameraFlashMode);
+            editor.putBoolean(FLASH_ON, mFlashOn);
             editor.apply();
         }
     }
 
-    public static String getCameraFlashMode(@NonNull final Context context) {
+    public static boolean getCameraFlashMode(@NonNull final Context context) {
         final SharedPreferences preferences = getCameraSettingPreferences(context);
 
-        if (preferences != null) {
-            return preferences.getString(FLASH_MODE, Camera.Parameters.FLASH_MODE_AUTO);
-        }
-
-        return Camera.Parameters.FLASH_MODE_AUTO;
+        return preferences != null && preferences.getBoolean(FLASH_ON, false);
     }
 }

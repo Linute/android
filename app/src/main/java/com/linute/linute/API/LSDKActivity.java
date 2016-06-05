@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -16,23 +15,22 @@ import okhttp3.Callback;
  */
 public class LSDKActivity {
 
-    // where user information will be
-    private static SharedPreferences mSharedPreferences;
 
-    private static String mToken;
+    private String mToken;
+    private String mUserId;
 
 
     public LSDKActivity(Context context) {
-
-        mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mToken = mSharedPreferences.getString("userToken","");
+        SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mToken = sharedPreferences.getString("userToken","");
+        mUserId = sharedPreferences.getString("userID", "");
     }
 
 
     public Call getActivities(int skip, int limit, Callback callback) {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        HashMap<String, String> header = API_Methods.getMainHeader(mToken);
 
-        Map<String, String> params = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>();
 
         if (skip >= 0) {
             params.put("skip", skip + "");
@@ -63,7 +61,7 @@ public class LSDKActivity {
 
         params.put("action[15]", "matched");
 
-        params.put("owner", mSharedPreferences.getString("userID", ""));
+        params.put("owner", mUserId);
 
         String[] path = {"activities"};
         return API_Methods.get(path, header, params, callback);

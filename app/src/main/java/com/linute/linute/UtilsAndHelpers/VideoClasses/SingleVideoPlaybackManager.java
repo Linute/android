@@ -1,13 +1,12 @@
 package com.linute.linute.UtilsAndHelpers.VideoClasses;
 
 import android.net.Uri;
-import android.util.Log;
 
 /**
  * Created by QiFeng on 3/11/16.
  */
 
-/*
+/**
  *
  * Manager that makes sure only one video is being played at a time
  *

@@ -114,7 +114,7 @@ public class SettingActivity extends AppCompatActivity {
                             "token=" + mSharedPreferences.getString("userToken", "") +
                                     "&deviceToken=" + device.getDeviceToken() +
                                     "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
+                                    "&version=" + device.getVersionName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&platform=" + device.getType() +

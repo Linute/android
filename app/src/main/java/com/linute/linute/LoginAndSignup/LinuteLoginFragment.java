@@ -169,24 +169,11 @@ public class LinuteLoginFragment extends Fragment {
         }
     }
 
-//    private void checkRegisteredDevice(String email, String password) {
-//        if (getActivity() == null) return;
-//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-//
-//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
-//            checkCredentialsWithDB(email, password);
-//        } else {
-//            sendRegistrationDevice(sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, ""), email, password);
-//        }
-//    }
 
     private boolean isEmailValid(String email) {
-        /*NOTE: some old users still have non-edu emails
-         *      we have to take them to a update email activity in that situation
-         *
-         */
+        //NOTE: some old users still have non-edu emails
+        //// TODO: 6/4/16 use regex
         // @.edu                        //hey@.edu          //hey.edu
-
         if (email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
                 !email.contains(".") || email.contains(" "))
             //hello@edededu             //whitespace
@@ -240,8 +227,7 @@ public class LinuteLoginFragment extends Fragment {
 
         if (getActivity() == null) return;
 
-        LSDKUser checker = new LSDKUser(getActivity());
-        checker.loginUserWithEmail(email, password, new Callback() {
+        new LSDKUser(getActivity()).loginUserWithEmail(email, password, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -377,19 +363,11 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.putString("collegeId", user.getCollegeId());
         sharedPreferences.putString("campus", user.getCampus());
         sharedPreferences.putString("email", user.getEmail());
-
         sharedPreferences.putString("lastLoginEmail", user.getEmail());
-
-        //NOTE: new stuff
-        //took out password
         sharedPreferences.putString("userName", user.getUserName());
         sharedPreferences.putString("points", user.getPoints());
         sharedPreferences.putString("userToken", user.getUserToken());
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
-
-
-        //NOTE:end
-
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
 

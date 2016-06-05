@@ -29,7 +29,7 @@ public class CustomBackPressedEditText extends EditText {
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // User has pressed Back key. So hide the keyboard
+            // user pressed back
             mBackAction.backPressed();
         }
         return true;
@@ -53,6 +53,6 @@ public class CustomBackPressedEditText extends EditText {
     }
 
     public interface BackButtonAction {
-        public void backPressed();
+        void backPressed();
     }
 }
