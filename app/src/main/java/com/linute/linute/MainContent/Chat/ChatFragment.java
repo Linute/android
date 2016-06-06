@@ -20,8 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.MainActivity;
@@ -69,6 +74,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     private static final String ROOM_ID = "room";
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
+    private static final String OTHER_PERSON_PROFILE_IMAGE = "userprofileimage";
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -81,6 +87,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
 
     private String mOtherPersonId;
     private String mOtherPersonName; //name of person youre talking to
+    private String mOtherPersonProfileImage;
 
     private String mUserId; //our user id
 
@@ -155,7 +162,13 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
     public static ChatFragment newInstance(String roomId,
                                            String otherPersonName,
-                                           String otherPersonId) {
+                                           String otherPersonId){
+       return newInstance(roomId, otherPersonName, otherPersonId, "");
+    }
+
+    public static ChatFragment newInstance(String roomId,
+                                           String otherPersonName,
+                                           String otherPersonId, String otherPersonProfileImage) {
 
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
@@ -163,6 +176,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         args.putString(ROOM_ID, roomId);
         args.putString(OTHER_PERSON_NAME, otherPersonName);
         args.putString(OTHER_PERSON_ID, otherPersonId);
+        args.putString(OTHER_PERSON_NAME, otherPersonProfileImage);
 
         //args.putInt(USER_COUNT, roomUsersCnt);
         //args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
@@ -177,6 +191,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             mRoomId = getArguments().getString(ROOM_ID);
             mOtherPersonName = getArguments().getString(OTHER_PERSON_NAME);
             mOtherPersonId = getArguments().getString(OTHER_PERSON_ID);
+            mOtherPersonProfileImage = getArguments().getString(OTHER_PERSON_PROFILE_IMAGE);
             //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
         }
@@ -189,7 +204,20 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
-        toolbar.setTitle(mOtherPersonName);
+
+        View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
+        TextView otherPersonNameTV = (TextView)otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
+        ImageView otherPersonIconIV = (ImageView)otherPersonHeader.findViewById(R.id.toolbar_chat_user_icon);
+        otherPersonNameTV.setText(mOtherPersonName);
+        Context context = container.getContext();
+        Glide.with(context)
+                .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
+                .dontAnimate()
+                .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .into(otherPersonIconIV);
+
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
