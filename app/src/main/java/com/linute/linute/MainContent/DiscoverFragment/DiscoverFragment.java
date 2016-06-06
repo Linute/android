@@ -105,7 +105,7 @@ public class DiscoverFragment extends BaseFragment {
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
 
-        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
 
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 

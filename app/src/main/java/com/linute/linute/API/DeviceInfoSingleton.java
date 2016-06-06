@@ -1,7 +1,6 @@
 package com.linute.linute.API;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -16,7 +15,7 @@ public class DeviceInfoSingleton {
 
     private static DeviceInfoSingleton mDeviceInfoSingleton;
 
-    private String mVersonName;
+    private String mVersionName;
     private String mVersionCode;
     private String mDeviceToken;
     private String mOS;
@@ -35,11 +34,11 @@ public class DeviceInfoSingleton {
 
         try {
             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-            mVersonName = pInfo.versionName;
+            mVersionName = pInfo.versionName;
             mVersionCode = pInfo.versionCode + "";
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
-            mVersonName = "";
+            mVersionName = "";
             mVersionCode = "";
         }
 
@@ -51,8 +50,8 @@ public class DeviceInfoSingleton {
         mUdid = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
-    public String getVersonName() {
-        return mVersonName;
+    public String getVersionName() {
+        return mVersionName;
     }
 
     public String getVersionCode() {

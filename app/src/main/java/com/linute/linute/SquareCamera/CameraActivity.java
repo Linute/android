@@ -164,7 +164,7 @@ public class CameraActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(
                         R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri, false),
+                        EditSavePhotoFragment.newInstance(uri),
                         EditSavePhotoFragment.TAG)
                 .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();

@@ -240,21 +240,6 @@ public class UpdatesFragment extends BaseFragment {
         }
     }
 
-//    @Override
-//    public void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        outState.putShort(LoadMoreViewHolder.STATE_KEY, mUpdatesAdapter.getFooterState());
-//        Log.i(TAG, "onSaveInstanceState: "+mUpdatesAdapter.getFooterState());
-//    }
-//
-//
-//    @Override
-//    public void onViewStateRestored(Bundle savedInstanceState) {
-//        super.onViewStateRestored(savedInstanceState);
-//        if (savedInstanceState != null) mUpdatesAdapter.setFooterState(savedInstanceState.getShort(LoadMoreViewHolder.STATE_KEY));
-//        Log.i(TAG, "onViewStateRestored: "+mUpdatesAdapter.getFooterState());
-//    }
-
     @Override
     public void onPause() {
         super.onPause();

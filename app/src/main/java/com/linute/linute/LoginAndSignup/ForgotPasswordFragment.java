@@ -361,19 +361,6 @@ public class ForgotPasswordFragment extends Fragment {
         return password.length() >= 6 && !password.contains(" ");
     }
 
-
-    private void serverErrorCurrentView(final int index) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                showProgress(false, index);
-                Utils.showServerErrorToast(getActivity());
-            }
-        });
-
-
-    }
-
     private void failedConnectionWithCurrentView(final int index) {
         getActivity().runOnUiThread(new Runnable() {
             @Override

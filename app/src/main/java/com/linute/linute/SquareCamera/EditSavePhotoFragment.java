@@ -6,15 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -34,7 +30,6 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
-import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -57,10 +52,6 @@ public class EditSavePhotoFragment extends Fragment {
 
     public static final String TAG = EditSavePhotoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
-    //public static final String ROTATION_KEY = "rotation";
-    public static final String IMAGE_INFO = "image_info";
-    public static final String MAKE_ANON = "make_anon";
-
 
     private View mFrame; //frame where we put edittext and picture
 
@@ -78,15 +69,13 @@ public class EditSavePhotoFragment extends Fragment {
 
     private View vBottom;
 
-    public static Fragment newInstance(Uri imageUri, boolean makeAnon) {
+    public static Fragment newInstance(Uri imageUri) {
         Fragment fragment = new EditSavePhotoFragment();
 
         Bundle args = new Bundle();
 
         if (imageUri != null)
             args.putParcelable(BITMAP_URI, imageUri);
-
-        args.putBoolean(MAKE_ANON, makeAnon);
 
         fragment.setArguments(args);
         return fragment;
@@ -139,23 +128,12 @@ public class EditSavePhotoFragment extends Fragment {
         mAnonSwitch = (CheckBox) view.findViewById(R.id.editFragment_switch);
 
         if (mReturnType == CameraActivity.SEND_POST) {
-            mAnonSwitch.setChecked(getArguments().getBoolean(MAKE_ANON));
             vBottom.findViewById(R.id.comments).setVisibility(View.VISIBLE);
             vBottom.findViewById(R.id.anon).setVisibility(View.VISIBLE);
         } else {
             vBottom.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
             vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
         }
-
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.edit_photo_toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        toolbar.setTitle("Tap the photo to add text");
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showConfirmDialog();
-            }
-        });
 
         mUploadButton = view.findViewById(R.id.save_photo);
 
@@ -298,7 +276,7 @@ public class EditSavePhotoFragment extends Fragment {
             return;
         }
 
-        Bitmap bitmap = Bitmap.createScaledBitmap(getBitmapFromView(mFrame), 1080, 1080, true);
+        Bitmap bitmap = ImageUtility.getBitmapFromView(mFrame);
 
         showProgress(true);
         if (getActivity() == null) return;
@@ -349,17 +327,6 @@ public class EditSavePhotoFragment extends Fragment {
         }
     }
 
-    private void showServerError() {
-        if (getActivity() == null) return;
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Utils.showServerErrorToast(getActivity());
-                showProgress(false);
-            }
-        });
-    }
-
     private void showKeyboard() { //show keyboard for EditText
         InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(mText, 0);
@@ -369,19 +336,6 @@ public class EditSavePhotoFragment extends Fragment {
         mText.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
-    }
-
-    //cuts a bitmap from our RelativeLayout
-    public static Bitmap getBitmapFromView(View view) {
-        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(returnedBitmap);
-        Drawable bgDrawable = view.getBackground();
-        if (bgDrawable != null)
-            bgDrawable.draw(canvas);
-        else
-            canvas.drawColor(Color.WHITE);
-        view.draw(canvas);
-        return returnedBitmap;
     }
 
 
@@ -415,7 +369,7 @@ public class EditSavePhotoFragment extends Fragment {
                                 "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
                                         "&deviceToken=" + device.getDeviceToken() +
                                         "&udid=" + device.getUdid() +
-                                        "&version=" + device.getVersonName() +
+                                        "&version=" + device.getVersionName() +
                                         "&build=" + device.getVersionCode() +
                                         "&os=" + device.getOS() +
                                         "&platform=" + device.getType() +

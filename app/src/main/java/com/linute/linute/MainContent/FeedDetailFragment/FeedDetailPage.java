@@ -101,7 +101,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private CheckBox mCheckBox;
 
     private String mViewId;
-    private String mImageSigniture;
+    private String mImageSignature;
 
     private Handler mHandler = new Handler();
 
@@ -137,7 +137,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         final View rootView = inflater.inflate(R.layout.fragment_feed_detail_page, container, false);
 
         SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
+        mImageSignature = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
         mViewId = pref.getString("userID", "");
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
@@ -1189,13 +1189,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
 
             public void bindView(final MentionedPerson person) {
-
-
                 mName.setText(person.getFullname());
                 Glide.with(mProfileImageView.getContext())
                         .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
-                        .signature(new StringSignature(mImageSigniture))
+                        .signature(new StringSignature(mImageSignature))
                         .placeholder(R.drawable.image_loading_background)
                         .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                         .into(mProfileImageView);
@@ -1210,10 +1208,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         mCommentEditText.requestFocus();
                     }
                 });
-
             }
-
-
         }
     }
 
@@ -1365,6 +1360,5 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
         }
-
     }
 }

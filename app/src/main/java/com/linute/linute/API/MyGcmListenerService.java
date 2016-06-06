@@ -92,7 +92,6 @@ public class MyGcmListenerService extends GcmListenerService {
         //Log.i(TAG, "action : "  + action);
         Log.i(TAG, "sendNotification: " + data.toString());
 
-        //// TODO: 3/21/16  fix
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
         if (action != null) { //<---
             if (isLoggedIn) {

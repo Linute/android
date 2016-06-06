@@ -99,7 +99,7 @@
         <activity
             android:name=".SquareCamera.CameraActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme.FullScreen"/>
         <activity
             android:name=".LoginAndSignup.CollegePickerActivity"
             android:label="@string/title_activity_college_picker"

@@ -30,7 +30,6 @@ public class FindFriendsChoiceFragment extends Fragment {
 
     private EditText mSearchView;
     private ViewPager mViewPager;
-    private FragmentPagerAdapter mFragmentPagerAdapter;
 
     private FindFriendsFragment[] mFindFriendsFragments;
 
@@ -49,7 +48,7 @@ public class FindFriendsChoiceFragment extends Fragment {
                     FindFriendsFragment.newInstance(1), FindFriendsFragment.newInstance(2)};
         }
 
-        mFragmentPagerAdapter = new FindFriendsFragmentAdapter(getChildFragmentManager(), mFindFriendsFragments);
+        FragmentPagerAdapter fragmentPagerAdapter = new FindFriendsFragmentAdapter(getChildFragmentManager(), mFindFriendsFragments);
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mSearchView = (EditText) rootView.findViewById(R.id.search_view);
@@ -76,7 +75,7 @@ public class FindFriendsChoiceFragment extends Fragment {
             }
         });
 
-        mViewPager.setAdapter(mFragmentPagerAdapter);
+        mViewPager.setAdapter(fragmentPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {

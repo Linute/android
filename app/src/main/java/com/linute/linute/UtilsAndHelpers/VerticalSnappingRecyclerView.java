@@ -183,8 +183,6 @@ public class VerticalSnappingRecyclerView extends RecyclerView {
             }
 
         } else {
-           // if (mFocusedPosition == llm.getItemCount() -1) return true; //note
-
             mCanBeTouched = false;
             mFocusedPosition = first+1;
             smoothScrollToPosition(first+1);

@@ -112,7 +112,4 @@ public class WebViewActivity extends AppCompatActivity {
                 mProgressBar.setVisibility(View.GONE);
         }
     }
-
-
-
 }
