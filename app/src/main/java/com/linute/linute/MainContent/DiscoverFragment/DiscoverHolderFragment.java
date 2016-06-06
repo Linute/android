@@ -29,19 +29,14 @@ import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-<<<<<<< HEAD
-=======
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
->>>>>>> qi
 import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 
 

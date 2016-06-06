@@ -48,11 +48,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-<<<<<<< HEAD
-
-import org.greenrobot.eventbus.EventBus;
-=======
->>>>>>> qi
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -194,10 +189,6 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("wasup! we see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
-<<<<<<< HEAD
-
-=======
->>>>>>> qi
     }
 
 

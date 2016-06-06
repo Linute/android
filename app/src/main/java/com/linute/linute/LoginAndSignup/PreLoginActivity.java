@@ -121,7 +121,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.login_activity_fragment_frame, fragment);
         transaction.commit();
     }
