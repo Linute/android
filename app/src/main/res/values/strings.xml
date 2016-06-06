@@ -147,9 +147,6 @@
     <string name="facebook_app_id">900595913337243</string>
     <string name="title_activity_rooms">RoomsActivity</string>
 
-
-    <!--<string name="SOCKET_URL">https://api.tapt.io/</string>-->
-
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
     <string name="need_contant_permission">To find friends, Tapt needs permission to view your

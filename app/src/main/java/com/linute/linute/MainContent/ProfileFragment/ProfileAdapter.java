@@ -287,6 +287,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                     if (!response.isSuccessful()) {
                                         Log.d(TAG, response.body().string());
+<<<<<<< HEAD
+
+=======
+>>>>>>> qi
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {

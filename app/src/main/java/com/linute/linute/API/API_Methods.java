@@ -29,6 +29,7 @@ public class API_Methods {
 
     // API ENPOINT URL
     public static final String SCHEME = "https";
+
     //private static String HOST = "api.tapt.io";
     public static final String HOST = "devapi2.tapt.io";
     public static final String VERSION = "v1.3.7";
