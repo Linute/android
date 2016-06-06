@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -74,7 +75,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     private static final String ROOM_ID = "room";
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
-    private static final String OTHER_PERSON_PROFILE_IMAGE = "userprofileimage";
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -160,15 +160,11 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
      * @return A new instance of fragment ChatFragment.
      */
     //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
-    public static ChatFragment newInstance(String roomId,
-                                           String otherPersonName,
-                                           String otherPersonId){
-       return newInstance(roomId, otherPersonName, otherPersonId, "");
-    }
+
 
     public static ChatFragment newInstance(String roomId,
                                            String otherPersonName,
-                                           String otherPersonId, String otherPersonProfileImage) {
+                                           String otherPersonId) {
 
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
@@ -176,7 +172,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         args.putString(ROOM_ID, roomId);
         args.putString(OTHER_PERSON_NAME, otherPersonName);
         args.putString(OTHER_PERSON_ID, otherPersonId);
-        args.putString(OTHER_PERSON_NAME, otherPersonProfileImage);
 
         //args.putInt(USER_COUNT, roomUsersCnt);
         //args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
@@ -191,7 +186,6 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             mRoomId = getArguments().getString(ROOM_ID);
             mOtherPersonName = getArguments().getString(OTHER_PERSON_NAME);
             mOtherPersonId = getArguments().getString(OTHER_PERSON_ID);
-            mOtherPersonProfileImage = getArguments().getString(OTHER_PERSON_PROFILE_IMAGE);
             //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
         }
@@ -207,17 +201,9 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
 
         View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
         TextView otherPersonNameTV = (TextView)otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
-        ImageView otherPersonIconIV = (ImageView)otherPersonHeader.findViewById(R.id.toolbar_chat_user_icon);
         otherPersonNameTV.setText(mOtherPersonName);
-        Context context = container.getContext();
-        Glide.with(context)
-                .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
-                .dontAnimate()
-                .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
-                .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .into(otherPersonIconIV);
-
+        updateRoomIconView();
+        toolbar.addView(otherPersonHeader);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -311,6 +297,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             }
         });
 
+
         vSendButton = view.findViewById(R.id.send_button);
         vSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -381,6 +368,8 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
     @Override
     public void onResume() {
         super.onResume();
+
+        updateRoomIconView();
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
@@ -570,6 +559,31 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
             activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
     }
 
+    private void updateRoomIconView(){
+        View rootV = getView();
+        if(rootV == null) return;
+        Toolbar toolbar = (Toolbar)rootV.findViewById(R.id.chat_fragment_toolbar);
+        ImageView otherPersonIconIV = (ImageView)toolbar.findViewById(R.id.toolbar_chat_user_icon);
+
+
+        if(mOtherPersonProfileImage == null){
+            otherPersonIconIV.setVisibility(View.GONE);
+
+        }else{
+
+            //TODO make visible AFTER image is done loading
+            otherPersonIconIV.setVisibility(View.VISIBLE);
+            Context context = rootV.getContext();
+            Glide.with(context)
+                    .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
+                    .dontAnimate()
+                    .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                    .placeholder(R.drawable.image_loading_background)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .into(otherPersonIconIV);
+        }
+    }
+
 
     private void getRoomAndChat() {
         if (getActivity() == null || mUserId == null || mOtherPersonId == null) return;
@@ -601,6 +615,8 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                         JSONObject object = new JSONObject(response.body().string());
                         //Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
+//                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
+
                         JSONArray messages = object.getJSONArray("messages");
                         mSkip = object.getInt("totalCount") - 20;
 
@@ -758,6 +774,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                         //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
                         JSONArray imageAndVideo;
+                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
 
                         mSkip = object.getInt("skip");
 
@@ -766,6 +783,26 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                         Chat chat;
                         String owner;
                         Date time;
+
+                        //get other person profile image (gets profile image of first person who isn't the user)
+                        if(mOtherPersonProfileImage == null && mUserId != null){
+                            for(int i = 0; i < users.length(); i++){
+                                JSONObject user = users.getJSONObject(i);
+                                if(!mUserId.equals(user.getString("id"))){
+                                    mOtherPersonProfileImage = user.getString("profileImage");
+                                    Activity activity = getActivity();
+                                    if(activity != null){
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updateRoomIconView();
+                                            }
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
 
                         boolean viewerIsOwnerOfMessage;
                         boolean messageBeenRead;
@@ -1212,9 +1249,9 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
         public void call(Object... args) {
             try {
 
-                if (new JSONObject(args[0].toString()).getBoolean("reload"))
+                if (new JSONObject(args[0].toString()).getBoolean("reload")) {
                     getChat();
-
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1293,7 +1330,7 @@ public class ChatFragment extends UpdatableFragment implements ChatAdapter.LoadM
                     try {
                         JSONObject object = new JSONObject(response.body().string());
 
-//Log.i(TAG, "onResponse: "+object);
+                        //Log.i(TAG, "onResponse: "+object);
                         final JSONArray messages = object.getJSONArray("messages");
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
