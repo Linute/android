@@ -123,7 +123,6 @@ public class CameraFragment extends Fragment {
 
         mTakePhotoBtn = (ImageView) root.findViewById(R.id.capture_image_button);
 
-        //mAnonCheckbox = (CheckBox) root.findViewById(R.id.anon_checkbox);
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
 
         if (mCameraType == CameraActivity.JUST_CAMERA) {
@@ -141,7 +140,7 @@ public class CameraFragment extends Fragment {
         mCameraOps = root.findViewById(R.id.camera_ops);
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
 
-        setOnClickListeners(root); //activate buttons
+        setOnClickListeners(root);
 
         return root;
     }
@@ -569,7 +568,6 @@ public class CameraFragment extends Fragment {
      * Take a picture
      */
     private void takePicture() {
-
         if (mIsSafeToTakePhoto && !mIsRecording) {
             setSafeToTakePhoto(false);
 
@@ -582,7 +580,7 @@ public class CameraFragment extends Fragment {
                                 takeImageOfView();
                             }
                         }, 300);
-            } else {
+            } else { //flash was off or flash failed to turn on
                 takeImageOfView();
             }
         }
@@ -590,13 +588,13 @@ public class CameraFragment extends Fragment {
 
     //returns true if flashlight turned on
     private boolean turnOnFlashLight() {
-        if (mCamera.getParameters().getSupportedFlashModes().contains(Camera.Parameters.FLASH_MODE_TORCH)) {
+        List<String> flashModes = mCamera.getParameters().getSupportedFlashModes();
+        if (flashModes != null && flashModes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
             Camera.Parameters p = mCamera.getParameters();
             p.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
             mCamera.setParameters(p);
             return true;
         }
-
         return false;
     }
 
