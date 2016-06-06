@@ -24,11 +24,10 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +46,7 @@ import rx.schedulers.Schedulers;
 /**
  * Created by QiFeng on 1/6/16.
  */
-public class UpdatesFragment extends UpdatableFragment {
+public class UpdatesFragment extends BaseFragment {
 
     public static final String TAG = UpdatesFragment.class.getSimpleName();
     private RecyclerView mUpdatesRecyclerView;
@@ -60,7 +59,6 @@ public class UpdatesFragment extends UpdatableFragment {
 
     private View mEmptyView;
 
-    private boolean mSafeToAddToTop = false;
     private boolean mHasMessage;
     private AppBarLayout mAppBarLayout;
 
@@ -73,11 +71,17 @@ public class UpdatesFragment extends UpdatableFragment {
     private Handler mHandler = new Handler();
 
 
-    //private boolean mCanLoadMore = false;
-    //private int mSkip = 0;
+    private boolean mCanLoadMore = true;
+    private int mSkip = 0;
 
     public UpdatesFragment() {
+    }
 
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
     }
 
     @Nullable
@@ -147,27 +151,18 @@ public class UpdatesFragment extends UpdatableFragment {
         mUpdatesRecyclerView.setLayoutManager(llm);
         mUpdatesRecyclerView.setHasFixedSize(true);
 
-        mUpdatesAdapter = new UpdatesAdapter(getContext(), mRecentUpdates, mOldUpdates);
+        mUpdatesAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
+            @Override
+            public void loadMore() {
+                if(mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore){
+                    loadMoreUpdates();
+                }
+            }
+        });
+
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
         mEmptyView = rootView.findViewById(R.id.empty_view);
-
-        //NOTE: Code for load more
-        /*
-        mUpdatesAdapter.setOnLoadMoreListener(new UpdatesAdapter.onLoadMoreListener() {
-            @Override
-            public void loadMore() {
-                if (mCanLoadMore) {
-                    UpdatesFragment.this.loadMore();
-                } else {
-                    //remove the progress bar
-                    if (!mOldUpdates.isEmpty()) { //add progress bar to end
-                        mOldUpdates.remove(mOldUpdates.size() - 1);
-                    } else if (!mRecentUpdates.isEmpty()) //old was empty but new wasn't
-                        mRecentUpdates.remove(mRecentUpdates.size() - 1);
-                }
-            }
-        });*/
 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -199,8 +194,7 @@ public class UpdatesFragment extends UpdatableFragment {
                 .subscribe(mNotificationEventAction1);
 
 
-        if (fragmentNeedsUpdating() || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
-            setFragmentNeedUpdating(false);
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -260,13 +254,14 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     private void getUpdatesInformation() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
-        mSafeToAddToTop = false;
+        setFragmentState(FragmentState.LOADING_DATA);
 
-        new LSDKActivity(getActivity()).getActivities(-1, new Callback() {
+        new LSDKActivity(getActivity()).getActivities(-1, 50, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                setFragmentState(FragmentState.FINISHED_UPDATING);
                 showBadConnectiontToast();
             }
 
@@ -274,24 +269,14 @@ public class UpdatesFragment extends UpdatableFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        String resString = response.body().string();
+                        JSONObject obj = new JSONObject(response.body().string());
 
-                        JSONArray activities = Update.getJsonArrayFromJson(new JSONObject(resString), "activities");
+                        JSONArray activities = obj.getJSONArray("activities");
 
-                        if (activities == null) {
-                            showServerErrorToast();
-                            return;
-                        }
-                        //Log.i(TAG, "onResponse: " + activities.getJSONObject(activities.length() - 4).toString(4));
-                        ArrayList<Update> oldItems = new ArrayList<>();
-                        ArrayList<Update> newItems = new ArrayList<>();
+                        // Log.i(TAG, "onResponse: " + obj.toString(4));
 
-                        //no more information to load
-                        //if (activities.length() < 25) mCanLoadMore = false;
-
-                        //mSkip = 25;
-
-                        if (getActivity() == null) return;
+                        final ArrayList<Update> oldItems = new ArrayList<>();
+                        final ArrayList<Update> newItems = new ArrayList<>();
 
                         JSONArray unread = new JSONArray();
 
@@ -312,53 +297,66 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
                         final MainActivity activity = (MainActivity) getActivity();
-                        if (activity == null) return;
+                        if (activity != null) {
 
 
-                        if (unread.length() > 0) {
-                            JSONObject obj = new JSONObject();
-                            obj.put("activities", unread);
-
-                            activity.emitSocket(API_Methods.VERSION + ":activities:read", obj);
-                        }
-
-                        mOldUpdates.clear();
-                        mOldUpdates.addAll(oldItems);
-
-                        mRecentUpdates.clear();
-                        mRecentUpdates.addAll(newItems);
-
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                activity.setUpdateNotification(0);
-                                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
-
-                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                                }
-
-                                if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
-                                    if (mEmptyView.getVisibility() == View.GONE)
-                                        mEmptyView.setVisibility(View.VISIBLE);
-                                } else {
-                                    if (mEmptyView.getVisibility() == View.VISIBLE)
-                                        mEmptyView.setVisibility(View.GONE);
-                                }
-
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mUpdatesAdapter.notifyDataSetChanged();
-                                    }
-                                });
-
-                                mSwipeRefreshLayout.setRefreshing(false);
-                                mSafeToAddToTop = true;
+                            if (unread.length() > 0) {
+                                JSONObject read = new JSONObject();
+                                read.put("activities", unread);
+                                activity.emitSocket(API_Methods.VERSION + ":activities:read", read);
                             }
-                        });
 
+                            mSkip = obj.getInt("skip");
+
+                            //no more information to load
+                            if (mSkip <= 0) {
+                                mCanLoadMore = false;
+                                mUpdatesAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+                            }else {
+                                mCanLoadMore = true;
+                                mUpdatesAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
+                            }
+
+                            mSkip -= 50;
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    activity.setUpdateNotification(0);
+                                    NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
+                                    NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
+
+                                    //if no updates or discover, remove indicator
+                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
+                                    }
+
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            mOldUpdates.clear();
+                                            mOldUpdates.addAll(oldItems);
+
+                                            mRecentUpdates.clear();
+                                            mRecentUpdates.addAll(newItems);
+
+                                            mUpdatesAdapter.notifyDataSetChanged();
+
+                                            if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
+                                                if (mEmptyView.getVisibility() == View.GONE)
+                                                    mEmptyView.setVisibility(View.VISIBLE);
+                                            } else {
+                                                if (mEmptyView.getVisibility() == View.VISIBLE)
+                                                    mEmptyView.setVisibility(View.GONE);
+                                            }
+                                        }
+                                    });
+
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                         showServerErrorToast();
@@ -367,9 +365,147 @@ public class UpdatesFragment extends UpdatableFragment {
                     showServerErrorToast();
                     Log.e(TAG, "onResponse: " + response.body().string());
                 }
+
+                setFragmentState(FragmentState.FINISHED_UPDATING);
             }
         });
+    }
 
+    private boolean mLoadingMore = false;
+
+    private void loadMoreUpdates(){
+        if (getActivity() == null) return;
+
+        mLoadingMore = true;
+
+        int limit = 50;
+
+        int skip = mSkip;
+
+        if (skip < 0) {
+            limit += skip;
+            skip = 0;
+        }
+
+        final int skip1 = skip;
+        new LSDKActivity(getActivity()).getActivities(skip1, limit, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null){
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()){
+                    try {
+                        JSONObject obj = new JSONObject(response.body().string());
+
+                        JSONArray activities = obj.getJSONArray("activities");
+
+                        // Log.i(TAG, "onResponse: " + obj.toString(4));
+
+                        final ArrayList<Update> oldItems = new ArrayList<>();
+                        final ArrayList<Update> newItems = new ArrayList<>();
+
+                        JSONArray unread = new JSONArray();
+
+                        Update update;
+                        //iterate through array of activities
+                        for (int i = activities.length() - 1; i >= 0; i--) {
+                            try {
+                                update = new Update(activities.getJSONObject(i));
+                                if (update.isRead()) oldItems.add(update); //if read, it's old
+                                else {
+                                    newItems.add(update); //else recent
+                                    unread.put(update.getActionID());
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+
+                        final MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null) {
+                            if (unread.length() > 0) {
+                                JSONObject read = new JSONObject();
+                                read.put("activities", unread);
+                                activity.emitSocket(API_Methods.VERSION + ":activities:read", read);
+                            }
+
+                            //no more information to load
+                            if (skip1 <= 0) {
+                                mCanLoadMore = false;
+                                mUpdatesAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+                            }
+
+                            mSkip -= 50;
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    activity.setUpdateNotification(0);
+                                    NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
+                                    NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
+
+                                    //if no updates or discover, remove indicator
+                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
+                                    }
+
+                                    if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
+                                        if (mEmptyView.getVisibility() == View.GONE)
+                                            mEmptyView.setVisibility(View.VISIBLE);
+                                    } else {
+                                        if (mEmptyView.getVisibility() == View.VISIBLE)
+                                            mEmptyView.setVisibility(View.GONE);
+                                    }
+
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mOldUpdates.addAll(oldItems);
+                                            mRecentUpdates.addAll(newItems);
+                                            mUpdatesAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null){
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                }else {
+                    Log.i(TAG, "onResponseError: "+response.body().string());
+                    if (getActivity() != null){
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+                mLoadingMore = false;
+            }
+        });
     }
 
 
@@ -397,7 +533,7 @@ public class UpdatesFragment extends UpdatableFragment {
 
 
     public boolean addItemToRecents(final Update update) {
-        if (mSafeToAddToTop && !mSwipeRefreshLayout.isRefreshing()) {
+        if (getFragmentState() == FragmentState.FINISHED_UPDATING && !mSwipeRefreshLayout.isRefreshing()) {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

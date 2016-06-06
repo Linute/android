@@ -33,7 +33,7 @@ import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -56,7 +56,7 @@ import okhttp3.Response;
 
 //TODO: ADD RELOAD BUTTON
 
-public class FindFriendsFragment extends UpdatableFragment {
+public class FindFriendsFragment extends BaseFragment {
 
     public static final int SEARCH_TYPE_NAME = 0;
     public static final int SEARCH_TYPE_FACEBOOK = 1;
@@ -141,7 +141,6 @@ public class FindFriendsFragment extends UpdatableFragment {
             } else {
                 mFindFriendsRationale.setVisibility(View.GONE);
             }
-            setFragmentNeedUpdating(false);
         } else if (mSearchType == SEARCH_TYPE_FACEBOOK) { //facebook
             rationaleText.setText(R.string.facebook_rationale);
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.facebook_blue));
@@ -413,7 +412,6 @@ public class FindFriendsFragment extends UpdatableFragment {
                                 mUnfilteredList.add(user);
                             }
                         }
-                        setFragmentNeedUpdating(false);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -564,8 +562,6 @@ public class FindFriendsFragment extends UpdatableFragment {
                             }
                         }
 
-                        setFragmentNeedUpdating(false);
-
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -606,8 +602,6 @@ public class FindFriendsFragment extends UpdatableFragment {
 
         });
     }
-
-    //TODO: get rid of progress bar mIn = false, hide text
 
     private void setUpFacebookCallback() {
 

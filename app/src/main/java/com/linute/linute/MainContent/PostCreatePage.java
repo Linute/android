@@ -188,7 +188,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                             "token=" + mSharedPreferences.getString("userToken", "") +
                                     "&deviceToken=" + device.getDeviceToken() +
                                     "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
+                                    "&version=" + device.getVersionName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&type=" + device.getType() +

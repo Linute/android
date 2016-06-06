@@ -14,9 +14,7 @@
     <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView android:id="@+id/video"
                                                                     android:layout_width="match_parent"
                                                                     android:layout_height="match_parent"
-                                                                    android:layout_gravity="center"
-                                                                    android:background="@color/seperator_color"
-    />
+                                                                    android:layout_gravity="center"/>
 
     <View android:id="@+id/icon"
           android:layout_width="72dp"

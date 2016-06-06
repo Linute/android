@@ -550,7 +550,7 @@ public class EditSaveVideoFragment extends Fragment {
                                 "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
                                         "&deviceToken=" + device.getDeviceToken() +
                                         "&udid=" + device.getUdid() +
-                                        "&version=" + device.getVersonName() +
+                                        "&version=" + device.getVersionName() +
                                         "&build=" + device.getVersionCode() +
                                         "&os=" + device.getOS() +
                                         "&platform=" + device.getType() +

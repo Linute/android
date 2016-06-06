@@ -28,12 +28,6 @@ public class LSDKChat {
         return API_Methods.get(path, header, param, callback);
     }
 
-    public Call getOrCreateRoom(Map<String, Object> param, Callback callback){
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        return API_Methods.post("rooms", header, param, callback);
-    }
-
     public Call getUsers(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
@@ -41,17 +35,6 @@ public class LSDKChat {
         return API_Methods.get(path, header, param, callback);
     }
 
-    public Call checkUserConvo(Map<String, String> param, Callback callback) {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        String[] path = {"rooms"};
-        return API_Methods.get(path, header, param, callback);
-    }
-
-    public Call newChat(Map<String, Object> param, Callback callback) {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-        return API_Methods.post("messages", header, param, callback);
-    }
 
     public Call getChat(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);

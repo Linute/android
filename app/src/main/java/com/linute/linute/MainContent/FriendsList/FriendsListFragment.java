@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -30,7 +30,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 2/6/16.
  */
-public class FriendsListFragment extends UpdatableFragment {
+public class FriendsListFragment extends BaseFragment {
 
     public static final String TAG = FriendsListFragment.class.getSimpleName();
 
@@ -47,7 +47,6 @@ public class FriendsListFragment extends UpdatableFragment {
     private TextView mEmptyView;
 
     private View mProgressBar;
-    private boolean mInfoSuccessfullyRetrieved = false;
 
     public FriendsListFragment() {
 
@@ -69,6 +68,9 @@ public class FriendsListFragment extends UpdatableFragment {
             mFollowing = getArguments().getBoolean(FOLLOWING_OR_FOLLOWER_KEY);
             mUserId = getArguments().getString(USER_ID_KEY);
         }
+
+        if (mFriendsListAdapter == null)
+            mFriendsListAdapter = new FriendsListAdapter(mFriendList, getActivity(), mFollowing);
     }
 
 
@@ -93,7 +95,6 @@ public class FriendsListFragment extends UpdatableFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendsListAdapter = new FriendsListAdapter(mFriendList, getActivity(), mFollowing);
         mFriendsListAdapter.setOnLoadMoreListener(new FriendsListAdapter.OnLoadMoreListener() {
             @Override
             public void loadMore() {
@@ -103,10 +104,9 @@ public class FriendsListFragment extends UpdatableFragment {
 
         recyclerView.setAdapter(mFriendsListAdapter);
 
-        if (fragmentNeedsUpdating()) {
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getFriendsList();
-            setFragmentNeedUpdating(false);
-        }else {
+        }else if (getFragmentState() == FragmentState.FINISHED_UPDATING){
             if (mFriendList.isEmpty()){
                 mEmptyView.setText("No results found");
                 mEmptyView.setVisibility(View.VISIBLE);
@@ -118,11 +118,13 @@ public class FriendsListFragment extends UpdatableFragment {
 
     private void getFriendsList() {
         if (getActivity() == null) return;
+
+        setFragmentState(FragmentState.LOADING_DATA);
         mProgressBar.setVisibility(View.VISIBLE);
         new LSDKFriends(getActivity()).getFriends(mUserId, mFollowing, "0", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                mInfoSuccessfullyRetrieved = false;
+                setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -158,7 +160,6 @@ public class FriendsListFragment extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mInfoSuccessfullyRetrieved = true;
                                     mProgressBar.setVisibility(View.GONE);
                                     mFriendsListAdapter.notifyDataSetChanged();
                                     if (mFriendList.isEmpty()){
@@ -175,7 +176,6 @@ public class FriendsListFragment extends UpdatableFragment {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mInfoSuccessfullyRetrieved = false;
                                     Utils.showServerErrorToast(getActivity());
                                     mProgressBar.setVisibility(View.GONE);
                                 }
@@ -184,7 +184,6 @@ public class FriendsListFragment extends UpdatableFragment {
                     }
                 } else {
                     Log.e(TAG, response.body().string());
-                    mInfoSuccessfullyRetrieved = false;
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -197,6 +196,7 @@ public class FriendsListFragment extends UpdatableFragment {
                         });
                     }
                 }
+                setFragmentState(FragmentState.FINISHED_UPDATING);
             }
 
         });
@@ -206,10 +206,14 @@ public class FriendsListFragment extends UpdatableFragment {
     private boolean mCanLoadMore = true;
 
     private void loadMore() {
-        if (!mCanLoadMore && getActivity() == null) return;
+        if (!mCanLoadMore || getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
+
+        setFragmentState(FragmentState.LOADING_DATA);
+
         new LSDKFriends(getActivity()).getFriends(mUserId, mFollowing, mSkip + "", new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -274,6 +278,8 @@ public class FriendsListFragment extends UpdatableFragment {
                         });
                     }
                 }
+
+                setFragmentState(FragmentState.FINISHED_UPDATING);
             }
         });
     }

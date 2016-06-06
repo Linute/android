@@ -47,7 +47,7 @@
                                                          android:layout_height="wrap_content"
                                                          android:background="#FFFFFF"
                                                          android:focusableInTouchMode="true">
-
+        <!--android:inputType="textMultiLine|textNoSuggestions|textCapSentences"-->
         <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
             android:id="@+id/post_create_text"
             android:layout_width="match_parent"
@@ -59,8 +59,8 @@
             android:background="@null"
             android:gravity="center_vertical"
             android:hint="Enter your text here"
+            android:inputType="textMultiLine|textCapSentences"
             android:imeOptions="actionDone"
-            android:inputType="textMultiLine|textNoSuggestions|textCapSentences"
             android:maxLines="8"
             android:textColor="#000000"
             android:textSize="28sp"

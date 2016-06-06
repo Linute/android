@@ -20,17 +20,7 @@
 -dontwarn com.makeramen.roundedimageview.**
 -dontwarn sun.misc.Unsafe
 
-## GreenRobot EventBus specific rules ##
-# http://greenrobot.org/eventbus/documentation/proguard/
-
--keepattributes *Annotation*
-
--keepclassmembers class ** {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
-
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
-
+## rxjava
 -keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
     long producerIndex;
     long consumerIndex;

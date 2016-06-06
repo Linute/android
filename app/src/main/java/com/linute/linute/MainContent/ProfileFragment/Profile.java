@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +25,8 @@ import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -42,29 +44,27 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class Profile extends UpdatableFragment {
+public class Profile extends BaseFragment {
     public static final String TAG = Profile.class.getSimpleName();
-
-    //public static final String PARCEL_DATA_KEY = "profileFragmentArrayOfActivities";
 
     private ProfileAdapter mProfileAdapter;
 
     private Toolbar mToolbar;
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    //private ImageView vProfileImage;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
 
-    private LSDKUser mUser;
     private SharedPreferences mSharedPreferences;
 
     private boolean mHasNotification;
 
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
-    private boolean mOtherCompotentHasUpdated = false;
+    private boolean mOtherComponentHasUpdated = false;
 
+    //handler that makes sure notify adapters are called in sequential order
+    //causes crashes if else
     private Handler mHandler = new Handler();
 
     private Runnable rServerErrorAction = new Runnable() {
@@ -87,11 +87,16 @@ public class Profile extends UpdatableFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = false;
-
-    private boolean mTitleIsVisible = false;
+    //private boolean mTitleIsVisible = false;
 
     public Profile() {
         // Required empty public constructor
+    }
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -100,7 +105,6 @@ public class Profile extends UpdatableFragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
-        mUser = new LSDKUser(getContext());
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
@@ -110,47 +114,65 @@ public class Profile extends UpdatableFragment {
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if (position == 0 || position == 1) return 3; //header is size 3
+                //header is size 3
+                //0 for image and 1 for profile info
+                if (position == 0 || position == 1)
+                    return 3;
+                    //view that shows empty
                 else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
                     return 3; //empty view size 3
-
+                    // view that shows loading indicator
+                else if (position == mUserActivityItems.size() + 2)
+                    return 3;
                 else return 1;
             }
         });
 
         recList.setLayoutManager(llm);
-        user = LinuteUser.getDefaultUser(getContext()); //get data from sharedpref
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext());
+
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+
+        if (user == null || mProfileAdapter == null) {
+            //get data from sharedpref
+            user = LinuteUser.getDefaultUser(getContext());
+            mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext());
+            mProfileAdapter.setTitleTextListener(new ProfileAdapter.TitleTextListener() {
+                @Override
+                protected void showTitle(boolean show) {
+                    mToolbar.setTitle(show ? user.getFirstName() + " " + user.getLastName() : "");
+                }
+            });
+        }
+
         recList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mOtherCompotentHasUpdated = false;
+                mOtherComponentHasUpdated = false;
                 updateAndSetHeader();
                 setActivities(); //get activities
-
             }
         });
 
-        mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts() {
+        mProfileAdapter.setLoadMorePosts(new LoadMoreViewHolder.OnLoadMore() {
             @Override
-            public void loadMorePosts() {
-                if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing()) {
-                    mSwipeRefreshLayout.setRefreshing(true);
+            public void loadMore() {
+                if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore) {
                     getMoreActivities();
                 }
             }
         });
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 recList.scrollToPosition(0);
             }
         });
+        if (mProfileAdapter.titleShown())
+            mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
 
 
         mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
@@ -182,37 +204,30 @@ public class Profile extends UpdatableFragment {
             }
         });
 
-        if (fragmentNeedsUpdating()) {
-            mToolbar.getBackground().mutate().setAlpha(0);
-        }else if (mTitleIsVisible){
-            mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
-        }
-
+        //lower the swipe refresh
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
+        //when user scrolls down, change alpha of actionbar
         recList.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                         super.onScrolled(recyclerView, dx, dy);
-
                         if (llm.findFirstVisibleItemPosition() == 0) {
                             View view = recyclerView.getChildAt(0);
                             if (view != null) {
+
+                                //// TODO: 5/29/16  shit that's a lot of casting. I'm sure there's a way to minimize
                                 int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
+                                //255 is max
+                                //unpredictable actions if it's over 255
                                 if (alpha >= 255) {
                                     alpha = 255;
-                                    if (!mTitleIsVisible){
-                                        mTitleIsVisible = true;
-                                        mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
-                                    }
                                 } else {
+                                    //unpredicatable if less than 0
                                     if (alpha < 0) alpha = 0;
-                                    if (mTitleIsVisible){
-                                        mTitleIsVisible = false;
-                                        mToolbar.setTitle("");
-                                    }
                                 }
+
                                 mToolbar.getBackground().mutate().setAlpha(alpha);
                             }
                         }
@@ -226,6 +241,7 @@ public class Profile extends UpdatableFragment {
     public void onResume() {
         super.onResume();
 
+        //the menu icon badge
         mNotificationSubscription = NotificationEventBus
                 .getInstance()
                 .getObservable()
@@ -234,18 +250,20 @@ public class Profile extends UpdatableFragment {
                 .subscribe(mNotificationEventAction1);
 
         //only update this fragment when it is first created or set to reupdate from outside
-        if (fragmentNeedsUpdating()) {
-            mOtherCompotentHasUpdated = false;
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            mOtherComponentHasUpdated = false;
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshLayout.setRefreshing(true);
                 }
             });
-            updateAndSetHeader(); //get information from server to update profile
 
+            updateAndSetHeader(); //get information from server to update profile
             setActivities();
-            setFragmentNeedUpdating(false);
+
+            //a bit trickier because we have 2 things we need updated
+            setFragmentState(FragmentState.FINISHED_UPDATING);
         }
     }
 
@@ -259,7 +277,8 @@ public class Profile extends UpdatableFragment {
 
     //get user information from server
     public void updateAndSetHeader() {
-        mUser.getProfileInfo(mSharedPreferences.getString("userID", null), new Callback() {
+        if (getActivity() == null) return;
+        new LSDKUser(getActivity()).getProfileInfo(mSharedPreferences.getString("userID", null), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -270,39 +289,38 @@ public class Profile extends UpdatableFragment {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //attempt to update view with response
-                    final String body = response.body().string();
-                    if (getActivity() == null) return;
-                    JSONObject jsonObject = null;
                     try {
-                        jsonObject = new JSONObject(body);
+                        JSONObject jsonObject = new JSONObject(response.body().string());
+                        user.updateUserInformation(jsonObject); //model for new information
+                        savePreferences(user);
+
+                        if (getActivity() == null) return;
+
+
+                        //set activities and update header are different calls
+                        //when we refresh, we need both to finish loading before we remove the loading indicator
+                        if (!mOtherComponentHasUpdated) {
+                            mOtherComponentHasUpdated = true;
+                        } else {
+                            mOtherComponentHasUpdated = false;
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //remove all callbacks
+                                    mHandler.removeCallbacksAndMessages(null);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mProfileAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            });
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    }
-                    user.updateUserInformation(jsonObject); //container for new information
-//                    Log.d(TAG, "onResponse: " + jsonObject);
-
-                    savePreferences(user);
-//                    Log.d(TAG, body);
-                    if (getActivity() == null) return;
-
-                    if (!mOtherCompotentHasUpdated) {
-                        mOtherCompotentHasUpdated = true;
-                    } else {
-                        mOtherCompotentHasUpdated = false;
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mHandler.removeCallbacksAndMessages(null);
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mProfileAdapter.notifyDataSetChanged();
-                                    }
-                                });
-
-                                mSwipeRefreshLayout.setRefreshing(false);
-                            }
-                        });
                     }
                 } else {//else something went
                     Log.v(TAG, response.body().string());
@@ -333,15 +351,14 @@ public class Profile extends UpdatableFragment {
     public void setActivities() {
 
         //skip  = -1 so we don't add skip to query
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), -1, 24, new Callback() { //todo fix skip
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), -1, 24, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
                     public void run() {
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
+                        mSwipeRefreshLayout.setRefreshing(false);
                         Utils.showBadConnectionToast(getContext());
                     }
                 });
@@ -352,10 +369,7 @@ public class Profile extends UpdatableFragment {
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
 
-                        String body = response.body().string();
-                        //Log.i(TAG, "onResponse: " + body);
-
-                        JSONObject bodyJson = new JSONObject(body);
+                        JSONObject bodyJson = new JSONObject(response.body().string());
 
                         mSkip = bodyJson.getInt("skip");
 
@@ -379,6 +393,8 @@ public class Profile extends UpdatableFragment {
                         //if skip was 0, we have reached end of db
                         mCanLoadMore = mSkip > 0;
 
+                        mProfileAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+
                         mUserActivityItems.clear();
                         mUserActivityItems.addAll(userActItems);
 
@@ -386,23 +402,23 @@ public class Profile extends UpdatableFragment {
                             mUserActivityItems.add(new EmptyUserActivityItem());
                         }
 
+                        mSkip -= 24;
                         if (getActivity() == null) return;
 
-                        mSkip -= 24;
-
-                        if (!mOtherCompotentHasUpdated) {
-                            mOtherCompotentHasUpdated = true;
+                        if (!mOtherComponentHasUpdated) {
+                            mOtherComponentHasUpdated = true;
                         } else {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() { //update view
-                                    mOtherCompotentHasUpdated = false;
+                                    mOtherComponentHasUpdated = false;
 
                                     mHandler.removeCallbacksAndMessages(null);
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
                                             mProfileAdapter.notifyDataSetChanged();
+
                                         }
                                     });
 
@@ -433,24 +449,33 @@ public class Profile extends UpdatableFragment {
     }
 
 
+    private boolean mLoadingMore = false;
+
     public void getMoreActivities() {
+
+        if (getActivity() == null) return;
+
+        mLoadingMore = true;
 
         int limit = 24;
 
-        if (mSkip < 0) {
-            limit += mSkip;
-            mSkip = 0;
+        int skip = mSkip;
+
+        if (skip < 0) {
+            limit += skip;
+            skip = 0;
         }
 
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), mSkip, limit, new Callback() {
+        final int skip1 = skip;
+
+        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), skip1, limit, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                mLoadingMore = false;
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
                     public void run() {
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
                         Utils.showBadConnectionToast(getContext());
                     }
                 });
@@ -465,7 +490,7 @@ public class Profile extends UpdatableFragment {
 
                         if (activities == null) return;
 
-                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
+                        final ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
                         for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
@@ -479,34 +504,39 @@ public class Profile extends UpdatableFragment {
                         }
 
 
-                        mUserActivityItems.addAll(userActItems);
-
                         //if skip isn't 0, we can still load more
-                        mCanLoadMore = mSkip > 0;
-                        mSkip -= 24; //skip 24 posts
+                        mCanLoadMore = skip1 > 0;
 
-                        if (getActivity() == null) return;
+                        if (!mCanLoadMore) {
+                            mProfileAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
+                        }
 
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() { //update view
-
-                                mHandler.removeCallbacksAndMessages(null);
-                                mHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mProfileAdapter.notifyDataSetChanged();
-                                    }
-                                });
-
-                                mSwipeRefreshLayout.setRefreshing(false);
-                            }
-                        });
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { //update view
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSkip -= 24; //skip 24 posts
+                                            int size = mUserActivityItems.size() + 2;
+                                            mUserActivityItems.addAll(userActItems);
+                                            mProfileAdapter.notifyItemRangeInserted(size, userActItems.size());
+                                        }
+                                    });
+                                }
+                            });
+                        }
 
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
                         if (getActivity() != null) {
-                            getActivity().runOnUiThread(rServerErrorAction);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
                         }
                     }
                 } else { //unable to connect with DB
@@ -515,12 +545,13 @@ public class Profile extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mSwipeRefreshLayout.setRefreshing(false);
                                 Utils.showServerErrorToast(getActivity());
                             }
                         });
                     }
                 }
+
+                mLoadingMore = false;
             }
         });
     }

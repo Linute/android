@@ -22,7 +22,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     protected ImageView vEventImage;
 
     private Context mContext;
-    private SharedPreferences mSharedPreferences;
 
     private UserActivityItem mUserActivityItem;
 
@@ -35,8 +34,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         super(itemView);
 
         mContext = context;
-        mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
         vEventImage = (ImageView) itemView.findViewById(R.id.profile_grid_item_image);
         vGradient = itemView.findViewById(R.id.gradient);
         vAnonIcon = itemView.findViewById(R.id.anon_icon);
@@ -50,7 +47,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
                 .load(userActivityItem.getEventImagePath())
                 .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
-                .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(vEventImage);
 

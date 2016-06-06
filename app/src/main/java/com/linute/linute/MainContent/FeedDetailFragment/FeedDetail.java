@@ -11,7 +11,6 @@ import java.util.List;
  */
 
 public class FeedDetail {
-    private static final String TAG = FeedDetail.class.getSimpleName();
     private Post mPost;
 
     private List<Object> mComments = new ArrayList<>();
@@ -25,44 +24,12 @@ public class FeedDetail {
         return mPost;
     }
 
-    public String getPostImage() {
-        return mPost.getImage();
-    }
-
-    public String getPostText() {
-        return mPost.getTitle();
-    }
-
-    public String getUserImage() {
-        return mPost.getUserImage();
-    }
-
     public String getUserName() {
         return mPost.getUserName();
     }
 
     public int getPostPrivacy() {
         return mPost.getPrivacy();
-    }
-
-    public String getPostTime() {
-        return Utils.getTimeAgoString(mPost.getPostLongTime());
-    }
-
-    public boolean isPostLiked() {
-        return mPost.isPostLiked();
-    }
-
-    public void setIsPostLiked(boolean isPostLiked) {
-        mPost.setPostLiked(isPostLiked);
-    }
-
-    public String getPostLikeNum() {
-        return mPost.getNumLike();
-    }
-
-    public void setPostLikeNum(String postLikeNum) {
-        mPost.setNumLike(Integer.parseInt(postLikeNum));
     }
 
     public List<Object> getComments() {
@@ -73,20 +40,12 @@ public class FeedDetail {
         mComments.addAll(comments);
     }
 
-    //public String getUserLiked() {
-        //return mUserLiked;
-    //}
-
     public String getPostId() {
         return mPost.getPostId();
     }
 
     public String getPostUserId() {
         return mPost.getUserId();
-    }
-
-    public String getNumOfComments(){
-        return mPost.getNumOfComments()+"";
     }
 
     public void setPostPrivacy(int privacy){
@@ -97,23 +56,11 @@ public class FeedDetail {
         mPost.setNumOfComments(mComments.size());
     }
 
-    public void setNumComments(int comments){
-        mPost.setNumOfComments(comments);
-    }
-
     public void setAnonImage(String image){
         mPost.setAnonImage(image);
     }
 
     public boolean isAnon (){
         return mPost.getPrivacy() == 1;
-    }
-
-    public String getAnonPic(){
-        return mPost.getAnonImage();
-    }
-
-    public String getVideoUrl(){
-        return mPost.getVideoUrl();
     }
 }

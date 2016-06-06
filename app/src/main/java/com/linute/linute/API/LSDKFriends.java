@@ -46,8 +46,4 @@ public class LSDKFriends {
 
         return API_Methods.get(new String[] {"friends"},header, param, callback);
     }
-
-
-
-
 }

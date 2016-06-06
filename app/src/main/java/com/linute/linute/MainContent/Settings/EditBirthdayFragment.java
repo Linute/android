@@ -73,7 +73,7 @@ public class EditBirthdayFragment extends Fragment {
         //try to set date picker to person's birthday
         try {
             if (!dob.equals("null")) {
-                c.setTime(Utils.DATE_FORMAT.parse(dob));
+                c.setTime(Utils.getDateFormat().parse(dob));
             }
         } catch (ParseException e) {
             e.printStackTrace();

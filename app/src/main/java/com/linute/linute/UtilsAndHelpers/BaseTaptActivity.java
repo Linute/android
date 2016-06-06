@@ -14,42 +14,10 @@ import io.socket.emitter.Emitter;
  */
 public abstract class BaseTaptActivity extends AppCompatActivity {
 
-
-//    public void resetToolbar() {
-//
-//    }
-
-
-    //actionbar elevation looks weird when tabs are added
-    //raise and lower it when needed
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//    public void raiseAppBarLayoutElevation() {
-//        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
-//        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-//    }
-//
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//    public void lowerAppBarElevation() {
-//        //NOTE MAKE SURE YOU USE THIS IF CLAUSE
-//        //if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-//    }
-
-
-    /*
-        so action bar can move with scrolling
-     */
-
-//    public void enableBarScrolling(boolean enabled){
-//    }
-//
-//    public void showMainToolbar(boolean show){
-//
-//    }
-
     /* MainActivity has tabs of Updatable fragments
      *  use this function to tell tab it needs to reload
      */
-    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index){
+    public void setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState state, int index){
     }
 
 
