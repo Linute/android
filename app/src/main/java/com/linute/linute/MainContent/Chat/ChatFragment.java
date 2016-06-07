@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -749,6 +750,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONArray listOfUnreadMessages = new JSONArray();
                         parseMessagesJSON(messages, tempChatList,  listOfUnreadMessages);
 
+                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
+                        if(mOtherPersonProfileImage == null && mUserId != null){
+                            for(int i = 0; i < users.length(); i++){
+                                JSONObject user = users.getJSONObject(i);
+                                if(!mUserId.equals(user.getString("id"))){
+                                    mOtherPersonProfileImage = user.getString("profileImage");
+                                    Activity activity = getActivity();
+                                    if(activity != null){
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updateRoomIconView();
+                                            }
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
 
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
@@ -1235,6 +1255,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONArray listOfUnreadMessages = new JSONArray();
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
+                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
+                        if(mOtherPersonProfileImage == null && mUserId != null){
+                            for(int i = 0; i < users.length(); i++){
+                                JSONObject user = users.getJSONObject(i);
+                                if(!mUserId.equals(user.getString("id"))){
+                                    mOtherPersonProfileImage = user.getString("profileImage");
+                                    Activity activity = getActivity();
+                                    if(activity != null){
+                                        activity.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                updateRoomIconView();
+                                            }
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
 
 
 
