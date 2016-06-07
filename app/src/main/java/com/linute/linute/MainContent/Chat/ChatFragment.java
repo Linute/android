@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -628,67 +627,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mSkip = object.getInt("totalCount") - 20;
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
-                        JSONObject message;
-                        Chat chat;
-                        String owner;
-                        Date date;
-                        JSONArray imageAndVideo;
-
-                        boolean viewerIsOwnerOfMessage;
-                        boolean messageBeenRead;
-
                         JSONArray listOfUnreadMessages = new JSONArray();
-                        SimpleDateFormat format = Utils.getDateFormat();
 
-                        for (int i = 0; i < messages.length(); i++) {
-                            try {
-                                message = messages.getJSONObject(i);
-                                owner = message.getJSONObject("owner").getString("id");
-                                viewerIsOwnerOfMessage = owner.equals(mUserId);
-
-                                messageBeenRead = true;
-
-                                if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
-                                    messageBeenRead = haveRead(message.getJSONArray("read"));
-                                }
-
-                                try {
-                                    date = format.parse(message.getString("date"));
-                                } catch (ParseException | JSONException e) {
-                                    date = null;
-                                }
-
-                                chat = new Chat(
-                                        message.getString("room"),
-                                        date,
-                                        owner,
-                                        message.getString("id"),
-                                        message.getString("text"),
-                                        messageBeenRead,
-                                        viewerIsOwnerOfMessage
-                                );
-
-                                if (!messageBeenRead) {
-                                    listOfUnreadMessages.put(chat.getMessageId());
-                                }
-
-                                imageAndVideo = message.getJSONArray("images");
-                                if (imageAndVideo.length() > 0) {
-                                    chat.setImageId(imageAndVideo.getString(0));
-                                    imageAndVideo = message.getJSONArray("videos");
-                                    if (imageAndVideo.length() > 0) {
-                                        chat.setVideoId(imageAndVideo.getString(0));
-                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
-                                    } else {
-                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
-                                    }
-                                }
-
-                                tempChatList.add(chat);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
@@ -787,113 +728,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONObject object = new JSONObject(response.body().string());
                         //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
-                        JSONArray imageAndVideo;
-                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
 
                         mSkip = object.getInt("skip");
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
-                        JSONObject message;
-                        Chat chat;
-                        String owner;
-                        Date time;
-
-                        //get other person profile image (gets profile image of first person who isn't the user)
-                        if(mOtherPersonProfileImage == null && mUserId != null){
-                            for(int i = 0; i < users.length(); i++){
-                                JSONObject user = users.getJSONObject(i);
-                                if(!mUserId.equals(user.getString("id"))){
-                                    mOtherPersonProfileImage = user.getString("profileImage");
-                                    Activity activity = getActivity();
-                                    if(activity != null){
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                updateRoomIconView();
-                                            }
-                                        });
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-
-                        boolean viewerIsOwnerOfMessage;
-                        boolean messageBeenRead;
-
                         JSONArray listOfUnreadMessages = new JSONArray();
-                        SimpleDateFormat format = Utils.getDateFormat();
-
-                        for (int i = 0; i < messages.length(); i++) {
-                            try {
-                                message = messages.getJSONObject(i);
-                                owner = message.getJSONObject("owner").getString("id");
-                                viewerIsOwnerOfMessage = owner.equals(mUserId);
+                        parseMessagesJSON(messages, tempChatList,  listOfUnreadMessages);
 
 
-                                messageBeenRead = true;
-
-                                if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
-                                    messageBeenRead = haveRead(message.getJSONArray("read"));
-                                }
-
-                                try {
-                                    time = format.parse(message.getString("date"));
-                                } catch (ParseException | JSONException e) {
-                                    time = null;
-                                }
-
-                                chat = new Chat(
-                                        message.getString("room"),
-                                        time,
-                                        owner,
-                                        message.getString("id"),
-                                        message.getString("text"),
-                                        messageBeenRead,
-                                        viewerIsOwnerOfMessage
-                                );
-
-                                if (!messageBeenRead) {
-                                    listOfUnreadMessages.put(chat.getMessageId());
-                                }
-
-                                imageAndVideo = message.getJSONArray("images");
-                                if (imageAndVideo.length() > 0) {
-                                    chat.setImageId(imageAndVideo.getString(0));
-                                    imageAndVideo = message.getJSONArray("videos");
-                                    if (imageAndVideo.length() > 0) {
-                                        chat.setVideoId(imageAndVideo.getString(0));
-                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
-                                    } else {
-                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
-                                    }
-                                }
-
-                                tempChatList.add(chat);
-
-                                if(i == messages.length()-1){
-
-
-                                }
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if(tempChatList.size() > 0) {
-                            Chat lastMessage = tempChatList.get(tempChatList.size()-1);
-                            Chat header = new Chat(
-                                    lastMessage.getRoomId(),
-                                    lastMessage.getDate(),
-                                    lastMessage.getOwnerId(),
-                                    "-1",
-                                    DATE_DIVIDER_DATE_FORMAT.format(lastMessage.getDate()),
-                                    true,
-                                    true
-                            );
-                            header.setType(Chat.TYPE_DATE_HEADER);
-                            tempChatList.add(0, header);
-                        }
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
@@ -1373,68 +1215,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         final JSONArray messages = object.getJSONArray("messages");
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
-                        JSONObject message;
-                        Chat chat;
-                        String owner;
-                        Date time;
-                        JSONArray imageAndVideo;
-
-                        boolean viewerIsOwnerOfMessage;
-                        boolean messageBeenRead;
-
                         JSONArray listOfUnreadMessages = new JSONArray();
-                        SimpleDateFormat format = Utils.getDateFormat();
+                        parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
-                        for (int i = 0; i < messages.length(); i++) {
-                            try {
-                                message = messages.getJSONObject(i);
-                                owner = message.getJSONObject("owner").getString("id");
-                                viewerIsOwnerOfMessage = owner.equals(mUserId);
 
-                                messageBeenRead = true;
 
-                                if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
-                                    messageBeenRead = haveRead(message.getJSONArray("read"));
-                                }
-
-                                try {
-                                    time = format.parse(message.getString("date"));
-                                } catch (ParseException | JSONException e) {
-                                    time = null;
-                                }
-
-                                chat = new Chat(
-                                        message.getString("room"),
-                                        time,
-                                        owner,
-                                        message.getString("id"),
-                                        message.getString("text"),
-                                        messageBeenRead,
-                                        viewerIsOwnerOfMessage
-                                );
-
-                                if (!messageBeenRead) {
-                                    listOfUnreadMessages.put(chat.getMessageId());
-                                }
-
-                                imageAndVideo = message.getJSONArray("images");
-                                if (imageAndVideo.length() > 0) {
-                                    chat.setImageId(imageAndVideo.getString(0));
-                                    imageAndVideo = message.getJSONArray("videos");
-                                    if (imageAndVideo.length() > 0) {
-                                        chat.setVideoId(imageAndVideo.getString(0));
-                                        chat.setMessageType(Chat.MESSAGE_VIDEO);
-                                    } else {
-                                        chat.setMessageType(Chat.MESSAGE_IMAGE);
-                                    }
-                                }
-
-                                tempChatList.add(chat);
-
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
 
                         if (mSkip == 0) {
                             mCanLoadMore = false;
@@ -1484,5 +1269,97 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         });
+    }
+
+    /**
+     * Parses JSON containing message data, adding in date headers as necessary
+     * @param messages JSONArray of messages
+     * @param intoChatList ArrayList to add Chat objects to
+     * @param listOfUnreadMessages JSONArray to populate with unread message data
+     */
+
+    private void parseMessagesJSON(JSONArray messages, final ArrayList<Chat> intoChatList, JSONArray listOfUnreadMessages){
+       // final ArrayList<Chat> intoChatList = new ArrayList<>();
+        JSONObject message;
+        Chat chat;
+        String owner;
+        Date time;
+        JSONArray imageAndVideo;
+
+        boolean viewerIsOwnerOfMessage;
+        boolean messageBeenRead;
+
+        SimpleDateFormat format = Utils.getDateFormat();
+
+        for (int i = 0; i < messages.length(); i++) {
+            try {
+                message = messages.getJSONObject(i);
+                owner = message.getJSONObject("owner").getString("id");
+                viewerIsOwnerOfMessage = owner.equals(mUserId);
+
+                messageBeenRead = true;
+
+                if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
+                    messageBeenRead = haveRead(message.getJSONArray("read"));
+                }
+
+                try {
+                    time = format.parse(message.getString("date"));
+                } catch (ParseException | JSONException e) {
+                    time = null;
+                }
+
+                chat = new Chat(
+                        message.getString("room"),
+                        time,
+                        owner,
+                        message.getString("id"),
+                        message.getString("text"),
+                        messageBeenRead,
+                        viewerIsOwnerOfMessage
+                );
+
+                if (!messageBeenRead) {
+                    listOfUnreadMessages.put(chat.getMessageId());
+                }
+
+                imageAndVideo = message.getJSONArray("images");
+                if (imageAndVideo.length() > 0) {
+                    chat.setImageId(imageAndVideo.getString(0));
+                    imageAndVideo = message.getJSONArray("videos");
+                    if (imageAndVideo.length() > 0) {
+                        chat.setVideoId(imageAndVideo.getString(0));
+                        chat.setMessageType(Chat.MESSAGE_VIDEO);
+                    } else {
+                        chat.setMessageType(Chat.MESSAGE_IMAGE);
+                    }
+                }
+
+                if(intoChatList.size() > 0){
+                    Chat previousMessage = intoChatList.get(intoChatList.size()-1);
+                    if(chat.getDate().getDate() != previousMessage.getDate().getDate()){
+                        Chat header = new Chat(
+                                previousMessage.getRoomId(),
+                                previousMessage.getDate(),
+                                previousMessage.getOwnerId(),
+                                "-1",
+                                DATE_DIVIDER_DATE_FORMAT.format(chat.getDate()),
+                                true,
+                                true
+                        );
+                        header.setType(Chat.TYPE_DATE_HEADER);
+                        intoChatList.add(header);
+                    }
+                }
+
+                intoChatList.add(chat);
+
+
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }
