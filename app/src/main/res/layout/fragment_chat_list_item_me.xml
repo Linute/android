@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<com.daimajia.swipe.SwipeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="end"
@@ -13,53 +14,24 @@
     android:layout_marginTop="4dp"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="4dp"
+        android:orientation="horizontal">
 
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/frame"
-                                                         android:layout_width="120dp"
-                                                         android:layout_height="120dp"
-                                                         android:layout_gravity="end"
-                                                         android:visibility="gone"
-    >
-
-        <com.makeramen.roundedimageview.RoundedImageView android:id="@+id/image"
-                                                         android:layout_width="120dp"
-                                                         android:layout_height="120dp"
-                                                         app:riv_corner_radius="2dp"
-        />
-
-        <ImageView android:id="@+id/cinema_icon"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center"
-                   android:src="@drawable/ic_cinema"
-        />
-
-    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
-
-    <TextView android:id="@+id/chat_user_message"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="end"
-              android:autoLink="web|email"
-              android:background="@drawable/chat_item_me"
-              android:padding="12dp"
-              android:textColor="@color/pure_white"
-              android:textSize="@dimen/body_font_size"
-              tools:text="test dfsdf sdf fsdf sdf ddf df "
-    />
-
-    <LinearLayout android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="4dp"
-                  android:layout_gravity="end"
-                  android:orientation="horizontal">
-
-        <TextView android:id="@+id/chat_user_time"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:textColor="@color/seperator_color"
-                  android:textSize="@dimen/sub_font_size"
-                  tools:text="3:00AM"/>
+        <TextView
+            android:id="@+id/chat_user_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/seperator_color"
+            android:textSize="@dimen/sub_font_size"
+            android:gravity="center_vertical"
+            tools:text="3:00AM" />
 
         <ImageView
             android:id="@+id/message_action_icon"
@@ -67,10 +39,51 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="4dp"
             android:layout_marginStart="2dp"
-            android:src="@drawable/delivered_chat"
-        />
+            android:gravity="center_vertical"
+            android:src="@drawable/delivered_chat" />
 
     </LinearLayout>
 
-</LinearLayout>
+    <!-- SurfaceView -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/frame"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="end"
+            android:visibility="gone">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:riv_corner_radius="2dp" />
+
+            <ImageView
+                android:id="@+id/cinema_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_cinema" />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <TextView
+            android:id="@+id/chat_user_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:autoLink="web|email"
+            android:background="@drawable/chat_item_me"
+            android:padding="12dp"
+            android:textColor="@color/pure_white"
+            android:textSize="@dimen/body_font_size"
+            tools:text="test dfsdf sdf fsdf sdf ddf df " />
+
+    </FrameLayout>
+
+</com.daimajia.swipe.SwipeLayout>
 

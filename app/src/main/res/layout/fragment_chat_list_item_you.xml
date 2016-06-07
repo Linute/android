@@ -1,60 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_alignParentStart="true"
-              android:layout_marginBottom="4dp"
-              android:layout_marginEnd="48dp"
-              android:layout_marginStart="12dp"
-              android:layout_marginTop="4dp"
-              android:orientation="vertical">
-
-
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/frame"
-                                                         android:layout_width="120dp"
-                                                         android:layout_height="120dp"
-                                                         android:layout_gravity="start"
-                                                         android:visibility="gone"
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipe_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentStart="true"
+    android:layout_marginBottom="4dp"
+    android:layout_marginEnd="48dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginTop="4dp"
+    android:orientation="vertical"
     >
 
-        <com.makeramen.roundedimageview.RoundedImageView android:id="@+id/image"
-                                                         android:layout_width="120dp"
-                                                         android:layout_height="120dp"
-                                                         app:riv_corner_radius="2dp"
-        />
+    <LinearLayout
+        android:id="@+id/bottom_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
 
-        <ImageView android:id="@+id/cinema_icon"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center"
-                   android:src="@drawable/ic_cinema"
-        />
+        <TextView
+            android:id="@+id/chat_user_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginTop="4dp"
+            android:padding="12dp"
+            android:textColor="@color/seperator_color"
+            android:textSize="@dimen/sub_font_size"
+            tools:text="3:00AM" />
+    </LinearLayout>
 
-    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView android:id="@+id/chat_user_message"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="start"
-              android:autoLink="web|email"
-              android:background="@drawable/chat_item_you"
-              android:padding="12dp"
-              android:textColor="@color/eighty_black"
-              android:textSize="@dimen/body_font_size"
-              tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
-    />
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/frame"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_gravity="start"
+            android:visibility="gone">
 
-    <TextView android:id="@+id/chat_user_time"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="start"
-              android:layout_marginStart="4dp"
-              android:layout_marginTop="4dp"
-              android:textColor="@color/seperator_color"
-              android:textSize="@dimen/sub_font_size"
-              tools:text="3:00AM"/>
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:riv_corner_radius="2dp" />
+
+            <ImageView
+                android:id="@+id/cinema_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_cinema" />
+
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+        <TextView
+            android:id="@+id/chat_user_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:autoLink="web|email"
+            android:background="@drawable/chat_item_you"
+            android:padding="12dp"
+            android:textColor="@color/eighty_black"
+            android:textSize="@dimen/body_font_size"
+            tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df " />
 
 
-</LinearLayout>
+    </FrameLayout>
+
+
+</com.daimajia.swipe.SwipeLayout>

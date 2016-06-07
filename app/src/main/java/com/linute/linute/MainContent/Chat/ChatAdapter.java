@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.daimajia.swipe.SwipeLayout;
 import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -49,13 +50,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                View myMessageView;
+                ChatViewHolder myMessageVH = new ChatViewHolder(
+                        myMessageView = LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_me, parent, false));
+                SwipeLayout mySwipeLayout = (SwipeLayout)myMessageView.findViewById(R.id.swipe_layout);
+                mySwipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
+                //TODO close other messages when this one is opened
+
+
+                return myMessageVH;
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                View theirMessageView;
+                ChatViewHolder theirMessageVH = new ChatViewHolder(
+                        theirMessageView = LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_you, parent, false));
+                SwipeLayout theirSwipeLayout = (SwipeLayout)theirMessageView.findViewById(R.id.swipe_layout);
+                theirSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, theirMessageView.findViewById(R.id.bottom_view));
+                theirSwipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
+                //TODO close other messages when this one is opened
+                return theirMessageVH;
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
