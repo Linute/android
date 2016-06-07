@@ -46,6 +46,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,6 +78,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private static final String ROOM_ID = "room";
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
+
+    private static final DateFormat DATE_DIVIDER_DATE_FORMAT = SimpleDateFormat.getDateInstance();
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -827,6 +830,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 owner = message.getJSONObject("owner").getString("id");
                                 viewerIsOwnerOfMessage = owner.equals(mUserId);
 
+
                                 messageBeenRead = true;
 
                                 if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
@@ -867,11 +871,29 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                                 tempChatList.add(chat);
 
+                                if(i == messages.length()-1){
+
+
+                                }
+
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-
+                        if(tempChatList.size() > 0) {
+                            Chat lastMessage = tempChatList.get(tempChatList.size()-1);
+                            Chat header = new Chat(
+                                    lastMessage.getRoomId(),
+                                    lastMessage.getDate(),
+                                    lastMessage.getOwnerId(),
+                                    "-1",
+                                    DATE_DIVIDER_DATE_FORMAT.format(lastMessage.getDate()),
+                                    true,
+                                    true
+                            );
+                            header.setType(Chat.TYPE_DATE_HEADER);
+                            tempChatList.add(0, header);
+                        }
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
@@ -1428,6 +1450,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            //removes old top chat header
+                                            mChatList.remove(0);
                                             mChatList.addAll(0, tempChatList);
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());

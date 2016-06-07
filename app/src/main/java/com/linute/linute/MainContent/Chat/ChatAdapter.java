@@ -78,6 +78,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_light, parent, false),
                         "", ""
                 );
+            case Chat.TYPE_DATE_HEADER:
+                return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
         }
 
         return null;
@@ -90,6 +92,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }else if (holder instanceof LoadMoreViewHolder){
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
+        }else if(holder instanceof  DateHeaderHolder){
+            ((DateHeaderHolder)holder).dateTV.setText(aChatList.get(position-1).getMessage());
         }
     }
 
@@ -195,6 +199,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .dontAnimate()
                     .placeholder(R.drawable.chat_backgrounds)
                     .into(vImage);
+        }
+    }
+
+    public class DateHeaderHolder extends RecyclerView.ViewHolder{
+        TextView dateTV;
+
+        public DateHeaderHolder(View itemView) {
+            super(itemView);
+            dateTV = (TextView)itemView.findViewById(R.id.text_date);
         }
     }
 
