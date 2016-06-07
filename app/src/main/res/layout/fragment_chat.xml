@@ -2,7 +2,9 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#2b3139"
+    >
 
     <android.support.v7.widget.Toolbar android:id="@+id/chat_fragment_toolbar"
                                        android:layout_width="match_parent"
@@ -59,16 +61,25 @@
 
     </LinearLayout>
 
+
+
+    <include layout="@layout/fragment_chat_list_item_date_header"
+        android:id="@+id/top_date_header"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_below="@+id/chat_fragment_toolbar"
+        android:text="Today"
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/chat_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/message_container"
-        android:layout_below="@id/chat_fragment_toolbar"
-        android:layout_weight="1"
-        android:background="#2b3139"
         android:scrollbarStyle="outsideOverlay"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        android:layout_below="@+id/top_date_header" />
 
 
     <TextView android:id="@+id/empty_view_messanger"

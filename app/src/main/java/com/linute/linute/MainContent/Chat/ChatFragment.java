@@ -78,7 +78,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private static final String OTHER_PERSON_NAME = "username";
     private static final String OTHER_PERSON_ID = "userid";
 
-    private static final DateFormat DATE_DIVIDER_DATE_FORMAT = SimpleDateFormat.getDateInstance();
+    private static final DateFormat DATE_DIVIDER_DATE_FORMAT = new SimpleDateFormat("MMMM d");
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -102,6 +102,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private RecyclerView recList;
     private EditText mInputMessageView;
+    private TextView mTopDateHeaderTV;
     private ChatAdapter mChatAdapter;
 
 
@@ -125,6 +126,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private Handler mHandler = new Handler();
+    private LinearLayoutManager mLinearLayoutManager;
 
     //private SharedPreferences mSharedPreferences;
 
@@ -224,6 +226,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
+        mTopDateHeaderTV = (TextView)view.findViewById(R.id.top_date_header);
+
         //when reaches end of list, we want to try to load more
         mChatAdapter.setLoadMoreListener(this);
 
@@ -252,11 +256,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onViewCreated(view, savedInstanceState);
 
         recList = (RecyclerView) view.findViewById(R.id.chat_list);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        llm.setStackFromEnd(true);
-        recList.setLayoutManager(llm);
+        mLinearLayoutManager = new LinearLayoutManager(getActivity());
+        mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        mLinearLayoutManager.setStackFromEnd(true);
+        recList.setLayoutManager(mLinearLayoutManager);
         recList.setAdapter(mChatAdapter);
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                updateTopHeader();
+            }
+        });
+
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
 
@@ -651,6 +663,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     //show empty view
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
+                                    }else{
+                                        updateTopHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -754,6 +768,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     //show empty view
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
+                                    }else{
+
+                                        updateTopHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -1235,9 +1252,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            //removes old top chat header
-                                            mChatList.remove(0);
                                             mChatList.addAll(0, tempChatList);
+
+                                           updateTopHeader();
+
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
                                             mLoadingMoreMessages = false;
@@ -1338,12 +1356,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if(intoChatList.size() > 0){
                     Chat previousMessage = intoChatList.get(intoChatList.size()-1);
                     if(chat.getDate().getDate() != previousMessage.getDate().getDate()){
+                        Date date = chat.getDate();
                         Chat header = new Chat(
-                                previousMessage.getRoomId(),
-                                previousMessage.getDate(),
-                                previousMessage.getOwnerId(),
+                                chat.getRoomId(),
+                                chat.getDate(),
+                                chat.getOwnerId(),
                                 "-1",
-                                DATE_DIVIDER_DATE_FORMAT.format(chat.getDate()),
+                                (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
                                 true,
                                 true
                         );
@@ -1361,5 +1380,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         }
 
+    }
+
+    private void updateTopHeader(){
+        //-1 to compensate for footer
+        int topItemIndex = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition()-2;
+
+        if (topItemIndex >= 0 && topItemIndex < mChatList.size()){
+            //sets top date header to date of first visible item
+            mTopDateHeaderTV.setVisibility(View.VISIBLE);
+            Date date = mChatList.get(topItemIndex).getDate();
+            mTopDateHeaderTV.setText(new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today");
+        }
     }
 }
