@@ -27,6 +27,9 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
@@ -584,9 +587,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             otherPersonIconIV.setVisibility(View.GONE);
 
         }else{
-
-            //TODO make visible AFTER image is done loading
-            otherPersonIconIV.setVisibility(View.VISIBLE);
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
@@ -594,9 +594,28 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .listener(mGlideListener)
                     .into(otherPersonIconIV);
         }
     }
+
+    private RequestListener<String, GlideDrawable> mGlideListener = new RequestListener<String, GlideDrawable>() {
+        @Override
+        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+
+            return false;
+        }
+
+        @Override
+        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+            View rootV = getView();
+            if(rootV == null) return false;
+            Toolbar toolbar = (Toolbar)rootV.findViewById(R.id.chat_fragment_toolbar);
+            ImageView otherPersonIconIV = (ImageView)toolbar.findViewById(R.id.toolbar_chat_user_icon);
+            otherPersonIconIV.setVisibility(View.VISIBLE);
+            return false;
+        }
+    };
 
 
     private void getRoomAndChat() {
