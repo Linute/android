@@ -276,7 +276,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             boolean isDragging = false;
 
             private final int MIN_PULL = 0;
-            private final int MAX_PULL = (int)(200*getActivity().getResources().getDisplayMetrics().density);
+            private final int MAX_PULL = (int)(150*getActivity().getResources().getDisplayMetrics().density);
             private final int THRESHOLD = 30;
 
             private int totalOffset = 0;
