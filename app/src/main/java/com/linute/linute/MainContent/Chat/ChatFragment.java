@@ -1,6 +1,9 @@
 package com.linute.linute.MainContent.Chat;
 
 
+import android.animation.Animator;
+import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -274,53 +277,89 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         recList.setOnTouchListener(new View.OnTouchListener() {
             private float lastX = 0;
             boolean isDragging = false;
+            private int preDrag = 9;
 
             private final int MIN_PULL = 0;
-            private final int MAX_PULL = (int)(150*getActivity().getResources().getDisplayMetrics().density);
-            private final int THRESHOLD = 30;
+            private final int MAX_PULL = (int) (150 * getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = (int) (30 * getActivity().getResources().getDisplayMetrics().density);
+
 
             private int totalOffset = 0;
 
+            ValueAnimator animator;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        isDragging = false;
-                        totalOffset = 0;
+                        if(animator != null && animator.isRunning()){
+                            animator.cancel();
+                            Log.i("TimeAnimation", "canceled : "+totalOffset);
+                            isDragging = true;
+                            preDrag = THRESHOLD;
+                        }else{
+                            totalOffset = 0;
+                            isDragging = false;
+                            preDrag = 0;
+                        }
+
                         lastX = motionEvent.getRawX();
                         return false;
                     case MotionEvent.ACTION_MOVE:
                         float x = motionEvent.getRawX();
-                        int dX = (int)(x - lastX);
+                        int dX = (int) (x - lastX);
                         lastX = x;
-                        Log.i(TAG, "dX:"+dX);
+                        Log.i(TAG, "dX:" + dX);
 
-                        if(dX >= THRESHOLD){
+                        if (preDrag >= THRESHOLD) {
                             isDragging = true;
                         }
 
-                        if(isDragging) {
-                            if(totalOffset + dX > MAX_PULL){
+                        if (isDragging) {
+                            recList.stopScroll();
+                            if (totalOffset + dX > MAX_PULL) {
                                 mLinearLayoutManager.offsetChildrenHorizontal(MAX_PULL - totalOffset);
                                 totalOffset = MAX_PULL;
-                            }else
-                            if(totalOffset + dX < MIN_PULL){
+                            } else if (totalOffset + dX < MIN_PULL) {
                                 mLinearLayoutManager.offsetChildrenHorizontal(MIN_PULL - totalOffset);
                                 totalOffset = MIN_PULL;
-                            }else{
+                            } else {
                                 totalOffset += dX;
-                                mLinearLayoutManager.offsetChildrenHorizontal((int)dX);
+                                mLinearLayoutManager.offsetChildrenHorizontal((int) dX);
                             }
+                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
                             return true;
 
+                        }else{
+                            preDrag += dX;
                         }
                         //returns false to allow natural scrolling to occur
                         return false;
                     case MotionEvent.ACTION_UP:
-                        mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
+                        if(totalOffset > 0) {
+                            animator = ValueAnimator.ofInt(0, -totalOffset);
+                            animator.setDuration(250)
+                                    .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                                        int lastVal = 0;
+
+                                        @Override
+                                        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                                            recList.stopScroll();
+                                            int val = (Integer) valueAnimator.getAnimatedValue();
+                                            mLinearLayoutManager.offsetChildrenHorizontal(val - lastVal);
+                                            totalOffset += (val - lastVal);
+                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
+                                            lastVal = val;
+                                        }
+                                    });
+                            animator.start();
+                        }
+
+                        //mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
-                        totalOffset = 0;
+                        preDrag = 0;
+                        //totalOffset = 0;
                         return false;
                     default:
                         return false;
