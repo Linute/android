@@ -390,8 +390,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         if (mRoomId == null) { //occurs when we didn't come from room fragment
             getRoomAndChat();
+
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+
             getChat();
+
             joinRoom(activity, false);
         } else {
             joinRoom(activity, true);
@@ -651,7 +654,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        //Log.i(TAG, "onResponse: " + object.toString(4));
+                        Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -760,7 +763,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        //Log.i(TAG, "onResponse: " + object.toString(4));
+                        Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -1416,8 +1419,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     if(chat.getDate().getDate() != previousMessage.getDate().getDate()){
                         Date date = chat.getDate();
                         Chat header = new Chat(
-                                chat.getRoomId(),
-                                chat.getDate(),
+                                previousMessage.getRoomId(),
+                                previousMessage.getDate(),
                                 chat.getOwnerId(),
                                 "-1",
                                 (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
@@ -1442,7 +1445,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private void updateTopHeader(){
         //-1 to compensate for footer
-        int topItemIndex = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition()-2;
+        int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition()-1;
 
         if (topItemIndex >= 0 && topItemIndex < mChatList.size()){
             //sets top date header to date of first visible item
