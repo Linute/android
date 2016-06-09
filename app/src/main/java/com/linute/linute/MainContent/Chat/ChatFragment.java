@@ -286,6 +286,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        isDragging = false;
+                        totalOffset = 0;
                         lastX = motionEvent.getRawX();
                         return false;
                     case MotionEvent.ACTION_MOVE:
