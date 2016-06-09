@@ -276,8 +276,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             boolean isDragging = false;
 
             private final int MIN_PULL = 0;
-            private final int MAX_PULL = 200;
-            private final int THRESHOLD = 15;
+            private final int MAX_PULL = (int)(200*getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = 30;
+
+            private int totalOffset = 0;
 
 
             @Override
@@ -288,7 +290,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         return false;
                     case MotionEvent.ACTION_MOVE:
                         float x = motionEvent.getRawX();
-                        float dX = x - lastX;
+                        int dX = (int)(x - lastX);
                         lastX = x;
                         Log.i(TAG, "dX:"+dX);
 
@@ -297,14 +299,26 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         }
 
                         if(isDragging) {
-                            float newX = recList.getX() + dX;
-                            recList.setX((newX > MAX_PULL ? MAX_PULL : (newX < MIN_PULL ? MIN_PULL : newX)));
+                            if(totalOffset + dX > MAX_PULL){
+                                mLinearLayoutManager.offsetChildrenHorizontal(MAX_PULL - totalOffset);
+                                totalOffset = MAX_PULL;
+                            }else
+                            if(totalOffset + dX < MIN_PULL){
+                                mLinearLayoutManager.offsetChildrenHorizontal(MIN_PULL - totalOffset);
+                                totalOffset = MIN_PULL;
+                            }else{
+                                totalOffset += dX;
+                                mLinearLayoutManager.offsetChildrenHorizontal((int)dX);
+                            }
+                            return true;
+
                         }
                         //returns false to allow natural scrolling to occur
                         return false;
                     case MotionEvent.ACTION_UP:
-                        recList.setX(0);
+                        mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
+                        totalOffset = 0;
                         return false;
                     default:
                         return false;

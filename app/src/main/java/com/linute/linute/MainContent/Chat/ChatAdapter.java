@@ -50,26 +50,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
-                View myMessageView;
-                ChatViewHolder myMessageVH = new ChatViewHolder(
-                        myMessageView = LayoutInflater.from(parent.getContext())
+                return new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_me, parent, false));
-                SwipeLayout mySwipeLayout = (SwipeLayout)myMessageView.findViewById(R.id.swipe_layout);
-                mySwipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
-                //TODO close other messages when this one is opened
-
-
-                return myMessageVH;
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                View theirMessageView;
-                ChatViewHolder theirMessageVH = new ChatViewHolder(
-                        theirMessageView = LayoutInflater.from(parent.getContext())
+                return  new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_you, parent, false));
-                SwipeLayout theirSwipeLayout = (SwipeLayout)theirMessageView.findViewById(R.id.swipe_layout);
-                theirSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, theirMessageView.findViewById(R.id.bottom_view));
-                theirSwipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
-                //TODO close other messages when this one is opened
-                return theirMessageVH;
+
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
@@ -185,8 +171,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             if (chat.getDate() != null) {
-                vUserTime.setText(new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
+                vUserTime.setText(
+                        /*new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
                         mLongFormat.format(chat.getDate()) :
+                        mDateFormat.format(chat.getDate())*/
                         mDateFormat.format(chat.getDate())
                 );
             }

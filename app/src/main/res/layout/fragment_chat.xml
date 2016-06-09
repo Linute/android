@@ -79,7 +79,9 @@
         android:layout_above="@id/message_container"
         android:scrollbarStyle="outsideOverlay"
         android:scrollbars="vertical"
-        android:layout_below="@+id/top_date_header" />
+        android:layout_below="@+id/top_date_header"
+        android:clipChildren="false"
+        />
 
 
     <TextView android:id="@+id/empty_view_messanger"
