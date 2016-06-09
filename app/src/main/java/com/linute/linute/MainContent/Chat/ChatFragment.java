@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -167,8 +168,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
      * @return A new instance of fragment ChatFragment.
      */
     //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
-
-
     public static ChatFragment newInstance(String roomId,
                                            String otherPersonName,
                                            String otherPersonId) {
@@ -207,7 +206,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
 
         View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
-        TextView otherPersonNameTV = (TextView)otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
+        TextView otherPersonNameTV = (TextView) otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
         otherPersonNameTV.setText(mOtherPersonName);
         updateRoomIconView();
         toolbar.addView(otherPersonHeader);
@@ -230,7 +229,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
-        mTopDateHeaderTV = (TextView)view.findViewById(R.id.top_date_header);
+        mTopDateHeaderTV = (TextView) view.findViewById(R.id.top_date_header);
 
         //when reaches end of list, we want to try to load more
         mChatAdapter.setLoadMoreListener(this);
@@ -272,7 +271,46 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 updateTopHeader();
             }
         });
+        recList.setOnTouchListener(new View.OnTouchListener() {
+            private float lastX = 0;
+            boolean isDragging = false;
 
+            private final int MIN_PULL = 0;
+            private final int MAX_PULL = 200;
+            private final int THRESHOLD = 15;
+
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        lastX = motionEvent.getRawX();
+                        return false;
+                    case MotionEvent.ACTION_MOVE:
+                        float x = motionEvent.getRawX();
+                        float dX = x - lastX;
+                        lastX = x;
+                        Log.i(TAG, "dX:"+dX);
+
+                        if(dX >= THRESHOLD){
+                            isDragging = true;
+                        }
+
+                        if(isDragging) {
+                            float newX = recList.getX() + dX;
+                            recList.setX((newX > MAX_PULL ? MAX_PULL : (newX < MIN_PULL ? MIN_PULL : newX)));
+                        }
+                        //returns false to allow natural scrolling to occur
+                        return false;
+                    case MotionEvent.ACTION_UP:
+                        recList.setX(0);
+                        isDragging = false;
+                        return false;
+                    default:
+                        return false;
+                }
+            }
+        });
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
 
@@ -579,17 +617,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
     }
 
-    private void updateRoomIconView(){
+    private void updateRoomIconView() {
         View rootV = getView();
-        if(rootV == null) return;
-        Toolbar toolbar = (Toolbar)rootV.findViewById(R.id.chat_fragment_toolbar);
-        ImageView otherPersonIconIV = (ImageView)toolbar.findViewById(R.id.toolbar_chat_user_icon);
+        if (rootV == null) return;
+        Toolbar toolbar = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
+        ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
 
 
-        if(mOtherPersonProfileImage == null){
+        if (mOtherPersonProfileImage == null) {
             otherPersonIconIV.setVisibility(View.GONE);
 
-        }else{
+        } else {
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
@@ -612,9 +650,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         @Override
         public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
             View rootV = getView();
-            if(rootV == null) return false;
-            Toolbar toolbar = (Toolbar)rootV.findViewById(R.id.chat_fragment_toolbar);
-            ImageView otherPersonIconIV = (ImageView)toolbar.findViewById(R.id.toolbar_chat_user_icon);
+            if (rootV == null) return false;
+            Toolbar toolbar = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
+            ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
             otherPersonIconIV.setVisibility(View.VISIBLE);
             return false;
         }
@@ -686,7 +724,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     //show empty view
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
-                                    }else{
+                                    } else {
                                         updateTopHeader();
                                     }
 
@@ -770,16 +808,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         final ArrayList<Chat> tempChatList = new ArrayList<>();
                         JSONArray listOfUnreadMessages = new JSONArray();
-                        parseMessagesJSON(messages, tempChatList,  listOfUnreadMessages);
+                        parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
-                        if(mOtherPersonProfileImage == null && mUserId != null){
-                            for(int i = 0; i < users.length(); i++){
+                        if (mOtherPersonProfileImage == null && mUserId != null) {
+                            for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
-                                if(!mUserId.equals(user.getString("id"))){
+                                if (!mUserId.equals(user.getString("id"))) {
                                     mOtherPersonProfileImage = user.getString("profileImage");
                                     Activity activity = getActivity();
-                                    if(activity != null){
+                                    if (activity != null) {
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -810,7 +848,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     //show empty view
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
-                                    }else{
+                                    } else {
 
                                         updateTopHeader();
                                     }
@@ -1278,13 +1316,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
-                        if(mOtherPersonProfileImage == null && mUserId != null){
-                            for(int i = 0; i < users.length(); i++){
+                        if (mOtherPersonProfileImage == null && mUserId != null) {
+                            for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
-                                if(!mUserId.equals(user.getString("id"))){
+                                if (!mUserId.equals(user.getString("id"))) {
                                     mOtherPersonProfileImage = user.getString("profileImage");
                                     Activity activity = getActivity();
-                                    if(activity != null){
+                                    if (activity != null) {
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -1296,7 +1334,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 }
                             }
                         }
-
 
 
                         if (mSkip == 0) {
@@ -1315,7 +1352,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         public void run() {
                                             mChatList.addAll(0, tempChatList);
 
-                                           updateTopHeader();
+                                            updateTopHeader();
 
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
@@ -1352,13 +1389,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     /**
      * Parses JSON containing message data, adding in date headers as necessary
-     * @param messages JSONArray of messages
-     * @param intoChatList ArrayList to add Chat objects to
+     *
+     * @param messages             JSONArray of messages
+     * @param intoChatList         ArrayList to add Chat objects to
      * @param listOfUnreadMessages JSONArray to populate with unread message data
      */
 
-    private void parseMessagesJSON(JSONArray messages, final ArrayList<Chat> intoChatList, JSONArray listOfUnreadMessages){
-       // final ArrayList<Chat> intoChatList = new ArrayList<>();
+    private void parseMessagesJSON(JSONArray messages, final ArrayList<Chat> intoChatList, JSONArray listOfUnreadMessages) {
+        // final ArrayList<Chat> intoChatList = new ArrayList<>();
         JSONObject message;
         Chat chat;
         String owner;
@@ -1414,9 +1452,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
                 }
 
-                if(intoChatList.size() > 0){
-                    Chat previousMessage = intoChatList.get(intoChatList.size()-1);
-                    if(chat.getDate().getDate() != previousMessage.getDate().getDate()){
+                if (intoChatList.size() > 0) {
+                    Chat previousMessage = intoChatList.get(intoChatList.size() - 1);
+                    if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
                         Date date = chat.getDate();
                         Chat header = new Chat(
                                 previousMessage.getRoomId(),
@@ -1435,7 +1473,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 intoChatList.add(chat);
 
 
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1443,11 +1480,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     }
 
-    private void updateTopHeader(){
+    private void updateTopHeader() {
         //-1 to compensate for footer
-        int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition()-1;
+        int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition() - 1;
 
-        if (topItemIndex >= 0 && topItemIndex < mChatList.size()){
+        if (topItemIndex >= 0 && topItemIndex < mChatList.size()) {
             //sets top date header to date of first visible item
             mTopDateHeaderTV.setVisibility(View.VISIBLE);
             Date date = mChatList.get(topItemIndex).getDate();
