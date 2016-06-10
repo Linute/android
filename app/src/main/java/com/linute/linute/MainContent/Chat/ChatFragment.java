@@ -278,10 +278,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             private float lastX = 0;
             private float lastY = 0;
 
-            private float startX = 0;
-            private float startY = 0;
-
-
             boolean isDragging = false;
             private int preDrag = 9;
 
@@ -310,8 +306,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             preDrag = 0;
                         }
 
-                        startX = lastX = motionEvent.getRawX();
-                        startY = lastY = motionEvent.getRawY();
+                        lastX = motionEvent.getRawX();
+                        lastY = motionEvent.getRawY();
                         return false;
                     case MotionEvent.ACTION_MOVE:
                         float x = motionEvent.getRawX();
