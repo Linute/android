@@ -335,46 +335,37 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         }
 
                         if (isDragging) {
-                            recList.stopScroll();
                             if (totalOffset + dX > MAX_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MAX_PULL - totalOffset);
                                 totalOffset = MAX_PULL;
                             } else if (totalOffset + dX < MIN_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MIN_PULL - totalOffset);
                                 totalOffset = MIN_PULL;
                             } else {
                                 totalOffset += dX;
-                                mLinearLayoutManager.offsetChildrenHorizontal(dX);
                             }
-
+                            recList.setX(totalOffset);
                             if(totalOffset == 0){
                                 isDragging = false;
-//                                recList.setLayoutFrozen(false);
                             }
-//                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
-                            //returns true to prevent scrolling
-                            return true;
-
                         }else{
                             preDrag += dX;
                         }
-                        //returns false to allow natural scrolling to occur
                         return false;
                     case MotionEvent.ACTION_UP:
                         if(totalOffset > 0) {
-                            animator = ValueAnimator.ofInt(0, -totalOffset);
+                            animator = ValueAnimator.ofInt(totalOffset, 0);
                             animator.setDuration(250)
                                     .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                        int lastVal = 0;
+//                                        int lastVal = 0;
 
                                         @Override
                                         public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                             recList.stopScroll();
                                             int val = (Integer) valueAnimator.getAnimatedValue();
-                                            mLinearLayoutManager.offsetChildrenHorizontal(val - lastVal);
-                                            totalOffset += (val - lastVal);
+//                                            recList.offsetChildrenHorizontal(val - lastVal);
+                                            totalOffset = val;
+                                            recList.setX(totalOffset);
 //                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
-                                            lastVal = val;
+//                                            lastVal = val;
                                         }
                                     });
                             animator.start();
