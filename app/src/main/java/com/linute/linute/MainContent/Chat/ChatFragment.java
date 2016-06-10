@@ -262,6 +262,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onViewCreated(view, savedInstanceState);
 
         recList = (RecyclerView) view.findViewById(R.id.chat_list);
+
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mLinearLayoutManager.setStackFromEnd(true);
@@ -278,12 +279,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             private float lastX = 0;
             private float lastY = 0;
 
-            private float startX = 0;
-            private float startY = 0;
+//            private float startX = 0;
+//            private float startY = 0;
 
 
             boolean isDragging = false;
-            private int preDrag = 9;
+            private int preDrag = 0;
 
             private final int MIN_PULL = 0;
             private final int MAX_PULL = (int) (100 * getActivity().getResources().getDisplayMetrics().density);
@@ -303,17 +304,21 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             animator.cancel();
 //                            Log.i("TimeAnimation", "canceled : "+totalOffset);
                             isDragging = true;
+//                            recList.setLayoutFrozen(true);
                             preDrag = THRESHOLD;
                         }else{
                             totalOffset = 0;
                             isDragging = false;
+//                            recList.setLayoutFrozen(false);
                             preDrag = 0;
                         }
 
-                        startX = lastX = motionEvent.getRawX();
-                        startY = lastY = motionEvent.getRawY();
+
+                        lastX = motionEvent.getRawX();
+                        lastY = motionEvent.getRawY();
                         return false;
                     case MotionEvent.ACTION_MOVE:
+
                         float x = motionEvent.getRawX();
                         float y = motionEvent.getRawY();
                         int dX = (int) (x - lastX);
@@ -326,6 +331,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         if (preDrag >= THRESHOLD) {
                             isDragging = true;
+//                            recList.setLayoutFrozen(true);
                         }
 
                         if (isDragging) {
@@ -340,7 +346,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 totalOffset += dX;
                                 mLinearLayoutManager.offsetChildrenHorizontal(dX);
                             }
+
+                            if(totalOffset == 0){
+                                isDragging = false;
+//                                recList.setLayoutFrozen(false);
+                            }
 //                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
+                            //returns true to prevent scrolling
                             return true;
 
                         }else{
@@ -370,6 +382,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         //mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
+//                        recList.setLayoutFrozen(false);
                         preDrag = 0;
                         //totalOffset = 0;
                         return false;
