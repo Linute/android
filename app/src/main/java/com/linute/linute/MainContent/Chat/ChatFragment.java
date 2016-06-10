@@ -276,12 +276,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
         recList.setOnTouchListener(new View.OnTouchListener() {
             private float lastX = 0;
+            private float lastY = 0;
+
+            private float startX = 0;
+            private float startY = 0;
+
+
             boolean isDragging = false;
             private int preDrag = 9;
 
             private final int MIN_PULL = 0;
-            private final int MAX_PULL = (int) (150 * getActivity().getResources().getDisplayMetrics().density);
-            private final int THRESHOLD = (int) (30 * getActivity().getResources().getDisplayMetrics().density);
+            private final int MAX_PULL = (int) (100 * getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
 
 
             private int totalOffset = 0;
@@ -295,7 +301,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     case MotionEvent.ACTION_DOWN:
                         if(animator != null && animator.isRunning()){
                             animator.cancel();
-                            Log.i("TimeAnimation", "canceled : "+totalOffset);
+//                            Log.i("TimeAnimation", "canceled : "+totalOffset);
                             isDragging = true;
                             preDrag = THRESHOLD;
                         }else{
@@ -304,13 +310,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             preDrag = 0;
                         }
 
-                        lastX = motionEvent.getRawX();
+                        startX = lastX = motionEvent.getRawX();
+                        startY = lastY = motionEvent.getRawY();
                         return false;
                     case MotionEvent.ACTION_MOVE:
                         float x = motionEvent.getRawX();
+                        float y = motionEvent.getRawY();
                         int dX = (int) (x - lastX);
+                        int dY = (int) (y - lastY);
                         lastX = x;
-                        Log.i(TAG, "dX:" + dX);
+                        lastY = y;
+//                        Log.i(TAG, "dX:" + dX + " dY:" + dY);
+
+                        if(!isDragging && Math.abs(dX/5) < Math.abs(dY)){return false;}
 
                         if (preDrag >= THRESHOLD) {
                             isDragging = true;
@@ -326,9 +338,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 totalOffset = MIN_PULL;
                             } else {
                                 totalOffset += dX;
-                                mLinearLayoutManager.offsetChildrenHorizontal((int) dX);
+                                mLinearLayoutManager.offsetChildrenHorizontal(dX);
                             }
-                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
+//                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
                             return true;
 
                         }else{
@@ -349,7 +361,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                             int val = (Integer) valueAnimator.getAnimatedValue();
                                             mLinearLayoutManager.offsetChildrenHorizontal(val - lastVal);
                                             totalOffset += (val - lastVal);
-                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
+//                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
                                             lastVal = val;
                                         }
                                     });
