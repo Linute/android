@@ -35,6 +35,8 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -158,6 +160,14 @@ public class MainActivity extends BaseTaptActivity {
                         }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.GLOBAL));
                         item.setChecked(true);
+                        mPreviousItem = item;
+                        break;
+                    case R.id.navigation_item_find_friends:
+                        if (mPreviousItem != null && mPreviousItem != item) {
+                            mPreviousItem.setChecked(false);
+                        }
+                        item.setChecked(true);
+                        addFragmentToContainer(new FindFriendsChoiceFragment());
                         mPreviousItem = item;
                         break;
                     default:
