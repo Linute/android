@@ -144,14 +144,14 @@ public class MainActivity extends BaseTaptActivity {
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
                         mPreviousItem = item;
                         break;
-                    case R.id.navigation_item_activity:
+                  /*  case R.id.navigation_item_activity:
                         if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
                         }
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                         item.setChecked(true);
                         mPreviousItem = item;
-                        break;
+                        break;*/
                     case R.id.navigation_item_global:
                         if (mPreviousItem != null && mPreviousItem != item) {
                             mPreviousItem.setChecked(false);
@@ -349,7 +349,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void setUpdateNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_activity, count);
+        //setNavItemNotification(R.id.navigation_item_activity, count);
     }
 
     //So we change fragments or activities only after the drawer closes

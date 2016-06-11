@@ -24,6 +24,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.PostCreatePage;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -100,18 +101,34 @@ public class DiscoverHolderFragment extends BaseFragment {
         });
 
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-        mToolbar.inflateMenu(R.menu.people_fragment_menu);
+        mToolbar.inflateMenu(R.menu.
+                people_fragment_menu);
 
         mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
         mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
 
-        View chatActionView = mToolbar.getMenu().getItem(1).getActionView();
+        View chatActionView = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
         mNotificationIndicator = chatActionView.findViewById(R.id.notification);
         mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
+
+        View updatesActionView = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+
+
+        updatesActionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                if(activity != null){
+                    activity.addFragmentToContainer(new UpdatesFragment());
+                }
+
+            }
+        });
+
         mToolbar.getMenu()
-                .getItem(0)
+                .findItem(R.id.menu_find_friends)
                 .getActionView()
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -132,6 +149,8 @@ public class DiscoverHolderFragment extends BaseFragment {
                         }
                     }
                 });
+
+
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 

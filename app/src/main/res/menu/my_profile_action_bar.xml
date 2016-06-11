@@ -15,6 +15,11 @@
           android:icon="@drawable/ic_action_action_settings"
           app:showAsAction="ifRoom"
     />
+    <item android:id="@+id/updates"
+        android:orderInCategory="1"
+        android:title="Updates"
+        android:icon="@drawable/ic_action_turn20"
+        app:showAsAction="always"/>
 
 
 </menu>
