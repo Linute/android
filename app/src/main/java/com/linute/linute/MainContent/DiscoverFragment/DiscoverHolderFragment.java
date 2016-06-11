@@ -127,18 +127,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             }
         });
 
-        mToolbar.getMenu()
-                .findItem(R.id.menu_find_friends)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
                     @Override

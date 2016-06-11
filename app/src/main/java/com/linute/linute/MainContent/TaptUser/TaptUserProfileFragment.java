@@ -207,10 +207,6 @@ public class TaptUserProfileFragment extends BaseFragment {
 
                         }
                         return true;
-                    case R.id.add_friend:
-                        if (activity != null)
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        return true;
                     case R.id.settings:
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);

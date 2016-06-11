@@ -5,12 +5,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:contex=".MainActivity">
 
-    <item android:id="@+id/menu_find_friends"
-          app:actionLayout="@layout/toolbar_friend_icon"
-          android:orderInCategory="100"
-          android:title="Find friends"
-          app:showAsAction="ifRoom"
-          />
+    <!--<item android:id="@+id/menu_find_friends"-->
+          <!--app:actionLayout="@layout/toolbar_friend_icon"-->
+          <!--android:orderInCategory="100"-->
+          <!--android:title="Find friends"-->
+          <!--app:showAsAction="ifRoom"-->
+          <!--/>-->
 
     <item
         android:id="@+id/menu_chat"

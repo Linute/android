@@ -124,18 +124,6 @@ public class GlobalFragment extends BaseFragment {
         vNotificationIndicator = chatActionView.findViewById(R.id.notification);
         vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
-        vToolbar.getMenu()
-                .findItem(R.id.menu_find_friends)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -192,10 +192,6 @@ public class Profile extends BaseFragment {
             public boolean onMenuItemClick(MenuItem item) {
                 MainActivity activity = (MainActivity) getActivity();
                 switch (item.getItemId()){
-                    case R.id.add_friend:
-                        if (activity != null)
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        return true;
                     case R.id.settings:
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);
