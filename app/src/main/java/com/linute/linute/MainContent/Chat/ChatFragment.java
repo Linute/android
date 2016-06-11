@@ -25,7 +25,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -262,6 +264,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onViewCreated(view, savedInstanceState);
 
         recList = (RecyclerView) view.findViewById(R.id.chat_list);
+
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mLinearLayoutManager.setStackFromEnd(true);
@@ -274,16 +277,20 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 updateTopHeader();
             }
         });
+        Log.i("AAA", "" + recList.getLayoutParams().width);
+        final int width = getResources().getDisplayMetrics().widthPixels;
+//        recList.getLayoutParams().width = width;
         recList.setOnTouchListener(new View.OnTouchListener() {
             private float lastX = 0;
             private float lastY = 0;
 
             boolean isDragging = false;
-            private int preDrag = 9;
+            private int preDrag = 0;
 
-            private final int MIN_PULL = 0;
+            private final int MIN_PULL = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
+
             private final int MAX_PULL = (int) (100 * getActivity().getResources().getDisplayMetrics().density);
-            private final int THRESHOLD = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = (int) (50 * getActivity().getResources().getDisplayMetrics().density);
 
 
             private int totalOffset = 0;
@@ -295,14 +302,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        if(animator != null && animator.isRunning()){
+                        if (animator != null && animator.isRunning()) {
                             animator.cancel();
 //                            Log.i("TimeAnimation", "canceled : "+totalOffset);
                             isDragging = true;
+//                            recList.setLayoutFrozen(true);
                             preDrag = THRESHOLD;
-                        }else{
+                        } else {
                             totalOffset = 0;
                             isDragging = false;
+//                            recList.setLayoutFrozen(false);
                             preDrag = 0;
                         }
 
@@ -310,6 +319,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         lastY = motionEvent.getRawY();
                         return false;
                     case MotionEvent.ACTION_MOVE:
+
                         float x = motionEvent.getRawX();
                         float y = motionEvent.getRawY();
                         int dX = (int) (x - lastX);
@@ -318,47 +328,54 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         lastY = y;
 //                        Log.i(TAG, "dX:" + dX + " dY:" + dY);
 
-                        if(!isDragging && Math.abs(dX/5) < Math.abs(dY)){return false;}
+                        if (!isDragging && Math.abs(dX / 5) < Math.abs(dY)) {
+                            return false;
+                        }
 
                         if (preDrag >= THRESHOLD) {
                             isDragging = true;
                         }
 
                         if (isDragging) {
-                            recList.stopScroll();
                             if (totalOffset + dX > MAX_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MAX_PULL - totalOffset);
                                 totalOffset = MAX_PULL;
                             } else if (totalOffset + dX < MIN_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MIN_PULL - totalOffset);
                                 totalOffset = MIN_PULL;
                             } else {
                                 totalOffset += dX;
-                                mLinearLayoutManager.offsetChildrenHorizontal(dX);
                             }
-//                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
-                            return true;
+//                            recList.getLayoutParams().width = width-totalOffset;
+//                            recList.setLayoutParams(new FrameLayout.LayoutParams(width+totalOffset, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                        }else{
+                            recList.getLayoutParams().width = width - totalOffset;
+                            recList.setX(totalOffset);
+                            recList.requestLayout();
+
+//                            recList.setX(totalOffset);
+                            if (totalOffset == 0) {
+                                isDragging = false;
+                            }
+                        } else {
                             preDrag += dX;
                         }
-                        //returns false to allow natural scrolling to occur
                         return false;
                     case MotionEvent.ACTION_UP:
-                        if(totalOffset > 0) {
-                            animator = ValueAnimator.ofInt(0, -totalOffset);
+                        if (totalOffset != 0) {
+                            animator = ValueAnimator.ofInt(totalOffset, 0);
                             animator.setDuration(250)
                                     .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                        int lastVal = 0;
+//                                        int lastVal = 0;
 
                                         @Override
                                         public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                             recList.stopScroll();
-                                            int val = (Integer) valueAnimator.getAnimatedValue();
-                                            mLinearLayoutManager.offsetChildrenHorizontal(val - lastVal);
-                                            totalOffset += (val - lastVal);
-//                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
-                                            lastVal = val;
+                                            totalOffset = (Integer) valueAnimator.getAnimatedValue();
+
+                                            Activity a = getActivity();
+                                            Log.i("AAA", a+"");
+                                            recList.getLayoutParams().width = width-totalOffset;
+                                            recList.setX(totalOffset);
+                                            recList.requestLayout();
                                         }
                                     });
                             animator.start();
@@ -366,6 +383,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         //mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
+//                        recList.setLayoutFrozen(false);
                         preDrag = 0;
                         //totalOffset = 0;
                         return false;
