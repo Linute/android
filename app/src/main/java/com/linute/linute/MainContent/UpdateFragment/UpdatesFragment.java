@@ -114,7 +114,7 @@ public class UpdatesFragment extends BaseFragment {
         });
 
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-        mToolbar.inflateMenu(R.menu.people_fragment_menu);
+        mToolbar.inflateMenu(R.menu.menu_fragment_updates);
         View chatActionView = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
         mHasNotifications = NotificationsCounterSingleton.getInstance().hasNotifications();
@@ -149,18 +149,6 @@ public class UpdatesFragment extends BaseFragment {
             }
         });
 
-        View updatesActionView = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
-
-        updatesActionView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity activity = (MainActivity) getActivity();
-                if(activity != null){
-                    activity.addFragmentToContainer(new UpdatesFragment());
-                }
-
-            }
-        });
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
