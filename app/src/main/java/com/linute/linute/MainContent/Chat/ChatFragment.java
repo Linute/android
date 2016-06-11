@@ -290,7 +290,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             private final int MIN_PULL = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
 
             private final int MAX_PULL = (int) (100 * getActivity().getResources().getDisplayMetrics().density);
-            private final int THRESHOLD = (int) (50 * getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
 
 
             private int totalOffset = 0;
@@ -344,14 +344,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             } else {
                                 totalOffset += dX;
                             }
-//                            recList.getLayoutParams().width = width-totalOffset;
-//                            recList.setLayoutParams(new FrameLayout.LayoutParams(width+totalOffset, ViewGroup.LayoutParams.MATCH_PARENT));
 
-                            recList.getLayoutParams().width = width - totalOffset;
+//                            recList.getLayoutParams().width = width - totalOffset;
                             recList.setX(totalOffset);
-                            recList.requestLayout();
+//                            recList.requestLayout();
 
-//                            recList.setX(totalOffset);
+
                             if (totalOffset == 0) {
                                 isDragging = false;
                             }
@@ -372,10 +370,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                             totalOffset = (Integer) valueAnimator.getAnimatedValue();
 
                                             Activity a = getActivity();
-                                            Log.i("AAA", a+"");
-                                            recList.getLayoutParams().width = width-totalOffset;
+
+//                                            recList.getLayoutParams().width = width - totalOffset;
                                             recList.setX(totalOffset);
-                                            recList.requestLayout();
+//                                            recList.requestLayout();
                                         }
                                     });
                             animator.start();
