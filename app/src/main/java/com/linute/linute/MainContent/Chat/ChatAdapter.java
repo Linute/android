@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.daimajia.swipe.SwipeLayout;
 import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -49,13 +50,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                return new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                return  new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_you, parent, false));
+
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
@@ -64,6 +64,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_light, parent, false),
                         "", ""
                 );
+            case Chat.TYPE_DATE_HEADER:
+                return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
         }
 
         return null;
@@ -76,6 +78,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }else if (holder instanceof LoadMoreViewHolder){
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
+        }else if(holder instanceof  DateHeaderHolder){
+            ((DateHeaderHolder)holder).dateTV.setText(aChatList.get(position-1).getMessage());
         }
     }
 
@@ -167,8 +171,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             if (chat.getDate() != null) {
-                vUserTime.setText(new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
+                vUserTime.setText(
+                        /*new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
                         mLongFormat.format(chat.getDate()) :
+                        mDateFormat.format(chat.getDate())*/
                         mDateFormat.format(chat.getDate())
                 );
             }
@@ -181,6 +187,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .dontAnimate()
                     .placeholder(R.drawable.chat_backgrounds)
                     .into(vImage);
+        }
+    }
+
+    public class DateHeaderHolder extends RecyclerView.ViewHolder{
+        TextView dateTV;
+
+        public DateHeaderHolder(View itemView) {
+            super(itemView);
+            dateTV = (TextView)itemView.findViewById(R.id.text_date);
         }
     }
 
