@@ -277,7 +277,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 updateTopHeader();
             }
         });
-        Log.i("AAA", "" + recList.getLayoutParams().width);
         final int width = getResources().getDisplayMetrics().widthPixels;
 //        recList.getLayoutParams().width = width;
         recList.setOnTouchListener(new View.OnTouchListener() {
@@ -304,14 +303,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     case MotionEvent.ACTION_DOWN:
                         if (animator != null && animator.isRunning()) {
                             animator.cancel();
-//                            Log.i("TimeAnimation", "canceled : "+totalOffset);
                             isDragging = true;
-//                            recList.setLayoutFrozen(true);
                             preDrag = THRESHOLD;
                         } else {
                             totalOffset = 0;
                             isDragging = false;
-//                            recList.setLayoutFrozen(false);
                             preDrag = 0;
                         }
 
@@ -362,7 +358,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             animator = ValueAnimator.ofInt(totalOffset, 0);
                             animator.setDuration(250)
                                     .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                                        int lastVal = 0;
 
                                         @Override
                                         public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -379,11 +374,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             animator.start();
                         }
 
-                        //mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
-//                        recList.setLayoutFrozen(false);
                         preDrag = 0;
-                        //totalOffset = 0;
                         return false;
                     default:
                         return false;
