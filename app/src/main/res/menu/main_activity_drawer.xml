@@ -17,12 +17,6 @@
             android:title="Global"
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
-        <!--<item
-            android:id="@+id/navigation_item_activity"
-            android:icon="@drawable/ic_action_turn20"
-            android:title="Updates"
-            android:checkable="true"
-            app:actionLayout="@layout/main_activity_nav_action_counter"/>-->
         <item
             android:id="@+id/navigation_item_find_friends"
             android:icon="@drawable/ic_action_add"
