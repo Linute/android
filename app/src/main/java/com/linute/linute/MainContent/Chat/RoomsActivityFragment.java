@@ -105,7 +105,6 @@ public class RoomsActivityFragment extends BaseFragment {
         });
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        fab.setImageResource(R.drawable.ic_action_new_message);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -9,15 +8,17 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -43,8 +45,13 @@ import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
 
 
-public class PostCreatePage extends AppCompatActivity implements View.OnClickListener {
-    private static final String TAG = PostCreatePage.class.getSimpleName();
+import static android.content.Context.MODE_PRIVATE;
+import static android.content.Context.INPUT_METHOD_SERVICE;
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
+public class PostCreatePage extends BaseFragment implements View.OnClickListener {
+    public static final String TAG = PostCreatePage.class.getSimpleName();
 
     private CustomBackPressedEditText mPostEditText;
     private View mTextFrame;
@@ -62,30 +69,34 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+    }
 
-        setContentView(R.layout.activity_new_post_create);
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.activity_new_post_create, container, false);
 
-        //setup toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        Toolbar toolbar = (Toolbar) root.findViewById(R.id.postContentToolbar);
+        mPostButton = toolbar.findViewById(R.id.create_page_post_button);
+        mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (getActivity() == null || mProgressbar.getVisibility() == View.VISIBLE) return;
                 hideKeyboard();
                 if (mPostEditText.getText().toString().isEmpty()) {
-                    setResult(RESULT_CANCELED);
-                    finish();
+                    getActivity().setResult(RESULT_CANCELED);
+                    getActivity().finish();
                 } else {
                     showConfirmDialog();
                 }
             }
         });
-        toolbar.setTitle("Status");
 
-        mPostButton = findViewById(R.id.create_page_post_button);
-        mProgressbar = findViewById(R.id.create_page_progress_bar);
+        toolbar.setTitle("Status");
 
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,9 +105,9 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                 postContent();
             }
         });
-        mPostEditText = (CustomBackPressedEditText) findViewById(R.id.post_create_text);
+        mPostEditText = (CustomBackPressedEditText) root.findViewById(R.id.post_create_text);
 
-        mPostEditText.setTypeface(Typeface.createFromAsset(getAssets(),
+        mPostEditText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),
                 "Lato-LightItalic.ttf"));
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -117,7 +128,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
         mPostEditText.addTextChangedListener(new TextWatcher() {
             String beforeText;
-            final int maxLines = 9;
+            final int maxLines = 8;
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -137,32 +148,34 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        vAnonComments = (CheckBox) findViewById(R.id.anon_comments);
-        vAnonPost = (CheckBox) findViewById(R.id.anon_post);
+        vAnonComments = (CheckBox) root.findViewById(R.id.anon_comments);
+        vAnonPost = (CheckBox) root.findViewById(R.id.anon_post);
 
-        mTextFrame = findViewById(R.id.post_create_frame);
+        mTextFrame = root.findViewById(R.id.post_create_frame);
 
-        findViewById(R.id.post_create_0).setOnClickListener(this);
-        findViewById(R.id.post_create_1).setOnClickListener(this);
-        findViewById(R.id.post_create_2).setOnClickListener(this);
-        findViewById(R.id.post_create_3).setOnClickListener(this);
-        findViewById(R.id.post_create_4).setOnClickListener(this);
-        findViewById(R.id.post_create_5).setOnClickListener(this);
+        root.findViewById(R.id.post_create_0).setOnClickListener(this);
+        root.findViewById(R.id.post_create_1).setOnClickListener(this);
+        root.findViewById(R.id.post_create_2).setOnClickListener(this);
+        root.findViewById(R.id.post_create_3).setOnClickListener(this);
+        root.findViewById(R.id.post_create_4).setOnClickListener(this);
+        root.findViewById(R.id.post_create_5).setOnClickListener(this);
+
+        return root;
     }
-
 
     private Socket mSocket;
     private boolean mConnecting = false;
 
     private void showConfirmDialog() {
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(getActivity())
                 .setTitle("you sure?")
                 .setMessage("would you like to throw away what you have currently?")
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        setResult(RESULT_CANCELED);
-                        finish();
+                        if (getActivity() == null) return;
+                        getActivity().setResult(RESULT_CANCELED);
+                        getActivity().finish();
                     }
                 })
                 .setNegativeButton("no", new DialogInterface.OnClickListener() {
@@ -174,7 +187,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         if (mSocket == null || !mSocket.connected() && !mConnecting) {
@@ -183,7 +196,7 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             {
                 try {
                     IO.Options op = new IO.Options();
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
+                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
                     op.query =
                             "token=" + mSharedPreferences.getString("userToken", "") +
                                     "&deviceToken=" + device.getDeviceToken() +
@@ -216,26 +229,24 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
 
         if (mSocket != null) {
-
             mSocket.disconnect();
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mSocket.off(Socket.EVENT_ERROR, eventError);
             mSocket.off("new post", newPost);
-
         }
     }
 
     private void postContent() {
 
-        if (mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
+        if (getActivity() == null || mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
 
-        if (!Utils.isNetworkAvailable(this) || !mSocket.connected()) {
-            Utils.showBadConnectionToast(this);
+        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()) {
+            Utils.showBadConnectionToast(getActivity());
             return;
         }
 
@@ -262,13 +273,13 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
             postData.put("owner", mSharedPreferences.getString("userID", ""));
 
             JSONArray imageArray = new JSONArray();
-            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 1080, 1080, true)));
+            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 720, 720, true)));
             postData.put("images", imageArray);
 
             mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
         } catch (JSONException e) {
             e.printStackTrace();
-            Utils.showServerErrorToast(this);
+            Utils.showServerErrorToast(getActivity());
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);
         }
@@ -288,15 +299,17 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         @Override
         public void call(final Object... args) {
             Log.i(TAG, "call: " + args[0]);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Utils.showServerErrorToast(PostCreatePage.this);
-                    mPostInProgress = false;
-                    mProgressbar.setVisibility(View.GONE);
-                    mPostButton.setVisibility(View.VISIBLE);
-                }
-            });
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Utils.showServerErrorToast(getActivity());
+                        mPostInProgress = false;
+                        mProgressbar.setVisibility(View.GONE);
+                        mPostButton.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
         }
     };
 
@@ -304,15 +317,16 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
         @Override
         public void call(Object... args) {
             JSONObject t = (JSONObject) args[0];
+            if (getActivity() == null) return;
             if (t != null) {
                 try {
                     if (t.getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", "1"))) {
-                        runOnUiThread(new Runnable() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                setResult(RESULT_OK);
-                                Toast.makeText(PostCreatePage.this, "Status has been posted", Toast.LENGTH_SHORT).show();
-                                finish();
+                                getActivity().setResult(RESULT_OK);
+                                Toast.makeText(getActivity(), "Status has been posted", Toast.LENGTH_SHORT).show();
+                                getActivity().finish();
                             }
                         });
                     }
@@ -325,6 +339,8 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
+        if (getActivity() == null) return;
+
         int viewId = v.getId();
 
         int backgroundColor;
@@ -361,13 +377,14 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
                 break;
         }
 
-        mPostEditText.setTextColor(ContextCompat.getColor(PostCreatePage.this, textColor));
-        mTextFrame.setBackgroundColor(ContextCompat.getColor(PostCreatePage.this, backgroundColor));
+        mPostEditText.setTextColor(ContextCompat.getColor(getActivity(), textColor));
+        mTextFrame.setBackgroundColor(ContextCompat.getColor(getActivity(), backgroundColor));
     }
 
 
     private void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (getActivity() == null) return;
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
         mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
     }
@@ -375,7 +392,6 @@ public class PostCreatePage extends AppCompatActivity implements View.OnClickLis
 
     //cuts a bitmap from our RelativeLayout
     public static Bitmap getBitmapFromView(View view) {
-
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(returnedBitmap);
         Drawable bgDrawable = view.getBackground();

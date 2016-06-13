@@ -99,6 +99,7 @@
         <activity
             android:name=".SquareCamera.CameraActivity"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan"
             android:theme="@style/AppTheme.FullScreen"/>
         <activity
             android:name=".LoginAndSignup.CollegePickerActivity"
@@ -109,22 +110,6 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
-        <activity
-            android:name=".MainContent.PostCreatePage"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
-        <!--<service-->
-            <!--android:name=".MainContent.Chat.ChatService"-->
-            <!--android:label="Chat Service">-->
-        <!--</service>-->
-
-        <!-- <receiver android:name=".UtilsAndHelpers.BootReceiver"> -->
-        <!-- <intent-filter> -->
-        <!-- <action android:name="android.intent.action.BOOT_COMPLETED"/> -->
-        <!-- </intent-filter> -->
-        <!-- </receiver> -->
 
         <activity
             android:name=".MainContent.Settings.SettingActivity"

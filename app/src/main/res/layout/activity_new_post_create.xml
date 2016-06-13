@@ -8,17 +8,18 @@
     tools:context=".MainContent.PostCreatePage">
 
 
-    <FrameLayout android:layout_width="match_parent" android:layout_height="?attr/actionBarSize">
-        <android.support.v7.widget.Toolbar android:id="@+id/postContentToolbar"
-                                           android:layout_width="match_parent"
-                                           android:layout_height="?attr/actionBarSize"
-                                           android:background="@color/colorPrimary"
-                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/postContentToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-        <FrameLayout android:layout_width="wrap_content"
-                     android:layout_height="match_parent"
-                     android:layout_gravity="end|center_vertical"
-                     android:layout_marginEnd="16dp"
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
         >
 
             <com.linute.linute.SquareCamera.SquareImageView
@@ -26,28 +27,30 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:clickable="true"
                 android:background="?selectableItemBackgroundBorderless"
+                android:clickable="true"
                 android:src="@drawable/ic_action_check83"
             />
-
-            <ProgressBar android:id="@+id/create_page_progress_bar"
-                         style="?android:attr/progressBarStyleSmall"
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:layout_gravity="center"
-                         android:visibility="gone"
+            <ProgressBar
+                android:id="@+id/create_page_progress_bar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone"
             />
         </FrameLayout>
 
-    </FrameLayout>
+    </android.support.v7.widget.Toolbar>
 
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_frame"
-                                                         android:layout_width="match_parent"
-                                                         android:layout_height="wrap_content"
-                                                         android:background="#FFFFFF"
-                                                         android:focusableInTouchMode="true">
-        <!--android:inputType="textMultiLine|textNoSuggestions|textCapSentences"-->
+
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+        android:id="@+id/post_create_frame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:focusableInTouchMode="true">
+
         <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
             android:id="@+id/post_create_text"
             android:layout_width="match_parent"
@@ -59,8 +62,8 @@
             android:background="@null"
             android:gravity="center_vertical"
             android:hint="Enter your text here"
-            android:inputType="textMultiLine|textCapSentences"
             android:imeOptions="actionDone"
+            android:inputType="textMultiLine|textCapSentences"
             android:maxLines="8"
             android:textColor="#000000"
             android:textSize="28sp"
@@ -71,30 +74,33 @@
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                  android:layout_marginStart="@dimen/activity_horizontal_margin"
-                  android:layout_marginTop="@dimen/half_margin"
-                  android:baselineAligned="false"
-                  android:gravity="center"
-                  android:weightSum="7"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/half_margin"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:weightSum="7"
     >
 
-        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/post_create_0"
-                                                             android:layout_width="0px"
-                                                             android:layout_height="wrap_content"
-                                                             android:layout_margin="@dimen/post_create_button_space"
-                                                             android:layout_weight="1"
-                                                             android:background="@drawable/post_color_0"
-                                                             android:clickable="true"
-                                                             android:foreground="?android:attr/selectableItemBackground">
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="T"
-                      android:textColor="#000000"
-                      android:textSize="25sp"
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            android:id="@+id/post_create_0"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/post_create_button_space"
+            android:layout_weight="1"
+            android:background="@drawable/post_color_0"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="T"
+                android:textColor="#000000"
+                android:textSize="25sp"
             />
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -108,12 +114,13 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="A"
-                      android:textColor="#FFFFFF"
-                      android:textSize="25sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="A"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
             />
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -128,12 +135,13 @@
             android:foreground="?android:attr/selectableItemBackground"
         >
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="P"
-                      android:textColor="#FFFFFF"
-                      android:textSize="25sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="P"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -148,12 +156,13 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="T"
-                      android:textColor="#FFFFFF"
-                      android:textSize="25sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="T"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -170,12 +179,13 @@
             android:foreground="?android:attr/selectableItemBackground"
         >
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="I"
-                      android:textColor="#FFFFFF"
-                      android:textSize="25sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="I"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -191,12 +201,13 @@
             android:foreground="?android:attr/selectableItemBackground"
         >
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:text="N"
-                      android:textColor="#FFFFFF"
-                      android:textSize="25sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="N"
+                android:textColor="#FFFFFF"
+                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -204,62 +215,70 @@
     </LinearLayout>
 
 
-    <LinearLayout android:id="@+id/options"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:gravity="center"
-                  android:orientation="horizontal"
-                  android:weightSum="2"
+    <LinearLayout
+        android:id="@+id/options"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp"
+        android:weightSum="2"
     >
 
 
-        <LinearLayout android:layout_width="0px"
-                      android:layout_height="match_parent"
-                      android:layout_weight="1"
-                      android:gravity="center"
-                      android:orientation="vertical"
+        <LinearLayout
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
         >
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center_horizontal"
-                      android:gravity="center"
-                      android:text="anon\ncomments"
-                      android:textColor="@color/pure_white"
-                      android:textSize="12sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="anon\ncomments"
+                android:textColor="@color/pure_white"
+                android:textSize="12sp"
             />
 
 
-            <CheckBox android:id="@+id/anon_comments"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center_horizontal"
-                      android:button="@drawable/turn_anon_comments_off"
-                      android:checked="true"
+            <CheckBox
+                android:id="@+id/anon_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:button="@drawable/turn_anon_comments_off"
+                android:checked="true"
             />
 
         </LinearLayout>
 
-        <LinearLayout android:layout_width="0px"
-                      android:layout_height="match_parent"
-                      android:layout_weight="1"
-                      android:gravity="center"
-                      android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center_horizontal"
-                      android:gravity="center"
-                      android:text="post\nas"
-                      android:textColor="@color/pure_white"
-                      android:textSize="12sp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="post\nas"
+                android:textColor="@color/pure_white"
+                android:textSize="12sp"
             />
 
-            <CheckBox android:id="@+id/anon_post"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center_horizontal"
-                      android:button="@drawable/post_as_anon_checkbox"
+            <CheckBox
+                android:id="@+id/anon_post"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:button="@drawable/post_as_anon_checkbox"
             />
         </LinearLayout>
 

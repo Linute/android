@@ -11,10 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -23,7 +19,6 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -52,11 +47,8 @@ public class DiscoverHolderFragment extends BaseFragment {
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
     private DiscoverFragment[] mDiscoverFragments;
-
-    private FloatingActionsMenu mFloatingActionsMenu;
     private AppBarLayout mAppBarLayout;
 
-    private View mBackgroundView;
     private boolean mHasMessage;
     private boolean mHasNotification;
 
@@ -75,14 +67,6 @@ public class DiscoverHolderFragment extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
 
         mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
-
-        mBackgroundView = rootView.findViewById(R.id.background);
-        mBackgroundView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFab();
-            }
-        });
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -165,36 +149,14 @@ public class DiscoverHolderFragment extends BaseFragment {
         tabLayout.setupWithViewPager(mViewPager);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
 
-        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabmenu);
-        mFloatingActionsMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
-            @Override
-            public void onMenuExpanded() {
-                fadeInBackground(true);
-            }
 
-            @Override
-            public void onMenuCollapsed() {
-                fadeInBackground(false);
-            }
-        });
-
-        rootView.findViewById(R.id.fabImage).setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
-                toggleFab();
                 Intent i = new Intent(getActivity(), CameraActivity.class);
                 i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
-        rootView.findViewById(R.id.fabText).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                toggleFab();
-                Intent i = new Intent(getActivity(), PostCreatePage.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
@@ -260,7 +222,9 @@ public class DiscoverHolderFragment extends BaseFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mNotificationEventAction1);
+
     }
+
 
     @Override
     public void onPause() {
@@ -276,7 +240,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             mNotificationSubscription.unsubscribe();
         }
 
-        toggleFab();
         mAppBarLayout.setExpanded(true, false);
     }
 
@@ -302,41 +265,11 @@ public class DiscoverHolderFragment extends BaseFragment {
         }
     }
 
-    public void toggleFab() {
-        if (mFloatingActionsMenu.isExpanded()) {
-            mFloatingActionsMenu.collapse();
-        }
-    }
-
 
     public SingleVideoPlaybackManager getSinglePlaybackManager() {
         return mSingleVideoPlaybackManager;
     }
 
-
-    private void fadeInBackground(final boolean show) {
-        mBackgroundView.clearAnimation();
-
-        AlphaAnimation alphaAnimation = show ?
-                new AlphaAnimation(0f, 1f) : new AlphaAnimation(1f, 0f);
-
-        alphaAnimation.setDuration(200);
-        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mBackgroundView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
-        mBackgroundView.startAnimation(alphaAnimation);
-    }
 
     private Subscription mChatSubscription;
 
