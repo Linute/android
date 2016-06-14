@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -165,10 +164,10 @@ public class CameraFragment extends Fragment {
         });
 
 
-        if (mHasSoftKeySingleton.getHasNavigation()){
+        if (mHasSoftKeySingleton.getHasNavigation()) {
             View bottom = root.findViewById(R.id.bottom);
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)bottom.getLayoutParams();
-            params.setMargins(params.leftMargin,params.topMargin,params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) bottom.getLayoutParams();
+            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
             bottom.setLayoutParams(params);
         }
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
@@ -528,11 +527,7 @@ public class CameraFragment extends Fragment {
         Size bestPreviewSize = determineBestSize(mCamera.getParameters().getSupportedPreviewSizes());
         parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
 
-        FrameLayout.LayoutParams params = bestPreviewSize.height > bestPreviewSize.width ?
-                new FrameLayout.LayoutParams(bestPreviewSize.width, bestPreviewSize.height) :
-                new FrameLayout.LayoutParams(bestPreviewSize.height, bestPreviewSize.width);
-
-        mPreviewView.setLayoutParams(params);
+        Log.i(TAG, "setupCamera: " + bestPreviewSize.width + " " + bestPreviewSize.height);
 
         List<String> focusmodes = parameters.getSupportedFocusModes();
 
@@ -548,19 +543,28 @@ public class CameraFragment extends Fragment {
     private Size determineBestSize(List<Size> sizes) {
 
         Size bestSize = null;
+        int longerReal = mHasSoftKeySingleton.getRealSize().y > mHasSoftKeySingleton.getRealSize().x ?
+                mHasSoftKeySingleton.getRealSize().y : mHasSoftKeySingleton.getRealSize().x;
+        int longerBest = 0;
 
         for (Size size : sizes) {
+            Log.i(TAG, "determineBestSize: " + mHasSoftKeySingleton.getRealSize());
             //same size as screen, return the size
             if ((mHasSoftKeySingleton.getRealSize().y == size.height && mHasSoftKeySingleton.getRealSize().x == size.width) ||
                     (mHasSoftKeySingleton.getRealSize().x == size.height && mHasSoftKeySingleton.getRealSize().y == size.width))
                 return size;
 
+            Log.i(TAG, "determineBestSize: w: " + size.width + " h : " + size.height);
+            int longerSide = size.height > size.width ? size.height : size.width;
             //better size
-            if ((bestSize == null) || size.width < mHasSoftKeySingleton.getRealSize().x || size.height < mHasSoftKeySingleton.getRealSize().x) {
+            if ((bestSize == null) || longerSide < longerReal) {
                 //ratio we need
-                if ((mHasSoftKeySingleton.getRealSize().x * size.width == mHasSoftKeySingleton.getRealSize().y * size.height) ||
-                        (mHasSoftKeySingleton.getRealSize().y * size.width == mHasSoftKeySingleton.getRealSize().x * size.height))
+                if (longerBest < longerSide &&
+                        ((mHasSoftKeySingleton.getRealSize().x * size.width == mHasSoftKeySingleton.getRealSize().y * size.height) ||
+                                (mHasSoftKeySingleton.getRealSize().y * size.width == mHasSoftKeySingleton.getRealSize().x * size.height))) {
                     bestSize = size;
+                    longerBest = longerSide;
+                }
             }
         }
 
@@ -876,8 +880,6 @@ public class CameraFragment extends Fragment {
 
 
     class StartCameraTask extends AsyncTask<Void, Void, Boolean> {
-
-
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -895,7 +897,7 @@ public class CameraFragment extends Fragment {
                 try {
                     mMediaRecorder.start();
                     return true;
-                }catch (RuntimeException e){
+                } catch (RuntimeException e) {
                     Log.i(TAG, "doInBackground: failed to start video");
                 }
             }
@@ -909,9 +911,11 @@ public class CameraFragment extends Fragment {
             mIsRecording = aBoolean;
             if (aBoolean) {
                 hideCameraButtons(true);
+
+                mRecordProgress.setMax(1000);
                 mRecordProgress.setVisibility(View.VISIBLE);
                 mProgressAnimator =
-                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 15000);
+                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 1000);
 
                 mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     boolean updated = false;

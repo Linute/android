@@ -34,7 +34,7 @@
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="6dp"
-            android:max="15000"
+            android:max="1000"
             android:progressDrawable="@drawable/camera_progress_red"
             android:visibility="invisible"/>
 
