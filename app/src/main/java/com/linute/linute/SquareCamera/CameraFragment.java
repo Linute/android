@@ -527,8 +527,6 @@ public class CameraFragment extends Fragment {
         Size bestPreviewSize = determineBestSize(mCamera.getParameters().getSupportedPreviewSizes());
         parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
 
-        Log.i(TAG, "setupCamera: " + bestPreviewSize.width + " " + bestPreviewSize.height);
-
         List<String> focusmodes = parameters.getSupportedFocusModes();
 
         // Set continuous picture focus, if it's supported
@@ -548,13 +546,11 @@ public class CameraFragment extends Fragment {
         int longerBest = 0;
 
         for (Size size : sizes) {
-            Log.i(TAG, "determineBestSize: " + mHasSoftKeySingleton.getRealSize());
             //same size as screen, return the size
             if ((mHasSoftKeySingleton.getRealSize().y == size.height && mHasSoftKeySingleton.getRealSize().x == size.width) ||
                     (mHasSoftKeySingleton.getRealSize().x == size.height && mHasSoftKeySingleton.getRealSize().y == size.width))
                 return size;
 
-            Log.i(TAG, "determineBestSize: w: " + size.width + " h : " + size.height);
             int longerSide = size.height > size.width ? size.height : size.width;
             //better size
             if ((bestSize == null) || longerSide < longerReal) {
@@ -918,16 +914,12 @@ public class CameraFragment extends Fragment {
                         ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 1000);
 
                 mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    boolean updated = false;
-
-
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        if (!updated && animation.getCurrentPlayTime() >= 3000) {
-                            updated = true;
+                        if (animation.getCurrentPlayTime() >= 3000) {
+                            mProgressAnimator.removeAllUpdateListeners();
                             mRecordProgress.setProgressDrawable(
-                                    ContextCompat.getDrawable(getContext(), R.drawable.camera_progress)
-                            );
+                                    ContextCompat.getDrawable(getContext(), R.drawable.camera_progress));
                         }
                     }
                 });

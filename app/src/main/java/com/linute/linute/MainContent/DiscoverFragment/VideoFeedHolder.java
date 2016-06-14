@@ -11,6 +11,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
@@ -27,37 +29,34 @@ import org.json.JSONObject;
  */
 public class VideoFeedHolder extends ImageFeedHolder {
 
-    private SquareVideoView mSquareVideoView;
 
+    private SquareVideoView vSquareVideoView;
     private String mCollegeId;
-
     private boolean videoProcessing = false;
 
     private View vCinemaIcon;
 
 
-    public VideoFeedHolder(final View itemView, Context context, final SingleVideoPlaybackManager manager) {
-        super(itemView, context);
-        mSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
-
-
+    public VideoFeedHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
+        super(itemView, context, manager);
+        vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
         vCinemaIcon = itemView.findViewById(R.id.cinema_icon);
 
-        mSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
+        vSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
             @Override
             public void onSurfaceDestroyed() {
                 //when video surface destroyed, hide the video and show image
                 vPostImage.setVisibility(View.VISIBLE);
-                mSquareVideoView.setVisibility(View.GONE);
+                vSquareVideoView.setVisibility(View.GONE);
                 vCinemaIcon.setAlpha(1);
             }
         });
 
         //when video is loaded and ready to play
-        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
+        vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
             @Override
             public void onPrepared(MediaPlayer mp) {
                 videoProcessing = false;
@@ -69,92 +68,58 @@ public class VideoFeedHolder extends ImageFeedHolder {
         });
 
         //when video finishes, restart video
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        vSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 //if video is paused AND finishes at the same time, video won't pause
                 //if icon is showing, then user has paused video
                 if (vCinemaIcon.getAlpha() != 1) {
-                    mSquareVideoView.start();
+                    vSquareVideoView.start();
                     sendImpressionsAsync(mPostId);
                 }
             }
         });
 
         //hide the texture view
-        mSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
+        vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
             @Override
             public void hideVideo() {
                 videoProcessing = false;
                 vPostImage.setVisibility(View.VISIBLE);
-                mSquareVideoView.setVisibility(View.GONE);
+                vSquareVideoView.setVisibility(View.GONE);
                 vCinemaIcon.clearAnimation();
                 vCinemaIcon.setAlpha(1);
             }
         });
+    }
 
-        itemView.findViewById(R.id.video_frame).setOnClickListener(new DoubleAndSingleClickListener() {
+    @Override
+    protected void setUpOnClicks(){
+        setUpOnClicks(itemView.findViewById(R.id.video_frame));
+    }
 
-            @Override
-            public void onSingleClick(View v) {
-                if (mVideoUrl == null || videoProcessing) return;
-                if (mSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
-                    mSquareVideoView.setVisibility(View.VISIBLE);
-                    manager.playNewVideo(mSquareVideoView, mVideoUrl);
-                    videoProcessing = true;
-                    vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-                } else {
-                    if (mSquareVideoView.isPlaying()){
-                        mSquareVideoView.pause();
-                        vCinemaIcon.setAlpha(1);
-                    }else {
-                        mSquareVideoView.start();
-                        vCinemaIcon.setAlpha(0);
-                    }
-                }
+    @Override
+    protected void singleClick(){
+        if (mVideoUrl == null || videoProcessing) return;
+        if (vSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
+            vSquareVideoView.setVisibility(View.VISIBLE);
+            mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, mVideoUrl);
+            videoProcessing = true;
+            vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+        } else {
+            if (vSquareVideoView.isPlaying()) {
+                vSquareVideoView.pause();
+                vCinemaIcon.setAlpha(1);
+            } else {
+                vSquareVideoView.start();
+                vCinemaIcon.setAlpha(0);
             }
-
-            @Override
-            public void onDoubleClick(View v) {
-                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
-
-                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-                a.setDuration(400);
-
-                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-                a2.setDuration(200);
-
-                a.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        layer.startAnimation(a2);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-
-                layer.startAnimation(a);
-
-                if (!vLikesHeart.isChecked()) {
-                    vLikesHeart.toggle();
-                }
-            }
-        });
-
+        }
     }
 
 
     private String mPostId;
     private Uri mVideoUrl;
-
 
     @Override
     public void bindModel(final Post post) {
@@ -162,8 +127,8 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
         videoProcessing = false;
 
-        if (mSquareVideoView.getVisibility() == View.VISIBLE) {
-            mSquareVideoView.setVisibility(View.GONE);
+        if (vSquareVideoView.getVisibility() == View.VISIBLE) {
+            vSquareVideoView.setVisibility(View.GONE);
             vPostImage.setVisibility(View.VISIBLE);
             vCinemaIcon.clearAnimation();
             vCinemaIcon.setAlpha(1f);

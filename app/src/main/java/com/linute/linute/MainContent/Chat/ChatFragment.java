@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
 
-import android.animation.Animator;
-import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
@@ -25,9 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -763,7 +759,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
+                       // Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -872,7 +868,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
+                        //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -1033,7 +1029,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void run() {
                 mChatList.add(chat);
-                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
             }
         });
@@ -1058,7 +1054,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void run() {
                 mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
-                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
             }
         });
@@ -1074,11 +1070,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                int pos = mChatList.size() - 1;
+                int pos = mChatList.size()-1;
 
                 if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
                     mChatList.remove(pos);
-                    mChatAdapter.notifyItemRemoved(pos);
+                    mChatAdapter.notifyItemRemoved(pos+1);
                 }
             }
         });
@@ -1562,4 +1558,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             mTopDateHeaderTV.setText(new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today");
         }
     }
+
+
+
 }

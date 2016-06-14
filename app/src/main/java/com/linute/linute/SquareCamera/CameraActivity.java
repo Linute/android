@@ -20,11 +20,11 @@ import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11;
-    public final static int JUST_CAMERA = 12;
+    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11; // everything
+    public final static int JUST_CAMERA = 12;  //just camera; no gallery or video option
 
-    public final static int SEND_POST = 14;
-    public final static int RETURN_URI = 15;
+    public final static int SEND_POST = 14;  //send image/video to server
+    public final static int RETURN_URI = 15; //save image and return image/video uri
 
     public final static int IMAGE = 1;
     public final static int VIDEO = 2;
@@ -41,6 +41,12 @@ public class CameraActivity extends AppCompatActivity {
 
     protected boolean mHasWriteAndCameraPermission = false;
 
+
+    /** need the following intent:
+     *  CameraActivity.CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
+     *  CameraActivity.RETURN_TYPE - SEND_POST or RETURN_URI
+     *
+     * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,16 +166,6 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public void launchEditAndSaveFragment(Uri uri) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(
-                        R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri),
-                        EditSavePhotoFragment.TAG)
-                .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
-                .commit();
-    }
 
     public void clearBackStack() { //pops all frag with name
         getSupportFragmentManager().popBackStack(EDIT_AND_GALLERY_STACK_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -180,10 +176,7 @@ public class CameraActivity extends AppCompatActivity {
     public void launchFragment(Fragment fragment, String tag) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(
-                        R.id.fragment_container,
-                        fragment,
-                        tag)
+                .replace(R.id.fragment_container, fragment, tag)
                 .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
     }

@@ -1,8 +1,8 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,18 +10,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.daimajia.swipe.SwipeLayout;
-import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAGE;
+import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_VIDEO;
 
 /**
  * Created by Arman on 1/20/16.
@@ -30,7 +30,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context aContext;
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
-    private static final SimpleDateFormat mLongFormat = new SimpleDateFormat("M/dd h:mm a");
     private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
@@ -127,13 +126,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         if (mType == Chat.MESSAGE_IMAGE) {
-                            EnlargePhotoViewer.newInstance(EnlargePhotoViewer.IMAGE, mUrl)
-                                    .show(activity.getSupportFragmentManager(), "ImageOrVideo");
+                            activity.addFragmentOnTop(
+                                    ViewFullScreenFragment.newInstance(
+                                            Uri.parse(Utils.getMessageImageURL(mUrl)),
+                                            POST_TYPE_IMAGE
+                                    )
+                            );
                         } else if (mType == Chat.MESSAGE_VIDEO) {
-                            EnlargePhotoViewer.newInstance(EnlargePhotoViewer.VIDEO, mUrl)
-                                    .show(activity.getSupportFragmentManager(), "ImageOrVideo");
+                           activity.addFragmentOnTop(
+                                   ViewFullScreenFragment.newInstance(
+                                           Uri.parse(Utils.getMessageVideoURL(mUrl)),
+                                           POST_TYPE_VIDEO
+                                   )
+                           );
                         }
-                        // Log.i("test", "onClick: "+mType);
                     }
                 }
             });
@@ -205,5 +211,4 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(itemView);
         }
     }
-
 }

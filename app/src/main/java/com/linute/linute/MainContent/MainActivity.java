@@ -9,6 +9,7 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,6 +17,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -268,6 +270,7 @@ public class MainActivity extends BaseTaptActivity {
                 .commit();
     }
 
+
     @Override
     public void addFragmentToContainer(final Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
@@ -277,6 +280,29 @@ public class MainActivity extends BaseTaptActivity {
                 .addToBackStack(PROFILE_OR_EVENT_NAME)
                 .commit();
     }
+
+    @Override
+    public void addFragmentOnTop(Fragment fragment) {
+        if (!mSafeForFragmentTransaction) return;
+        hideKeyboard();
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
+                .add(R.id.mainActivity_fragment_holder, fragment)
+                .addToBackStack(PROFILE_OR_EVENT_NAME)
+                .commit();
+    }
+
+
+    public void hideKeyboard(){
+        View v = getCurrentFocus();
+        if (v != null && v instanceof EditText){
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+    }
+
 
     public void clearBackStack() {
         //if there are a lot of other user profile/ events in mainActivity, clear them
@@ -581,7 +607,6 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-
                     NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));

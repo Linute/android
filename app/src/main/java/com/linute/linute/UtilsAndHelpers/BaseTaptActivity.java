@@ -28,6 +28,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public abstract void addFragmentToContainer(final Fragment fragment);
     public abstract void addFragmentToContainer(final Fragment fragment, String tag);
     public abstract void replaceContainerWithFragment(final Fragment fragment);
+    public abstract void addFragmentOnTop(Fragment fragment);
 
 
     /* action when toolbar is pressed */
@@ -46,7 +47,5 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public interface SocketErrorResponse{
         void runSocketError();
     }
-
-
 }
 

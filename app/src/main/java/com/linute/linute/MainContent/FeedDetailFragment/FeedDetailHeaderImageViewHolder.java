@@ -6,6 +6,7 @@ import android.view.View;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 /**
  * Created by QiFeng on 2/4/16.
@@ -15,8 +16,8 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
     public static final String TAG = FeedDetailHeaderImageViewHolder.class.getSimpleName();
 
 
-    public FeedDetailHeaderImageViewHolder(final View itemView, Context context) {
-        super(itemView, context);
+    public FeedDetailHeaderImageViewHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
+        super(itemView, context, manager);
     }
 
     @Override

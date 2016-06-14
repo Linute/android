@@ -82,7 +82,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             case TYPE_IMAGE_HEADER:
                 return new FeedDetailHeaderImageViewHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.feed_detail_header_image, parent, false), context);
+                        .inflate(R.layout.feed_detail_header_image, parent, false), context, mSingleVideoPlaybackManager);
             case TYPE_STATUS_HEADER:
                 return new FeedDetailHeaderStatusViewHolder(
                         LayoutInflater.from(parent.getContext())
