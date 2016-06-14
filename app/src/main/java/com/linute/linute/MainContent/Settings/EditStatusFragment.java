@@ -60,6 +60,7 @@ public class EditStatusFragment extends Fragment {
         setUpOnClickListeners();
         setUpEditTextMaxLines();
 
+
         return rootView;
     }
 
@@ -86,12 +87,13 @@ public class EditStatusFragment extends Fragment {
         });
     }
 
+    private static final int MAX_CHARACTERS = 200;
 
     //sets max line number to 3
     private void setUpEditTextMaxLines() {
+        updateCharCountView(mStatusText.getText());
         mStatusText.addTextChangedListener(new TextWatcher() {
             private String text;
-            private static final int MAX_CHARACTERS = 200;
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -105,18 +107,19 @@ public class EditStatusFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.i(TAG, s.toString());
-                Log.i(TAG, ""+s.length());
                 if(s.length() > MAX_CHARACTERS){
                     mStatusText.setText(text);
                 }
-                mCharCountTV.setText(String.valueOf(MAX_CHARACTERS-s.length()));
-                mCharCountTV.setTextColor((s.length() >= MAX_CHARACTERS ? 0xFFCC0000 : 0xFFCCCCCC));
-
+                updateCharCountView(s);
             }
         });
     }
 
+
+    private void updateCharCountView(Editable s){
+        mCharCountTV.setText(String.valueOf(MAX_CHARACTERS-s.length()));
+        mCharCountTV.setTextColor((s.length() >= MAX_CHARACTERS ? 0xFFCC0000 : 0xFFCCCCCC));
+    }
 
     private void saveStatus() {
         String status = mStatusText.getText().toString();
