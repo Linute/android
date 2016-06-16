@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.FriendsList;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,8 +13,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
+import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CameraFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -44,7 +53,11 @@ public class FriendsListFragment extends BaseFragment {
     private boolean mFollowing;
     private String mUserId;
 
-    private TextView mEmptyView;
+    private ViewGroup mListEmptyLayout;
+    private ViewGroup mFailLayout;
+
+    private View mListEmptyView;
+    private View mFailView;
 
     private View mProgressBar;
 
@@ -80,12 +93,43 @@ public class FriendsListFragment extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_friends_list, container, false);
         mProgressBar = rootView.findViewById(R.id.progress_bar);
         final RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.friendsList_recycler_view);
-        mEmptyView = (TextView) rootView.findViewById(R.id.friendsList_no_res);
+        mListEmptyLayout = (ViewGroup) rootView.findViewById(R.id.layout_empty_list);
+        mFailLayout = (ViewGroup) rootView.findViewById(R.id.layout_loading_failed);
 
-        mEmptyView.setOnClickListener(new View.OnClickListener() {
+        inflater.inflate((mFollowing ? R.layout.fragment_friends_list_not_following : R.layout.fragment_friends_list_no_followers), mListEmptyLayout, true);
+        mListEmptyLayout.findViewById(R.id.text_empty_action).setOnClickListener(
+                (mFollowing ?
+                //Not Following anyone
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Log.i(TAG, "Empty List Text Clicked (Not Following)");
+                        BaseTaptActivity acc = (BaseTaptActivity)getActivity();
+                        acc.addFragmentToContainer(new FindFriendsChoiceFragment());
+                    }
+                }
+                        :
+                 //Has no Followers
+                 new View.OnClickListener() {
+                     @Override
+                     public void onClick(View view) {
+                         Log.i(TAG, "Empty List Text Clicked (No Followers)");
+                         BaseTaptActivity acc = (BaseTaptActivity)getActivity();
+                         Intent i = new Intent(getActivity(), CameraActivity.class);
+                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                         i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+                         acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
+                     }
+                 }
+                )
+
+        );
+
+
+        mFailLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEmptyView.setVisibility(View.GONE);
+                mListEmptyLayout.setVisibility(View.GONE);
                 mProgressBar.setVisibility(View.VISIBLE);
                 getFriendsList();
             }
@@ -108,8 +152,11 @@ public class FriendsListFragment extends BaseFragment {
             getFriendsList();
         }else if (getFragmentState() == FragmentState.FINISHED_UPDATING){
             if (mFriendList.isEmpty()){
-                mEmptyView.setText("No results found");
-                mEmptyView.setVisibility(View.VISIBLE);
+
+                if(mListEmptyLayout != null)
+                    mListEmptyLayout.setVisibility(View.VISIBLE);
+                if(mFailLayout != null)
+                    mFailLayout.setVisibility(View.GONE);
             }
         }
         return rootView;
@@ -131,8 +178,10 @@ public class FriendsListFragment extends BaseFragment {
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
                             mProgressBar.setVisibility(View.GONE);
-                            mEmptyView.setText("Tap to reload");
-                            mEmptyView.setVisibility(View.VISIBLE);
+                            if(mListEmptyLayout != null)
+                                mListEmptyLayout.setVisibility(View.GONE);
+                            if(mFailLayout != null)
+                                mFailLayout.setVisibility(View.VISIBLE);
                         }
                     });
                 }
@@ -163,8 +212,10 @@ public class FriendsListFragment extends BaseFragment {
                                     mProgressBar.setVisibility(View.GONE);
                                     mFriendsListAdapter.notifyDataSetChanged();
                                     if (mFriendList.isEmpty()){
-                                        mEmptyView.setText("No results found");
-                                        mEmptyView.setVisibility(View.VISIBLE);
+                                        if(mListEmptyLayout != null)
+                                            mListEmptyLayout.setVisibility(View.VISIBLE);
+                                        if(mFailLayout != null)
+                                            mFailLayout.setVisibility(View.GONE);
                                     }
                                 }
                             });
@@ -189,9 +240,10 @@ public class FriendsListFragment extends BaseFragment {
                             @Override
                             public void run() {
                                 mProgressBar.setVisibility(View.GONE);
-                                Utils.showServerErrorToast(getActivity());
-                                mEmptyView.setText("Tap to reload");
-                                mEmptyView.setVisibility(View.VISIBLE);
+                                if(mListEmptyLayout != null)
+                                    mListEmptyLayout.setVisibility(View.GONE);
+                                if(mFailLayout != null)
+                                    mFailLayout.setVisibility(View.VISIBLE);
                             }
                         });
                     }
@@ -206,7 +258,8 @@ public class FriendsListFragment extends BaseFragment {
     private boolean mCanLoadMore = true;
 
     private void loadMore() {
-        if (!mCanLoadMore || getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
+        if (!mCanLoadMore || getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA)
+            return;
 
         setFragmentState(FragmentState.LOADING_DATA);
 
@@ -283,4 +336,22 @@ public class FriendsListFragment extends BaseFragment {
             }
         });
     }
+
+    public void setEmptyView(View mEmptyView) {
+        this.mListEmptyView = mEmptyView;
+        if(mListEmptyLayout != null){
+            mListEmptyLayout.removeAllViews();
+            mListEmptyLayout.addView(mEmptyView);
+        }
+    }
+
+    public void setFailView(View mFailView) {
+        this.mFailView = mFailView;
+        if(mFailLayout != null){
+            mFailLayout.removeAllViews();
+            mFailLayout.addView(mFailView);
+        }
+
+    }
+
 }
