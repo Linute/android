@@ -12,14 +12,19 @@
                                        app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
                                        app:titleTextColor="@color/white">
 
-        <android.support.v7.widget.AppCompatSpinner android:id="@+id/spinner"
-                                                    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                                                    android:layout_width="wrap_content"
-                                                    android:layout_height="wrap_content"/>
+
 
     </android.support.v7.widget.Toolbar>
+    <android.support.design.widget.TabLayout
+    android:id="@+id/friends_sliding_tabs"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:tabBackground="@color/colorPrimary"
+    app:tabIndicatorColor="@color/white"
+    app:tabSelectedTextColor="@color/white"
+    app:tabTextColor="@color/white"/>
 
-    <FrameLayout android:id="@+id/frame"
+    <android.support.v4.view.ViewPager android:id="@+id/frame"
                  android:layout_width="match_parent"
                  android:layout_height="match_parent"
     />
