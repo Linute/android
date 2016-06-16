@@ -3,7 +3,12 @@ package com.linute.linute.MainContent.FriendsList;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.AppCompatSpinner;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,46 +61,20 @@ public class FriendsListHolder extends BaseFragment {
                 .getString("userID", "")
                 .equals(mUserId);
 
-        String[] fragments = viewIsOwner ? new String[]{"Followers", "Following"} : new String[]{"Followers"};
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        AppCompatSpinner spinner = (AppCompatSpinner) rootView.findViewById(R.id.spinner);
 
-        spinner.setVisibility(View.VISIBLE);
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(
-                        getActivity(),
-                        R.layout.spinner_text,
-                        fragments
-                );
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != currentFragment) {
-                    currentFragment = position;
-                    getChildFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.frame, getFragment(position))
-                            .commit();
-                }
-            }
+        ViewPager viewPager = (ViewPager)rootView.findViewById(R.id.frame);
+        viewPager.setAdapter(new FriendsFragmentAdapter(getActivity().getSupportFragmentManager(), mUserId , viewIsOwner));
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        TabLayout tabLayout = (TabLayout)rootView.findViewById(R.id.friends_sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
 
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             setFragmentState(FragmentState.FINISHED_UPDATING);
             currentFragment = 0;
-            getChildFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.frame, getFragment(0))
-                    .commit();
+            viewPager.setCurrentItem(0);
         }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -108,11 +87,38 @@ public class FriendsListHolder extends BaseFragment {
         return rootView;
     }
 
+    private static class FriendsFragmentAdapter extends FragmentStatePagerAdapter {
 
-    private FriendsListFragment getFragment(int position){
-        if (mFriendsListFragments[position] == null){
-            mFriendsListFragments[position] = FriendsListFragment.newInstance(position == 1, mUserId);
+        Fragment[] mFriendsListFragments;
+        String mUserId;
+
+        public FriendsFragmentAdapter(FragmentManager fm, String userId, boolean isUser) {
+            super(fm);
+            this.mFriendsListFragments = new Fragment[(isUser ? 2 : 1)];
+            this.mUserId = userId;
         }
-        return mFriendsListFragments[position];
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position){
+                case 0: return "Followers";
+                case 1: return "Following";
+                default: return "";
+            }
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (mFriendsListFragments[position] == null){
+                mFriendsListFragments[position] = FriendsListFragment.newInstance(position == 1, mUserId);
+            }
+            return mFriendsListFragments[position];
+        }
+
+        @Override
+        public int getCount() {
+            return mFriendsListFragments.length;
+        }
     }
+
 }
