@@ -67,7 +67,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
+        Log.i("AAA", mFriendsList.get(position).getOwnerName());
         if (holder instanceof FriendsListViewHolder)
             ((FriendsListViewHolder) holder).bindView(mFriendsList.get(position));
 

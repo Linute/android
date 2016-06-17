@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainContent.Settings.EditNameFragment">
+    tools:context=".MainContent.Settings.EditNameFragment"
+    android:contextClickable="false">
 
 
     <EditText
@@ -16,9 +17,10 @@
         android:inputType="textCapSentences|textMultiLine"
         android:singleLine="false"
         android:lines="3"
-        android:maxLength="60"
+        android:maxLength="200"
         android:maxLines="3"
         android:textSize="@dimen/header_font_size"/>
+
 
 
     <Button android:id="@+id/editstatus_save"
@@ -27,6 +29,16 @@
             android:layout_alignParentBottom="true"
             android:text="Save Changes"/>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@id/editstatus_save"
+        android:textColor="@color/fifty_black"
+        tools:text="200"
+        android:textSize="20sp"
+        android:padding="12dp"
+        android:id="@+id/text_char_count" />
 
     <ProgressBar
         android:id="@+id/editstatus_progressbar"
