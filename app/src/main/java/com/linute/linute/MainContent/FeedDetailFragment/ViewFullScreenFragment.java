@@ -104,10 +104,11 @@ public class ViewFullScreenFragment extends BaseFragment {
                     mp.start();
                 }
             });
+
             vTextureVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (vVideoLoadingIndicator.getVisibility() != View.GONE) {
+                    if (vVideoLoadingIndicator.getVisibility() == View.GONE) {
                         mp.start();
                     }
                 }

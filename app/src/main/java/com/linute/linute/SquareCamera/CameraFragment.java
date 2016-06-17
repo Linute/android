@@ -73,6 +73,7 @@ public class CameraFragment extends Fragment {
     private View mGalleryButton;
     private View mStatusButton;
     private View mFlashTop;
+    private View mFocusCircle;
 
     private Uri mVideoUri;
 
@@ -171,6 +172,7 @@ public class CameraFragment extends Fragment {
             bottom.setLayoutParams(params);
         }
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
+        mFocusCircle = root.findViewById(R.id.focus);
 
         setOnClickListeners(root);
 
@@ -178,11 +180,10 @@ public class CameraFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mPreviewView = (CustomCameraPreview) view.findViewById(R.id.camera_preview_view);
-
         mPreviewView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -190,7 +191,6 @@ public class CameraFragment extends Fragment {
                 mSurfaceHolder = surface;
                 if (hasCameraAndWritePermission()) {
                     mSurfaceAlreadyCreated = true;
-
                     //start camera after slight delay. Without delay,
                     //there is huge lag time between active and inactive app state
                     mShowCameraHandler.postDelayed(mShowPreview, 250);
@@ -227,6 +227,31 @@ public class CameraFragment extends Fragment {
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+            }
+        });
+
+        mPreviewView.setOnTouched(new CustomCameraPreview.OnFocus() {
+            @Override
+            public void onFocusStart(float x, float y) {
+                float center = (float)mFocusCircle.getWidth() / 2;
+                mFocusCircle.setX(x - center);
+                mFocusCircle.setY(y - center);
+                mFocusCircle.setAlpha(0);
+                mFocusCircle.setScaleX(0.75f);
+                mFocusCircle.setScaleY(0.75f);
+                mFocusCircle.setVisibility(View.VISIBLE);
+                mFocusCircle.animate()
+                        .alpha(1.f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(300)
+                        .start();
+            }
+
+            @Override
+            public void onFocusFinished() {
+                mFocusCircle.clearAnimation();
+                mFocusCircle.setVisibility(View.GONE);
             }
         });
 
@@ -882,6 +907,7 @@ public class CameraFragment extends Fragment {
             if (mFlashOn && !turnOnFlashLight()) {
                 fadeInFlashForgreound(true);
             }
+            mIsRecording = true;
         }
 
         @Override

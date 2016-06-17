@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -108,14 +109,14 @@ public class DiscoverHolderFragment extends BaseFragment {
                 });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
-                        }
-                    }
-                });
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) {
+                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                }
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -148,6 +149,14 @@ public class DiscoverHolderFragment extends BaseFragment {
 
         tabLayout.setupWithViewPager(mViewPager);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
+        tabLayout.setOnTabSelectedListener(
+                new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
+                    @Override
+                    public void onTabReselected(TabLayout.Tab tab) {
+                        mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+                    }
+                }
+        );
 
 
         rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
@@ -164,6 +173,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         return rootView;
     }
 
+
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
 
@@ -173,7 +183,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         if (state == FragmentState.NEEDS_UPDATING) {
             mCampusFeedNeedsUpdating = true;
             mFriendsFeedNeedsUpdating = true;
-        }else{
+        } else {
             mCampusFeedNeedsUpdating = false;
             mFriendsFeedNeedsUpdating = false;
         }
@@ -236,7 +246,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             mChatSubscription.unsubscribe();
         }
 
-        if (mNotificationSubscription != null){
+        if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
         }
 
@@ -265,6 +275,13 @@ public class DiscoverHolderFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void resetFragment(){
+        mAppBarLayout.setExpanded(true, false);
+        mViewPager.setCurrentItem(0, true);
+        mDiscoverFragments[0].scrollUp();
+    }
+
 
     public SingleVideoPlaybackManager getSinglePlaybackManager() {
         return mSingleVideoPlaybackManager;
@@ -288,7 +305,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotification){
+            if (notificationEvent.hasNotification() != mHasNotification) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
                 mHasNotification = notificationEvent.hasNotification();
             }

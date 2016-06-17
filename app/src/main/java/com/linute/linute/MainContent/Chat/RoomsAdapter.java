@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -37,11 +38,13 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<Rooms> mRoomsList;
     private SharedPreferences mSharedPreferences;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
+    private Handler mHandler;
     private short mLoadingMoreState = LoadMoreViewHolder.STATE_LOADING;
 
-    public RoomsAdapter(Context aContext, List<Rooms> roomsList) {
+    public RoomsAdapter(Context aContext, List<Rooms> roomsList, Handler handler) {
         this.aContext = aContext;
         mRoomsList = roomsList;
+        mHandler = handler;
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
@@ -148,25 +151,29 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                                                         activity.runOnUiThread(new Runnable() {
                                                             @Override
                                                             public void run() {
+                                                                mHandler.post(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        //find the room that user wanted to delete
 
-                                                                //find the room that user wanted to delete
+                                                                        //the room might have moved so we might have
+                                                                        //      to find new position of room
+                                                                        int newPos = getAdapterPosition();
 
-                                                                //the room might have moved so we might have
-                                                                //      to find new position of room
-                                                                int newPos = getAdapterPosition();
+                                                                        //if room moved, try looking for it
+                                                                        if (newPos < 0 || !mRoomsList.get(newPos).equals(room)) {
+                                                                            newPos = mRoomsList.indexOf(room);
+                                                                        }
 
-                                                                //if room moved, try looking for it
-                                                                if (!mRoomsList.get(newPos).equals(room)) {
-                                                                    newPos = mRoomsList.indexOf(room);
-                                                                }
+                                                                        //if can't find appropriate room, return
+                                                                        if (newPos == -1) return;
 
-                                                                //if can't find appropriate room, return
-                                                                if (newPos == -1) return;
-
-                                                                //remove room from list and notify it was removed
-                                                                mRoomsList.remove(newPos);
-                                                                notifyItemRemoved(newPos);
-                                                                notifyItemRangeChanged(newPos, getItemCount());
+                                                                        //remove room from list and notify it was removed
+                                                                        mRoomsList.remove(newPos);
+                                                                        notifyItemRemoved(newPos);
+                                                                        notifyItemRangeChanged(newPos, getItemCount());
+                                                                    }
+                                                                });
                                                             }
                                                         });
                                                     } else {

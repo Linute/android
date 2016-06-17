@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -9,10 +10,10 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -119,13 +120,18 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
 
-                clearBackStack();
+                boolean hasBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
                 if (mPreviousItem != null) { //profile doesn't get checked
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
+                    replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                }else {
+                    getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
 
-                replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                if (hasBackStack)
+                    clearBackStack();
             }
         });
 
@@ -134,33 +140,15 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
 
-                //if there are a lot of other user profile/ events in mainActivity, clear them
-                clearBackStack();
-
                 switch (item.getItemId()) {
                     case R.id.navigation_item_feed:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        item.setChecked(true);
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.FEED, item);
                         break;
                     case R.id.navigation_item_activity:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
-                        item.setChecked(true);
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.ACTIVITY, item);
                         break;
                     case R.id.navigation_item_global:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.GLOBAL));
-                        item.setChecked(true);
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.GLOBAL, item);
                         break;
                     default:
                         break;
@@ -194,7 +182,31 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private Fragment getFragment(short index) {
+    private void navItemSelected(short position, MenuItem item){
+        boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
+        if (mPreviousItem != null) {
+            if (mPreviousItem != item || wereItemsInBackStack) {
+                mPreviousItem.setChecked(false);
+                item.setChecked(true);
+                replaceContainerWithFragment(getFragment(position));
+                mPreviousItem = item;
+            }else {
+                getFragment(position).resetFragment();
+            }
+        }else {
+            item.setChecked(true);
+            replaceContainerWithFragment(getFragment(position));
+            mPreviousItem = item;
+        }
+
+        //if there are a lot of other user profile/ events in mainActivity, clear them
+        if (wereItemsInBackStack)
+            clearBackStack();
+    }
+
+
+    private BaseFragment getFragment(short index) {
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
             BaseFragment fragment;
 
@@ -295,10 +307,10 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    public void hideKeyboard(){
+    public void hideKeyboard() {
         View v = getCurrentFocus();
-        if (v != null && v instanceof EditText){
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (v != null && v instanceof EditText) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
     }
@@ -349,7 +361,23 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else {
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 0){
+            new AlertDialog.Builder(this)
+                    .setTitle("Quit")
+                    .setMessage("Are you sure you want to quit?")
+                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+        }else {
             super.onBackPressed();
         }
     }

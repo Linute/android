@@ -384,7 +384,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     vImageView.setVisibility(View.GONE);
                     vPlayView.clearAnimation();
                     vPlayView.setVisibility(View.GONE);
-                    //sendImpressionsAsync(mPostId); note
                 }
             });
 
@@ -395,7 +394,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     //if icon is showing, then user has paused video
                     if (vPlayView.getVisibility() == View.GONE) {
                         vSquareVideoView.start();
-                        //sendImpressionsAsync(mPostId); note
                     }
                 }
             });
@@ -421,12 +419,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             vSquareVideoView.setVisibility(View.GONE);
             videoProcessing = false;
         }
-
-//            videoProcessing = false;
-//            vPlayView.clearAnimation();
-//            vPlayView.setVisibility(View.VISIBLE);
-//            vSquareVideoView.stopPlayback();
-
 
         @Override
         public void singleClick() {

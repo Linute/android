@@ -332,7 +332,7 @@ public class EditSaveVideoFragment extends Fragment {
                         if (bottomMargin == -1) {
                             if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y){
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = 75;
+                                topMargin = mUploadButton.getBottom();
                             }else {
                                 bottomMargin = 0;
                                 topMargin = 0;

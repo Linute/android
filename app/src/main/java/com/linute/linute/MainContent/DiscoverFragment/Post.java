@@ -327,6 +327,10 @@ public class Post implements Parcelable {
         mPostMuted = postMuted;
     }
 
+    public boolean isCommentAnonDisabled() {
+        return mCommentAnonDisabled;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -376,12 +380,4 @@ public class Post implements Parcelable {
             return new Post[size];
         }
     };
-
-    public boolean isCommentAnonDisabled() {
-        return mCommentAnonDisabled;
-    }
-
-    public void setCommentAnonDisabled(boolean commentAnonDisabled) {
-        mCommentAnonDisabled = commentAnonDisabled;
-    }
 }

@@ -76,7 +76,7 @@ public class RoomsActivityFragment extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mRoomsAdapter = new RoomsAdapter(context, mRoomsList);
+        mRoomsAdapter = new RoomsAdapter(context, mRoomsList, mHandler);
     }
 
     @Override
@@ -301,7 +301,6 @@ public class RoomsActivityFragment extends BaseFragment {
 //                                    chatHeads
                         }
 
-
                         mCanLoadMore = mSkip > 0;
 
                         mRoomsAdapter.setLoadingMoreState(!mCanLoadMore ?
@@ -505,7 +504,7 @@ public class RoomsActivityFragment extends BaseFragment {
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mSkip-=20;
+                                            mSkip -= 20;
                                             int pos = mRoomsList.size();
                                             mRoomsList.addAll(tempRooms);
                                             mRoomsAdapter.notifyItemRangeInserted(pos, tempRooms.size());
@@ -548,41 +547,29 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-
                 final Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
-                final int pos = mRoomsList.indexOf(tempRoom);
-
-                if (pos >= 0) {
-                    mRoomsList.get(pos).merge(tempRoom);
-                    mRoomsList.add(0, mRoomsList.remove(pos));
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                final int pos = mRoomsList.indexOf(tempRoom);
+                                if (pos >= 0) {
+                                    mRoomsList.get(pos).merge(tempRoom);
                                     mRoomsAdapter.notifyItemChanged(pos);
-                                }
-                            });
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
+                                    mRoomsList.add(0, mRoomsList.remove(pos));
                                     mRoomsAdapter.notifyItemMoved(pos, 0);
+                                } else {
+                                    if (!mSwipeRefreshLayout.isRefreshing()) {
+                                        mSwipeRefreshLayout.setRefreshing(true);
+                                        getRooms();
+                                    }
                                 }
-                            });
-                        }
-                    });
-                } else {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!mSwipeRefreshLayout.isRefreshing()) {
-                                mSwipeRefreshLayout.setRefreshing(true);
-                                getRooms();
                             }
-                        }
-                    });
-                }
+                        });
+                    }
+                });
             }
         }
     };

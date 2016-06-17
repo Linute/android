@@ -572,6 +572,11 @@ public class UpdatesFragment extends BaseFragment {
         return false;
     }
 
+    @Override
+    public void resetFragment(){
+        mUpdatesRecyclerView.scrollToPosition(0);
+    }
+
     private boolean mHasNotifications;
 
     private Subscription mChatSubscription;

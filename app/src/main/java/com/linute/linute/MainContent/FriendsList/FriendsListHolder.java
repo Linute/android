@@ -56,38 +56,43 @@ public class FriendsListHolder extends BaseFragment {
                 .getString("userID", "")
                 .equals(mUserId);
 
-        String[] fragments = viewIsOwner ? new String[]{"Followers", "Following"} : new String[]{"Followers"};
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         AppCompatSpinner spinner = (AppCompatSpinner) rootView.findViewById(R.id.spinner);
 
-        spinner.setVisibility(View.VISIBLE);
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(
-                        getActivity(),
-                        R.layout.spinner_text,
-                        fragments
-                );
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != currentFragment) {
-                    currentFragment = position;
-                    getChildFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.frame, getFragment(position))
-                            .commit();
+        if (viewIsOwner) {
+            spinner.setVisibility(View.VISIBLE);
+            String[] fragments =  new String[]{"Followers", "Following"};
+            ArrayAdapter<String> adapter =
+                    new ArrayAdapter<>(
+                            getActivity(),
+                            R.layout.spinner_text,
+                            fragments
+                    );
+            adapter.setDropDownViewResource(R.layout.spinner_dropdown);
+            spinner.setAdapter(adapter);
+            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (position != currentFragment) {
+                        currentFragment = position;
+                        getChildFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.frame, getFragment(position))
+                                .commit();
+                    }
                 }
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
 
-            }
-        });
+                }
+            });
 
+        }else{
+            spinner.setVisibility(View.GONE);
+            toolbar.setTitle("Followers");
+        }
 
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             setFragmentState(FragmentState.FINISHED_UPDATING);

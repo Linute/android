@@ -5,12 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.linute.linute.SquareCamera.SquareImageView
-        android:id="@+id/image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-
     <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView
         android:id="@+id/video"
         android:layout_width="match_parent"
@@ -19,11 +13,17 @@
         android:visibility="gone"
     />
 
+    <com.linute.linute.SquareCamera.SquareImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-    <LinearLayout android:id="@+id/topPanel"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:background="@drawable/downside_gradient"
+
+    <LinearLayout
+        android:id="@+id/topPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/downside_gradient"
     >
 
         <com.makeramen.roundedimageview.RoundedImageView

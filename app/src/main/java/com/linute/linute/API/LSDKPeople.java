@@ -33,5 +33,4 @@ public class LSDKPeople {
         return API_Methods.put("friends/" + friendshipID, header, param, callback);
     }
 
-
 }
