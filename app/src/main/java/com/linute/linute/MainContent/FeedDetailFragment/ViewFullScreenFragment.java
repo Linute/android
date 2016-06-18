@@ -4,9 +4,12 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -56,6 +59,48 @@ public class ViewFullScreenFragment extends BaseFragment {
         vImage = (ImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
         vTextureVideoView = (TextureVideoView) vVideoParent.findViewById(R.id.video);
+
+        root.findViewById(R.id.touch_layer).setOnTouchListener(
+                new View.OnTouchListener() {
+                    float totalMovement = 0;
+                    float x;
+                    float y;
+
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                totalMovement = 0;
+                                x = event.getX();
+                                y = event.getY();
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                if (totalMovement >= 150) {
+                                    getFragmentManager().popBackStack();
+                                    return true;
+                                } else {
+                                    if (mPostType == Post.POST_TYPE_VIDEO) {
+                                        if (vTextureVideoView.isPlaying()) {
+                                            vVideoLoadingIndicator.setVisibility(View.VISIBLE);
+                                            vTextureVideoView.pause();
+                                        } else {
+                                            vVideoLoadingIndicator.setVisibility(View.GONE);
+                                            vTextureVideoView.start();
+                                        }
+                                    }
+                                    return true;
+                                }
+                            case MotionEvent.ACTION_MOVE:
+                                totalMovement += Math.abs(event.getX() - x);
+                                totalMovement += Math.abs(event.getY() - y);
+                                x = event.getX();
+                                y = event.getY();
+                                break;
+                        }
+                        return true;
+                    }
+                });
+
         vVideoLoadingIndicator = root.findViewById(R.id.play);
         vLoadingText = root.findViewById(R.id.loading);
 
@@ -68,7 +113,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (mPostType == Post.POST_TYPE_IMAGE) {
+        if (mPostType == Post.POST_TYPE_IMAGE || mPostType == Post.POST_TYPE_STATUS) {
             vVideoParent.setVisibility(View.GONE);
             vImage.setVisibility(View.VISIBLE);
             vVideoLoadingIndicator.setVisibility(View.GONE);
@@ -114,21 +159,14 @@ public class ViewFullScreenFragment extends BaseFragment {
                 }
             });
 
-            vVideoParent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (vTextureVideoView.isPlaying()) {
-                        vVideoLoadingIndicator.setVisibility(View.VISIBLE);
-                        vTextureVideoView.pause();
-                    } else {
-                        vVideoLoadingIndicator.setVisibility(View.GONE);
-                        vTextureVideoView.start();
-                    }
-                }
-            });
-
             vTextureVideoView.setVideoURI(mLink);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     @Override
@@ -146,8 +184,10 @@ public class ViewFullScreenFragment extends BaseFragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStop() {
+        super.onStop();
         if (vTextureVideoView != null) vTextureVideoView.stopPlayback();
+        if (getActivity() != null) getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
+
 }

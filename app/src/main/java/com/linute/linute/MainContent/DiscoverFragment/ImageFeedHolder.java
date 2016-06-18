@@ -10,12 +10,10 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
-import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -93,18 +91,17 @@ public class ImageFeedHolder extends BaseFeedHolder {
             @Override
             public boolean onLongClick(View v) {
                 MainActivity activity = (MainActivity) mContext;
-                if (mPost != null && activity != null && mPost.getType() != Post.POST_TYPE_STATUS) {
 
-                    if (mSingleVideoPlaybackManager != null)
-                        mSingleVideoPlaybackManager.stopPlayback();
+                if (mSingleVideoPlaybackManager != null)
+                    mSingleVideoPlaybackManager.stopPlayback();
 
-                    activity.addFragmentOnTop(
-                            ViewFullScreenFragment.newInstance(
-                                    Uri.parse(mPost.getType() == Post.POST_TYPE_IMAGE ? mPost.getImage() : mPost.getVideoUrl()),
-                                    mPost.getType()
-                            )
-                    );
-                }
+                activity.addFragmentOnTop(
+                        ViewFullScreenFragment.newInstance(
+                                Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
+                                mPost.getType()
+                        )
+                );
+
                 return true;
             }
         });
@@ -132,7 +129,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
                     .bitmapTransform(new BlurTransformation(mContext))
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .into(vBlurred);
-        }else {
+        } else {
             vBlurred.setImageDrawable(null);
         }
 

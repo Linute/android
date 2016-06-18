@@ -138,7 +138,7 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         //shows the text strip when image touched
-        photoImageView.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.parent).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
@@ -146,9 +146,18 @@ public class EditSavePhotoFragment extends Fragment {
                     mEditText.requestFocus();
                     showKeyboard();
                     //mCanMove = false; //can't mvoe strip while in edit
+                } else if (mEditText.getVisibility() == View.VISIBLE){
+                    hideKeyboard();
+                    mEditText.setVisibility(View.GONE);
+                    if (!mEditText.getText().toString().trim().isEmpty()) {
+                        mTextView.setText(mEditText.getText().toString());
+                        mTextView.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });
+
+        mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
 
         Toolbar t = (Toolbar) view.findViewById(R.id.top);
         mProgressBar = (ProgressBar) t.findViewById(R.id.editFragment_progress_bar);
@@ -161,7 +170,6 @@ public class EditSavePhotoFragment extends Fragment {
                     showConfirmDialog();
             }
         });
-        mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mTextView = (TextView) mFrame.findViewById(R.id.textView);
 
@@ -195,12 +203,12 @@ public class EditSavePhotoFragment extends Fragment {
 
     private void showConfirmDialog() {
         if (mEditText.getVisibility() == View.VISIBLE) {
+            hideKeyboard();
             mEditText.setVisibility(View.GONE);
             if (!mEditText.getText().toString().trim().isEmpty()) {
                 mTextView.setText(mEditText.getText().toString());
                 mTextView.setVisibility(View.VISIBLE);
             }
-            hideKeyboard();
         }
 
         new AlertDialog.Builder(getActivity())

@@ -30,7 +30,7 @@ import org.json.JSONObject;
 public class VideoFeedHolder extends ImageFeedHolder {
 
 
-    private SquareVideoView vSquareVideoView;
+    private TextureVideoView vSquareVideoView;
     private String mCollegeId;
     private boolean videoProcessing = false;
 
@@ -39,7 +39,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
     public VideoFeedHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
         super(itemView, context, manager);
-        vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
+        vSquareVideoView = (TextureVideoView) itemView.findViewById(R.id.feed_detail_video);
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
@@ -94,22 +94,23 @@ public class VideoFeedHolder extends ImageFeedHolder {
     }
 
     @Override
-    protected void setUpOnClicks(){
+    protected void setUpOnClicks() {
         setUpOnClicks(itemView.findViewById(R.id.video_frame));
     }
 
     @Override
-    protected void singleClick(){
+    protected void singleClick() {
         if (mVideoUrl == null || videoProcessing) return;
         if (vSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
-            vSquareVideoView.setVisibility(View.VISIBLE);
             mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, mVideoUrl);
             videoProcessing = true;
             vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+            vSquareVideoView.setVisibility(View.VISIBLE);
         } else {
             if (vSquareVideoView.isPlaying()) {
                 vSquareVideoView.pause();
                 vCinemaIcon.setAlpha(1);
+
             } else {
                 vSquareVideoView.start();
                 vCinemaIcon.setAlpha(0);

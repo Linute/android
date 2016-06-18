@@ -19,6 +19,8 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -190,6 +192,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     public void onResume() {
         super.onResume();
 
+        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         if (mSocket == null || !mSocket.connected() && !mConnecting) {
             mConnecting = true;
 
@@ -239,6 +242,12 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
             mSocket.off(Socket.EVENT_ERROR, eventError);
             mSocket.off("new post", newPost);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
     }
 
     private void postContent() {

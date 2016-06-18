@@ -335,11 +335,16 @@ public class TextureVideoView extends TextureView
     MediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
             new MediaPlayer.OnVideoSizeChangedListener() {
                 public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                    mVideoWidth = mp.getVideoWidth();
-                    mVideoHeight = mp.getVideoHeight();
-                    if (mVideoWidth != 0 && mVideoHeight != 0) {
-                        getSurfaceTexture().setDefaultBufferSize(mVideoWidth, mVideoHeight);
-                        requestLayout();
+                    //really bad hack. portrait videos are just landscape videos with rotation 90
+                    //videoview will show landscape version before showing portrait on some phones
+                    //way around this will be to check if it's playing before we change view size
+                    if (mp.isPlaying()) {
+                        mVideoWidth = mp.getVideoWidth();
+                        mVideoHeight = mp.getVideoHeight();
+                        if (mVideoWidth != 0 && mVideoHeight != 0) {
+                            getSurfaceTexture().setDefaultBufferSize(mVideoWidth, mVideoHeight);
+                            requestLayout();
+                        }
                     }
                 }
             };

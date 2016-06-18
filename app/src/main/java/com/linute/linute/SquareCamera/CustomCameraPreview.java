@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
 
@@ -19,7 +20,7 @@ public class CustomCameraPreview extends TextureView{
 
 
     private static final int FOCUS_SQR_SIZE = 100;
-    private static final int FOCUS_MAX_BOUND = 1000;
+    private static final int FOCUS_MAX_BOUND = 950;
     private static final int FOCUS_MIN_BOUND = -FOCUS_MAX_BOUND;
 
     private Camera mCamera;
@@ -73,7 +74,6 @@ public class CustomCameraPreview extends TextureView{
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 mIsFocus = true;
-
                 mLastTouchX = event.getX();
                 mLastTouchY = event.getY();
                 break;
@@ -85,7 +85,7 @@ public class CustomCameraPreview extends TextureView{
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
-                if (mCamera != null) mCamera.cancelAutoFocus();
+                if (mCamera!=null) mCamera.cancelAutoFocus();
                 mIsFocus = false;
                 break;
             }
@@ -126,19 +126,18 @@ public class CustomCameraPreview extends TextureView{
     }
 
     private void setFocusArea(float x, float y) {
-        int left = clamp(Float.valueOf((x / getWidth()) * 2000 - 1000).intValue(), FOCUS_SQR_SIZE);
-        int top = clamp(Float.valueOf((y / getHeight()) * 2000 - 1000).intValue(), FOCUS_SQR_SIZE);
-
+        int left = clamp(Float.valueOf((x / getWidth()) * 2000 - FOCUS_MAX_BOUND).intValue(), FOCUS_SQR_SIZE);
+        int top = clamp(Float.valueOf((y / getHeight()) * 2000 - FOCUS_MAX_BOUND).intValue(), FOCUS_SQR_SIZE);
         mFocusArea.rect.set(left, top, left + FOCUS_SQR_SIZE, top + FOCUS_SQR_SIZE);
     }
 
     private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
         int result;
-        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>FOCUS_MAX_BOUND){
             if (touchCoordinateInCameraReper>0){
-                result = 1000 - focusAreaSize/2;
+                result = FOCUS_MAX_BOUND - focusAreaSize/2;
             } else {
-                result = -1000 + focusAreaSize/2;
+                result = FOCUS_MIN_BOUND + focusAreaSize/2;
             }
         } else{
             result = touchCoordinateInCameraReper - focusAreaSize/2;

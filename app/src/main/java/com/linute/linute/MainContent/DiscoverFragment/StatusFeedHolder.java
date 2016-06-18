@@ -15,13 +15,8 @@ public class StatusFeedHolder extends BaseFeedHolder {
 
     public static final String TAG = StatusFeedHolder.class.getSimpleName();
 
-
-
     protected TextView vStatus;
     protected View vStatusContainer; //so status is easier to press
-
-
-
 
     public StatusFeedHolder( View itemView, Context context) {
         super(itemView, context);

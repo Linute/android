@@ -34,10 +34,11 @@
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"/>
 
-        <com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView
+        <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView
             android:id="@+id/feed_detail_video"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@android:color/transparent"
             android:layout_gravity="center"
             android:visibility="gone"
         />

@@ -173,13 +173,21 @@ public class EditSaveVideoFragment extends Fragment {
         });
 
         mFrame = view.findViewById(R.id.text_container);
-        mFrame.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.parent).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mEditText.getVisibility() == View.GONE) {
+                if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
                     mEditText.setVisibility(View.VISIBLE);
                     mEditText.requestFocus();
                     showKeyboard();
+                    //mCanMove = false; //can't mvoe strip while in edit
+                } else if (mEditText.getVisibility() == View.VISIBLE){
+                    hideKeyboard();
+                    mEditText.setVisibility(View.GONE);
+                    if (!mEditText.getText().toString().trim().isEmpty()) {
+                        mTextView.setText(mEditText.getText().toString());
+                        mTextView.setVisibility(View.VISIBLE);
+                    }
                 }
             }
         });
