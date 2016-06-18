@@ -33,6 +33,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
@@ -741,6 +742,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(new UpdatesFragment());
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -749,6 +751,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(new UpdatesFragment());
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -756,6 +759,7 @@ public class MainActivity extends BaseTaptActivity {
             String userId = intent.getStringExtra("ownerID");
             String userName = intent.getStringExtra("ownerFullName");
             mSafeForFragmentTransaction = true;
+            addFragmentToContainer(new RoomsActivityFragment());
             addFragmentToContainer(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
                     userName, userId.isEmpty() ? null : userId));
         }
