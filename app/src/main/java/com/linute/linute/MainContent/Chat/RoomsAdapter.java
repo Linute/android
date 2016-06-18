@@ -14,15 +14,12 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -38,14 +35,17 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<Rooms> mRoomsList;
     private SharedPreferences mSharedPreferences;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
-    private Handler mHandler;
     private short mLoadingMoreState = LoadMoreViewHolder.STATE_LOADING;
+    private DeleteRoom mDeleteRoom;
 
-    public RoomsAdapter(Context aContext, List<Rooms> roomsList, Handler handler) {
+    public RoomsAdapter(Context aContext, List<Rooms> roomsList) {
         this.aContext = aContext;
         mRoomsList = roomsList;
-        mHandler = handler;
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    public void setDeleteRoom(DeleteRoom deleteRoom){
+        mDeleteRoom = deleteRoom;
     }
 
     public void setLoadMore(LoadMoreViewHolder.OnLoadMore load) {
@@ -140,54 +140,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     if (which == 0) {
-                                        if (mRooms != null) {
-                                            final BaseTaptActivity activity = (BaseTaptActivity) aContext;
-                                            if (activity != null) {
-                                                JSONObject object = new JSONObject();
-                                                try {
-                                                    if (activity.socketConnected()) {
-                                                        object.put("room", room.getRoomId());
-                                                        activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
-                                                        activity.runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                mHandler.post(new Runnable() {
-                                                                    @Override
-                                                                    public void run() {
-                                                                        //find the room that user wanted to delete
-
-                                                                        //the room might have moved so we might have
-                                                                        //      to find new position of room
-                                                                        int newPos = getAdapterPosition();
-
-                                                                        //if room moved, try looking for it
-                                                                        if (newPos < 0 || !mRoomsList.get(newPos).equals(room)) {
-                                                                            newPos = mRoomsList.indexOf(room);
-                                                                        }
-
-                                                                        //if can't find appropriate room, return
-                                                                        if (newPos == -1) return;
-
-                                                                        //remove room from list and notify it was removed
-                                                                        mRoomsList.remove(newPos);
-                                                                        notifyItemRemoved(newPos);
-                                                                        notifyItemRangeChanged(newPos, getItemCount());
-                                                                    }
-                                                                });
-                                                            }
-                                                        });
-                                                    } else {
-                                                        activity.runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-                                                                Utils.showBadConnectionToast(activity);
-                                                            }
-                                                        });
-                                                    }
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
+                                        if (room != null && mDeleteRoom != null) {
+                                            mDeleteRoom.deleteRoom(getAdapterPosition(), room);
                                         }
                                     }
                                 }
@@ -220,5 +174,9 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE)
                 vHasUnreadIcon.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public interface DeleteRoom{
+        void deleteRoom(int position, Rooms room);
     }
 }

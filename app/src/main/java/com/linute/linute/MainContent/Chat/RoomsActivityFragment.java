@@ -76,7 +76,7 @@ public class RoomsActivityFragment extends BaseFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mRoomsAdapter = new RoomsAdapter(context, mRoomsList, mHandler);
+        mRoomsAdapter = new RoomsAdapter(context, mRoomsList);
     }
 
     @Override
@@ -129,6 +129,12 @@ public class RoomsActivityFragment extends BaseFragment {
             public void loadMore() {
                 if (mCanLoadMore)
                     getMoreRooms();
+            }
+        });
+        mRoomsAdapter.setDeleteRoom(new RoomsAdapter.DeleteRoom() {
+            @Override
+            public void deleteRoom(int position, Rooms room) {
+                RoomsActivityFragment.this.deleteRoom(position, room);
             }
         });
 
@@ -573,4 +579,61 @@ public class RoomsActivityFragment extends BaseFragment {
             }
         }
     };
+
+
+    private void deleteRoom(final int position, final Rooms room){
+        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            JSONObject object = new JSONObject();
+            try {
+                if (activity.socketConnected()) {
+                    object.put("room", room.getRoomId());
+                    activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    //find the room that user wanted to delete
+
+                                    //the room might have moved so we might have
+                                    //      to find new position of room
+                                    int newPos = position;
+
+                                    //if room moved, try looking for it
+                                    if (newPos < 0 || !mRoomsList.get(newPos).equals(room)) {
+                                        newPos = mRoomsList.indexOf(room);
+                                    }
+
+                                    //if can't find appropriate room, return
+                                    if (newPos == -1) return;
+
+
+                                    //remove room from list and notify it was removed
+                                    mRoomsList.remove(newPos);
+                                    if (mRoomsList.isEmpty()){
+                                        mRoomsAdapter.notifyDataSetChanged();
+                                        mEmptyText.setVisibility(View.VISIBLE);
+                                    }else {
+                                        mRoomsAdapter.notifyItemRemoved(newPos);
+                                        mRoomsAdapter.notifyItemRangeChanged(newPos, mRoomsList.size());
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(activity);
+                        }
+                    });
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

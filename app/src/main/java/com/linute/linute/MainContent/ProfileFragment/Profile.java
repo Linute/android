@@ -115,11 +115,9 @@ public class Profile extends BaseFragment {
                 //0 for image and 1 for profile info
                 if (position == 0 || position == 1)
                     return 3;
-                    //view that shows empty
                 else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
                     return 3; //empty view size 3
-                    // view that shows loading indicator
-                else if (position == mUserActivityItems.size() + 2)
+                else if (position == mUserActivityItems.size() + 2)  // view that shows loading indicator
                     return 3;
                 else return 1;
             }

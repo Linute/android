@@ -825,6 +825,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         public void run() {
                             Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
                             activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.PROFILE);
                             getFragmentManager().popBackStack();
                         }
                     });

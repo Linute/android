@@ -43,9 +43,8 @@ dependencies {
     }
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
-    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+    compile 'com.squareup.okhttp3:okhttp:3.3.1'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
-    compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     compile 'com.android.support:support-v4:23.4.0'
     compile 'com.android.support:recyclerview-v7:23.4.0'
     compile 'com.github.bumptech.glide:glide:3.7.0'
@@ -62,6 +61,9 @@ dependencies {
     compile 'com.lyft:scissors:1.0.3'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
+
+    //new
+    compile 'jp.wasabeef:glide-transformations:2.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

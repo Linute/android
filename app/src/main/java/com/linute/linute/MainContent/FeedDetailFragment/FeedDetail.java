@@ -19,7 +19,6 @@ public class FeedDetail {
         mPost = post;
     }
 
-
     public Post getPost(){
         return mPost;
     }
