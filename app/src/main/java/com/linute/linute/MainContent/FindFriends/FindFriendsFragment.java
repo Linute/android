@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -189,7 +190,15 @@ public class FindFriendsFragment extends BaseFragment {
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        mProgressBar.setVisibility(View.GONE);
+                        Activity activity = getActivity();
+                        if(activity != null){
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProgressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
                     }
 
                 }

@@ -1028,9 +1028,42 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+
+                if (mChatList.size() > 0) {
+                    Chat previousMessage = mChatList.get(mChatList.size() - 1);
+                    if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
+                        Date date = chat.getDate();
+                        Chat header = new Chat(
+                                previousMessage.getRoomId(),
+                                previousMessage.getDate(),
+                                previousMessage.getOwnerId(),
+                                "-1",
+                                (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                                true,
+                                true
+                        );
+                        header.setType(Chat.TYPE_DATE_HEADER);
+                        mChatList.add(header);
+                    }
+                }else{
+                    Date date = chat.getDate();
+                    Chat header = new Chat(
+                            chat.getRoomId(),
+                            chat.getDate(),
+                            chat.getOwnerId(),
+                            "-1",
+                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            true,
+                            true
+                    );
+                    header.setType(Chat.TYPE_DATE_HEADER);
+                    mChatList.add(header);
+                }
+
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
+                updateTopHeader();
             }
         });
 
@@ -1535,6 +1568,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         header.setType(Chat.TYPE_DATE_HEADER);
                         intoChatList.add(header);
                     }
+                }else{
+                    Date date = chat.getDate();
+                    Chat header = new Chat(
+                            chat.getRoomId(),
+                            chat.getDate(),
+                            chat.getOwnerId(),
+                            "-1",
+                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            true,
+                            true
+                    );
+                    header.setType(Chat.TYPE_DATE_HEADER);
+                    intoChatList.add(header);
                 }
 
                 intoChatList.add(chat);
