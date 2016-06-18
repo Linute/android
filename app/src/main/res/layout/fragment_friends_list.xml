@@ -38,7 +38,7 @@
         android:text="@string/no_results"
         android:visibility="gone"
         />
-
+f
     <FrameLayout
         android:id="@+id/layout_loading_failed"
         android:layout_width="wrap_content"
