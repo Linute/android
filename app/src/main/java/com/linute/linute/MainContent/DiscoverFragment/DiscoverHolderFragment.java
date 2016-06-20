@@ -255,28 +255,14 @@ public class DiscoverHolderFragment extends BaseFragment {
 
 
     //returns if success
-    public boolean addPostToFeed(Object post) {
-
-        JSONObject obj = (JSONObject) post;
-
-        if (obj != null && getActivity() != null && mDiscoverFragments[0] != null) {
-            try {
-                Post post1 = new Post(obj);
-
-                return mDiscoverFragments[0].addPostToTop(post1);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return false;
-            }
-        } else {
-            Log.i(TAG, "addPostToFeed: obj was null");
-            return false;
-        }
+    public boolean addPostToFeed(Post post) {
+        return getActivity() != null &&
+                mDiscoverFragments[0] != null &&
+                mDiscoverFragments[0].addPostToTop(post);
     }
 
     @Override
-    public void resetFragment(){
+    public void resetFragment() {
         mAppBarLayout.setExpanded(true, false);
         mViewPager.setCurrentItem(0, true);
         mDiscoverFragments[0].scrollUp();

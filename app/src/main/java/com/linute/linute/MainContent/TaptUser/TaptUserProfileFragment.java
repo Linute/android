@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
@@ -613,10 +614,20 @@ public class TaptUserProfileFragment extends BaseFragment {
             emit.put("block", !mLinuteUser.isBlocked());
             emit.put("user", mTaptUserId);
             activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
-            Toast.makeText(activity,
-                    mLinuteUser.isBlocked() ? "You will now see this user, and they will see you"
-                            : "You will no longer see this user and they won't be able to see you",
-                    Toast.LENGTH_SHORT).show();
+
+            String message;
+            if (mLinuteUser.isBlocked()) {
+                message = "You will now see this user, and they will see you";
+                BlockedUsersSingleton.getBlockedListSingletion().remove(mLinuteUser.getUserID());
+            } else {
+                message = "You will no longer see this user and they won't be able to see you";
+                BlockedUsersSingleton.getBlockedListSingletion().add(mLinuteUser.getUserID());
+            }
+
+            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
 
         } catch (JSONException e) {

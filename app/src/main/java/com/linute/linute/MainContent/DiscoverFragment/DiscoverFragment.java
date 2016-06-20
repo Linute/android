@@ -221,15 +221,14 @@ public class DiscoverFragment extends BaseFragment {
                             return;
                         }
 
-                        String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
 
                         final ArrayList<Post> tempList = new ArrayList<>();
 
                         try {
-                            jsonObject = new JSONObject(json);
+                            jsonObject = new JSONObject(response.body().string());
+                            //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                             jsonArray = jsonObject.getJSONArray("events");
 
                             if (skip1 == 0) {
@@ -329,12 +328,12 @@ public class DiscoverFragment extends BaseFragment {
                         }
 
                         String json = response.body().string();
-                        //Log.i(TAG, "onResponse: "+json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
 
                             jsonObject = new JSONObject(json);
+                            //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                             mSkip = jsonObject.getInt("skip");
 
                             jsonArray = jsonObject.getJSONArray("events");

@@ -68,6 +68,7 @@ public class EditSavePhotoFragment extends Fragment {
     private String mUserId;
 
     private View mUploadButton;
+    private Toolbar mToolbar;
 
     private int mReturnType;
 
@@ -137,6 +138,8 @@ public class EditSavePhotoFragment extends Fragment {
             photoImageView.setImageURI(imageUri);
         }
 
+        mToolbar = (Toolbar) view.findViewById(R.id.top);
+
         //shows the text strip when image touched
         view.findViewById(R.id.parent).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,6 +148,8 @@ public class EditSavePhotoFragment extends Fragment {
                     mEditText.setVisibility(View.VISIBLE);
                     mEditText.requestFocus();
                     showKeyboard();
+                    mToolbar.setVisibility(View.GONE);
+
                     //mCanMove = false; //can't mvoe strip while in edit
                 } else if (mEditText.getVisibility() == View.VISIBLE){
                     hideKeyboard();
@@ -153,17 +158,17 @@ public class EditSavePhotoFragment extends Fragment {
                         mTextView.setText(mEditText.getText().toString());
                         mTextView.setVisibility(View.VISIBLE);
                     }
+                    mToolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
 
         mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
 
-        Toolbar t = (Toolbar) view.findViewById(R.id.top);
-        mProgressBar = (ProgressBar) t.findViewById(R.id.editFragment_progress_bar);
-        mUploadButton = t.findViewById(R.id.save_photo);
-        t.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
+        mProgressBar = (ProgressBar) mToolbar.findViewById(R.id.editFragment_progress_bar);
+        mUploadButton = mToolbar.findViewById(R.id.save_photo);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mProgressBar.getVisibility() != View.VISIBLE)
@@ -242,6 +247,7 @@ public class EditSavePhotoFragment extends Fragment {
                     mTextView.setText(mEditText.getText().toString());
                     mTextView.setVisibility(View.VISIBLE);
                 }
+                mToolbar.setVisibility(View.VISIBLE);
             }
         });
 
@@ -258,6 +264,7 @@ public class EditSavePhotoFragment extends Fragment {
                         mTextView.setText(mEditText.getText().toString());
                         mTextView.setVisibility(View.VISIBLE);
                     }
+                    mToolbar.setVisibility(View.VISIBLE);
                 }
                 return false;
             }
@@ -280,7 +287,7 @@ public class EditSavePhotoFragment extends Fragment {
                         if (bottomMargin == -1) {
                             if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y) {
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mUploadButton.getBottom();
+                                topMargin = mToolbar.getHeight();
                             }else {
                                 bottomMargin = 0;
                                 topMargin = 0;
@@ -294,6 +301,7 @@ public class EditSavePhotoFragment extends Fragment {
                             mEditText.setVisibility(View.VISIBLE);
                             mEditText.requestFocus(); //open edittext
                             showKeyboard();
+                            mToolbar.setVisibility(View.GONE);
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -320,19 +328,7 @@ public class EditSavePhotoFragment extends Fragment {
     }
 
     private void sendPicture() {
-
-        if (getActivity() == null) return;
-
-        if (mEditText.getVisibility() == View.VISIBLE) {
-            mEditText.setVisibility(View.GONE);
-            if (!mEditText.getText().toString().trim().isEmpty()) {
-                mTextView.setText(mEditText.getText().toString());
-                mTextView.setVisibility(View.VISIBLE);
-            }
-            hideKeyboard();
-            return;
-        }
-
+        if (getActivity() == null || mEditText.getVisibility() == View.VISIBLE) return;
 
         if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
             Utils.showBadConnectionToast(getActivity());

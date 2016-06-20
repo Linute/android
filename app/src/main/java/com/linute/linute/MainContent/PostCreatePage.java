@@ -100,14 +100,18 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         toolbar.setTitle("Status");
 
+        mPostEditText = (CustomBackPressedEditText) root.findViewById(R.id.post_create_text);
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                hideKeyboard();
-                postContent();
+                if (mPostEditText.hasFocus()) {
+                    hideKeyboard();
+                    mPostEditText.clearFocus();
+                }else {
+                    postContent();
+                }
             }
         });
-        mPostEditText = (CustomBackPressedEditText) root.findViewById(R.id.post_create_text);
 
         mPostEditText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),
                 "Lato-LightItalic.ttf"));

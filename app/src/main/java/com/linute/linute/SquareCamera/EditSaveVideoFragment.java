@@ -101,6 +101,7 @@ public class EditSaveVideoFragment extends Fragment {
     private TextureVideoView mSquareVideoView;
     private CustomBackPressedEditText mEditText;
     private TextView mTextView;
+    private Toolbar mToolbar;
 
     private View mFrame;
 
@@ -162,9 +163,9 @@ public class EditSaveVideoFragment extends Fragment {
             }
         });
 
-        Toolbar t = (Toolbar) view.findViewById(R.id.top);
-        t.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) view.findViewById(R.id.top);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mVideoState == VS_IDLE)
@@ -180,6 +181,8 @@ public class EditSaveVideoFragment extends Fragment {
                     mEditText.setVisibility(View.VISIBLE);
                     mEditText.requestFocus();
                     showKeyboard();
+                    mToolbar.setVisibility(View.GONE);
+
                     //mCanMove = false; //can't mvoe strip while in edit
                 } else if (mEditText.getVisibility() == View.VISIBLE){
                     hideKeyboard();
@@ -188,6 +191,7 @@ public class EditSaveVideoFragment extends Fragment {
                         mTextView.setText(mEditText.getText().toString());
                         mTextView.setVisibility(View.VISIBLE);
                     }
+                    mToolbar.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -231,7 +235,7 @@ public class EditSaveVideoFragment extends Fragment {
             commentParent.setVisibility(View.INVISIBLE);
         }
 
-        mUploadButton = t.findViewById(R.id.save_photo);
+        mUploadButton = mToolbar.findViewById(R.id.save_photo);
 
         //save button
         mUploadButton.setOnClickListener(new View.OnClickListener() {
@@ -300,7 +304,7 @@ public class EditSaveVideoFragment extends Fragment {
                     mTextView.setText(mEditText.getText().toString());
                     mTextView.setVisibility(View.VISIBLE);
                 }
-
+                mToolbar.setVisibility(View.VISIBLE);
             }
         });
 
@@ -317,6 +321,7 @@ public class EditSaveVideoFragment extends Fragment {
                         mTextView.setText(mEditText.getText().toString());
                         mTextView.setVisibility(View.VISIBLE);
                     }
+                    mEditText.setVisibility(View.VISIBLE);
                 }
                 return false;
             }
@@ -340,7 +345,7 @@ public class EditSaveVideoFragment extends Fragment {
                         if (bottomMargin == -1) {
                             if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y){
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mUploadButton.getBottom();
+                                topMargin = mToolbar.getHeight();
                             }else {
                                 bottomMargin = 0;
                                 topMargin = 0;
@@ -354,6 +359,7 @@ public class EditSaveVideoFragment extends Fragment {
                             mEditText.setVisibility(View.VISIBLE);
                             mEditText.requestFocus(); //open edittext
                             showKeyboard();
+                            mToolbar.setVisibility(View.GONE);
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
@@ -422,19 +428,11 @@ public class EditSaveVideoFragment extends Fragment {
 
 
     private void processVideo() {
-        if (getActivity() == null || mVideoLink == null || mVideoState != VS_IDLE) return;
-
-        if (mEditText.hasFocus()) {
-            mEditText.clearFocus();
-            hideKeyboard();
-            mEditText.setVisibility(View.GONE);
-            if (!mEditText.getText().toString().trim().isEmpty()){
-                mTextView.setText(mEditText.getText().toString());
-                mTextView.setVisibility(View.VISIBLE);
-            }
-
+        if (getActivity() == null ||
+                mVideoLink == null ||
+                mVideoState != VS_IDLE ||
+                mEditText.getVisibility() == View.VISIBLE)
             return;
-        }
 
         mPlaying.setChecked(false);
 
@@ -474,9 +472,9 @@ public class EditSaveVideoFragment extends Fragment {
                     }
                 }
 
-                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
-                Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
+//                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+//                Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
+//                Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
 
 
                 if (mTextView.getVisibility() == View.GONE) {
@@ -490,9 +488,6 @@ public class EditSaveVideoFragment extends Fragment {
                     }
                 } else {
                     String overlay = saveViewAsImage(mTextView);
-
-                    Log.i(TAG, "call:frame  " + mFrame.getHeight());
-                    Log.i(TAG, "call: " + mTextView.getTop());
 
                     if (overlay != null) {
                         cmd += "-i " + overlay + " -filter_complex ";

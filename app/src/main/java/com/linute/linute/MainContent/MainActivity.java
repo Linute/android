@@ -30,6 +30,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
@@ -51,10 +52,12 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
@@ -491,6 +494,7 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("badge", badge);
                     mSocket.on("unread", haveUnread);
                     mSocket.on("posts refresh", refresh);
+                    mSocket.on("blocked", blocked);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
@@ -606,24 +610,31 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-                final Object post = args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                            NotificationEventBus
-                                    .getInstance()
-                                    .setNotification(new NotificationEvent(true));
-                        }
+                try {
+                    final Post postObj = new Post((JSONObject) args[0]);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //the owner of the post is not blocked
+                            if (!BlockedUsersSingleton.getBlockedListSingletion().contains(postObj.getUserId())) {
+                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                    NotificationEventBus
+                                            .getInstance()
+                                            .setNotification(new NotificationEvent(true));
+                                }
 
-                        setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
 
-                        if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                                .addPostToFeed(post)) {
-                            NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                        .addPostToFeed(postObj)) {
+                                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                }catch (JSONException | NullPointerException e){
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -868,6 +879,22 @@ public class MainActivity extends BaseTaptActivity {
                 });
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener blocked = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject object = (JSONObject) args[0];
+            if (object != null){
+                try {
+                    BlockedUsersSingleton
+                            .getBlockedListSingletion()
+                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous") );
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
