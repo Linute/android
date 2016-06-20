@@ -36,11 +36,17 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONObject;
+
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -105,12 +111,11 @@ public class MyGcmListenerService extends GcmListenerService {
 
         String message = data.getString("message");
         int type = gettNotificationType(data.getString("action"));
-        int notificationId = 0;
         String name = String.valueOf(data.get("ownerFullName"));
         Object profileImage = data.get("ownerProfileImage");
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+        final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
 
                 .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setColor(Color.BLACK)
@@ -120,33 +125,39 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-        if(profileImage != null){
+        if (profileImage != null) {
             File image = null;
             try {
                 String url =
                         (name.toLowerCase().contains("anon")
-                        ?Utils.getAnonImageUrl(String.valueOf(profileImage))
-                        :Utils.getImageUrlOfUser(String.valueOf(profileImage))
+                                ? Utils.getAnonImageUrl(String.valueOf(profileImage))
+                                : Utils.getImageUrlOfUser(String.valueOf(profileImage))
                         );
-                image = Glide.with(this).load(url).downloadOnly(64,64).get();
+                image = Glide.with(this).load(url).downloadOnly(64, 64).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-            if(image != null)
+            if (image != null)
                 notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
         }
 
-        if(type == LinuteConstants.MESSAGE){
-            try {
-                BigInteger notificationIdBI = new BigInteger(String.valueOf(data.get("ownerID")),16);
-                notificationId = notificationIdBI.intValue();
-            }catch(Exception e){e.printStackTrace();}
+        BigInteger notificationId;
+
+        Object ownerId = data.get("ownerID");
+        Object eventId = data.get("event");
+        if (eventId != null) {
+            notificationId = new BigInteger(String.valueOf(eventId), 16);
+        } else if (ownerId != null) {
+            notificationId = new BigInteger(String.valueOf(ownerId), 16);
+        } else {
+            notificationId = BigInteger.ZERO;
         }
 
+        final int notifId = notificationId.intValue();
         Notification notifications = notificationBuilder.build();
-        NotificationManagerCompat.from(this).notify(notificationId, notifications);
+        NotificationManagerCompat.from(this).notify(notificationId.intValue(), notifications);
     }
 
 
