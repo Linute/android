@@ -19,6 +19,7 @@ package com.linute.linute.API;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -27,11 +28,18 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
+
+import java.io.File;
+import java.util.concurrent.ExecutionException;
+
+import okhttp3.OkHttpClient;
 
 
 public class MyGcmListenerService extends GcmListenerService {
@@ -85,54 +93,22 @@ public class MyGcmListenerService extends GcmListenerService {
      * @param data GCM Bundle received.
      */
     private void sendNotification(Bundle data, String action) {
-        Intent intent;
-        PendingIntent pendingIntent;
-        String message = data.getString("message");
 
-        //Log.i(TAG, "action : "  + action);
-        Log.i(TAG, "sendNotification: " + data.toString());
-
-        boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
-        if (action != null) { //<---
-            if (isLoggedIn) {
-                int type = gettNotificationType(data.getString("action"));
-                if (type != LinuteConstants.MISC) {
-                    intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    intent.putExtra("NOTIFICATION", type);
-                    if (type == LinuteConstants.MESSAGE){
-                        intent.putExtra("NOTIFICATION", type);
-                        intent.putExtra("ownerID", data.getString("ownerID"));
-                        intent.putExtra("ownerFullName", data.getString("ownerFullName"));
-                        intent.putExtra("room", data.getString("room") );
-                    } else if (type == LinuteConstants.FEED_DETAIL)
-                        intent.putExtra("event", data.getString("event"));
-                    else intent.putExtra("user", data.getString("user"));
-                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                            PendingIntent.FLAG_ONE_SHOT);
-                } else {
-                    intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                            PendingIntent.FLAG_ONE_SHOT);
-                }
-            } else {
-                intent = new Intent(this, PreLoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                        PendingIntent.FLAG_ONE_SHOT);
-            }
-        } else {
-            intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            pendingIntent = PendingIntent.getActivity(this, 0, intent,
-                    PendingIntent.FLAG_ONE_SHOT);
-        }
+        Intent intent = buildIntent(data, action);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         //Log.d(TAG, message);
 
+        String message = data.getString("message");
+
+        Log.i("AAA", data.toString());
+
+        int type = gettNotificationType(data.getString("action"));
+
+
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
+
                 .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setColor(Color.BLACK)
                 .setContentTitle("Tapt")
@@ -141,8 +117,69 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+        if(type == LinuteConstants.MESSAGE){
+            File image = null;
+            try {
+                String url = Utils.getImageUrlOfUser(String.valueOf(data.get("ownerProfileImage")));
+                Log.i("AAA", url);
+                image = Glide.with(this).load(url).downloadOnly(64,64).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            if(image != null)
+                notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
+        }
+
         Notification notifications = notificationBuilder.build();
         NotificationManagerCompat.from(this).notify(0, notifications);
+    }
+
+
+    private Intent buildIntent(Bundle data, String action) {
+        Intent intent;
+
+        //Log.i(TAG, "action : "  + action);
+        Log.i(TAG, "sendNotification: " + data.toString());
+
+        boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
+
+
+        if (action == null) {
+            intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return intent;
+        }
+        if (!isLoggedIn) {
+            intent = new Intent(this, PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return intent;
+        }
+
+        int type = gettNotificationType(data.getString("action"));
+        if (type == LinuteConstants.MISC) {
+            intent = new Intent(this, PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return intent;
+        }
+
+        intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.putExtra("NOTIFICATION", type);
+        if (type == LinuteConstants.MESSAGE) {
+            intent.putExtra("NOTIFICATION", type);
+            intent.putExtra("ownerID", data.getString("ownerID"));
+            intent.putExtra("ownerFullName", data.getString("ownerFullName"));
+            intent.putExtra("room", data.getString("room"));
+
+        } else if (type == LinuteConstants.FEED_DETAIL) {
+            intent.putExtra("event", data.getString("event"));
+        } else {
+            intent.putExtra("user", data.getString("user"));
+        }
+
+        return intent;
     }
 
 
