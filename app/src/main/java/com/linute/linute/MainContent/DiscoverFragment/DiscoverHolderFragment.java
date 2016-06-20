@@ -311,4 +311,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             }
         }
     };
+
+
 }
