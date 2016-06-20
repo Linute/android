@@ -37,6 +37,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.concurrent.ExecutionException;
 
 import okhttp3.OkHttpClient;
@@ -99,12 +100,13 @@ public class MyGcmListenerService extends GcmListenerService {
 
         //Log.d(TAG, message);
 
-        String message = data.getString("message");
-
         Log.i("AAA", data.toString());
 
+
+        String message = data.getString("message");
         int type = gettNotificationType(data.getString("action"));
         int notificationId = 0;
+        String name = String.valueOf(data.get("ownerFullName"));
         Object profileImage = data.get("ownerProfileImage");
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -121,7 +123,11 @@ public class MyGcmListenerService extends GcmListenerService {
         if(profileImage != null){
             File image = null;
             try {
-                String url = Utils.getImageUrlOfUser(String.valueOf(profileImage));
+                String url =
+                        (name.toLowerCase().contains("anon")
+                        ?Utils.getAnonImageUrl(String.valueOf(profileImage))
+                        :Utils.getImageUrlOfUser(String.valueOf(profileImage))
+                        );
                 image = Glide.with(this).load(url).downloadOnly(64,64).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -134,8 +140,9 @@ public class MyGcmListenerService extends GcmListenerService {
 
         if(type == LinuteConstants.MESSAGE){
             try {
-                notificationId = Integer.valueOf(String.valueOf(data.get("ownerID")));
-            }catch(Exception e){}
+                BigInteger notificationIdBI = new BigInteger(String.valueOf(data.get("ownerID")),16);
+                notificationId = notificationIdBI.intValue();
+            }catch(Exception e){e.printStackTrace();}
         }
 
         Notification notifications = notificationBuilder.build();
