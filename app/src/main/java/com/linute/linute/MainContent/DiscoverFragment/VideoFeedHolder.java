@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -58,12 +59,19 @@ public class VideoFeedHolder extends ImageFeedHolder {
         //when video is loaded and ready to play
         vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
             @Override
-            public void onPrepared(MediaPlayer mp) {
-                videoProcessing = false;
-                vPostImage.setVisibility(View.GONE);
-                vCinemaIcon.clearAnimation();
-                vCinemaIcon.setAlpha(0);
-                sendImpressionsAsync(mPostId);
+            public void onPrepared(final MediaPlayer mp) {
+                // <shoddy-fix>
+                vCinemaIcon.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoProcessing = false;
+                        vCinemaIcon.clearAnimation();
+                        vCinemaIcon.setAlpha(0);
+                        sendImpressionsAsync(mPostId);
+                        vPostImage.setVisibility(View.GONE);
+                    }
+                }, 500);
+                //</shoddy-fix>
             }
         });
 
@@ -79,6 +87,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 }
             }
         });
+
 
         //hide the texture view
         vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {

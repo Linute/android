@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -13,8 +12,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -30,7 +29,11 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
+
+import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
@@ -240,18 +243,28 @@ public class MainActivity extends BaseTaptActivity {
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
-        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
-            @Override
-            public void run() {
-                if (mSafeForFragmentTransaction) {
-                    MainActivity.this.getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.mainActivity_fragment_holder, fragment)
-                            .commit();
+        if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+                @Override
+                public void run() {
+                    if (mSafeForFragmentTransaction) {
+                        MainActivity.this.getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainActivity_fragment_holder, fragment)
+                                .commit();
+                    }
                 }
+            });
+        }else{
+            if (mSafeForFragmentTransaction) {
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .commit();
             }
-        });
+        }
     }
+
 
     public static final int SETTINGS_REQUEST_CODE = 13;
 
@@ -364,23 +377,9 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else if (getSupportFragmentManager().getBackStackEntryCount() == 0){
-            new AlertDialog.Builder(this)
-                    .setTitle("Quit")
-                    .setMessage("Are you sure you want to quit?")
-                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
-                    })
-                    .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).show();
-        }else {
+        } else if((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
+        } else{
             super.onBackPressed();
         }
     }
@@ -752,6 +751,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(new UpdatesFragment());
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -760,6 +760,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(new UpdatesFragment());
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -767,6 +768,7 @@ public class MainActivity extends BaseTaptActivity {
             String userId = intent.getStringExtra("ownerID");
             String userName = intent.getStringExtra("ownerFullName");
             mSafeForFragmentTransaction = true;
+            addFragmentToContainer(new RoomsActivityFragment());
             addFragmentToContainer(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
                     userName, userId.isEmpty() ? null : userId));
         }
