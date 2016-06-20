@@ -104,7 +104,8 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.i("AAA", data.toString());
 
         int type = gettNotificationType(data.getString("action"));
-
+        int notificationId = 0;
+        Object profileImage = data.get("ownerProfileImage");
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
@@ -117,11 +118,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
-        if(type == LinuteConstants.MESSAGE){
+        if(profileImage != null){
             File image = null;
             try {
-                String url = Utils.getImageUrlOfUser(String.valueOf(data.get("ownerProfileImage")));
-                Log.i("AAA", url);
+                String url = Utils.getImageUrlOfUser(String.valueOf(profileImage));
                 image = Glide.with(this).load(url).downloadOnly(64,64).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -132,8 +132,14 @@ public class MyGcmListenerService extends GcmListenerService {
                 notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
         }
 
+        if(type == LinuteConstants.MESSAGE){
+            try {
+                notificationId = Integer.valueOf(String.valueOf(data.get("ownerID")));
+            }catch(Exception e){}
+        }
+
         Notification notifications = notificationBuilder.build();
-        NotificationManagerCompat.from(this).notify(0, notifications);
+        NotificationManagerCompat.from(this).notify(notificationId, notifications);
     }
 
 
