@@ -46,7 +46,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -98,7 +97,7 @@ public class EditSaveVideoFragment extends Fragment {
 
     private ProgressDialog mProgressDialog;
 
-    private TextureVideoView mSquareVideoView;
+    //private TextureVideoView mSquareVideoView;
     private CustomBackPressedEditText mEditText;
     private TextView mTextView;
     private Toolbar mToolbar;
@@ -152,16 +151,16 @@ public class EditSaveVideoFragment extends Fragment {
 
         //setup VideoView
         mVideoLink = getArguments().getParcelable(BITMAP_URI);
-        mSquareVideoView = (TextureVideoView) view.findViewById(R.id.video_frame);
-        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
-
-        mSquareVideoView.setVideoURI(mVideoLink);
-        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mSquareVideoView.start();
-            }
-        });
+//        mSquareVideoView = (TextureVideoView) view.findViewById(R.id.video_frame);
+//        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
+//
+//        mSquareVideoView.setVideoURI(mVideoLink);
+//        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//            @Override
+//            public void onPrepared(MediaPlayer mp) {
+//                mSquareVideoView.start();
+//            }
+//        });
 
         mToolbar = (Toolbar) view.findViewById(R.id.top);
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -197,20 +196,20 @@ public class EditSaveVideoFragment extends Fragment {
         });
 
         mPlaying = (CheckBox) view.findViewById(R.id.play);
-        mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) mSquareVideoView.start();
-                else mSquareVideoView.pause();
-            }
-        });
-
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                if (mPlaying.isChecked()) mSquareVideoView.start();
-            }
-        });
+//        mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                if (isChecked) mSquareVideoView.start();
+//                else mSquareVideoView.pause();
+//            }
+//        });
+//
+//        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//            @Override
+//            public void onCompletion(MediaPlayer mp) {
+//                if (mPlaying.isChecked()) mSquareVideoView.start();
+//            }
+//        });
 
         mBottom = view.findViewById(R.id.bottom);
         //shows the text strip when image touched
@@ -724,7 +723,7 @@ public class EditSaveVideoFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        mSquareVideoView.pause();
+        //mSquareVideoView.pause();
 
         if (mReturnType != CameraActivity.RETURN_URI) {
             if (mSocket != null) {

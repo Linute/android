@@ -30,8 +30,6 @@ import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.json.JSONArray;
@@ -357,106 +355,109 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
     public class VideoTrendViewHolder extends BaseTrendViewHolder {
-
-        protected View vPlayView;
-        protected SquareVideoView vSquareVideoView;
-        private boolean videoProcessing = false;
-
         public VideoTrendViewHolder(View itemView) {
             super(itemView);
-            vPlayView = itemView.findViewById(R.id.play);
-            vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.video);
-
-            vSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
-                @Override
-                public void onSurfaceDestroyed() {
-                    //when video surface destroyed, hide the video and show image
-                    vImageView.setVisibility(View.VISIBLE);
-                    vSquareVideoView.setVisibility(View.GONE);
-                    vPlayView.setVisibility(View.VISIBLE);
-                }
-            });
-
-            vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    videoProcessing = false;
-                    vImageView.setVisibility(View.GONE);
-                    vPlayView.clearAnimation();
-                    vPlayView.setVisibility(View.GONE);
-                }
-            });
-
-            vSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    //if video is paused AND finishes at the same time, video won't pause
-                    //if icon is showing, then user has paused video
-                    if (vPlayView.getVisibility() == View.GONE) {
-                        vSquareVideoView.start();
-                    }
-                }
-            });
-
-            vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
-                @Override
-                public void hideVideo() {
-                    videoProcessing = false;
-                    vImageView.setVisibility(View.VISIBLE);
-                    vSquareVideoView.setVisibility(View.GONE);
-                    vPlayView.clearAnimation();
-                    vPlayView.setVisibility(View.VISIBLE);
-                }
-            });
         }
 
-        @Override
-        public void bindView(Post post) {
-            super.bindView(post);
-            vPlayView.clearAnimation();
-            vPlayView.setVisibility(View.VISIBLE);
-            vImageView.setVisibility(View.VISIBLE);
-            vSquareVideoView.setVisibility(View.GONE);
-            videoProcessing = false;
-        }
-
-        @Override
-        public void singleClick() {
-            if (videoProcessing) {
-                activate();
-                mSingleVideoPlaybackManager.stopPlayback();
-            } else if (!mSingleVideoPlaybackManager.hasVideo()) {
-                deactivate();
-                videoProcessing = true;
-                vSquareVideoView.setVisibility(View.VISIBLE);
-                vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-                mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
-            } else if (vSquareVideoView.isPlaying()) {
-                activate();
-                vPlayView.clearAnimation();
-                vPlayView.setVisibility(View.VISIBLE);
-                vSquareVideoView.pause();
-            } else {
-                deactivate();
-                vPlayView.setVisibility(View.GONE);
-                vSquareVideoView.start();
-            }
-        }
-
-        @Override
-        public void gainedFocus() {
-            if (videoProcessing) return;
-            videoProcessing = true;
-            vSquareVideoView.setVisibility(View.VISIBLE);
-            vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-            mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
-        }
-
-        @Override
-        public void lostFocus() {
-            deactivate();
-            mSingleVideoPlaybackManager.stopPlayback();
-        }
+//        protected View vPlayView;
+//        protected SquareVideoView vSquareVideoView;
+//        private boolean videoProcessing = false;
+//
+//        public VideoTrendViewHolder(View itemView) {
+//            super(itemView);
+//            vPlayView = itemView.findViewById(R.id.play);
+//            vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.video);
+//
+//            vSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
+//                @Override
+//                public void onSurfaceDestroyed() {
+//                    //when video surface destroyed, hide the video and show image
+//                    vImageView.setVisibility(View.VISIBLE);
+//                    vSquareVideoView.setVisibility(View.GONE);
+//                    vPlayView.setVisibility(View.VISIBLE);
+//                }
+//            });
+//
+//            vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
+//                @Override
+//                public void onPrepared(MediaPlayer mp) {
+//                    videoProcessing = false;
+//                    vImageView.setVisibility(View.GONE);
+//                    vPlayView.clearAnimation();
+//                    vPlayView.setVisibility(View.GONE);
+//                }
+//            });
+//
+//            vSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+//                @Override
+//                public void onCompletion(MediaPlayer mp) {
+//                    //if video is paused AND finishes at the same time, video won't pause
+//                    //if icon is showing, then user has paused video
+//                    if (vPlayView.getVisibility() == View.GONE) {
+//                        vSquareVideoView.start();
+//                    }
+//                }
+//            });
+//
+//            vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
+//                @Override
+//                public void hideVideo() {
+//                    videoProcessing = false;
+//                    vImageView.setVisibility(View.VISIBLE);
+//                    vSquareVideoView.setVisibility(View.GONE);
+//                    vPlayView.clearAnimation();
+//                    vPlayView.setVisibility(View.VISIBLE);
+//                }
+//            });
+//        }
+//
+//        @Override
+//        public void bindView(Post post) {
+//            super.bindView(post);
+//            vPlayView.clearAnimation();
+//            vPlayView.setVisibility(View.VISIBLE);
+//            vImageView.setVisibility(View.VISIBLE);
+//            vSquareVideoView.setVisibility(View.GONE);
+//            videoProcessing = false;
+//        }
+//
+//        @Override
+//        public void singleClick() {
+//            if (videoProcessing) {
+//                activate();
+//                mSingleVideoPlaybackManager.stopPlayback();
+//            } else if (!mSingleVideoPlaybackManager.hasVideo()) {
+//                deactivate();
+//                videoProcessing = true;
+//                vSquareVideoView.setVisibility(View.VISIBLE);
+//                vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+//                mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
+//            } else if (vSquareVideoView.isPlaying()) {
+//                activate();
+//                vPlayView.clearAnimation();
+//                vPlayView.setVisibility(View.VISIBLE);
+//                vSquareVideoView.pause();
+//            } else {
+//                deactivate();
+//                vPlayView.setVisibility(View.GONE);
+//                vSquareVideoView.start();
+//            }
+//        }
+//
+//        @Override
+//        public void gainedFocus() {
+//            if (videoProcessing) return;
+//            videoProcessing = true;
+//            vSquareVideoView.setVisibility(View.VISIBLE);
+//            vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+//            mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
+//        }
+//
+//        @Override
+//        public void lostFocus() {
+//            deactivate();
+//            mSingleVideoPlaybackManager.stopPlayback();
+//        }
     }
 
     public interface ScrollToPosition {

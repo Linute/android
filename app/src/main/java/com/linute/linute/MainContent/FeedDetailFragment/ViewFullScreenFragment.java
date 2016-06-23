@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,10 +24,12 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -43,7 +44,7 @@ public class ViewFullScreenFragment extends BaseFragment {
 
     private ImageView vImage;
     private View vVideoParent;
-    private TextureVideoView vTextureVideoView;
+    private ScalableVideoView vTextureVideoView;
     private View vVideoLoadingIndicator;
     private View vLoadingText;
 
@@ -115,7 +116,7 @@ public class ViewFullScreenFragment extends BaseFragment {
 
         vImage = (ImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
-        vTextureVideoView = (TextureVideoView) vVideoParent.findViewById(R.id.video);
+        vTextureVideoView = (ScalableVideoView) vVideoParent.findViewById(R.id.video);
 
         root.findViewById(R.id.touch_layer).setOnTouchListener(
                 new View.OnTouchListener() {
@@ -194,32 +195,35 @@ public class ViewFullScreenFragment extends BaseFragment {
                     })
                     .into(vImage);
         } else if (mPostType == Post.POST_TYPE_VIDEO) {
-            vVideoParent.setVisibility(View.VISIBLE);
-            vImage.setVisibility(View.GONE);
-            vLoadingText.setVisibility(View.VISIBLE);
-            vTextureVideoView.stopPlayback();
-            vTextureVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    setFragmentState(FragmentState.FINISHED_UPDATING);
-                    vLoadingText.setVisibility(View.GONE);
-                    mp.start();
-                }
-            });
 
-            vTextureVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    if (vVideoLoadingIndicator.getVisibility() == View.GONE) {
+            try {
+                vTextureVideoView.setDataSource(getContext(), mLink);
+                vVideoParent.setVisibility(View.VISIBLE);
+                vImage.setVisibility(View.GONE);
+                vLoadingText.setVisibility(View.VISIBLE);
+                //vTextureVideoView.stop();
+                vTextureVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
+                        vLoadingText.setVisibility(View.GONE);
                         mp.start();
-
-                        if (mPostId != null)
-                            sendImpressionsAsync(mPostId);
                     }
-                }
-            });
+                });
 
-            vTextureVideoView.setVideoURI(mLink);
+                vTextureVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        if (vVideoLoadingIndicator.getVisibility() == View.GONE) {
+                            mp.start();
+                            if (mPostId != null)
+                                sendImpressionsAsync(mPostId);
+                        }
+                    }
+                });
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -238,7 +242,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                 vVideoLoadingIndicator.setVisibility(View.VISIBLE);
                 vLoadingText.setVisibility(View.GONE);
             } else {
-                vTextureVideoView.stopPlayback();
+                vTextureVideoView.stop();
             }
         }
     }
@@ -246,7 +250,10 @@ public class ViewFullScreenFragment extends BaseFragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (vTextureVideoView != null) vTextureVideoView.stopPlayback();
+        if (vTextureVideoView != null){
+            vTextureVideoView.stop();
+            vTextureVideoView.release();
+        }
         if (getActivity() != null) getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
