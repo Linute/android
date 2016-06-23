@@ -293,7 +293,6 @@ public class DiscoverHolderFragment extends BaseFragment {
         return mSingleVideoPlaybackManager;
     }
 
-
     private Subscription mChatSubscription;
 
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
