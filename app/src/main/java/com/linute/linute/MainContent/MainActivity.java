@@ -63,6 +63,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.Arrays;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
@@ -420,6 +421,7 @@ public class MainActivity extends BaseTaptActivity {
                 updateItem.getActionView().findViewById(R.id.notification).setVisibility(
                         count > 0 ? View.VISIBLE : View.GONE
                 );
+                ((TextView)updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count): "+"));
             }
         }
     }
@@ -859,6 +861,7 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            Log.i("AAA", Arrays.toString(args));
             NotificationsCounterSingleton.getInstance().setHasMessage((boolean) args[0]);
             NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
         }
