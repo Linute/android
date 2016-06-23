@@ -22,6 +22,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -184,16 +185,16 @@ public class Profile extends BaseFragment {
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.add_friend) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null)
-                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                    return true;
-                } else if (item.getItemId() == R.id.settings) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null)
-                        activity.startEditProfileActivity(SettingActivity.class);
-                    return true;
+                MainActivity activity = (MainActivity) getActivity();
+                switch (item.getItemId()){
+                    case R.id.settings:
+                        if (activity != null)
+                            activity.startEditProfileActivity(SettingActivity.class);
+                        return true;
+                    case R.id.menu_updates:
+                        if (activity != null)
+                            activity.addFragmentToContainer(new UpdatesFragment());
+                        return true;
                 }
                 return false;
             }

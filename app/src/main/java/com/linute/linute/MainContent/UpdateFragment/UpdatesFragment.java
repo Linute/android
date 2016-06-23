@@ -114,27 +114,17 @@ public class UpdatesFragment extends BaseFragment {
         });
 
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-        mToolbar.inflateMenu(R.menu.people_fragment_menu);
-        View chatActionView = mToolbar.getMenu().getItem(1).getActionView();
+        mToolbar.inflateMenu(R.menu.menu_fragment_updates);
+        View chatActionView = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
         mHasNotifications = NotificationsCounterSingleton.getInstance().hasNotifications();
+
+
+
         mToolbar.setNavigationIcon(mHasNotifications ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
 
         mNotificationIndicator = chatActionView.findViewById(R.id.notification);
         mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
-
-        mToolbar.getMenu()
-                .getItem(0)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -145,6 +135,7 @@ public class UpdatesFragment extends BaseFragment {
                 }
             }
         });
+
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);

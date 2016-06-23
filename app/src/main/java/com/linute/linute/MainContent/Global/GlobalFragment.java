@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -100,28 +101,29 @@ public class GlobalFragment extends BaseFragment {
             }
         });
 
-        View chatActionView = vToolbar.getMenu().getItem(1).getActionView();
+        View chatActionView = vToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
         mHasNotifications = NotificationsCounterSingleton.getInstance().hasNotifications();
+
+        View updatesActionView = vToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+
+
+        updatesActionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity activity = (MainActivity) getActivity();
+                if(activity != null){
+                    activity.addFragmentToContainer(new UpdatesFragment());
+                }
+            }
+        });
 
         vToolbar.setNavigationIcon(mHasNotifications ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
 
         vNotificationIndicator = chatActionView.findViewById(R.id.notification);
         vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
-        vToolbar.getMenu()
-                .getItem(0)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
             @Override

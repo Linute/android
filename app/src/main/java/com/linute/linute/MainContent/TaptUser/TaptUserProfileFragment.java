@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -25,6 +26,7 @@ import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
 import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -205,13 +207,14 @@ public class TaptUserProfileFragment extends BaseFragment {
 
                         }
                         return true;
-                    case R.id.add_friend:
-                        if (activity != null)
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        return true;
                     case R.id.settings:
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);
+                        return true;
+                    case R.id.menu_updates:
+                        if(activity != null){
+                            activity.addFragmentToContainer(new UpdatesFragment());
+                        }
                         return true;
 
                 }

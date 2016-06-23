@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -43,6 +44,8 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -149,11 +152,16 @@ public class MainActivity extends BaseTaptActivity {
                     case R.id.navigation_item_feed:
                         navItemSelected(FRAGMENT_INDEXES.FEED, item);
                         break;
-                    case R.id.navigation_item_activity:
-                        navItemSelected(FRAGMENT_INDEXES.ACTIVITY, item);
-                        break;
                     case R.id.navigation_item_global:
                         navItemSelected(FRAGMENT_INDEXES.GLOBAL, item);
+                        break;
+                    case R.id.navigation_item_find_friends:
+                        if (mPreviousItem != null && mPreviousItem != item) {
+                            mPreviousItem.setChecked(false);
+                        }
+                        item.setChecked(true);
+                        addFragmentToContainer(new FindFriendsChoiceFragment());
+                        mPreviousItem = item;
                         break;
                     default:
                         break;
@@ -404,7 +412,16 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void setUpdateNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_activity, count);
+        //setNavItemNotification(R.id.navigation_item_activity, count);
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        if(toolbar != null){
+            MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
+            if(updateItem != null){
+                updateItem.getActionView().findViewById(R.id.notification).setVisibility(
+                        count > 0 ? View.VISIBLE : View.GONE
+                );
+            }
+        }
     }
 
     //So we change fragments or activities only after the drawer closes
@@ -653,20 +670,9 @@ public class MainActivity extends BaseTaptActivity {
                             public void run() {
                                 if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
                                     if (!((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update)) {
-                                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                            NotificationEventBus
-                                                    .getInstance()
-                                                    .setNotification(new NotificationEvent(true));
-                                        }
-
                                         setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
                                     }
                                 } else {
-                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                        NotificationEventBus
-                                                .getInstance()
-                                                .setNotification(new NotificationEvent(true));
-                                    }
                                     setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
                                 }
 

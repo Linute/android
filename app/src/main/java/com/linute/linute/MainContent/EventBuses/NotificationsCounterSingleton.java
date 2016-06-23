@@ -77,7 +77,7 @@ public class NotificationsCounterSingleton {
     }
 
     public boolean hasNotifications() {
-        return mNumOfNewActivities + mNumOfNewPosts > 0;
+        return mNumOfNewPosts > 0;
     }
 
     public boolean hasNewActivities() {
