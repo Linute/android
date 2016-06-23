@@ -420,6 +420,7 @@ public class MainActivity extends BaseTaptActivity {
                 updateItem.getActionView().findViewById(R.id.notification).setVisibility(
                         count > 0 ? View.VISIBLE : View.GONE
                 );
+                ((TextView)updateItem.getActionView().findViewById(R.id.notification_count)).setText(String.valueOf(count));
             }
         }
     }
