@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
 
-import android.animation.Animator;
-import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
@@ -262,6 +260,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onViewCreated(view, savedInstanceState);
 
         recList = (RecyclerView) view.findViewById(R.id.chat_list);
+
         mLinearLayoutManager = new LinearLayoutManager(getActivity());
         mLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mLinearLayoutManager.setStackFromEnd(true);
@@ -274,14 +273,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 updateTopHeader();
             }
         });
+        final int width = getResources().getDisplayMetrics().widthPixels;
+//        recList.getLayoutParams().width = width;
         recList.setOnTouchListener(new View.OnTouchListener() {
             private float lastX = 0;
-            boolean isDragging = false;
-            private int preDrag = 9;
+            private float lastY = 0;
 
-            private final int MIN_PULL = 0;
-            private final int MAX_PULL = (int) (150 * getActivity().getResources().getDisplayMetrics().density);
-            private final int THRESHOLD = (int) (30 * getActivity().getResources().getDisplayMetrics().density);
+            boolean isDragging = false;
+            private int preDrag = 0;
+
+            private final int MIN_PULL = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
+
+            private final int MAX_PULL = (int) (100 * getActivity().getResources().getDisplayMetrics().density);
+            private final int THRESHOLD = (int) (0 * getActivity().getResources().getDisplayMetrics().density);
 
 
             private int totalOffset = 0;
@@ -293,73 +297,81 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        if(animator != null && animator.isRunning()){
+                        if (animator != null && animator.isRunning()) {
                             animator.cancel();
-                            Log.i("TimeAnimation", "canceled : "+totalOffset);
                             isDragging = true;
                             preDrag = THRESHOLD;
-                        }else{
+                        } else {
                             totalOffset = 0;
                             isDragging = false;
                             preDrag = 0;
                         }
 
                         lastX = motionEvent.getRawX();
+                        lastY = motionEvent.getRawY();
                         return false;
                     case MotionEvent.ACTION_MOVE:
+
                         float x = motionEvent.getRawX();
+                        float y = motionEvent.getRawY();
                         int dX = (int) (x - lastX);
+                        int dY = (int) (y - lastY);
                         lastX = x;
-                        Log.i(TAG, "dX:" + dX);
+                        lastY = y;
+//                        Log.i(TAG, "dX:" + dX + " dY:" + dY);
+
+                        if (!isDragging && Math.abs(dX / 5) < Math.abs(dY)) {
+                            return false;
+                        }
 
                         if (preDrag >= THRESHOLD) {
                             isDragging = true;
                         }
 
                         if (isDragging) {
-                            recList.stopScroll();
                             if (totalOffset + dX > MAX_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MAX_PULL - totalOffset);
                                 totalOffset = MAX_PULL;
                             } else if (totalOffset + dX < MIN_PULL) {
-                                mLinearLayoutManager.offsetChildrenHorizontal(MIN_PULL - totalOffset);
                                 totalOffset = MIN_PULL;
                             } else {
                                 totalOffset += dX;
-                                mLinearLayoutManager.offsetChildrenHorizontal((int) dX);
                             }
-                            Log.i("TimeAnimation", "Dragging: "+totalOffset);
-                            return true;
 
-                        }else{
+//                            recList.getLayoutParams().width = width - totalOffset;
+                            recList.setX(totalOffset);
+//                            recList.requestLayout();
+
+
+                            if (totalOffset == 0) {
+                                isDragging = false;
+                            }
+                        } else {
                             preDrag += dX;
                         }
-                        //returns false to allow natural scrolling to occur
                         return false;
                     case MotionEvent.ACTION_UP:
-                        if(totalOffset > 0) {
-                            animator = ValueAnimator.ofInt(0, -totalOffset);
+                        if (totalOffset != 0) {
+                            animator = ValueAnimator.ofInt(totalOffset, 0);
                             animator.setDuration(250)
                                     .addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                        int lastVal = 0;
 
                                         @Override
                                         public void onAnimationUpdate(ValueAnimator valueAnimator) {
                                             recList.stopScroll();
-                                            int val = (Integer) valueAnimator.getAnimatedValue();
-                                            mLinearLayoutManager.offsetChildrenHorizontal(val - lastVal);
-                                            totalOffset += (val - lastVal);
-                                            Log.i("TimeAnimation", "Animation: " + totalOffset);
-                                            lastVal = val;
+                                            totalOffset = (Integer) valueAnimator.getAnimatedValue();
+
+                                            Activity a = getActivity();
+
+//                                            recList.getLayoutParams().width = width - totalOffset;
+                                            recList.setX(totalOffset);
+//                                            recList.requestLayout();
                                         }
                                     });
                             animator.start();
                         }
 
-                        //mLinearLayoutManager.offsetChildrenHorizontal(-totalOffset);
                         isDragging = false;
                         preDrag = 0;
-                        //totalOffset = 0;
                         return false;
                     default:
                         return false;
@@ -747,7 +759,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
+                       // Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -856,7 +868,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
+                        //Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -1016,9 +1028,42 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+
+                if (mChatList.size() > 0) {
+                    Chat previousMessage = mChatList.get(mChatList.size() - 1);
+                    if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
+                        Date date = chat.getDate();
+                        Chat header = new Chat(
+                                previousMessage.getRoomId(),
+                                previousMessage.getDate(),
+                                previousMessage.getOwnerId(),
+                                "-1",
+                                (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                                true,
+                                true
+                        );
+                        header.setType(Chat.TYPE_DATE_HEADER);
+                        mChatList.add(header);
+                    }
+                }else{
+                    Date date = chat.getDate();
+                    Chat header = new Chat(
+                            chat.getRoomId(),
+                            chat.getDate(),
+                            chat.getOwnerId(),
+                            "-1",
+                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            true,
+                            true
+                    );
+                    header.setType(Chat.TYPE_DATE_HEADER);
+                    mChatList.add(header);
+                }
+
                 mChatList.add(chat);
-                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
+                updateTopHeader();
             }
         });
 
@@ -1042,7 +1087,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void run() {
                 mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
-                mChatAdapter.notifyItemInserted(mChatList.size() - 1);
+                mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
             }
         });
@@ -1058,11 +1103,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                int pos = mChatList.size() - 1;
+                int pos = mChatList.size()-1;
 
                 if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
                     mChatList.remove(pos);
-                    mChatAdapter.notifyItemRemoved(pos);
+                    mChatAdapter.notifyItemRemoved(pos+1);
                 }
             }
         });
@@ -1523,6 +1568,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         header.setType(Chat.TYPE_DATE_HEADER);
                         intoChatList.add(header);
                     }
+                }else{
+                    Date date = chat.getDate();
+                    Chat header = new Chat(
+                            chat.getRoomId(),
+                            chat.getDate(),
+                            chat.getOwnerId(),
+                            "-1",
+                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            true,
+                            true
+                    );
+                    header.setType(Chat.TYPE_DATE_HEADER);
+                    intoChatList.add(header);
                 }
 
                 intoChatList.add(chat);
@@ -1546,4 +1604,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             mTopDateHeaderTV.setText(new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today");
         }
     }
+
+
+
 }

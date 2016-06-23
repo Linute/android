@@ -175,11 +175,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         recList.setHasFixedSize(true);
-        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+        final LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
+
         recList.setAdapter(mFeedDetailAdapter);
 
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -188,6 +189,22 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 loadMoreComments();
             }
         });
+
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //when passing last item and scrolling upward
+                if(llm.findLastCompletelyVisibleItemPosition() ==  RecyclerView.NO_POSITION && dy < 0){
+                    //close keyboard
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(recyclerView.getWindowToken(), 0);
+                }
+            }
+
+        });
+
+
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -808,6 +825,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         public void run() {
                             Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
                             activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.PROFILE);
                             getFragmentManager().popBackStack();
                         }
                     });

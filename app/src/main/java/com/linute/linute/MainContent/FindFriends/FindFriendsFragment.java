@@ -1,8 +1,11 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -29,11 +32,14 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriendSearch;
+import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -43,7 +49,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -109,7 +117,7 @@ public class FindFriendsFragment extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_find_friends, container, false);
 
         TextView rationaleText = (TextView) rootView.findViewById(R.id.findFriends_rat_text);
-        RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
+        final RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
         mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
 
@@ -128,7 +136,86 @@ public class FindFriendsFragment extends BaseFragment {
 
 
         if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
-            rationaleText.setText("Enter your friend's name in the search bar");
+            //rationaleText.setText("Enter your friend's name in the search bar");
+            rationaleText.setVisibility(View.GONE);
+
+            mProgressBar.setVisibility(View.VISIBLE);
+
+            Map<String, String> params = new HashMap<>();
+
+
+            new LSDKPeople(rootView.getContext()).getPeople(params, new Callback(){
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+//                    Log.i(TAG, response.body().string());
+                    try {
+                        JSONObject json = new JSONObject(response.body().string());
+                        JSONArray events = json.getJSONArray("people");
+                        ArrayList<FriendSearchUser> tempFriends = new ArrayList<FriendSearchUser>();
+                        if (events != null) {
+                            for (int i = 0; i < events.length(); i++) {
+                                tempFriends.add(new FriendSearchUser(events.getJSONObject(i).getJSONObject("owner")));
+                            }
+                        }
+
+                        mFriendFoundList.clear();
+                        mFriendFoundList.addAll(tempFriends);
+
+                        if (getActivity() == null) return;
+
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                if (mFriendFoundList.isEmpty()) { //show no results found if empty
+                                    mEmptyText.setVisibility(View.VISIBLE);
+                                } else if (mEmptyText.getVisibility() == View.VISIBLE) {
+                                    mEmptyText.setVisibility(View.GONE);
+                                }
+
+                                //so notify isn't called repeadedly if they don't have to be
+                                mMainHandler.removeCallbacks(null);
+                                mMainHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mFriendSearchAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                                mProgressBar.setVisibility(View.GONE);
+
+                            }
+                        });
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Activity activity = getActivity();
+                        if(activity != null){
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProgressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                            mProgressBar.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            });
+
             reloadButton.setVisibility(View.GONE);
             mRecievedList = true;
             if (mFriendFoundList.isEmpty()) {

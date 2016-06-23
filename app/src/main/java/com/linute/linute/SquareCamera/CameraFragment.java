@@ -6,7 +6,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -28,11 +29,15 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 
 import java.io.IOException;
@@ -64,8 +69,11 @@ public class CameraFragment extends Fragment {
 
     private ImageView mTakePhotoBtn;
     private EditSaveVideoFragment.VideoDimen mVideoDimen;
-    private View mCameraOps;
+    private View mCameraTopButtons;
     private View mGalleryButton;
+    private View mStatusButton;
+    private View mFlashTop;
+    private View mFocusCircle;
 
     private Uri mVideoUri;
 
@@ -82,7 +90,7 @@ public class CameraFragment extends Fragment {
     private boolean mIsSafeToTakePhoto = false;
     private boolean mVideoProcessing = false;
 
-    private Point mDisplayMetrics;
+    private HasSoftKeySingleton mHasSoftKeySingleton;
 
     public static Fragment newInstance() {
         return new CameraFragment();
@@ -110,8 +118,7 @@ public class CameraFragment extends Fragment {
             mFlashOn = savedInstanceState.getBoolean(CAMERA_FLASH_KEY);
         }
 
-        mDisplayMetrics = new Point();
-        getActivity().getWindowManager().getDefaultDisplay().getRealSize(mDisplayMetrics);
+        mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
         mCameraType = ((CameraActivity) getActivity()).getCameraType();
     }
 
@@ -122,23 +129,50 @@ public class CameraFragment extends Fragment {
         View root = inflater.inflate(R.layout.square_camera_take_photo, container, false);
 
         mTakePhotoBtn = (ImageView) root.findViewById(R.id.capture_image_button);
+        mFlashTop = root.findViewById(R.id.flash_top);
 
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
+        mStatusButton = root.findViewById(R.id.new_post);
 
         if (mCameraType == CameraActivity.JUST_CAMERA) {
             mGalleryButton.setVisibility(View.INVISIBLE);
+            mStatusButton.setVisibility(View.INVISIBLE);
         } else {
             mGalleryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
-                        ((CameraActivity) getActivity()).launchGalleryFragment();
+                        ((CameraActivity) getActivity()).launchFragment(GalleryFragment.newInstance(), GalleryFragment.TAG);
+                }
+            });
+            mStatusButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing) {
+                        ((CameraActivity) getActivity()).launchFragment(new PostCreatePage(), PostCreatePage.TAG);
+                    }
                 }
             });
         }
 
-        mCameraOps = root.findViewById(R.id.camera_ops);
+        mCameraTopButtons = root.findViewById(R.id.toolbar);
+        ((Toolbar) mCameraTopButtons).setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
+                    getActivity().finish();
+            }
+        });
+
+
+        if (mHasSoftKeySingleton.getHasNavigation()) {
+            View bottom = root.findViewById(R.id.bottom);
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) bottom.getLayoutParams();
+            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
+            bottom.setLayoutParams(params);
+        }
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
+        mFocusCircle = root.findViewById(R.id.focus);
 
         setOnClickListeners(root);
 
@@ -146,11 +180,10 @@ public class CameraFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         mPreviewView = (CustomCameraPreview) view.findViewById(R.id.camera_preview_view);
-
         mPreviewView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
@@ -158,7 +191,6 @@ public class CameraFragment extends Fragment {
                 mSurfaceHolder = surface;
                 if (hasCameraAndWritePermission()) {
                     mSurfaceAlreadyCreated = true;
-
                     //start camera after slight delay. Without delay,
                     //there is huge lag time between active and inactive app state
                     mShowCameraHandler.postDelayed(mShowPreview, 250);
@@ -195,6 +227,31 @@ public class CameraFragment extends Fragment {
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
+            }
+        });
+
+        mPreviewView.setOnTouched(new CustomCameraPreview.OnFocus() {
+            @Override
+            public void onFocusStart(float x, float y) {
+                float center = (float)mFocusCircle.getWidth() / 2;
+                mFocusCircle.setX(x - center);
+                mFocusCircle.setY(y - center);
+                mFocusCircle.setAlpha(0);
+                mFocusCircle.setScaleX(0.75f);
+                mFocusCircle.setScaleY(0.75f);
+                mFocusCircle.setVisibility(View.VISIBLE);
+                mFocusCircle.animate()
+                        .alpha(1.f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(300)
+                        .start();
+            }
+
+            @Override
+            public void onFocusFinished() {
+                mFocusCircle.clearAnimation();
+                mFocusCircle.setVisibility(View.GONE);
             }
         });
 
@@ -275,16 +332,18 @@ public class CameraFragment extends Fragment {
 
     //hides the gallery, flash, and reverse camera button
     private void hideCameraButtons(boolean hide) {
-        if (hide && mCameraOps.getVisibility() == View.VISIBLE) {
-            mCameraOps.setVisibility(View.INVISIBLE);
+        if (hide && mCameraTopButtons.getVisibility() == View.VISIBLE) {
+            mCameraTopButtons.setVisibility(View.INVISIBLE);
 
             if (mCameraType == CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY) {
                 mGalleryButton.setVisibility(View.INVISIBLE);
+                mStatusButton.setVisibility(View.INVISIBLE);
             }
-        } else if (!hide && mCameraOps.getVisibility() == View.INVISIBLE) {
-            mCameraOps.setVisibility(View.VISIBLE);
+        } else if (!hide && mCameraTopButtons.getVisibility() == View.INVISIBLE) {
+            mCameraTopButtons.setVisibility(View.VISIBLE);
             if (mCameraType == CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY) {
                 mGalleryButton.setVisibility(View.VISIBLE);
+                mStatusButton.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -308,12 +367,11 @@ public class CameraFragment extends Fragment {
     private void goToVideoEditFragment(Uri uri, EditSaveVideoFragment.VideoDimen videoDimen) {
         if (getActivity() != null) {
             try {
-                //// TODO: 6/4/16 fix saveVid params
                 getFragmentManager()
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditSaveVideoFragment.newInstance(uri, false, videoDimen),
+                                EditSaveVideoFragment.newInstance(uri, videoDimen),
                                 EditSaveVideoFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -329,7 +387,6 @@ public class CameraFragment extends Fragment {
     private void setupFlashMode() {
         View view = getView();
         if (view == null) return;
-
         ((TextView) view.findViewById(R.id.auto_flash_icon)).setText(mFlashOn ? "On" : "Off");
     }
 
@@ -493,31 +550,13 @@ public class CameraFragment extends Fragment {
         Camera.Parameters parameters = mCamera.getParameters();
 
         Size bestPreviewSize = determineBestSize(mCamera.getParameters().getSupportedPreviewSizes());
-        Size bestPictureSize = determineBestSize(mCamera.getParameters().getSupportedPictureSizes());
-
-        int bPrevWid = bestPreviewSize.width;
-        int bPrevHei = bestPreviewSize.height;
-
-        int bPicWid = bestPictureSize.width;
-        int bPicHei = bestPictureSize.height;
-
-        parameters.setPreviewSize(bPrevWid, bPrevHei);
-        parameters.setPictureSize(bPicWid, bPicHei);
+        parameters.setPreviewSize(bestPreviewSize.width, bestPreviewSize.height);
 
         List<String> focusmodes = parameters.getSupportedFocusModes();
 
         // Set continuous picture focus, if it's supported
         if (focusmodes != null && focusmodes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        }
-
-        final View changeCameraFlashModeBtn = getView().findViewById(R.id.flash);
-        List<String> flashModes = parameters.getSupportedFlashModes();
-        if (flashModes != null && flashModes.contains(Camera.Parameters.FLASH_MODE_TORCH)) {
-            changeCameraFlashModeBtn.setVisibility(View.VISIBLE);
-        } else {
-            changeCameraFlashModeBtn.setVisibility(View.INVISIBLE);
-            mFlashOn = false;
         }
 
         // Lock in the changes
@@ -527,19 +566,26 @@ public class CameraFragment extends Fragment {
     private Size determineBestSize(List<Size> sizes) {
 
         Size bestSize = null;
+        int longerReal = mHasSoftKeySingleton.getRealSize().y > mHasSoftKeySingleton.getRealSize().x ?
+                mHasSoftKeySingleton.getRealSize().y : mHasSoftKeySingleton.getRealSize().x;
+        int longerBest = 0;
 
         for (Size size : sizes) {
             //same size as screen, return the size
-            if ((mDisplayMetrics.y == size.height && mDisplayMetrics.x == size.width) ||
-                    (mDisplayMetrics.x == size.height && mDisplayMetrics.y == size.width))
+            if ((mHasSoftKeySingleton.getRealSize().y == size.height && mHasSoftKeySingleton.getRealSize().x == size.width) ||
+                    (mHasSoftKeySingleton.getRealSize().x == size.height && mHasSoftKeySingleton.getRealSize().y == size.width))
                 return size;
 
+            int longerSide = size.height > size.width ? size.height : size.width;
             //better size
-            if ((bestSize == null) || size.width < mDisplayMetrics.x || size.height < mDisplayMetrics.x) {
+            if ((bestSize == null) || longerSide < longerReal) {
                 //ratio we need
-                if ((mDisplayMetrics.x * size.width == mDisplayMetrics.y * size.height) ||
-                        (mDisplayMetrics.y * size.width == mDisplayMetrics.x * size.height))
+                if (longerBest < longerSide &&
+                        ((mHasSoftKeySingleton.getRealSize().x * size.width == mHasSoftKeySingleton.getRealSize().y * size.height) ||
+                                (mHasSoftKeySingleton.getRealSize().y * size.width == mHasSoftKeySingleton.getRealSize().x * size.height))) {
                     bestSize = size;
+                    longerBest = longerSide;
+                }
             }
         }
 
@@ -571,7 +617,11 @@ public class CameraFragment extends Fragment {
         if (mIsSafeToTakePhoto && !mIsRecording) {
             setSafeToTakePhoto(false);
 
-            if (mFlashOn && turnOnFlashLight()) {
+            if (mFlashOn) {
+                if (!turnOnFlashLight()) {
+                    fadeInFlashForgreound(true);
+                }
+
                 // need to wait for flashlight to turn on fully
                 mRecordHandler.postDelayed(
                         new Runnable() {
@@ -580,6 +630,7 @@ public class CameraFragment extends Fragment {
                                 takeImageOfView();
                             }
                         }, 300);
+
             } else { //flash was off or flash failed to turn on
                 takeImageOfView();
             }
@@ -666,7 +717,6 @@ public class CameraFragment extends Fragment {
                 stopCameraPreview();
                 mCamera.release();
                 mCamera = null;
-                Log.i(TAG, "onPause: ");
             } catch (RuntimeException e) {
                 Log.i(TAG, "onPause: release error : ignore");
                 mCamera.release();
@@ -677,39 +727,73 @@ public class CameraFragment extends Fragment {
     }
 
     private void takeImageOfView() {
-        mProcessImageSubscriptions = Observable.create(
-                new Observable.OnSubscribe<Uri>() {
-                    @Override
-                    public void call(Subscriber<? super Uri> subscriber) {
-                        mCamera.stopPreview();
-                        subscriber.onNext(ImageUtility.savePicture(getActivity(), mPreviewView.getBitmap()));
-                    }
-                })
+//        subscriber.onNext(ImageUtility.savePicture(getActivity(), mPreviewView.getBitmap()));
+        mProcessImageSubscriptions = Observable
+                .just(stopCamera())
                 .subscribeOn(io())
-                .observeOn(mainThread()).subscribe(new Action1<Uri>() {
-                    @Override
-                    public void call(Uri uri) {
-                        getFragmentManager()
-                                .beginTransaction()
-                                .replace(
-                                        R.id.fragment_container,
-                                        EditSavePhotoFragment.newInstance(uri),
-                                        EditSavePhotoFragment.TAG)
-                                .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
-                                .commit();
+                .observeOn(mainThread())
+                .subscribe(
+                        new Action1<Void>() {
+                            @Override
+                            public void call(Void aVoid) {
+                                if (getActivity() == null) return;
+                                Bitmap b = mPreviewView.getBitmap();
+                                mStartCameraSubscription = Observable
+                                        .just(ImageUtility.savePicture(getActivity(), b))
+                                        .subscribeOn(io())
+                                        .observeOn(mainThread())
+                                        .subscribe(
+                                                new Action1<Uri>() {
+                                                    @Override
+                                                    public void call(Uri uri) {
+                                                        getFragmentManager()
+                                                                .beginTransaction()
+                                                                .replace(
+                                                                        R.id.fragment_container,
+                                                                        EditSavePhotoFragment.newInstance(uri),
+                                                                        EditSavePhotoFragment.TAG)
+                                                                .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
+                                                                .commit();
 
-                        setSafeToTakePhoto(true);
-                    }
-                });
+                                                        setSafeToTakePhoto(true);
+                                                    }
+                                                }
+                                        );
+
+                            }
+                        }
+                );
     }
 
-    private boolean usingFrontFaceCamera() {
-        CameraInfo info = new CameraInfo();
-        Camera.getCameraInfo(mCameraID, info);
-
-        return (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+    private Void stopCamera() {
+        mCamera.stopPreview();
+        return null;
     }
 
+
+    private void fadeInFlashForgreound(final boolean show) {
+        mFlashTop.clearAnimation();
+
+        AlphaAnimation alphaAnimation = show ?
+                new AlphaAnimation(0f, 1f) : new AlphaAnimation(1f, 0f);
+
+        alphaAnimation.setDuration(200);
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mFlashTop.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        mFlashTop.startAnimation(alphaAnimation);
+    }
 
     //Permissions
     private boolean hasPermission(String permission) {
@@ -732,50 +816,13 @@ public class CameraFragment extends Fragment {
                 CamcorderProfile.get(CamcorderProfile.QUALITY_480P) :
                 CamcorderProfile.get(CamcorderProfile.QUALITY_LOW);
 
-        //the profile might not be 4:3
-        //is that is the case, use the height to find 4:3 ratio
-        //remark: width is the longer side of the phone
-        //        height is the shorter side
-
-        //Log.i(TAG, "prepareMediaRecorder: h:" + camcorderProfile.videoFrameHeight + "W: " + camcorderProfile.videoFrameWidth);
-//        int bestWidth = camcorderProfile.videoFrameWidth;
-//
-//        Size betterSize = getVideoSize(camcorderProfile.videoFrameHeight);
-
-        // couldn't find a 4:3 ratio so set it to the profiles values
-        //if (betterSize != null) bestWidth = betterSize.width;
-
-        //sent to EditSaveVideoFragment dimensions so we know how much to crop
-
-        //Log.i(TAG, "prepareMediaRecorder: "+bestWidth +" "+camcorderProfile.videoFrameHeight);
-
-
-        // stop and restart
-        // must stop and reset camera when params are changed
-        // must set preview size to same size as video size or it will record green on some phones
-        //mCamera.cancelAutoFocus();
-//        Camera.Parameters param = mCamera.getParameters();
-//
-//        // video size and preview size might be different
-//        // if they are, just fine a 4:3 preview size
-//        if (param.getSupportedVideoSizes() != null) {
-//            //Log.i(TAG, "prepareMediaRecorder: not null");
-//            Camera.Size size = getVideoPreviewSize(camcorderProfile.videoFrameHeight);
-//            param.setPreviewSize(size.width, size.height);
-//        } else {
-//            // Log.i(TAG, "prepareMediaRecorder: null");
-//            param.setPreviewSize(bestWidth, camcorderProfile.videoFrameHeight);
-//        }
-//
-//        mCamera.stopPreview();
-//        mCamera.setParameters(param);
-//        mCamera.startPreview();
         Camera.Parameters p = mCamera.getParameters();
         Size vidSize = p.getSupportedVideoSizes() != null ? determineBestSize(p.getSupportedVideoSizes()) : p.getPreviewSize();
 
+
         mVideoDimen = new EditSaveVideoFragment.VideoDimen(
-                vidSize.height,
-                vidSize.width, mCameraID == CameraInfo.CAMERA_FACING_FRONT
+                vidSize.width,
+                vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
         );
 
         mMediaRecorder = new MediaRecorder();
@@ -854,14 +901,27 @@ public class CameraFragment extends Fragment {
 
 
     class StartCameraTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (mFlashOn && !turnOnFlashLight()) {
+                fadeInFlashForgreound(true);
+            }
+            mIsRecording = true;
+        }
 
         @Override
         protected Boolean doInBackground(Void... params) {
+
             mVideoUri = prepareMediaRecorder();
 
             if (mVideoUri != null) {
-                mMediaRecorder.start();
-                return true;
+                try {
+                    mMediaRecorder.start();
+                    return true;
+                } catch (RuntimeException e) {
+                    Log.i(TAG, "doInBackground: failed to start video");
+                }
             }
 
             return false;
@@ -873,21 +933,19 @@ public class CameraFragment extends Fragment {
             mIsRecording = aBoolean;
             if (aBoolean) {
                 hideCameraButtons(true);
+
+                mRecordProgress.setMax(1000);
                 mRecordProgress.setVisibility(View.VISIBLE);
                 mProgressAnimator =
-                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 15000);
+                        ObjectAnimator.ofInt(mRecordProgress, "progress", 0, 1000);
 
                 mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    boolean updated = false;
-
-
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        if (!updated && animation.getCurrentPlayTime() >= 3000) {
-                            updated = true;
+                        if (animation.getCurrentPlayTime() >= 3000) {
+                            mProgressAnimator.removeAllUpdateListeners();
                             mRecordProgress.setProgressDrawable(
-                                    ContextCompat.getDrawable(getContext(), R.drawable.camera_progress)
-                            );
+                                    ContextCompat.getDrawable(getContext(), R.drawable.camera_progress));
                         }
                     }
                 });
@@ -897,6 +955,8 @@ public class CameraFragment extends Fragment {
                 mProgressAnimator.start();
 
                 mTakePhotoBtn.setImageResource(R.drawable.square_camera_record);
+            } else {
+                mFlashTop.setVisibility(View.GONE);
             }
         }
     }
@@ -937,6 +997,17 @@ public class CameraFragment extends Fragment {
             mRecordProgress.setProgress(0);
             mRecordProgress.setProgressDrawable(ContextCompat.getDrawable(getContext(), R.drawable.camera_progress_red));
 
+            if (mFlashTop.getVisibility() == View.VISIBLE)
+                fadeInFlashForgreound(false);
+
+            if (mCamera != null) {
+                Camera.Parameters p = mCamera.getParameters();
+                if (p.getSupportedFlashModes() != null && p.getSupportedFlashModes().contains(Camera.Parameters.FLASH_MODE_OFF)) {
+                    p.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                    mCamera.setParameters(p);
+                }
+            }
+
             mTakePhotoBtn.setImageResource(R.drawable.square_camera_capture);
             hideCameraButtons(false);
             if (duration < 3000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
@@ -950,3 +1021,4 @@ public class CameraFragment extends Fragment {
         }
     }
 }
+

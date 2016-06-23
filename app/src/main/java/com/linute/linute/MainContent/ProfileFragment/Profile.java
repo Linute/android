@@ -49,15 +49,12 @@ public class Profile extends BaseFragment {
     public static final String TAG = Profile.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
-
     private Toolbar mToolbar;
-
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private RecyclerView vRecList;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
-
     private SharedPreferences mSharedPreferences;
-
     private boolean mHasNotification;
 
     //we have 2 seperate queries, one for header and one for activities
@@ -108,8 +105,8 @@ public class Profile extends BaseFragment {
 
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
-        recList.setHasFixedSize(true);
+        vRecList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
+        vRecList.setHasFixedSize(true);
         final GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
 
         llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -119,17 +116,15 @@ public class Profile extends BaseFragment {
                 //0 for image and 1 for profile info
                 if (position == 0 || position == 1)
                     return 3;
-                    //view that shows empty
                 else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
                     return 3; //empty view size 3
-                    // view that shows loading indicator
-                else if (position == mUserActivityItems.size() + 2)
+                else if (position == mUserActivityItems.size() + 2)  // view that shows loading indicator
                     return 3;
                 else return 1;
             }
         });
 
-        recList.setLayoutManager(llm);
+        vRecList.setLayoutManager(llm);
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
@@ -145,7 +140,7 @@ public class Profile extends BaseFragment {
             });
         }
 
-        recList.setAdapter(mProfileAdapter);
+        vRecList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -169,7 +164,7 @@ public class Profile extends BaseFragment {
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recList.scrollToPosition(0);
+                vRecList.scrollToPosition(0);
             }
         });
         if (mProfileAdapter.titleShown())
@@ -209,7 +204,7 @@ public class Profile extends BaseFragment {
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
         //when user scrolls down, change alpha of actionbar
-        recList.addOnScrollListener(
+        vRecList.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -557,6 +552,10 @@ public class Profile extends BaseFragment {
         });
     }
 
+    @Override
+    public void resetFragment(){
+        vRecList.scrollToPosition(0);
+    }
 
     private Subscription mNotificationSubscription;
 

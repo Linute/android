@@ -105,7 +105,6 @@ public class RoomsActivityFragment extends BaseFragment {
         });
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.fab);
-        fab.setImageResource(R.drawable.ic_action_new_message);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,6 +129,12 @@ public class RoomsActivityFragment extends BaseFragment {
             public void loadMore() {
                 if (mCanLoadMore)
                     getMoreRooms();
+            }
+        });
+        mRoomsAdapter.setDeleteRoom(new RoomsAdapter.DeleteRoom() {
+            @Override
+            public void deleteRoom(int position, Rooms room) {
+                RoomsActivityFragment.this.deleteRoom(position, room);
             }
         });
 
@@ -301,7 +306,6 @@ public class RoomsActivityFragment extends BaseFragment {
 //                                    users.length() + 1,  // add yourself
 //                                    chatHeads
                         }
-
 
                         mCanLoadMore = mSkip > 0;
 
@@ -506,7 +510,7 @@ public class RoomsActivityFragment extends BaseFragment {
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mSkip-=20;
+                                            mSkip -= 20;
                                             int pos = mRoomsList.size();
                                             mRoomsList.addAll(tempRooms);
                                             mRoomsAdapter.notifyItemRangeInserted(pos, tempRooms.size());
@@ -549,42 +553,87 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-
                 final Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
-                final int pos = mRoomsList.indexOf(tempRoom);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                final int pos = mRoomsList.indexOf(tempRoom);
+                                if (pos >= 0) {
+                                    mRoomsList.get(pos).merge(tempRoom);
+                                    mRoomsAdapter.notifyItemChanged(pos);
+                                    mRoomsList.add(0, mRoomsList.remove(pos));
+                                    mRoomsAdapter.notifyItemMoved(pos, 0);
+                                } else {
+                                    if (!mSwipeRefreshLayout.isRefreshing()) {
+                                        mSwipeRefreshLayout.setRefreshing(true);
+                                        getRooms();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    };
 
-                if (pos >= 0) {
-                    mRoomsList.get(pos).merge(tempRoom);
-                    mRoomsList.add(0, mRoomsList.remove(pos));
-                    getActivity().runOnUiThread(new Runnable() {
+
+    private void deleteRoom(final int position, final Rooms room){
+        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            JSONObject object = new JSONObject();
+            try {
+                if (activity.socketConnected()) {
+                    object.put("room", room.getRoomId());
+                    activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mRoomsAdapter.notifyItemChanged(pos);
-                                }
-                            });
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mRoomsAdapter.notifyItemMoved(pos, 0);
+                                    //find the room that user wanted to delete
+
+                                    //the room might have moved so we might have
+                                    //      to find new position of room
+                                    int newPos = position;
+
+                                    //if room moved, try looking for it
+                                    if (newPos < 0 || !mRoomsList.get(newPos).equals(room)) {
+                                        newPos = mRoomsList.indexOf(room);
+                                    }
+
+                                    //if can't find appropriate room, return
+                                    if (newPos == -1) return;
+
+
+                                    //remove room from list and notify it was removed
+                                    mRoomsList.remove(newPos);
+                                    if (mRoomsList.isEmpty()){
+                                        mRoomsAdapter.notifyDataSetChanged();
+                                        mEmptyText.setVisibility(View.VISIBLE);
+                                    }else {
+                                        mRoomsAdapter.notifyItemRemoved(newPos);
+                                        mRoomsAdapter.notifyItemRangeChanged(newPos, mRoomsList.size());
+                                    }
                                 }
                             });
                         }
                     });
                 } else {
-                    getActivity().runOnUiThread(new Runnable() {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (!mSwipeRefreshLayout.isRefreshing()) {
-                                mSwipeRefreshLayout.setRefreshing(true);
-                                getRooms();
-                            }
+                            Utils.showBadConnectionToast(activity);
                         }
                     });
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
-    };
+    }
 }

@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -42,6 +43,7 @@ public class EditStatusFragment extends Fragment {
     private ProgressBar mProgressBar;
     private EditText mStatusText;
     private Button mSaveButton;
+    private TextView mCharCountTV;
 
 
 
@@ -58,6 +60,7 @@ public class EditStatusFragment extends Fragment {
         setUpOnClickListeners();
         setUpEditTextMaxLines();
 
+
         return rootView;
     }
 
@@ -65,6 +68,7 @@ public class EditStatusFragment extends Fragment {
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.editstatus_progressbar);
         mSaveButton = (Button) rootView.findViewById(R.id.editstatus_save);
         mStatusText = (EditText) rootView.findViewById(R.id.editstatus_status_text);
+        mCharCountTV = (TextView) rootView.findViewById(R.id.text_char_count);
     }
 
     private void setDefaultValues() {
@@ -83,9 +87,11 @@ public class EditStatusFragment extends Fragment {
         });
     }
 
+    private static final int MAX_CHARACTERS = 200;
 
     //sets max line number to 3
     private void setUpEditTextMaxLines() {
+        updateCharCountView(mStatusText.getText());
         mStatusText.addTextChangedListener(new TextWatcher() {
             private String text;
 
@@ -96,18 +102,24 @@ public class EditStatusFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (mStatusText.getLineCount() > 3) {
+                if(s.length() > MAX_CHARACTERS){
                     mStatusText.setText(text);
                 }
-
+                updateCharCountView(s);
             }
         });
     }
 
+
+    private void updateCharCountView(Editable s){
+        mCharCountTV.setText(String.valueOf(MAX_CHARACTERS-s.length()));
+        mCharCountTV.setTextColor((s.length() >= MAX_CHARACTERS ? 0xFFCC0000 : 0xFFCCCCCC));
+    }
 
     private void saveStatus() {
         String status = mStatusText.getText().toString();

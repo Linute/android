@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 
 
@@ -38,7 +39,17 @@ public class NeedPermissionsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 CameraActivity main = (CameraActivity) getActivity();
-                main.requestPermissions();
+                if (main != null)
+                    main.requestPermissions();
+            }
+        });
+
+        view.findViewById(R.id.new_post).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CameraActivity cameraActivity = (CameraActivity) getActivity();
+                if (cameraActivity != null)
+                    cameraActivity.launchFragment(new PostCreatePage(), PostCreatePage.TAG);
             }
         });
     }

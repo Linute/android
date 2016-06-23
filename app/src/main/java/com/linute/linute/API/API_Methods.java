@@ -27,7 +27,7 @@ public class API_Methods {
 
     public static String TAG = "API_METHODS";
 
-    // API ENPOINT URL
+    // API ENDPOINT URL
     public static final String SCHEME = "https";
 
     //private static String HOST = "api.tapt.io";

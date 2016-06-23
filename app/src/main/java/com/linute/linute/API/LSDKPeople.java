@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -33,5 +32,9 @@ public class LSDKPeople {
         return API_Methods.put("friends/" + friendshipID, header, param, callback);
     }
 
-
+    public Call getPeople(Map<String, String> param, Callback callback) {
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        String[] path = {"people"};
+        return API_Methods.get(path, header, param, callback);
+    }
 }

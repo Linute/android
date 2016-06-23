@@ -13,12 +13,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,18 +27,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CropActivity.CropActivity;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,12 +68,9 @@ public class ChangeProfileImageFragment extends Fragment {
     private View mButtonLayer;
 
     private CircleImageView mImageView;
-
     private SharedPreferences mSharedPreferences;
-
     private ProgressBar mProgressBar;
-
-    private Bitmap mProfilePictureBitmap;
+    private Uri mImageUri;
 
     @Nullable
     @Override
@@ -86,7 +82,7 @@ public class ChangeProfileImageFragment extends Fragment {
         setDefaultValues();
         setUpOnClickListeners();
 
-        ((EditProfileInfoActivity)getActivity()).setTitle("Photo");
+        ((EditProfileInfoActivity) getActivity()).setTitle("Photo");
 
         return rootView;
     }
@@ -132,7 +128,7 @@ public class ChangeProfileImageFragment extends Fragment {
                     break;
                 case 1:
                     //go to gallery
-                    Crop.pickImage(getActivity(), ChangeProfileImageFragment.this);
+                    ImageUtils.pickUsing(ChangeProfileImageFragment.this, REQUEST_PICK);
                     break;
                 case 2:
                     break;
@@ -155,14 +151,23 @@ public class ChangeProfileImageFragment extends Fragment {
 
 
     private void saveImage() {
-        if (!mHasChangedImage) return; //no edits to image
-        LSDKUser user = new LSDKUser(getActivity());
+
+        if (!mHasChangedImage || getActivity() == null) return; //no edits to image
+        Map<String, Object> userInfo = new HashMap<>();
+        try {
+            userInfo.put("profileImage",
+                    Utils.encodeImageBase64(
+                            Bitmap.createScaledBitmap(
+                                    MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri),
+                                    1080, 1080, false)));
+        }catch (IOException e){
+            e.printStackTrace();
+            return;
+        }
+
         showProgress(true);
 
-        Map<String, Object> userInfo = new HashMap<>();
-        userInfo.put("profileImage", Utils.encodeImageBase64(mProfilePictureBitmap));
-
-        user.updateUserInfo(userInfo, null, new Callback() {
+        new LSDKUser(getActivity()).updateUserInfo(userInfo, null, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -223,20 +228,20 @@ public class ChangeProfileImageFragment extends Fragment {
     }
 
 
-    static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int REQUEST_PICK = 99;
+    private static final int REQUEST_CROP = 111;
+
     private String mCurrentPhotoPath;
-
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mCurrentPhotoPath == null) Log.i(TAG, "onActivityResult: 123"); //return;
 
         if (requestCode == REQUEST_TAKE_PHOTO) { //got response from camera
-            if (mCurrentPhotoPath == null) return; //NOTE: added this
+            if (mCurrentPhotoPath == null) return;
 
-            if (!hasWritePermission() && !hasCameraPermissions()){
-                if (mCurrentPhotoPath != null){
+            if (!hasWritePermission() && !hasCameraPermissions()) {
+                if (mCurrentPhotoPath != null) {
                     new File(mCurrentPhotoPath).delete();
                     mCurrentPhotoPath = null;
                 }
@@ -248,45 +253,30 @@ public class ChangeProfileImageFragment extends Fragment {
                 Uri contentUri = Uri.fromFile(f);
                 galleryAddPic(contentUri); // add to gallery
                 beginCrop(contentUri); //crop image
-            }
-             else { //no picture captured. delete the temp file created to hold image
+            } else { //no picture captured. delete the temp file created to hold image
                 if (!new File(mCurrentPhotoPath).delete())
                     Log.v(TAG, "could not delete temp file");
                 mCurrentPhotoPath = null;
             }
-        } else if (requestCode == Crop.REQUEST_PICK) { //got image from gallery
+        } else if (requestCode == REQUEST_PICK) { //got image from gallery
             if (resultCode == Activity.RESULT_OK)
                 beginCrop(data.getData()); //crop image
-        } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+        } else if (requestCode == REQUEST_CROP) { //photo came back from crop
             if (resultCode == Activity.RESULT_OK) {
-                Uri imageUri = Crop.getOutput(data);
-                ImageUtils.normalizeImageForUri(getActivity(), imageUri);
-                try {
-                    //release old pictures resources
-                    if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();
-
-
-                    //scale cropped image to 1080 x 1080 (will be sent to database
-                    mProfilePictureBitmap = Bitmap.createScaledBitmap(
-                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri),
-                            1080, 1080, false);
-
-                    mImageView.setImageBitmap(mProfilePictureBitmap);
+                mImageUri = data.getData();
+                if (mImageUri != null) {
+                    mImageView.setImageURI(mImageUri);
                     mHasChangedImage = true;
-
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-            } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
-                Toast.makeText(getActivity(), Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
             }
         }
     }
 
 
     private void beginCrop(Uri source) { //begin crop activity
-        Uri destination = Uri.fromFile(new File(getActivity().getCacheDir(), "cropped"));
-        Crop.of(source, destination).asSquare().start(getActivity(), ChangeProfileImageFragment.this);
+        Intent i = new Intent(getActivity(), CropActivity.class);
+        i.putExtra(CropActivity.IMAGE_URI, source);
+        this.startActivityForResult(i, REQUEST_CROP);
     }
 
 
@@ -328,21 +318,21 @@ public class ChangeProfileImageFragment extends Fragment {
     private static final int REQUEST_PERMISSIONS = 10;
 
     @TargetApi(Build.VERSION_CODES.M)
-    public void requestPermissions(){
+    public void requestPermissions() {
         List<String> permissions = new ArrayList<>();
         //check for camera
-        if (!hasCameraPermissions()){
+        if (!hasCameraPermissions()) {
             permissions.add(Manifest.permission.CAMERA);
         }
         //check for write
-        if (!hasWritePermission()){
+        if (!hasWritePermission()) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
         //we need permissions
-        if (!permissions.isEmpty()){
-           requestPermissions(permissions.toArray(new String[permissions.size()]),
-                   REQUEST_PERMISSIONS);
-        }else {
+        if (!permissions.isEmpty()) {
+            requestPermissions(permissions.toArray(new String[permissions.size()]),
+                    REQUEST_PERMISSIONS);
+        } else {
             //we have permissions : show camera
             dispatchTakePictureIntent();
         }
@@ -434,11 +424,11 @@ public class ChangeProfileImageFragment extends Fragment {
     }
 
 
-    private boolean hasWritePermission(){
+    private boolean hasWritePermission() {
         return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean hasCameraPermissions(){
+    private boolean hasCameraPermissions() {
         return ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
 
     }

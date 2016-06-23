@@ -1,101 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:orientation="vertical">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
 
     <com.linute.linute.SquareCamera.CustomCameraPreview
         android:id="@+id/camera_preview_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/black"/>
+        android:background="@android:color/black"
+        android:fitsSystemWindows="true"/>
+
+
+    <View
+        android:id="@+id/flash_top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.7"
+        android:background="@color/pure_white"
+        android:visibility="gone"/>
 
     <!-- top -->
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ProgressBar android:id="@+id/record_progress"
-                     style="?android:attr/progressBarStyleHorizontal"
-                     android:layout_width="match_parent"
-                     android:layout_height="6dp"
-                     android:max="15000"
-                     android:progressDrawable="@drawable/camera_progress_red"
-                     android:visibility="invisible"/>
+        <ProgressBar
+            android:id="@+id/record_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:max="1000"
+            android:progressDrawable="@drawable/camera_progress_red"
+            android:visibility="invisible"/>
 
         <!--top actionbar-->
-        <FrameLayout android:layout_width="match_parent"
-                     android:layout_height="?android:attr/actionBarSize">
 
-            <LinearLayout android:id="@+id/camera_ops"
-                          android:layout_width="wrap_content"
-                          android:layout_height="match_parent"
-                          android:layout_gravity="end|center_vertical"
-                          android:layout_margin="@dimen/half_margin">
 
-                <LinearLayout android:id="@+id/flash"
-                              android:layout_width="wrap_content"
-                              android:layout_height="match_parent"
-                              android:orientation="horizontal"
-                >
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_action_navigation_close"
+        >
 
-                    <ImageView android:id="@+id/flash_icon"
-                               android:layout_width="wrap_content"
-                               android:layout_height="match_parent"
-                               android:paddingStart="@dimen/activity_horizontal_margin"
-                               android:src="@drawable/ic_form1"/>
+            <LinearLayout
+                android:id="@+id/camera_ops"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end|center_vertical"
+                android:layout_margin="@dimen/half_margin">
 
-                    <TextView android:id="@+id/auto_flash_icon"
-                              android:layout_width="wrap_content"
-                              android:layout_height="wrap_content"
-                              android:layout_gravity="bottom"
-                              android:layout_marginStart="-12dp"
-                              android:gravity="bottom"
-                              android:text="ON"
-                              android:textColor="@color/fifty_white"
-                              android:textSize="@dimen/sub_font_size"
-                    />
+                <LinearLayout
+                    android:id="@+id/flash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/flash_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:contentDescription="Flash"
+                        android:paddingStart="@dimen/activity_horizontal_margin"
+                        android:src="@drawable/ic_form1"/>
+
+                    <TextView
+                        android:id="@+id/auto_flash_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginStart="-12dp"
+                        android:gravity="bottom"
+                        android:text="On"
+                        android:textColor="@color/fifty_white"
+                        android:textSize="@dimen/sub_font_size"/>
 
                 </LinearLayout>
 
 
-                <ImageView android:id="@+id/change_camera"
-                           android:layout_width="wrap_content"
-                           android:layout_height="match_parent"
-                           android:layout_gravity="end"
-                           android:paddingEnd="16dp"
-                           android:paddingStart="16dp"
-                           android:src="@drawable/ic_icon_reverse_camera"
+                <ImageView
+                    android:id="@+id/change_camera"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:contentDescription="Reverse"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
+                    android:src="@drawable/ic_icon_reverse_camera"
                 />
 
             </LinearLayout>
-        </FrameLayout>
+
+        </android.support.v7.widget.Toolbar>
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/focus"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:src="@drawable/focus_circle"
+        android:visibility="gone"
+    />
 
     <!--bottom buttons-->
-    <FrameLayout android:layout_width="match_parent"
-                 android:layout_height="wrap_content"
-                 android:layout_gravity="bottom"
-                 android:layout_margin="@dimen/activity_horizontal_margin">
+    <FrameLayout
+        android:id="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/activity_horizontal_margin">
 
-        <ImageView android:id="@+id/cameraFragment_galleryButton"
-                   android:layout_width="40dp"
-                   android:layout_height="40dp"
-                   android:layout_gravity="bottom"
-                   android:layout_marginStart="@dimen/double_margin"
-                   android:contentDescription="Gallery"
-                   android:src="@drawable/ic_photography159"/>
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/cameraFragment_galleryButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="@dimen/double_margin"
+            android:contentDescription="Gallery"
+            android:src="@drawable/ic_photography159"
+            app:riv_border_color="@color/seperator_color"
+            app:riv_border_width="1px"
+            app:riv_corner_radius="2dp"/>
 
-        <FrameLayout android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:layout_gravity="center"
-                     android:alpha="0.8">
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:alpha="0.8">
 
-            <ImageView android:layout_width="wrap_content"
-                       android:layout_height="wrap_content"
-                       android:layout_gravity="center"
-                       android:src="@drawable/square_camera_surround"
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/square_camera_surround"
             />
 
             <ImageView
@@ -109,28 +152,30 @@
 
         </FrameLayout>
 
-        <!--<RelativeLayout android:id="@+id/anon"-->
-        <!--android:layout_width="120dp"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="end"-->
-        <!--&gt;-->
-        <!--<CheckBox android:id="@+id/anon_checkbox"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--android:button="@drawable/post_as_anon_checkbox"-->
-        <!--/>-->
+        <FrameLayout
+            android:id="@+id/new_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="@dimen/double_margin"
+            android:contentDescription="Status"
+        >
 
-        <!--<TextView android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_above="@id/anon_checkbox"-->
-        <!--android:layout_centerHorizontal="true"-->
-        <!--android:gravity="center"-->
-        <!--android:text="post\nas"-->
-        <!--android:textColor="@color/pure_white"-->
-        <!--android:textSize="12sp"-->
-        <!--/>-->
-        <!--</RelativeLayout>-->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/post_button"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="T"
+                android:textSize="25sp"
+            />
+
+
+        </FrameLayout>
     </FrameLayout>
+
 </FrameLayout>

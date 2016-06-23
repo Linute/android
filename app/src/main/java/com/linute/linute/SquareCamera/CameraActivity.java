@@ -7,23 +7,25 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.WindowManager;
 
 import com.linute.linute.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11;
-    public final static int JUST_CAMERA = 12;
+    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11; // everything
+    public final static int JUST_CAMERA = 12;  //just camera; no gallery or video option
 
-    public final static int SEND_POST = 14;
-    public final static int RETURN_URI = 15;
+    public final static int SEND_POST = 14;  //send image/video to server
+    public final static int RETURN_URI = 15; //save image and return image/video uri
 
     public final static int IMAGE = 1;
     public final static int VIDEO = 2;
@@ -36,21 +38,28 @@ public class CameraActivity extends AppCompatActivity {
     private int mCameraType;
     private int mReturnType;
 
-
     public static final String TAG = CameraActivity.class.getSimpleName();
 
     protected boolean mHasWriteAndCameraPermission = false;
 
+
+    /** need the following intent:
+     *  CameraActivity.CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
+     *  CameraActivity.RETURN_TYPE - SEND_POST or RETURN_URI
+     *
+     * */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.squarecamera__activity_camera);
+        HasSoftKeySingleton.getmSoftKeySingleton(getWindowManager());
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
         Intent i = getIntent();
-        if (i != null){
+        if (i != null) {
             mCameraType = i.getIntExtra(CAMERA_TYPE, JUST_CAMERA);
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
-        }else {
+        } else {
             mCameraType = JUST_CAMERA;
             mReturnType = RETURN_URI;
         }
@@ -68,7 +77,6 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         if (mReceivedRequestPermissionResults) { //only runs if we have updated permissions information
             clearBackStack(); //clears gallery or camera fragment
             if (mHasWriteAndCameraPermission) launchCameraFragment();
@@ -159,16 +167,6 @@ public class CameraActivity extends AppCompatActivity {
                 .commit();
     }
 
-    public void launchEditAndSaveFragment(Uri uri) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(
-                        R.id.fragment_container,
-                        EditSavePhotoFragment.newInstance(uri),
-                        EditSavePhotoFragment.TAG)
-                .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
-                .commit();
-    }
 
     public void clearBackStack() { //pops all frag with name
         getSupportFragmentManager().popBackStack(EDIT_AND_GALLERY_STACK_NAME, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -176,13 +174,10 @@ public class CameraActivity extends AppCompatActivity {
 
     public static final String EDIT_AND_GALLERY_STACK_NAME = "edit_and_gallery_stack_name";
 
-    public void launchGalleryFragment() {
+    public void launchFragment(Fragment fragment, String tag) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(
-                        R.id.fragment_container,
-                        GalleryFragment.newInstance(),
-                        GalleryFragment.TAG)
+                .replace(R.id.fragment_container, fragment, tag)
                 .addToBackStack(EDIT_AND_GALLERY_STACK_NAME)
                 .commit();
     }
@@ -196,11 +191,11 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    public int getCameraType(){
+    public int getCameraType() {
         return mCameraType;
     }
 
-    public int getReturnType(){
+    public int getReturnType() {
         return mReturnType;
     }
 }

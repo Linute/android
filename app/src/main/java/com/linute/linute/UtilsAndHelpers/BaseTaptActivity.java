@@ -1,12 +1,7 @@
 package com.linute.linute.UtilsAndHelpers;
 
-import android.annotation.TargetApi;
-import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-
-import io.socket.client.Ack;
 import io.socket.emitter.Emitter;
 
 /**
@@ -28,6 +23,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public abstract void addFragmentToContainer(final Fragment fragment);
     public abstract void addFragmentToContainer(final Fragment fragment, String tag);
     public abstract void replaceContainerWithFragment(final Fragment fragment);
+    public abstract void addFragmentOnTop(Fragment fragment);
 
 
     /* action when toolbar is pressed */
@@ -46,7 +42,5 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public interface SocketErrorResponse{
         void runSocketError();
     }
-
-
 }
 

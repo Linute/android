@@ -290,7 +290,6 @@ public class UpdatesFragment extends BaseFragment {
                         final MainActivity activity = (MainActivity) getActivity();
                         if (activity != null) {
 
-
                             if (unread.length() > 0) {
                                 JSONObject read = new JSONObject();
                                 read.put("activities", unread);
@@ -334,7 +333,7 @@ public class UpdatesFragment extends BaseFragment {
 
                                             mUpdatesAdapter.notifyDataSetChanged();
 
-                                            if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
+                                            if (mRecentUpdates.size() + mOldUpdates.size() == 0) {
                                                 if (mEmptyView.getVisibility() == View.GONE)
                                                     mEmptyView.setVisibility(View.VISIBLE);
                                             } else {
@@ -451,14 +450,6 @@ public class UpdatesFragment extends BaseFragment {
                                         NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
                                     }
 
-                                    if (mUpdatesAdapter.getItemCount(0) + mUpdatesAdapter.getItemCount(1) == 0) {
-                                        if (mEmptyView.getVisibility() == View.GONE)
-                                            mEmptyView.setVisibility(View.VISIBLE);
-                                    } else {
-                                        if (mEmptyView.getVisibility() == View.VISIBLE)
-                                            mEmptyView.setVisibility(View.GONE);
-                                    }
-
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
@@ -561,6 +552,11 @@ public class UpdatesFragment extends BaseFragment {
         }
 
         return false;
+    }
+
+    @Override
+    public void resetFragment(){
+        mUpdatesRecyclerView.scrollToPosition(0);
     }
 
     private boolean mHasNotifications;

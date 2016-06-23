@@ -17,7 +17,7 @@
                                            android:layout_height="?attr/actionBarSize"
                                            android:background="@color/colorPrimary"
                                            app:layout_scrollFlags="scroll|enterAlways|snap"
-                                           app:title="Trending"
+                                           app:title="Globally Trending"
                                            app:titleTextColor="@color/pure_white"
         />
 

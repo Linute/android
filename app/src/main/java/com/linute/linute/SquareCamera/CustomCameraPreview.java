@@ -85,7 +85,7 @@ public class CustomCameraPreview extends TextureView{
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
-                mCamera.cancelAutoFocus();
+                if (mCamera != null) mCamera.cancelAutoFocus();
                 mIsFocus = false;
                 break;
             }
@@ -102,19 +102,20 @@ public class CustomCameraPreview extends TextureView{
         float x = mLastTouchX;
         float y = mLastTouchY;
 
-        if (!setFocusBound(x, y)) return;
-
         List<String> supportedFocusModes = params.getSupportedFocusModes();
         if (supportedFocusModes != null
                 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             //Log.d(TAG, mFocusAreas.size() + "");
+
+            setFocusArea(x,y);
+            if (mOnFocus != null) mOnFocus.onFocusStart(x,y);
             params.setFocusAreas(mFocusAreas);
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             mCamera.setParameters(params);
             mCamera.autoFocus(new Camera.AutoFocusCallback() {
                 @Override
                 public void onAutoFocus(boolean success, Camera camera) {
-                    // Callback when the auto focus completes
+                    if (mOnFocus != null) mOnFocus.onFocusFinished();
                 }
             });
         }
@@ -124,20 +125,35 @@ public class CustomCameraPreview extends TextureView{
         mIsFocusReady = isFocusReady;
     }
 
-    private boolean setFocusBound(float x, float y) {
-        int left = (int) (x - FOCUS_SQR_SIZE / 2);
-        int right = (int) (x + FOCUS_SQR_SIZE / 2);
-        int top = (int) (y - FOCUS_SQR_SIZE / 2);
-        int bottom = (int) (y + FOCUS_SQR_SIZE / 2);
+    private void setFocusArea(float x, float y) {
+        int left = clamp(Float.valueOf((x / getWidth()) * 2000 - 1000).intValue(), FOCUS_SQR_SIZE);
+        int top = clamp(Float.valueOf((y / getHeight()) * 2000 - 1000).intValue(), FOCUS_SQR_SIZE);
 
-        if (FOCUS_MIN_BOUND > left || left > FOCUS_MAX_BOUND) return false;
-        if (FOCUS_MIN_BOUND > right || right > FOCUS_MAX_BOUND) return false;
-        if (FOCUS_MIN_BOUND > top || top > FOCUS_MAX_BOUND) return false;
-        if (FOCUS_MIN_BOUND > bottom || bottom > FOCUS_MAX_BOUND) return false;
-
-        mFocusArea.rect.set(left, top, right, bottom);
-
-        return true;
+        mFocusArea.rect.set(left, top, left + FOCUS_SQR_SIZE, top + FOCUS_SQR_SIZE);
     }
 
+    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
+        int result;
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+            if (touchCoordinateInCameraReper>0){
+                result = 1000 - focusAreaSize/2;
+            } else {
+                result = -1000 + focusAreaSize/2;
+            }
+        } else{
+            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        }
+        return result;
+    }
+
+    private OnFocus mOnFocus;
+
+    public void setOnTouched(OnFocus foc){
+        mOnFocus = foc;
+    }
+
+    public interface OnFocus{
+        void onFocusStart(float x, float y);
+        void onFocusFinished();
+    }
 }

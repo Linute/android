@@ -42,6 +42,8 @@ public class Post implements Parcelable {
 
     private boolean mCommentAnonDisabled;
 
+    private int mType;
+
     public Post() {
 
     }
@@ -69,12 +71,12 @@ public class Post implements Parcelable {
      */
     public Post(JSONObject jsonObject) throws JSONException {
 
-        int type = jsonObject.getInt("type");
+        mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
             mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
 
-        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+        if (mType == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
             mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
 
         Date myDate;
@@ -259,6 +261,9 @@ public class Post implements Parcelable {
         return mVideoURL != null && !mVideoURL.equals("");
     }
 
+    public int getType() {
+        return mType;
+    }
 
     public String getVideoUrl() {
         return mVideoURL;
@@ -322,6 +327,10 @@ public class Post implements Parcelable {
         mPostMuted = postMuted;
     }
 
+    public boolean isCommentAnonDisabled() {
+        return mCommentAnonDisabled;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -371,12 +380,4 @@ public class Post implements Parcelable {
             return new Post[size];
         }
     };
-
-    public boolean isCommentAnonDisabled() {
-        return mCommentAnonDisabled;
-    }
-
-    public void setCommentAnonDisabled(boolean commentAnonDisabled) {
-        mCommentAnonDisabled = commentAnonDisabled;
-    }
 }

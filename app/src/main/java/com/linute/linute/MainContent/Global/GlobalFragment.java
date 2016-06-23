@@ -280,6 +280,10 @@ public class GlobalFragment extends BaseFragment {
         });
     }
 
+    @Override
+    public void resetFragment(){
+        vRecycler.scrollToPosition(0);
+    }
 
     private boolean mHasNotifications;
     private boolean mHasMessage;

@@ -49,4 +49,8 @@ public class BaseFragment extends Fragment {
     public FragmentState getFragmentState(){
         return mFragmentState;
     }
+
+    public void resetFragment(){
+
+    }
 }
