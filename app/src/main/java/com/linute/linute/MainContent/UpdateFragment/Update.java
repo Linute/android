@@ -43,7 +43,7 @@ public class Update {
     private UpdateType mUpdateType;     // type of update
 
     private boolean mIsRead;            //determine if viewer has seen this update before
-
+    private boolean mIsViewed;          //determine if the viewer has opened this update before
 
     //'User' refers to the person performing the action
     // i.e. if 'max liked your picture' -> user = max
@@ -100,6 +100,8 @@ public class Update {
             setUpEvent(json);
 
         mDescription = getStringFromJson(json, "text");
+
+        mIsViewed = getBooleanFromJson(json, "isViewed");
     }
 
     //parse action String and return UpdateType
@@ -213,6 +215,10 @@ public class Update {
 
     public boolean isRead() {
         return mIsRead;
+    }
+
+    public boolean isViewed(){
+        return mIsViewed;
     }
 
     public String getEventID() {

@@ -240,6 +240,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mDescriptionText.setText(update.getDescription());
             mTimeView.setText(Utils.getTimeAgoString(update.getActionTime()));
 
+            Log.i("AAA", ""+update.isViewed());
+
+            itemView.setBackgroundColor(update.isViewed() ? 0 : 0x84CFDF);
+
             setUpPictures(update); //profile and event image
 
         }
