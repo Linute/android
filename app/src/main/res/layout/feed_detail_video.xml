@@ -8,41 +8,21 @@
 
     <include layout="@layout/feed_detail_header"/>
 
-
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/seperator_color"
     />
 
-    <com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout
-        android:id="@+id/video_frame"
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/seperator_color"
-    >
-
-        <com.linute.linute.SquareCamera.SquareImageView
-            android:id="@+id/blurred"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
-
+        android:layout_height="match_parent"
+        android:background="@color/seperator_color">
         <com.linute.linute.SquareCamera.SquareImageView
             android:id="@+id/feedDetail_event_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"/>
-
-        <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView
-            android:id="@+id/feed_detail_video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/transparent"
-            android:layout_gravity="center"
-            android:visibility="gone"
-        />
-
+            android:scaleType="centerCrop"/>
 
         <ImageView
             android:id="@+id/cinema_icon"
@@ -52,7 +32,6 @@
             android:layout_margin="@dimen/activity_horizontal_margin"
             android:src="@drawable/ic_cinema"/>
 
-
         <View
             android:id="@+id/feed_detail_hidden_animation"
             android:layout_width="match_parent"
@@ -61,7 +40,7 @@
             android:background="#EA294C"
             android:visibility="invisible"/>
 
-    </com.linute.linute.UtilsAndHelpers.ClickableSquareFrameLayout>
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
     <include layout="@layout/feed_detail_action_bar"/>
 

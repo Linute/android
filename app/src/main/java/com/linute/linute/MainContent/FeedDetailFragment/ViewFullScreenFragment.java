@@ -1,7 +1,10 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -16,10 +19,18 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by QiFeng on 6/13/16.
@@ -28,6 +39,7 @@ public class ViewFullScreenFragment extends BaseFragment {
 
     private static final String URI_KEY = "uri_key";
     private static final String TYPE_KEY = "type_key";
+    private static final String POST_ID_KEY = "post_id_key";
 
     private ImageView vImage;
     private View vVideoParent;
@@ -38,10 +50,23 @@ public class ViewFullScreenFragment extends BaseFragment {
     private Uri mLink;
     private int mPostType;
 
+
+    //stuff for impressions
+    //if postId is not null, we will send impression
+    private String mPostId;
+    private String mCollegeId;
+    private String mUserId;
+
     private ViewFullScreenFragment() {
 
     }
 
+    /**
+     * Use this if no impessions are needed
+     * @param link - url of post
+     * @param type - status/image/video
+     * @return fragment
+     */
     public static ViewFullScreenFragment newInstance(Uri link, int type) {
         ViewFullScreenFragment fragment = new ViewFullScreenFragment();
         Bundle args = new Bundle();
@@ -49,6 +74,38 @@ public class ViewFullScreenFragment extends BaseFragment {
         args.putInt(TYPE_KEY, type);
         fragment.setArguments(args);
         return fragment;
+    }
+
+
+    /**
+     * Use this if we want to send impressions
+     * @param postId - id of post
+     * @param link - url of post
+     * @param type - status/video/image
+     * @return fragment
+     */
+    public static ViewFullScreenFragment newInstance(String postId, Uri link, int type) {
+        ViewFullScreenFragment fragment = new ViewFullScreenFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(URI_KEY, link);
+        args.putInt(TYPE_KEY, type);
+        args.putString(POST_ID_KEY, postId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //if not null, we will send impression
+        mPostId = getArguments().getString(POST_ID_KEY, null);
+
+        if (mPostId != null) {
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+            mCollegeId = sharedPreferences.getString("collegeId", "");
+            mUserId = sharedPreferences.getString("userID", "");
+        }
     }
 
     @Nullable
@@ -155,6 +212,9 @@ public class ViewFullScreenFragment extends BaseFragment {
                 public void onCompletion(MediaPlayer mp) {
                     if (vVideoLoadingIndicator.getVisibility() == View.GONE) {
                         mp.start();
+
+                        if (mPostId != null)
+                            sendImpressionsAsync(mPostId);
                     }
                 }
             });
@@ -190,4 +250,31 @@ public class ViewFullScreenFragment extends BaseFragment {
         if (getActivity() != null) getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
+    //sends info on how many times looped
+    private void sendImpressionsAsync(final String id) {
+        if (id == null) return;
+
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+                    if (activity == null) return;
+
+                    JSONObject body = new JSONObject();
+
+                    body.put("college", mCollegeId);
+                    body.put("user", mUserId);
+
+                    body.put("room", id);
+
+                    activity.emitSocket(API_Methods.VERSION + ":posts:loops", body);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 }

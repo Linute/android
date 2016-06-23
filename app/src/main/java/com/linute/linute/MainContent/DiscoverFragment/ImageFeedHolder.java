@@ -16,8 +16,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
-import jp.wasabeef.glide.transformations.BlurTransformation;
-
 /**
  * Created by QiFeng on 2/3/16.
  */
@@ -26,7 +24,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
 
     protected ImageView vPostImage;
-    protected ImageView vBlurred;
 
     protected int mType;
     protected SingleVideoPlaybackManager mSingleVideoPlaybackManager;
@@ -35,7 +32,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
         super(itemView, context);
         mSingleVideoPlaybackManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        vBlurred = (ImageView) itemView.findViewById(R.id.blurred);
         setUpOnClicks();
     }
 
@@ -121,22 +117,9 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void getEventImage(String image) {
-
-        if (mType != Post.POST_TYPE_STATUS) {
-            Glide.with(mContext)
-                    .load(image)
-                    .override(100, 100)
-                    .bitmapTransform(new BlurTransformation(mContext))
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                    .into(vBlurred);
-        } else {
-            vBlurred.setImageDrawable(null);
-        }
-
         Glide.with(mContext)
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(vPostImage);
-
     }
 }
