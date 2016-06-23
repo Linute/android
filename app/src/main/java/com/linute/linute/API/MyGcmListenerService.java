@@ -111,7 +111,9 @@ public class MyGcmListenerService extends GcmListenerService {
 
         String message = data.getString("message");
         int type = gettNotificationType(data.getString("action"));
-        String name = String.valueOf(data.get("ownerFullName"));
+        String name = data.getString("ownerFullName");
+        boolean isAnon = "1".equals(data.getString("privacy"));
+        Log.i("AAA", data.getInt("privacy") + " " + data.getString("privacy") + " " + isAnon);
         Object profileImage = data.get("ownerProfileImage");
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -129,10 +131,11 @@ public class MyGcmListenerService extends GcmListenerService {
             File image = null;
             try {
                 String url =
-                        (name.toLowerCase().contains("anon")
+                        (isAnon
                                 ? Utils.getAnonImageUrl(String.valueOf(profileImage))
                                 : Utils.getImageUrlOfUser(String.valueOf(profileImage))
                         );
+                Log.i("AAA", url);
                 image = Glide.with(this).load(url).downloadOnly(64, 64).get();
             } catch (InterruptedException e) {
                 e.printStackTrace();
