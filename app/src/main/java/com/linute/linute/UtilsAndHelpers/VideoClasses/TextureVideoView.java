@@ -338,7 +338,9 @@ public class TextureVideoView extends TextureView
                     //really bad hack. portrait videos are just landscape videos with rotation 90
                     //videoview will show landscape version before showing portrait on some phones
                     //way around this will be to check if it's playing before we change view size
+                    Log.i(TAG, "onVideoSizeChanged w "+width + " h "+height);
                     if (mp.isPlaying()) {
+                        Log.i(TAG, "onVideoSizeChanged1 w "+width + " h "+height);
                         mVideoWidth = mp.getVideoWidth();
                         mVideoHeight = mp.getVideoHeight();
                         if (mVideoWidth != 0 && mVideoHeight != 0) {
