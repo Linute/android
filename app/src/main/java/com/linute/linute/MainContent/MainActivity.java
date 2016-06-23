@@ -670,20 +670,9 @@ public class MainActivity extends BaseTaptActivity {
                             public void run() {
                                 if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
                                     if (!((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update)) {
-                                        /*if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                            NotificationEventBus
-                                                    .getInstance()
-                                                    .setNotification(new NotificationEvent(true));
-                                        }*/
-
                                         setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
                                     }
                                 } else {
-                                    /*if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                        NotificationEventBus
-                                                .getInstance()
-                                                .setNotification(new NotificationEvent(true));
-                                    }*/
                                     setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
                                 }
 
