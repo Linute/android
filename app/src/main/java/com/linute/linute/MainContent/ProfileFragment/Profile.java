@@ -191,7 +191,7 @@ public class Profile extends BaseFragment {
                         if (activity != null)
                             activity.startEditProfileActivity(SettingActivity.class);
                         return true;
-                    case R.id.updates:
+                    case R.id.menu_updates:
                         if (activity != null)
                             activity.addFragmentToContainer(new UpdatesFragment());
                         return true;
