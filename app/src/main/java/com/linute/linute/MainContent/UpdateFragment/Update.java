@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
+import android.util.Log;
+
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -43,7 +45,7 @@ public class Update {
     private UpdateType mUpdateType;     // type of update
 
     private boolean mIsRead;            //determine if viewer has seen this update before
-
+    private boolean mIsViewed;          //determine if the viewer has opened this update before
 
     //'User' refers to the person performing the action
     // i.e. if 'max liked your picture' -> user = max
@@ -76,6 +78,8 @@ public class Update {
      */
     public Update(JSONObject json) throws JSONException {
 
+        Log.i("AAA", json.toString(4));
+
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json,"action"));
 
         mIsRead = getBooleanFromJson(json, "isRead");
@@ -100,6 +104,8 @@ public class Update {
             setUpEvent(json);
 
         mDescription = getStringFromJson(json, "text");
+
+        mIsViewed = getBooleanFromJson(json, "isViewed");
     }
 
     //parse action String and return UpdateType
@@ -214,6 +220,12 @@ public class Update {
     public boolean isRead() {
         return mIsRead;
     }
+
+    public boolean isViewed(){
+        return mIsViewed;
+    }
+
+    public void markViewed(){mIsViewed = true;}
 
     public String getEventID() {
         return mPost.getPostId();
