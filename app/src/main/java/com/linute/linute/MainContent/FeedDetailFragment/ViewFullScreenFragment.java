@@ -31,7 +31,6 @@ import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -60,7 +59,7 @@ public class ViewFullScreenFragment extends BaseFragment {
     private String mCollegeId;
     private String mUserId;
 
-    private ViewFullScreenFragment() {
+    public ViewFullScreenFragment() {
 
     }
 

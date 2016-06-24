@@ -101,7 +101,7 @@ public class EditSavePhotoFragment extends Fragment {
         return fragment;
     }
 
-    private EditSavePhotoFragment() {
+    public EditSavePhotoFragment() {
     }
 
     @Override
