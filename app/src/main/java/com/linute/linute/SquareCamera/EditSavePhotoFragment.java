@@ -6,10 +6,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -31,6 +33,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.overlay.ImageOverlayAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -100,7 +103,7 @@ public class EditSavePhotoFragment extends Fragment {
         return fragment;
     }
 
-    private EditSavePhotoFragment() {
+    public EditSavePhotoFragment() {
     }
 
     @Override
@@ -114,6 +117,38 @@ public class EditSavePhotoFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        ViewPager overlayPager = (ViewPager)view.findViewById(R.id.filter_overlay);
+        Bitmap bitmapblue = Bitmap.createBitmap(new int[]{0x220000FF},1,1, Bitmap.Config.ARGB_8888);
+        Bitmap bitmapwhite = Bitmap.createBitmap(new int[]{0x22FFFFFF},1,1, Bitmap.Config.ARGB_8888);
+        Bitmap bitmapred = Bitmap.createBitmap(new int[]{0x22FF0000},1,1, Bitmap.Config.ARGB_8888);
+        ImageOverlayAdapter overlayAdapter = new ImageOverlayAdapter(getActivity().getSupportFragmentManager(), bitmapblue, bitmapwhite, bitmapred);
+        overlayPager.setAdapter(overlayAdapter);
+
+        overlayPager.setOnTouchListener(new View.OnTouchListener() {
+            long timeDown = 0;
+            int x , y;
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    timeDown = System.currentTimeMillis();
+                    x = (int)motionEvent.getRawX();
+                    y = (int)motionEvent.getRawY();
+                }
+                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY()-y) < 10) {
+                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+                            mEditText.setVisibility(View.VISIBLE);
+                            mEditText.requestFocus();
+                            showKeyboard();
+                            //mCanMove = false; //can't mvoe strip while in edit
+                        }
+                    }
+                }
+                    return false;
+            }
+        });
+
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
@@ -138,17 +173,6 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         //shows the text strip when image touched
-        photoImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                    mEditText.setVisibility(View.VISIBLE);
-                    mEditText.requestFocus();
-                    showKeyboard();
-                    //mCanMove = false; //can't mvoe strip while in edit
-                }
-            }
-        });
 
         Toolbar t = (Toolbar) view.findViewById(R.id.top);
         mProgressBar = (ProgressBar) t.findViewById(R.id.editFragment_progress_bar);
