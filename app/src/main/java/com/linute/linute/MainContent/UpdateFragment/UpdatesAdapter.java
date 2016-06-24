@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.UpdateFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
@@ -22,6 +24,10 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -225,6 +231,10 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                                     FeedDetailPage.newInstance(mUpdate.getPost())
                             );
                         }
+                        if(!mUpdate.isViewed()){
+                            sendReadAsync(mUpdate.getActionID());
+                            mUpdate.markViewed();
+                        }
                     }
                 }
             });
@@ -240,9 +250,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mDescriptionText.setText(update.getDescription());
             mTimeView.setText(Utils.getTimeAgoString(update.getActionTime()));
 
-            Log.i("AAA", ""+update.isViewed());
-
-            itemView.setBackgroundColor(update.isViewed() ? 0 : 0x84CFDF);
+            itemView.setBackgroundColor(update.isViewed() ? 0 : 0x2284CFDF);
 
             setUpPictures(update); //profile and event image
 
@@ -319,7 +327,26 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                         .addFragmentToContainer(
                                 TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId()));
             }
+
         }
+
+        private void sendReadAsync(final String id) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                        JSONObject obj = new JSONObject();
+                        try {
+                            JSONArray activities = new JSONArray();
+                            activities.put(id);
+                            obj.put("activities", activities);
+                            ((MainActivity)mContext).emitSocket(API_Methods.VERSION + ":activities:viewed", obj);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                }
+            });
+        }
+
 
 
         private void setUpFollowButton(boolean followedBack) {
