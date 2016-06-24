@@ -748,7 +748,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(new UpdatesFragment());
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -757,7 +757,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(new UpdatesFragment());
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {

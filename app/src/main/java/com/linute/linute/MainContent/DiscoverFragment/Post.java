@@ -9,9 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by Arman on 12/27/15.
@@ -137,12 +135,12 @@ public class Post implements Parcelable {
 
 
     public void updateInfo(JSONObject jsonObject) throws JSONException{
-        int type = jsonObject.getInt("type");
+        mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
             mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
 
-        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+        if (mType == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
             mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
 
         Date myDate;

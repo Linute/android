@@ -184,7 +184,17 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) clearBackStack();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0){
+            // Maybe there is a better way to do this
+            // When back pressed, we need to ask: "are you sure you want to discard this"
+            EditSaveVideoFragment saveVideoFragment =
+                    (EditSaveVideoFragment) getSupportFragmentManager().findFragmentByTag(EditSaveVideoFragment.TAG);
+            if (saveVideoFragment != null){
+                saveVideoFragment.showConfirmDialog();
+            }else {
+                clearBackStack();
+            }
+        }
         else {
             setResult(RESULT_CANCELED);
             super.onBackPressed();

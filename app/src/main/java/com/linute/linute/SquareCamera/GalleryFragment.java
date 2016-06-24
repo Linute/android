@@ -116,7 +116,7 @@ public class GalleryFragment extends Fragment {
                                                                 Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION))
                                                         )
                                                 ),
-                                                EditSavePhotoFragment.TAG)
+                                                EditSaveVideoFragment.TAG)
                                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                         .commit();
 

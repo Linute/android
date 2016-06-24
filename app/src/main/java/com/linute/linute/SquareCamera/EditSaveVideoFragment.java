@@ -72,7 +72,7 @@ import rx.schedulers.Schedulers;
 /**
  *
  */
-public class EditSaveVideoFragment extends Fragment {
+public class EditSaveVideoFragment extends Fragment{
 
     public static final String TAG = EditSaveVideoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
@@ -141,7 +141,6 @@ public class EditSaveVideoFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         mReturnType = ((CameraActivity) getActivity()).getReturnType();
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -394,7 +393,7 @@ public class EditSaveVideoFragment extends Fragment {
 
     }
 
-    private void showConfirmDialog() {
+    public void showConfirmDialog() {
         if (getActivity() == null) return;
 
         if (mEditText.getVisibility() == View.VISIBLE) {
@@ -756,6 +755,7 @@ public class EditSaveVideoFragment extends Fragment {
             Log.i(TAG, "call: failed socket connection");
         }
     };
+
 
 
     //event ERROR

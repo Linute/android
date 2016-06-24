@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -79,6 +80,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
         v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                Log.i(TAG, "onLongClick: "+mPost.getType());
                 if (mPost.getType() != Post.POST_TYPE_STATUS) {
                     MainActivity activity = (MainActivity) mContext;
                     VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();

@@ -1,23 +1,25 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.signature.StringSignature;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 /**
  * Created by Arman on 12/30/15.
  */
-public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
     protected ImageView vEventImage;
 
@@ -39,6 +41,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         vAnonIcon = itemView.findViewById(R.id.anon_icon);
         vMovieIcon = itemView.findViewById(R.id.movie_icon);
         itemView.setOnClickListener(this);
+        itemView.setOnLongClickListener(this);
     }
 
     void bindModel(UserActivityItem userActivityItem) {
@@ -54,7 +57,6 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
             vAnonIcon.setVisibility(View.VISIBLE);
             vGradient.setVisibility(View.VISIBLE);
             vMovieIcon.setVisibility(userActivityItem.hasVideo() ? View.VISIBLE : View.GONE);
-
         } else {
             vAnonIcon.setVisibility(View.GONE);
 
@@ -79,5 +81,22 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         if (activity != null && mUserActivityItem != null) {
             activity.addFragmentToContainer(FeedDetailPage.newInstance(mUserActivityItem.getPost()));
         }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (mUserActivityItem.getPost().getType() != Post.POST_TYPE_STATUS){
+            MainActivity activity = (MainActivity) mContext;
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+            activity.addFragmentOnTop(
+                    ViewFullScreenFragment.newInstance(
+                            Uri.parse(mUserActivityItem.getPost().getType() == Post.POST_TYPE_VIDEO ?
+                                    mUserActivityItem.getPost().getVideoUrl() : mUserActivityItem.getPost().getImage()),
+                            mUserActivityItem.getPost().getType()
+                    )
+            );
+            vEventImage.getParent().requestDisallowInterceptTouchEvent(true);
+        }
+        return true;
     }
 }
