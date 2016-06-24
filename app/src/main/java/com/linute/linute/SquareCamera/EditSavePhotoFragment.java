@@ -171,8 +171,9 @@ public class EditSavePhotoFragment extends Fragment {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mProgressBar.getVisibility() != View.VISIBLE)
-                    showConfirmDialog();
+                if (mProgressBar.getVisibility() != View.VISIBLE && getActivity() != null){
+                    ((CameraActivity)getActivity()).clearBackStack();
+                }
             }
         });
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
@@ -203,35 +204,6 @@ public class EditSavePhotoFragment extends Fragment {
             }
         });
         setUpEditText();
-    }
-
-
-    private void showConfirmDialog() {
-        if (mEditText.getVisibility() == View.VISIBLE) {
-            hideKeyboard();
-            mEditText.setVisibility(View.GONE);
-            if (!mEditText.getText().toString().trim().isEmpty()) {
-                mTextView.setText(mEditText.getText().toString());
-                mTextView.setVisibility(View.VISIBLE);
-            }
-        }
-
-        new AlertDialog.Builder(getActivity())
-                .setTitle("you sure?")
-                .setMessage("would you like to throw away what you have currently?")
-                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (getActivity() == null) return;
-                        ((CameraActivity) getActivity()).clearBackStack();
-                    }
-                })
-                .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
     }
 
     private void setUpEditText() {

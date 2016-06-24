@@ -34,6 +34,10 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
     protected MediaPlayer mMediaPlayer;
     protected ScalableType mScalableType = ScalableType.NONE;
 
+    private HideVideo mHideVideo;
+
+    private boolean mVideoStopped;
+
     public ScalableVideoView(Context context) {
         this(context, null);
     }
@@ -73,6 +77,7 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        if (mHideVideo != null) mHideVideo.hideVideo();
         return false;
     }
 
@@ -152,6 +157,7 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
     public void setDataSource(@NonNull Context context, @NonNull Uri uri) throws IOException {
         initializeMediaPlayer();
         mMediaPlayer.setDataSource(context, uri);
+        mVideoStopped = false;
     }
 
     public void setDataSource(@NonNull FileDescriptor fd, long offset, long length)
@@ -223,11 +229,12 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
     }
 
     public boolean isPlaying() {
-        return mMediaPlayer.isPlaying();
+        return mMediaPlayer != null && mMediaPlayer.isPlaying();
     }
 
     public void pause() {
-        mMediaPlayer.pause();
+        if (mMediaPlayer != null)
+            mMediaPlayer.pause();
     }
 
     public void seekTo(int msec) {
@@ -243,12 +250,17 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
     }
 
     public void start() {
-        mMediaPlayer.start();
+        if (mMediaPlayer != null) {
+            mMediaPlayer.start();
+            mVideoStopped = false;
+        }
     }
 
     public void stop() {
-        if (mMediaPlayer != null)
+        if (mMediaPlayer != null) {
             mMediaPlayer.stop();
+            mVideoStopped = true;
+        }
     }
 
     public void reset() {
@@ -263,4 +275,21 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
             mMediaPlayer = null;
         }
     }
+
+    public boolean isVideoStopped(){
+        return mVideoStopped;
+    }
+
+    public void setHideVideo(HideVideo hideVideo){
+        mHideVideo = hideVideo;
+    }
+
+    public void runHideVideo(){
+        if (mHideVideo != null) mHideVideo.hideVideo();
+    }
+
+    public interface HideVideo{
+        void hideVideo();
+    }
+
 }

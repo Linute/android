@@ -85,7 +85,6 @@ public class DiscoverFragment extends BaseFragment {
             mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
                     mPosts,
                     getContext(),
-                    ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager(),
                     mSectionTwo
             );
         }

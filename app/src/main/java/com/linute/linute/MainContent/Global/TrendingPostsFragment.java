@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Global;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -7,11 +8,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinearLayoutManagerWithSmoothScroller;
@@ -20,7 +24,6 @@ import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VerticalSnappingRecyclerView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +41,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingPostsFragment extends BaseFragment {
+public class TrendingPostsFragment extends BaseFragment implements TrendingItemAdapter.OnLongPress{
 
     private static final String ID_KEY = "id_key";
     private static final String TAG = TrendingPostsFragment.class.getSimpleName();
@@ -47,7 +50,6 @@ public class TrendingPostsFragment extends BaseFragment {
     private ArrayList<Post> mPostList = new ArrayList<>();
 
     private String mTrendId;
-    private SingleVideoPlaybackManager mSingleVideoPlayerManager = new SingleVideoPlaybackManager();
     private View mProgressBar;
     private View mRetry;
 
@@ -70,7 +72,6 @@ public class TrendingPostsFragment extends BaseFragment {
             mTrendId = getArguments().getString(ID_KEY);
         }
         mTrendingAdapter = new TrendingItemAdapter(mPostList, getContext(),
-                mSingleVideoPlayerManager,
                 new LoadMoreViewHolder.OnLoadMore() {
                     @Override
                     public void loadMore() {
@@ -105,8 +106,9 @@ public class TrendingPostsFragment extends BaseFragment {
                     vRecView.setHolder(vRecView.findViewHolderForAdapterPosition(0));
                     if (vRecView.getHolder() == null) return;
                 }
-                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                    ((TrendingItemAdapter.BaseTrendViewHolder)vRecView.getHolder()).lostFocus();
+                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder) {
+                    ((TrendingItemAdapter.BaseTrendViewHolder) vRecView.getHolder()).lostFocus();
+                }
             }
 
             @Override
@@ -114,8 +116,9 @@ public class TrendingPostsFragment extends BaseFragment {
                 RecyclerView.ViewHolder h = vRecView.findViewHolderForAdapterPosition(position);
                 if (h != null) {
                     vRecView.setHolder(h);
-                    if (h instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                        ((TrendingItemAdapter.BaseTrendViewHolder)h).gainedFocus();
+                    if (h instanceof TrendingItemAdapter.BaseTrendViewHolder) {
+                        ((TrendingItemAdapter.BaseTrendViewHolder) h).gainedFocus();
+                    }
                 }
             }
         });
@@ -129,6 +132,7 @@ public class TrendingPostsFragment extends BaseFragment {
                 vRecView.customScrollToPosition(position);
             }
         });
+        mTrendingAdapter.setOnLongPress(this);
 
         vRecView.setAdapter(mTrendingAdapter);
         vRecView.addItemDecoration(new SpaceItemDecoration(2));
@@ -144,6 +148,7 @@ public class TrendingPostsFragment extends BaseFragment {
 
         return root;
     }
+
 
 
     @Override
@@ -162,7 +167,7 @@ public class TrendingPostsFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mSingleVideoPlayerManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
     }
 
     private int mSkip;
@@ -394,4 +399,22 @@ public class TrendingPostsFragment extends BaseFragment {
         );
     }
 
+    @Override
+    public void onLongPress(Post post, int pos) {
+        LinearLayoutManager manager = (LinearLayoutManager) vRecView.getLayoutManager();
+
+        Log.i(TAG, "onLongPress: "+pos + " "+manager.findFirstVisibleItemPosition());
+        if (manager.findFirstVisibleItemPosition() != pos) return;
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.addFragmentOnTop(
+                    ViewFullScreenFragment.newInstance(
+                            Uri.parse(post.getType() == Post.POST_TYPE_VIDEO ? post.getVideoUrl() : post.getImage()),
+                            post.getType()
+                    )
+            );
+        }
+    }
 }

@@ -26,12 +26,11 @@ public class SingleVideoPlaybackManager {
     public void playNewVideo(Context context, ScalableVideoView videoView, Uri link){
         if (mTextureVideoView != null && videoView != mTextureVideoView){
             mTextureVideoView.stop();
-            //mTextureVideoView.runHideVideo();
+            mTextureVideoView.runHideVideo();
         }
 
         try {
             videoView.setDataSource(context,link);
-            videoView.start();
             mTextureVideoView = videoView;
         }catch (IOException e){
             e.printStackTrace();
@@ -43,6 +42,7 @@ public class SingleVideoPlaybackManager {
     public void stopPlayback(){
         if (mTextureVideoView != null){
             mTextureVideoView.stop();
+            mTextureVideoView.runHideVideo();
             mTextureVideoView = null;
         }
     }

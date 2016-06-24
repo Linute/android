@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -14,7 +13,6 @@ import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 /**
  * Created by QiFeng on 2/3/16.
@@ -23,20 +21,15 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
 
+
     protected ImageView vPostImage;
 
     protected int mType;
-    protected SingleVideoPlaybackManager mSingleVideoPlaybackManager;
 
-    public ImageFeedHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
+    public ImageFeedHolder(final View itemView, Context context) {
         super(itemView, context);
-        mSingleVideoPlaybackManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        setUpOnClicks();
-    }
-
-    protected void setUpOnClicks() {
-        setUpOnClicks(vPostImage);
+        setUpOnClicks(itemView.findViewById(R.id.parent));
     }
 
 
@@ -86,18 +79,18 @@ public class ImageFeedHolder extends BaseFeedHolder {
         v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                MainActivity activity = (MainActivity) mContext;
+                if (mPost.getType() != Post.POST_TYPE_STATUS) {
+                    MainActivity activity = (MainActivity) mContext;
+                    VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+                    activity.addFragmentOnTop(
+                            ViewFullScreenFragment.newInstance(
+                                    Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
+                                    mPost.getType()
+                            )
+                    );
 
-                if (mSingleVideoPlaybackManager != null)
-                    mSingleVideoPlaybackManager.stopPlayback();
-
-                activity.addFragmentOnTop(
-                        ViewFullScreenFragment.newInstance(
-                                Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
-                                mPost.getType()
-                        )
-                );
-
+                    vPostImage.getParent().requestDisallowInterceptTouchEvent(true);
+                }
                 return true;
             }
         });

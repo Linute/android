@@ -296,7 +296,6 @@ public class MainActivity extends BaseTaptActivity {
                 .commit();
     }
 
-
     @Override
     public void addFragmentToContainer(final Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;

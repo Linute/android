@@ -41,6 +41,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -49,7 +50,6 @@ import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 
 import org.json.JSONArray;
@@ -95,8 +95,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private View mProgressbar;
     private View mSendButton;
-
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     private CheckBox mCheckBox;
 
@@ -179,7 +177,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
 
         recList.setAdapter(mFeedDetailAdapter);
 
@@ -360,7 +358,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mFeedDetailAdapter.closeAllDialogs();
         mFeedDetailAdapter.closeAllItems();
 
-        mSingleVideoPlaybackManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 

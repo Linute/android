@@ -18,6 +18,7 @@
     />
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+        android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/seperator_color">

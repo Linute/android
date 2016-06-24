@@ -23,10 +23,6 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -54,9 +50,6 @@ public class DiscoverHolderFragment extends BaseFragment {
     private boolean mHasNotification;
 
     private View mNotificationIndicator;
-
-    //makes sure only one video is playing at a time
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
     }
@@ -138,7 +131,7 @@ public class DiscoverHolderFragment extends BaseFragment {
 
             @Override
             public void onPageSelected(int position) {
-                mSingleVideoPlaybackManager.stopPlayback();
+                VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
             }
 
             @Override
@@ -240,7 +233,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
 
-        mSingleVideoPlaybackManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
@@ -267,12 +260,6 @@ public class DiscoverHolderFragment extends BaseFragment {
         mViewPager.setCurrentItem(0, true);
         mDiscoverFragments[0].scrollUp();
     }
-
-
-    public SingleVideoPlaybackManager getSinglePlaybackManager() {
-        return mSingleVideoPlaybackManager;
-    }
-
 
     private Subscription mChatSubscription;
 

@@ -33,7 +33,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,14 +60,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private FeedDetail mFeedDetail;
 
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager;
-
     private MentionedTextAdder mMentionedTextAdder;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context, SingleVideoPlaybackManager manager) {
+    public FeedDetailAdapter(FeedDetail feedDetail, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
-        mSingleVideoPlaybackManager = manager;
     }
 
     @Override
@@ -82,7 +78,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             case TYPE_IMAGE_HEADER:
                 return new FeedDetailHeaderImageViewHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.feed_detail_header_image, parent, false), context, mSingleVideoPlaybackManager);
+                        .inflate(R.layout.feed_detail_header_image, parent, false), context);
             case TYPE_STATUS_HEADER:
                 return new FeedDetailHeaderStatusViewHolder(
                         LayoutInflater.from(parent.getContext())
@@ -90,7 +86,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             case TYPE_VIDEO_HEADER:
                 return new FeedDetailHeaderVideoViewHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.feed_detail_header_video, parent, false), context, mSingleVideoPlaybackManager);
+                        .inflate(R.layout.feed_detail_header_video, parent, false), context);
             case TYPE_LOAD_MORE:
                 return new LoadMoreViewHolder(LayoutInflater
                         .from(parent.getContext())
