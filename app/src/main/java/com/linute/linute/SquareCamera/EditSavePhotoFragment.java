@@ -6,12 +6,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -33,7 +32,8 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.overlay.ImageOverlayAdapter;
+import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
+import com.linute.linute.SquareCamera.overlay.WipeViewPager;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -42,7 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -118,37 +120,6 @@ public class EditSavePhotoFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ViewPager overlayPager = (ViewPager)view.findViewById(R.id.filter_overlay);
-        Bitmap bitmapblue = Bitmap.createBitmap(new int[]{0x220000FF},1,1, Bitmap.Config.ARGB_8888);
-        Bitmap bitmapwhite = Bitmap.createBitmap(new int[]{0x22FFFFFF},1,1, Bitmap.Config.ARGB_8888);
-        Bitmap bitmapred = Bitmap.createBitmap(new int[]{0x22FF0000},1,1, Bitmap.Config.ARGB_8888);
-        ImageOverlayAdapter overlayAdapter = new ImageOverlayAdapter(getActivity().getSupportFragmentManager(), bitmapblue, bitmapwhite, bitmapred);
-        overlayPager.setAdapter(overlayAdapter);
-
-        overlayPager.setOnTouchListener(new View.OnTouchListener() {
-            long timeDown = 0;
-            int x , y;
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    timeDown = System.currentTimeMillis();
-                    x = (int)motionEvent.getRawX();
-                    y = (int)motionEvent.getRawY();
-                }
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY()-y) < 10) {
-                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                            mEditText.setVisibility(View.VISIBLE);
-                            mEditText.requestFocus();
-                            showKeyboard();
-                            //mCanMove = false; //can't mvoe strip while in edit
-                        }
-                    }
-                }
-                    return false;
-            }
-        });
-
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
@@ -171,6 +142,50 @@ public class EditSavePhotoFragment extends Fragment {
             //no lag time when loading with this method
             photoImageView.setImageURI(imageUri);
         }
+
+        WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
+        ArrayList<Bitmap> overlays = new ArrayList<>(5);
+        overlays.add(Bitmap.createBitmap(new int[]{0x220000FF}, 1, 1, Bitmap.Config.ARGB_8888));
+        overlays.add(Bitmap.createBitmap(new int[]{0x22FFFFFF}, 1, 1, Bitmap.Config.ARGB_8888));
+        overlays.add(Bitmap.createBitmap(new int[]{0x22FF0000}, 1, 1, Bitmap.Config.ARGB_8888));
+        try {
+            Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+
+            Bitmap blackwhite = ImageUtility.toGrayscale(og);
+            overlays.add(blackwhite);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter(overlays
+        );
+        overlayPager.setPosition(Integer.MAX_VALUE/2);
+        overlayPager.setWipeAdapter(overlayAdapter);
+
+        overlayPager.setOnTouchListener(new View.OnTouchListener() {
+            long timeDown = 0;
+            int x, y;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    timeDown = System.currentTimeMillis();
+                    x = (int) motionEvent.getRawX();
+                    y = (int) motionEvent.getRawY();
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
+                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+                            mEditText.setVisibility(View.VISIBLE);
+                            mEditText.requestFocus();
+                            showKeyboard();
+                            //mCanMove = false; //can't mvoe strip while in edit
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
 
         //shows the text strip when image touched
 
@@ -215,6 +230,7 @@ public class EditSavePhotoFragment extends Fragment {
         });
         setUpEditText();
     }
+
 
 
     private void showConfirmDialog() {
@@ -297,7 +313,7 @@ public class EditSavePhotoFragment extends Fragment {
                             if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y) {
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
                                 topMargin = mUploadButton.getBottom();
-                            }else {
+                            } else {
                                 bottomMargin = 0;
                                 topMargin = 0;
                             }
