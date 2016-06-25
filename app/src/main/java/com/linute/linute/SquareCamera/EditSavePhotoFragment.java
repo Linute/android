@@ -158,7 +158,6 @@ public class EditSavePhotoFragment extends Fragment {
         }
         OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter(overlays
         );
-        overlayPager.setPosition(Integer.MAX_VALUE/2);
         overlayPager.setWipeAdapter(overlayAdapter);
 
         overlayPager.setOnTouchListener(new View.OnTouchListener() {
