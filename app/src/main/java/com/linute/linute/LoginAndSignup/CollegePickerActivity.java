@@ -312,9 +312,6 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
         Intent i = new Intent(this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(i);
-        overridePendingTransition(0, 0); //no transition effects
         this.finish();
     }
-
-
 }

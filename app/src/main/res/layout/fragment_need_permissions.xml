@@ -1,37 +1,75 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@android:color/black"
-              android:gravity="center"
-              android:orientation="vertical">
-    <TextView android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginBottom="10dp"
-              android:layout_marginEnd="32dp"
-              android:layout_marginStart="32dp"
-              android:gravity="center"
-              android:text="Take photos and record videos with Tapt's camera"
-              android:textColor="@android:color/white"
-              android:textSize="18sp"
-              android:textStyle="bold"/>
-    <TextView android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginBottom="10dp"
-              android:layout_marginEnd="32dp"
-              android:layout_marginStart="32dp"
-              android:gravity="center"
-              android:text="Tapt needs permission to use your phone's camera, storage, and audio to take pictures and record video."
-              android:textColor="@android:color/darker_gray"
-              android:textSize="16sp"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:gravity="center"
+        android:text="Take photos and record videos with Tapt's camera"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
+        android:gravity="center"
+        android:text="Tapt needs permission to use your phone's camera, storage, and audio to take pictures and record video."
+        android:textColor="@color/fifty_white"
+        android:textSize="16sp"/>
+
+    <Button
+        android:id="@+id/needPermission_text_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:text="Turn On"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="16sp"/>
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/half_margin"
+        android:text="Or you can post a status."
+        android:textColor="@color/fifty_white"
     />
-    <Button android:id="@+id/needPermission_text_button"
+
+    <FrameLayout
+        android:id="@+id/new_post"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:contentDescription="Status">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/post_button"/>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:text="Turn On"
-            android:textColor="@android:color/holo_blue_dark"
-            android:textSize="16sp"/>
+            android:layout_gravity="center"
+            android:text="T"
+            android:textSize="25sp"/>
+
+
+    </FrameLayout>
 
 </LinearLayout>

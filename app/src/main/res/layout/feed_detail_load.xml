@@ -9,7 +9,7 @@
               android:layout_gravity="center"
               android:textSize="@dimen/body_font_size"
               android:textStyle="bold"
-              android:text="load more comments"
+              android:text="Load more comments"
               android:layout_margin="@dimen/activity_horizontal_margin"
     />
 

@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Global;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -7,20 +8,22 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinearLayoutManagerWithSmoothScroller;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VerticalSnappingRecyclerView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +41,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingPostsFragment extends UpdatableFragment {
+public class TrendingPostsFragment extends BaseFragment implements TrendingItemAdapter.OnLongPress{
 
     private static final String ID_KEY = "id_key";
     private static final String TAG = TrendingPostsFragment.class.getSimpleName();
@@ -47,7 +50,6 @@ public class TrendingPostsFragment extends UpdatableFragment {
     private ArrayList<Post> mPostList = new ArrayList<>();
 
     private String mTrendId;
-    private SingleVideoPlaybackManager mSingleVideoPlayerManager = new SingleVideoPlaybackManager();
     private View mProgressBar;
     private View mRetry;
 
@@ -70,12 +72,11 @@ public class TrendingPostsFragment extends UpdatableFragment {
             mTrendId = getArguments().getString(ID_KEY);
         }
         mTrendingAdapter = new TrendingItemAdapter(mPostList, getContext(),
-                mSingleVideoPlayerManager,
                 new LoadMoreViewHolder.OnLoadMore() {
                     @Override
-                    public void onLoadMore(boolean clicked) {
-                        if (mLoadingMore || feedDone) return;
-                        if (mTrendingAdapter.getFooterState() == LoadMoreViewHolder.STATE_LOADING || clicked) {
+                    public void loadMore() {
+                        if (getFragmentState() == FragmentState.LOADING_DATA || feedDone) return;
+                        if (mTrendingAdapter.getFooterState() == LoadMoreViewHolder.STATE_LOADING) {
                             loadMoreFeedFromServer();
                         }
                     }
@@ -105,8 +106,9 @@ public class TrendingPostsFragment extends UpdatableFragment {
                     vRecView.setHolder(vRecView.findViewHolderForAdapterPosition(0));
                     if (vRecView.getHolder() == null) return;
                 }
-                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                    ((TrendingItemAdapter.BaseTrendViewHolder)vRecView.getHolder()).lostFocus();
+                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder) {
+                    ((TrendingItemAdapter.BaseTrendViewHolder) vRecView.getHolder()).lostFocus();
+                }
             }
 
             @Override
@@ -114,8 +116,9 @@ public class TrendingPostsFragment extends UpdatableFragment {
                 RecyclerView.ViewHolder h = vRecView.findViewHolderForAdapterPosition(position);
                 if (h != null) {
                     vRecView.setHolder(h);
-                    if (h instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                        ((TrendingItemAdapter.BaseTrendViewHolder)h).gainedFocus();
+                    if (h instanceof TrendingItemAdapter.BaseTrendViewHolder) {
+                        ((TrendingItemAdapter.BaseTrendViewHolder) h).gainedFocus();
+                    }
                 }
             }
         });
@@ -129,6 +132,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
                 vRecView.customScrollToPosition(position);
             }
         });
+        mTrendingAdapter.setOnLongPress(this);
 
         vRecView.setAdapter(mTrendingAdapter);
         vRecView.addItemDecoration(new SpaceItemDecoration(2));
@@ -146,10 +150,11 @@ public class TrendingPostsFragment extends UpdatableFragment {
     }
 
 
+
     @Override
     public void onResume() {
         super.onResume();
-        if (fragmentNeedsUpdating()) {
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getPosts();
         }else {
             if (mPostList.isEmpty()){
@@ -162,7 +167,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mSingleVideoPlayerManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
     }
 
     private int mSkip;
@@ -171,6 +176,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
     public void getPosts() {
         if (getActivity() == null) return;
 
+        setFragmentState(FragmentState.LOADING_DATA);
 
         mProgressBar.setVisibility(View.VISIBLE);
 
@@ -181,6 +187,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
         new LSDKGlobal(getActivity()).getPosts(params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -197,6 +204,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
 
                 if (!response.isSuccessful()) {
                     Log.d("HEY", response.body().string());
+                    setFragmentState(FragmentState.FINISHED_UPDATING);
                     if (getActivity() != null) { //shows server error toast
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -204,6 +212,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                 Utils.showServerErrorToast(getActivity());
                                 mProgressBar.setVisibility(View.GONE);
                                 mRetry.setVisibility(View.VISIBLE);
+
                             }
                         });
                     }
@@ -226,7 +235,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
                         mTrendingAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
                     }
 
-                    ArrayList<Post> refreshedPosts = new ArrayList<>();
+                    final ArrayList<Post> refreshedPosts = new ArrayList<>();
 
                     for (int i = jsonArray.length() - 1; i >= 0; i--) {
                         try {
@@ -236,12 +245,9 @@ public class TrendingPostsFragment extends UpdatableFragment {
                         }
                     }
 
-
-                    mPostList.clear();
-                    mPostList.addAll(refreshedPosts);
-
                     final MainActivity activity = (MainActivity) getActivity();
                     if (activity == null) {
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
                         return;
                     }
 
@@ -252,6 +258,8 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            mPostList.clear();
+                                            mPostList.addAll(refreshedPosts);
                                             mTrendingAdapter.notifyDataSetChanged();
                                         }
                                     });
@@ -273,18 +281,17 @@ public class TrendingPostsFragment extends UpdatableFragment {
                         });
                     }
                 }
+                setFragmentState(FragmentState.FINISHED_UPDATING);
             }
         });
     }
 
 
-    boolean mLoadingMore = false;
-
     public void loadMoreFeedFromServer() {
 
-        if (mLoadingMore || getActivity() == null) return;
+        if (getFragmentState() == FragmentState.LOADING_DATA || getActivity() == null) return;
 
-        mLoadingMore = true;
+        setFragmentState(FragmentState.LOADING_DATA);
 
         int skip = mSkip;
 
@@ -306,12 +313,12 @@ public class TrendingPostsFragment extends UpdatableFragment {
         new LSDKGlobal(getContext()).getPosts(params, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     Utils.showBadConnectionToast(getActivity());
-                                    mLoadingMore = false;
                                 }
                             });
                         }
@@ -321,11 +328,11 @@ public class TrendingPostsFragment extends UpdatableFragment {
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
                             Log.d("HEY", response.body().string());
+                            setFragmentState(FragmentState.FINISHED_UPDATING);
                             if (getActivity() != null) { //shows server error toast
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mLoadingMore = false;
                                         Utils.showServerErrorToast(getActivity());
                                     }
                                 });
@@ -337,7 +344,7 @@ public class TrendingPostsFragment extends UpdatableFragment {
                         //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
-                        ArrayList<Post> temp = new ArrayList<>();
+                        final ArrayList<Post> temp = new ArrayList<>();
                         try {
                             jsonObject = new JSONObject(json);
                             jsonArray = jsonObject.getJSONArray("posts");
@@ -354,9 +361,6 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                     e.printStackTrace();
                                 }
                             }
-
-                            mPostList.addAll(temp);
-
                             mSkip = skip1;
 
                             if (getActivity() == null) return;
@@ -368,10 +372,10 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                             mHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
+                                                    mPostList.addAll(temp);
                                                     mTrendingAdapter.notifyDataSetChanged();
                                                 }
                                             });
-                                            mLoadingMore = false;
                                         }
                                     }
 
@@ -384,14 +388,33 @@ public class TrendingPostsFragment extends UpdatableFragment {
                                     @Override
                                     public void run() {
                                         Utils.showServerErrorToast(getActivity());
-                                        mLoadingMore = false;
                                     }
                                 });
                             }
                         }
+
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
                     }
                 }
         );
     }
 
+    @Override
+    public void onLongPress(Post post, int pos) {
+        LinearLayoutManager manager = (LinearLayoutManager) vRecView.getLayoutManager();
+
+        Log.i(TAG, "onLongPress: "+pos + " "+manager.findFirstVisibleItemPosition());
+        if (manager.findFirstVisibleItemPosition() != pos) return;
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.addFragmentOnTop(
+                    ViewFullScreenFragment.newInstance(
+                            Uri.parse(post.getType() == Post.POST_TYPE_VIDEO ? post.getVideoUrl() : post.getImage()),
+                            post.getType()
+                    )
+            );
+        }
+    }
 }

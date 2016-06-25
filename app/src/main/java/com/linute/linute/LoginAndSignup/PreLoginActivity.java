@@ -52,13 +52,9 @@ public class PreLoginActivity extends AppCompatActivity {
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
 
-    public static String TAG = "PreLogin";
+    public static String TAG = PreLoginActivity.class.getSimpleName();
 
     private String mFBToken;
-//
-//    private Button mLinuteLoginButton;
-//    private Button mFacebookloginButton;
-//    private TextView mSignupText;
 
     private CallbackManager mCallbackManager;
 
@@ -125,7 +121,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.login_activity_fragment_frame, fragment);
         transaction.commit();
     }
@@ -165,7 +161,7 @@ public class PreLoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                mFBToken = loginResult.getAccessToken().getToken(); //NOTE : NEED IT>
+                mFBToken = loginResult.getAccessToken().getToken();
 
                 final ProgressDialog progress = ProgressDialog.show(PreLoginActivity.this, null, "Retrieving information from Facebook", true);
                 loginOrSignUpWithFacebook(mFBToken, progress);
@@ -185,14 +181,6 @@ public class PreLoginActivity extends AppCompatActivity {
 
     }
 
-
-//    private void checkDeviceRegistered(final String fbToken, ProgressDialog progressDialog) {
-//        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-//        if (sharedPreferences.getBoolean("deviceRegistered", false)) {
-//            loginOrSignUpWithFacebook(fbToken, progressDialog);
-//        }
-//
-//    }
 
     private void loginOrSignUpWithFacebook(final String fbToken, final ProgressDialog progress) {
 
@@ -309,10 +297,6 @@ public class PreLoginActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         });
-    }
-
-    private boolean isEduEmail(String email) {
-        return email != null && email.endsWith(".edu");
     }
 
 

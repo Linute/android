@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,7 +14,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.Chat.Chat;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
@@ -24,6 +22,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
@@ -57,8 +56,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private String mUserid;
 
+    private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
 
-    private LoadMorePosts mLoadMorePosts;
+
+    private LoadMoreViewHolder.OnLoadMore mLoadMorePosts;
+
+    private TitleTextListener mTitleTextListener;
 
 
     public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
@@ -85,7 +88,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             //inflate your layout and pass it to view holder
             return new ProfileHeaderViewHolder(LayoutInflater
                     .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header3, parent, false), context);
+                    .inflate(R.layout.fragment_profile_header3, parent, false));
         } else if (viewType == TYPE_HEADER_ACTIONS) {
             return new ProfileHeaderActions(LayoutInflater
                     .from(parent.getContext())
@@ -95,6 +98,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     .from(parent.getContext())
                     .inflate(R.layout.empty_cell_holders, parent, false)
             );
+        } else if (viewType == LoadMoreViewHolder.FOOTER) {
+            return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");
         }
         return null;
     }
@@ -102,11 +108,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
-        if (position == mUserActivityItems.size()) { //on last elem, need to load more
+        if (position == mUserActivityItems.size() + 2) { //on last elem, need to load more
             if (mLoadMorePosts != null)
-                mLoadMorePosts.loadMorePosts();
+                mLoadMorePosts.loadMore();
         }
-        if (holder instanceof ProfileViewHolder) {
+        if (holder instanceof LoadMoreViewHolder) {
+            ((LoadMoreViewHolder) holder).bindView(mLoadState);
+        } else if (holder instanceof ProfileViewHolder) {
             ((ProfileViewHolder) holder).bindModel(mUserActivityItems.get(position - 2));
         } else if (holder instanceof ProfileHeaderViewHolder) {
             ((ProfileHeaderViewHolder) holder).bindModel(mUser);
@@ -119,7 +127,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemCount() {
-        return mUserActivityItems.size() + 2;
+        //2 for headers and 1 for footer
+        int size = mUserActivityItems.size() + 2;
+        return size == 2 ? 2 : size + 1;
     }
 
     @Override
@@ -128,25 +138,48 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return TYPE_HEADER_IMAGE;
         else if (position == 1)
             return TYPE_HEADER_ACTIONS;
-
+        else if (position == mUserActivityItems.size() + 2)
+            return LoadMoreViewHolder.FOOTER;
         else if (mUserActivityItems.get(position - 2) instanceof EmptyUserActivityItem)
             return TYPE_EMPTY;
-
         else {
             if (mUserActivityItems.get(position - 2).getEventImagePath() != null && !mUserActivityItems.get(position - 2).getEventImagePath().equals(""))
                 return TYPE_ITEM_WITH_IMAGE;
-
             else return TYPE_ITEM_WITHOUT_IMAGE;
         }
     }
 
-
-    public void setLoadMorePosts(LoadMorePosts loadMorePosts) {
+    public void setLoadMorePosts(LoadMoreViewHolder.OnLoadMore loadMorePosts) {
         mLoadMorePosts = loadMorePosts;
     }
 
-    public interface LoadMorePosts {
-        void loadMorePosts();
+    public void setTitleTextListener(TitleTextListener t) {
+        mTitleTextListener = t;
+    }
+
+    public boolean titleShown() {
+        return mTitleTextListener != null && mTitleTextListener.shown;
+    }
+
+    public void setLoadState(short state) {
+        mLoadState = state;
+    }
+
+    //when photo disappears
+    @Override
+    public void onViewDetachedFromWindow(RecyclerView.ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        if (holder instanceof ProfileHeaderViewHolder && mTitleTextListener != null)
+            mTitleTextListener.runShowTitle(true);
+    }
+
+    //when photo appears
+    @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (holder instanceof ProfileHeaderViewHolder && mTitleTextListener != null) {
+            mTitleTextListener.runShowTitle(false);
+        }
     }
 
     //horrible hack
@@ -155,20 +188,14 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         protected ImageView vProfilePicture;
 
-        private Context mContext;
-
-        public ProfileHeaderViewHolder(View itemView, Context context) {
+        public ProfileHeaderViewHolder(View itemView) {
             super(itemView);
-
-            mContext = context;
             vProfilePicture = (ImageView) itemView.findViewById(R.id.profile_image);
 //            vMessageButton = (FloatingActionButton) itemView.findViewById(R.id.chat_button);
         }
 
-        void bindModel(final LinuteUser user) {
-
-
-            Glide.with(mContext)
+        void bindModel(LinuteUser user) {
+            Glide.with(context)
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                     .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
@@ -176,7 +203,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vProfilePicture);
         }
-
     }
 
     public class ProfileHeaderActions extends RecyclerView.ViewHolder {
@@ -215,7 +241,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         return;
 
                     BaseTaptActivity activity = (BaseTaptActivity) context;
-                    if (activity != null){
+                    if (activity != null) {
                         activity.addFragmentToContainer(ChatFragment
                                 .newInstance(
                                         null
@@ -261,10 +287,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                                     if (!response.isSuccessful()) {
                                         Log.d(TAG, response.body().string());
-<<<<<<< HEAD
-
-=======
->>>>>>> qi
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
@@ -387,8 +409,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (mUser.getStatus() != null)
                     vStatusText.setText(mUser.getStatus().equals("") ? "No bio... :|" : mUser.getStatus());
 
-                vPosts.setText(String.valueOf(mUser.getPosts()));
-                vFollowers.setText(String.valueOf(mUser.getFollowers()));
+                vPosts.setText(mUser.getPosts()+"");
+                vFollowers.setText(mUser.getFollowers()+"");
                 vCollegeName.setText(mUser.getCollegeName());
 
                 if (mUser.getUserID().equals(mUserid)) { //viewer is viewing own profile
@@ -403,5 +425,16 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             }
         }
+    }
+
+    public static abstract class TitleTextListener {
+        public boolean shown = false;
+
+        public void runShowTitle(boolean show) {
+            shown = show;
+            showTitle(show);
+        }
+
+        protected abstract void showTitle(boolean show);
     }
 }

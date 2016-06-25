@@ -17,7 +17,7 @@
                  android:visibility="gone"
     />
 
-    <TextView android:id="@+id/friendsList_no_res"
+    <TextView android:id="@+id/followingList_no_res"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal"
@@ -26,5 +26,33 @@
               android:text="@string/no_results"
               android:visibility="gone"
     />
+
+    <FrameLayout
+        android:id="@+id/layout_empty_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="64dp"
+        android:padding="50dp"
+        android:text="@string/no_results"
+        android:visibility="gone"
+        />
+f
+    <FrameLayout
+        android:id="@+id/layout_loading_failed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="64dp"
+        android:padding="50dp"
+        android:text="@string/no_results"
+        android:visibility="gone"
+        />
+
+
+
+
 
 </FrameLayout>

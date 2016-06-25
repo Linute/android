@@ -11,10 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 
-import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -23,32 +20,22 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-<<<<<<< HEAD
-=======
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
->>>>>>> qi
 import static com.linute.linute.MainContent.MainActivity.PHOTO_STATUS_POSTED;
 
 
 /**
  * Created by QiFeng on 1/20/16.
  */
-public class DiscoverHolderFragment extends UpdatableFragment {
+public class DiscoverHolderFragment extends BaseFragment {
 
     public static final String TAG = DiscoverHolderFragment.class.getSimpleName();
 
@@ -57,18 +44,12 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
     private DiscoverFragment[] mDiscoverFragments;
-
-    private FloatingActionsMenu mFloatingActionsMenu;
     private AppBarLayout mAppBarLayout;
 
-    private View mBackgroundView;
     private boolean mHasMessage;
     private boolean mHasNotification;
 
     private View mNotificationIndicator;
-
-    //makes sure only one video is playing at a time
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
     }
@@ -80,14 +61,6 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         View rootView = inflater.inflate(R.layout.fragment_discover_holder, container, false);
 
         mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
-
-        mBackgroundView = rootView.findViewById(R.id.background);
-        mBackgroundView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleFab();
-            }
-        });
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -129,14 +102,14 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 });
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
-                        }
-                    }
-                });
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) {
+                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+                }
+            }
+        });
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -158,7 +131,7 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
             @Override
             public void onPageSelected(int position) {
-                mSingleVideoPlaybackManager.stopPlayback();
+                VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
             }
 
             @Override
@@ -169,37 +142,23 @@ public class DiscoverHolderFragment extends UpdatableFragment {
 
         tabLayout.setupWithViewPager(mViewPager);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
+        tabLayout.setOnTabSelectedListener(
+                new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
+                    @Override
+                    public void onTabReselected(TabLayout.Tab tab) {
+                        mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+                    }
+                }
+        );
 
-        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.fabmenu);
-        mFloatingActionsMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
-            @Override
-            public void onMenuExpanded() {
-                fadeInBackground(true);
-            }
 
-            @Override
-            public void onMenuCollapsed() {
-                fadeInBackground(false);
-            }
-        });
-
-        rootView.findViewById(R.id.fabImage).setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
-                toggleFab();
                 Intent i = new Intent(getActivity(), CameraActivity.class);
                 i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
-        rootView.findViewById(R.id.fabText).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                toggleFab();
-                Intent i = new Intent(getActivity(), PostCreatePage.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
@@ -207,18 +166,20 @@ public class DiscoverHolderFragment extends UpdatableFragment {
         return rootView;
     }
 
+
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
 
     @Override
-    public void setFragmentNeedUpdating(boolean needsUpdating) {
-        mCampusFeedNeedsUpdating = needsUpdating;
-        mFriendsFeedNeedsUpdating = needsUpdating;
-    }
-
-    @Override
-    public boolean fragmentNeedsUpdating() {
-        return mCampusFeedNeedsUpdating && mFriendsFeedNeedsUpdating;
+    public void setFragmentState(FragmentState state) {
+        super.setFragmentState(state);
+        if (state == FragmentState.NEEDS_UPDATING) {
+            mCampusFeedNeedsUpdating = true;
+            mFriendsFeedNeedsUpdating = true;
+        } else {
+            mCampusFeedNeedsUpdating = false;
+            mFriendsFeedNeedsUpdating = false;
+        }
     }
 
     public boolean getCampusFeedNeedsUpdating() {
@@ -264,82 +225,40 @@ public class DiscoverHolderFragment extends UpdatableFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mNotificationEventAction1);
+
     }
+
 
     @Override
     public void onPause() {
         super.onPause();
 
-        mSingleVideoPlaybackManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
         }
 
-        if (mNotificationSubscription != null){
+        if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
         }
 
-        toggleFab();
         mAppBarLayout.setExpanded(true, false);
     }
 
 
     //returns if success
-    public boolean addPostToFeed(Object post) {
-
-        JSONObject obj = (JSONObject) post;
-
-        if (obj != null && getActivity() != null && mDiscoverFragments[0] != null) {
-            try {
-                Post post1 = new Post(obj);
-
-                return mDiscoverFragments[0].addPostToTop(post1);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return false;
-            }
-        } else {
-            Log.i(TAG, "addPostToFeed: obj was null");
-            return false;
-        }
+    public boolean addPostToFeed(Post post) {
+        return getActivity() != null &&
+                mDiscoverFragments[0] != null &&
+                mDiscoverFragments[0].addPostToTop(post);
     }
 
-    public void toggleFab() {
-        if (mFloatingActionsMenu.isExpanded()) {
-            mFloatingActionsMenu.collapse();
-        }
-    }
-
-
-    public SingleVideoPlaybackManager getSinglePlaybackManager() {
-        return mSingleVideoPlaybackManager;
-    }
-
-
-    private void fadeInBackground(final boolean show) {
-        mBackgroundView.clearAnimation();
-
-        AlphaAnimation alphaAnimation = show ?
-                new AlphaAnimation(0f, 1f) : new AlphaAnimation(1f, 0f);
-
-        alphaAnimation.setDuration(200);
-        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mBackgroundView.setVisibility(show ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
-        mBackgroundView.startAnimation(alphaAnimation);
+    @Override
+    public void resetFragment() {
+        mAppBarLayout.setExpanded(true, false);
+        mViewPager.setCurrentItem(0, true);
+        mDiscoverFragments[0].scrollUp();
     }
 
     private Subscription mChatSubscription;
@@ -359,10 +278,12 @@ public class DiscoverHolderFragment extends UpdatableFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotification){
+            if (notificationEvent.hasNotification() != mHasNotification) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
                 mHasNotification = notificationEvent.hasNotification();
             }
         }
     };
+
+
 }

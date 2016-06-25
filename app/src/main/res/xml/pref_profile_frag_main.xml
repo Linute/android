@@ -33,7 +33,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory>
-        <Preference android:key="logout"
+        <com.linute.linute.MainContent.Settings.ColoredPreference android:key="logout"
                     android:title="Log Out"
         />
         <Preference android:key="version"

@@ -41,15 +41,15 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 
 import org.json.JSONArray;
@@ -76,7 +76,7 @@ import okhttp3.Response;
  * Created by Arman on 1/11/16.
  */
 
-public class FeedDetailPage extends UpdatableFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
+public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -96,12 +96,10 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
     private View mProgressbar;
     private View mSendButton;
 
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
-
     private CheckBox mCheckBox;
 
     private String mViewId;
-    private String mImageSigniture;
+    private String mImageSignature;
 
     private Handler mHandler = new Handler();
 
@@ -137,7 +135,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         final View rootView = inflater.inflate(R.layout.fragment_feed_detail_page, container, false);
 
         SharedPreferences pref = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mImageSigniture = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
+        mImageSignature = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
         mViewId = pref.getString("userID", "");
 
         Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.feed_detail_toolbar);
@@ -175,11 +173,12 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         recList.setHasFixedSize(true);
-        LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
+        final LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), mSingleVideoPlaybackManager);
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
+
         recList.setAdapter(mFeedDetailAdapter);
 
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -188,6 +187,22 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                 loadMoreComments();
             }
         });
+
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //when passing last item and scrolling upward
+                if(llm.findLastCompletelyVisibleItemPosition() ==  RecyclerView.NO_POSITION && dy < 0){
+                    //close keyboard
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(recyclerView.getWindowToken(), 0);
+                }
+            }
+
+        });
+
+
 
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -325,9 +340,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         }
 
         //only updates first time it is created
-        if (fragmentNeedsUpdating()) {
+        if (!mCommentsRetrieved) {
             displayCommentsAndPost();
-            setFragmentNeedUpdating(false);
         }
     }
 
@@ -344,7 +358,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
         mFeedDetailAdapter.closeAllDialogs();
         mFeedDetailAdapter.closeAllItems();
 
-        mSingleVideoPlaybackManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
@@ -425,6 +439,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                     comments = jsonObject.getJSONArray("comments");
 
                     Date myDate;
+                    SimpleDateFormat format = Utils.getDateFormat();
 
                     if (mSkip > 0) {
                         tempComments.add(new LoadMoreItem());
@@ -435,7 +450,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                         //get date
                         try {
-                            myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = format.parse(comments.getJSONObject(i).getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
@@ -574,6 +589,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                             comments = jsonObject.getJSONArray("comments");
 
                             Date myDate;
+                            SimpleDateFormat format = Utils.getDateFormat();
 
                             if (mSkip != 0) {
                                 tempComments.add(new LoadMoreItem());
@@ -584,7 +600,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
                                 //get date
                                 try {
-                                    myDate = Utils.DATE_FORMAT.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = format.parse(comments.getJSONObject(i).getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
@@ -806,7 +822,8 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         @Override
                         public void run() {
                             Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
-                            activity.setFragmentOfIndexNeedsUpdating(true, MainActivity.FRAGMENT_INDEXES.FEED);
+                            activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.PROFILE);
                             getFragmentManager().popBackStack();
                         }
                     });
@@ -1188,13 +1205,11 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             }
 
             public void bindView(final MentionedPerson person) {
-
-
                 mName.setText(person.getFullname());
                 Glide.with(mProfileImageView.getContext())
                         .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
-                        .signature(new StringSignature(mImageSigniture))
+                        .signature(new StringSignature(mImageSignature))
                         .placeholder(R.drawable.image_loading_background)
                         .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                         .into(mProfileImageView);
@@ -1209,10 +1224,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
                         mCommentEditText.requestFocus();
                     }
                 });
-
             }
-
-
         }
     }
 
@@ -1247,7 +1259,7 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
 
             try {
                 Date myDate;
-                myDate = Utils.DATE_FORMAT.parse(object.getString("date"));
+                myDate = Utils.getDateFormat().parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
                 JSONArray mentionedPeople = object.getJSONArray("mentions");
@@ -1364,6 +1376,5 @@ public class FeedDetailPage extends UpdatableFragment implements QueryTokenRecei
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
         }
-
     }
 }

@@ -69,6 +69,10 @@ public class FriendSearchUser implements Parcelable{
         return mIsFollowing;
     }
 
+    public void setFollowing(boolean following){
+        mIsFollowing = following;
+    }
+
 
     public String getProfileImage() {
         return mProfileImage;

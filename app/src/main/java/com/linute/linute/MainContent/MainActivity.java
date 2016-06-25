@@ -13,9 +13,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -27,6 +29,11 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
+
+import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
@@ -45,14 +52,9 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-<<<<<<< HEAD
-
-import org.greenrobot.eventbus.EventBus;
-=======
->>>>>>> qi
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -80,7 +82,7 @@ public class MainActivity extends BaseTaptActivity {
 
     // array of our fragments
     // the fragment is not created until it is needed.
-    private UpdatableFragment[] mFragments; //holds our fragments
+    private BaseFragment[] mFragments; //holds our fragments
 
 
     private SharedPreferences mSharedPreferences;
@@ -104,7 +106,7 @@ public class MainActivity extends BaseTaptActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mFragments = new UpdatableFragment[4];
+        mFragments = new BaseFragment[4];
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
@@ -122,13 +124,18 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
 
-                clearBackStack();
+                boolean hasBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
                 if (mPreviousItem != null) { //profile doesn't get checked
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
+                    replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                }else {
+                    getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
 
-                replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                if (hasBackStack)
+                    clearBackStack();
             }
         });
 
@@ -137,33 +144,15 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
 
-                //if there are a lot of other user profile/ events in mainActivity, clear them
-                clearBackStack();
-
                 switch (item.getItemId()) {
                     case R.id.navigation_item_feed:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        item.setChecked(true);
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.FEED));
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.FEED, item);
                         break;
                     case R.id.navigation_item_activity:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.ACTIVITY));
-                        item.setChecked(true);
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.ACTIVITY, item);
                         break;
                     case R.id.navigation_item_global:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.GLOBAL));
-                        item.setChecked(true);
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.GLOBAL, item);
                         break;
                     default:
                         break;
@@ -194,16 +183,36 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("wasup! we see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
-<<<<<<< HEAD
-
-=======
->>>>>>> qi
     }
 
 
-    private Fragment getFragment(short index) {
+    private void navItemSelected(short position, MenuItem item){
+        boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
+        if (mPreviousItem != null) {
+            if (mPreviousItem != item || wereItemsInBackStack) {
+                mPreviousItem.setChecked(false);
+                item.setChecked(true);
+                replaceContainerWithFragment(getFragment(position));
+                mPreviousItem = item;
+            }else {
+                getFragment(position).resetFragment();
+            }
+        }else {
+            item.setChecked(true);
+            replaceContainerWithFragment(getFragment(position));
+            mPreviousItem = item;
+        }
+
+        //if there are a lot of other user profile/ events in mainActivity, clear them
+        if (wereItemsInBackStack)
+            clearBackStack();
+    }
+
+
+    private BaseFragment getFragment(short index) {
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
-            UpdatableFragment fragment;
+            BaseFragment fragment;
 
             switch (index) {
                 case FRAGMENT_INDEXES.FEED:
@@ -232,18 +241,28 @@ public class MainActivity extends BaseTaptActivity {
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
-        mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
-            @Override
-            public void run() {
-                if (mSafeForFragmentTransaction) {
-                    MainActivity.this.getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.mainActivity_fragment_holder, fragment)
-                            .commit();
+        if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+                @Override
+                public void run() {
+                    if (mSafeForFragmentTransaction) {
+                        MainActivity.this.getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.mainActivity_fragment_holder, fragment)
+                                .commit();
+                    }
                 }
+            });
+        }else{
+            if (mSafeForFragmentTransaction) {
+                MainActivity.this.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .commit();
             }
-        });
+        }
     }
+
 
     public static final int SETTINGS_REQUEST_CODE = 13;
 
@@ -255,10 +274,10 @@ public class MainActivity extends BaseTaptActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
-            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.PROFILE);
+            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
         } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
-            setFragmentOfIndexNeedsUpdating(true, FRAGMENT_INDEXES.FEED);
+            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.FEED);
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -287,6 +306,29 @@ public class MainActivity extends BaseTaptActivity {
                 .commit();
     }
 
+    @Override
+    public void addFragmentOnTop(Fragment fragment) {
+        if (!mSafeForFragmentTransaction) return;
+        hideKeyboard();
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
+                .add(R.id.mainActivity_fragment_holder, fragment)
+                .addToBackStack(PROFILE_OR_EVENT_NAME)
+                .commit();
+    }
+
+
+    public void hideKeyboard() {
+        View v = getCurrentFocus();
+        if (v != null && v instanceof EditText) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+    }
+
+
     public void clearBackStack() {
         //if there are a lot of other user profile/ events in mainActivity, clear them
         if (getSupportFragmentManager().getBackStackEntryCount() > 0)
@@ -296,9 +338,9 @@ public class MainActivity extends BaseTaptActivity {
 
     //sets needsUpdating for fragment at index
     @Override
-    public void setFragmentOfIndexNeedsUpdating(boolean needsUpdating, int index) {
+    public void setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState state, int index) {
         if (mFragments[index] != null) {
-            mFragments[index].setFragmentNeedUpdating(needsUpdating);
+            mFragments[index].setFragmentState(state);
         }
     }
 
@@ -332,7 +374,9 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else {
+        } else if((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
+        } else{
             super.onBackPressed();
         }
     }
@@ -426,7 +470,7 @@ public class MainActivity extends BaseTaptActivity {
                             "token=" + mSharedPreferences.getString("userToken", "") +
                                     "&deviceToken=" + device.getDeviceToken() +
                                     "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersonName() +
+                                    "&version=" + device.getVersionName() +
                                     "&build=" + device.getVersionCode() +
                                     "&os=" + device.getOS() +
                                     "&platform=" + device.getType() +
@@ -446,6 +490,7 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("badge", badge);
                     mSocket.on("unread", haveUnread);
                     mSocket.on("posts refresh", refresh);
+                    mSocket.on("blocked", blocked);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
@@ -561,24 +606,31 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-                final Object post = args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                            NotificationEventBus
-                                    .getInstance()
-                                    .setNotification(new NotificationEvent(true));
-                        }
+                try {
+                    final Post postObj = new Post((JSONObject) args[0]);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //the owner of the post is not blocked
+                            if (!BlockedUsersSingleton.getBlockedListSingletion().contains(postObj.getUserId())) {
+                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                    NotificationEventBus
+                                            .getInstance()
+                                            .setNotification(new NotificationEvent(true));
+                                }
 
-                        setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
 
-                        if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                                .addPostToFeed(post)) {
-                            NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                        .addPostToFeed(postObj)) {
+                                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                }catch (JSONException | NullPointerException e){
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -590,7 +642,6 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-
                     NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));
@@ -697,6 +748,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -705,6 +757,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -712,6 +765,7 @@ public class MainActivity extends BaseTaptActivity {
             String userId = intent.getStringExtra("ownerID");
             String userName = intent.getStringExtra("ownerFullName");
             mSafeForFragmentTransaction = true;
+            addFragmentToContainer(new RoomsActivityFragment());
             addFragmentToContainer(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
                     userName, userId.isEmpty() ? null : userId));
         }
@@ -824,6 +878,22 @@ public class MainActivity extends BaseTaptActivity {
                 });
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener blocked = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject object = (JSONObject) args[0];
+            if (object != null){
+                try {
+                    BlockedUsersSingleton
+                            .getBlockedListSingletion()
+                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous") );
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };

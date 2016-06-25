@@ -21,7 +21,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.StatusFeedHolder;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
@@ -29,9 +32,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.json.JSONArray;
@@ -49,12 +51,13 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     List<Post> mPosts;
     Context mContext;
-    SingleVideoPlaybackManager mSingleVideoPlaybackManager;
 
     String mUserId;
     String mImageSignature;
     String mCollege;
     String mTrendId;
+
+    OnLongPress mOnLongPress;
 
     ScrollToPosition mScrollToPosition;
 
@@ -64,10 +67,9 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
 
-    TrendingItemAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager manager, LoadMoreViewHolder.OnLoadMore o, String trendId) {
+    TrendingItemAdapter(List<Post> posts, Context context, LoadMoreViewHolder.OnLoadMore o, String trendId) {
         mContext = context;
         mPosts = posts;
-        mSingleVideoPlaybackManager = manager;
         mOnLoadMore = o;
         mTrendId = trendId;
 
@@ -87,7 +89,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false));
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
-                    mOnLoadMore,
                     "",
                     "Come back later for more!"
             );
@@ -103,6 +104,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
         }
+
+        if (position == mPosts.size() - 1 && mOnLoadMore != null) mOnLoadMore.loadMore();
     }
 
 
@@ -184,6 +187,18 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onDoubleClick(View v) {
                     doubleClick();
+                }
+            });
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (mPost.getType() != Post.POST_TYPE_STATUS && mOnLongPress != null) {
+                        mOnLongPress.onLongPress(mPost, getAdapterPosition());
+                        vImageView.getParent().requestDisallowInterceptTouchEvent(true);
+                    }
+
+                    return true;
                 }
             });
         }
@@ -271,7 +286,9 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 MainActivity activity = (MainActivity) mContext;
                 if (activity != null) {
-                    activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mPost.getUserName(), mPost.getUserId()));
+                    activity.addFragmentToContainer(
+                            TaptUserProfileFragment.newInstance(mPost.getUserName(), mPost.getUserId())
+                    );
                 }
             } else if (v == vLikesText) {
                 if (mPost.isPostLiked()) {
@@ -355,60 +372,19 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
 
-    public class VideoTrendViewHolder extends BaseTrendViewHolder {
+    public class VideoTrendViewHolder extends BaseTrendViewHolder implements MediaPlayer.OnPreparedListener,
+            MediaPlayer.OnCompletionListener, ScalableVideoView.HideVideo {
 
         protected View vPlayView;
-        protected SquareVideoView vSquareVideoView;
+        protected ScalableVideoView vSquareVideoView;
         private boolean videoProcessing = false;
+        private Uri mVideoLink;
 
         public VideoTrendViewHolder(View itemView) {
             super(itemView);
             vPlayView = itemView.findViewById(R.id.play);
-            vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.video);
-
-            vSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
-                @Override
-                public void onSurfaceDestroyed() {
-                    //when video surface destroyed, hide the video and show image
-                    vImageView.setVisibility(View.VISIBLE);
-                    vSquareVideoView.setVisibility(View.GONE);
-                    vPlayView.setVisibility(View.VISIBLE);
-                }
-            });
-
-            vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    videoProcessing = false;
-                    vImageView.setVisibility(View.GONE);
-                    vPlayView.clearAnimation();
-                    vPlayView.setVisibility(View.GONE);
-                    //sendImpressionsAsync(mPostId); note
-                }
-            });
-
-            vSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    //if video is paused AND finishes at the same time, video won't pause
-                    //if icon is showing, then user has paused video
-                    if (vPlayView.getVisibility() == View.GONE) {
-                        vSquareVideoView.start();
-                        //sendImpressionsAsync(mPostId); note
-                    }
-                }
-            });
-
-            vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
-                @Override
-                public void hideVideo() {
-                    videoProcessing = false;
-                    vImageView.setVisibility(View.VISIBLE);
-                    vSquareVideoView.setVisibility(View.GONE);
-                    vPlayView.clearAnimation();
-                    vPlayView.setVisibility(View.VISIBLE);
-                }
-            });
+            vSquareVideoView = (ScalableVideoView) itemView.findViewById(R.id.video);
+            vSquareVideoView.setHideVideo(this);
         }
 
         @Override
@@ -419,25 +395,22 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             vImageView.setVisibility(View.VISIBLE);
             vSquareVideoView.setVisibility(View.GONE);
             videoProcessing = false;
+            mVideoLink = Uri.parse(mPost.getVideoUrl());
         }
-
-//            videoProcessing = false;
-//            vPlayView.clearAnimation();
-//            vPlayView.setVisibility(View.VISIBLE);
-//            vSquareVideoView.stopPlayback();
-
 
         @Override
         public void singleClick() {
             if (videoProcessing) {
                 activate();
-                mSingleVideoPlaybackManager.stopPlayback();
-            } else if (!mSingleVideoPlaybackManager.hasVideo()) {
+                VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+            } else if (vSquareVideoView.getVisibility() == View.GONE) {
                 deactivate();
                 videoProcessing = true;
                 vSquareVideoView.setVisibility(View.VISIBLE);
                 vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-                mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
+                VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(mContext, vSquareVideoView, mVideoLink);
+                vSquareVideoView.prepareAsync(this);
+                vSquareVideoView.setOnCompletionListener(this);
             } else if (vSquareVideoView.isPlaying()) {
                 activate();
                 vPlayView.clearAnimation();
@@ -456,13 +429,43 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             videoProcessing = true;
             vSquareVideoView.setVisibility(View.VISIBLE);
             vPlayView.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-            mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, Uri.parse(mPost.getVideoUrl()));
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(mContext, vSquareVideoView, mVideoLink);
+            vSquareVideoView.prepareAsync(this);
+            vSquareVideoView.setOnCompletionListener(this);
         }
 
         @Override
         public void lostFocus() {
             deactivate();
-            mSingleVideoPlaybackManager.stopPlayback();
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        }
+
+        @Override
+        public void hideVideo() {
+            videoProcessing = false;
+            vSquareVideoView.setVisibility(View.GONE);
+            vPlayView.clearAnimation();
+            vPlayView.setVisibility(View.VISIBLE);
+            vPlayView.setAlpha(1);
+        }
+
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            //if video is paused AND finishes at the same time, video won't pause
+            //if icon is showing, then user has paused video
+            if (vPlayView.getVisibility() == View.GONE) {
+                vSquareVideoView.start();
+            }
+        }
+
+        @Override
+        public void onPrepared(MediaPlayer mp) {
+            if (!vSquareVideoView.isVideoStopped()) {
+                videoProcessing = false;
+                vPlayView.clearAnimation();
+                vPlayView.setVisibility(View.GONE);
+                mp.start();
+            }
         }
     }
 
@@ -485,7 +488,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     JSONArray mEventIds = new JSONArray();
                     mEventIds.put(id);
                     body.put("events", mEventIds);
-                    body.put("trend",mTrendId);
+                    body.put("trend", mTrendId);
 
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
@@ -500,6 +503,12 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         });
     }
 
+    public void setOnLongPress(OnLongPress onLongPress) {
+        mOnLongPress = onLongPress;
+    }
 
 
+    public interface OnLongPress {
+        void onLongPress(Post post, int pos);
+    }
 }

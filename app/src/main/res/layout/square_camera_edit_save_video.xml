@@ -1,139 +1,169 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/pure_black"
-                android:focusableInTouchMode="true">
+<FrameLayout
+    android:id="@+id/parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:keepScreenOn="true">
+
+    <FrameLayout
+        android:id="@+id/text_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+        <com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView
+            android:id="@+id/video_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:scalableType="fitCenter"/>
+
+        <com.linute.linute.UtilsAndHelpers.NoSuggestionsTextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="120dp"
+            android:background="#96000000"
+            android:gravity="center"
+            android:lines="1"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+        />
+
+    </FrameLayout>
 
 
-    <FrameLayout android:id="@+id/tool_bar_container"
-                 android:layout_width="match_parent"
-                 android:layout_height="?android:attr/actionBarSize">
+    <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:background="#96000000"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="textCapSentences"
+        android:lines="1"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:visibility="gone"
+    />
 
-        <android.support.v7.widget.Toolbar android:id="@+id/edit_photo_toolbar"
-                                           android:layout_width="match_parent"
-                                           android:layout_height="?android:attr/actionBarSize"
-                                           android:background="@color/colorPrimary"
-                                           android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+    <FrameLayout
+        android:id="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
 
-        <ImageButton
-            android:id="@+id/save_photo"
+        <LinearLayout
+            android:id="@+id/comments"
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:shadowColor="@color/pure_black"
+                android:shadowDx="-2.0"
+                android:shadowDy="2.0"
+                android:shadowRadius="1.3"
+                android:text="anon\ncomments"
+                android:textColor="@color/pure_white"
+                android:textSize="12sp"
+            />
+
+            <CheckBox
+                android:id="@+id/anon_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:button="@drawable/turn_anon_comments_off"
+                android:checked="true"
+            />
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:button="@drawable/play_pause_checkbox"
+            android:checked="true"/>
+
+
+        <LinearLayout
+            android:id="@+id/anon"
+            android:layout_width="120dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="end"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:shadowColor="@color/pure_black"
+                android:shadowDx="-2.0"
+                android:shadowDy="2.0"
+                android:shadowRadius="1.3"
+                android:text="post\nas"
+                android:textColor="@color/pure_white"
+                android:textSize="12sp"
+            />
+
+            <CheckBox
+                android:id="@+id/anon_post"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:button="@drawable/post_as_anon_checkbox"
+            />
+        </LinearLayout>
+    </FrameLayout>
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/top"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+    >
+
+        <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="16dp"
-            android:background="@android:color/transparent"
-            android:foreground="?selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_action_check83"/>
-    </FrameLayout>
+            android:layout_marginEnd="16dp">
 
-    <com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView android:id="@+id/video_frame"
-                                                                     android:layout_width="match_parent"
-                                                                     android:layout_height="wrap_content"
-                                                                     android:layout_alignParentEnd="true"
-                                                                     android:layout_alignParentStart="true"
-                                                                     android:layout_below="@id/tool_bar_container"/>
-
-
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout android:id="@+id/square_videoFrame"
-                                                         android:layout_width="match_parent"
-                                                         android:layout_height="wrap_content"
-                                                         android:layout_below="@id/tool_bar_container">
-        <FrameLayout android:id="@+id/text_container"
-                     android:layout_width="match_parent"
-                     android:layout_height="wrap_content"
-                     android:layout_marginTop="80dp"
-                     android:visibility="gone"
-        >
-
-            <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
-                android:id="@+id/text"
+            <ImageButton
+                android:id="@+id/save_photo"
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:foreground="?selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_action_check83"/>
+
+            <ProgressBar
+                android:id="@+id/editFragment_progress_bar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.6"
-                android:background="@android:color/black"
-                android:gravity="center"
-                android:imeOptions="actionDone"
-                android:inputType="textCapSentences|textNoSuggestions"
-                android:lines="1"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-            />
+                android:layout_gravity="center"
+                android:visibility="gone"/>
 
-        </FrameLayout>
+        </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+    </android.support.v7.widget.Toolbar>
 
-    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
-
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/square_videoFrame"
-        android:background="@color/colorPrimary"
-        android:gravity="center">
-
-
-        <RelativeLayout android:id="@+id/comments"
-                        android:layout_width="120dp"
-                        android:layout_height="match_parent"
-        >
-            <CheckBox android:id="@+id/anon_comments"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_centerHorizontal="true"
-                      android:layout_centerVertical="true"
-                      android:button="@drawable/turn_anon_comments_off"
-                      android:checked="true"
-            />
-
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_above="@id/anon_comments"
-                      android:layout_centerHorizontal="true"
-                      android:gravity="center"
-                      android:text="anon\ncomments"
-                      android:textColor="@color/pure_white"
-                      android:textSize="12sp"
-            />
-
-        </RelativeLayout>
-
-
-        <CheckBox android:id="@+id/play"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center"
-                  android:button="@drawable/play_pause_checkbox"
-                  android:checked="true"/>
-
-
-        <RelativeLayout android:id="@+id/anon"
-                        android:layout_width="120dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="end"
-        >
-
-
-            <CheckBox android:id="@+id/anon_post"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_centerInParent="true"
-                      android:layout_marginStart="50dp"
-                      android:button="@drawable/post_as_anon_checkbox"/>
-
-            <TextView android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_above="@id/anon_post"
-                      android:layout_centerHorizontal="true"
-                      android:gravity="center"
-                      android:text="post\nas"
-                      android:textColor="@color/pure_white"
-                      android:textSize="12sp"
-            />
-
-        </RelativeLayout>
-    </FrameLayout>
-
-
-</RelativeLayout>
+</FrameLayout>

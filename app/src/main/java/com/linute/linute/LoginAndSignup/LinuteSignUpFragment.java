@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,17 +29,16 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CropActivity.CropActivity;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.WebViewActivity;
-import com.soundcloud.android.crop.Crop;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,8 +88,6 @@ public class LinuteSignUpFragment extends Fragment {
     private View mVerifyLayer;
     private View mResendButton;
 
-    private Bitmap mProfilePictureBitmap;
-
     private TextView mEmailConfirmTextView;
 
     private CircleImageView mProfilePictureView;
@@ -97,6 +95,13 @@ public class LinuteSignUpFragment extends Fragment {
     private boolean mCredentialCheckInProgress = false; //determine if currently querying database
 
     private String mCurrentPhotoPath; //the path of photo we take
+
+    private final static int REQUEST_PICK = 101;
+    private final static int REQUEST_CROP = 11;
+
+    private Uri mImageUri;
+
+
 
     public LinuteSignUpFragment() {
 
@@ -171,8 +176,8 @@ public class LinuteSignUpFragment extends Fragment {
             }
         }
 
-        if (mProfilePictureBitmap != null) {
-            mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
+        if (mImageUri != null) {
+            mProfilePictureView.setImageURI(mImageUri);
         }
     }
 
@@ -264,7 +269,7 @@ public class LinuteSignUpFragment extends Fragment {
                 case 1:
                     //go to gallery
                     if (getActivity() == null) return;
-                    Crop.pickImage(getActivity(), LinuteSignUpFragment.this);
+                    ImageUtils.pickUsing(LinuteSignUpFragment.this, REQUEST_PICK);
                     break;
                 case 2:
                     break;
@@ -334,7 +339,7 @@ public class LinuteSignUpFragment extends Fragment {
                     try {
                         String stringResp = response.body().string();
                         mPinCode = (new JSONObject(stringResp).getString("pinCode"));
-                        //Log.i(TAG, "onResponse: " + stringResp);
+                        Log.i(TAG, "onResponse: " + stringResp);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -566,8 +571,15 @@ public class LinuteSignUpFragment extends Fragment {
             userInfo.put("firstName", fName);
             userInfo.put("lastName", lName);
 
-            if (mProfilePictureBitmap != null)
-                userInfo.put("profileImage", Utils.encodeImageBase64(mProfilePictureBitmap));
+            if (mImageUri != null) {
+                try {
+                    userInfo.put("profileImage", Utils.encodeImageBase64(Bitmap.createScaledBitmap(
+                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri),
+                            1080, 1080, false)));
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
 
 
             userInfo.put("timeZone", Utils.getTimeZone());
@@ -718,42 +730,22 @@ public class LinuteSignUpFragment extends Fragment {
                     Log.v(TAG, "could not delete temp file");
                 mCurrentPhotoPath = null;
             }
-        } else if (requestCode == Crop.REQUEST_PICK && resultCode == Activity.RESULT_OK) { //got image from gallery
+        } else if (requestCode == REQUEST_PICK && resultCode == Activity.RESULT_OK) { //got image from gallery
             beginCrop(data.getData()); //crop image
-        } else if (requestCode == Crop.REQUEST_CROP) { //photo came back from crop
+        } else if (requestCode == REQUEST_CROP) { //photo came back from crop
             if (resultCode == Activity.RESULT_OK) {
-                Uri imageUri = Crop.getOutput(data);
-                if (getActivity() == null) return;
-                ImageUtils.normalizeImageForUri(getActivity(), imageUri);
-
-                try {
-                    //release old pictures resources
-                    if (mProfilePictureBitmap != null) mProfilePictureBitmap.recycle();
-
-                    //scale cropped image to 1080 x 1080 (will be sent to database
-                    mProfilePictureBitmap = Bitmap.createScaledBitmap(
-                            MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri),
-                            1080, 1080, false);
-
-                    mProfilePictureView.setImageBitmap(mProfilePictureBitmap);
-
-                    //save mCurrentFilePath
-                    mCurrentPhotoPath = imageUri.getPath();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (resultCode == Crop.RESULT_ERROR) { //error cropping, show error
-                if (getActivity() == null) return;
-                Toast.makeText(getActivity(), Crop.getError(data).getMessage(), Toast.LENGTH_SHORT).show();
+                mImageUri = data.getData();
+                if (getActivity() == null || mImageUri == null) return;
+                mProfilePictureView.setImageURI(mImageUri);
             }
         }
     }
 
     private void beginCrop(Uri source) { //begin crop activity
         if (getActivity() == null) return;
-        Uri destination = Uri.fromFile(new File(getActivity().getCacheDir(), "cropped"));
-        Crop.of(source, destination).asSquare().start(getActivity(), this);
+        Intent intent = new Intent(getActivity(), CropActivity.class);
+        intent.putExtra(CropActivity.IMAGE_URI, source);
+        startActivityForResult(intent, REQUEST_CROP);
     }
 
 
@@ -885,18 +877,12 @@ public class LinuteSignUpFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (mFirstNameTextView.hasFocus()) {
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mFirstNameTextView.getWindowToken(), 0);
-        } else if (mLastNameTextView.hasFocus()) {
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mLastNameTextView.getWindowToken(), 0);
-        } else if (mEmailView.hasFocus()) {
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-        } else if (mPasswordView.hasFocus()) {
-            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
+        if (getActivity() != null){
+            View focusedView = getActivity().getCurrentFocus();
+            if (focusedView instanceof EditText){
+                final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(focusedView.getWindowToken(), 0);
+            }
         }
     }
 }

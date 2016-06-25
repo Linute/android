@@ -1,17 +1,19 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:background="@color/fifty_black"
-                tools:context=".LoginAndSignup.LinuteLoginFragment">
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/fifty_black"
+    tools:context=".LoginAndSignup.LinuteLoginFragment">
 
-    <ImageView android:id="@android:id/home"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:alpha="0.35"
-               android:padding="@dimen/activity_horizontal_margin"
-               android:foreground="?selectableItemBackgroundBorderless"
-               android:src="@drawable/ic_action_navigation_arrow_back_inverted"
+    <ImageView
+        android:id="@android:id/home"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.35"
+        android:foreground="?selectableItemBackgroundBorderless"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 
 
@@ -35,11 +37,12 @@
             android:src="@drawable/create_button"/>
 
 
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_horizontal"
-                  android:text="-OR-"
-                  android:textColor="@color/fifty_white"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="-OR-"
+            android:textColor="@color/fifty_white"
         />
 
 
@@ -47,9 +50,9 @@
             android:id="@+id/signin_email_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="@string/prompt_email"
             android:inputType="textEmailAddress"
-            android:layout_marginTop="16dp"
             android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/fifty_white"
@@ -74,10 +77,11 @@
     </LinearLayout>
 
 
-    <RelativeLayout android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/signin_email_login_form"
-                    android:layout_centerHorizontal="true"
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/signin_email_login_form"
+        android:layout_centerHorizontal="true"
     >
 
         <ImageView
@@ -100,14 +104,15 @@
     </RelativeLayout>
 
 
-    <TextView android:id="@+id/login_forgot_pass"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_alignParentBottom="true"
-              android:layout_alignParentEnd="true"
-              android:layout_margin="@dimen/activity_horizontal_margin"
-              android:text="Forgot password"
-              android:textColor="@color/thirtyfive_white"
+    <TextView
+        android:id="@+id/login_forgot_pass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="Forgot password"
+        android:textColor="@color/thirtyfive_white"
 
     />
 

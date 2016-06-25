@@ -1,8 +1,8 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,16 +10,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.linute.linute.MainContent.ProfileFragment.EnlargePhotoViewer;
+import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAGE;
+import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_VIDEO;
 
 /**
  * Created by Arman on 1/20/16.
@@ -28,8 +30,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context aContext;
     private List<Chat> aChatList;
     private static final DateFormat mDateFormat = DateFormat.getTimeInstance(DateFormat.SHORT);
-    private static final SimpleDateFormat mLongFormat = new SimpleDateFormat("M/dd h:mm a");
-    private LoadMoreListener mLoadMoreListener;
+    private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
+    private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
@@ -47,17 +49,22 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                return new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                return new ChatViewHolder(
-                        LayoutInflater.from(parent.getContext())
+                return  new ChatViewHolder(LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_you, parent, false));
+
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
                                 .inflate(R.layout.fragment_chat_list_item_action_typing, parent, false));
+            case LoadMoreViewHolder.FOOTER:
+                return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_light, parent, false),
+                        "", ""
+                );
+            case Chat.TYPE_DATE_HEADER:
+                return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
         }
 
         return null;
@@ -66,28 +73,32 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
-            ((ChatViewHolder) holder).bindModel(aChatList.get(position));
-        }
-
-        if (position == 0) {
-            if (mLoadMoreListener != null) {
-                mLoadMoreListener.loadMore();
-            }
+            ((ChatViewHolder) holder).bindModel(aChatList.get(position - 1));
+        }else if (holder instanceof LoadMoreViewHolder){
+            if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
+            ((LoadMoreViewHolder) holder).bindView(mFooterState);
+        }else if(holder instanceof  DateHeaderHolder){
+            ((DateHeaderHolder)holder).dateTV.setText(aChatList.get(position-1).getMessage());
         }
     }
 
-    public void setLoadMoreListener(LoadMoreListener l) {
+    public void setLoadMoreListener(LoadMoreViewHolder.OnLoadMore l) {
         mLoadMoreListener = l;
     }
 
+    //+1 for load more loader
     @Override
     public int getItemCount() {
-        return aChatList.size();
+        return aChatList.size() == 0 ? 0 : aChatList.size()+1;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return aChatList.get(position).getType();
+        return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
+    }
+
+    public void setFooterState(short footerState) {
+        mFooterState = footerState;
     }
 
     public class ChatViewHolder extends RecyclerView.ViewHolder {
@@ -115,13 +126,20 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         if (mType == Chat.MESSAGE_IMAGE) {
-                            EnlargePhotoViewer.newInstance(EnlargePhotoViewer.IMAGE, mUrl)
-                                    .show(activity.getSupportFragmentManager(), "ImageOrVideo");
+                            activity.addFragmentOnTop(
+                                    ViewFullScreenFragment.newInstance(
+                                            Uri.parse(Utils.getMessageImageURL(mUrl)),
+                                            POST_TYPE_IMAGE
+                                    )
+                            );
                         } else if (mType == Chat.MESSAGE_VIDEO) {
-                            EnlargePhotoViewer.newInstance(EnlargePhotoViewer.VIDEO, mUrl)
-                                    .show(activity.getSupportFragmentManager(), "ImageOrVideo");
+                           activity.addFragmentOnTop(
+                                   ViewFullScreenFragment.newInstance(
+                                           Uri.parse(Utils.getMessageVideoURL(mUrl)),
+                                           POST_TYPE_VIDEO
+                                   )
+                           );
                         }
-                        // Log.i("test", "onClick: "+mType);
                     }
                 }
             });
@@ -159,8 +177,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
 
             if (chat.getDate() != null) {
-                vUserTime.setText(new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
+                vUserTime.setText(
+                        /*new Date().getTime() - chat.getDate().getTime() > DateUtils.DAY_IN_MILLIS ?
                         mLongFormat.format(chat.getDate()) :
+                        mDateFormat.format(chat.getDate())*/
                         mDateFormat.format(chat.getDate())
                 );
             }
@@ -176,17 +196,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    public class DateHeaderHolder extends RecyclerView.ViewHolder{
+        TextView dateTV;
+
+        public DateHeaderHolder(View itemView) {
+            super(itemView);
+            dateTV = (TextView)itemView.findViewById(R.id.text_date);
+        }
+    }
+
 
     public class ChatActionHolder extends RecyclerView.ViewHolder {
         public ChatActionHolder(View itemView) {
             super(itemView);
         }
     }
-
-
-    public interface LoadMoreListener {
-        void loadMore();
-    }
-
-
 }

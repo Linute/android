@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
@@ -28,7 +30,8 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.UtilsAndHelpers.UpdatableFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -45,15 +48,13 @@ import okhttp3.Response;
 /**
  * Created by Arman on 1/9/16.
  */
-public class TaptUserProfileFragment extends UpdatableFragment {
+public class TaptUserProfileFragment extends BaseFragment {
     public static final String TAG = TaptUserProfileFragment.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
-
-    private LSDKUser mUser;
 
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
@@ -69,8 +70,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     private boolean mCanLoadMore = false;
 
     private boolean mOwnerIsViewer; //viewer viewing own profile
+    private Handler mHandler = new Handler();
 
-    private boolean mUserNameVisible = false;
+    //private boolean mUserNameVisible = false;
 
     public TaptUserProfileFragment() {
         // Required empty public constructor
@@ -106,7 +108,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         // Inflate the layout for this fragment
         final View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
-        mUser = new LSDKUser(getActivity());
+        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         final RecyclerView recList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
@@ -119,6 +121,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 if (position == 0 || position == 1) return 3;
                 else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
                     return 3;
+                else if (position == mUserActivityItems.size() + 2)
+                    return 3;
                 else return 1;
             }
         });
@@ -128,7 +132,18 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         mLinuteUser.setUserID(mTaptUserId);
         mLinuteUser.setFirstName(mUserName);
         mLinuteUser.setLastName("");
-        mProfileAdapter = new ProfileAdapter(mUserActivityItems, mLinuteUser, getActivity());
+
+        if (mProfileAdapter == null) {
+            mProfileAdapter = new ProfileAdapter(mUserActivityItems, mLinuteUser, getActivity());
+            mProfileAdapter.setTitleTextListener(new ProfileAdapter.TitleTextListener() {
+                @Override
+                protected void showTitle(boolean show) {
+                    mToolbar.setTitle(show ? mUserName : "");
+                }
+            });
+        }
+
+
         recList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
@@ -142,7 +157,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
         });
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,11 +227,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 recList.scrollToPosition(0);
             }
         });
-        if (fragmentNeedsUpdating()) {
-            mToolbar.getBackground().mutate().setAlpha(0);
-        } else if (mUserNameVisible){
-            mToolbar.setTitle(mUserName);
-        }
+        if (mProfileAdapter.titleShown()) mToolbar.setTitle(mUserName);
 
         recList.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
@@ -231,18 +241,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                 int alpha = (int) ((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight()))) * 255);
                                 if (alpha >= 255) {
                                     alpha = 255;
-
-                                    if (!mUserNameVisible) {
-                                        mUserNameVisible = true;
-                                        mToolbar.setTitle(mUserName);
-                                    }
                                 } else {
-                                    if (alpha < 0) alpha = 0;
-
-                                    if (mUserNameVisible){
-                                        mUserNameVisible = false;
-                                        mToolbar.setTitle("");
-                                    }
+                                    if (alpha <= 0) alpha = 0;
                                 }
                                 mToolbar.getBackground().mutate().setAlpha(alpha);
                             }
@@ -251,22 +251,22 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                 }
         );
 
-        mProfileAdapter.setLoadMorePosts(new ProfileAdapter.LoadMorePosts()
-
-                                         {
-                                             @Override
-                                             public void loadMorePosts() {
-                                                 if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing()) {
-                                                     mSwipeRefreshLayout.setRefreshing(true);
-                                                     getMoreActivities();
-                                                 }
-                                             }
-                                         }
-
+        mProfileAdapter.setLoadMorePosts(
+                new LoadMoreViewHolder.OnLoadMore() {
+                    @Override
+                    public void loadMore() {
+                        if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore) {
+                            getMoreActivities();
+                        }
+                    }
+                }
         );
+
+
         return rootView;
     }
 
+    private boolean mLoadingMore = false;
     private boolean mProfileInfoHasLoaded = false;
 
     @Override
@@ -275,12 +275,17 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
         //if first time creating this fragment
         //won't be loaded again is user gets here using onBack
-        if (fragmentNeedsUpdating()) {
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             mOtherSectionUpdated = false;
-            mSwipeRefreshLayout.setRefreshing(true);
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
             updateAndSetHeader();
             setActivities(); //get activities
-            setFragmentNeedUpdating(false);
+            setFragmentState(FragmentState.FINISHED_UPDATING);
         }
     }
 
@@ -298,7 +303,9 @@ public class TaptUserProfileFragment extends UpdatableFragment {
     //get user information from server
 
     public void updateAndSetHeader() {
-        mUser.getProfileInfo(mTaptUserId, new Callback() {
+        if (getActivity() == null) return;
+
+        new LSDKUser(getActivity()).getProfileInfo(mTaptUserId, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -308,10 +315,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) { //attempt to update view with response
                     final String body = response.body().string();
-
-                    //Log.i(TAG, "onResponse: "+body);
-
-                    if (getActivity() == null) return;
                     JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
@@ -336,11 +339,16 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                             } else {
                                 mOtherSectionUpdated = false;
                                 mSwipeRefreshLayout.setRefreshing(false);
-                                mProfileAdapter.notifyDataSetChanged();
+                                mHandler.removeCallbacksAndMessages(null);
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProfileAdapter.notifyDataSetChanged();
+                                    }
+                                });
                             }
                         }
                     });
-
                 } else {//else something went
                     Log.v(TAG, response.code() + response.body().string());
                 }
@@ -350,6 +358,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
     public void setActivities() {
         LSDKUser user = new LSDKUser(getActivity());
+        //-1 so we don't send skip
         user.getUserActivities(mTaptUserId, -1, 24, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -358,8 +367,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                             @Override
                             public void run() {
                                 Utils.showBadConnectionToast(getActivity());
-                                if (mSwipeRefreshLayout.isRefreshing())
-                                    mSwipeRefreshLayout.setRefreshing(false);
+                                mSwipeRefreshLayout.setRefreshing(false);
                             }
                         });
                     }
@@ -375,7 +383,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                 mSkip = jsonObject.getInt("skip");
 
                                 final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-//                        Log.d(TAG, body);
 
                                 if (activities == null) return;
 
@@ -399,6 +406,8 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                 mCanLoadMore = mSkip > 0;
                                 mSkip -= 24;
 
+                                mProfileAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+
                                 if (mUserActivityItems.isEmpty()) {
                                     mUserActivityItems.add(new EmptyUserActivityItem());
                                 }
@@ -413,9 +422,14 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                     getActivity().runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() { //update view
+                                            mHandler.removeCallbacksAndMessages(null);
+                                            mHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mProfileAdapter.notifyDataSetChanged();
+                                                }
+                                            });
                                             mSwipeRefreshLayout.setRefreshing(false);
-                                            mProfileAdapter.notifyDataSetChanged();
-
                                         }
                                     });
                                 }
@@ -432,9 +446,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                     });
                                 }
                             }
-                        } else
-
-                        { //unable to connect with DB
+                        } else { //unable to connect with DB
                             Log.v(TAG, response.body().string());
                             if (getActivity() != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -448,7 +460,6 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         }
                     }
                 }
-
         );
     }
 
@@ -603,10 +614,20 @@ public class TaptUserProfileFragment extends UpdatableFragment {
             emit.put("block", !mLinuteUser.isBlocked());
             emit.put("user", mTaptUserId);
             activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
-            Toast.makeText(activity,
-                    mLinuteUser.isBlocked() ? "You will now see this user, and they will see you"
-                            : "You will no longer see this user and they won't be able to see you",
-                    Toast.LENGTH_SHORT).show();
+
+            String message;
+            if (mLinuteUser.isBlocked()) {
+                message = "You will now see this user, and they will see you";
+                BlockedUsersSingleton.getBlockedListSingletion().remove(mLinuteUser.getUserID());
+            } else {
+                message = "You will no longer see this user and they won't be able to see you";
+                BlockedUsersSingleton.getBlockedListSingletion().add(mLinuteUser.getUserID());
+            }
+
+            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
 
         } catch (JSONException e) {
@@ -617,23 +638,28 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
 
     public void getMoreActivities() {
+        if (getActivity() == null) return;
+
+        mLoadingMore = true;
 
         int limit = 24;
+        int skip = mSkip;
 
-        if (mSkip < 0) {
-            limit += mSkip;
-            mSkip = 0;
+        if (skip < 0) {
+            limit += skip;
+            skip = 0;
         }
 
-        new LSDKUser(getContext()).getUserActivities(mTaptUserId, mSkip, limit, new Callback() {
+        final int skip1 = skip;
+
+        new LSDKUser(getContext()).getUserActivities(mTaptUserId, skip1, limit, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                mLoadingMore = false;
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(new Runnable() { //if refreshing, turn off
                     @Override
                     public void run() {
-                        if (mSwipeRefreshLayout.isRefreshing())
-                            mSwipeRefreshLayout.setRefreshing(false);
                         Utils.showBadConnectionToast(getContext());
                     }
                 });
@@ -648,7 +674,7 @@ public class TaptUserProfileFragment extends UpdatableFragment {
 
                         if (activities == null) return;
 
-                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
+                        final ArrayList<UserActivityItem> userActItems = new ArrayList<>();
 
                         for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
                             try {
@@ -660,31 +686,35 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                                 e.printStackTrace();
                             }
                         }
-
-                        mUserActivityItems.addAll(userActItems);
-
                         //if we got 24 back, there might still be more
-                        mCanLoadMore = mSkip > 0;
+                        mCanLoadMore = skip1 > 0;
 
-                        mSkip -= 24; //skip 24 posts
+                        if (!mCanLoadMore)
+                            mProfileAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
 
-                        if (getActivity() == null) return;
+                        if (getActivity() != null) {
 
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() { //update view
-                                mProfileAdapter.notifyDataSetChanged();
-                                mSwipeRefreshLayout.setRefreshing(false);
-                            }
-                        });
-
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() { //update view
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSkip -= 24; //skip 24 posts
+                                            int size = mUserActivityItems.size() + 2;
+                                            mUserActivityItems.addAll(userActItems);
+                                            mProfileAdapter.notifyItemRangeInserted(size, userActItems.size());
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     } catch (JSONException e) { //unable to grab needed info
                         e.printStackTrace();
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mSwipeRefreshLayout.setRefreshing(false);
                                     Utils.showServerErrorToast(getActivity());
                                 }
                             });
@@ -696,12 +726,12 @@ public class TaptUserProfileFragment extends UpdatableFragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mSwipeRefreshLayout.setRefreshing(false);
                                 Utils.showServerErrorToast(getActivity());
                             }
                         });
                     }
                 }
+                mLoadingMore = false;
             }
         });
     }

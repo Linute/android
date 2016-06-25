@@ -3,7 +3,6 @@ package com.linute.linute.UtilsAndHelpers;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.EditText;
@@ -30,7 +29,7 @@ public class CustomBackPressedEditText extends EditText {
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // User has pressed Back key. So hide the keyboard
+            // user pressed back
             mBackAction.backPressed();
         }
         return true;
@@ -48,7 +47,12 @@ public class CustomBackPressedEditText extends EditText {
         return conn;
     }
 
+    @Override
+    public boolean isSuggestionsEnabled() {
+        return false;
+    }
+
     public interface BackButtonAction {
-        public void backPressed();
+        void backPressed();
     }
 }

@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
@@ -16,9 +17,9 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 
 import org.json.JSONArray;
@@ -34,48 +35,51 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private static final String TAG = CheckBoxQuestionAdapter.class.getSimpleName();
     private List<Post> mPosts;
     private Context context;
-    private GetMoreFeed mGetMoreFeed; //interface that gets more feed
 
-    private boolean mSendImpressions = true; //when scrolling back up, we don't want to send impressions
+    private LoadMoreViewHolder.OnLoadMore mGetMoreFeed; //interface that gets more feed
+    private short mLoadState;
 
     private String mCollege;
     private String mUserId;
 
-    private boolean mFriendOnly;
+    private boolean mSectionTwo;
 
-    private SingleVideoPlaybackManager mVideoPlayerManager;
-
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager, boolean friendOnly) {
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, boolean sectiontwo) {
         super(new MultiChoiceMode());
-        mFriendOnly = friendOnly;
+        mSectionTwo = sectiontwo;
         mPosts = posts;
         this.context = context;
-        mVideoPlayerManager = singleVideoPlaybackManager;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mCollege = sharedPreferences.getString("collegeId","");
+        mCollege = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
     }
 
-    public void setGetMoreFeed(GetMoreFeed moreFeed){
+    public void setGetMoreFeed(LoadMoreViewHolder.OnLoadMore moreFeed) {
         mGetMoreFeed = moreFeed;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        
-        switch (viewType){
+
+        switch (viewType) {
+            case LoadMoreViewHolder.FOOTER:
+                return new LoadMoreViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
+                        "", "You have reached the end. Come back later for more!");
+
             case IMAGE_POST:
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
-                        context);
-            
+                        context
+                );
+
             case VIDEO_POST:
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
-                        context,
-                        mVideoPlayerManager);
-            
+                        context
+                );
+
             default: //status post
                 return new StatusFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
@@ -85,41 +89,42 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof  VideoFeedHolder){
+        boolean sendImpression = true;
+        if (holder instanceof VideoFeedHolder) {
             ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
-        }else if (holder instanceof  ImageFeedHolder){
+        } else if (holder instanceof ImageFeedHolder) {
             ((ImageFeedHolder) holder).bindModel(mPosts.get(position));
-        }else {
+        } else if (holder instanceof LoadMoreViewHolder) {
+            ((LoadMoreViewHolder) holder).bindView(mLoadState);
+            sendImpression = false;
+        } else {
             ((StatusFeedHolder) holder).bindModel(mPosts.get(position));
         }
 
-//position + 1 == mPosts.size()
         if (position + 1 == mPosts.size()) {
-            mGetMoreFeed.getMoreFeed();
-        }else if (!mFriendOnly && position == 0 && !NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing()){
+            if (mGetMoreFeed != null)
+                mGetMoreFeed.loadMore();
+        } else if (!mSectionTwo && position == 0 && !NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing()) {
             MainActivity activity = (MainActivity) context;
-            if (activity != null){
+            if (activity != null) {
                 activity.setFeedNotification(0);
                 NotificationsCounterSingleton.getInstance().setNumOfNewPosts(0);
 
-                if(!NotificationsCounterSingleton.getInstance().hasNotifications()){
+                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
                     NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
                 }
             }
         }
 
         //tracking impressions
-        if (!mSendImpressions){ //scrolled back to the top
-            if (position == 0)
-                mSendImpressions = true;
-        }else{
+        if (sendImpression)
             sendImpressionsAsync(mPosts.get(position).getPostId());
-        }
+
     }
 
     @Override
     public int getItemCount() {
-        return mPosts.size();
+        return mPosts.isEmpty() ? 0 : mPosts.size() + 1;
     }
 
     public static final int IMAGE_POST = 0;
@@ -128,17 +133,15 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     @Override
     public int getItemViewType(int position) {
-        if (mPosts.get(position).isImagePost()){
+        if (position == mPosts.size()) {
+            return LoadMoreViewHolder.FOOTER;
+        } else if (mPosts.get(position).isImagePost()) {
             return mPosts.get(position).isVideoPost() ? VIDEO_POST : IMAGE_POST;
         }
-        return  STATUS_POST;
+        return STATUS_POST;
     }
 
-    public void setSendImpressions(boolean set){
-        mSendImpressions = set;
-    }
-
-    private void sendImpressionsAsync (final String id){
+    private void sendImpressionsAsync(final String id) {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
@@ -157,19 +160,18 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
                     if (activity != null) {
                         activity.emitSocket(API_Methods.VERSION + ":posts:impressions", body);
                         //Log.i(TAG, "run: impression sent");
-                    }else {
+                    } else {
                         Log.i(TAG, "impression not sent: no activity");
                     }
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
     }
 
-
-    public interface GetMoreFeed {
-        void getMoreFeed();
+    public void setLoadState(short loadState) {
+        mLoadState = loadState;
     }
 
 }

@@ -2,7 +2,6 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +11,6 @@ import org.json.JSONObject;
  */
 public class LinuteUser {
 
-    private static final String TAG = LinuteUser.class.getSimpleName();
     private String mUserID;
     private String mUserName;
     private String mRegistrationType;
@@ -28,25 +26,16 @@ public class LinuteUser {
     private String mProfileImage;
     private String mRegistrationDate;
     private String mDob;
-    //    private int mFriendsNumber;
-    //private int mAttendedNumber;
-//    private int mHostedNumber;
     private String mCollegeName;
     private String mCollegeId;
     private String mCampus;
-
     private int mPosts;
     private int mFollowers;
     private int mFollowing;
     private String mFriend;
     private String mFriendship;
-
     private boolean mIsSubscribed;
     private boolean mIsBlocked;
-    //private String mPointsNumber;
-    //private Map<String,String> mFriendships;
-
-    //NOTE: new stuff
     private String mPoints;
     private String mUserToken;
     private boolean mInformationLoaded;
@@ -123,8 +112,6 @@ public class LinuteUser {
         mIsBlocked = getBooleon("isBlocked", userInfo);
         mInformationLoaded = true;
 
-
-        //NOTE: NEW STUFF
         mPoints = getStringFromJson("points", userInfo);
         mUserToken = getStringFromJson("token", userInfo);
 
@@ -133,8 +120,6 @@ public class LinuteUser {
         }catch (JSONException e){
             mIsSubscribed = false;
         }
-
-        //NOTE: END
 
         mFriend = "";
         mFriendship = "";
@@ -174,16 +159,9 @@ public class LinuteUser {
         mProfileImage = getStringFromJson("profileImage", userInfo);
         mRegistrationDate = getStringFromJson("registrationDate", userInfo);
         mDob = getStringFromJson("dob", userInfo);
-        // OLD
-//        mFriendsNumber = getIntFromJson("numberOfFriends", userInfo);
-//        mHostedNumber = getIntFromJson("numberOfEvents", userInfo);
-        //mAttendedNumber = getIntFromJson("numberOfAttended", userInfo);
-        // NEW start
         mPosts = getIntFromJson("numberOfEvents", userInfo);
         mFollowers = getIntFromJson("numberOfFollowers", userInfo);
         mFollowing = getIntFromJson("numberOfFollowing", userInfo);
-        // NEW end
-        //mPasswordFacebook = getStringFromJson("passwordFacebook", userInfo);
 
         try {
             mIsSubscribed = userInfo.getBoolean("isSubscribed");
@@ -198,13 +176,8 @@ public class LinuteUser {
             mCollegeId = getStringFromJson("id", college);
         }
         mInformationLoaded = true;
-        //NOTE: NEW
-
         mPoints = getStringFromJson("points", userInfo);
         mUserToken = getStringFromJson("token", userInfo);
-
-        //NOTE: END
-
         mFriend = "";
         mFriendship = "";
         try {
@@ -324,48 +297,6 @@ public class LinuteUser {
         mDob = dob;
     }
 
-
-//    public int getFriendsNumber() {
-//        return mFriendsNumber;
-//    }
-
-//    public void setFriendsNumber(int friendsNumber) {
-//        mFriendsNumber = friendsNumber;
-//    }
-
-//    public int getAttendedNumber() {
-//        return mAttendedNumber;
-//    }
-//
-//    public void setAttendedNumber(int attendedNumber) {
-//        mAttendedNumber = attendedNumber;
-//    }
-
-//    //public int getHostedNumber() {
-//        return mHostedNumber;
-//    }
-
-//    public void setHostedNumber(int hostedNumber) {
-//        mHostedNumber = hostedNumber;
-//    }
-
-    /*
-    public Map<String, String> getFriendships() {
-        return mFriendships;
-    }
-
-    public void setFriendships(Map<String, String> friendships) {
-        mFriendships = friendships;
-    }
-
-    public String getPointsNumber() {
-        return mPointsNumber;
-    }
-
-    public void setPointsNumber(String pointsNumber) {
-        mPointsNumber = pointsNumber;
-    }*/
-
     public String getRegistrationDate() {
         return mRegistrationDate;
     }
@@ -483,50 +414,6 @@ public class LinuteUser {
         mIsBlocked = blocked;
     }
 
-
-    /*TODO: SEARCH
-        searchUserByName
-        searchUserByFacebook
-        searchUserByContacts
-        searchFriends
-        searchFriendsForInvite
-
-     */
-
-    /*TODO: RESET PASSWORDS
-        resetPassword
-        resetPasswordByPhone
-     */
-
-    /*TODO: CHANGE FRIENDSHIPS
-        changeFriendStatus
-        changeFriendStatusDelete
-        confirmPhone
-     */
-
-    /* TODO: ACTIVITIES
-        getActivities
-        readActivities
-     */
-
-    public static class CollegeNameAndID {
-        private String mCollegeName;
-        private String mCollegeId;
-
-        public CollegeNameAndID(String name, String id) {
-            mCollegeId = id;
-            mCollegeName = name;
-        }
-
-        public String getCollegeName() {
-            return mCollegeName;
-        }
-
-        public String getCollegeId() {
-            return mCollegeId;
-        }
-    }
-
     public String getFriend() {
         return mFriend;
     }
@@ -565,5 +452,25 @@ public class LinuteUser {
 
     public void setInformationLoaded(boolean informationLoaded) {
         mInformationLoaded = informationLoaded;
+    }
+
+
+
+    public static class CollegeNameAndID {
+        private String mCollegeName;
+        private String mCollegeId;
+
+        public CollegeNameAndID(String name, String id) {
+            mCollegeId = id;
+            mCollegeName = name;
+        }
+
+        public String getCollegeName() {
+            return mCollegeName;
+        }
+
+        public String getCollegeId() {
+            return mCollegeId;
+        }
     }
 }

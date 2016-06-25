@@ -2,8 +2,6 @@ package com.linute.linute.MainContent.UpdateFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,13 +14,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
-import com.linute.linute.MainContent.EventBuses.NotificationEvent;
-import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -50,10 +47,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     private Context mContext;
 
-    //private boolean mAutoLoad = true;
-
-
-    //image width / radius
+    //load more
+    private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
+    private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
     public UpdatesAdapter(Context context, List<Update> recentItems, List<Update> olderItems) {
         mRecentItems = recentItems;
@@ -62,7 +58,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     }
 
     //private onLoadMoreListener mLoadMore;
-
 
     @Override
     public int getSectionCount() {
@@ -76,13 +71,23 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     public int getItemCount(int section) {
         switch (section) {
             case 0: //if mRecentItems is empty, mOlderItems becomes section 0
-                return mRecentItems.isEmpty() ? mOlderItems.size() : mRecentItems.size();
+                if (!mRecentItems.isEmpty()){
+                    //if olderItems is not empty, the load more is below recentItems
+                    //else the load more is under the olderItems
+                    return mOlderItems.isEmpty() ? mRecentItems.size() + 1 : mRecentItems.size();
+                }else {
+                    return mOlderItems.isEmpty() ? 0 : mOlderItems.size() + 1;
+                }
             case 1:
-                return mOlderItems.size();
+                //section 1 means there was a section before
+                //loader must be in this section
+                return mOlderItems.size() + 1;
             default:
                 return 0;
         }
     }
+
+
 
 
     @Override //header view
@@ -100,39 +105,30 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
     @Override //non header views
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int section, int relativePosition, int absolutePosition) {
 
-
-//        if (absolutePosition == 0) {
-//            MainActivity activity = (MainActivity) mContext;
-//            if (activity != null && activity.hasNewActivities()) {
-//                activity.setUpdateNotification(0);
-//                activity.setNumNewActivities(0);
-//
-//                if (!activity.hasNotifications()){
-//                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-//                }
-//            }
-//        }
-
-        UpdateItemViewHolder tHolder = (UpdateItemViewHolder) holder;
-        if (holder == null) { //error
-            Log.e("Updates adapter", "onBindViewHolder: problem binding s-" + section + " r-" + relativePosition + " a-" + absolutePosition);
-            return;
-        }
-
-        if (section == 0) {
-            tHolder.bindView(mRecentItems.isEmpty() ?
-                    mOlderItems.get(relativePosition)
-                    : mRecentItems.get(relativePosition));
-
-        } else if (section == 1) { //section 1 will always mean old items
-            tHolder.bindView(mOlderItems.get(relativePosition));
-        } else { //invalid section
-            Log.e("Update adapter", "onBindViewHolder: invalid section" + section);
+        if (holder instanceof UpdateItemViewHolder) {
+            UpdateItemViewHolder tHolder = (UpdateItemViewHolder) holder;
+            if (section == 0) {
+                tHolder.bindView(mRecentItems.isEmpty() ?
+                        mOlderItems.get(relativePosition)
+                        : mRecentItems.get(relativePosition));
+            } else if (section == 1) { //section 1 will always mean old items
+                tHolder.bindView(mOlderItems.get(relativePosition));
+            } else { //invalid section
+                Log.e("Update adapter", "onBindViewHolder: invalid section" + section);
+            }
+        }else if (holder instanceof LoadMoreViewHolder){
+            ((LoadMoreViewHolder) holder).bindView(mFooterState);
+            if (mOnLoadMore != null) mOnLoadMore.loadMore();
         }
     }
 
     @Override
     public int getItemViewType(int section, int relativePosition, int absolutePosition) {
+
+        if (absolutePosition == mRecentItems.size() + mOlderItems.size()){
+            return LoadMoreViewHolder.FOOTER;
+        }
+
         return super.getItemViewType(section, relativePosition, absolutePosition);
     }
 
@@ -150,14 +146,30 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             .from(parent.getContext())
                             .inflate(R.layout.fragment_updates_item_cells, parent, false)
             );
+        } else if (viewType == LoadMoreViewHolder.FOOTER){
+            return new LoadMoreViewHolder(
+                    LayoutInflater
+                            .from(parent.getContext())
+                            .inflate(R.layout.wrapping_footer_dark, parent, false), "","");
         }
 
         return null;
     }
 
+    public void setFooterState(short state){
+        mFooterState = state;
+    }
 
-    public static class UpdateItemHeaderViewHolder extends RecyclerView.ViewHolder {
+    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore l){
+        mOnLoadMore = l;
+    }
 
+    public short getFooterState(){
+        return mFooterState;
+    }
+
+
+    public class UpdateItemHeaderViewHolder extends RecyclerView.ViewHolder {
         private TextView mTitleText;
 
         public UpdateItemHeaderViewHolder(View itemView) {
@@ -169,6 +181,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mTitleText.setText(title);
         }
     }
+
 
     public class UpdateItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -221,7 +234,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             mUpdate = update;
 
             mNameText.setText(update.isAnon() ? "Anonymous" : update.getUserFullName());
-            mIconImage.setImageDrawable(getUpdateTypeIconDrawable(update.getUpdateType()));
+            mIconImage.setImageResource(getUpdateTypeIcon(update.getUpdateType()));
 
             mDescriptionText.setText(update.getDescription());
             mTimeView.setText(Utils.getTimeAgoString(update.getActionTime()));
@@ -384,7 +397,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
 
         //return small icon on top of the profile picture
-        public Drawable getUpdateTypeIconDrawable(Update.UpdateType updateType) {
+        public int getUpdateTypeIcon(Update.UpdateType updateType) {
             int drawable;
             switch (updateType) {
                 case LIKED_PHOTO:
@@ -440,9 +453,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     break;
 
             }
-            return ContextCompat.getDrawable(mContext, drawable);
+            return drawable;
         }
     }
-
-
 }

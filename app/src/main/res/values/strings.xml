@@ -173,9 +173,7 @@
     <string name="discover_no_posts_campus">Is anybody out there?!\n\n Looks like you\'re the first
         one here. Make a post so the rest of the campus can recognize
     </string>
-    <string name="discover_no_posts_friends">Don\’t be #foreveralone \n\n Start adding your friends
-        to Tapt
-    </string>
+    <string name="discover_no_posts_hot">No posts at this time</string>
 
     <string name="profile_no_posts">Your Story \n\n It\'s a ghost town out here! Make a post so the
         rest of the campus can recognize
@@ -1588,6 +1586,23 @@ See the License for the specific language governing permissions and\n
 limitations under the License.\n\n
 
 Android-Five-Stars-Library by Angtrim \n\n
+
+
+Android-ScalableVideoView\n\n
+Copyright 2015 yqritc\n\n
+
+Licensed under the Apache License, Version 2.0 (the "License");\n
+you may not use this file except in compliance with the License.\n
+You may obtain a copy of the License at\n
+
+   http://www.apache.org/licenses/LICENSE-2.0\n
+
+Unless required by applicable law or agreed to in writing, software\n
+distributed under the License is distributed on an "AS IS" BASIS,\n
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n
+See the License for the specific language governing permissions and\n
+limitations under the License.\n\n
+
     ]]></string>
     <string name="create_account_agree">By tapping to continue, you are indicating that you have
         read and agreed to the following
