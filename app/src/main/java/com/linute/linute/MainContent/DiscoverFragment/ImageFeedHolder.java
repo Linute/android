@@ -80,7 +80,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
         v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Log.i(TAG, "onLongClick: "+mPost.getType());
                 if (mPost.getType() != Post.POST_TYPE_STATUS) {
                     MainActivity activity = (MainActivity) mContext;
                     VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
@@ -90,7 +89,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
                                     mPost.getType()
                             )
                     );
-
                     vPostImage.getParent().requestDisallowInterceptTouchEvent(true);
                 }
                 return true;
