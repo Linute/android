@@ -13,7 +13,15 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 /**
- * Created by mikhail on 6/24/16.
+ * Created by mikhail on 6/25/16.
+ *
+ * View that allows users to cycle through images. Uses a "wipe" transition
+ *
+ * Requires a WipeAdapter to provide it with images, set using @link setAdapter(WipeAdapter)
+ *
+ * Will request images with no bounds (infinite scrolling)
+ *
+ * Images MUST be the size of the view to display correctly
  */
 public class WipeViewPager extends FrameLayout {
 

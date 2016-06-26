@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -13,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -145,9 +147,19 @@ public class EditSavePhotoFragment extends Fragment {
 
         WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
         ArrayList<Bitmap> overlays = new ArrayList<>(5);
-        overlays.add(Bitmap.createBitmap(new int[]{0x220000FF}, 1, 1, Bitmap.Config.ARGB_8888));
-        overlays.add(Bitmap.createBitmap(new int[]{0x22FFFFFF}, 1, 1, Bitmap.Config.ARGB_8888));
-        overlays.add(Bitmap.createBitmap(new int[]{0x22FF0000}, 1, 1, Bitmap.Config.ARGB_8888));
+
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+        Bitmap aBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.widthPixels, Bitmap.Config.ARGB_8888);
+        aBitmap.eraseColor(0x22FF0000);
+        Bitmap bBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
+        bBitmap.eraseColor(0x22FFFFFF);
+        Bitmap cBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
+        cBitmap.eraseColor(0x220000FF);
+
+        overlays.add(aBitmap);
+        overlays.add(bBitmap);
+        overlays.add(cBitmap);
         try {
             Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
 
@@ -156,6 +168,9 @@ public class EditSavePhotoFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        overlays.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_fire_on));
+
         OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter(overlays
         );
         overlayPager.setWipeAdapter(overlayAdapter);

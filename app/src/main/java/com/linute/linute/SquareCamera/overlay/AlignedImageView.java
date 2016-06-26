@@ -44,6 +44,8 @@ public class AlignedImageView extends ImageView {
             float height = getWidth();
             if (!alignLeft) {
                 matrix.setTranslate(height-heightD, 0);
+            }else{
+                matrix.setTranslate(0,0);
             }
             setImageMatrix(matrix);
         }
