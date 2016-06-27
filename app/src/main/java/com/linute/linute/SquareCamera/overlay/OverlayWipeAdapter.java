@@ -47,5 +47,12 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter{
         return mOverlays.get(position);
     }
 
+    public void add(Bitmap overlay){
+        add(overlay,1);
+    }
+
+    public void add(Bitmap overlay, int position){
+        mOverlays.add(position, overlay);
+    }
 
 }

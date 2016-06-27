@@ -151,21 +151,18 @@ public class ImageUtility {
         return returnedBitmap;
     }
 
-    public static Bitmap toGrayscale(Bitmap bmpOriginal)
-    {
+    public static Bitmap applyFilter(Bitmap bmpOriginal, ColorMatrix m){
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
 
-        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas c = new Canvas(bmpGrayscale);
+        Bitmap bmpNew = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpNew);
         Paint paint = new Paint();
-        ColorMatrix cm = new ColorMatrix();
-        cm.setSaturation(0);
-        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(m);
         paint.setColorFilter(f);
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
-        return bmpGrayscale;
+        c.drawBitmap(bmpOriginal, 0, 0 , paint);
+        return bmpNew;
     }
 
 }

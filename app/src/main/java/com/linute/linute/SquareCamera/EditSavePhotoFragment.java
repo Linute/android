@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.ColorMatrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -46,7 +45,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -128,7 +126,7 @@ public class EditSavePhotoFragment extends Fragment {
         mUserId = sharedPreferences.getString("userID", "");
 
         //setup ImageView
-        Uri imageUri = getArguments().getParcelable(BITMAP_URI);
+        final Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         boolean fromGallery = getArguments().getBoolean(FROM_GALLERY, false);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
@@ -146,11 +144,10 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
-        ArrayList<Bitmap> overlays = new ArrayList<>(5);
 
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
+//        DisplayMetrics metrics = getResources().getDisplayMetrics();
 
-        Bitmap aBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.widthPixels, Bitmap.Config.ARGB_8888);
+       /* Bitmap aBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
         aBitmap.eraseColor(0x22FF0000);
         Bitmap bBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
         bBitmap.eraseColor(0x22FFFFFF);
@@ -159,21 +156,33 @@ public class EditSavePhotoFragment extends Fragment {
 
         overlays.add(aBitmap);
         overlays.add(bBitmap);
-        overlays.add(cBitmap);
-        try {
-            Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+        overlays.add(cBitmap);*/
 
-            Bitmap blackwhite = ImageUtility.toGrayscale(og);
-            overlays.add(blackwhite);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        overlays.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_fire_on));
+//        overlays.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_fire_on));
 
-        OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter(overlays
-        );
+        final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+                    ColorMatrix bw = new ColorMatrix();
+                    bw.setSaturation(0);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
+                    ColorMatrix sat = new ColorMatrix();
+                    sat.setSaturation(3);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
         overlayPager.setWipeAdapter(overlayAdapter);
+
+
 
         overlayPager.setOnTouchListener(new View.OnTouchListener() {
             long timeDown = 0;
