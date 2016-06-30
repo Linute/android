@@ -42,12 +42,14 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunnin
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
+import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +82,6 @@ public class EditSaveVideoFragment extends Fragment{
 
     public static short VS_IDLE = 0;
     public static short VS_PROCESSING = 1;
-    public static short VS_SENDING = 2;
 
     public short mVideoState = 0;
 
@@ -442,11 +443,6 @@ public class EditSaveVideoFragment extends Fragment{
 
         mPlaying.setChecked(false);
 
-        if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
-            Utils.showBadConnectionToast(getActivity());
-            return;
-        }
-
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
 
@@ -609,14 +605,7 @@ public class EditSaveVideoFragment extends Fragment{
                             getActivity().setResult(Activity.RESULT_OK, i);
                             getActivity().finish();
                         } else {
-                            mProgressDialog.setMessage("Uploading video...");
-
-                            new sendVideoAsync().execute(outputFile,
-                                    mAnonSwitch.isChecked() ? "1" : "0",
-                                    mCommentsAnon.isChecked() ? "0" : "1",
-                                    mTextView.getText().toString(),
-                                    image.getPath()
-                            );
+                            uploadVideo(image.toString(), outputFile);
                         }
                     }
                 });
@@ -679,68 +668,10 @@ public class EditSaveVideoFragment extends Fragment{
     }
 
 
-    private Socket mSocket;
-    private boolean mConnecting = false;
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mReturnType != CameraActivity.RETURN_URI) {
-            if (getActivity() == null) return;
-            if (mSocket == null || !mSocket.connected() && !mConnecting) {
-                mConnecting = true;
-                {
-                    try {
-                        IO.Options op = new IO.Options();
-                        DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                        op.query =
-                                "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
-                                        "&deviceToken=" + device.getDeviceToken() +
-                                        "&udid=" + device.getUdid() +
-                                        "&version=" + device.getVersionName() +
-                                        "&build=" + device.getVersionCode() +
-                                        "&os=" + device.getOS() +
-                                        "&platform=" + device.getType() +
-                                        "&api=" + API_Methods.VERSION +
-                                        "&model=" + device.getModel();
-
-                        op.reconnectionDelay = 5;
-                        op.secure = true;
-
-                        op.transports = new String[]{WebSocket.NAME};
-
-                        mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.on(Socket.EVENT_ERROR, eventError);
-                mSocket.on("new post", newPost);
-                mSocket.connect();
-                mConnecting = false;
-            }
-        }
-    }
-
-
     @Override
     public void onPause() {
         super.onPause();
-
         mSquareVideoView.pause();
-
-        if (mReturnType != CameraActivity.RETURN_URI) {
-            if (mSocket != null) {
-                mSocket.disconnect();
-                mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.off(Socket.EVENT_ERROR, eventError);
-                mSocket.off("new post", newPost);
-            }
-        }
         if (mVideoState != VS_IDLE) {
             mFfmpeg.killRunningProcesses();
             showProgress(false);
@@ -748,131 +679,25 @@ public class EditSaveVideoFragment extends Fragment{
         }
     }
 
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
-
-
-
-    //event ERROR
-    private Emitter.Listener eventError = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            Log.i(TAG, "call: " + args[0]);
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Utils.showServerErrorToast(getActivity());
-                    if (mVideoState == VS_SENDING)
-                        showProgress(false);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener newPost = new Emitter.Listener() {
-
-        @Override
-        public void call(Object... args) {
-            if (getActivity() == null) return;
-            try {
-                //if it was your post that got posted, finished this activity
-                String owner = new JSONObject(args[0].toString()).getJSONObject("owner").getString("id");
-                if (owner.equals(mUserId)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mProgressDialog != null) mProgressDialog.dismiss();
-                            getActivity().setResult(Activity.RESULT_OK);
-                            Toast.makeText(getActivity(), "Video has been posted", Toast.LENGTH_SHORT).show();
-                            getActivity().finish();
-                        }
-                    });
-                }
-            } catch (JSONException e) {
-                Log.i(TAG, "call: error in newPost Listener");
-            }
-        }
-    };
+    private void uploadVideo(String imagepath, String videopath){
+        PendingUploadPost post = new PendingUploadPost(
+                ObjectId.get().toString(),
+                mCollegeId,
+                mAnonSwitch.isChecked() ? 1 : 0,
+                mCommentsAnon.isChecked() ? 0 : 1,
+                mTextView.getText().toString(),
+                2,
+                imagepath,
+                videopath,
+                mUserId
+        );
 
 
-    private class sendVideoAsync extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            if (getActivity() == null || params[0] == null || params[1] == null
-                    || params[2] == null || params[3] == null || params[4] == null)
-                return null;
-
-            String outputFile = params[0];
-
-            if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoState = VS_IDLE;
-                        Utils.showBadConnectionToast(getActivity());
-                        showProgress(false);
-                    }
-                });
-                return null;
-            }
-
-            mVideoState = VS_SENDING;
-            try {
-                JSONObject postData = new JSONObject();
-
-                postData.put("college", mCollegeId);
-                postData.put("privacy", params[1]);
-                postData.put("isAnonymousCommentsDisabled", params[2]);
-                postData.put("title", params[3]);
-                JSONArray imageArray = new JSONArray();
-                imageArray.put(Utils.encodeImageBase64(
-                        MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
-                                , Uri.fromFile(new File(params[4])))));
-
-                JSONArray videoArray = new JSONArray();
-                videoArray.put(Utils.encodeFileBase64(new File(outputFile)));
-
-                postData.put("images", imageArray);
-                postData.put("videos", videoArray);
-                postData.put("type", "2"); //0 for status 1 for image and 2 for video
-                postData.put("owner", mUserId);
-
-                JSONArray coord = new JSONArray();
-                JSONObject jsonObject = new JSONObject();
-                coord.put(0);
-                coord.put(0);
-                jsonObject.put("coordinates", coord);
-
-                postData.put("geo", jsonObject);
-                mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
-
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getActivity());
-                            showProgress(false);
-                        }
-                    });
-                }
-            }
-
-            mVideoState = VS_IDLE;
-            return null;
-        }
+        Intent result = new Intent();
+        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+        getActivity().setResult(Activity.RESULT_OK, result);
+        getActivity().finish();
     }
-
 
     private void showKeyboard() { //show keyboard for EditText
         InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

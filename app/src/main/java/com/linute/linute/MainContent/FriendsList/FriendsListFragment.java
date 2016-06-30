@@ -116,7 +116,7 @@ public class FriendsListFragment extends BaseFragment {
                          Log.i(TAG, "Empty List Text Clicked (No Followers)");
                          BaseTaptActivity acc = (BaseTaptActivity)getActivity();
                          Intent i = new Intent(getActivity(), CameraActivity.class);
-                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
                          i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                          acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
                      }

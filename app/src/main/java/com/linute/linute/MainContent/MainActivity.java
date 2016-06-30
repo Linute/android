@@ -47,6 +47,8 @@ import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
+import com.linute.linute.MainContent.Uploading.UploadIntentService;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
@@ -130,7 +132,7 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
-                }else {
+                } else {
                     getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
 
@@ -186,7 +188,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private void navItemSelected(short position, MenuItem item){
+    private void navItemSelected(short position, MenuItem item) {
         boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
 
         if (mPreviousItem != null) {
@@ -195,10 +197,10 @@ public class MainActivity extends BaseTaptActivity {
                 item.setChecked(true);
                 replaceContainerWithFragment(getFragment(position));
                 mPreviousItem = item;
-            }else {
+            } else {
                 getFragment(position).resetFragment();
             }
-        }else {
+        } else {
             item.setChecked(true);
             replaceContainerWithFragment(getFragment(position));
             mPreviousItem = item;
@@ -241,7 +243,7 @@ public class MainActivity extends BaseTaptActivity {
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
-        if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
             mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
                 @Override
                 public void run() {
@@ -253,7 +255,7 @@ public class MainActivity extends BaseTaptActivity {
                     }
                 }
             });
-        }else{
+        } else {
             if (mSafeForFragmentTransaction) {
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
@@ -276,10 +278,11 @@ public class MainActivity extends BaseTaptActivity {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
-        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
-            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.FEED);
+        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
+            Intent intent = new Intent(this, UploadIntentService.class);
+            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
+            startService(intent);
         }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -374,9 +377,9 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else if((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
+        } else if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
             navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
-        } else{
+        } else {
             super.onBackPressed();
         }
     }
@@ -628,7 +631,7 @@ public class MainActivity extends BaseTaptActivity {
                             }
                         }
                     });
-                }catch (JSONException | NullPointerException e){
+                } catch (JSONException | NullPointerException e) {
                     e.printStackTrace();
                 }
             }
@@ -886,11 +889,11 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             JSONObject object = (JSONObject) args[0];
-            if (object != null){
+            if (object != null) {
                 try {
                     BlockedUsersSingleton
                             .getBlockedListSingletion()
-                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous") );
+                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -912,7 +915,6 @@ public class MainActivity extends BaseTaptActivity {
         });
         sn.show();
     }
-
 
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);

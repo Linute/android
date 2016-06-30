@@ -2,17 +2,13 @@ package com.linute.linute.SquareCamera;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,26 +21,14 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
+import org.bson.types.ObjectId;
 
 
 /**
@@ -151,7 +135,7 @@ public class EditSavePhotoFragment extends Fragment {
                     mToolbar.setVisibility(View.GONE);
 
                     //mCanMove = false; //can't mvoe strip while in edit
-                } else if (mEditText.getVisibility() == View.VISIBLE){
+                } else if (mEditText.getVisibility() == View.VISIBLE) {
                     hideKeyboard();
                     mEditText.setVisibility(View.GONE);
                     if (!mEditText.getText().toString().trim().isEmpty()) {
@@ -171,8 +155,8 @@ public class EditSavePhotoFragment extends Fragment {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mProgressBar.getVisibility() != View.VISIBLE && getActivity() != null){
-                    ((CameraActivity)getActivity()).clearBackStack();
+                if (mProgressBar.getVisibility() != View.VISIBLE && getActivity() != null) {
+                    ((CameraActivity) getActivity()).clearBackStack();
                 }
             }
         });
@@ -260,7 +244,7 @@ public class EditSavePhotoFragment extends Fragment {
                             if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y) {
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
                                 topMargin = mToolbar.getHeight();
-                            }else {
+                            } else {
                                 bottomMargin = 0;
                                 topMargin = 0;
                             }
@@ -302,17 +286,10 @@ public class EditSavePhotoFragment extends Fragment {
     private void sendPicture() {
         if (getActivity() == null || mEditText.getVisibility() == View.VISIBLE) return;
 
-        if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
-            Utils.showBadConnectionToast(getActivity());
-            return;
-        }
-
-        Bitmap bitmap = ImageUtility.getBitmapFromView(mFrame);
-
         showProgress(true);
         if (getActivity() == null) return;
         if (mReturnType == CameraActivity.RETURN_URI) {
-            Uri image = ImageUtility.savePictureToCache(getActivity(), bitmap);
+            Uri image = ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mFrame));
             if (image != null) {
                 Intent i = new Intent()
                         .putExtra("image", image)
@@ -325,34 +302,24 @@ public class EditSavePhotoFragment extends Fragment {
                 getActivity().finish();
             }
         } else {
-            try {
-                JSONObject postData = new JSONObject();
-
-                postData.put("college", mCollegeId);
-                postData.put("privacy", (mAnonSwitch.isChecked() ? 1 : 0) + "");
-                postData.put("isAnonymousCommentsDisabled", mAnonComments.isChecked() ? 0 : 1);
-                postData.put("title", mEditText.getText().toString());
-                JSONArray imageArray = new JSONArray();
-                imageArray.put(Utils.encodeImageBase64(bitmap));
-                postData.put("images", imageArray);
-                postData.put("type", "1");
-                postData.put("owner", mUserId);
-
-
-                JSONArray coord = new JSONArray();
-                JSONObject jsonObject = new JSONObject();
-                coord.put(0);
-                coord.put(0);
-                jsonObject.put("coordinates", coord);
-
-                postData.put("geo", jsonObject);
-
-                mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Utils.showServerErrorToast(getActivity());
-                showProgress(false);
+            Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mFrame));
+            if (image != null) {
+                PendingUploadPost pendingUploadPost =
+                        new PendingUploadPost(
+                                ObjectId.get().toString(),
+                                mCollegeId,
+                                (mAnonSwitch.isChecked() ? 1 : 0),
+                                mAnonComments.isChecked() ? 0 : 1,
+                                mEditText.getText().toString(),
+                                1,
+                                image.toString(),
+                                null,
+                                mUserId
+                        );
+                Intent result = new Intent();
+                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
+                getActivity().setResult(Activity.RESULT_OK, result);
+                getActivity().finish();
             }
         }
     }
@@ -378,70 +345,10 @@ public class EditSavePhotoFragment extends Fragment {
     }
 
 
-    private Socket mSocket;
-    private boolean mConnecting = false;
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mReturnType != CameraActivity.RETURN_URI) { //don't connect if we don't have to
-            if (getActivity() == null) return;
-
-            if (mSocket == null || !mSocket.connected() && !mConnecting) {
-                mConnecting = true;
-
-                {
-                    try {
-                        IO.Options op = new IO.Options();
-                        DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                        op.query =
-                                "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
-                                        "&deviceToken=" + device.getDeviceToken() +
-                                        "&udid=" + device.getUdid() +
-                                        "&version=" + device.getVersionName() +
-                                        "&build=" + device.getVersionCode() +
-                                        "&os=" + device.getOS() +
-                                        "&platform=" + device.getType() +
-                                        "&api=" + API_Methods.VERSION +
-                                        "&model=" + device.getModel();
-
-                        op.reconnectionDelay = 5;
-                        op.secure = true;
-
-                        op.transports = new String[]{WebSocket.NAME};
-
-                        mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.on(Socket.EVENT_ERROR, eventError);
-                mSocket.on("new post", newPost);
-                mSocket.connect();
-                mConnecting = false;
-            }
-        }
-    }
-
-
     @Override
     public void onPause() {
         super.onPause();
 
-        if (mReturnType != CameraActivity.RETURN_URI) {
-            if (mSocket != null) {
-
-                mSocket.disconnect();
-                mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.off(Socket.EVENT_ERROR, eventError);
-                mSocket.off("new post", newPost);
-            }
-        }
 
         if (mEditText.getVisibility() == View.VISIBLE) {
             hideKeyboard();
@@ -453,54 +360,5 @@ public class EditSavePhotoFragment extends Fragment {
         }
     }
 
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
-
-
-    //event ERROR
-    private Emitter.Listener eventError = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            Log.i(TAG, "call: " + args[0]);
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Utils.showServerErrorToast(getActivity());
-                    showProgress(false);
-                }
-            });
-        }
-    };
-
-    //new post was posted; we aren't sure if we're the one that posted it. must check
-    private Emitter.Listener newPost = new Emitter.Listener() {
-
-        @Override
-        public void call(Object... args) {
-            if (getActivity() == null) return;
-
-            try {
-                String owner = new JSONObject(args[0].toString()).getJSONObject("owner").getString("id");
-                if (owner.equals(mUserId)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            getActivity().setResult(Activity.RESULT_OK);
-                            Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
-                            getActivity().finish();
-                        }
-                    });
-                }
-            } catch (JSONException e) {
-                Log.i(TAG, "call: error in newPost Listener");
-            }
-        }
-    };
 
 }

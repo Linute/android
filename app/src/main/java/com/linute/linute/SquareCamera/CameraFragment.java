@@ -134,10 +134,12 @@ public class CameraFragment extends Fragment {
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
         mStatusButton = root.findViewById(R.id.new_post);
 
-        if (mCameraType == CameraActivity.JUST_CAMERA) {
+        if (mCameraType == CameraActivity.CAMERA_JUST_CAMERA) {
             mGalleryButton.setVisibility(View.INVISIBLE);
             mStatusButton.setVisibility(View.INVISIBLE);
-        } else {
+        } else if (mCameraType == CameraActivity.CAMERA_EVERYTHING_NO_STATUS){
+            mStatusButton.setVisibility(View.INVISIBLE);
+        } else{
             mGalleryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -286,7 +288,7 @@ public class CameraFragment extends Fragment {
             }
         });
 
-        if (mCameraType == CameraActivity.JUST_CAMERA) {
+        if (mCameraType == CameraActivity.CAMERA_JUST_CAMERA) {
             mTakePhotoBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -335,13 +337,13 @@ public class CameraFragment extends Fragment {
         if (hide && mCameraTopButtons.getVisibility() == View.VISIBLE) {
             mCameraTopButtons.setVisibility(View.INVISIBLE);
 
-            if (mCameraType == CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY) {
+            if (mCameraType == CameraActivity.CAMERA_EVERYTHING) {
                 mGalleryButton.setVisibility(View.INVISIBLE);
                 mStatusButton.setVisibility(View.INVISIBLE);
             }
         } else if (!hide && mCameraTopButtons.getVisibility() == View.INVISIBLE) {
             mCameraTopButtons.setVisibility(View.VISIBLE);
-            if (mCameraType == CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY) {
+            if (mCameraType == CameraActivity.CAMERA_EVERYTHING) {
                 mGalleryButton.setVisibility(View.VISIBLE);
                 mStatusButton.setVisibility(View.VISIBLE);
             }

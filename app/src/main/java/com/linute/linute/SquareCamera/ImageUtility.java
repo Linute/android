@@ -85,7 +85,7 @@ public class ImageUtility {
             exception.printStackTrace();
         }
 
-        return Uri.parse(image.getAbsolutePath());
+        return Uri.fromFile(image);
     }
 
     public static String getTempFilePath(Context context, String url, String end) throws IOException {

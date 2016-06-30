@@ -157,7 +157,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }

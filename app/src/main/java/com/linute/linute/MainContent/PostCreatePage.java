@@ -1,12 +1,14 @@
 package com.linute.linute.MainContent;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -14,7 +16,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,24 +27,14 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
+import org.bson.types.ObjectId;
 
 
 import static android.content.Context.MODE_PRIVATE;
@@ -106,7 +97,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                 if (mPostEditText.hasFocus()) {
                     hideKeyboard();
                     mPostEditText.clearFocus();
-                }else {
+                } else {
                     postContent();
                 }
             }
@@ -168,8 +159,6 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         return root;
     }
 
-    private Socket mSocket;
-    private boolean mConnecting = false;
 
     private void showConfirmDialog() {
         new AlertDialog.Builder(getActivity())
@@ -194,57 +183,12 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     @Override
     public void onResume() {
         super.onResume();
-
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
-
-            {
-                try {
-                    IO.Options op = new IO.Options();
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                    op.query =
-                            "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersionName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&type=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION +
-                                    "&model=" + device.getModel();
-                    op.reconnectionDelay = 5;
-                    op.secure = true;
-
-
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.on(Socket.EVENT_ERROR, eventError);
-            mSocket.on("new post", newPost);
-            mSocket.connect();
-            mConnecting = false;
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
-        if (mSocket != null) {
-            mSocket.disconnect();
-            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.off(Socket.EVENT_ERROR, eventError);
-            mSocket.off("new post", newPost);
-        }
     }
 
     @Override
@@ -255,99 +199,62 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
     private void postContent() {
 
-        if (getActivity() == null || mPostInProgress || mPostEditText.getText().toString().trim().equals("")) return;
-
-        if (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected()) {
-            Utils.showBadConnectionToast(getActivity());
+        if (getActivity() == null || mPostInProgress || mPostEditText.getText().toString().trim().equals(""))
             return;
-        }
 
         mPostInProgress = true;
 
         mProgressbar.setVisibility(View.VISIBLE);
         mPostButton.setVisibility(View.INVISIBLE);
 
-        try {
-            JSONObject postData = new JSONObject();
-            postData.put("college", mSharedPreferences.getString("collegeId", ""));
-            postData.put("privacy", (vAnonPost.isChecked() ? 1 : 0) + "");
-            postData.put("isAnonymousCommentsDisabled", vAnonComments.isChecked() ? 0 : 1);
-            postData.put("title", mPostEditText.getText().toString());
 
-            JSONArray coord = new JSONArray();
-            JSONObject jsonObject = new JSONObject();
-            coord.put(0);
-            coord.put(0);
-            jsonObject.put("coordinates", coord);
+        Uri image = ImageUtility.savePicture(getActivity(), getBitmapFromView(mTextFrame));
+        if (image != null) {
+            PendingUploadPost post =
+                    new PendingUploadPost(
+                            ObjectId.get().toString(),
+                            mSharedPreferences.getString("collegeId", ""),
+                            (vAnonPost.isChecked() ? 1 : 0),
+                            vAnonComments.isChecked() ? 0 : 1,
+                            mPostEditText.getText().toString(),
+                            0,
+                            image.toString(),
+                            null,
+                            mSharedPreferences.getString("userID", "")
+                    );
 
-            postData.put("geo", jsonObject);
-            postData.put("type", "0");
-            postData.put("owner", mSharedPreferences.getString("userID", ""));
-
-            JSONArray imageArray = new JSONArray();
-            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 720, 720, true)));
-            postData.put("images", imageArray);
-
-            mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            Utils.showServerErrorToast(getActivity());
+            Intent result = new Intent();
+            result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+            getActivity().setResult(RESULT_OK, result);
+            getActivity().finish();
+        }else {
+            Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);
+            mPostInProgress = false;
         }
+
+//            JSONObject postData = new JSONObject();
+//            postData.put("college", mSharedPreferences.getString("collegeId", ""));
+//            postData.put("privacy", (vAnonPost.isChecked() ? 1 : 0) + "");
+//            postData.put("isAnonymousCommentsDisabled", vAnonComments.isChecked() ? 0 : 1);
+//            postData.put("title", mPostEditText.getText().toString());
+//
+//            JSONArray coord = new JSONArray();
+//            JSONObject jsonObject = new JSONObject();
+//            coord.put(0);
+//            coord.put(0);
+//            jsonObject.put("coordinates", coord);
+//
+//            postData.put("geo", jsonObject);
+//            postData.put("type", "0");
+//            postData.put("owner", mSharedPreferences.getString("userID", ""));
+//
+//            JSONArray imageArray = new JSONArray();
+//            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 720, 720, true)));
+//            postData.put("images", imageArray);
+
     }
-
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
-
-
-    //event ERROR
-    private Emitter.Listener eventError = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            Log.i(TAG, "call: " + args[0]);
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showServerErrorToast(getActivity());
-                        mPostInProgress = false;
-                        mProgressbar.setVisibility(View.GONE);
-                        mPostButton.setVisibility(View.VISIBLE);
-                    }
-                });
-            }
-        }
-    };
-
-    private Emitter.Listener newPost = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            JSONObject t = (JSONObject) args[0];
-            if (getActivity() == null) return;
-            if (t != null) {
-                try {
-                    if (t.getJSONObject("owner").getString("id").equals(mSharedPreferences.getString("userID", "1"))) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                getActivity().setResult(RESULT_OK);
-                                Toast.makeText(getActivity(), "Status has been posted", Toast.LENGTH_SHORT).show();
-                                getActivity().finish();
-                            }
-                        });
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
 
     @Override
     public void onClick(View v) {

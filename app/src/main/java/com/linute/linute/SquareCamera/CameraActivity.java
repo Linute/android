@@ -21,8 +21,9 @@ import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11; // everything
-    public final static int JUST_CAMERA = 12;  //just camera; no gallery or video option
+    public final static int CAMERA_EVERYTHING = 11; // everything
+    public final static int CAMERA_JUST_CAMERA = 12;  //just camera; no gallery or video option
+    public final static int CAMERA_EVERYTHING_NO_STATUS = 13;
 
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
@@ -57,10 +58,10 @@ public class CameraActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         if (i != null) {
-            mCameraType = i.getIntExtra(CAMERA_TYPE, JUST_CAMERA);
+            mCameraType = i.getIntExtra(CAMERA_TYPE, CAMERA_JUST_CAMERA);
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
         } else {
-            mCameraType = JUST_CAMERA;
+            mCameraType = CAMERA_JUST_CAMERA;
             mReturnType = RETURN_URI;
         }
 
@@ -112,7 +113,7 @@ public class CameraActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (mCameraType == CAMERA_AND_VIDEO_AND_GALLERY) {
+        if (mCameraType == CAMERA_EVERYTHING) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.RECORD_AUDIO);
             }
