@@ -6,12 +6,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,7 +36,9 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
 import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
+import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
 import com.linute.linute.SquareCamera.overlay.WipeViewPager;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -73,6 +79,9 @@ public class EditSavePhotoFragment extends Fragment {
     private String mUserId;
 
     private View mUploadButton;
+
+    private CoordinatorLayout mStickerContainer;
+    private RecyclerView mStickerDrawer;
 
     private int mReturnType;
 
@@ -200,6 +209,16 @@ public class EditSavePhotoFragment extends Fragment {
                     showConfirmDialog();
             }
         });
+        View stickerDrawerHandle = t.findViewById(R.id.sticker_drawer_handle);
+        stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleStickerDrawer();
+            }
+        });
+
+
+
         mFrame = view.findViewById(R.id.frame); //frame where we put edittext and picture
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mTextView = (TextView) mFrame.findViewById(R.id.textView);
@@ -228,6 +247,36 @@ public class EditSavePhotoFragment extends Fragment {
                 sendPicture();
             }
         });
+
+        mStickerContainer = (CoordinatorLayout)view.findViewById(R.id.stickers_container);
+
+        mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
+        mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        StickerDrawerAdapter adapter = null;// = new StickerDrawerAdapter()
+//DELETE ME
+        try{
+            Bitmap spongegar = BitmapFactory.decodeStream(getActivity().getAssets().open("spongegar.png"));
+            ArrayList<Bitmap> stickers = new ArrayList<>();
+            stickers.add(spongegar);
+            mStickerDrawer.setAdapter(adapter = new StickerDrawerAdapter(stickers));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+//\DELETE ME
+        if(adapter == null){
+            adapter = new StickerDrawerAdapter();
+        }
+        adapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
+            @Override
+            public void onStickerSelected(Bitmap sticker) {
+                ManipulableImageView stickerIV = new ManipulableImageView(getContext());
+                stickerIV.setImageBitmap(sticker);
+                mStickerContainer.addView(stickerIV);
+                closeStickerDrawer();
+            }
+        });
+
+
         setUpEditText();
     }
 
@@ -349,6 +398,15 @@ public class EditSavePhotoFragment extends Fragment {
                 return true;
             }
         });
+    }
+
+    private void toggleStickerDrawer(){
+        if(mStickerDrawer.isAnimating()) return;
+        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    private void closeStickerDrawer(){
+        mStickerDrawer.setVisibility(View.GONE);
     }
 
     private void sendPicture() {
