@@ -57,7 +57,6 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
 
-
 /**
  *
  */
@@ -68,6 +67,7 @@ public class EditSavePhotoFragment extends Fragment {
     public static final String FROM_GALLERY = "from_gallery";
 
     private View mFrame; //frame where we put edittext and picture
+    private Toolbar mToolbar;
 
     private CustomBackPressedEditText mEditText; //the edit text
     private TextView mTextView;
@@ -196,20 +196,21 @@ public class EditSavePhotoFragment extends Fragment {
         });
 
 
+
         //shows the text strip when image touched
 
-        Toolbar t = (Toolbar) view.findViewById(R.id.top);
-        mProgressBar = (ProgressBar) t.findViewById(R.id.editFragment_progress_bar);
-        mUploadButton = t.findViewById(R.id.save_photo);
-        t.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) view.findViewById(R.id.top);
+        mProgressBar = (ProgressBar) mToolbar.findViewById(R.id.editFragment_progress_bar);
+        mUploadButton = mToolbar.findViewById(R.id.save_photo);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mProgressBar.getVisibility() != View.VISIBLE)
                     showConfirmDialog();
             }
         });
-        View stickerDrawerHandle = t.findViewById(R.id.sticker_drawer_handle);
+        View stickerDrawerHandle = mToolbar.findViewById(R.id.sticker_drawer_handle);
         stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -252,30 +253,61 @@ public class EditSavePhotoFragment extends Fragment {
 
         mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
         mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
-        StickerDrawerAdapter adapter = null;// = new StickerDrawerAdapter()
+        StickerDrawerAdapter stickerDrawerAdapter = null;// = new StickerDrawerAdapter()
 //DELETE ME
         try{
             Bitmap spongegar = BitmapFactory.decodeStream(getActivity().getAssets().open("spongegar.png"));
             ArrayList<Bitmap> stickers = new ArrayList<>();
             stickers.add(spongegar);
-            mStickerDrawer.setAdapter(adapter = new StickerDrawerAdapter(stickers));
+            mStickerDrawer.setAdapter(stickerDrawerAdapter = new StickerDrawerAdapter(stickers));
         }catch(Exception e){
             e.printStackTrace();
         }
 //\DELETE ME
-        if(adapter == null){
-            adapter = new StickerDrawerAdapter();
+        if(stickerDrawerAdapter == null){
+            stickerDrawerAdapter = new StickerDrawerAdapter();
         }
-        adapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
+        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
+        stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
             @Override
-            public void onStickerSelected(Bitmap sticker) {
+            public void onStickerSelected(final Bitmap sticker) {
                 ManipulableImageView stickerIV = new ManipulableImageView(getContext());
                 stickerIV.setImageBitmap(sticker);
+
+                stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
+                    @Override
+                    public void onViewPickedUp(View me) {
+                        mToolbar.setVisibility(View.GONE);
+                        stickerTrashCan.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onViewDropped(View me) {
+                        mToolbar.setVisibility(View.VISIBLE);
+                        stickerTrashCan.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onViewCollision(View me) {
+//                        stickerTrashCan.set
+                    }
+
+                    @Override
+                    public void onViewDropCollision(View me) {
+                        mStickerContainer.removeView(me);
+                    }
+
+                    @Override
+                    public View getCollisionSensor() {
+                        return stickerTrashCan;
+                    }
+                });
+
+
                 mStickerContainer.addView(stickerIV);
                 closeStickerDrawer();
             }
         });
-
 
         setUpEditText();
     }

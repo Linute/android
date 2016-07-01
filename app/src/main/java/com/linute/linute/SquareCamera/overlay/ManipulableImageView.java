@@ -2,11 +2,12 @@ package com.linute.linute.SquareCamera.overlay;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -14,7 +15,6 @@ import android.widget.ImageView;
  */
 public class ManipulableImageView extends ImageView {
 
-    private Paint mPaint;
 
     public ManipulableImageView(Context context) {
         super(context); init();
@@ -38,16 +38,26 @@ public class ManipulableImageView extends ImageView {
         }
     });
 
+//    private Paint mPaint;
+
+
     private void init(){
-        mPaint = new Paint();
-        mPaint.setColor(0xFFFF0000);
-        mPaint.setStrokeWidth(5);
+//        mPaint = new Paint();
+//        mPaint.setColor(0xFFFF0000);
+//        mPaint.setStrokeWidth(5);
     }
 
+    private ViewManipulationListener mCollisionListener;
+
+    public void setManipulationListener(ViewManipulationListener collisionListener){
+        mCollisionListener = collisionListener;
+    }
+
+
     private float mTotalScale = 1;
-    private float mScaleXFlip = 1;
-    private float focusX = 0;
-    private float focusY = 0;
+    private short mScaleXFlip = 1;
+//    private float focusX = 0;
+//    private float focusY = 0;
     ScaleGestureDetector mScaleGestureDetector = new ScaleGestureDetector(getContext(), new ScaleGestureDetector.OnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
@@ -56,8 +66,8 @@ public class ManipulableImageView extends ImageView {
             // Don't let the object get too small or too large.
 //            mTotalScale = Math.max(0.1f, Math.min(mTotalScale, 5.0f));
 
-            focusX = scaleGestureDetector.getFocusX();
-            focusY = scaleGestureDetector.getFocusY();
+//            focusX = scaleGestureDetector.getFocusX();
+//            focusY = scaleGestureDetector.getFocusY();
 
             setScaleX(mTotalScale * mScaleXFlip);
             setScaleY(mTotalScale);
@@ -90,7 +100,7 @@ public class ManipulableImageView extends ImageView {
     float[] positionY = new float[10];
     long timeDown;
 
-
+    boolean isInCollision = false;
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
@@ -102,6 +112,8 @@ public class ManipulableImageView extends ImageView {
         mRotationGestureDetector.onTouchEvent(event);
         mScaleGestureDetector.onTouchEvent(event);
         int id;
+
+        Rect myBounds = new Rect(), theirBounds = new Rect();
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 long time = event.getDownTime();
@@ -111,9 +123,8 @@ public class ManipulableImageView extends ImageView {
                     setScaleX(mTotalScale * mScaleXFlip);
                 }
                 timeDown = time;
+                if(mCollisionListener != null) mCollisionListener.onViewPickedUp(this);
             case MotionEvent.ACTION_POINTER_DOWN:
-
-
                 id = event.getPointerId(event.getActionIndex());
                 initialX[id] = event.getX();
                 initialY[id] = event.getY();
@@ -130,6 +141,29 @@ public class ManipulableImageView extends ImageView {
                 setX(positionX[0]);
                 setY(positionY[0]);
 
+                if(mCollisionListener != null){
+                    getHitRect(myBounds);
+                    mCollisionListener.getCollisionSensor().getHitRect(theirBounds);
+
+                    if(myBounds.intersect(theirBounds) && !isInCollision){
+                        isInCollision = true;
+                        mCollisionListener.onViewCollision(this);
+                    }else if(!myBounds.intersect(theirBounds) && isInCollision){
+                        isInCollision = false;
+                    }
+
+                }
+
+
+                return true;
+            case MotionEvent.ACTION_UP:
+                if(mCollisionListener != null){
+                    mCollisionListener.onViewDropped(this);
+                    if(isInCollision){
+                        isInCollision = false;
+                        mCollisionListener.onViewDropCollision(this);
+                    }
+                }
                 return true;
             default:
                 return false;
@@ -137,38 +171,13 @@ public class ManipulableImageView extends ImageView {
 
 
     }
+
+    public interface ViewManipulationListener {
+        void onViewPickedUp(View me);
+        void onViewDropped(View me);
+        void onViewCollision(View me);
+        void onViewDropCollision(View me);
+        View getCollisionSensor();
+    }
+
 }
-
-/* private GestureDetector detector = new GestureDetector(getContext(), new GestureDetector.OnGestureListener() {
-         @Override
-         public boolean onDown(MotionEvent motionEvent) {
-             return false;
-         }
-
-         @Override
-         public void onShowPress(MotionEvent motionEvent) {
-
-         }
-
-         @Override
-         public boolean onSingleTapUp(MotionEvent motionEvent) {
-             return false;
-         }
-
-         @Override
-         public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-             return false;
-         }
-
-         @Override
-         public void onLongPress(MotionEvent motionEvent) {
-
-         }
-
-         @Override
-         public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-             return false;
-         }
-     });
-
-*/

@@ -63,7 +63,6 @@ public class StickerDrawerAdapter extends RecyclerView.Adapter<StickerDrawerAdap
         public StickerVH(View itemView) {
             super(itemView);
             stickerIV = (ImageView)itemView.findViewById(R.id.image_sticker);
-
         }
 
         public void bind(Bitmap sticker){

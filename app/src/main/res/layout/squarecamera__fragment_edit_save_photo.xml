@@ -1,5 +1,4 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
@@ -18,17 +17,20 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:background="@color/pure_black"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter" />
+
         <com.linute.linute.SquareCamera.overlay.WipeViewPager
             android:id="@+id/filter_overlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
+
         <android.support.design.widget.CoordinatorLayout
             android:id="@+id/stickers_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <!--Trash Can for deleting -->
         </android.support.design.widget.CoordinatorLayout>
+
         <com.linute.linute.UtilsAndHelpers.NoSuggestionsTextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
@@ -41,11 +43,8 @@
             android:paddingTop="8dp"
             android:textColor="@android:color/white"
             android:textSize="14sp"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
     </FrameLayout>
-
-
 
 
     <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
@@ -62,8 +61,7 @@
         android:paddingTop="8dp"
         android:textColor="@android:color/white"
         android:textSize="14sp"
-        android:visibility="gone"
-    />
+        android:visibility="gone" />
 
 
     <FrameLayout
@@ -91,8 +89,7 @@
                 android:shadowRadius="1.3"
                 android:text="anon\ncomments"
                 android:textColor="@color/pure_white"
-                android:textSize="12sp"
-            />
+                android:textSize="12sp" />
 
             <CheckBox
                 android:id="@+id/anon_comments"
@@ -100,8 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:button="@drawable/turn_anon_comments_off"
-                android:checked="true"
-            />
+                android:checked="true" />
 
         </LinearLayout>
 
@@ -124,38 +120,44 @@
                 android:shadowRadius="1.3"
                 android:text="post\nas"
                 android:textColor="@color/pure_white"
-                android:textSize="12sp"
-            />
+                android:textSize="12sp" />
 
             <CheckBox
                 android:id="@+id/editFragment_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:button="@drawable/post_as_anon_checkbox"
-            />
+                android:button="@drawable/post_as_anon_checkbox" />
         </LinearLayout>
     </FrameLayout>
+
+    <ImageView
+        android:id="@+id/sticker_trash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:padding="12dp"
+        android:src="@drawable/ic_icon_send"
+        android:visibility="gone" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/sticker_drawer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:background="#CC000000"
-        />
+        android:visibility="gone" />
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/top"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        >
+        android:layout_height="?android:attr/actionBarSize">
 
         <ImageView
+            android:id="@+id/sticker_drawer_handle"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:src="@drawable/ic_fire_off"
-            android:id="@+id/sticker_drawer_handle" />
+            android:src="@drawable/ic_fire_off" />
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
             android:layout_width="wrap_content"
@@ -169,7 +171,7 @@
                 android:layout_height="match_parent"
                 android:background="@android:color/transparent"
                 android:foreground="?selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_action_check83"/>
+                android:src="@drawable/ic_action_check83" />
 
             <ProgressBar
                 android:id="@+id/editFragment_progress_bar"
@@ -177,11 +179,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
     </android.support.v7.widget.Toolbar>
-
 
 
 </FrameLayout>
