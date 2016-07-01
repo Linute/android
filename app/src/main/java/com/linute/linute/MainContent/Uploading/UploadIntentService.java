@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
@@ -37,19 +38,29 @@ public class UploadIntentService extends IntentService {
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
 
+    private int mPendingFiles;
+
     public UploadIntentService() {
         super("UploadIntentService");
         setIntentRedelivery(true);
     }
+
+    //// TODO: 6/30/16 move processing of video to this service?
 
     @Override
     public void onCreate() {
         super.onCreate();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mBuilder = new NotificationCompat.Builder(this);
-        mBuilder.setSmallIcon(R.drawable.ic_stat_untitled_4_01);
+        mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload);
+        mPendingFiles = 0;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        ++mPendingFiles;
+        return super.onStartCommand(intent, flags, startId);
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
@@ -63,6 +74,7 @@ public class UploadIntentService extends IntentService {
         try {
             Bitmap image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(p.getImagePath()));
             mBuilder.setContentTitle("Preparing for upload")
+                    .setContentText("")
                     .setProgress(0, 0, true)
                     .setLargeIcon(image)
                     .setAutoCancel(false)
@@ -106,6 +118,7 @@ public class UploadIntentService extends IntentService {
                 @Override
                 public void onRequestProgress(long bytesWritten, long contentLength) {
                     mBuilder.setContentTitle("Uploading content")
+                            .setContentText(mPendingFiles + (mPendingFiles > 1 ? " files remaining" : " file remaining"))
                             .setProgress(100, (int) (100 * bytesWritten / contentLength), false);
                     mNotificationManager.notify(ID, mBuilder.build());
                 }
@@ -113,6 +126,8 @@ public class UploadIntentService extends IntentService {
 
             if (r.isSuccessful()) {
                 mBuilder.setContentTitle("Upload complete")
+                        .setContentText("")
+                        .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                         .setProgress(0, 0, false)
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
@@ -122,6 +137,7 @@ public class UploadIntentService extends IntentService {
         } catch (IOException e) {
             failedToPost(p);
         }
+        --mPendingFiles;
     }
 
     private String getPostText(int type) {
@@ -148,6 +164,7 @@ public class UploadIntentService extends IntentService {
         Intent i = new Intent(this, UploadIntentService.class);
         i.putExtra(PendingUploadPost.PENDING_POST_KEY, p);
         mBuilder.setProgress(0, 0, false)
+                .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setContentTitle("File failed to upload")
                 .setContentText("Tap to retry")
                 .setAutoCancel(true)

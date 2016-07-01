@@ -166,7 +166,6 @@ public class DiscoverFragment extends BaseFragment {
                 ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
-
             }
         }
     }
@@ -332,7 +331,6 @@ public class DiscoverFragment extends BaseFragment {
                         try {
 
                             jsonObject = new JSONObject(json);
-                            //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                             mSkip = jsonObject.getInt("skip");
 
                             jsonArray = jsonObject.getJSONArray("events");

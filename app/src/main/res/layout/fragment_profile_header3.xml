@@ -7,7 +7,6 @@
     android:background="@color/colorPrimary"
     android:orientation="vertical"
 >
-
     <com.linute.linute.SquareCamera.SquareImageView
         android:id="@+id/profile_image"
         android:layout_width="match_parent"
@@ -15,5 +14,4 @@
         android:background="@color/white"
         tools:src="@color/feed_action_bar_grey"
     />
-
 </LinearLayout>

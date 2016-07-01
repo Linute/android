@@ -10,14 +10,32 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="68dp"
         android:orientation="vertical">
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="31dp"
+            android:layout_height="39dp"
             android:layout_gravity="bottom"
             android:background="@color/colorPrimary"/>
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="match_parent"
+            android:layout_height="31dp"
+            android:background="@color/colorPrimary"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
+            android:ellipsize="end"
+            android:lines="1"
+            android:layout_marginEnd="76dp"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:textAllCaps="true"
+            android:textColor="@color/secondaryColor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            tools:text="QI FENG HUANG"
+        />
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/chat_button"
@@ -28,24 +46,6 @@
             android:src="@drawable/ic_action_messanger"
             app:backgroundTint="@color/messanger_blue"/>
     </FrameLayout>
-
-
-    <TextView
-        android:id="@+id/username"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:ellipsize="end"
-        android:lines="1"
-        android:paddingEnd="@dimen/activity_horizontal_margin"
-        android:paddingStart="@dimen/activity_horizontal_margin"
-        android:paddingTop="8dp"
-        android:textAllCaps="true"
-        android:textColor="@color/secondaryColor"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        tools:text="QI FENG HUANG"
-    />
 
     <TextView
         android:id="@+id/college_name"

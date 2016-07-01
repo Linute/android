@@ -56,7 +56,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter <GlobalChoicesAda
         private TextView vTitle;
         private ImageView vImage;
 
-        private String mId;
+        private GlobalChoiceItem mGlobalChoiceItem;
 
         public TrendingChoiceViewHolder(View itemView) {
             super(itemView);
@@ -71,7 +71,7 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter <GlobalChoicesAda
         public void bindView(GlobalChoiceItem item){
             vTitle.setText(item.getTitle());
 
-            mId = item.getKey();
+            mGlobalChoiceItem = item;
 
             Glide.with(mContext)
                     .load(Utils.getTrendsImageURL(item.getImageUrl()))
@@ -84,12 +84,12 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter <GlobalChoicesAda
         @Override
         public void onClick(View v) {
             if (mGoToTrend != null){
-                mGoToTrend.goToTrend(mId);
+                mGoToTrend.goToTrend(mGlobalChoiceItem.getKey(), mGlobalChoiceItem.getTitle());
             }
         }
     }
 
     interface GoToTrend{
-        void goToTrend(String id);
+        void goToTrend(String id, String title);
     }
 }
