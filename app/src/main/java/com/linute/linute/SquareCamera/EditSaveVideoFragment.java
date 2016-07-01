@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
@@ -18,8 +19,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -32,6 +36,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +48,8 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
+import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -56,6 +63,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import io.socket.client.IO;
@@ -102,6 +110,9 @@ public class EditSaveVideoFragment extends Fragment {
     private CustomBackPressedEditText mEditText;
     private TextView mTextView;
 
+    private CoordinatorLayout mStickerContainer;
+    private RecyclerView mStickerDrawer;
+
     private View mFrame;
 
     private VideoDimen mVideoDimen;
@@ -112,6 +123,8 @@ public class EditSaveVideoFragment extends Fragment {
     private FFmpeg mFfmpeg;
 
     private HasSoftKeySingleton mHasSoftKeySingleton;
+
+    View mOverlays;
 
 
     public static Fragment newInstance(Uri imageUri, VideoDimen videoDimen) {
@@ -162,7 +175,7 @@ public class EditSaveVideoFragment extends Fragment {
             }
         });
 
-        Toolbar t = (Toolbar) view.findViewById(R.id.top);
+        final Toolbar t = (Toolbar) view.findViewById(R.id.top);
         t.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,6 +245,8 @@ public class EditSaveVideoFragment extends Fragment {
                 processVideo();
             }
         });
+
+        mOverlays = mFrame.findViewById(R.id.overlays);
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.text);
         mTextView = (TextView) mFrame.findViewById(R.id.textView);
         setUpEditText();
@@ -276,6 +291,77 @@ public class EditSaveVideoFragment extends Fragment {
                         }
                     });
         }
+
+
+        View stickerDrawerHandle = t.findViewById(R.id.sticker_drawer_handle);
+        stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                toggleStickerDrawer();
+            }
+        });
+
+        mStickerContainer = (CoordinatorLayout)view.findViewById(R.id.stickers_container);
+
+        mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
+        mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        StickerDrawerAdapter stickerDrawerAdapter = null;// = new StickerDrawerAdapter()
+//DELETE ME
+        try{
+            Bitmap spongegar = BitmapFactory.decodeStream(getActivity().getAssets().open("spongegar.png"));
+            ArrayList<Bitmap> stickers = new ArrayList<>();
+            stickers.add(spongegar);
+            mStickerDrawer.setAdapter(stickerDrawerAdapter = new StickerDrawerAdapter(stickers));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+//\DELETE ME
+        if(stickerDrawerAdapter == null){
+            stickerDrawerAdapter = new StickerDrawerAdapter();
+        }
+        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
+        stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
+            @Override
+            public void onStickerSelected(final Bitmap sticker) {
+                ManipulableImageView stickerIV = new ManipulableImageView(getContext());
+                stickerIV.setImageBitmap(sticker);
+
+                stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
+                    @Override
+                    public void onViewPickedUp(View me) {
+                        t.setVisibility(View.GONE);
+                        stickerTrashCan.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onViewDropped(View me) {
+                        t.setVisibility(View.VISIBLE);
+                        stickerTrashCan.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onViewCollision(View me) {
+//                        stickerTrashCan.set
+                    }
+
+                    @Override
+                    public void onViewDropCollision(View me) {
+                        mStickerContainer.removeView(me);
+                    }
+
+                    @Override
+                    public View getCollisionSensor() {
+                        return stickerTrashCan;
+                    }
+                });
+
+
+                mStickerContainer.addView(stickerIV);
+                closeStickerDrawer();
+            }
+        });
+
+
     }
 
     private void setUpEditText() {
@@ -403,6 +489,16 @@ public class EditSaveVideoFragment extends Fragment {
                 }).show();
     }
 
+    private void toggleStickerDrawer(){
+        if(mStickerDrawer.isAnimating()) return;
+        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    private void closeStickerDrawer(){
+        mStickerDrawer.setVisibility(View.GONE);
+    }
+
+
 
     @Override
     public void onDestroy() {
@@ -481,7 +577,7 @@ public class EditSaveVideoFragment extends Fragment {
                                 "-filter_complex scale=%d:%d ", newWidth, newHeight);
                     }
                 } else {
-                    String overlay = saveViewAsImage(mTextView);
+                    String overlay = saveViewAsImage(mOverlays);
 
                     Log.i(TAG, "call:frame  " + mFrame.getHeight());
                     Log.i(TAG, "call: " + mTextView.getTop());
@@ -506,6 +602,8 @@ public class EditSaveVideoFragment extends Fragment {
                         }
 
                         Point coord = getOverlayCoordinates(newWidth, newHeight);
+                        coord.x = 0;
+                        coord.y = 0;
                         //overlay
                         cmd += String.format(Locale.US,
                                 "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
