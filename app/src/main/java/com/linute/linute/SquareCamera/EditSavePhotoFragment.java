@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ColorMatrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -135,7 +136,7 @@ public class EditSavePhotoFragment extends Fragment {
         mUserId = sharedPreferences.getString("userID", "");
 
         //setup ImageView
-        Uri imageUri = getArguments().getParcelable(BITMAP_URI);
+        final Uri imageUri = getArguments().getParcelable(BITMAP_URI);
         boolean fromGallery = getArguments().getBoolean(FROM_GALLERY, false);
         final ImageView photoImageView = (ImageView) view.findViewById(R.id.photo);
 
@@ -153,22 +154,45 @@ public class EditSavePhotoFragment extends Fragment {
         }
 
         WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
-        ArrayList<Bitmap> overlays = new ArrayList<>(5);
-        overlays.add(Bitmap.createBitmap(new int[]{0x220000FF}, 1, 1, Bitmap.Config.ARGB_8888));
-        overlays.add(Bitmap.createBitmap(new int[]{0x22FFFFFF}, 1, 1, Bitmap.Config.ARGB_8888));
-        overlays.add(Bitmap.createBitmap(new int[]{0x22FF0000}, 1, 1, Bitmap.Config.ARGB_8888));
-        try {
-            Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
 
-            Bitmap blackwhite = ImageUtility.toGrayscale(og);
-            overlays.add(blackwhite);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter(overlays
-        );
-        overlayPager.setPosition(Integer.MAX_VALUE/2);
+//        DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+       /* Bitmap aBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
+        aBitmap.eraseColor(0x22FF0000);
+        Bitmap bBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
+        bBitmap.eraseColor(0x22FFFFFF);
+        Bitmap cBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
+        cBitmap.eraseColor(0x220000FF);
+
+        overlays.add(aBitmap);
+        overlays.add(bBitmap);
+        overlays.add(cBitmap);*/
+
+
+//        overlays.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_fire_on));
+
+        final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+                    ColorMatrix bw = new ColorMatrix();
+                    bw.setSaturation(0);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
+                    ColorMatrix sat = new ColorMatrix();
+                    sat.setSaturation(3);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
         overlayPager.setWipeAdapter(overlayAdapter);
+
+
 
         overlayPager.setOnTouchListener(new View.OnTouchListener() {
             long timeDown = 0;

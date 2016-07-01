@@ -33,20 +33,22 @@ public class AlignedImageView extends ImageView {
     @Override
     protected boolean setFrame(int l, int t, int r, int b) {
         boolean hasChanged = super.setFrame(l, t, r, b);
-        Matrix matrix = getImageMatrix();
-        float scaleFactor = getHeight() / (float) getDrawable().getIntrinsicHeight();
-        matrix.setScale(scaleFactor, scaleFactor, 0, 0);
+        if(getDrawable() != null) {
+            Matrix matrix = getImageMatrix();
+            float scaleFactor = getHeight() / (float) getDrawable().getIntrinsicHeight();
+            matrix.setScale(scaleFactor, scaleFactor, 0, 0);
 
-        // The Important Bit
-        Drawable drawable = getDrawable();
-        float heightD = drawable.getIntrinsicWidth();
-        float height = getWidth();
-        if(alignLeft) {
-            matrix.setTranslate(height - heightD, 0);
-        }else{
-            matrix.setTranslate(heightD - height, 0);
+            // The Important Bit
+            Drawable drawable = getDrawable();
+            float heightD = drawable.getIntrinsicWidth();
+            float height = getWidth();
+            if (!alignLeft) {
+                matrix.setTranslate(height-heightD, 0);
+            }else{
+                matrix.setTranslate(0,0);
+            }
+            setImageMatrix(matrix);
         }
-        setImageMatrix(matrix);
         return hasChanged;
     }
 }

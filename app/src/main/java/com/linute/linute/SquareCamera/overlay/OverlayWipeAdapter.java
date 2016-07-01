@@ -1,10 +1,7 @@
 package com.linute.linute.SquareCamera.overlay;
 
 import android.graphics.Bitmap;
-import android.util.DisplayMetrics;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,33 +37,21 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter{
     }
 
     @Override
-    public View getView(View recycle, ViewGroup container, int position, boolean right) {
+    public Bitmap getOverlay(int position) {
         while(position < 0){
             position+=mOverlays.size();
         }
-        Bitmap overlay = mOverlays.get(position % mOverlays.size());
+        position = position % mOverlays.size();
 
-        AlignedImageView overlayIV = (AlignedImageView)recycle;
-        if(overlayIV == null){
-            overlayIV = new AlignedImageView(container.getContext());
-            DisplayMetrics displayMetrics = container.getContext().getResources().getDisplayMetrics();
-            overlayIV.setLayoutParams(new ViewGroup.LayoutParams(displayMetrics.widthPixels,displayMetrics.heightPixels));
-            overlayIV.setMinimumWidth(displayMetrics.widthPixels);
-            overlayIV.setMaxWidth(displayMetrics.widthPixels);
-            overlayIV.setMinimumHeight(displayMetrics.heightPixels);
-            overlayIV.setMaxHeight(displayMetrics.heightPixels);
-            overlayIV.setScaleType(ImageView.ScaleType.FIT_END);
-            /*Matrix m = new Matrix();
-            if(right){
-                m.setScale(1,1,displayMetrics.widthPixels, displayMetrics.heightPixels/2);
-            }else{
-                m.setScale(1,1,0,displayMetrics.heightPixels/2);
-            }
-            overlayIV.setImageMatrix(m);*/
-        }
-
-        overlayIV.setAlignLeft(right);
-        overlayIV.setImageBitmap(overlay);
-        return overlayIV;
+        return mOverlays.get(position);
     }
+
+    public void add(Bitmap overlay){
+        add(overlay,1);
+    }
+
+    public void add(Bitmap overlay, int position){
+        mOverlays.add(position, overlay);
+    }
+
 }
