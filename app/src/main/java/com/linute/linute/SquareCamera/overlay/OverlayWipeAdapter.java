@@ -2,7 +2,6 @@ package com.linute.linute.SquareCamera.overlay;
 
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -48,7 +47,6 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter{
         Bitmap overlay = mOverlays.get(position % mOverlays.size());
 
         AlignedImageView overlayIV = (AlignedImageView)recycle;
-        Log.i("BBB", recycle + " " + overlayIV);
         if(overlayIV == null){
             overlayIV = new AlignedImageView(container.getContext());
             DisplayMetrics displayMetrics = container.getContext().getResources().getDisplayMetrics();
@@ -69,7 +67,6 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter{
 
         overlayIV.setAlignLeft(right);
         overlayIV.setImageBitmap(overlay);
-        Log.i("BBB", ""+overlayIV);
         return overlayIV;
     }
 }

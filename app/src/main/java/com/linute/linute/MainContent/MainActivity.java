@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -10,15 +9,12 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -35,35 +31,32 @@ import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
-import java.util.Arrays;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
@@ -861,7 +854,6 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i("AAA", Arrays.toString(args));
             NotificationsCounterSingleton.getInstance().setHasMessage((boolean) args[0]);
             NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
         }

@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
-import android.util.Log;
-
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -77,8 +75,6 @@ public class Update {
      * @throws JSONException
      */
     public Update(JSONObject json) throws JSONException {
-
-        Log.i("AAA", json.toString(4));
 
         mUpdateType = getUpdateTypeFromString(getStringFromJson(json,"action"));
 
