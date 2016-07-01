@@ -49,7 +49,9 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
+import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
 import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
+import com.linute.linute.SquareCamera.overlay.WipeViewPager;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -341,7 +343,7 @@ public class EditSaveVideoFragment extends Fragment {
 
                     @Override
                     public void onViewCollision(View me) {
-//                        stickerTrashCan.set
+//                        animate trashcan stickerTrashCan.set
                     }
 
                     @Override
@@ -360,6 +362,9 @@ public class EditSaveVideoFragment extends Fragment {
                 closeStickerDrawer();
             }
         });
+
+        WipeViewPager pager = (WipeViewPager)mFrame.findViewById(R.id.filter_overlay);
+        pager.setWipeAdapter(new OverlayWipeAdapter());
 
 
     }
