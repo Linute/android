@@ -3,8 +3,10 @@ package com.linute.linute.MainContent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -23,6 +25,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -53,9 +57,14 @@ import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -504,6 +513,8 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("badge", badge);
                     mSocket.on("unread", haveUnread);
                     mSocket.on("posts refresh", refresh);
+                    mSocket.on("memes", meme);
+                    mSocket.on("filters", filter);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
@@ -534,6 +545,8 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.off("badge", badge);
             mSocket.off("unread", haveUnread);
             mSocket.off("posts refresh", refresh);
+            mSocket.off("memes", meme);
+            mSocket.off("filters", filter);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -871,6 +884,117 @@ public class MainActivity extends BaseTaptActivity {
                         showUpdateSnackbar(text);
                     }
                 });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private  Emitter.Listener meme = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject body = new JSONObject(args[0].toString());
+                JSONArray memes = body.getJSONArray("memes");
+
+                File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
+                memeDir.mkdirs();
+
+
+                for(File f : memeDir.listFiles()){
+                    for(int i = 0; i < memes.length(); i++) {
+                        String fileName = memes.getString(i);
+                        if(fileName.equals(f)) break;
+                        if(i == memes.length()-1)
+                            f.delete();
+                    }
+                }
+
+                for(int i = 0; i < memes.length(); i++){
+                    final String fileName = memes.getString(i);
+                    final File file = new File(memeDir, fileName);
+                    if(!file.exists()){
+                        try {
+                            file.createNewFile();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Glide.with(MainActivity.this).load(Utils.getMemeImageUrl(fileName)).asBitmap().into(new SimpleTarget<Bitmap>() {
+                                        @Override
+                                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                            try {
+                                                FileOutputStream fos = new FileOutputStream(file);
+                                                resource.compress(Bitmap.CompressFormat.PNG, 10, fos);
+                                            }catch (FileNotFoundException f){
+                                                f.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                        }catch (IOException ioe){
+                            ioe.printStackTrace();
+                        }
+
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private  Emitter.Listener filter = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject body = new JSONObject(args[0].toString());
+                JSONArray filters = body.getJSONArray("filters");
+
+                File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
+                memeDir.mkdirs();
+
+
+                for (File f : memeDir.listFiles()) {
+                    for (int i = 0; i < filters.length(); i++) {
+                        String fileName = filters.getString(i);
+                        if (fileName.equals(f)) break;
+                        if (i == filters.length() - 1)
+                            f.delete();
+                    }
+                }
+
+                for (int i = 0; i < filters.length(); i++) {
+                    final String fileName = filters.getString(i);
+                    final File file = new File(memeDir, fileName);
+                    if (!file.exists()) {
+                        try {
+                            file.createNewFile();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Glide.with(MainActivity.this).load(Utils.getFilterImageUrl(fileName)).asBitmap().into(new SimpleTarget<Bitmap>() {
+                                        @Override
+                                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                                            try {
+                                                FileOutputStream fos = new FileOutputStream(file);
+                                                Log.e("AAA", file.getAbsolutePath());
+                                                resource.compress(Bitmap.CompressFormat.PNG, 10, fos);
+                                            } catch (FileNotFoundException f) {
+                                                f.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                        } catch (IOException ioe) {
+                            ioe.printStackTrace();
+                        }
+
+                    }
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }

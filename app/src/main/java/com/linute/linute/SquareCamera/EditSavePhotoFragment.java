@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ColorMatrix;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
@@ -18,6 +17,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -49,9 +49,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -155,25 +154,11 @@ public class EditSavePhotoFragment extends Fragment {
 
         WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
 
-//        DisplayMetrics metrics = getResources().getDisplayMetrics();
 
-       /* Bitmap aBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
-        aBitmap.eraseColor(0x22FF0000);
-        Bitmap bBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
-        bBitmap.eraseColor(0x22FFFFFF);
-        Bitmap cBitmap = Bitmap.createBitmap(metrics.widthPixels,metrics.heightPixels, Bitmap.Config.ARGB_8888);
-        cBitmap.eraseColor(0x220000FF);
-
-        overlays.add(aBitmap);
-        overlays.add(bBitmap);
-        overlays.add(cBitmap);*/
-
-
-//        overlays.add(BitmapFactory.decodeResource(getResources(), R.drawable.ic_fire_on));
 
         final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
 
-        new Thread(new Runnable() {
+      /*  new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -188,7 +173,7 @@ public class EditSavePhotoFragment extends Fragment {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        }).start();*/
 
         overlayPager.setWipeAdapter(overlayAdapter);
 
@@ -277,26 +262,22 @@ public class EditSavePhotoFragment extends Fragment {
 
         mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
         mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
-        StickerDrawerAdapter stickerDrawerAdapter = null;// = new StickerDrawerAdapter()
-//DELETE ME
-        try{
-            Bitmap spongegar = BitmapFactory.decodeStream(getActivity().getAssets().open("spongegar.png"));
-            ArrayList<Bitmap> stickers = new ArrayList<>();
-            stickers.add(spongegar);
-            mStickerDrawer.setAdapter(stickerDrawerAdapter = new StickerDrawerAdapter(stickers));
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-//\DELETE ME
-        if(stickerDrawerAdapter == null){
-            stickerDrawerAdapter = new StickerDrawerAdapter();
-        }
+        final StickerDrawerAdapter stickerDrawerAdapter = new StickerDrawerAdapter();
+        mStickerDrawer.setAdapter(stickerDrawerAdapter);
+
         final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
+
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+
         stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
             @Override
             public void onStickerSelected(final Bitmap sticker) {
                 ManipulableImageView stickerIV = new ManipulableImageView(getContext());
                 stickerIV.setImageBitmap(sticker);
+                stickerIV.setX(metrics.widthPixels/10);
+                stickerIV.setY(metrics.heightPixels/10);
+
 
                 stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
                     @Override
@@ -332,6 +313,45 @@ public class EditSavePhotoFragment extends Fragment {
                 closeStickerDrawer();
             }
         });
+
+
+        final File filterDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
+                measureOptions.inJustDecodeBounds = true;
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                for(File f: filterDir.listFiles()) {
+                    Log.i("AAA", f.getAbsolutePath());
+                    Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                    float scale = (float)metrics.widthPixels/b.getWidth();
+
+                    overlayAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false));
+                    Log.i("AAA", overlayAdapter.getCount()+"");
+                }
+            }
+        }).start();
+
+        final File memeDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                for(File f: memeDir.listFiles()) {
+                    stickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            stickerDrawerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        }).start();
+
 
         setUpEditText();
     }

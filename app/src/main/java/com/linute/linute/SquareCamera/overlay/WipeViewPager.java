@@ -81,7 +81,6 @@ public class WipeViewPager extends FrameLayout {
         Left2Right, None, Right2Left
     }
 
-    ;
     private DragDirection mDragDirection = DragDirection.None;
     private static final float KINETIC_THRESHOLD = 20;
     private static final float STATIC_THRESHOLD = 200;
@@ -103,12 +102,12 @@ public class WipeViewPager extends FrameLayout {
                         float dX = initX - x;
                         if (dX < -INIT_DRAG_THRESHOLD) {
                             mDragDirection = DragDirection.Left2Right;
-                            mContainerViews[CENTER].setAlignLeft(false);
+//                            mContainerViews[CENTER].setAlignLeft(false);
                             break;
                         }
                         if (dX > INIT_DRAG_THRESHOLD) {
                             mDragDirection = DragDirection.Right2Left;
-                            mContainerViews[CENTER].setAlignLeft(true);
+//                            mContainerViews[CENTER].setAlignLeft(true);
                             break;
                         }
                         break;

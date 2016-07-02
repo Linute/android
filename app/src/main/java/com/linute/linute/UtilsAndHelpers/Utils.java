@@ -2,7 +2,6 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.text.format.DateUtils;
@@ -187,6 +186,12 @@ public class Utils {
         return "http://images.linute.com/profiles/anonymous/"+image;
     }
 
+    public static String getFilterImageUrl(String image){
+        return "http://images.linute.com/filters/"+image;
+    }
+    public static String getMemeImageUrl(String image){
+        return "http://images.linute.com/memes/"+image;
+    }
 
 
     public static String formatDateToReadableString(String date) {

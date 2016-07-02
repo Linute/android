@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -321,12 +322,19 @@ public class EditSaveVideoFragment extends Fragment {
         if(stickerDrawerAdapter == null){
             stickerDrawerAdapter = new StickerDrawerAdapter();
         }
+
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+
         final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
         stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
             @Override
             public void onStickerSelected(final Bitmap sticker) {
                 ManipulableImageView stickerIV = new ManipulableImageView(getContext());
+
                 stickerIV.setImageBitmap(sticker);
+                stickerIV.setX(metrics.widthPixels/10);
+                stickerIV.setY(metrics.heightPixels/10);
 
                 stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
                     @Override

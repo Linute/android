@@ -47,6 +47,10 @@ public class StickerDrawerAdapter extends RecyclerView.Adapter<StickerDrawerAdap
         });
     }
 
+    public void add(Bitmap sticker){
+        stickers.add(sticker);
+    }
+
     @Override
     public int getItemCount() {
         return stickers.size();
