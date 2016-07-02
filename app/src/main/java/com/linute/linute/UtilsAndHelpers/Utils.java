@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.linute.linute.R;
 
-
 import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;

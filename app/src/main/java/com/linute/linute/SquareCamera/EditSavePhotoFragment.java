@@ -87,6 +87,7 @@ public class EditSavePhotoFragment extends Fragment {
 
     private View vBottom;
     private HasSoftKeySingleton mHasSoftKeySingleton;
+    private OverlayWipeAdapter mOverlayAdapter;
 
     public static Fragment newInstance(Uri imageUri) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -151,59 +152,6 @@ public class EditSavePhotoFragment extends Fragment {
             //no lag time when loading with this method
             photoImageView.setImageURI(imageUri);
         }
-
-        WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
-
-
-
-        final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
-
-      /*  new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
-                    ColorMatrix bw = new ColorMatrix();
-                    bw.setSaturation(0);
-                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
-                    ColorMatrix sat = new ColorMatrix();
-                    sat.setSaturation(3);
-                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
-
-        overlayPager.setWipeAdapter(overlayAdapter);
-
-
-
-        overlayPager.setOnTouchListener(new View.OnTouchListener() {
-            long timeDown = 0;
-            int x, y;
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    timeDown = System.currentTimeMillis();
-                    x = (int) motionEvent.getRawX();
-                    y = (int) motionEvent.getRawY();
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
-                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                            mEditText.setVisibility(View.VISIBLE);
-                            mEditText.requestFocus();
-                            showKeyboard();
-                            //mCanMove = false; //can't mvoe strip while in edit
-                        }
-                    }
-                }
-                return false;
-            }
-        });
-
 
 
         //shows the text strip when image touched
@@ -315,6 +263,61 @@ public class EditSavePhotoFragment extends Fragment {
         });
 
 
+        WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
+
+
+        mOverlayAdapter = new OverlayWipeAdapter();
+
+      /*  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+                    ColorMatrix bw = new ColorMatrix();
+                    bw.setSaturation(0);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
+                    ColorMatrix sat = new ColorMatrix();
+                    sat.setSaturation(3);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();*/
+
+        overlayPager.setWipeAdapter(mOverlayAdapter);
+
+
+
+        overlayPager.setOnTouchListener(new View.OnTouchListener() {
+            long timeDown = 0;
+            int x, y;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    timeDown = System.currentTimeMillis();
+                    x = (int) motionEvent.getRawX();
+                    y = (int) motionEvent.getRawY();
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
+                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+                            mEditText.setVisibility(View.VISIBLE);
+                            mEditText.requestFocus();
+                            showKeyboard();
+                            //mCanMove = false; //can't mvoe strip while in edit
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
+
+
+
+
         final File filterDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
 
         new Thread(new Runnable() {
@@ -325,11 +328,15 @@ public class EditSavePhotoFragment extends Fragment {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 for(File f: filterDir.listFiles()) {
                     Log.i("AAA", f.getAbsolutePath());
-                    Bitmap b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                    Bitmap b = null;
+                    do {
+                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                    }while(b == null);
                     float scale = (float)metrics.widthPixels/b.getWidth();
 
-                    overlayAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false));
-                    Log.i("AAA", overlayAdapter.getCount()+"");
+                    mOverlayAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false),-1);
+                    b.recycle();
+                    Log.i("AAA", mOverlayAdapter.getCount()+"");
                 }
             }
         }).start();
@@ -625,6 +632,11 @@ public class EditSavePhotoFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mOverlayAdapter.destroy();
+    }
 
     @Override
     public void onPause() {

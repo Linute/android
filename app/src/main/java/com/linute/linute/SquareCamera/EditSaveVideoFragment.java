@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
@@ -66,7 +67,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Locale;
 
 import io.socket.client.IO;
@@ -304,37 +304,29 @@ public class EditSaveVideoFragment extends Fragment {
             }
         });
 
+
+        WipeViewPager pager = (WipeViewPager)mFrame.findViewById(R.id.filter_overlay);
+        pager.setWipeAdapter(new OverlayWipeAdapter());
         mStickerContainer = (CoordinatorLayout)view.findViewById(R.id.stickers_container);
 
         mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
         mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
-        StickerDrawerAdapter stickerDrawerAdapter = null;// = new StickerDrawerAdapter()
-//DELETE ME
-        try{
-            Bitmap spongegar = BitmapFactory.decodeStream(getActivity().getAssets().open("spongegar.png"));
-            ArrayList<Bitmap> stickers = new ArrayList<>();
-            stickers.add(spongegar);
-            mStickerDrawer.setAdapter(stickerDrawerAdapter = new StickerDrawerAdapter(stickers));
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-//\DELETE ME
-        if(stickerDrawerAdapter == null){
-            stickerDrawerAdapter = new StickerDrawerAdapter();
-        }
+        final StickerDrawerAdapter stickerDrawerAdapter = new StickerDrawerAdapter();
+        mStickerDrawer.setAdapter(stickerDrawerAdapter);
+
+        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
 
         final DisplayMetrics metrics = getResources().getDisplayMetrics();
 
 
-        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
         stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
             @Override
             public void onStickerSelected(final Bitmap sticker) {
                 ManipulableImageView stickerIV = new ManipulableImageView(getContext());
-
                 stickerIV.setImageBitmap(sticker);
                 stickerIV.setX(metrics.widthPixels/10);
                 stickerIV.setY(metrics.heightPixels/10);
+
 
                 stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
                     @Override
@@ -351,7 +343,7 @@ public class EditSaveVideoFragment extends Fragment {
 
                     @Override
                     public void onViewCollision(View me) {
-//                        animate trashcan stickerTrashCan.set
+//                        stickerTrashCan.set
                     }
 
                     @Override
@@ -371,8 +363,104 @@ public class EditSaveVideoFragment extends Fragment {
             }
         });
 
-        WipeViewPager pager = (WipeViewPager)mFrame.findViewById(R.id.filter_overlay);
-        pager.setWipeAdapter(new OverlayWipeAdapter());
+
+        final File filterDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
+
+
+        WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
+
+
+
+        final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
+
+      /*  new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
+                    ColorMatrix bw = new ColorMatrix();
+                    bw.setSaturation(0);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
+                    ColorMatrix sat = new ColorMatrix();
+                    sat.setSaturation(3);
+                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();*/
+
+        overlayPager.setWipeAdapter(overlayAdapter);
+
+
+
+        overlayPager.setOnTouchListener(new View.OnTouchListener() {
+            long timeDown = 0;
+            int x, y;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    timeDown = System.currentTimeMillis();
+                    x = (int) motionEvent.getRawX();
+                    y = (int) motionEvent.getRawY();
+                }
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
+                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+                            mEditText.setVisibility(View.VISIBLE);
+                            mEditText.requestFocus();
+                            showKeyboard();
+                            //mCanMove = false; //can't mvoe strip while in edit
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
+
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
+                measureOptions.inJustDecodeBounds = true;
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                for(File f: filterDir.listFiles()) {
+                    Log.i("AAA", f.getAbsolutePath());
+                    Bitmap b = null;
+                    do {
+                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                    }while(b == null);
+                    float scale = (float)metrics.widthPixels/b.getWidth();
+
+                    overlayAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false), -1);
+                    b.recycle();
+                    Log.i("AAA", overlayAdapter.getCount()+"");
+                }
+            }
+        }).start();
+
+        final File memeDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                for(File f: memeDir.listFiles()) {
+                    stickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            stickerDrawerAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        }).start();
+
 
 
     }
@@ -1073,5 +1161,10 @@ public class EditSaveVideoFragment extends Fragment {
                 return new VideoDimen[size];
             }
         };
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }

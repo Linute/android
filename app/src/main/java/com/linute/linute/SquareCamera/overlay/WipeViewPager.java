@@ -112,20 +112,20 @@ public class WipeViewPager extends FrameLayout {
                         }
                         break;
                     case Left2Right:
-                        mContainerViews[LEFT].setX(0);
-                        mContainerViews[LEFT].getLayoutParams().width = (int) x;
-                        mContainerViews[LEFT].requestLayout();
+                        mContainerViews[LEFT].setX(x-SCREEN_WIDTH);
+//                        mContainerViews[LEFT].getLayoutParams().width = (int) x;
+//                        mContainerViews[LEFT].requestLayout();
                         mContainerViews[CENTER].setX(x);
-                        mContainerViews[CENTER].getLayoutParams().width = (int) (SCREEN_WIDTH - x);
-                        mContainerViews[CENTER].requestLayout();
+//                        mContainerViews[CENTER].getLayoutParams().width = (int) (SCREEN_WIDTH - x);
+//                        mContainerViews[CENTER].requestLayout();
                         break;
                     case Right2Left:
                         mContainerViews[RIGHT].setX(x);
-                        mContainerViews[RIGHT].getLayoutParams().width = (int) (SCREEN_WIDTH - x);
-                        mContainerViews[RIGHT].requestLayout();
-                        mContainerViews[CENTER].setX(0);
-                        mContainerViews[CENTER].getLayoutParams().width = (int) x;
-                        mContainerViews[CENTER].requestLayout();
+//                        mContainerViews[RIGHT].getLayoutParams().width = (int) (SCREEN_WIDTH - x);
+//                        mContainerViews[RIGHT].requestLayout();
+                        mContainerViews[CENTER].setX(x-SCREEN_WIDTH);
+//                        mContainerViews[CENTER].getLayoutParams().width = (int) x;
+//                        mContainerViews[CENTER].requestLayout();
                         break;
                 }
                 lastX = x;
@@ -181,17 +181,17 @@ public class WipeViewPager extends FrameLayout {
     }
 
     private void prepareContainerViewPositions() {
-        mContainerViews[LEFT].setX(0);
-        mContainerViews[LEFT].getLayoutParams().width = 0;
-        mContainerViews[LEFT].requestLayout();
-        mContainerViews[LEFT].setAlignLeft(true);
+        mContainerViews[LEFT].setX(-SCREEN_WIDTH);
+//        mContainerViews[LEFT].getLayoutParams().width = 0;
+//        mContainerViews[LEFT].requestLayout();
+//        mContainerViews[LEFT].setAlignLeft(true);
         mContainerViews[RIGHT].setX(SCREEN_WIDTH);
-        mContainerViews[RIGHT].getLayoutParams().width = 0;
-        mContainerViews[RIGHT].requestLayout();
-        mContainerViews[RIGHT].setAlignLeft(false);
+//        mContainerViews[RIGHT].getLayoutParams().width = 0;
+//        mContainerViews[RIGHT].requestLayout();
+//        mContainerViews[RIGHT].setAlignLeft(false);
         mContainerViews[CENTER].setX(0);
-        mContainerViews[CENTER].getLayoutParams().width = SCREEN_WIDTH;
-        mContainerViews[CENTER].requestLayout();
+//        mContainerViews[CENTER].getLayoutParams().width = SCREEN_WIDTH;
+//        mContainerViews[CENTER].requestLayout();
     }
 
     public interface WipeAdapter {

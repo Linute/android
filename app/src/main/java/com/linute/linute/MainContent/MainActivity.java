@@ -897,6 +897,8 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
 
+                Log.i("AAA", body.toString(4));
+
                 File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
                 memeDir.mkdirs();
 
@@ -952,11 +954,11 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray filters = body.getJSONArray("filters");
 
-                File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
-                memeDir.mkdirs();
+                File filtersDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
+                filtersDir.mkdirs();
 
 
-                for (File f : memeDir.listFiles()) {
+                for (File f : filtersDir.listFiles()) {
                     for (int i = 0; i < filters.length(); i++) {
                         String fileName = filters.getString(i);
                         if (fileName.equals(f)) break;
@@ -967,7 +969,7 @@ public class MainActivity extends BaseTaptActivity {
 
                 for (int i = 0; i < filters.length(); i++) {
                     final String fileName = filters.getString(i);
-                    final File file = new File(memeDir, fileName);
+                    final File file = new File(filtersDir, fileName);
                     if (!file.exists()) {
                         try {
                             file.createNewFile();
