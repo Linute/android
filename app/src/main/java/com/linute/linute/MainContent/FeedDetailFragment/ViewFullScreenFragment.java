@@ -7,13 +7,14 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
@@ -26,6 +27,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.ProgressBarAnimation;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
 import org.json.JSONException;
@@ -39,9 +41,11 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class ViewFullScreenFragment extends BaseFragment {
 
+
     private static final String URI_KEY = "uri_key";
     private static final String TYPE_KEY = "type_key";
     private static final String POST_ID_KEY = "post_id_key";
+    private static final String PROGRESS_THRESHOLD = "progress_thresh";
 
     private ImageView vImage;
     private View vVideoParent;
@@ -52,12 +56,13 @@ public class ViewFullScreenFragment extends BaseFragment {
     private Uri mLink;
     private int mPostType;
 
-
     //stuff for impressions
     //if postId is not null, we will send impression
     private String mPostId;
     private String mCollegeId;
     private String mUserId;
+
+    private ProgressBar vProgressBar;
 
     public ViewFullScreenFragment() {
 
@@ -70,11 +75,12 @@ public class ViewFullScreenFragment extends BaseFragment {
      * @param type - status/image/video
      * @return fragment
      */
-    public static ViewFullScreenFragment newInstance(Uri link, int type) {
+    public static ViewFullScreenFragment newInstance(Uri link, int type, int progressThreshold) {
         ViewFullScreenFragment fragment = new ViewFullScreenFragment();
         Bundle args = new Bundle();
         args.putParcelable(URI_KEY, link);
         args.putInt(TYPE_KEY, type);
+        args.putInt(PROGRESS_THRESHOLD, progressThreshold);
         fragment.setArguments(args);
         return fragment;
     }
@@ -88,12 +94,13 @@ public class ViewFullScreenFragment extends BaseFragment {
      * @param type   - status/video/image
      * @return fragment
      */
-    public static ViewFullScreenFragment newInstance(String postId, Uri link, int type) {
+    public static ViewFullScreenFragment newInstance(String postId, Uri link, int type, int progressThreshold) {
         ViewFullScreenFragment fragment = new ViewFullScreenFragment();
         Bundle args = new Bundle();
         args.putParcelable(URI_KEY, link);
         args.putInt(TYPE_KEY, type);
         args.putString(POST_ID_KEY, postId);
+        args.putInt(PROGRESS_THRESHOLD, progressThreshold);
         fragment.setArguments(args);
         return fragment;
     }
@@ -116,12 +123,43 @@ public class ViewFullScreenFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_view_full_screen, container, false);
-
-
         getActivity().onTouchEvent(MotionEvent.obtain(0,0,MotionEvent.ACTION_CANCEL,0,0,0));
         vImage = (ImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
         vTextureVideoView = (ScalableVideoView) vVideoParent.findViewById(R.id.video);
+
+        vProgressBar = (ProgressBar) root.findViewById(R.id.progress_bar);
+        vProgressBar.setIndeterminate(false);
+
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            int threshold = getArguments().getInt(PROGRESS_THRESHOLD, 0);
+            if (threshold == 0) vProgressBar.setVisibility(View.GONE);
+            else {
+                vProgressBar.setMax(threshold);
+                ProgressBarAnimation animation = new ProgressBarAnimation(vProgressBar, threshold, 0);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        vProgressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                    }
+                });
+
+                animation.setDuration(threshold);
+                vProgressBar.startAnimation(animation);
+            }
+
+            setFragmentState(FragmentState.FINISHED_UPDATING);
+        }else {
+            vProgressBar.setVisibility(View.GONE);
+        }
 
         root.findViewById(R.id.touch_layer).setOnTouchListener(
                 new View.OnTouchListener() {
@@ -248,6 +286,9 @@ public class ViewFullScreenFragment extends BaseFragment {
                 vTextureVideoView.stop();
             }
         }
+
+        vProgressBar.clearAnimation();
+        vProgressBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -267,16 +308,11 @@ public class ViewFullScreenFragment extends BaseFragment {
             public void run() {
                 try {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
                     if (activity == null) return;
-
                     JSONObject body = new JSONObject();
-
                     body.put("college", mCollegeId);
                     body.put("user", mUserId);
-
                     body.put("room", id);
-
                     activity.emitSocket(API_Methods.VERSION + ":posts:loops", body);
 
                 } catch (JSONException e) {

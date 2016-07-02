@@ -19,14 +19,14 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            app:scalableType="fitCenter"
-            android:background="@color/fifty_black"/>
+            android:background="@color/fifty_black"
+            app:scalableType="fitCenter"/>
     </FrameLayout>
 
     <ImageView
         android:id="@+id/play"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_gravity="center"
         android:src="@drawable/ic_cinema"
         android:visibility="gone"/>
@@ -49,6 +49,18 @@
         android:textColor="@color/white"
         android:textSize="20sp"
         android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:max="1000"
+        android:indeterminate="false"
+        android:progress="1000"
+        android:progressDrawable="@drawable/circle_progress"
+    />
 
     <View
         android:id="@+id/touch_layer"

@@ -51,7 +51,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +75,8 @@ import okhttp3.Response;
  * Created by Arman on 1/11/16.
  */
 
-public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, SuggestionsResultListener, SuggestionsVisibilityManager {
+public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
+        SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
@@ -154,15 +154,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     recList.smoothScrollToPosition(0);
             }
         });
-
-
         toolbar.inflateMenu(R.menu.feed_detail_toolbar);
-
-
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.feed_detail_options){
+                if (item.getItemId() == R.id.feed_detail_options) {
                     if (mCommentsRetrieved)
                         showOptionsDialog();
                     return true;
@@ -171,16 +167,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
         });
 
+
+        //comments recyclerview
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
-        recList.setHasFixedSize(true);
         final LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
-
+        mFeedDetailAdapter.setCommentActions(this);
         recList.setAdapter(mFeedDetailAdapter);
-
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
             @Override
             public void run() {
@@ -193,9 +189,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 //when passing last item and scrolling upward
-                if(llm.findLastCompletelyVisibleItemPosition() ==  RecyclerView.NO_POSITION && dy < 0){
+                if (llm.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
                     //close keyboard
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(recyclerView.getWindowToken(), 0);
                 }
             }
@@ -203,14 +199,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         });
 
 
-
+        //mention recyclerview
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         manager.setOrientation(LinearLayoutManager.VERTICAL);
-
         mMentionedList = (RecyclerView) rootView.findViewById(R.id.feed_detail_mentions);
         mMentionedList.setLayoutManager(manager);
         mMentionedList.setHasFixedSize(true);
-        mMentionedList.addItemDecoration(new DividerItemDecoration(getActivity(), null));
         mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
         mMentionedList.setAdapter(mMentionedPersonAdapter);
 
@@ -350,12 +344,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public void onPause() {
         super.onPause();
 
-        if (mAlertDialog != null){
+        if (mAlertDialog != null) {
             mAlertDialog.dismiss();
             mAlertDialog = null;
         }
 
-        mFeedDetailAdapter.closeAllDialogs();
         mFeedDetailAdapter.closeAllItems();
 
         VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
@@ -390,8 +383,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
 
-        LSDKEvents event = new LSDKEvents(getActivity());
-        event.getEventWithId(mFeedDetail.getPostId(), new Callback() {
+        new LSDKEvents(getActivity()).getEventWithId(mFeedDetail.getPostId(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -417,25 +409,22 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         });
                     }
                     return;
-//                    Toast.makeText(getActivity(), "Oops, looks like something went wrong", Toast.LENGTH_SHORT).show();
-
                 }
+
                 JSONObject jsonObject;
                 JSONArray comments;
+                JSONObject owner;
                 JSONArray mentionedPeople;
 
-                String res = response.body().string();
-                // Log.i(TAG, "onResponse: " + res);
                 try {
-                    jsonObject = new JSONObject(res);
+                    jsonObject = new JSONObject(response.body().string());
 
-                    //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
+                    //Log.i(TAG, "onResponse: " + jsonObject.toString(4));
 
                     mFeedDetail.getPost().updateInfo(jsonObject);
-
                     mSkip = mFeedDetail.getPost().getNumOfComments() - 20;
 
-                    ArrayList<Object> tempComments = new ArrayList<>();
+                    final ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
 
                     Date myDate;
@@ -468,17 +457,21 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             );
                         }
 
+                        owner = comments.getJSONObject(i).getJSONObject("owner");
+
                         tempComments
                                 .add(new Comment(
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
-                                                ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                                ((JSONObject) comments.get(i)).getString("text"),
-                                                ((JSONObject) comments.get(i)).getString("id"),
-                                                ((JSONObject) comments.get(i)).getInt("privacy") == 1,
-                                                ((JSONObject) comments.get(i)).getString("anonymousImage"),
+                                                owner.getString("id"),
+                                                owner.getString("profileImage"),
+                                                owner.getString("fullName"),
+                                                comments.getJSONObject(i).getString("text"),
+                                                comments.getJSONObject(i).getString("id"),
+                                                comments.getJSONObject(i).getInt("privacy") == 1,
+                                                comments.getJSONObject(i).getString("anonymousImage"),
                                                 mentionedPersonLightArrayList,
-                                                myDate == null ? 0 : myDate.getTime()
+                                                myDate == null ? 0 : myDate.getTime(),
+                                                comments.getJSONObject(i).getBoolean("isLiked"),
+                                                comments.getJSONObject(i).getInt("numberOfLikes")
                                         )
                                 );
                     }
@@ -486,9 +479,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     if (comments.length() == 0) {
                         tempComments.add(null);
                     }
-
-                    mFeedDetail.getComments().clear();
-                    mFeedDetail.getComments().addAll(tempComments);
 
                     if (getActivity() == null) return;
 
@@ -498,6 +488,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
+                                    mFeedDetail.getComments().clear();
+                                    mFeedDetail.getComments().addAll(tempComments);
+
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
                                     mAnonCheckBoxContainer.setVisibility(
@@ -528,26 +521,27 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private void loadMoreComments() {
 
-        if (!mCommentsRetrieved) {
+        if (!mCommentsRetrieved || mSkip < 0) {
             return;
         }
 
         mFeedDetailAdapter.setDenySwipe(true);
         mFeedDetailAdapter.closeAllItems();
 
-        mSkip -= 20;
+        int skip = mSkip - 20;
         int limit = 20;
 
         Map<String, String> eventComments = new HashMap<>();
         eventComments.put("event", mFeedDetail.getPostId());
-        if (mSkip < 0) {
-            limit += mSkip;
-            mSkip = 0;
+        if (skip < 0) {
+            limit += skip;
+            skip = 0;
         }
 
-        eventComments.put("skip", mSkip + "");
+        eventComments.put("skip", skip + "");
         eventComments.put("limit", limit + "");
 
+        final int skip1 = skip;
         new LSDKEvents(getActivity()).getComments(eventComments, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -577,11 +571,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             }
                             return;
                         }
+
                         JSONObject jsonObject;
                         JSONArray comments;
+                        JSONObject owner;
                         JSONArray mentionedPeople;
 
-                        ArrayList<Object> tempComments = new ArrayList<>();
+                        final ArrayList<Object> tempComments = new ArrayList<>();
 
                         try {
                             jsonObject = new JSONObject(response.body().string());
@@ -591,7 +587,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             Date myDate;
                             SimpleDateFormat format = Utils.getDateFormat();
 
-                            if (mSkip != 0) {
+                            if (skip1 > 0) {
                                 tempComments.add(new LoadMoreItem());
                             }
 
@@ -618,23 +614,24 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     );
                                 }
 
+                                owner = comments.getJSONObject(i).getJSONObject("owner");
                                 tempComments
                                         .add(new Comment(
-                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("id"),
-                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("profileImage"),
-                                                        ((JSONObject) comments.get(i)).getJSONObject("owner").getString("fullName"),
-                                                        ((JSONObject) comments.get(i)).getString("text"),
-                                                        ((JSONObject) comments.get(i)).getString("id"),
-                                                        ((JSONObject) comments.get(i)).getInt("privacy") == 1,
-                                                        ((JSONObject) comments.get(i)).getString("anonymousImage"),
+                                                        owner.getString("id"),
+                                                        owner.getString("profileImage"),
+                                                        owner.getString("fullName"),
+                                                        comments.getJSONObject(i).getString("text"),
+                                                        comments.getJSONObject(i).getString("id"),
+                                                        comments.getJSONObject(i).getInt("privacy") == 1,
+                                                        comments.getJSONObject(i).getString("anonymousImage"),
                                                         mentionedPersonLightArrayList,
-                                                        myDate == null ? 0 : myDate.getTime()
+                                                        myDate == null ? 0 : myDate.getTime(),
+                                                        comments.getJSONObject(i).getBoolean("isLiked"),
+                                                        comments.getJSONObject(i).getInt("numberOfLikes")
                                                 )
                                         );
                             }
 
-                            mFeedDetail.getComments().remove(0);
-                            mFeedDetail.getComments().addAll(0, tempComments);
 
                             if (getActivity() == null) return;
 
@@ -644,6 +641,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            mSkip = skip1;
+                                            mFeedDetail.getComments().remove(0);
+                                            mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.setDenySwipe(false);
                                             mFeedDetailAdapter.notifyDataSetChanged();
                                         }
@@ -667,24 +667,24 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         );
     }
 
-    private void showOptionsDialog(){
+    private void showOptionsDialog() {
         if (mFeedDetail.getPostUserId() == null || getActivity() == null) return;
 
-        if (mFeedDetail.getPostUserId().equals(mViewId)){ //is the viewers post
+        if (mFeedDetail.getPostUserId().equals(mViewId)) { //is the viewers post
             String[] ops = new String[]{"Delete post", mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous"};
 
             mAlertDialog = new AlertDialog.Builder(getActivity())
                     .setItems(ops, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (which == 0){
+                            if (which == 0) {
                                 showConfirmDeleteDialog();
-                            }else {
+                            } else {
                                 showRevealConfirm();
                             }
                         }
                     }).show();
-        }else {
+        } else {
             String[] ops = new String[]{
                     mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post",
                     mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide post",
@@ -694,7 +694,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     .setItems(ops, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
+                            switch (which) {
                                 case 0:
                                     showMuteConfirmation();
                                     break;
@@ -1043,21 +1043,28 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
 
+
+
+
     /* MENTIONS CODE */
 
     private final String BUCKET = "MENTIONS";
     private Handler mSearchHandler = new Handler();
     private String mQueryString = "";
     private boolean mDisplayList = false;
+    private Call mFriendSearchCall;
 
     private Runnable mSearchRunnable = new Runnable() {
         @Override
         public void run() {
             if (getActivity() == null) return;
-            new LSDKFriends(getActivity()).getFriendsForMention(mViewId, mQueryString, "0", new Callback() {
+
+            if (mFriendSearchCall != null) mFriendSearchCall.cancel();
+
+            mFriendSearchCall = new LSDKFriends(getActivity()).getFriendsForMention(mViewId, mQueryString, "0", new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    if (getActivity() == null) return;
+                    if (getActivity() == null || call.isCanceled()) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1075,16 +1082,18 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             //Log.i(TAG, "onResponse: " + res);
 
                             JSONArray friends = new JSONObject(res).getJSONArray("friends");
+                            JSONObject user;
 
                             final ArrayList<MentionedPerson> personList = new ArrayList<>();
 
                             for (int i = 0; i < friends.length(); i++) {
+                                user = friends.getJSONObject(i).getJSONObject("user");
                                 try {
                                     personList.add(
                                             new MentionedPerson(
-                                                    friends.getJSONObject(i).getJSONObject("user").getString("fullName"),
-                                                    friends.getJSONObject(i).getJSONObject("user").getString("id"),
-                                                    friends.getJSONObject(i).getJSONObject("user").getString("profileImage")
+                                                    user.getString("fullName"),
+                                                    user.getString("id"),
+                                                    user.getString("profileImage")
                                             )
                                     );
                                 } catch (JSONException e) {
@@ -1228,6 +1237,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         }
     }
 
+
+
+    /* DEALING WITH COMMENTS */
+
     private boolean mCommentsRetrieved = false;
 
     private Emitter.Listener newComment = new Emitter.Listener() {
@@ -1251,7 +1264,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
                         recList.canScrollVertically(1);
 
-            }catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
 
@@ -1273,11 +1286,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     );
                 }
 
-                //if NoComments View is showing, remove it
-                if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
-                    mFeedDetail.getComments().clear();
-                }
-
                 final Comment com = new Comment(
                         object.getJSONObject("owner").getString("id"),
                         object.getJSONObject("owner").getString("profileImage"),
@@ -1287,13 +1295,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         object.getInt("privacy") == 1,
                         object.getString("anonymousImage"),
                         mentionedPersonLightArrayList,
-                        myDate.getTime()
+                        myDate.getTime(),
+                        false,
+                        0
                 );
-
-                mFeedDetail.getComments().add(com);
-
-                mFeedDetail.refreshCommentCount();
-
 
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -1311,7 +1316,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mFeedDetailAdapter.notifyDataSetChanged();
+                                    //if NoComments View is showing, remove it
+                                    if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
+                                        mFeedDetail.getComments().clear();
+                                    }
+
+                                    mFeedDetail.getComments().add(com);
+                                    mFeedDetail.refreshCommentCount();
+                                    mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     if (finalSmoothScroll || !mCanScrollDown)
                                         recList.scrollToPosition(mFeedDetail.getComments().size());
                                 }
@@ -1377,4 +1389,306 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             Utils.showServerErrorToast(getActivity());
         }
     }
+
+
+    /* DELETING COMMENT */
+    @Override
+    public void deleteComment(final int pos, final String id) {
+        if (mFeedDetailAdapter.getDenySwipe()) return;
+
+        if (getActivity() != null) {
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Delete")
+                    .setMessage("Are you sure you want to delete this comment?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            confirmDeleteComment(pos, id);
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
+    }
+
+    private void confirmDeleteComment(final int in, final String id) {
+        if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
+
+        final int pos = in - 1;
+        final Comment com = (Comment) mFeedDetail.getComments().get(pos);
+
+        //if viewer is not the owner of the comment, return
+        // exception: anon comments can be deleted by post owner
+        if (!com.getCommentPostId().equals(id) || (!com.getCommentUserId().equals(mViewId) && !com.isAnon()))
+            return;
+
+        mFeedDetailAdapter.setDenySwipe(true);
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Deleting comment...", true, false);
+
+        new LSDKEvents(getActivity()).deleteComment(id, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                mFeedDetailAdapter.setDenySwipe(false);
+                progressDialog.dismiss();
+
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(act, "Failed to delete comment. Could not find connection.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+
+                    final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                    if (act != null) {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        //mItemManger.removeShownLayouts(mSwipeLayout);
+                                        mFeedDetail.getComments().remove(pos);
+                                        mFeedDetailAdapter.notifyItemRemoved(pos + 1);
+                                        mFeedDetailAdapter.notifyItemRangeChanged(pos + 1, mFeedDetail.getComments().size() + 1);
+                                        mFeedDetail.refreshCommentCount();
+
+                                        Toast.makeText(act, "Comment deleted", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    Log.i("Comment item delete", "onResponse: " + response.body().string());
+                    final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+
+                    if (act != null) {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(act);
+                            }
+                        });
+                    }
+                }
+
+                progressDialog.dismiss();
+                mFeedDetailAdapter.setDenySwipe(false);
+            }
+        });
+    }
+
+    @Override
+    public void closeAllDialogs() {
+        if (mAlertDialog != null) mAlertDialog.dismiss();
+    }
+
+
+    /* REVEALING COMMENT */
+    @Override
+    public void revealComment(final int pos, final String id, final boolean isAnon) {
+        if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Hide")
+                    .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to make this comment anonymous?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            confirmRevealComment(pos, id, isAnon);
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+    }
+
+    private void confirmRevealComment(final int in, final String id, final boolean isAnon) {
+        if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
+
+        final int pos = in - 1;
+        final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
+
+        //safe check
+        //double check that they are revealing their own comment
+        if (!comment.getCommentUserId().equals(mViewId) || !comment.getCommentPostId().equals(id))
+            return;
+
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
+        mFeedDetailAdapter.setDenySwipe(true);
+
+        new LSDKEvents(getActivity()).revealComment(id, !isAnon, new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                progressDialog.dismiss();
+                mFeedDetailAdapter.setDenySwipe(false);
+
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(act, "Failed to change comment. Could not find connection.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String res = response.body().string();
+                if (response.isSuccessful()) {
+                    try {
+                        if (!isAnon) { //set new anon image
+                            comment.setAnonImage(new JSONObject(res).getString("anonymousImage"));
+                        }
+
+                        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            comment.setIsAnon(!isAnon);
+                                            mFeedDetailAdapter.notifyItemChanged(pos + 1);
+                                            Toast.makeText(activity, isAnon ? "Comment revealed" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                    } catch (JSONException e) {
+                        final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                        if (act != null) {
+                            act.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(act, "An error occurred. Please try again later.", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.i("Comment item reveal", "onResponse: " + response.body().string());
+                    final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                    if (act != null) {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(act, "Failed to change comment. Please try again later.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+                progressDialog.dismiss();
+                mFeedDetailAdapter.setDenySwipe(false);
+            }
+        });
+    }
+
+
+    /* Report Comment */
+
+    @Override
+    public void reportComment(final String id) {
+        if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Report")
+                    .setMessage("Are you sure you want to report this comment?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            confirmReportComment(id);
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+    }
+
+    @Override
+    public void likeComment(boolean like, String id) {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("comment", id);
+                obj.put("liked", like);
+                activity.emitSocket(API_Methods.VERSION +":comments:liked", obj);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void confirmReportComment(String id) {
+        if (getActivity() == null || mFeedDetailAdapter.getDenySwipe()) return;
+
+        new LSDKEvents(getActivity()).reportComment(id, mViewId, new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                if (act != null) {
+                    act.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(act);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+                    final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                    if (act != null) {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(act, "Comment reported", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                } else {
+                    Log.i("Comment item report", "onResponse: " + response.body().string());
+                    final BaseTaptActivity act = (BaseTaptActivity) getActivity();
+                    if (act != null) {
+                        act.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showBadConnectionToast(act);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
 }
+

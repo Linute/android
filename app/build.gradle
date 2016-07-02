@@ -63,9 +63,6 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.0'
 
     //new
-    compile 'net.gotev:uploadservice:2.1'
-    compile 'net.gotev:uploadservice-okhttp:2.1'
-
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.2.2'
 
 }

@@ -214,8 +214,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 @Override
                 public void onClick(View v) {
                     if (mUpdate != null) {
-                        if (mUpdate.getUpdateType() == Update.UpdateType.MATCHED
-                                || mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
+                        if (mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
                             ((MainActivity) mContext).addFragmentToContainer(
                                     TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
                             );
@@ -445,8 +444,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case ALSO_COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
-                case MATCHED:
-                    drawable = R.drawable.icon_user;
+                case LIKED_COMMENT:
+                    drawable = R.drawable.icon_like;
                     break;
                 default:
                     drawable = R.drawable.icon_user;

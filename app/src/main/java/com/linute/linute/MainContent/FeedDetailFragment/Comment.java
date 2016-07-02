@@ -17,7 +17,9 @@ public class Comment {
     private String mCommentPostId;
     private long mDateLong;
     private boolean mIsAnon;
+    private boolean mIsLiked;
     private String mAnonImage;
+    private int mNumberOfLikes;
 
 
     private List<MentionedPersonLight> mMentionedPeople;
@@ -32,6 +34,7 @@ public class Comment {
         mAnonImage = "";
         mMentionedPeople = new ArrayList<>();
         mDateLong = 0;
+        mNumberOfLikes = 0;
     }
 
     public Comment(String commentUserId,
@@ -42,7 +45,9 @@ public class Comment {
                    boolean isAnon,
                    String anonImage,
                    List<MentionedPersonLight> mentionedPeople,
-                   long date
+                   long date,
+                   boolean isLiked,
+                   int numberOfLikes
     ) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
@@ -53,6 +58,8 @@ public class Comment {
         mAnonImage = anonImage;
         mMentionedPeople = mentionedPeople;
         mDateLong = date;
+        mIsLiked = isLiked;
+        mNumberOfLikes = numberOfLikes;
 
     }
 
@@ -78,6 +85,27 @@ public class Comment {
 
     public boolean isAnon(){
         return mIsAnon;
+    }
+
+    public boolean isLiked(){
+        return mIsLiked;
+    }
+
+    public boolean toggleLiked(){
+        mIsLiked = !mIsLiked;
+        return mIsLiked;
+    }
+
+    public int getNumberOfLikes(){
+        return mNumberOfLikes;
+    }
+
+    public int decrementLikes(){
+        return --mNumberOfLikes;
+    }
+
+    public int incrementLikes(){
+        return ++mNumberOfLikes;
     }
 
     public List<MentionedPersonLight> getMentionedPeople(){

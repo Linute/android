@@ -55,6 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -547,7 +548,9 @@ public class EditSaveVideoFragment extends Fragment{
                             media.release();
 
                             ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
-                            subscriber.onNext(image);
+
+                            if (image != null) subscriber.onNext(image);
+                            else subscriber.onError(new FileNotFoundException("Could not find image"));
                         }
 
                         @Override

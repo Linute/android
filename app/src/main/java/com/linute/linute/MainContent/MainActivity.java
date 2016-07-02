@@ -310,14 +310,13 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     @Override
-    public void addFragmentOnTop(Fragment fragment) {
+    public void addFragmentOnTop(Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
         hideKeyboard();
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
-                .add(R.id.mainActivity_fragment_holder, fragment)
+                .add(R.id.mainActivity_fragment_holder, fragment, tag)
                 .addToBackStack(PROFILE_OR_EVENT_NAME)
                 .commit();
     }
@@ -645,12 +644,18 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-                    NewMessageEvent chat = new NewMessageEvent(true);
+                    final NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));
                     chat.setOtherUserId(activity.getString("ownerID"));
                     chat.setOtherUserName(activity.getString("ownerFullName"));
-                    newMessageSnackbar(chat);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            newMessageSnackbar(chat);
+                        }
+                    });
 
                     NewMessageBus.getInstance().setNewMessage(chat);
                 } else {

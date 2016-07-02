@@ -70,6 +70,7 @@ public class ImageUtility {
 
 
     public static Uri savePictureToCache(Context context, Bitmap bitmap) {
+        if (context == null) return  null;
         File image = new File(
                 context.getCacheDir() + File.separator + "temp.jpg");
         // Saving the bitmap

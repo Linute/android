@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -21,6 +23,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
  */
 public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
+    private static final String FULL_VIEW_TAG = "profile_full_viewer";
+
     protected ImageView vEventImage;
 
     private Context mContext;
@@ -32,7 +36,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private View vMovieIcon;
 
 
-    public ProfileViewHolder(View itemView, Context context) {
+    public ProfileViewHolder(View itemView, final Context context) {
         super(itemView);
 
         mContext = context;
@@ -42,6 +46,22 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         vMovieIcon = itemView.findViewById(R.id.movie_icon);
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
+        itemView.setOnTouchListener(
+                new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            MainActivity activity = (MainActivity) context;
+                            if (activity != null &&
+                                    activity.getSupportFragmentManager().findFragmentByTag(FULL_VIEW_TAG) != null) {
+                                activity.getSupportFragmentManager().popBackStack();
+
+                            }
+                        }
+                        return false;
+                    }
+                }
+        );
     }
 
     void bindModel(UserActivityItem userActivityItem) {
@@ -60,11 +80,10 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         } else {
             vAnonIcon.setVisibility(View.GONE);
 
-            if (userActivityItem.hasVideo()){
+            if (userActivityItem.hasVideo()) {
                 vMovieIcon.setVisibility(View.VISIBLE);
                 vGradient.setVisibility(View.VISIBLE);
-            }
-            else {
+            } else {
                 vGradient.setVisibility(View.GONE);
                 vMovieIcon.setVisibility(View.GONE);
             }
@@ -85,17 +104,20 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
     @Override
     public boolean onLongClick(View v) {
-        if (mUserActivityItem.getPost().getType() != Post.POST_TYPE_STATUS){
+        if (mUserActivityItem.getPost().getType() != Post.POST_TYPE_STATUS) {
             MainActivity activity = (MainActivity) mContext;
             VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
             activity.addFragmentOnTop(
                     ViewFullScreenFragment.newInstance(
                             Uri.parse(mUserActivityItem.getPost().getType() == Post.POST_TYPE_VIDEO ?
                                     mUserActivityItem.getPost().getVideoUrl() : mUserActivityItem.getPost().getImage()),
-                            mUserActivityItem.getPost().getType()
-                    )
+                            mUserActivityItem.getPost().getType(),
+                            0
+                    ),
+                    FULL_VIEW_TAG
             );
-            vEventImage.getParent().requestDisallowInterceptTouchEvent(true);
+
+            v.getParent().requestDisallowInterceptTouchEvent(true);
         }
         return true;
     }
