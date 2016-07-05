@@ -71,15 +71,15 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     public short mVideoState = 0;
 
-    private CheckBox mAnonSwitch;
-    private CheckBox mCommentsAnon;
+//    private CheckBox mAnonSwitch;
+//    private CheckBox mCommentsAnon;
     private CheckBox mPlaying;
-    private View mBottom;
+//    private View mBottom;
 
     private String mCollegeId;
     private String mUserId;
 
-    private View mUploadButton;
+//    private View mUploadButton;
 
     private Uri mVideoLink;
 
@@ -103,7 +103,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
 //    private HasSoftKeySingleton mHasSoftKeySingleton;
 
-    View mOverlays;
+//    View mOverlays;
 
 
     public static Fragment newInstance(Uri imageUri, VideoDimen videoDimen) {
@@ -211,7 +211,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
         View view = getView();
 
-        FrameLayout bottomFL = (FrameLayout)view.findViewById(R.id.bottom);
 
         mPlaying = new CheckBox(getContext());
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
@@ -229,7 +228,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
             }
         });
 
-        bottomFL.addView(mPlaying);
+        vBottom.addView(mPlaying);
 
 
 
@@ -257,6 +256,23 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     @Override
     protected void uploadContent() {
         processVideo();
+    }
+
+    public void showProgress(final boolean show) {
+        if (getActivity() == null) return;
+
+        vBottom.setVisibility(show ? View.GONE : View.VISIBLE);
+        mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+
+        if (show) {
+            if (mProgressDialog == null) { //none exist yet
+                mProgressDialog = ProgressDialog.show(getActivity(), null, "Processing video. This may take a moment.", true);
+            } else { //show it
+                mProgressDialog.show();
+            }
+        } else if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
     }
 
     /*
@@ -587,7 +603,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
                             new sendVideoAsync().execute(outputFile,
                                     mAnonSwitch.isChecked() ? "1" : "0",
-                                    mCommentsAnon.isChecked() ? "0" : "1",
+                                    mAnonComments.isChecked() ? "0" : "1",
                                     mTextView.getText().toString(),
                                     image.getPath()
                             );
@@ -602,26 +618,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     }
 
 
-/*
 
-
-    private void showProgress(final boolean show) {
-        if (getActivity() == null) return;
-
-        mBottom.setVisibility(show ? View.GONE : View.VISIBLE);
-        mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
-
-        if (show) {
-            if (mProgressDialog == null) { //none exist yet
-                mProgressDialog = ProgressDialog.show(getActivity(), null, "Processing video. This may take a moment.", true);
-            } else { //show it
-                mProgressDialog.show();
-            }
-        } else if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-    }
-*/
 
 
 

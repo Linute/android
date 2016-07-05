@@ -56,6 +56,14 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         return fragment;
     }
 
+    protected void showProgress(final boolean show) {
+        if (mReturnType == CameraActivity.SEND_POST) {
+            vBottom.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+        }
+        mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
 
     @Override
     protected void loadContent(ViewGroup container) {

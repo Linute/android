@@ -82,7 +82,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected int mReturnType;
 
-    protected View vBottom;
+    protected View mOverlays;
+    protected ViewGroup vBottom;
     protected HasSoftKeySingleton mHasSoftKeySingleton;
     protected OverlayWipeAdapter mFilterAdapter;
 
@@ -121,7 +122,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mUserId = sharedPreferences.getString("userID", "");
 
 
+
         mContentContainer = (ViewGroup)view.findViewById(R.id.main_content);
+        mOverlays = view.findViewById(R.id.overlays);
 
         //shows the text strip when image touched
 
@@ -150,7 +153,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mTextView = (TextView) view.findViewById(R.id.textView);
 
-        vBottom = view.findViewById(R.id.bottom);
+        vBottom = (ViewGroup)view.findViewById(R.id.bottom);
         mAnonComments = (CheckBox) vBottom.findViewById(R.id.anon_comments);
         mAnonSwitch = (CheckBox) vBottom.findViewById(R.id.editFragment_switch);
         if (mReturnType == CameraActivity.SEND_POST) {
@@ -456,6 +459,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected abstract void uploadContent();
 
+    protected abstract void showProgress(boolean show);
+
     protected void toggleStickerDrawer(){
         if(mStickerDrawer.isAnimating()) return;
         mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
@@ -478,14 +483,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         imm.hideSoftInputFromWindow(mContentContainer.getWindowToken(), 0);
     }
 
-
-    protected void showProgress(final boolean show) {
-        if (mReturnType == CameraActivity.SEND_POST) {
-            vBottom.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
-        }
-        mUploadButton.setVisibility(show ? View.INVISIBLE : View.VISIBLE);
-        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
 
 
     protected Socket mSocket;
