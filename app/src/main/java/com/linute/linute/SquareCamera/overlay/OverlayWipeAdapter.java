@@ -1,8 +1,6 @@
 package com.linute.linute.SquareCamera.overlay;
 
 import android.graphics.Bitmap;
-import android.util.Log;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,11 +50,9 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter {
     }
 
     public void add(Bitmap overlay, int position) {
-        Log.i("AAA", "" + position);
         if (position == -1) {
             position = mOverlays.size() - 1;
         }
-        Log.i("AAA", "" + position);
 
         mOverlays.add(position, overlay);
     }
@@ -67,5 +63,6 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter {
                 b.recycle();
         }
     }
+
 
 }

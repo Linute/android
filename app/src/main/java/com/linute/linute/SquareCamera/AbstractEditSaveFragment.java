@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -86,6 +87,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     protected ViewGroup vBottom;
     protected HasSoftKeySingleton mHasSoftKeySingleton;
     protected OverlayWipeAdapter mFilterAdapter;
+    private StickerDrawerAdapter mStickerDrawerAdapter;
+    private WipeViewPager mFilterPager;
 
     public static Fragment newInstance(Uri imageUri, boolean fromGallery) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -122,8 +125,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mUserId = sharedPreferences.getString("userID", "");
 
 
-
-        mContentContainer = (ViewGroup)view.findViewById(R.id.main_content);
+        mContentContainer = (ViewGroup) view.findViewById(R.id.main_content);
         mOverlays = view.findViewById(R.id.overlays);
 
         //shows the text strip when image touched
@@ -149,11 +151,10 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         });
 
 
-
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
         mTextView = (TextView) view.findViewById(R.id.textView);
 
-        vBottom = (ViewGroup)view.findViewById(R.id.bottom);
+        vBottom = (ViewGroup) view.findViewById(R.id.bottom);
         mAnonComments = (CheckBox) vBottom.findViewById(R.id.anon_comments);
         mAnonSwitch = (CheckBox) vBottom.findViewById(R.id.editFragment_switch);
         if (mReturnType == CameraActivity.SEND_POST) {
@@ -179,27 +180,26 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         });
 
 
-
         //setup memes drawer
-        mStickerContainer = (CoordinatorLayout)view.findViewById(R.id.stickers_container);
+        mStickerContainer = (CoordinatorLayout) view.findViewById(R.id.stickers_container);
 
-        mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
+        mStickerDrawer = (RecyclerView) view.findViewById(R.id.sticker_drawer);
         mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
-        final StickerDrawerAdapter stickerDrawerAdapter = new StickerDrawerAdapter();
-        mStickerDrawer.setAdapter(stickerDrawerAdapter);
+        mStickerDrawerAdapter = new StickerDrawerAdapter();
+        mStickerDrawer.setAdapter(mStickerDrawerAdapter);
 
-        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
+        final ImageView stickerTrashCan = (ImageView) view.findViewById(R.id.sticker_trash);
 
         final DisplayMetrics metrics = getResources().getDisplayMetrics();
 
 
-        stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
+        mStickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
             @Override
             public void onStickerSelected(final Bitmap sticker) {
                 ManipulableImageView stickerIV = new ManipulableImageView(getContext());
                 stickerIV.setImageBitmap(sticker);
-                stickerIV.setX(metrics.widthPixels/10);
-                stickerIV.setY(metrics.heightPixels/10);
+                stickerIV.setX(metrics.widthPixels / 10);
+                stickerIV.setY(metrics.heightPixels / 10);
 
 
                 stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
@@ -239,7 +239,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
 
         //setup Filters pager and adapter
-        WipeViewPager filterPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
+        mFilterPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
         mFilterAdapter = new OverlayWipeAdapter();
 
       /*  new Thread(new Runnable() {
@@ -259,9 +259,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         }).start();*/
 
-        filterPager.setWipeAdapter(mFilterAdapter);
+        mFilterPager.setWipeAdapter(mFilterAdapter);
 
-        filterPager.setOnTouchListener(new View.OnTouchListener() {
+        mFilterPager.setOnTouchListener(new View.OnTouchListener() {
             long timeDown = 0;
             int x, y;
 
@@ -286,7 +286,34 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         });
 
+
+        if (!overlaysLoaded)
+            loadOverlays();
+        loadContent(mContentContainer);
+
+        setUpEditText();
+    }
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         //load filters async
+        if (!overlaysLoaded)
+            loadOverlays();
+    }
+
+    private boolean overlaysLoaded;
+
+    private void loadOverlays() {
+        final FragmentActivity activity = getActivity();
+        if(mStickerDrawerAdapter == null || mFilterAdapter == null || activity == null) return;
+
+        overlaysLoaded = true;
+
+        final DisplayMetrics metrics = getResources().getDisplayMetrics();
+
+
         final File filterDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
 
         new Thread(new Runnable() {
@@ -295,17 +322,21 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
                 measureOptions.inJustDecodeBounds = true;
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for(File f: filterDir.listFiles()) {
-                    Log.i("AAA", f.getAbsolutePath());
+                for (File f : filterDir.listFiles()) {
                     Bitmap b = null;
                     do {
                         b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                    }while(b == null);
-                    float scale = (float)metrics.widthPixels/b.getWidth();
+                    } while (b == null);
+                    float scale = (float) metrics.widthPixels / b.getWidth();
 
-                    mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false),-1);
+                    mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
                     b.recycle();
-                    Log.i("AAA", mFilterAdapter.getCount()+"");
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFilterPager.invalidate();
+                        }
+                    });
                 }
             }
         }).start();
@@ -318,24 +349,18 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for(File f: memeDir.listFiles()) {
-                    stickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
-                    getActivity().runOnUiThread(new Runnable() {
+                for (File f : memeDir.listFiles()) {
+                    mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            stickerDrawerAdapter.notifyDataSetChanged();
+                            mStickerDrawerAdapter.notifyDataSetChanged();
                         }
                     });
                 }
             }
         }).start();
-
-        loadContent(mContentContainer);
-
-        setUpEditText();
     }
-
-
 
     private void showConfirmDialog() {
         if (mEditText.getVisibility() == View.VISIBLE) {
@@ -461,15 +486,14 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected abstract void showProgress(boolean show);
 
-    protected void toggleStickerDrawer(){
-        if(mStickerDrawer.isAnimating()) return;
+    protected void toggleStickerDrawer() {
+        if (mStickerDrawer.isAnimating()) return;
         mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
-    protected void closeStickerDrawer(){
+    protected void closeStickerDrawer() {
         mStickerDrawer.setVisibility(View.GONE);
     }
-
 
 
     protected void showKeyboard() { //show keyboard for EditText
@@ -482,7 +506,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mContentContainer.getWindowToken(), 0);
     }
-
 
 
     protected Socket mSocket;
@@ -538,6 +561,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         mFilterAdapter.destroy();
+        mStickerDrawerAdapter.destroy();
     }
 
     @Override

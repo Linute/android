@@ -897,8 +897,6 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
 
-                Log.i("AAA", body.toString(4));
-
                 File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
                 memeDir.mkdirs();
 
@@ -981,7 +979,6 @@ public class MainActivity extends BaseTaptActivity {
                                         public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                                             try {
                                                 FileOutputStream fos = new FileOutputStream(file);
-                                                Log.e("AAA", file.getAbsolutePath());
                                                 resource.compress(Bitmap.CompressFormat.PNG, 10, fos);
                                             } catch (FileNotFoundException f) {
                                                 f.printStackTrace();

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -96,7 +95,6 @@ public class WipeViewPager extends FrameLayout {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 x = event.getX(0);
-                Log.i("AAA", mDragDirection.toString());
                 switch (mDragDirection) {
                     case None:
                         float dX = initX - x;
@@ -150,7 +148,6 @@ public class WipeViewPager extends FrameLayout {
                         break;
                 }
                 if (swapIndex != CENTER) {
-                    Log.i("AAA", mPosition+"");
                     //swap containers for next swipe action
                     AlignedImageView tmp = mContainerViews[CENTER];
                     mContainerViews[CENTER] = mContainerViews[swapIndex];
@@ -178,6 +175,13 @@ public class WipeViewPager extends FrameLayout {
 
 //            }
         }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        prepareContainerViewPositions();
+        prepareContainerViewContents();
     }
 
     private void prepareContainerViewPositions() {
