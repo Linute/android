@@ -13,13 +13,13 @@ import android.widget.ImageView;
 
 /**
  * Created by mikhail on 6/25/16.
- *
+ * <p/>
  * View that allows users to cycle through images. Uses a "wipe" transition
- *
+ * <p/>
  * Requires a WipeAdapter to provide it with images, set using @link setAdapter(WipeAdapter)
- *
+ * <p/>
  * Will request images with no bounds (infinite scrolling)
- *
+ * <p/>
  * Images MUST be the size of the view to display correctly
  */
 public class WipeViewPager extends FrameLayout {
@@ -62,7 +62,7 @@ public class WipeViewPager extends FrameLayout {
             mContainerViews[i].setScaleType(ImageView.ScaleType.MATRIX);
             addView(mContainerViews[i]);
         }
-        prepareContainerViewPositions();
+        prepareContainerViewPositions(-1);
     }
 
     public void setPosition(int mPosition) {
@@ -74,7 +74,7 @@ public class WipeViewPager extends FrameLayout {
         prepareContainerViewContents();
     }
 
-    private float initX, initY, lastX, lastY, x;
+    private float initX, lastX, lastVelX, x;
 
     private enum DragDirection {
         Left2Right, None, Right2Left
@@ -110,7 +110,7 @@ public class WipeViewPager extends FrameLayout {
                         }
                         break;
                     case Left2Right:
-                        mContainerViews[LEFT].setX(x-SCREEN_WIDTH);
+                        mContainerViews[LEFT].setX(x - SCREEN_WIDTH);
 //                        mContainerViews[LEFT].getLayoutParams().width = (int) x;
 //                        mContainerViews[LEFT].requestLayout();
                         mContainerViews[CENTER].setX(x);
@@ -121,29 +121,29 @@ public class WipeViewPager extends FrameLayout {
                         mContainerViews[RIGHT].setX(x);
 //                        mContainerViews[RIGHT].getLayoutParams().width = (int) (SCREEN_WIDTH - x);
 //                        mContainerViews[RIGHT].requestLayout();
-                        mContainerViews[CENTER].setX(x-SCREEN_WIDTH);
+                        mContainerViews[CENTER].setX(x - SCREEN_WIDTH);
 //                        mContainerViews[CENTER].getLayoutParams().width = (int) x;
 //                        mContainerViews[CENTER].requestLayout();
                         break;
                 }
+                lastVelX = lastX - x;
                 lastX = x;
                 return true;
             case MotionEvent.ACTION_UP:
                 x = event.getX(0);
                 int swapIndex = CENTER;
                 //TODO check bounds of mPosition
-
                 switch (mDragDirection) {
                     case Left2Right:
-                        if (x - lastX > KINETIC_THRESHOLD || x > SCREEN_WIDTH - STATIC_THRESHOLD) {
+                        if (lastVelX < KINETIC_THRESHOLD || x > SCREEN_WIDTH - STATIC_THRESHOLD) {
                             swapIndex = LEFT;
-                            mPosition --;
+                            mPosition--;
                         }
                         break;
                     case Right2Left:
-                        if (lastX - x > KINETIC_THRESHOLD || x < STATIC_THRESHOLD) {
+                        if (lastVelX > KINETIC_THRESHOLD || x < STATIC_THRESHOLD) {
                             swapIndex = RIGHT;
-                            mPosition ++;
+                            mPosition++;
                         }
                         break;
                 }
@@ -151,10 +151,11 @@ public class WipeViewPager extends FrameLayout {
                     //swap containers for next swipe action
                     AlignedImageView tmp = mContainerViews[CENTER];
                     mContainerViews[CENTER] = mContainerViews[swapIndex];
-                    mContainerViews[swapIndex] = tmp;
+                    mContainerViews[swapIndex] = mContainerViews[(swapIndex == LEFT ? RIGHT : LEFT)];
+                    mContainerViews[(swapIndex == LEFT ? RIGHT : LEFT)] = tmp;
                     //prepare container contents for next wipe action;
                 }
-                prepareContainerViewPositions();
+                prepareContainerViewPositions(swapIndex);
                 if (swapIndex != CENTER) {
                     prepareContainerViewContents();
                 }
@@ -168,10 +169,10 @@ public class WipeViewPager extends FrameLayout {
     private void prepareContainerViewContents() {
         if (mWipeAdapter != null) {
 //            if (mPosition - 1 > 0) {
-                mContainerViews[LEFT].setImageBitmap(mWipeAdapter.getOverlay(mPosition - 1));
+            mContainerViews[LEFT].setImageBitmap(mWipeAdapter.getOverlay(mPosition - 1));
 //            }
 //            if (mPosition + 1 < mWipeAdapter.getCount()) {
-                mContainerViews[RIGHT].setImageBitmap(mWipeAdapter.getOverlay(mPosition + 1));
+            mContainerViews[RIGHT].setImageBitmap(mWipeAdapter.getOverlay(mPosition + 1));
 
 //            }
         }
@@ -180,22 +181,27 @@ public class WipeViewPager extends FrameLayout {
     @Override
     public void invalidate() {
         super.invalidate();
-        prepareContainerViewPositions();
+        prepareContainerViewPositions(-1);
         prepareContainerViewContents();
     }
 
-    private void prepareContainerViewPositions() {
-        mContainerViews[LEFT].setX(-SCREEN_WIDTH);
-//        mContainerViews[LEFT].getLayoutParams().width = 0;
-//        mContainerViews[LEFT].requestLayout();
-//        mContainerViews[LEFT].setAlignLeft(true);
-        mContainerViews[RIGHT].setX(SCREEN_WIDTH);
-//        mContainerViews[RIGHT].getLayoutParams().width = 0;
-//        mContainerViews[RIGHT].requestLayout();
-//        mContainerViews[RIGHT].setAlignLeft(false);
-        mContainerViews[CENTER].setX(0);
-//        mContainerViews[CENTER].getLayoutParams().width = SCREEN_WIDTH;
-//        mContainerViews[CENTER].requestLayout();
+    private void prepareContainerViewPositions(int swapIndex) {
+
+        int duration = Math.abs(lastVelX) > KINETIC_THRESHOLD ? (int)((swapIndex == RIGHT ? SCREEN_WIDTH-x : x)/Math.abs(lastVelX) * .75f) : 200;
+//        Log.e("AA", "prepare ("+duration + " = " + (swapIndex == RIGHT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
+
+        if (swapIndex == RIGHT || swapIndex == CENTER) {
+            mContainerViews[LEFT].animate().x(-SCREEN_WIDTH).setDuration(duration).start();
+        } else {
+            mContainerViews[LEFT].setX(-SCREEN_WIDTH);
+        }
+
+        if (swapIndex == LEFT || swapIndex == CENTER) {
+            mContainerViews[RIGHT].animate().x(SCREEN_WIDTH).setDuration(duration).start();
+        } else {
+            mContainerViews[RIGHT].setX(SCREEN_WIDTH);
+        }
+        mContainerViews[CENTER].animate().x(0).setDuration(duration).start();
     }
 
     public interface WipeAdapter {
