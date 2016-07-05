@@ -122,7 +122,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
 
         mContentContainer = (ViewGroup)view.findViewById(R.id.main_content);
-        loadContent(mContentContainer);
 
         //shows the text strip when image touched
 
@@ -328,6 +327,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         }).start();
 
+        loadContent(mContentContainer);
 
         setUpEditText();
     }

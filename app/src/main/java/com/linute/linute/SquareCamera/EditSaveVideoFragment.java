@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
@@ -15,32 +14,20 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
@@ -48,13 +35,7 @@ import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
-import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
-import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
-import com.linute.linute.SquareCamera.overlay.WipeViewPager;
-import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
@@ -66,13 +47,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.Locale;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
@@ -83,7 +59,7 @@ import rx.schedulers.Schedulers;
 /**
  *
  */
-public class EditSaveVideoFragment extends Fragment {
+public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     public static final String TAG = EditSaveVideoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
@@ -110,13 +86,13 @@ public class EditSaveVideoFragment extends Fragment {
     private ProgressDialog mProgressDialog;
 
     private TextureVideoView mSquareVideoView;
-    private CustomBackPressedEditText mEditText;
-    private TextView mTextView;
+//    private CustomBackPressedEditText mEditText;
+//    private TextView mTextView;
 
-    private CoordinatorLayout mStickerContainer;
-    private RecyclerView mStickerDrawer;
+//    private CoordinatorLayout mStickerContainer;
+//    private RecyclerView mStickerDrawer;
 
-    private View mFrame;
+//    private View mFrame;
 
     private VideoDimen mVideoDimen;
 
@@ -125,7 +101,7 @@ public class EditSaveVideoFragment extends Fragment {
     private Subscription mVideoProcessSubscription;
     private FFmpeg mFfmpeg;
 
-    private HasSoftKeySingleton mHasSoftKeySingleton;
+//    private HasSoftKeySingleton mHasSoftKeySingleton;
 
     View mOverlays;
 
@@ -148,12 +124,6 @@ public class EditSaveVideoFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.square_camera_edit_save_video, container, false);
-    }
-
-    @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -163,20 +133,8 @@ public class EditSaveVideoFragment extends Fragment {
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
 
-        mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
-
         //setup VideoView
-        mVideoLink = getArguments().getParcelable(BITMAP_URI);
-        mSquareVideoView = (TextureVideoView) view.findViewById(R.id.video_frame);
-        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
 
-        mSquareVideoView.setVideoURI(mVideoLink);
-        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mSquareVideoView.start();
-            }
-        });
 
         final Toolbar t = (Toolbar) view.findViewById(R.id.top);
         t.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -188,7 +146,7 @@ public class EditSaveVideoFragment extends Fragment {
             }
         });
 
-        mFrame = view.findViewById(R.id.text_container);
+ /*       mFrame = view.findViewById(R.id.text_container);
         mFrame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,61 +156,10 @@ public class EditSaveVideoFragment extends Fragment {
                     showKeyboard();
                 }
             }
-        });
+        });*/
 
-        mPlaying = (CheckBox) view.findViewById(R.id.play);
-        mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) mSquareVideoView.start();
-                else mSquareVideoView.pause();
-            }
-        });
 
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                if (mPlaying.isChecked()) mSquareVideoView.start();
-            }
-        });
 
-        mBottom = view.findViewById(R.id.bottom);
-        //shows the text strip when image touched
-        View anonParent = mBottom.findViewById(R.id.anon);
-        View commentParent = mBottom.findViewById(R.id.comments);
-
-        mCommentsAnon = (CheckBox) commentParent.findViewById(R.id.anon_comments);
-        mAnonSwitch = (CheckBox) anonParent.findViewById(R.id.anon_post);
-
-        mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
-        if (mHasSoftKeySingleton.getHasNavigation()) {
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mBottom.getLayoutParams();
-            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
-            mBottom.setLayoutParams(params);
-        }
-
-        if (mReturnType == CameraActivity.SEND_POST) {
-            anonParent.setVisibility(View.VISIBLE);
-            commentParent.setVisibility(View.VISIBLE);
-        } else {
-            anonParent.setVisibility(View.INVISIBLE);
-            commentParent.setVisibility(View.INVISIBLE);
-        }
-
-        mUploadButton = t.findViewById(R.id.save_photo);
-
-        //save button
-        mUploadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                processVideo();
-            }
-        });
-
-        mOverlays = mFrame.findViewById(R.id.overlays);
-        mEditText = (CustomBackPressedEditText) view.findViewById(R.id.text);
-        mTextView = (TextView) mFrame.findViewById(R.id.textView);
-        setUpEditText();
 
         mFfmpeg = FFmpeg.getInstance(getActivity());
 
@@ -295,271 +202,160 @@ public class EditSaveVideoFragment extends Fragment {
                     });
         }
 
-
-        View stickerDrawerHandle = t.findViewById(R.id.sticker_drawer_handle);
-        stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleStickerDrawer();
-            }
-        });
-
-
-        WipeViewPager pager = (WipeViewPager)mFrame.findViewById(R.id.filter_overlay);
-        pager.setWipeAdapter(new OverlayWipeAdapter());
-        mStickerContainer = (CoordinatorLayout)view.findViewById(R.id.stickers_container);
-
-        mStickerDrawer = (RecyclerView)view.findViewById(R.id.sticker_drawer);
-        mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
-        final StickerDrawerAdapter stickerDrawerAdapter = new StickerDrawerAdapter();
-        mStickerDrawer.setAdapter(stickerDrawerAdapter);
-
-        final ImageView stickerTrashCan = (ImageView)view.findViewById(R.id.sticker_trash);
-
-        final DisplayMetrics metrics = getResources().getDisplayMetrics();
-
-
-        stickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
-            @Override
-            public void onStickerSelected(final Bitmap sticker) {
-                ManipulableImageView stickerIV = new ManipulableImageView(getContext());
-                stickerIV.setImageBitmap(sticker);
-                stickerIV.setX(metrics.widthPixels/10);
-                stickerIV.setY(metrics.heightPixels/10);
-
-
-                stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
-                    @Override
-                    public void onViewPickedUp(View me) {
-                        t.setVisibility(View.GONE);
-                        stickerTrashCan.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onViewDropped(View me) {
-                        t.setVisibility(View.VISIBLE);
-                        stickerTrashCan.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onViewCollision(View me) {
-//                        stickerTrashCan.set
-                    }
-
-                    @Override
-                    public void onViewDropCollision(View me) {
-                        mStickerContainer.removeView(me);
-                    }
-
-                    @Override
-                    public View getCollisionSensor() {
-                        return stickerTrashCan;
-                    }
-                });
-
-
-                mStickerContainer.addView(stickerIV);
-                closeStickerDrawer();
-            }
-        });
-
-
-        final File filterDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
-
-
-        WipeViewPager overlayPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
-
-
-
-        final OverlayWipeAdapter overlayAdapter = new OverlayWipeAdapter();
-
-      /*  new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Bitmap og = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
-                    ColorMatrix bw = new ColorMatrix();
-                    bw.setSaturation(0);
-                    overlayAdapter.add(ImageUtility.applyFilter(og, bw));
-                    ColorMatrix sat = new ColorMatrix();
-                    sat.setSaturation(3);
-                    overlayAdapter.add(ImageUtility.applyFilter(og, sat));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();*/
-
-        overlayPager.setWipeAdapter(overlayAdapter);
-
-
-
-        overlayPager.setOnTouchListener(new View.OnTouchListener() {
-            long timeDown = 0;
-            int x, y;
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    timeDown = System.currentTimeMillis();
-                    x = (int) motionEvent.getRawX();
-                    y = (int) motionEvent.getRawY();
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
-                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                            mEditText.setVisibility(View.VISIBLE);
-                            mEditText.requestFocus();
-                            showKeyboard();
-                            //mCanMove = false; //can't mvoe strip while in edit
-                        }
-                    }
-                }
-                return false;
-            }
-        });
-
-
-
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
-                measureOptions.inJustDecodeBounds = true;
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                for(File f: filterDir.listFiles()) {
-                    Log.i("AAA", f.getAbsolutePath());
-                    Bitmap b = null;
-                    do {
-                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                    }while(b == null);
-                    float scale = (float)metrics.widthPixels/b.getWidth();
-
-                    overlayAdapter.add(Bitmap.createScaledBitmap(b, (int)(b.getWidth()*scale), (int)(b.getHeight()*scale), false), -1);
-                    b.recycle();
-                    Log.i("AAA", overlayAdapter.getCount()+"");
-                }
-            }
-        }).start();
-
-        final File memeDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final BitmapFactory.Options options = new BitmapFactory.Options();
-                for(File f: memeDir.listFiles()) {
-                    stickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            stickerDrawerAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-            }
-        }).start();
-
-
-
     }
 
-    private void setUpEditText() {
-        //when back is pressed
-        mEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+
+    @Override
+    protected void loadContent(ViewGroup container) {
+        mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
+
+        View view = getView();
+
+        FrameLayout bottomFL = (FrameLayout)view.findViewById(R.id.bottom);
+
+        mPlaying = new CheckBox(getContext());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+        mPlaying.setLayoutParams(params);
+        mPlaying.setChecked(true);
+        mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
+
+
+        mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void backPressed() {
-                hideKeyboard();
-
-                mEditText.setVisibility(View.GONE);
-
-                //if EditText is empty, hide it
-                if (!mEditText.getText().toString().trim().isEmpty()) {
-                    mTextView.setText(mEditText.getText().toString());
-                    mTextView.setVisibility(View.VISIBLE);
-                }
-
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) mSquareVideoView.start();
+                else mSquareVideoView.pause();
             }
         });
 
-        //when done is pressed on keyboard
-        mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        bottomFL.addView(mPlaying);
+
+
+
+        mVideoLink = getArguments().getParcelable(BITMAP_URI);
+
+        mSquareVideoView = new TextureVideoView(container.getContext());
+        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
+
+        mSquareVideoView.setVideoURI(mVideoLink);
+        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
+            public void onPrepared(MediaPlayer mp) {
+                mSquareVideoView.start();
+            }
+        });
+        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mPlaying.isChecked()) mSquareVideoView.start();
+            }
+        });
+        container.addView(mSquareVideoView);
+    }
+
+    @Override
+    protected void uploadContent() {
+        processVideo();
+    }
+
+    /*
+
+        private void setUpEditText() {
+            //when back is pressed
+            mEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+                @Override
+                public void backPressed() {
                     hideKeyboard();
 
                     mEditText.setVisibility(View.GONE);
+
                     //if EditText is empty, hide it
                     if (!mEditText.getText().toString().trim().isEmpty()) {
                         mTextView.setText(mEditText.getText().toString());
                         mTextView.setVisibility(View.VISIBLE);
                     }
+
                 }
-                return false;
-            }
-        });
+            });
 
-        //movement
-        mTextView.setOnTouchListener(new View.OnTouchListener() {
-            float prevY;
-            float totalMovement;
-            int mTextMargin;
-            int bottomMargin = -1;
-            int topMargin = 0;
+            //when done is pressed on keyboard
+            mEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if (actionId == EditorInfo.IME_ACTION_DONE) {
+                        hideKeyboard();
 
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
+                        mEditText.setVisibility(View.GONE);
+                        //if EditText is empty, hide it
+                        if (!mEditText.getText().toString().trim().isEmpty()) {
+                            mTextView.setText(mEditText.getText().toString());
+                            mTextView.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    return false;
+                }
+            });
 
-                switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        prevY = event.getY();
-                        totalMovement = 0;
-                        if (bottomMargin == -1) {
-                            if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y){
-                                bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mUploadButton.getBottom();
-                            }else {
-                                bottomMargin = 0;
-                                topMargin = 0;
+            //movement
+            mTextView.setOnTouchListener(new View.OnTouchListener() {
+                float prevY;
+                float totalMovement;
+                int mTextMargin;
+                int bottomMargin = -1;
+                int topMargin = 0;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+
+                    switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                        case MotionEvent.ACTION_DOWN:
+                            prevY = event.getY();
+                            totalMovement = 0;
+                            if (bottomMargin == -1) {
+                                if (mFrame.getHeight() >= mHasSoftKeySingleton.getSize().y){
+                                    bottomMargin = mHasSoftKeySingleton.getBottomPixels();
+                                    topMargin = mUploadButton.getBottom();
+                                }else {
+                                    bottomMargin = 0;
+                                    topMargin = 0;
+                                }
                             }
-                        }
-                        break;
+                            break;
 
-                    case MotionEvent.ACTION_UP:
-                        if (totalMovement <= 2) { //tapped and no movement
-                            mTextView.setVisibility(View.GONE);
-                            mEditText.setVisibility(View.VISIBLE);
-                            mEditText.requestFocus(); //open edittext
-                            showKeyboard();
-                        }
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        int change = (int) (event.getY() - prevY);
-                        totalMovement += Math.abs(change);
+                        case MotionEvent.ACTION_UP:
+                            if (totalMovement <= 2) { //tapped and no movement
+                                mTextView.setVisibility(View.GONE);
+                                mEditText.setVisibility(View.VISIBLE);
+                                mEditText.requestFocus(); //open edittext
+                                showKeyboard();
+                            }
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            int change = (int) (event.getY() - prevY);
+                            totalMovement += Math.abs(change);
 
-                        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mTextView.getLayoutParams();
+                            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mTextView.getLayoutParams();
 
-                        mTextMargin = params.topMargin + change; //new margintop
+                            mTextMargin = params.topMargin + change; //new margintop
 
-                        if (mTextMargin <= topMargin) { //over the top edge
-                            mTextMargin = topMargin;
-                        } else if (mTextMargin > mFrame.getHeight() - bottomMargin - v.getHeight()) { //under the bottom edge
-                            mTextMargin = mFrame.getHeight() - bottomMargin - v.getHeight();
-                        }
+                            if (mTextMargin <= topMargin) { //over the top edge
+                                mTextMargin = topMargin;
+                            } else if (mTextMargin > mFrame.getHeight() - bottomMargin - v.getHeight()) { //under the bottom edge
+                                mTextMargin = mFrame.getHeight() - bottomMargin - v.getHeight();
+                            }
 
-                        params.setMargins(0, mTextMargin, 0, 0); //set new margin
-                        mTextView.setLayoutParams(params);
+                            params.setMargins(0, mTextMargin, 0, 0); //set new margin
+                            mTextView.setLayoutParams(params);
 
-                        break;
+                            break;
+                    }
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
 
-    }
-
+        }
+    */
     private void showConfirmDialog() {
         if (getActivity() == null) return;
 
@@ -589,16 +385,6 @@ public class EditSaveVideoFragment extends Fragment {
                     }
                 }).show();
     }
-
-    private void toggleStickerDrawer(){
-        if(mStickerDrawer.isAnimating()) return;
-        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
-    }
-
-    private void closeStickerDrawer(){
-        mStickerDrawer.setVisibility(View.GONE);
-    }
-
 
 
     @Override
@@ -680,7 +466,7 @@ public class EditSaveVideoFragment extends Fragment {
                 } else {
                     String overlay = saveViewAsImage(mOverlays);
 
-                    Log.i(TAG, "call:frame  " + mFrame.getHeight());
+                    Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
                     Log.i(TAG, "call: " + mTextView.getTop());
 
                     if (overlay != null) {
@@ -702,9 +488,7 @@ public class EditSaveVideoFragment extends Fragment {
                                     "[1:v]scale=%d:-1[over];", newWidth);
                         }
 
-                        Point coord = getOverlayCoordinates(newWidth, newHeight);
-                        coord.x = 0;
-                        coord.y = 0;
+                        Point coord = new Point(0,0);
                         //overlay
                         cmd += String.format(Locale.US,
                                 "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
@@ -818,6 +602,7 @@ public class EditSaveVideoFragment extends Fragment {
     }
 
 
+/*
 
 
     private void showProgress(final boolean show) {
@@ -836,6 +621,7 @@ public class EditSaveVideoFragment extends Fragment {
             mProgressDialog.dismiss();
         }
     }
+*/
 
 
 
@@ -912,7 +698,7 @@ public class EditSaveVideoFragment extends Fragment {
     }
 
 
-    private void showKeyboard() { //show keyboard for EditText
+    /*private void showKeyboard() { //show keyboard for EditText
         InputMethodManager lManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(mEditText, 0);
     }
@@ -922,7 +708,7 @@ public class EditSaveVideoFragment extends Fragment {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mFrame.getWindowToken(), 0);
     }
-
+*/
 
     //save the overlay as png
     public String saveViewAsImage(View view) {
