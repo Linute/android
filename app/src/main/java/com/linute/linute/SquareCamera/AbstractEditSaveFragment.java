@@ -64,6 +64,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     public static final String BITMAP_URI = "bitmap_Uri";
     public static final String FROM_GALLERY = "from_gallery";
 
+    protected View mAllContent;
     protected ViewGroup mContentContainer;
     protected Toolbar mToolbar;
 
@@ -124,8 +125,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
 
-
-        mContentContainer = (ViewGroup) view.findViewById(R.id.main_content);
+        mAllContent = view.findViewById(R.id.final_content);
+        mContentContainer = (ViewGroup) view.findViewById(R.id.base_content);
         mOverlays = view.findViewById(R.id.overlays);
 
         //shows the text strip when image touched
@@ -329,7 +330,11 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                     } while (b == null);
                     float scale = (float) metrics.widthPixels / b.getWidth();
 
-                    mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
+                    try {
+                        mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
+                    }catch(OutOfMemoryError e){
+                        e.printStackTrace();
+                    }
                     b.recycle();
                     activity.runOnUiThread(new Runnable() {
                         @Override

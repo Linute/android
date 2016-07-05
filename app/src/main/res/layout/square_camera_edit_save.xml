@@ -4,9 +4,14 @@
     android:background="@color/colorPrimary"
     android:focusableInTouchMode="true">
 
+    <FrameLayout
+        android:id="@+id/final_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <!-- Photos and videos taken/uploaded by user in this view -->
     <FrameLayout
-        android:id="@+id/main_content"
+        android:id="@+id/base_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -44,6 +49,7 @@
             android:textColor="@android:color/white"
             android:textSize="14sp"
             android:visibility="gone" />
+    </FrameLayout>
     </FrameLayout>
 
 

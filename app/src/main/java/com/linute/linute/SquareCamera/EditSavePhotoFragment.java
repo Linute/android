@@ -110,7 +110,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
             return;
         }
 
-        Bitmap bitmap = ImageUtility.getBitmapFromView(mContentContainer);
+        Bitmap bitmap = ImageUtility.getBitmapFromView(mAllContent);
 
         showProgress(true);
         if (getActivity() == null) return;
