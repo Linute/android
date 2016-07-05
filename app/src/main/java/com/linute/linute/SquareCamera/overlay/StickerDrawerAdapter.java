@@ -78,4 +78,12 @@ public class StickerDrawerAdapter extends RecyclerView.Adapter<StickerDrawerAdap
         public void onStickerSelected(Bitmap sticker);
     }
 
+    public void destroy(){
+        for(Bitmap sticker:stickers){
+            if(sticker != null){
+                sticker.recycle();
+            }
+        }
+    }
+
 }
