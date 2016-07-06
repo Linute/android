@@ -3,7 +3,6 @@ package com.linute.linute.MainContent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -25,8 +24,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -62,10 +59,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
@@ -137,7 +135,7 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
-                }else {
+                } else {
                     getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
 
@@ -198,7 +196,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private void navItemSelected(short position, MenuItem item){
+    private void navItemSelected(short position, MenuItem item) {
         boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
 
         if (mPreviousItem != null) {
@@ -207,10 +205,10 @@ public class MainActivity extends BaseTaptActivity {
                 item.setChecked(true);
                 replaceContainerWithFragment(getFragment(position));
                 mPreviousItem = item;
-            }else {
+            } else {
                 getFragment(position).resetFragment();
             }
-        }else {
+        } else {
             item.setChecked(true);
             replaceContainerWithFragment(getFragment(position));
             mPreviousItem = item;
@@ -253,7 +251,7 @@ public class MainActivity extends BaseTaptActivity {
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
-        if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
             mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
                 @Override
                 public void run() {
@@ -265,7 +263,7 @@ public class MainActivity extends BaseTaptActivity {
                     }
                 }
             });
-        }else{
+        } else {
             if (mSafeForFragmentTransaction) {
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
@@ -387,9 +385,9 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else if((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
+        } else if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
             navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
-        } else{
+        } else {
             super.onBackPressed();
         }
     }
@@ -416,14 +414,14 @@ public class MainActivity extends BaseTaptActivity {
 
     public void setUpdateNotification(int count) {
         //setNavItemNotification(R.id.navigation_item_activity, count);
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        if(toolbar != null){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if (toolbar != null) {
             MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
-            if(updateItem != null){
+            if (updateItem != null) {
                 updateItem.getActionView().findViewById(R.id.notification).setVisibility(
                         count > 0 ? View.VISIBLE : View.GONE
                 );
-                ((TextView)updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count): "+"));
+                ((TextView) updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count) : "+"));
             }
         }
     }
@@ -890,9 +888,10 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private  Emitter.Listener meme = new Emitter.Listener() {
+    private Emitter.Listener meme = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+            ;
             try {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
@@ -901,40 +900,40 @@ public class MainActivity extends BaseTaptActivity {
                 memeDir.mkdirs();
 
 
-                for(File f : memeDir.listFiles()){
-                    for(int i = 0; i < memes.length(); i++) {
+                for (File f : memeDir.listFiles()) {
+                    for (int i = 0; i < memes.length(); i++) {
                         String fileName = memes.getString(i);
-                        if(fileName.equals(f)) break;
-                        if(i == memes.length()-1)
+                        if (fileName.equals(f)) break;
+                        if (i == memes.length() - 1)
                             f.delete();
                     }
                 }
 
-                for(int i = 0; i < memes.length(); i++){
+                for (int i = 0; i < memes.length(); i++) {
                     final String fileName = memes.getString(i);
                     final File file = new File(memeDir, fileName);
-                    if(!file.exists()){
+                    if (!file.exists()) {
                         try {
                             file.createNewFile();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Glide.with(MainActivity.this).load(Utils.getMemeImageUrl(fileName)).asBitmap().into(new SimpleTarget<Bitmap>() {
-                                        @Override
-                                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                            try {
-                                                FileOutputStream fos = new FileOutputStream(file);
-                                                resource.compress(Bitmap.CompressFormat.PNG, 10, fos);
-                                            }catch (FileNotFoundException f){
-                                                f.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                }
-                            });
+                            File res = Glide.with(MainActivity.this)
+                                    .load(Utils.getMemeImageUrl(fileName))
+                                    .downloadOnly(1080,1920).get();
 
-                        }catch (IOException ioe){
+                            FileOutputStream fos = new FileOutputStream(file);
+                            FileInputStream fis = new FileInputStream(res);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = fis.read(buf)) > 0) {
+                                fos.write(buf, 0, len);
+                            }
+                            fis.close();
+                            fos.close();
+                        } catch (IOException ioe) {
                             ioe.printStackTrace();
+                        } catch (ExecutionException ee){
+                            ee.printStackTrace();
+                        } catch (InterruptedException ie){
+                            ie.printStackTrace();
                         }
 
                     }
@@ -945,7 +944,7 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private  Emitter.Listener filter = new Emitter.Listener() {
+    private Emitter.Listener filter = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             try {
@@ -971,25 +970,25 @@ public class MainActivity extends BaseTaptActivity {
                     if (!file.exists()) {
                         try {
                             file.createNewFile();
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Glide.with(MainActivity.this).load(Utils.getFilterImageUrl(fileName)).asBitmap().into(new SimpleTarget<Bitmap>() {
-                                        @Override
-                                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                                            try {
-                                                FileOutputStream fos = new FileOutputStream(file);
-                                                resource.compress(Bitmap.CompressFormat.PNG, 10, fos);
-                                            } catch (FileNotFoundException f) {
-                                                f.printStackTrace();
-                                            }
-                                        }
-                                    });
-                                }
-                            });
+                            File res = Glide.with(MainActivity.this)
+                                    .load(Utils.getFilterImageUrl(fileName))
+                                    .downloadOnly(1080,1920).get();
 
+                            FileOutputStream fos = new FileOutputStream(file);
+                            FileInputStream fis = new FileInputStream(res);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = fis.read(buf)) > 0) {
+                                fos.write(buf, 0, len);
+                            }
+                            fis.close();
+                            fos.close();
                         } catch (IOException ioe) {
                             ioe.printStackTrace();
+                        } catch (ExecutionException ee){
+                            ee.printStackTrace();
+                        } catch (InterruptedException ie){
+                            ie.printStackTrace();
                         }
 
                     }

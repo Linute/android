@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
@@ -74,14 +75,14 @@ public class WipeViewPager extends FrameLayout {
         prepareContainerViewContents();
     }
 
-    private float initX, lastX, lastVelX, x;
+    private float initX, lastX, lastVelX, lastTime,  x;
 
     private enum DragDirection {
         Left2Right, None, Right2Left
     }
 
     private DragDirection mDragDirection = DragDirection.None;
-    private static final float KINETIC_THRESHOLD = 20;
+    private static final float KINETIC_THRESHOLD = 5;
     private static final float STATIC_THRESHOLD = 200;
     private static final float INIT_DRAG_THRESHOLD = 50;
 
@@ -92,6 +93,8 @@ public class WipeViewPager extends FrameLayout {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 initX = event.getX(0);
+                lastTime = event.getEventTime();
+
                 return true;
             case MotionEvent.ACTION_MOVE:
                 x = event.getX(0);
@@ -126,7 +129,8 @@ public class WipeViewPager extends FrameLayout {
 //                        mContainerViews[CENTER].requestLayout();
                         break;
                 }
-                lastVelX = lastX - x;
+                lastVelX = (lastX - x)/(event.getEventTime() - lastTime);
+                lastTime = event.getEventTime();
                 lastX = x;
                 return true;
             case MotionEvent.ACTION_UP:
@@ -187,8 +191,10 @@ public class WipeViewPager extends FrameLayout {
 
     private void prepareContainerViewPositions(int swapIndex) {
 
-        int duration = Math.abs(lastVelX) > KINETIC_THRESHOLD ? (int)((swapIndex == RIGHT ? SCREEN_WIDTH-x : x)/Math.abs(lastVelX) * .75f) : 200;
-//        Log.e("AA", "prepare ("+duration + " = " + (swapIndex == RIGHT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
+        int duration = Math.abs(lastVelX) > KINETIC_THRESHOLD ? (int)((swapIndex == LEFT ? SCREEN_WIDTH-x : x)/Math.abs(lastVelX)) : 200;
+        Log.e("AA", "prepare le("+duration + " = " + (swapIndex == LEFT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
+        Log.e("AA", "prepare ri("+duration + " = " + (swapIndex == RIGHT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
+
 
         if (swapIndex == RIGHT || swapIndex == CENTER) {
             mContainerViews[LEFT].animate().x(-SCREEN_WIDTH).setDuration(duration).start();

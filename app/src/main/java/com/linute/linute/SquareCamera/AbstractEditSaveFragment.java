@@ -325,23 +325,23 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 for (File f : filterDir.listFiles()) {
                     Bitmap b = null;
-                    do {
-                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                    } while (b == null);
-                    float scale = (float) metrics.widthPixels / b.getWidth();
+                    b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                    if(b != null) {
+                        float scale = (float) metrics.widthPixels / b.getWidth();
 
-                    try {
-                        mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
-                    }catch(OutOfMemoryError e){
-                        e.printStackTrace();
-                    }
-                    b.recycle();
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mFilterPager.invalidate();
+                        try {
+                            mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
+                        } catch (OutOfMemoryError e) {
+                            e.printStackTrace();
                         }
-                    });
+                        b.recycle();
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mFilterPager.invalidate();
+                            }
+                        });
+                    }
                 }
             }
         }).start();
