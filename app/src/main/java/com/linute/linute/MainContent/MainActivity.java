@@ -31,7 +31,12 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
+
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
@@ -46,6 +51,8 @@ import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
+import com.linute.linute.MainContent.Uploading.UploadIntentService;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -286,10 +293,11 @@ public class MainActivity extends BaseTaptActivity {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
-        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
-            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.FEED);
+        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
+            Intent intent = new Intent(this, UploadIntentService.class);
+            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
+            startService(intent);
         }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -306,7 +314,6 @@ public class MainActivity extends BaseTaptActivity {
                 .commit();
     }
 
-
     @Override
     public void addFragmentToContainer(final Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
@@ -318,14 +325,13 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     @Override
-    public void addFragmentOnTop(Fragment fragment) {
+    public void addFragmentOnTop(Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
         hideKeyboard();
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
-                .add(R.id.mainActivity_fragment_holder, fragment)
+                .add(R.id.mainActivity_fragment_holder, fragment, tag)
                 .addToBackStack(PROFILE_OR_EVENT_NAME)
                 .commit();
     }
@@ -513,6 +519,7 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("posts refresh", refresh);
                     mSocket.on("memes", meme);
                     mSocket.on("filters", filter);
+                    mSocket.on("blocked", blocked);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
@@ -630,24 +637,31 @@ public class MainActivity extends BaseTaptActivity {
         @Override
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
-                final Object post = args[0];
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                            NotificationEventBus
-                                    .getInstance()
-                                    .setNotification(new NotificationEvent(true));
-                        }
+                try {
+                    final Post postObj = new Post((JSONObject) args[0]);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            //the owner of the post is not blocked
+                            if (!BlockedUsersSingleton.getBlockedListSingletion().contains(postObj.getUserId())) {
+                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                    NotificationEventBus
+                                            .getInstance()
+                                            .setNotification(new NotificationEvent(true));
+                                }
 
-                        setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
 
-                        if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                                .addPostToFeed(post)) {
-                            NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
+                                        .addPostToFeed(postObj)) {
+                                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                                }
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (JSONException | NullPointerException e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
@@ -659,12 +673,18 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-                    NewMessageEvent chat = new NewMessageEvent(true);
+                    final NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));
                     chat.setOtherUserId(activity.getString("ownerID"));
                     chat.setOtherUserName(activity.getString("ownerFullName"));
-                    newMessageSnackbar(chat);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            newMessageSnackbar(chat);
+                        }
+                    });
 
                     NewMessageBus.getInstance().setNewMessage(chat);
                 } else {
@@ -754,7 +774,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(new UpdatesFragment());
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -763,7 +783,7 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(new UpdatesFragment());
+                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -972,7 +992,7 @@ public class MainActivity extends BaseTaptActivity {
                             file.createNewFile();
                             File res = Glide.with(MainActivity.this)
                                     .load(Utils.getFilterImageUrl(fileName))
-                                    .downloadOnly(1080,1920).get();
+                                    .downloadOnly(1080, 1920).get();
 
                             FileOutputStream fos = new FileOutputStream(file);
                             FileInputStream fis = new FileInputStream(res);
@@ -985,9 +1005,9 @@ public class MainActivity extends BaseTaptActivity {
                             fos.close();
                         } catch (IOException ioe) {
                             ioe.printStackTrace();
-                        } catch (ExecutionException ee){
+                        } catch (ExecutionException ee) {
                             ee.printStackTrace();
-                        } catch (InterruptedException ie){
+                        } catch (InterruptedException ie) {
                             ie.printStackTrace();
                         }
 
@@ -995,9 +1015,26 @@ public class MainActivity extends BaseTaptActivity {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+
             }
         }
     };
+    private Emitter.Listener blocked = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            JSONObject object = (JSONObject) args[0];
+            if (object != null) {
+                try {
+                    BlockedUsersSingleton
+                            .getBlockedListSingletion()
+                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
 
     private void showUpdateSnackbar(String text) {
         final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);
@@ -1013,7 +1050,6 @@ public class MainActivity extends BaseTaptActivity {
         });
         sn.show();
     }
-
 
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);

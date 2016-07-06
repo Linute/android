@@ -59,7 +59,7 @@ public class LSDKActivity {
         params.put("action[13]", "friend posted photo");
         params.put("action[14]", "friend posted video");
 
-        params.put("action[15]", "matched");
+        params.put("action[15]", "liked comment");
 
         params.put("owner", mUserId);
 

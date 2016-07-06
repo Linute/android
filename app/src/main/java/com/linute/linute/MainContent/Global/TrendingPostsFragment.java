@@ -3,8 +3,10 @@ package com.linute.linute.MainContent.Global;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,15 +14,12 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.LinearLayoutManagerWithSmoothScroller;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
-import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VerticalSnappingRecyclerView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,26 +37,30 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingPostsFragment extends BaseFragment {
+public class TrendingPostsFragment extends BaseFragment{
 
     private static final String ID_KEY = "id_key";
+    private static final String TITLE_KEY = "title_key";
     private static final String TAG = TrendingPostsFragment.class.getSimpleName();
-    private VerticalSnappingRecyclerView vRecView;
+    private RecyclerView vRecView;
 
     private ArrayList<Post> mPostList = new ArrayList<>();
 
     private String mTrendId;
-    private SingleVideoPlaybackManager mSingleVideoPlayerManager = new SingleVideoPlaybackManager();
+    private String mTitleString;
+
     private View mProgressBar;
     private View mRetry;
+    private AppBarLayout vAppBarLayout;
 
     TrendingItemAdapter mTrendingAdapter;
     Handler mHandler = new Handler();
 
 
-    public static TrendingPostsFragment newInstance(String id) {
+    public static TrendingPostsFragment newInstance(String id, String title) {
         Bundle args = new Bundle();
         args.putString(ID_KEY, id);
+        args.putString(TITLE_KEY, title);
         TrendingPostsFragment fragment = new TrendingPostsFragment();
         fragment.setArguments(args);
         return fragment;
@@ -68,9 +71,9 @@ public class TrendingPostsFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mTrendId = getArguments().getString(ID_KEY);
+            mTitleString = getArguments().getString(TITLE_KEY);
         }
         mTrendingAdapter = new TrendingItemAdapter(mPostList, getContext(),
-                mSingleVideoPlayerManager,
                 new LoadMoreViewHolder.OnLoadMore() {
                     @Override
                     public void loadMore() {
@@ -87,7 +90,24 @@ public class TrendingPostsFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_trending, container, false);
 
-        vRecView = (VerticalSnappingRecyclerView) root.findViewById(R.id.recycler_view);
+        vAppBarLayout = (AppBarLayout) root.findViewById(R.id.appbar_layout);
+        Toolbar toolbar = (Toolbar) vAppBarLayout.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
+        toolbar.setTitle(mTitleString);
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vRecView.scrollToPosition(0);
+            }
+        });
+
+        vRecView = (RecyclerView) root.findViewById(R.id.recycler_view);
         mRetry = root.findViewById(R.id.retry);
         mRetry.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,52 +118,15 @@ public class TrendingPostsFragment extends BaseFragment {
             }
         });
 
-        vRecView.setOnScrollStoppedListener(new VerticalSnappingRecyclerView.OnScrollStoppedListener() {
-            @Override
-            public void scrollStarted() {
-                if (vRecView.getHolder() == null) {
-                    vRecView.setHolder(vRecView.findViewHolderForAdapterPosition(0));
-                    if (vRecView.getHolder() == null) return;
-                }
-                if (vRecView.getHolder() instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                    ((TrendingItemAdapter.BaseTrendViewHolder)vRecView.getHolder()).lostFocus();
-            }
-
-            @Override
-            public void scrollStopped(int position) {
-                RecyclerView.ViewHolder h = vRecView.findViewHolderForAdapterPosition(position);
-                if (h != null) {
-                    vRecView.setHolder(h);
-                    if (h instanceof TrendingItemAdapter.BaseTrendViewHolder)
-                        ((TrendingItemAdapter.BaseTrendViewHolder)h).gainedFocus();
-                }
-            }
-        });
-
-        vRecView.enableTouchListener();
-
-        vRecView.setLayoutManager(new LinearLayoutManagerWithSmoothScroller(getContext(), LinearLayoutManager.VERTICAL, false));
-        mTrendingAdapter.setScrollToPosition(new TrendingItemAdapter.ScrollToPosition() {
-            @Override
-            public void scrollToPosition(int position) {
-                vRecView.customScrollToPosition(position);
-            }
-        });
+        vRecView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
         vRecView.setAdapter(mTrendingAdapter);
-        vRecView.addItemDecoration(new SpaceItemDecoration(2));
 
         mProgressBar = root.findViewById(R.id.progress_bar);
 
-        root.findViewById(R.id.back_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getFragmentManager().popBackStack();
-            }
-        });
-
         return root;
     }
+
 
 
     @Override
@@ -162,7 +145,8 @@ public class TrendingPostsFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        mSingleVideoPlayerManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+        vAppBarLayout.setExpanded(true, false);
     }
 
     private int mSkip;
@@ -196,7 +180,6 @@ public class TrendingPostsFragment extends BaseFragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
                 if (!response.isSuccessful()) {
                     Log.d("HEY", response.body().string());
                     setFragmentState(FragmentState.FINISHED_UPDATING);
@@ -393,5 +376,4 @@ public class TrendingPostsFragment extends BaseFragment {
                 }
         );
     }
-
 }

@@ -70,10 +70,10 @@ public class GlobalFragment extends BaseFragment {
 
         mGlobalChoicesAdapter.setGoToTrend(new GlobalChoicesAdapter.GoToTrend() {
             @Override
-            public void goToTrend(String id) {
+            public void goToTrend(String id, String title) {
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null){
-                    activity.addFragmentToContainer(TrendingPostsFragment.newInstance(id), "TREND");
+                    activity.addFragmentToContainer(TrendingPostsFragment.newInstance(id, title), "TREND");
                 }
             }
         });

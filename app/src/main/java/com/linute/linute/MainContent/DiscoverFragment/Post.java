@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -9,9 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * Created by Arman on 12/27/15.
@@ -25,6 +24,7 @@ public class Post implements Parcelable {
     private String mUserId;         // id of post owner
     private String mUserName;       // post owner's full name
     private String mUserImage;      // post owner's profile image
+    private String mCollegeName;    // OP's college
     private String mAnonImage;      // anon image of user
 
     private String mPostId;         // id of post
@@ -61,6 +61,7 @@ public class Post implements Parcelable {
         mAnonImage = "";
         mNumLikes = 0;
         mNumOfComments = 0;
+        mCollegeName = "";
         mPostLiked = false;
         mPostHidden = false;
         mPostMuted = false;
@@ -70,7 +71,6 @@ public class Post implements Parcelable {
      * @param jsonObject  - post json object
      */
     public Post(JSONObject jsonObject) throws JSONException {
-
         mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
@@ -96,6 +96,12 @@ public class Post implements Parcelable {
             mUserId = owner.getString("id");
             mUserName = owner.getString("fullName");
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+
+            try {
+                mCollegeName = owner.getJSONObject("college").getString("name");
+            }catch (JSONException e){
+                mCollegeName = "";
+            }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
             mUserName = "";
@@ -137,12 +143,12 @@ public class Post implements Parcelable {
 
 
     public void updateInfo(JSONObject jsonObject) throws JSONException{
-        int type = jsonObject.getInt("type");
+        mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
             mImage = Utils.getEventImageURL(jsonObject.getJSONArray("images").getString(0));
 
-        if (type == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
+        if (mType == POST_TYPE_VIDEO && jsonObject.getJSONArray("videos").length() > 0)
             mVideoURL = Utils.getVideoURL(jsonObject.getJSONArray("videos").getString(0));
 
         Date myDate;
@@ -162,12 +168,17 @@ public class Post implements Parcelable {
             mUserId = owner.getString("id");
             mUserName = owner.getString("fullName");
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
+
+            try {
+                mCollegeName = owner.getJSONObject("college").getString("name");
+            }catch (JSONException e){
+                mCollegeName = "";
+            }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
             mUserName = "";
             mUserImage = "";
         }
-
 
         mTitle = jsonObject.getString("title");
         mPrivacy = jsonObject.getInt("privacy");
@@ -199,6 +210,10 @@ public class Post implements Parcelable {
         } catch (JSONException e) {
             mPostMuted = false;
         }
+    }
+
+    public String getCollegeName() {
+        return mCollegeName;
     }
 
     public String getNumLike() {
@@ -351,6 +366,7 @@ public class Post implements Parcelable {
         dest.writeString(mAnonImage);
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
         dest.writeString(mVideoURL);
+        dest.writeString(mCollegeName);
     }
 
     private Post(Parcel in) {
@@ -367,6 +383,7 @@ public class Post implements Parcelable {
         mAnonImage = in.readString();
         mPostLiked = in.readByte() != 0; //true if byte != 0
         mVideoURL = in.readString();
+        mCollegeName = in.readString();
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {

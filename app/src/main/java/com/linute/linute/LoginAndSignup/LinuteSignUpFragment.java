@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -33,7 +32,6 @@ import android.widget.ViewFlipper;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.CropActivity.CropActivity;
 import com.linute.linute.UtilsAndHelpers.ImageUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -721,7 +719,8 @@ public class LinuteSignUpFragment extends Fragment {
                     File f = new File(mCurrentPhotoPath);
                     Uri contentUri = Uri.fromFile(f);
                     galleryAddPic(contentUri); // add to gallery
-                    beginCrop(contentUri); //crop image
+                    //beginCrop(contentUri); //crop image
+                    // TODO: 7/5/16
                 } else {
                     showRationalizationDialog();
                 }
@@ -731,7 +730,8 @@ public class LinuteSignUpFragment extends Fragment {
                 mCurrentPhotoPath = null;
             }
         } else if (requestCode == REQUEST_PICK && resultCode == Activity.RESULT_OK) { //got image from gallery
-            beginCrop(data.getData()); //crop image
+            //beginCrop(data.getData()); //crop image
+            //// TODO: 7/5/16
         } else if (requestCode == REQUEST_CROP) { //photo came back from crop
             if (resultCode == Activity.RESULT_OK) {
                 mImageUri = data.getData();
@@ -741,12 +741,12 @@ public class LinuteSignUpFragment extends Fragment {
         }
     }
 
-    private void beginCrop(Uri source) { //begin crop activity
-        if (getActivity() == null) return;
-        Intent intent = new Intent(getActivity(), CropActivity.class);
-        intent.putExtra(CropActivity.IMAGE_URI, source);
-        startActivityForResult(intent, REQUEST_CROP);
-    }
+//    private void beginCrop(Uri source) { //begin crop activity
+//        if (getActivity() == null) return;
+//        Intent intent = new Intent(getActivity(), CropActivity.class);
+//        intent.putExtra(CropActivity.IMAGE_URI, source);
+//        startActivityForResult(intent, REQUEST_CROP);
+//    }
 
 
     public void requestPermissions() {

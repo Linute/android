@@ -7,14 +7,13 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
@@ -24,9 +23,6 @@ import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -54,9 +50,6 @@ public class DiscoverHolderFragment extends BaseFragment {
     private boolean mHasNotification;
 
     private View mNotificationIndicator;
-
-    //makes sure only one video is playing at a time
-    private SingleVideoPlaybackManager mSingleVideoPlaybackManager = new SingleVideoPlaybackManager();
 
     public DiscoverHolderFragment() {
     }
@@ -144,7 +137,7 @@ public class DiscoverHolderFragment extends BaseFragment {
 
             @Override
             public void onPageSelected(int position) {
-                mSingleVideoPlaybackManager.stopPlayback();
+                VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
             }
 
             @Override
@@ -170,7 +163,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
@@ -246,7 +239,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     public void onPause() {
         super.onPause();
 
-        mSingleVideoPlaybackManager.stopPlayback();
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
 
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
@@ -261,38 +254,24 @@ public class DiscoverHolderFragment extends BaseFragment {
 
 
     //returns if success
-    public boolean addPostToFeed(Object post) {
-
-        JSONObject obj = (JSONObject) post;
-
-        if (obj != null && getActivity() != null && mDiscoverFragments[0] != null) {
-            try {
-                Post post1 = new Post(obj);
-
-                return mDiscoverFragments[0].addPostToTop(post1);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                return false;
-            }
-        } else {
-            Log.i(TAG, "addPostToFeed: obj was null");
-            return false;
-        }
+    public boolean addPostToFeed(Post post) {
+        return getActivity() != null &&
+                mDiscoverFragments[0] != null &&
+                mDiscoverFragments[0].addPostToTop(post);
     }
 
     @Override
-    public void resetFragment(){
+    public void resetFragment() {
         mAppBarLayout.setExpanded(true, false);
         mViewPager.setCurrentItem(0, true);
         mDiscoverFragments[0].scrollUp();
     }
 
 
-    public SingleVideoPlaybackManager getSinglePlaybackManager() {
+    /*public SingleVideoPlaybackManager getSinglePlaybackManager() {
         return mSingleVideoPlaybackManager;
     }
-
+*/
     private Subscription mChatSubscription;
 
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {

@@ -10,15 +10,11 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
-import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
 
 /**
  * Created by QiFeng on 2/3/16.
@@ -26,88 +22,101 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 public class ImageFeedHolder extends BaseFeedHolder {
 
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
-
+    public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
-    protected ImageView vBlurred;
-
     protected int mType;
-    protected SingleVideoPlaybackManager mSingleVideoPlaybackManager;
 
-    public ImageFeedHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
+    public ImageFeedHolder(final View itemView, Context context) {
         super(itemView, context);
-        mSingleVideoPlaybackManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        vBlurred = (ImageView) itemView.findViewById(R.id.blurred);
-        setUpOnClicks();
+        setUpOnClicks(itemView.findViewById(R.id.parent));
     }
-
-    protected void setUpOnClicks() {
-        setUpOnClicks(vPostImage);
-    }
-
 
     protected final void setUpOnClicks(View v) {
-        v.setOnClickListener(new DoubleAndSingleClickListener() {
-
+        v.setOnTouchListener(new CustomOnTouchListener() {
             @Override
-            public void onSingleClick(View v) {
+            protected void onSingleTap() {
+                //Log.i(TAG, "onSingleTap: ");
                 singleClick();
             }
 
             @Override
-            public void onDoubleClick(View v) {
-                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
-
-                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-                a.setDuration(400);
-
-                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-                a2.setDuration(200);
-
-                a.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        layer.startAnimation(a2);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-
-                layer.startAnimation(a);
-
-                if (!vLikesHeart.isChecked()) {
-                    vLikesHeart.toggle();
-                }
+            protected void onDoubleTap(float x, float y) {
+                //Log.i(TAG, "onDoubleTap: ");
+                doubleClick();
             }
-        });
 
-        v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                MainActivity activity = (MainActivity) mContext;
-                if (mPost != null && activity != null && mPost.getType() != Post.POST_TYPE_STATUS) {
+            protected void onLongPress() {
+                //Log.i(TAG, "onLongPress: ");
+                longPress();
+            }
 
-                    if (mSingleVideoPlaybackManager != null)
-                        mSingleVideoPlaybackManager.stopPlayback();
-
-                    activity.addFragmentOnTop(
-                            ViewFullScreenFragment.newInstance(
-                                    Uri.parse(mPost.getType() == Post.POST_TYPE_IMAGE ? mPost.getImage() : mPost.getVideoUrl()),
-                                    mPost.getType()
-                            )
-                    );
-                }
-                return true;
+            @Override
+            protected void onLongPressCancelled(boolean thresholdMet) {
+                cancelLongPress(thresholdMet);
             }
         });
+    }
+
+    private void doubleClick() {
+        final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+        AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+        a.setDuration(400);
+
+        final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+        a2.setDuration(200);
+
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                layer.startAnimation(a2);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        layer.startAnimation(a);
+
+        if (!vLikesHeart.isChecked()) {
+            vLikesHeart.toggle();
+        }
+    }
+
+    private void longPress() {
+        if (mPost.getType() != Post.POST_TYPE_STATUS) {
+            MainActivity activity = (MainActivity) mContext;
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+            activity.addFragmentOnTop(
+                    ViewFullScreenFragment.newInstance(
+                            Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
+                            mPost.getType(),
+                            3000
+                    ),
+                    FULL_VIEW
+            );
+
+            //so parent doesn't intercept touch
+            vPostImage.getParent().requestDisallowInterceptTouchEvent(true);
+        }
+    }
+
+    private void cancelLongPress(boolean thresholdMet) {
+        if (!thresholdMet) {
+            MainActivity activity = (MainActivity) mContext;
+            if (activity != null && activity.getSupportFragmentManager().findFragmentByTag(FULL_VIEW) != null) {
+               activity.getSupportFragmentManager().popBackStack();
+            }
+        }
     }
 
     @Override
@@ -124,22 +133,9 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void getEventImage(String image) {
-
-        if (mType != Post.POST_TYPE_STATUS) {
-            Glide.with(mContext)
-                    .load(image)
-                    .override(100, 100)
-                    .bitmapTransform(new BlurTransformation(mContext))
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                    .into(vBlurred);
-        }else {
-            vBlurred.setImageDrawable(null);
-        }
-
         Glide.with(mContext)
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .into(vPostImage);
-
     }
 }

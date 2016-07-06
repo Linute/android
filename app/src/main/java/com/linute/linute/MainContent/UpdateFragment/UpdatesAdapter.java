@@ -80,9 +80,9 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 if (!mRecentItems.isEmpty()){
                     //if olderItems is not empty, the load more is below recentItems
                     //else the load more is under the olderItems
-                    return mOlderItems.isEmpty() ? (mRecentItems.isEmpty() ? 0 : mRecentItems.size() + 1) : mRecentItems.size();
+                    return mOlderItems.isEmpty() ? mRecentItems.size() + 1 : mRecentItems.size();
                 }else {
-                    return mOlderItems.isEmpty() ? 0 : mOlderItems.size()+1;
+                    return mOlderItems.isEmpty() ? 0 : mOlderItems.size() + 1;
                 }
             case 1:
                 //section 1 means there was a section before
@@ -176,7 +176,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
 
     public class UpdateItemHeaderViewHolder extends RecyclerView.ViewHolder {
-
         private TextView mTitleText;
 
         public UpdateItemHeaderViewHolder(View itemView) {
@@ -221,8 +220,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 @Override
                 public void onClick(View v) {
                     if (mUpdate != null) {
-                        if (mUpdate.getUpdateType() == Update.UpdateType.MATCHED
-                                || mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
+                        if (mUpdate.getUpdateType() == Update.UpdateType.FOLLOWER){
                             ((MainActivity) mContext).addFragmentToContainer(
                                     TaptUserProfileFragment.newInstance(mUpdate.getUserFullName(), mUpdate.getUserId())
                             );
@@ -477,8 +475,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                 case ALSO_COMMENTED_VIDEO:
                     drawable = R.drawable.icon_comment;
                     break;
-                case MATCHED:
-                    drawable = R.drawable.icon_user;
+                case LIKED_COMMENT:
+                    drawable = R.drawable.icon_like;
                     break;
                 default:
                     drawable = R.drawable.icon_user;

@@ -245,7 +245,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING_NO_STATUS);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
                 startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
             }
@@ -438,7 +438,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING_NO_STATUS);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
                 startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
             }
@@ -549,10 +549,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
             }
 
+            if (mAttachType < 0) return;
             //we have item we need to send
-            if (mAttachType == CameraActivity.IMAGE) {
+            if (mAttachType != CameraActivity.VIDEO) {
                 sendImage(activity);
-            } else if (mAttachType == CameraActivity.VIDEO) {
+            } else {
                 sendVideo(activity);
             }
         } catch (JSONException e) {
@@ -574,7 +575,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     //need thumbnail, get first frame
                     images.put(Utils.encodeImageBase64(
                             MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
-                                    , Uri.fromFile(new File(mImageUri.getPath())))));
+                                    , mImageUri)));
 
                     postData.put("images", images);
 
@@ -619,10 +620,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     //get bitmap from uri
                     images.put(Utils.encodeImageBase64(
                             MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
-                                    , Uri.fromFile(new File(mImageUri.getPath())))));
+                                    , mImageUri)));
 
                     postData.put("images", images);
-                    postData.put("type", "1");
+                    postData.put("type", mAttachType);
                     postData.put("owner", mUserId);
 
                     JSONArray coord = new JSONArray();

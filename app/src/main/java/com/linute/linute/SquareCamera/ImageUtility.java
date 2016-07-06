@@ -68,6 +68,7 @@ public class ImageUtility {
 
 
     public static Uri savePictureToCache(Context context, Bitmap bitmap) {
+        if (context == null) return  null;
         File image = new File(
                 context.getCacheDir() + File.separator + "temp.jpg");
         // Saving the bitmap
@@ -83,7 +84,7 @@ public class ImageUtility {
             exception.printStackTrace();
         }
 
-        return Uri.parse(image.getAbsolutePath());
+        return Uri.fromFile(image);
     }
 
     public static String getTempFilePath(Context context, String url, String end) throws IOException {

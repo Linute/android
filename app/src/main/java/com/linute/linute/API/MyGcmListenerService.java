@@ -219,6 +219,8 @@ public class MyGcmListenerService extends GcmListenerService {
                 return LinuteConstants.FEED_DETAIL;
             case "commented video":
                 return LinuteConstants.FEED_DETAIL;
+            case "liked comment":
+                return LinuteConstants.FEED_DETAIL;
             case "liked video":
                 return LinuteConstants.FEED_DETAIL;
             case "also commented status":

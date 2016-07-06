@@ -3,7 +3,6 @@ package com.linute.linute.SquareCamera;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -11,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.linute.linute.R;
@@ -21,8 +19,9 @@ import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_AND_VIDEO_AND_GALLERY = 11; // everything
-    public final static int JUST_CAMERA = 12;  //just camera; no gallery or video option
+    public final static int CAMERA_EVERYTHING = 11; // everything
+    public final static int CAMERA_JUST_CAMERA = 12;  //just camera; no gallery or video option
+    public final static int CAMERA_EVERYTHING_NO_STATUS = 13;
 
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
@@ -57,10 +56,10 @@ public class CameraActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         if (i != null) {
-            mCameraType = i.getIntExtra(CAMERA_TYPE, JUST_CAMERA);
+            mCameraType = i.getIntExtra(CAMERA_TYPE, CAMERA_JUST_CAMERA);
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
         } else {
-            mCameraType = JUST_CAMERA;
+            mCameraType = CAMERA_JUST_CAMERA;
             mReturnType = RETURN_URI;
         }
 
@@ -112,7 +111,7 @@ public class CameraActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (mCameraType == CAMERA_AND_VIDEO_AND_GALLERY) {
+        if (mCameraType == CAMERA_EVERYTHING) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.RECORD_AUDIO);
             }
@@ -184,7 +183,17 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) clearBackStack();
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0){
+            // Maybe there is a better way to do this
+            // When back pressed, we need to ask: "are you sure you want to discard this"
+            EditSaveVideoFragment saveVideoFragment =
+                    (EditSaveVideoFragment) getSupportFragmentManager().findFragmentByTag(EditSaveVideoFragment.TAG);
+            if (saveVideoFragment != null){
+                saveVideoFragment.showConfirmDialog();
+            }else {
+                clearBackStack();
+            }
+        }
         else {
             setResult(RESULT_CANCELED);
             super.onBackPressed();

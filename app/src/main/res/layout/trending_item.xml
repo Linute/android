@@ -1,98 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <com.linute.linute.SquareCamera.SquareImageView
-        android:id="@+id/image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <LinearLayout
-        android:id="@+id/topPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/downside_gradient"
-    >
-
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/profile_image"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:src="@color/seperator_color"
-            app:riv_border_color="@color/seperator_color"
-            app:riv_border_width="1px"
-            app:riv_corner_radius="2dp"
-        />
-
-        <TextView
-            android:id="@+id/profile_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:shadowColor="@color/pure_black"
-            android:shadowDx="-2.0"
-            android:shadowDy="2.0"
-            android:shadowRadius="1.3"
-            android:text="Temp jjbj"
-            android:textColor="@color/white"
-            android:textSize="@dimen/body_font_size"/>
-    </LinearLayout>
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    tools:background="@android:color/holo_red_light">
 
 
-    <FrameLayout
-        android:id="@+id/bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="@drawable/upside_gradient">
-
-        <TextView
-            android:id="@+id/like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|center_vertical"
-            android:paddingBottom="@dimen/activity_horizontal_margin"
-            android:paddingEnd="64dp"
-            android:paddingStart="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_horizontal_margin"
-            android:shadowColor="@color/pure_black"
-            android:shadowDx="-2.0"
-            android:shadowDy="2.0"
-            android:shadowRadius="1.3"
-            android:text="Likes"
-            android:textColor="@color/pure_white"
-            android:textSize="@dimen/body_font_size"/>
-
-
-        <TextView
-            android:id="@+id/comment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:paddingBottom="@dimen/activity_horizontal_margin"
-            android:paddingEnd="@dimen/activity_horizontal_margin"
-            android:paddingStart="32dp"
-            android:paddingTop="@dimen/activity_horizontal_margin"
-            android:shadowColor="@color/pure_black"
-            android:shadowDx="-2.0"
-            android:shadowDy="2.0"
-            android:shadowRadius="1.3"
-            android:text="Comments"
-            android:textColor="@color/pure_white"
-            android:textSize="@dimen/body_font_size"/>
-
-    </FrameLayout>
+    <include layout="@layout/trending_name_header"/>
 
     <View
-        android:id="@+id/red_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:alpha="0.3"
-        android:background="#EA294C"
-        android:visibility="invisible"/>
+        android:layout_height="1dp"
+        android:background="@color/seperator_color"
+    />
 
-</com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+        android:id="@+id/parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/seperator_color">
+
+        <com.linute.linute.SquareCamera.SquareImageView
+            android:id="@+id/feedDetail_event_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"/>
+
+        <View
+            android:id="@+id/feed_detail_hidden_animation"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.3"
+            android:background="#EA294C"
+            android:visibility="invisible"
+        />
+
+
+    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+
+
+    <include layout="@layout/feed_detail_action_bar"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:background="@color/seperator_color"/>
+
+</LinearLayout>

@@ -57,17 +57,31 @@ public class FriendsListHolder extends BaseFragment {
                 .equals(mUserId);
 
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
 
-        ViewPager viewPager = (ViewPager)rootView.findViewById(R.id.frame);
-        viewPager.setAdapter(new FriendsFragmentAdapter(getActivity().getSupportFragmentManager(), mUserId , viewIsOwner));
+        final ViewPager viewPager = (ViewPager)rootView.findViewById(R.id.frame);
+        viewPager.setAdapter(new FriendsFragmentAdapter(getChildFragmentManager(), mUserId , viewIsOwner));
 
         TabLayout tabLayout = (TabLayout)rootView.findViewById(R.id.friends_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
-            setFragmentState(FragmentState.FINISHED_UPDATING);
-            viewPager.setCurrentItem(0);
+        if (viewIsOwner){
+            toolbar.setTitle(viewPager.getCurrentItem() == 0 ? "Followers" : "Following");
+            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+                @Override
+                public void onPageSelected(int position) {
+                    toolbar.setTitle(position == 0 ?  "Followers" : "Following");
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {}
+            });
+        }else {
+            toolbar.setTitle("Followers");
+            tabLayout.setVisibility(View.GONE);
         }
 
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

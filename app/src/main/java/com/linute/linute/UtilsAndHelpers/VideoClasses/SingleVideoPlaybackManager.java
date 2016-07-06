@@ -1,6 +1,9 @@
 package com.linute.linute.UtilsAndHelpers.VideoClasses;
 
+import android.content.Context;
 import android.net.Uri;
+
+import java.io.IOException;
 
 /**
  * Created by QiFeng on 3/11/16.
@@ -14,26 +17,31 @@ import android.net.Uri;
 
 public class SingleVideoPlaybackManager {
 
-    private TextureVideoView mTextureVideoView;
+    private ScalableVideoView mTextureVideoView;
 
     public SingleVideoPlaybackManager(){
 
     }
 
-    public void playNewVideo(TextureVideoView videoView, Uri link){
+    public void playNewVideo(Context context, ScalableVideoView videoView, Uri link){
         if (mTextureVideoView != null && videoView != mTextureVideoView){
-            mTextureVideoView.stopPlayback();
+            mTextureVideoView.stop();
             mTextureVideoView.runHideVideo();
         }
 
-        videoView.setVideoURI(link);
-        videoView.start();
-        mTextureVideoView = videoView;
+        try {
+            videoView.setDataSource(context,link);
+            mTextureVideoView = videoView;
+        }catch (IOException e){
+            e.printStackTrace();
+            videoView.stop();
+        }
+
     }
 
     public void stopPlayback(){
         if (mTextureVideoView != null){
-            mTextureVideoView.stopPlayback();
+            mTextureVideoView.stop();
             mTextureVideoView.runHideVideo();
             mTextureVideoView = null;
         }

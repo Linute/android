@@ -35,7 +35,7 @@ public class Update {
         AlSO_COMMENTED_STATUS,
         ALSO_COMMENTED_IMAGE,
         ALSO_COMMENTED_VIDEO,
-        MATCHED
+        LIKED_COMMENT
     }
 
     private String mActionID;           // id of action
@@ -137,8 +137,8 @@ public class Update {
                 return UpdateType.ALSO_COMMENTED_IMAGE;
             case "also commented video":
                 return UpdateType.ALSO_COMMENTED_VIDEO;
-            case "matched":
-                return UpdateType.MATCHED;
+            case "liked comment":
+                return UpdateType.LIKED_COMMENT;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -159,8 +159,7 @@ public class Update {
     public final boolean hasEventInformation(){
         return mUpdateType != UpdateType.UNDEFINED &&
                 mUpdateType != UpdateType.FOLLOWER &&
-                mUpdateType != UpdateType.FRIEND_JOINED &&
-                mUpdateType != UpdateType.MATCHED;
+                mUpdateType != UpdateType.FRIEND_JOINED;
     }
 
     public final boolean hasFriendShipInformation(){

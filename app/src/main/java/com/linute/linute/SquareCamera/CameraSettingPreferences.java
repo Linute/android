@@ -15,7 +15,7 @@ public class CameraSettingPreferences {
         return context.getSharedPreferences("com.desmond.squarecamera", Context.MODE_PRIVATE);
     }
 
-    protected static void saveCameraFlashMode(@NonNull final Context context, final boolean mFlashOn) {
+    public static void saveCameraFlashMode(@NonNull final Context context, final boolean mFlashOn) {
         final SharedPreferences preferences = getCameraSettingPreferences(context);
 
         if (preferences != null) {

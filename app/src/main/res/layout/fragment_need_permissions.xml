@@ -41,35 +41,42 @@
         android:textSize="16sp"/>
 
 
-    <TextView
+    <LinearLayout
+        android:id="@+id/post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/half_margin"
-        android:text="Or you can post a status."
-        android:textColor="@color/fifty_white"
-    />
-
-    <FrameLayout
-        android:id="@+id/new_post"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:contentDescription="Status">
-
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/post_button"/>
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="T"
-            android:textSize="25sp"/>
+            android:layout_marginTop="@dimen/half_margin"
+            android:text="Or you can post a status."
+            android:textColor="@color/fifty_white"
+        />
+
+        <FrameLayout
+            android:id="@+id/new_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:contentDescription="Status">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/post_button"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="T"
+                android:textSize="25sp"/>
 
 
-    </FrameLayout>
+        </FrameLayout>
+    </LinearLayout>
 
 </LinearLayout>

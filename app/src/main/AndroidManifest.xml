@@ -7,8 +7,6 @@
         android:protectionLevel="signature"/>
 
     <uses-permission android:name="com.linute.linute.permission.C2D_MESSAGE"/>
-
-    <!-- Request permission to use a device camera -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -79,7 +77,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity"/>
         <activity
             android:name=".MainContent.Settings.EditProfileInfoActivity"
             android:screenOrientation="portrait"
@@ -98,8 +95,8 @@
         <activity
             android:name=".SquareCamera.CameraActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/AppTheme.FullScreen"/>
+            android:theme="@style/AppTheme.FullScreen"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".LoginAndSignup.CollegePickerActivity"
             android:label="@string/title_activity_college_picker"
@@ -110,32 +107,44 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
 
-        <activity android:name=".UtilsAndHelpers.CropActivity.CropActivity"
-                  android:configChanges="orientation"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".UtilsAndHelpers.CropActivity.CropActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
         <activity
             android:name=".MainContent.Settings.SettingActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
-        <activity android:name=".UtilsAndHelpers.WebViewActivity"
-                  android:configChanges="orientation"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".UtilsAndHelpers.WebViewActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
 
-        <activity android:name=".MainContent.Settings.NotificationSettingsActivity"
-                  android:configChanges="orientation"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".MainContent.Settings.NotificationSettingsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+
+        <activity
+            android:name=".ProfileCamera.ProfileCameraActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="90e83e6f6353d1c449a0b3e3e30dff28fe01a3ae"/>
 
-        <activity android:name=".MainContent.Settings.AttributionsActivity">
-        </activity>
+        <activity
+            android:name=".MainContent.Settings.AttributionsActivity"/>
+
+        <service
+            android:name=".MainContent.Uploading.UploadIntentService"
+            android:process=":taptupload"/>
     </application>
 
 </manifest>

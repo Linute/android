@@ -18,21 +18,16 @@
     />
 
     <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+        android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/seperator_color">
 
         <com.linute.linute.SquareCamera.SquareImageView
-            android:id="@+id/blurred"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
-
-        <com.linute.linute.SquareCamera.SquareImageView
             android:id="@+id/feedDetail_event_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scaleType="fitCenter"/>
+            android:scaleType="centerCrop"/>
 
         <View
             android:id="@+id/feed_detail_hidden_animation"

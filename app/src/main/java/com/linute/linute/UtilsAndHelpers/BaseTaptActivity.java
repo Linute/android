@@ -23,7 +23,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public abstract void addFragmentToContainer(final Fragment fragment);
     public abstract void addFragmentToContainer(final Fragment fragment, String tag);
     public abstract void replaceContainerWithFragment(final Fragment fragment);
-    public abstract void addFragmentOnTop(Fragment fragment);
+    public abstract void addFragmentOnTop(Fragment fragment, String tag);
 
 
     /* action when toolbar is pressed */

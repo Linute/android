@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
@@ -19,7 +20,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
 import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 
 import org.json.JSONArray;
@@ -44,14 +44,11 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
 
     private boolean mSectionTwo;
 
-    private SingleVideoPlaybackManager mVideoPlayerManager;
-
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, SingleVideoPlaybackManager singleVideoPlaybackManager, boolean sectiontwo) {
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, boolean sectiontwo) {
         super(new MultiChoiceMode());
         mSectionTwo = sectiontwo;
         mPosts = posts;
         this.context = context;
-        mVideoPlayerManager = singleVideoPlaybackManager;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId", "");
@@ -74,15 +71,13 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             case IMAGE_POST:
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
-                        context,
-                        mVideoPlayerManager
+                        context
                 );
 
             case VIDEO_POST:
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
-                        context,
-                        mVideoPlayerManager
+                        context
                 );
 
             default: //status post

@@ -5,116 +5,59 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Handler;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
-import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SquareVideoView;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class VideoFeedHolder extends ImageFeedHolder {
+public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPreparedListener,
+        MediaPlayer.OnCompletionListener, ScalableVideoView.HideVideo {
 
 
-    private SquareVideoView vSquareVideoView;
+    private ScalableVideoView vSquareVideoView;
     private String mCollegeId;
     private boolean videoProcessing = false;
 
     private View vCinemaIcon;
 
 
-    public VideoFeedHolder(final View itemView, Context context, SingleVideoPlaybackManager manager) {
-        super(itemView, context, manager);
-        vSquareVideoView = (SquareVideoView) itemView.findViewById(R.id.feed_detail_video);
+    public VideoFeedHolder(final View itemView, Context context) {
+        super(itemView, context);
+        //weird thing with this library where we have to seat a source before we do anything else
+        vSquareVideoView = (ScalableVideoView) itemView.findViewById(R.id.video);
+        vSquareVideoView.setHideVideo(this);
+
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
 
         vCinemaIcon = itemView.findViewById(R.id.cinema_icon);
-
-        vSquareVideoView.setCustomSurfaceTextureListener(new TextureVideoView.CustomSurfaceTextureListener() {
-            @Override
-            public void onSurfaceDestroyed() {
-                //when video surface destroyed, hide the video and show image
-                vPostImage.setVisibility(View.VISIBLE);
-                vSquareVideoView.setVisibility(View.GONE);
-                vCinemaIcon.setAlpha(1);
-            }
-        });
-
-        //when video is loaded and ready to play
-        vSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() { //when video ready to be played
-            @Override
-            public void onPrepared(final MediaPlayer mp) {
-                // <shoddy-fix>
-                vCinemaIcon.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        videoProcessing = false;
-                        vCinemaIcon.clearAnimation();
-                        vCinemaIcon.setAlpha(0);
-                        sendImpressionsAsync(mPostId);
-                        vPostImage.setVisibility(View.GONE);
-                    }
-                }, 500);
-                //</shoddy-fix>
-            }
-        });
-
-        //when video finishes, restart video
-        vSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                //if video is paused AND finishes at the same time, video won't pause
-                //if icon is showing, then user has paused video
-                if (vCinemaIcon.getAlpha() != 1) {
-                    vSquareVideoView.start();
-                    sendImpressionsAsync(mPostId);
-                }
-            }
-        });
-
-
-        //hide the texture view
-        vSquareVideoView.setHideVideo(new TextureVideoView.HideVideo() {
-            @Override
-            public void hideVideo() {
-                videoProcessing = false;
-                vPostImage.setVisibility(View.VISIBLE);
-                vSquareVideoView.setVisibility(View.GONE);
-                vCinemaIcon.clearAnimation();
-                vCinemaIcon.setAlpha(1);
-            }
-        });
     }
 
     @Override
-    protected void setUpOnClicks(){
-        setUpOnClicks(itemView.findViewById(R.id.video_frame));
-    }
-
-    @Override
-    protected void singleClick(){
+    protected void singleClick() {
         if (mVideoUrl == null || videoProcessing) return;
         if (vSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
-            vSquareVideoView.setVisibility(View.VISIBLE);
-            mSingleVideoPlaybackManager.playNewVideo(vSquareVideoView, mVideoUrl);
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(mContext, vSquareVideoView, mVideoUrl);
+
+            vSquareVideoView.prepareAsync(this);
+            vSquareVideoView.setOnCompletionListener(this);
+
             videoProcessing = true;
             vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
+            vSquareVideoView.setVisibility(View.VISIBLE);
+
+
         } else {
             if (vSquareVideoView.isPlaying()) {
                 vSquareVideoView.pause();
@@ -138,7 +81,7 @@ public class VideoFeedHolder extends ImageFeedHolder {
 
         if (vSquareVideoView.getVisibility() == View.VISIBLE) {
             vSquareVideoView.setVisibility(View.GONE);
-            vPostImage.setVisibility(View.VISIBLE);
+            //vPostImage.setVisibility(View.VISIBLE);
             vCinemaIcon.clearAnimation();
             vCinemaIcon.setAlpha(1f);
         }
@@ -175,6 +118,36 @@ public class VideoFeedHolder extends ImageFeedHolder {
                 }
             }
         });
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        //if video is paused AND finishes at the same time, video won't pause
+        //if icon is showing, then user has paused video
+        if (vCinemaIcon.getAlpha() != 1) {
+            vSquareVideoView.start();
+            sendImpressionsAsync(mPostId);
+        }
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        if (!vSquareVideoView.isVideoStopped()) {
+            videoProcessing = false;
+            vCinemaIcon.clearAnimation();
+            vCinemaIcon.setAlpha(0);
+            sendImpressionsAsync(mPostId);
+            mp.start();
+        }
+    }
+
+    @Override
+    public void hideVideo() {
+        videoProcessing = false;
+        vPostImage.setVisibility(View.VISIBLE);
+        vSquareVideoView.setVisibility(View.GONE);
+        vCinemaIcon.clearAnimation();
+        vCinemaIcon.setAlpha(1);
     }
 
 }

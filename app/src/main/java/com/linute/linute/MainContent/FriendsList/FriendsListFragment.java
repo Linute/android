@@ -10,16 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
-import com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.SquareCamera.CameraFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -56,8 +52,8 @@ public class FriendsListFragment extends BaseFragment {
     private ViewGroup mListEmptyLayout;
     private ViewGroup mFailLayout;
 
-    private View mListEmptyView;
-    private View mFailView;
+//    private View mListEmptyView;
+//    private View mFailView;
 
     private View mProgressBar;
 
@@ -116,13 +112,12 @@ public class FriendsListFragment extends BaseFragment {
                          Log.i(TAG, "Empty List Text Clicked (No Followers)");
                          BaseTaptActivity acc = (BaseTaptActivity)getActivity();
                          Intent i = new Intent(getActivity(), CameraActivity.class);
-                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
                          i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                          acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
                      }
                  }
                 )
-
         );
 
 
@@ -337,21 +332,20 @@ public class FriendsListFragment extends BaseFragment {
         });
     }
 
-    public void setEmptyView(View mEmptyView) {
-        this.mListEmptyView = mEmptyView;
-        if(mListEmptyLayout != null){
-            mListEmptyLayout.removeAllViews();
-            mListEmptyLayout.addView(mEmptyView);
-        }
-    }
-
-    public void setFailView(View mFailView) {
-        this.mFailView = mFailView;
-        if(mFailLayout != null){
-            mFailLayout.removeAllViews();
-            mFailLayout.addView(mFailView);
-        }
-
-    }
+//    public void setEmptyView(View mEmptyView) {
+//        this.mListEmptyView = mEmptyView;
+//        if(mListEmptyLayout != null){
+//            mListEmptyLayout.removeAllViews();
+//            mListEmptyLayout.addView(mEmptyView);
+//        }
+//    }
+//
+//    public void setFailView(View mFailView) {
+//        this.mFailView = mFailView;
+//        if(mFailLayout != null){
+//            mFailLayout.removeAllViews();
+//            mFailLayout.addView(mFailView);
+//        }
+//    }
 
 }

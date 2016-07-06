@@ -33,6 +33,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
+
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
     }
@@ -129,15 +130,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             activity.addFragmentOnTop(
                                     ViewFullScreenFragment.newInstance(
                                             Uri.parse(Utils.getMessageImageURL(mUrl)),
-                                            POST_TYPE_IMAGE
-                                    )
+                                            POST_TYPE_IMAGE,
+                                            0
+                                    ),
+                                    "full_view"
                             );
                         } else if (mType == Chat.MESSAGE_VIDEO) {
                            activity.addFragmentOnTop(
                                    ViewFullScreenFragment.newInstance(
                                            Uri.parse(Utils.getMessageVideoURL(mUrl)),
-                                           POST_TYPE_VIDEO
-                                   )
+                                           POST_TYPE_VIDEO,
+                                           0
+                                   ),
+                                   "full_view"
                            );
                         }
                     }

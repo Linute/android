@@ -12,11 +12,9 @@ import android.graphics.Point;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -34,15 +32,12 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
-import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.bson.types.ObjectId;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,6 +49,8 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+//import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 
 /**
@@ -71,7 +68,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     public short mVideoState = 0;
 
-//    private CheckBox mAnonSwitch;
+    //    private CheckBox mAnonSwitch;
 //    private CheckBox mCommentsAnon;
     private CheckBox mPlaying;
 //    private View mBottom;
@@ -85,7 +82,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     private ProgressDialog mProgressDialog;
 
-    private TextureVideoView mSquareVideoView;
+    private ScalableVideoView mSquareVideoView;
 //    private CustomBackPressedEditText mEditText;
 //    private TextView mTextView;
 
@@ -159,8 +156,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         });*/
 
 
-
-
         mFfmpeg = FFmpeg.getInstance(getActivity());
 
         try {
@@ -231,19 +226,25 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         vBottom.addView(mPlaying);
 
 
-
         mVideoLink = getArguments().getParcelable(BITMAP_URI);
 
-        mSquareVideoView = new TextureVideoView(container.getContext());
+        mSquareVideoView = new ScalableVideoView(container.getContext());
         if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
 
-        mSquareVideoView.setVideoURI(mVideoLink);
-        mSquareVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mSquareVideoView.start();
-            }
-        });
+        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
+        try {
+            mSquareVideoView.setDataSource(getContext(),mVideoLink);
+            mSquareVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    if(!mSquareVideoView.isVideoStopped()) {
+                        mSquareVideoView.start();
+                    }
+                }
+            });
+        }catch (IOException e){
+            e.printStackTrace();
+        }
         mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -372,7 +373,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
         }
     */
-    private void showConfirmDialog() {
+    protected void showConfirmDialog() {
         if (getActivity() == null) return;
 
         if (mEditText.getVisibility() == View.VISIBLE) {
@@ -419,7 +420,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
             mEditText.clearFocus();
             hideKeyboard();
             mEditText.setVisibility(View.GONE);
-            if (!mEditText.getText().toString().trim().isEmpty()){
+            if (!mEditText.getText().toString().trim().isEmpty()) {
                 mTextView.setText(mEditText.getText().toString());
                 mTextView.setVisibility(View.VISIBLE);
             }
@@ -429,10 +430,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
         mPlaying.setChecked(false);
 
-        if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
-            Utils.showBadConnectionToast(getActivity());
-            return;
-        }
 
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
@@ -504,7 +501,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                                     "[1:v]scale=%d:-1[over];", newWidth);
                         }
 
-                        Point coord = new Point(0,0);
+                        Point coord = new Point(0, 0);
                         //overlay
                         cmd += String.format(Locale.US,
                                 "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
@@ -599,14 +596,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                             getActivity().setResult(Activity.RESULT_OK, i);
                             getActivity().finish();
                         } else {
-                            mProgressDialog.setMessage("Uploading video...");
-
-                            new sendVideoAsync().execute(outputFile,
-                                    mAnonSwitch.isChecked() ? "1" : "0",
-                                    mAnonComments.isChecked() ? "0" : "1",
-                                    mTextView.getText().toString(),
-                                    image.getPath()
-                            );
+                            uploadVideo(image.toString(), outputFile);
                         }
                     }
                 });
@@ -618,81 +608,26 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     }
 
 
+    private void uploadVideo(String imagepath, String videopath) {
+        PendingUploadPost post = new PendingUploadPost(
+                ObjectId.get().toString(),
+                mCollegeId,
+                mAnonSwitch.isChecked() ? 1 : 0,
+                mAnonComments.isChecked() ? 0 : 1,
+                mTextView.getText().toString(),
+                2,
+                imagepath,
+                videopath,
+                mUserId
+        );
 
-
-
-
-    private class sendVideoAsync extends AsyncTask<String, Void, Void> {
-
-        @Override
-        protected Void doInBackground(String... params) {
-
-            if (getActivity() == null || params[0] == null || params[1] == null
-                    || params[2] == null || params[3] == null || params[4] == null)
-                return null;
-
-            String outputFile = params[0];
-
-            if (mReturnType == CameraActivity.SEND_POST && (!Utils.isNetworkAvailable(getActivity()) || !mSocket.connected())) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mVideoState = VS_IDLE;
-                        Utils.showBadConnectionToast(getActivity());
-                        showProgress(false);
-                    }
-                });
-                return null;
-            }
-
-            mVideoState = VS_SENDING;
-            try {
-                JSONObject postData = new JSONObject();
-
-                postData.put("college", mCollegeId);
-                postData.put("privacy", params[1]);
-                postData.put("isAnonymousCommentsDisabled", params[2]);
-                postData.put("title", params[3]);
-                JSONArray imageArray = new JSONArray();
-                imageArray.put(Utils.encodeImageBase64(
-                        MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
-                                , Uri.fromFile(new File(params[4])))));
-
-                JSONArray videoArray = new JSONArray();
-                videoArray.put(Utils.encodeFileBase64(new File(outputFile)));
-
-                postData.put("images", imageArray);
-                postData.put("videos", videoArray);
-                postData.put("type", "2"); //0 for status 1 for image and 2 for video
-                postData.put("owner", mUserId);
-
-                JSONArray coord = new JSONArray();
-                JSONObject jsonObject = new JSONObject();
-                coord.put(0);
-                coord.put(0);
-                jsonObject.put("coordinates", coord);
-
-                postData.put("geo", jsonObject);
-                mSocket.emit(API_Methods.VERSION + ":posts:new post", postData);
-
-            } catch (JSONException | IOException e) {
-                e.printStackTrace();
-
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showServerErrorToast(getActivity());
-                            showProgress(false);
-                        }
-                    });
-                }
-            }
-
-            mVideoState = VS_IDLE;
-            return null;
-        }
+        Intent result = new Intent();
+        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+        getActivity().setResult(Activity.RESULT_OK, result);
+        getActivity().finish();
     }
+
+
 
 
     /*private void showKeyboard() { //show keyboard for EditText

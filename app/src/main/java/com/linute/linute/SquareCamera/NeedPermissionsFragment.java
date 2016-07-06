@@ -35,6 +35,22 @@ public class NeedPermissionsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        int cameraType = ((CameraActivity) getActivity()).getCameraType();
+
+        if (cameraType == CameraActivity.CAMERA_EVERYTHING_NO_STATUS){
+            view.findViewById(R.id.post).setVisibility(View.GONE);
+        }else {
+            view.findViewById(R.id.new_post).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    CameraActivity cameraActivity = (CameraActivity) getActivity();
+                    if (cameraActivity != null)
+                        cameraActivity.launchFragment(new PostCreatePage(), PostCreatePage.TAG);
+                }
+            });
+        }
+
         view.findViewById(R.id.needPermission_text_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -44,14 +60,7 @@ public class NeedPermissionsFragment extends Fragment {
             }
         });
 
-        view.findViewById(R.id.new_post).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CameraActivity cameraActivity = (CameraActivity) getActivity();
-                if (cameraActivity != null)
-                    cameraActivity.launchFragment(new PostCreatePage(), PostCreatePage.TAG);
-            }
-        });
+
     }
 }
 

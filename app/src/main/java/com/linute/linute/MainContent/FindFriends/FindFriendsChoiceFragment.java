@@ -10,6 +10,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,8 +29,11 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 public class FindFriendsChoiceFragment extends Fragment {
 
+    public static final String TAG = FindFriendsChoiceFragment.class.getSimpleName();
+
     private EditText mSearchView;
     private ViewPager mViewPager;
+    private int mCurrentTab = 0;
 
     private FindFriendsFragment[] mFindFriendsFragments;
 
@@ -77,21 +81,31 @@ public class FindFriendsChoiceFragment extends Fragment {
 
         mViewPager.setAdapter(fragmentPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
             @Override
             public void onPageSelected(int position) {
-                //changed fragments. if that fragment has already updated, then search using new query string
-                //else do nothing
-                if (mFindFriendsFragments[position] != null && mFindFriendsFragments[position].getFragmentState() != BaseFragment.FragmentState.NEEDS_UPDATING) {
-                    mFindFriendsFragments[position].searchWithQuery(mSearchView.getText().toString());
+                if (mCurrentTab != position) {
+                    //changed fragments. if that fragment has already updated, then search using new query string
+                    //else do nothing
+                    if (mFindFriendsFragments[position] != null
+                            && mFindFriendsFragments[position].getFragmentState() != BaseFragment.FragmentState.NEEDS_UPDATING) {
+                        mFindFriendsFragments[position].searchWithQuery(mSearchView.getText().toString());
+                        Log.i(TAG, "onPageSelected: ");
+                    }
+
+                    mCurrentTab = position;
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager.SCROLL_STATE_IDLE){
+
+                }
             }
         });
 
@@ -132,8 +146,6 @@ public class FindFriendsChoiceFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
-
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             //hide keyboard

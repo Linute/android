@@ -85,7 +85,6 @@ public class DiscoverFragment extends BaseFragment {
             mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
                     mPosts,
                     getContext(),
-                    ((DiscoverHolderFragment) getParentFragment()).getSinglePlaybackManager(),
                     mSectionTwo
             );
         }
@@ -167,7 +166,6 @@ public class DiscoverFragment extends BaseFragment {
                 ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
                 mEmptyView.requestLayout();
                 mEmptyView.setVisibility(View.VISIBLE);
-
             }
         }
     }
@@ -221,15 +219,14 @@ public class DiscoverFragment extends BaseFragment {
                             return;
                         }
 
-                        String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
 
                         final ArrayList<Post> tempList = new ArrayList<>();
 
                         try {
-                            jsonObject = new JSONObject(json);
+                            jsonObject = new JSONObject(response.body().string());
+                            //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
                             jsonArray = jsonObject.getJSONArray("events");
 
                             if (skip1 == 0) {
@@ -329,7 +326,6 @@ public class DiscoverFragment extends BaseFragment {
                         }
 
                         String json = response.body().string();
-                        //Log.i(TAG, "onResponse: "+json);
                         JSONObject jsonObject;
                         JSONArray jsonArray;
                         try {
