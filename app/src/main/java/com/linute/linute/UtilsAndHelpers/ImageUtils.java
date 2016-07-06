@@ -4,8 +4,6 @@ import android.app.Fragment;
 import android.content.Intent;
 
 
-
-
 public class ImageUtils {
 
     public static void pickUsing(Fragment fragment, int requestCode) {

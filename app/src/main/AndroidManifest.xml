@@ -130,6 +130,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
+        <activity
+            android:name=".ProfileCamera.ProfileCameraActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="90e83e6f6353d1c449a0b3e3e30dff28fe01a3ae"/>
