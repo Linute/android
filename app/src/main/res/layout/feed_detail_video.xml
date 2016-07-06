@@ -21,6 +21,12 @@
         android:layout_height="match_parent"
         android:background="@color/seperator_color">
 
+        <com.linute.linute.SquareCamera.SquareImageView
+            android:id="@+id/feedDetail_event_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop"/>
+
         <com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView
             android:id="@+id/video"
             android:layout_width="match_parent"
@@ -28,11 +34,6 @@
             android:layout_gravity="center"
             android:visibility="gone"
         />
-        <com.linute.linute.SquareCamera.SquareImageView
-            android:id="@+id/feedDetail_event_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scaleType="fitCenter"/>
 
 
         <ImageView

@@ -18,10 +18,9 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
     private boolean longPressActive = false;
     private Handler mDelayHandler = new Handler();
 
-    private float touchDownX = 0;
-    private float touchDownY = 0;
-
     private long longPressStart = 0;
+
+    private boolean touchCancelled = false;
 
     public CustomOnTouchListener() {
         longPressReleaseThreshold = 3000;
@@ -36,10 +35,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 //Log.i("test", "onTouch: down");
-
-                //keep track of where we pressed down
-                touchDownX = event.getX();
-                touchDownY = event.getY();
+                touchCancelled = false;
 
                 //if not looking for the second tap
                 if (!clicked) {
@@ -85,6 +81,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 break;
             case MotionEvent.ACTION_CANCEL:
                 //Log.i("test", "onTouch: cancelled");
+                touchCancelled = true;
                 mDelayHandler.removeCallbacksAndMessages(null);
                 clicked = false;
                 break;
@@ -93,8 +90,8 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
 
                 // will sometimes trigger move even if no movement
                 // just do some math
-                if (Math.abs(event.getX() - touchDownX) + Math.abs(event.getY() - touchDownY) > 2) {
-
+//                if (Math.abs(event.getX() - touchDownX) + Math.abs(event.getY() - touchDownY) > 10) {
+                if (!touchCancelled){
                     //if we move, remove all callbacks
                     if (!longPressActive)
                         mDelayHandler.removeCallbacksAndMessages(null);
