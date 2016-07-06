@@ -5,10 +5,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -82,7 +82,7 @@ public class WipeViewPager extends FrameLayout {
     }
 
     private DragDirection mDragDirection = DragDirection.None;
-    private static final float KINETIC_THRESHOLD = 5;
+    private static final float KINETIC_THRESHOLD = 3;
     private static final float STATIC_THRESHOLD = 200;
     private static final float INIT_DRAG_THRESHOLD = 50;
 
@@ -103,11 +103,18 @@ public class WipeViewPager extends FrameLayout {
                         float dX = initX - x;
                         if (dX < -INIT_DRAG_THRESHOLD) {
                             mDragDirection = DragDirection.Left2Right;
+                            LinearInterpolator lInter = new LinearInterpolator();
+                            mContainerViews[LEFT].animate().x(x-SCREEN_WIDTH).setDuration(100).setInterpolator(lInter).start();
+                            mContainerViews[CENTER].animate().x(x).setDuration(100).setInterpolator(lInter).start();
 //                            mContainerViews[CENTER].setAlignLeft(false);
                             break;
                         }
                         if (dX > INIT_DRAG_THRESHOLD) {
                             mDragDirection = DragDirection.Right2Left;
+                            LinearInterpolator lInter = new LinearInterpolator();
+                            mContainerViews[RIGHT].animate().x(x).setDuration(100).setInterpolator(lInter).start();
+                            mContainerViews[CENTER].animate().x(x-SCREEN_WIDTH).setDuration(100).setInterpolator(lInter).start();
+//
 //                            mContainerViews[CENTER].setAlignLeft(true);
                             break;
                         }
@@ -191,10 +198,9 @@ public class WipeViewPager extends FrameLayout {
 
     private void prepareContainerViewPositions(int swapIndex) {
 
-        int duration = Math.abs(lastVelX) > KINETIC_THRESHOLD ? (int)((swapIndex == LEFT ? SCREEN_WIDTH-x : x)/Math.abs(lastVelX)) : 200;
-        Log.e("AA", "prepare le("+duration + " = " + (swapIndex == LEFT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
-        Log.e("AA", "prepare ri("+duration + " = " + (swapIndex == RIGHT ? SCREEN_WIDTH-x : x) + " / " + lastVelX);
+//        int duration = Math.abs(lastVelX) > KINETIC_THRESHOLD ? (int)((swapIndex == LEFT ? SCREEN_WIDTH-x : x)/Math.abs(lastVelX)) : 200;
 
+        int duration = 200;
 
         if (swapIndex == RIGHT || swapIndex == CENTER) {
             mContainerViews[LEFT].animate().x(-SCREEN_WIDTH).setDuration(duration).start();
