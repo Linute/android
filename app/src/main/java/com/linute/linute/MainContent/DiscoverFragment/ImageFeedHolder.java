@@ -36,19 +36,19 @@ public class ImageFeedHolder extends BaseFeedHolder {
         v.setOnTouchListener(new CustomOnTouchListener() {
             @Override
             protected void onSingleTap() {
-                //Log.i(TAG, "onSingleTap: ");
+                Log.i(TAG, "onSingleTap: ");
                 singleClick();
             }
 
             @Override
             protected void onDoubleTap(float x, float y) {
-                //Log.i(TAG, "onDoubleTap: ");
+                Log.i(TAG, "onDoubleTap: ");
                 doubleClick();
             }
 
             @Override
             protected void onLongPress() {
-                //Log.i(TAG, "onLongPress: ");
+                Log.i(TAG, "onLongPress: ");
                 longPress();
             }
 

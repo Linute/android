@@ -34,7 +34,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
     public boolean onTouch(View v, final MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                //Log.i("test", "onTouch: down");
+                Log.i("test", "onTouch: down");
                 touchCancelled = false;
 
                 //if not looking for the second tap
@@ -52,7 +52,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                //Log.i("test", "onTouch: up");
+                Log.i("test", "onTouch: up");
 
                 //remove every callback we had
                 mDelayHandler.removeCallbacksAndMessages(null);
@@ -80,24 +80,26 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                //Log.i("test", "onTouch: cancelled");
+                Log.i("test", "onTouch: cancelled");
                 touchCancelled = true;
                 mDelayHandler.removeCallbacksAndMessages(null);
                 clicked = false;
                 break;
             case MotionEvent.ACTION_MOVE:
-                //Log.i("test", "onTouch: move");
+                Log.i("test", "onTouch: move");
 
                 // will sometimes trigger move even if no movement
                 // just do some math
-//                if (Math.abs(event.getX() - touchDownX) + Math.abs(event.getY() - touchDownY) > 10) {
                 if (!touchCancelled){
                     //if we move, remove all callbacks
+                    Log.i("test", "onTouch: touch not cancelled");
                     if (!longPressActive)
                         mDelayHandler.removeCallbacksAndMessages(null);
 
                     return longPressActive;
                 }
+
+                Log.i("test", "onTouch: touch cancelled");
                 return false;
         }
 
