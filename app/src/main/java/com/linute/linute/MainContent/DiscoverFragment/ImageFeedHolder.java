@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -33,22 +34,22 @@ public class ImageFeedHolder extends BaseFeedHolder {
     }
 
     protected final void setUpOnClicks(View v) {
-        v.setOnTouchListener(new CustomOnTouchListener() {
+        v.setOnTouchListener(new CustomOnTouchListener(3200) {
             @Override
             protected void onSingleTap() {
-                Log.i(TAG, "onSingleTap: ");
+                //Log.i(TAG, "onSingleTap: ");
                 singleClick();
             }
 
             @Override
             protected void onDoubleTap(float x, float y) {
-                Log.i(TAG, "onDoubleTap: ");
+                //Log.i(TAG, "onDoubleTap: ");
                 doubleClick();
             }
 
             @Override
             protected void onLongPress() {
-                Log.i(TAG, "onLongPress: ");
+                //Log.i(TAG, "onLongPress: ");
                 longPress();
             }
 

@@ -1317,13 +1317,21 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                 @Override
                                 public void run() {
                                     //if NoComments View is showing, remove it
+                                    boolean notifyChange = false;
                                     if (!mFeedDetail.getComments().isEmpty() && mFeedDetail.getComments().get(0) == null) {
                                         mFeedDetail.getComments().clear();
+                                        notifyChange = true;
                                     }
 
                                     mFeedDetail.getComments().add(com);
                                     mFeedDetail.refreshCommentCount();
-                                    mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
+
+                                    if (notifyChange){
+                                        mFeedDetailAdapter.notifyDataSetChanged();
+                                    }else {
+                                        mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
+                                    }
+
                                     if (finalSmoothScroll || !mCanScrollDown)
                                         recList.scrollToPosition(mFeedDetail.getComments().size());
                                 }

@@ -31,7 +31,6 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
 
     private View vCinemaIcon;
 
-
     public VideoFeedHolder(final View itemView, Context context) {
         super(itemView, context);
         //weird thing with this library where we have to seat a source before we do anything else

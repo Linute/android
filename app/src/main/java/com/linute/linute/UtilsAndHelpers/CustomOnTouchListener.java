@@ -20,10 +20,8 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
 
     private long longPressStart = 0;
 
-    private boolean touchCancelled = false;
-
     public CustomOnTouchListener() {
-        longPressReleaseThreshold = 3000;
+        longPressReleaseThreshold = 3200;
     }
 
     public CustomOnTouchListener(int longPressReleaseThreshold) {
@@ -34,9 +32,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
     public boolean onTouch(View v, final MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.i("test", "onTouch: down");
-                touchCancelled = false;
-
+                //Log.i("test", "onTouch: down");
                 //if not looking for the second tap
                 if (!clicked) {
                     //remove the single click callback and add new long press callback
@@ -52,8 +48,7 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                Log.i("test", "onTouch: up");
-
+                //Log.i("test", "onTouch: up");
                 //remove every callback we had
                 mDelayHandler.removeCallbacksAndMessages(null);
                 if (!clicked) {
@@ -80,27 +75,10 @@ public abstract class CustomOnTouchListener implements View.OnTouchListener {
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
-                Log.i("test", "onTouch: cancelled");
-                touchCancelled = true;
+                //Log.i("test", "onTouch: cancelled");
                 mDelayHandler.removeCallbacksAndMessages(null);
                 clicked = false;
                 break;
-            case MotionEvent.ACTION_MOVE:
-                Log.i("test", "onTouch: move");
-
-                // will sometimes trigger move even if no movement
-                // just do some math
-                if (!touchCancelled){
-                    //if we move, remove all callbacks
-                    Log.i("test", "onTouch: touch not cancelled");
-                    if (!longPressActive)
-                        mDelayHandler.removeCallbacksAndMessages(null);
-
-                    return longPressActive;
-                }
-
-                Log.i("test", "onTouch: touch cancelled");
-                return false;
         }
 
         return true;
