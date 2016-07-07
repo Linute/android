@@ -1042,12 +1042,13 @@ public class MainActivity extends BaseTaptActivity {
                     JSONArray colors = object.getJSONArray("colors");
                     for(int i = 0;i<colors.length();i++){
                         JSONObject color = colors.getJSONObject(i);
-                        prefs.putInt("status_color_"+i+"_text", color.getInt("text"));
-                        prefs.putInt("status_color_"+i+"_bg", color.getInt("background"));
+                        int tColor = Integer.valueOf(color.getString("text"),16);
+                        int bColor = Integer.valueOf(color.getString("background"), 16);
+                        prefs.putInt("status_color_"+i+"_text", /*(tColor <= 0x01000000 ? */0xFF000000+ tColor/* + 0xFF000000 : tColor)*/);
+                        prefs.putInt("status_color_"+i+"_bg", /*(bColor <= 0x01000000 ? */0xFF000000+ bColor /*+ 0xFF000000 : bColor)*/);
                     }
-                    prefs.apply();
+                    prefs.commit();
 
-//                    Log.i("AAA", object.toString(4));
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
