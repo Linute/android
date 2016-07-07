@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -29,7 +30,6 @@ public class ProfileCameraActivity extends AppCompatActivity {
 
     private int mType;
 
-
     /**
      * Needs intent:
      * TYPE - Gallery for picking and cropping
@@ -46,12 +46,12 @@ public class ProfileCameraActivity extends AppCompatActivity {
         else mType = TYPE_CAMERA;
 
         if (savedInstanceState == null) {
-            if (mType == TYPE_GALLERY){
+
+            if (mType == TYPE_GALLERY) {
                 replaceWithoutAddingToBackstack(new ProfilePictureGalleryFragment());
-            }
-            else {
-                boolean hasPerm = requestPermissions();
-                if (hasPerm) {
+            } else {
+                requestPermissions();
+                if (mHasWriteAndCameraPermission) {
                     replaceWithoutAddingToBackstack(new ProfilePictureCamera());
                 }
             }
@@ -72,25 +72,38 @@ public class ProfileCameraActivity extends AppCompatActivity {
         mType = savedInstanceState.getInt(TYPE_KEY);
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mReceivedRequestPermissionResults) { //only runs if we have updated permissions information
+            clearBackStack();
+            if (mHasWriteAndCameraPermission)
+                replaceWithoutAddingToBackstack(new ProfilePictureCamera());
+            else replaceWithoutAddingToBackstack(new ProfilePermissionRationalFragment());
+            mReceivedRequestPermissionResults = false;
+        }
+    }
+
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED);
-        if (mType == TYPE_GALLERY){
+        if (mType == TYPE_GALLERY) {
             finish();
-        }else {
+        } else {
             super.onBackPressed();
         }
     }
 
     protected static final int REQUEST_PERMISSIONS = 23;
 
-    public boolean requestPermissions() {
+    public void requestPermissions() {
         List<String> permissions = new ArrayList<>();
         //check for camera
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CAMERA);
         }
-
         //check for write
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -101,50 +114,54 @@ public class ProfileCameraActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     permissions.toArray(new String[permissions.size()]),
                     REQUEST_PERMISSIONS);
-            return false;
+        } else {
+            //we have permissions : show camera
+            mHasWriteAndCameraPermission = true;
         }
-
-        //we have permissions : show camera
-        return true;
     }
+
+    protected boolean mReceivedRequestPermissionResults = false;
+    private boolean mHasWriteAndCameraPermission = false;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_PERMISSIONS:
 
-                //mReceivedRequestPermissionResults = true;
+                mReceivedRequestPermissionResults = true;
 
                 for (int result : grantResults) // if we didn't get approved for a permission, show permission needed frag
-                    if (result == PackageManager.PERMISSION_GRANTED) {
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container, new ProfilePictureCamera(), ProfilePictureCamera.TAG)
-                                .commit();
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        mHasWriteAndCameraPermission = false;
                         return;
                     }
 
-                Log.i(TAG, "onRequestPermissionsResult: rational");
-                //// TODO: 7/5/16 rational
-
+                mHasWriteAndCameraPermission = true;
                 break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
-
-    public void replaceFragment(Fragment fragment, String tag){
+    public void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, fragment, tag)
+                .replace(R.id.fragment_container, fragment, TAG)
                 .addToBackStack(null)
                 .commit();
     }
 
+    private void clearBackStack() {
+        getSupportFragmentManager().popBackStack(TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+    }
 
-    public void replaceWithoutAddingToBackstack(Fragment fragment){
+    public void replaceWithoutAddingToBackstack(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .commit();
+    }
+
+
+    public int getType() {
+        return mType;
     }
 }

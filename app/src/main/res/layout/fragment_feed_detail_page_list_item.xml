@@ -16,14 +16,14 @@
         android:id="@+id/left_controls"
         android:layout_width="60dp"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_red_light">
+        android:background="@color/red">
 
         <ImageView
             android:id="@+id/like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_fire_off"
+            android:src="@drawable/ic_action_fire"
         />
 
     </FrameLayout>
@@ -104,36 +104,15 @@
         android:background="@color/pure_white"
         android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/comment_user_image"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
             android:layout_margin="@dimen/activity_horizontal_margin"
-            android:orientation="vertical"
-        >
-
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/comment_user_image"
-                android:layout_width="@dimen/profile_image_radius"
-                android:layout_height="@dimen/profile_image_radius"
-                app:civ_border_color="@color/seperator_color"
-                app:civ_border_width="1dp"
-            />
-
-            <TextView
-                android:id="@+id/num_likes"
-                android:layout_width="@dimen/profile_image_radius"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:ellipsize="marquee"
-                android:gravity="center"
-                android:lines="1"
-                android:textColor="@android:color/holo_red_light"
-                android:textSize="@dimen/sub_font_size"
-            />
-
-
-        </LinearLayout>
+            app:civ_border_color="@color/seperator_color"
+            app:civ_border_width="1dp"
+        />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -143,34 +122,64 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="vertical">
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
+                <ImageView
+                    android:id="@+id/fire_icon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="2dp"
+                    android:src="@drawable/ic_action_fire"
+                    android:tint="@color/red"
+                />
+
+                <TextView
+                    android:id="@+id/num_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/fire_icon"
+                    android:ellipsize="marquee"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:text="123"
+                    android:textColor="@color/twentyfive_black"
+                    android:textSize="@dimen/sub_font_size"
+                />
+
+
                 <TextView
                     android:id="@+id/comment_user_name"
-                    android:layout_width="0px"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:lines="1"
+                    android:maxEms="12"
                     android:textColor="@color/user_name_blue"
                     android:textSize="@dimen/body_font_size"
                     android:textStyle="bold"
-                    tools:text="Name NameName Name"/>
+                    tools:text="Name NameName Nddsa adasd asdaddame"/>
+
 
                 <TextView
                     android:id="@+id/comment_time_ago"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="end"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="2dp"
+                    android:layout_toLeftOf="@id/num_likes"
+                    android:layout_toRightOf="@id/comment_user_name"
+                    android:minEms="4"
+                    android:minWidth="4dp"
                     android:textColor="@color/twentyfive_black"
                     android:textSize="@dimen/sub_font_size"
                     tools:text="1h"
                 />
 
-
-            </LinearLayout>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/comment"
@@ -179,7 +188,7 @@
                 android:autoLink="web|email"
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/sub_font_size"
-                tools:text="test test test testtest test test testtest "/>
+                tools:text="test test test teest test testtest test test testtest "/>
 
         </LinearLayout>
     </LinearLayout>

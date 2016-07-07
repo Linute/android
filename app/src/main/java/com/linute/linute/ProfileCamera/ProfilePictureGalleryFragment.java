@@ -110,8 +110,7 @@ public class ProfilePictureGalleryFragment extends BaseFragment{
                         ProfileCameraActivity activity = (ProfileCameraActivity) getActivity();
                         if (activity != null) {
                             activity.replaceFragment(
-                                    ConfirmProfilePicture.newInstance(Uri.fromFile(croppedFile)),
-                                    ConfirmProfilePicture.TAG
+                                    ConfirmProfilePicture.newInstance(Uri.fromFile(croppedFile))
                             );
                         }
                     }
