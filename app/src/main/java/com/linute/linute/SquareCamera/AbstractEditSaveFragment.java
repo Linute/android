@@ -308,7 +308,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     private void loadOverlays() {
         final FragmentActivity activity = getActivity();
-        if(mStickerDrawerAdapter == null || mFilterAdapter == null || activity == null) return;
+        if (mStickerDrawerAdapter == null || mFilterAdapter == null || activity == null) return;
 
         overlaysLoaded = true;
 
@@ -326,13 +326,15 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 for (File f : filterDir.listFiles()) {
                     Bitmap b = null;
                     b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                    if(b != null) {
+                    if (b != null) {
                         float scale = (float) metrics.widthPixels / b.getWidth();
 
                         try {
                             mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
                         } catch (OutOfMemoryError e) {
                             e.printStackTrace();
+                        } catch (NullPointerException np) {
+                            np.printStackTrace();
                         }
                         b.recycle();
                         activity.runOnUiThread(new Runnable() {
@@ -343,6 +345,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                         });
                     }
                 }
+
             }
         }).start();
 
@@ -355,15 +358,22 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 for (File f : memeDir.listFiles()) {
-                    mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mStickerDrawerAdapter.notifyDataSetChanged();
-                        }
-                    });
+                    try {
+                        mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mStickerDrawerAdapter.notifyDataSetChanged();
+                            }
+                        });
+                    } catch (OutOfMemoryError e) {
+                        e.printStackTrace();
+                    } catch (NullPointerException np) {
+                        np.printStackTrace();
+                    }
                 }
             }
+
         }).start();
     }
 
