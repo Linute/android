@@ -18,10 +18,7 @@ import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
-import com.linute.linute.MainContent.EventBuses.NotificationEvent;
-import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -109,8 +106,7 @@ public class UpdatesFragment extends BaseFragment {
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity activity = (MainActivity) getActivity();
-                if (activity != null) activity.openDrawer();
+                getFragmentManager().popBackStack();
             }
         });
 
@@ -118,11 +114,7 @@ public class UpdatesFragment extends BaseFragment {
         mToolbar.inflateMenu(R.menu.menu_fragment_updates);
         View chatActionView = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
-        mHasNotifications = NotificationsCounterSingleton.getInstance().hasNotifications();
-
-
-
-        mToolbar.setNavigationIcon(mHasNotifications ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         mNotificationIndicator = chatActionView.findViewById(R.id.notification);
         mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
@@ -170,21 +162,12 @@ public class UpdatesFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
 
-
         mChatSubscription = NewMessageBus
                 .getInstance()
                 .getObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mNewMessageSubscriber);
-
-        mNotificationSubscription = NotificationEventBus
-                .getInstance()
-                .getObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(mNotificationEventAction1);
-
 
         if (getFragmentState() == FragmentState.NEEDS_UPDATING || NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing()) {
             mSwipeRefreshLayout.post(new Runnable() {
@@ -201,14 +184,8 @@ public class UpdatesFragment extends BaseFragment {
 
             //Log.i(TAG, "onResume: ");
             if (activity != null && !NotificationsCounterSingleton.getInstance().updatesNeedsRefreshing() && NotificationsCounterSingleton.getInstance().hasNewActivities()) {
-
-                activity.setUpdateNotification(0);
                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
                 NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
-
-                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                }
 
                 if (mUnreadArray.length() > 0) {
                     JSONObject obj = new JSONObject();
@@ -235,10 +212,6 @@ public class UpdatesFragment extends BaseFragment {
         super.onPause();
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
-        }
-
-        if (mNotificationSubscription != null) {
-            mNotificationSubscription.unsubscribe();
         }
 
         mAppBarLayout.setExpanded(true, false);
@@ -313,14 +286,8 @@ public class UpdatesFragment extends BaseFragment {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    activity.setUpdateNotification(0);
                                     NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
                                     NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
-
-                                    //if no updates or discover, remove indicator
-                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                                    }
 
                                     mHandler.post(new Runnable() {
                                         @Override
@@ -442,14 +409,6 @@ public class UpdatesFragment extends BaseFragment {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    activity.setUpdateNotification(0);
-                                    NotificationsCounterSingleton.getInstance().setNumOfNewActivities(0);
-                                    NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(false);
-
-                                    //if no updates or discover, remove indicator
-                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                                    }
 
                                     mHandler.post(new Runnable() {
                                         @Override
@@ -560,8 +519,6 @@ public class UpdatesFragment extends BaseFragment {
         mUpdatesRecyclerView.scrollToPosition(0);
     }
 
-    private boolean mHasNotifications;
-
     private Subscription mChatSubscription;
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
@@ -569,18 +526,6 @@ public class UpdatesFragment extends BaseFragment {
             if (event.hasNewMessage() != mHasMessage) {
                 mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
                 mHasMessage = event.hasNewMessage();
-            }
-        }
-    };
-
-
-    private Subscription mNotificationSubscription;
-    private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
-        @Override
-        public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotifications) {
-                mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
-                mHasNotifications = notificationEvent.hasNotification();
             }
         }
     };

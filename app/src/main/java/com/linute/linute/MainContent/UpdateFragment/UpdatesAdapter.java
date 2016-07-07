@@ -255,10 +255,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         }
 
 
-        private void setUpPictures(Update update) {
-
+        private void setUpPictures(final Update update) {
             SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
 
             //set profile image
             Glide.with(mContext)
@@ -301,6 +299,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                         ((MainActivity) mContext).addFragmentToContainer(
                                 FeedDetailPage.newInstance(mUpdate.getPost())
                         );
+                        update.markViewed();
                     }
                 });
 

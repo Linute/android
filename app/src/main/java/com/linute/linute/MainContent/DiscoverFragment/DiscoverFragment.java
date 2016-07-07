@@ -285,7 +285,7 @@ public class DiscoverFragment extends BaseFragment {
     public void refreshFeed() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
-        if (!refreshLayout.isRefreshing()){
+        if (!refreshLayout.isRefreshing()) {
             refreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -338,7 +338,7 @@ public class DiscoverFragment extends BaseFragment {
                             if (mSkip == 0) {
                                 feedDone = true; //no more feed to load
                                 mCheckBoxChoiceCapableAdapters.setLoadState(LoadMoreViewHolder.STATE_END);
-                            }else {
+                            } else {
                                 feedDone = false;
                                 mCheckBoxChoiceCapableAdapters.setLoadState(LoadMoreViewHolder.STATE_LOADING);
                             }
@@ -389,9 +389,7 @@ public class DiscoverFragment extends BaseFragment {
                                             if (t.hasNewPosts()) {
                                                 t.setNumOfNewPosts(0);
                                                 activity.setFeedNotification(0);
-                                                if (!t.hasNotifications()) {
-                                                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                                                }
+                                                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER,false));
                                             }
 
                                             refreshLayout.setRefreshing(false);

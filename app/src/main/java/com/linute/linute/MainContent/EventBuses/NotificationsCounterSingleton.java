@@ -76,10 +76,6 @@ public class NotificationsCounterSingleton {
         mDiscoverNeedsRefreshing = discoverNeedsRefreshing;
     }
 
-    public boolean hasNotifications() {
-        return mNumOfNewPosts > 0;
-    }
-
     public boolean hasNewActivities() {
         return mNumOfNewActivities > 0;
     }

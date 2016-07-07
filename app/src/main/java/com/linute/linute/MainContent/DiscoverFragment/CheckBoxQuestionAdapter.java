@@ -111,10 +111,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             if (activity != null) {
                 activity.setFeedNotification(0);
                 NotificationsCounterSingleton.getInstance().setNumOfNewPosts(0);
-
-                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                }
+                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
             }
         }
 

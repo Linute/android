@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -39,8 +38,6 @@ import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
@@ -106,6 +103,7 @@ public class MainActivity extends BaseTaptActivity {
         public static final short FEED = 1;
         public static final short GLOBAL = 2;
         public static final short ACTIVITY = 3;
+        public static final short FIND_FRIENDS = 4;
     }
 
 
@@ -124,8 +122,6 @@ public class MainActivity extends BaseTaptActivity {
         mMainDrawerListener = new MainDrawerListener();
         mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
-
-        //mParentView = findViewById(R.id.mainActivity_fragment_holder);
 
         //profile image and header setup
         loadDrawerHeader();
@@ -164,12 +160,7 @@ public class MainActivity extends BaseTaptActivity {
                         navItemSelected(FRAGMENT_INDEXES.GLOBAL, item);
                         break;
                     case R.id.navigation_item_find_friends:
-                        if (mPreviousItem != null && mPreviousItem != item) {
-                            mPreviousItem.setChecked(false);
-                        }
-                        item.setChecked(true);
-                        addFragmentToContainer(new FindFriendsChoiceFragment());
-                        mPreviousItem = item;
+                        navItemSelected(FRAGMENT_INDEXES.FIND_FRIENDS, item);
                         break;
                     default:
                         break;
@@ -210,14 +201,22 @@ public class MainActivity extends BaseTaptActivity {
             if (mPreviousItem != item || wereItemsInBackStack) {
                 mPreviousItem.setChecked(false);
                 item.setChecked(true);
-                replaceContainerWithFragment(getFragment(position));
+                replaceContainerWithFragment(
+                        position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                                FindFriendsChoiceFragment.newInstance(true) :
+                                getFragment(position));
                 mPreviousItem = item;
             } else {
                 getFragment(position).resetFragment();
             }
         } else {
             item.setChecked(true);
-            replaceContainerWithFragment(getFragment(position));
+            replaceContainerWithFragment(
+                    position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                            FindFriendsChoiceFragment.newInstance(true) :
+                            getFragment(position)
+            );
+
             mPreviousItem = item;
         }
 
@@ -418,19 +417,19 @@ public class MainActivity extends BaseTaptActivity {
         setNavItemNotification(R.id.navigation_item_feed, count);
     }
 
-    public void setUpdateNotification(int count) {
-        //setNavItemNotification(R.id.navigation_item_activity, count);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
-            if (updateItem != null) {
-                updateItem.getActionView().findViewById(R.id.notification).setVisibility(
-                        count > 0 ? View.VISIBLE : View.GONE
-                );
-                ((TextView) updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count) : "+"));
-            }
-        }
-    }
+//    public void setUpdateNotification(int count) {
+//        //setNavItemNotification(R.id.navigation_item_activity, count);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        if (toolbar != null) {
+//            MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
+//            if (updateItem != null) {
+//                updateItem.getActionView().findViewById(R.id.notification).setVisibility(
+//                        count > 0 ? View.VISIBLE : View.GONE
+//                );
+//                ((TextView) updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count) : "+"));
+//            }
+//        }
+//    }
 
     //So we change fragments or activities only after the drawer closes
     private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
@@ -644,10 +643,10 @@ public class MainActivity extends BaseTaptActivity {
                         public void run() {
                             //the owner of the post is not blocked
                             if (!BlockedUsersSingleton.getBlockedListSingletion().contains(postObj.getUserId())) {
-                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                if (!NotificationsCounterSingleton.getInstance().hasNewPosts()) {
                                     NotificationEventBus
                                             .getInstance()
-                                            .setNotification(new NotificationEvent(true));
+                                            .setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
                                 }
 
                                 setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
@@ -689,18 +688,20 @@ public class MainActivity extends BaseTaptActivity {
                     NewMessageBus.getInstance().setNewMessage(chat);
                 } else {
                     final Update update = new Update(activity);
+                    Log.i(TAG, "call: ello");
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                                    if (!((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update)) {
-                                        setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
-                                    }
-                                } else {
-                                    setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
-                                }
+                                NotificationsCounterSingleton.getInstance().incrementActivities();
+
+                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null)
+                                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+
+                                NotificationEventBus
+                                        .getInstance()
+                                        .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
                                     newEventSnackbar(update.getDescription(), update.getPost());
@@ -838,18 +839,11 @@ public class MainActivity extends BaseTaptActivity {
                 NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
 
                 int activities = badge.getInt("activities");
+                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
                 if (activities > 0) {
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
                     NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
                 }
-
-                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setUpdateNotification(NotificationsCounterSingleton.getInstance().getNumOfNewActivities());
-                    }
-                });
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -872,7 +866,7 @@ public class MainActivity extends BaseTaptActivity {
                         }
                     });
 
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
                     NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
                 }
             } catch (JSONException e) {
@@ -911,7 +905,7 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener meme = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            ;
+
             try {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
@@ -937,7 +931,7 @@ public class MainActivity extends BaseTaptActivity {
                             file.createNewFile();
                             File res = Glide.with(MainActivity.this)
                                     .load(Utils.getMemeImageUrl(fileName))
-                                    .downloadOnly(1080,1920).get();
+                                    .downloadOnly(1080, 1920).get();
 
                             FileOutputStream fos = new FileOutputStream(file);
                             FileInputStream fis = new FileInputStream(res);
@@ -950,9 +944,9 @@ public class MainActivity extends BaseTaptActivity {
                             fos.close();
                         } catch (IOException ioe) {
                             ioe.printStackTrace();
-                        } catch (ExecutionException ee){
+                        } catch (ExecutionException ee) {
                             ee.printStackTrace();
-                        } catch (InterruptedException ie){
+                        } catch (InterruptedException ie) {
                             ie.printStackTrace();
                         }
 
@@ -1019,6 +1013,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         }
     };
+
     private Emitter.Listener blocked = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -1053,6 +1048,10 @@ public class MainActivity extends BaseTaptActivity {
 
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
+    }
+
+    public void addActivityFragment() {
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
     }
 }
 
