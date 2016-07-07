@@ -64,6 +64,9 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
     }
 
+    private int[] mPostBackgroundColors = new int[6];
+    private int[] mPostTextColors = new int[6];
+    private View[] mPostColorSelectorViews = new View[6];
 
     @Nullable
     @Override
@@ -149,12 +152,18 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         mTextFrame = root.findViewById(R.id.post_create_frame);
 
-        root.findViewById(R.id.post_create_0).setOnClickListener(this);
-        root.findViewById(R.id.post_create_1).setOnClickListener(this);
-        root.findViewById(R.id.post_create_2).setOnClickListener(this);
-        root.findViewById(R.id.post_create_3).setOnClickListener(this);
-        root.findViewById(R.id.post_create_4).setOnClickListener(this);
-        root.findViewById(R.id.post_create_5).setOnClickListener(this);
+        mPostColorSelectorViews[0] = root.findViewById(R.id.post_create_0);
+        mPostColorSelectorViews[1] = root.findViewById(R.id.post_create_1);
+        mPostColorSelectorViews[2] = root.findViewById(R.id.post_create_2);
+        mPostColorSelectorViews[3] = root.findViewById(R.id.post_create_3);
+        mPostColorSelectorViews[4] = root.findViewById(R.id.post_create_4);
+        mPostColorSelectorViews[5] = root.findViewById(R.id.post_create_5);
+        for(int i = 0; i< mPostColorSelectorViews.length; i++){
+            View postColorSelectorView = mPostColorSelectorViews[i];
+            postColorSelectorView.setBackgroundColor(mPostBackgroundColors[i]);
+            ((TextView)postColorSelectorView.findViewById(R.id.selector_text)).setTextColor(mPostTextColors[i]);
+            postColorSelectorView.setOnClickListener(this);
+        }
 
         return root;
     }
@@ -267,32 +276,32 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         switch (viewId) {
             case R.id.post_create_0:
-                backgroundColor = R.color.post_color_0;
-                textColor = R.color.pure_black;
+                backgroundColor = mPostBackgroundColors[0];
+                textColor = mPostTextColors[0];
                 break;
             case R.id.post_create_1:
-                backgroundColor = R.color.post_color_1;
-                textColor = R.color.pure_white;
+                backgroundColor = mPostBackgroundColors[1];
+                textColor = mPostTextColors[1];
                 break;
             case R.id.post_create_2:
-                backgroundColor = R.color.post_color_2;
-                textColor = R.color.pure_white;
+                backgroundColor = mPostBackgroundColors[2];
+                textColor = mPostTextColors[2];
                 break;
             case R.id.post_create_3:
-                backgroundColor = R.color.post_color_3;
-                textColor = R.color.pure_white;
+                backgroundColor = mPostBackgroundColors[3];
+                textColor = mPostTextColors[3];
                 break;
             case R.id.post_create_4:
-                backgroundColor = R.color.post_color_4;
-                textColor = R.color.pure_white;
+                backgroundColor = mPostBackgroundColors[4];
+                textColor = mPostTextColors[4];
                 break;
             case R.id.post_create_5:
-                backgroundColor = R.color.post_color_5;
-                textColor = R.color.pure_white;
+                backgroundColor = mPostBackgroundColors[5];
+                textColor = mPostTextColors[5];
                 break;
             default:
-                backgroundColor = R.color.post_color_0;
-                textColor = R.color.pure_black;
+                backgroundColor = mPostTextColors[];
+                textColor = mPostTextColors[];
                 break;
         }
 
