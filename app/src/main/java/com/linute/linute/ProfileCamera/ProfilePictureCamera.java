@@ -277,7 +277,12 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
                     mCamera.autoFocus(new Camera.AutoFocusCallback() {
                         @Override
                         public void onAutoFocus(boolean success, Camera camera) {
-                            mCamera.takePicture(ProfilePictureCamera.this, null, null, ProfilePictureCamera.this);
+                            try {
+                                mCamera.takePicture(ProfilePictureCamera.this, null, null, ProfilePictureCamera.this);
+                            }catch (RuntimeException e){
+                                e.printStackTrace();
+                                mIsSafeToTakePhoto = true;
+                            }
                         }
                     });
                 }
@@ -471,10 +476,7 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
                             public void call(Uri uri) {
                                 ProfileCameraActivity activity = (ProfileCameraActivity) getActivity();
                                 if (activity != null){
-                                    activity.replaceFragment(
-                                            ConfirmProfilePicture.newInstance(uri),
-                                            ConfirmProfilePicture.TAG
-                                    );
+                                    activity.replaceFragment(ConfirmProfilePicture.newInstance(uri));
                                 }
                             }
                         });
