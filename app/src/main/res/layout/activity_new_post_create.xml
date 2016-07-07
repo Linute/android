@@ -95,6 +95,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
             <TextView
+                android:id="@+id/selector_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -115,6 +116,7 @@
             android:foreground="?android:attr/selectableItemBackground"
         >
             <TextView
+                android:id="@+id/selector_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -136,6 +138,7 @@
         >
 
             <TextView
+                android:id="@+id/selector_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -181,6 +184,7 @@
         >
 
             <TextView
+                android:id="@+id/selector_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -203,6 +207,7 @@
         >
 
             <TextView
+                android:id="@+id/selector_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
