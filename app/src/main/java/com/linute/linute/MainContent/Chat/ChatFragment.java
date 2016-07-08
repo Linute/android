@@ -230,6 +230,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
+
+        View settingsButton = toolbar.findViewById(R.id.toolbar_chat_settings);
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity)getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId));
+            }
+        });
+
+
         mTopDateHeaderTV = (TextView) view.findViewById(R.id.top_date_header);
 
         //when reaches end of list, we want to try to load more
