@@ -355,7 +355,11 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 for (File f : memeDir.listFiles()) {
-                    mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                    try {
+                        mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                    }catch (OutOfMemoryError e){
+                        e.printStackTrace();
+                    }
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

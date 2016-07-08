@@ -133,8 +133,6 @@ public class UploadIntentService extends IntentService {
                         .setProgress(0, 0, false)
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
-
-                Toast.makeText(UploadIntentService.this, getPostText(p.getType()), Toast.LENGTH_SHORT).show();
             } else {
                 failedToPost(p);
             }

@@ -384,15 +384,17 @@ public class DiscoverFragment extends BaseFragment {
                                                 }
                                             });
 
-                                            NotificationsCounterSingleton t = NotificationsCounterSingleton.getInstance();
-                                            t.setDiscoverNeedsRefreshing(false);
-                                            if (t.hasNewPosts()) {
+                                            Log.i(TAG, "run: ");
+                                            if(!mSectionTwo) {
+                                                NotificationsCounterSingleton t = NotificationsCounterSingleton.getInstance();
+                                                t.setDiscoverNeedsRefreshing(false);
+
                                                 t.setNumOfNewPosts(0);
                                                 activity.setFeedNotification(0);
-                                                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER,false));
+                                                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
+                                                Log.i(TAG, "run: sent");
+                                                refreshLayout.setRefreshing(false);
                                             }
-
-                                            refreshLayout.setRefreshing(false);
                                         }
                                     }
                             );
