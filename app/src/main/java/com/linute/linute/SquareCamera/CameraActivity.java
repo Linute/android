@@ -188,9 +188,21 @@ public class CameraActivity extends AppCompatActivity {
             // When back pressed, we need to ask: "are you sure you want to discard this"
             EditSaveVideoFragment saveVideoFragment =
                     (EditSaveVideoFragment) getSupportFragmentManager().findFragmentByTag(EditSaveVideoFragment.TAG);
+            EditSavePhotoFragment savePhotoFragment =
+                    (EditSavePhotoFragment) getSupportFragmentManager().findFragmentByTag(EditSavePhotoFragment.TAG);
+
             if (saveVideoFragment != null){
+                if(saveVideoFragment.isStickerDrawerOpen()){
+                    saveVideoFragment.closeStickerDrawer();
+                }else
                 saveVideoFragment.showConfirmDialog();
-            }else {
+            }else
+            if(savePhotoFragment != null){
+                if(savePhotoFragment.isStickerDrawerOpen()){
+                    savePhotoFragment.closeStickerDrawer();
+                }
+            }else
+            {
                 clearBackStack();
             }
         }
