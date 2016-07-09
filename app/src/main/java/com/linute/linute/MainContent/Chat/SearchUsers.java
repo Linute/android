@@ -19,11 +19,8 @@ import android.widget.EditText;
 
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -155,6 +152,7 @@ public class SearchUsers extends Fragment {
                         });
                     }
                 } else {
+
 //                    mSearchUserList.clear();
                     ArrayList<SearchUser> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;

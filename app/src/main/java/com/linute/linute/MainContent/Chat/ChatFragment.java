@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,12 +38,11 @@ import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -69,7 +70,6 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
-
 import static android.app.Activity.RESULT_OK;
 
 /**
@@ -81,8 +81,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String ROOM_ID = "room";
-    private static final String OTHER_PERSON_NAME = "username";
-    private static final String OTHER_PERSON_ID = "userid";
+    //    private static final String OTHER_PERSON_NAME = "username";
+//    private static final String OTHER_PERSON_ID = "userid";
+    private static final String ARG_USERS = "users";
 
     private static final DateFormat DATE_DIVIDER_DATE_FORMAT = new SimpleDateFormat("MMMM d");
 
@@ -95,8 +96,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private String mRoomId;
 
-    private String mOtherPersonId;
-    private String mOtherPersonName; //name of person youre talking to
+    //    private String mOtherPersonId;
+    private ArrayList<User> mUsers;
+    //    private String mOtherPersonName; //name of person youre talking to
     private String mOtherPersonProfileImage;
 
     private String mUserId; //our user id
@@ -177,11 +179,62 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         Bundle args = new Bundle();
 
         args.putString(ROOM_ID, roomId);
-        args.putString(OTHER_PERSON_NAME, otherPersonName);
-        args.putString(OTHER_PERSON_ID, otherPersonId);
+
+        ArrayList<User> users = new ArrayList<>(1);
+        users.add(new User(otherPersonId, otherPersonName));
+        args.putParcelableArrayList(ARG_USERS, users);
+//        args.putString(OTHER_PERSON_NAME, otherPersonName);
+//        args.putString(OTHER_PERSON_ID, otherPersonId);
 
         //args.putInt(USER_COUNT, roomUsersCnt);
         //args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static class User implements Parcelable {
+        public final String id;
+        public final String name;
+
+        public User(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(id);
+            parcel.writeString(name);
+        }
+
+        public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+            @Override
+            public User createFromParcel(Parcel parcel) {
+                return new User(
+                        parcel.readString(),
+                        parcel.readString()
+                );
+            }
+
+            @Override
+            public User[] newArray(int i) {
+                return new User[i];
+            }
+        };
+    }
+
+
+    public static ChatFragment newInstance(String roomId, User... users) {
+        ChatFragment fragment = new ChatFragment();
+        Bundle args = new Bundle();
+        ArrayList<User> usersList = new ArrayList<>(users.length);
+        args.putString(ROOM_ID, roomId);
+        args.putParcelableArrayList(ARG_USERS, usersList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -191,12 +244,15 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mRoomId = getArguments().getString(ROOM_ID);
-            mOtherPersonName = getArguments().getString(OTHER_PERSON_NAME);
-            mOtherPersonId = getArguments().getString(OTHER_PERSON_ID);
+//            mOtherPersonName = getArguments().getString(OTHER_PERSON_NAME);
+//            mOtherPersonId = getArguments().getString(OTHER_PERSON_ID);
             //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
+
+            mUsers = getArguments().getParcelableArrayList(ARG_USERS);
         }
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -207,8 +263,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
 
         View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
-        TextView otherPersonNameTV = (TextView) otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
-        otherPersonNameTV.setText(mOtherPersonName);
+        TextView ChatName = (TextView) otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
+        ChatName.setText(getChatName());
         updateRoomIconView();
         toolbar.addView(otherPersonHeader);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
@@ -220,22 +276,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
-        toolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) getActivity();
-                if (activity != null) {
-                    activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mOtherPersonName, mOtherPersonId));
+        if (isOneOnOne()) {
+            toolbar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null) {
+//                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance());
+                        Log.i("AAA", mUsers.toString());
+                    }
                 }
-            }
-        });
+            });
+        }
 
 
         View settingsButton = toolbar.findViewById(R.id.toolbar_chat_settings);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId));
+                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId));
             }
         });
 
@@ -740,16 +799,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void getRoomAndChat() {
         if (getActivity() == null ||
                 mUserId == null ||
-                mOtherPersonId == null ||
+                mUsers == null ||
                 getFragmentState() == FragmentState.LOADING_DATA) return;
 
         setFragmentState(FragmentState.LOADING_DATA);
         mProgressBar.setVisibility(View.VISIBLE);
 
         JSONArray users = new JSONArray();
+        for (User user : mUsers) {
+            users.put(user.id);
+        }
         users.put(mUserId);
-        users.put(mOtherPersonId);
-
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -770,7 +830,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                       // Log.i(TAG, "onResponse: " + object.toString(4));
+                        // Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -849,7 +909,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
     private void getChat() {
-
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
         Map<String, String> chat = new HashMap<>();
@@ -1056,7 +1115,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         header.setType(Chat.TYPE_DATE_HEADER);
                         mChatList.add(header);
                     }
-                }else{
+                } else {
                     Date date = chat.getDate();
                     Chat header = new Chat(
                             chat.getRoomId(),
@@ -1114,11 +1173,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                int pos = mChatList.size()-1;
+                int pos = mChatList.size() - 1;
 
                 if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
                     mChatList.remove(pos);
-                    mChatAdapter.notifyItemRemoved(pos+1);
+                    mChatAdapter.notifyItemRemoved(pos + 1);
                 }
             }
         });
@@ -1383,6 +1442,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private boolean mLoadingMoreMessages = false;
 
+    private boolean isOneOnOne() {
+        return mUsers.size() <= 2;
+    }
+
     @Override
     public void loadMore() {
         if (!mCanLoadMore || mLoadingMoreMessages) return;
@@ -1579,7 +1642,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         header.setType(Chat.TYPE_DATE_HEADER);
                         intoChatList.add(header);
                     }
-                }else{
+                } else {
                     Date date = chat.getDate();
                     Chat header = new Chat(
                             chat.getRoomId(),
@@ -1616,6 +1679,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
     }
 
+    public String getChatName() {
 
+        StringBuilder builder = new StringBuilder();
+        if (isOneOnOne()) {
+            String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
+            for (User user : mUsers) {
+                if (user.id != me) {
+                    builder.append(user.name);
+                }
+            }
+        } else {
+            for (int i = 0; i < mUsers.size(); i++) {
+                builder.append(mUsers.get(i).name);
+                if (i != mUsers.size() - 1) {
+                    builder.append(" ,");
+                }
+            }
+        }
+        return builder.toString();
+    }
 
 }
