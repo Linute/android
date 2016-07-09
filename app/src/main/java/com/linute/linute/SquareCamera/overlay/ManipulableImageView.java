@@ -2,6 +2,7 @@ package com.linute.linute.SquareCamera.overlay;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -98,6 +99,8 @@ public class ManipulableImageView extends ImageView {
     float[] initialY = new float[10];
     float[] positionX = new float[10];
     float[] positionY = new float[10];
+    int mainX, mainY;
+
     long timeDown;
 
     boolean isInCollision = false;
@@ -134,22 +137,42 @@ public class ManipulableImageView extends ImageView {
 
             case MotionEvent.ACTION_MOVE:
                 id = event.getPointerId(event.getActionIndex());
+                if(id == 0){
+                    mainX = (int)event.getRawX();
+                    mainY = (int)event.getRawY();
+                }
 
                 positionX[id] = event.getRawX() - initialX[id];// + positionX[id];
                 positionY[id] = event.getRawY() - initialY[id];// + positionY[id];
 
-                setX(positionX[0]);
-                setY(positionY[0]);
+
+                float posX = positionX[0];
+                float posY = positionY[0];
+
+                for(int i=0;i<event.getPointerCount();i++){
+                    int pid = event.getPointerId(i);
+                    posX =(positionX[pid] - posX)/2 + posX;
+                    posY =(positionY[pid] - posY)/2 + posY;
+                }
+
+
+                setX(posX);
+                setY(posY);
 
                 if(mCollisionListener != null){
-                    getHitRect(myBounds);
+                    Point p = new Point(mainX, mainY);
                     mCollisionListener.getCollisionSensor().getHitRect(theirBounds);
+                    theirBounds.left -= 10;
+                    theirBounds.right += 10;
+                    theirBounds.top -= 10;
+                    theirBounds.bottom += 10;
 
-                    if(myBounds.intersect(theirBounds) && !isInCollision){
+                    if(theirBounds.contains(p.x, p.y) && !isInCollision){
                         isInCollision = true;
-                        mCollisionListener.onViewCollision(this);
+                        mCollisionListener.onViewCollisionBegin(this);
                     }else if(!myBounds.intersect(theirBounds) && isInCollision){
                         isInCollision = false;
+                        mCollisionListener.onViewCollisionEnd(this);
                     }
 
                 }
@@ -175,7 +198,8 @@ public class ManipulableImageView extends ImageView {
     public interface ViewManipulationListener {
         void onViewPickedUp(View me);
         void onViewDropped(View me);
-        void onViewCollision(View me);
+        void onViewCollisionBegin(View me);
+        void onViewCollisionEnd(View me);
         void onViewDropCollision(View me);
         View getCollisionSensor();
     }
