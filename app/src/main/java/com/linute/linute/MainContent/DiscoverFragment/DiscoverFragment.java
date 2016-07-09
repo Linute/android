@@ -389,7 +389,6 @@ public class DiscoverFragment extends BaseFragment {
                                                 t.setNumOfNewPosts(0);
                                                 activity.setFeedNotification(0);
                                                 NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
-                                                Log.i(TAG, "run: sent");
                                             }
                                             refreshLayout.setRefreshing(false);
                                         }

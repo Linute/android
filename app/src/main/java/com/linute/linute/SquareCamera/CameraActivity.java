@@ -42,11 +42,11 @@ public class CameraActivity extends AppCompatActivity {
     protected boolean mHasWriteAndCameraPermission = false;
 
 
-    /** need the following intent:
-     *  CameraActivity.CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
-     *  CameraActivity.RETURN_TYPE - SEND_POST or RETURN_URI
-     *
-     * */
+    /**
+     * need the following intent:
+     * CameraActivity.CAMERA_TYPE - CAMERA_AND_VIDEO_AND_GALLERY or JUST_CAMERA
+     * CameraActivity.RETURN_TYPE - SEND_POST or RETURN_URI
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,7 +183,7 @@ public class CameraActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0){
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             // Maybe there is a better way to do this
             // When back pressed, we need to ask: "are you sure you want to discard this"
             EditSaveVideoFragment saveVideoFragment =
@@ -191,22 +191,19 @@ public class CameraActivity extends AppCompatActivity {
             EditSavePhotoFragment savePhotoFragment =
                     (EditSavePhotoFragment) getSupportFragmentManager().findFragmentByTag(EditSavePhotoFragment.TAG);
 
-            if (saveVideoFragment != null){
-                if(saveVideoFragment.isStickerDrawerOpen()){
+            if (saveVideoFragment != null) {
+                if (saveVideoFragment.isStickerDrawerOpen()) {
                     saveVideoFragment.closeStickerDrawer();
-                }else
-                saveVideoFragment.showConfirmDialog();
-            }else
-            if(savePhotoFragment != null){
-                if(savePhotoFragment.isStickerDrawerOpen()){
+                } else
+                    saveVideoFragment.showConfirmDialog();
+            } else if (savePhotoFragment != null) {
+                if (savePhotoFragment.isStickerDrawerOpen()) {
                     savePhotoFragment.closeStickerDrawer();
-                }
-            }else
-            {
+                } else savePhotoFragment.showConfirmDialog();
+            } else {
                 clearBackStack();
             }
-        }
-        else {
+        } else {
             setResult(RESULT_CANCELED);
             super.onBackPressed();
         }

@@ -36,6 +36,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableType;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
 
 import org.bson.types.ObjectId;
@@ -113,6 +114,21 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
             args.putParcelable(BITMAP_URI, imageUri);
 
         args.putParcelable(VIDEO_DIMEN, videoDimen);
+
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static Fragment newInstance(Uri imageUri, VideoDimen videoDimen, boolean fromGallery) {
+        Fragment fragment = new EditSaveVideoFragment();
+
+        Bundle args = new Bundle();
+
+        if (imageUri != null)
+            args.putParcelable(BITMAP_URI, imageUri);
+
+        args.putParcelable(VIDEO_DIMEN, videoDimen);
+        args.putBoolean(FROM_GALLERY, fromGallery);
 
         fragment.setArguments(args);
         return fragment;
@@ -207,7 +223,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
         View view = getView();
 
-
         mPlaying = new CheckBox(getContext());
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 
@@ -230,11 +245,15 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         mVideoLink = getArguments().getParcelable(BITMAP_URI);
 
         mSquareVideoView = new ScalableVideoView(container.getContext());
-        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
+
+        mSquareVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
         if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
+
         try {
             mSquareVideoView.setDataSource(getContext(),mVideoLink);
+            mSquareVideoView.setScalableType(ScalableType.FIT_CENTER);
             mSquareVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
@@ -374,35 +393,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
         }
     */
-    protected void showConfirmDialog() {
-        if (getActivity() == null) return;
-
-        if (mEditText.getVisibility() == View.VISIBLE) {
-            mEditText.setVisibility(View.GONE);
-            if (!mEditText.getText().toString().trim().isEmpty()) {
-                mTextView.setText(mEditText.getText().toString());
-                mTextView.setVisibility(View.VISIBLE);
-            }
-            hideKeyboard();
-        }
-
-        new AlertDialog.Builder(getActivity())
-                .setTitle("you sure?")
-                .setMessage("would you like to throw away what you have currently?")
-                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (getActivity() == null) return;
-                        ((CameraActivity) getActivity()).clearBackStack();
-                    }
-                })
-                .setNegativeButton("no", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                }).show();
-    }
 
 
     @Override
@@ -597,6 +587,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                             getActivity().setResult(Activity.RESULT_OK, i);
                             getActivity().finish();
                         } else {
+
                             uploadVideo(image.toString(), outputFile);
                         }
                     }
@@ -623,6 +614,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                 mUserToken
         );
 
+        showProgress(false);
         Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
         Intent result = new Intent();
         result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
