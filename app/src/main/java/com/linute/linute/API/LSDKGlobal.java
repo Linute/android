@@ -14,7 +14,7 @@ import okhttp3.Callback;
  * Created by QiFeng on 5/14/16.
  */
 public class LSDKGlobal {
-    private static String mToken;
+    private String mToken;
 
     public LSDKGlobal(Context context) {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");

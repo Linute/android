@@ -76,6 +76,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected String mCollegeId;
     protected String mUserId;
+    protected String mUserToken;
 
     protected View mUploadButton;
 
@@ -124,6 +125,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
+        mUserToken = sharedPreferences.getString("userToken","");
 
         mAllContent = view.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) view.findViewById(R.id.base_content);

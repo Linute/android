@@ -15,7 +15,7 @@ import okhttp3.Callback;
  */
 public class LSDKFriends {
 
-    private static String mToken;
+    private String mToken;
 
 
     public LSDKFriends(Context context) {

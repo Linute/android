@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:lines="1"
-            android:textColor="@color/secondaryColor"
+            android:textColor="@color/twentyfive_black"
             android:textSize="@dimen/sub_font_size"
             tools:text="City college of new"
         />

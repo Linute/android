@@ -206,7 +206,6 @@ public class SettingActivity extends AppCompatActivity {
         public static final int NEED_UPDATE_REQUEST = 1;
 
         private void setOnClickListeners() {
-            //logout //TODO: unregister phone
             mLogOut.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {

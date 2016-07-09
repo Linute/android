@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
@@ -618,9 +619,11 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                 2,
                 imagepath,
                 videopath,
-                mUserId
+                mUserId,
+                mUserToken
         );
 
+        Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
         Intent result = new Intent();
         result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
         getActivity().setResult(Activity.RESULT_OK, result);

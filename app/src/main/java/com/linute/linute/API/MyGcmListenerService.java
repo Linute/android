@@ -109,8 +109,8 @@ public class MyGcmListenerService extends GcmListenerService {
 
 
         String message = data.getString("message");
-        int type = gettNotificationType(data.getString("action"));
-        String name = data.getString("ownerFullName");
+        //int type = gettNotificationType(data.getString("action"));
+        //String name = data.getString("ownerFullName");
         boolean isAnon = "1".equals(data.getString("privacy"));
         Object profileImage = data.get("ownerProfileImage");
 

@@ -220,14 +220,16 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                             0,
                             image.toString(),
                             null,
-                            mSharedPreferences.getString("userID", "")
+                            mSharedPreferences.getString("userID", ""),
+                            mSharedPreferences.getString("userToken","")
                     );
 
+            Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
             Intent result = new Intent();
             result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
             getActivity().setResult(RESULT_OK, result);
             getActivity().finish();
-        }else {
+        } else {
             Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);

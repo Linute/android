@@ -21,6 +21,7 @@ public class PendingUploadPost implements Parcelable {
     private String mImagePath;
     private String mVideoPath;
     private String mOwner;
+    private String mUserToken;
 
     public PendingUploadPost(String id,
                              String collegeId,
@@ -30,7 +31,8 @@ public class PendingUploadPost implements Parcelable {
                              int type,
                              String imagePath,
                              String videoPath,
-                             String owner
+                             String owner,
+                             String userToken
     ){
         mId = id;
         mCollegeId = collegeId;
@@ -43,6 +45,7 @@ public class PendingUploadPost implements Parcelable {
         mImagePath = imagePath;
         mVideoPath = videoPath;
         mOwner = owner;
+        mUserToken = userToken;
     }
 
     public String getId() {
@@ -85,6 +88,10 @@ public class PendingUploadPost implements Parcelable {
         return mOwner;
     }
 
+    public String getUserToken() {
+        return mUserToken;
+    }
+
     public String getImagePath() {
         return mImagePath;
     }
@@ -101,6 +108,7 @@ public class PendingUploadPost implements Parcelable {
         mImagePath = in.readString();
         mVideoPath = in.readString();
         mOwner = in.readString();
+        mUserToken = in.readString();
     }
 
     @Override
@@ -116,6 +124,7 @@ public class PendingUploadPost implements Parcelable {
         dest.writeString(mImagePath);
         dest.writeString(mVideoPath);
         dest.writeString(mOwner);
+        dest.writeString(mUserToken);
     }
 
     public static final Creator<PendingUploadPost> CREATOR = new Creator<PendingUploadPost>() {

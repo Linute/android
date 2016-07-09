@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
@@ -120,22 +121,24 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         } else {
             Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
             if (image != null) {
-                    PendingUploadPost pendingUploadPost =
-                                    new PendingUploadPost(
-                                                    ObjectId.get().toString(),
-                                                    mCollegeId,
-                                                    (mAnonSwitch.isChecked() ? 1 : 0),
-                                                    mAnonComments.isChecked() ? 0 : 1,
-                                                    mEditText.getText().toString(),
-                                                    1,
-                                                    image.toString(),
-                                                    null,
-                                                    mUserId
-                                                    );
-                    Intent result = new Intent();
-                    result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
-                    getActivity().setResult(Activity.RESULT_OK, result);
-                    getActivity().finish();
+                PendingUploadPost pendingUploadPost =
+                        new PendingUploadPost(
+                                ObjectId.get().toString(),
+                                mCollegeId,
+                                (mAnonSwitch.isChecked() ? 1 : 0),
+                                mAnonComments.isChecked() ? 0 : 1,
+                                mEditText.getText().toString(),
+                                1,
+                                image.toString(),
+                                null,
+                                mUserId,
+                                mUserToken
+                        );
+                Intent result = new Intent();
+                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
+                Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
+                getActivity().setResult(Activity.RESULT_OK, result);
+                getActivity().finish();
             }
         }
     }

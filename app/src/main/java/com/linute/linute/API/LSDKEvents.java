@@ -1,14 +1,13 @@
 package com.linute.linute.API;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
-import com.linute.linute.MainContent.Uploading.ProgressRequestBody;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -20,7 +19,7 @@ import okhttp3.Response;
  */
 public class LSDKEvents {
 
-    private static String mToken;
+    private String mToken;
 
     public LSDKEvents(Context context) {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
@@ -28,9 +27,7 @@ public class LSDKEvents {
 
     public Call getEvents(boolean hot, Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
         String[] path = {"events", hot ? "hot" : "discover"};
-
         return API_Methods.get(path, header, param, callback);
     }
 
@@ -50,8 +47,9 @@ public class LSDKEvents {
         return API_Methods.get(path, header, param, callback);
     }
 
-    public Response postEvent(Map<String, Object> param, CountingRequestBody.Listener listener) throws IOException {
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
+    public Response postEvent(String token, Map<String, Object> param, CountingRequestBody.Listener listener) throws IOException {
+        Map<String, String> header = API_Methods.getMainHeader(token);
+        Log.i("test", "postEvent: token "+token);
         return API_Methods.postWithProgress("events", header, param, listener);
     }
 

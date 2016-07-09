@@ -16,7 +16,7 @@ import okhttp3.Callback;
  * Created by Arman on 1/16/16.
  */
 public class LSDKChat {
-    private static String mToken;
+    private String mToken;
 
     public LSDKChat(Context context) {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");

@@ -618,8 +618,6 @@ public class FacebookSignUpFragment extends Fragment {
         sharedPreferences.putBoolean("notif_alsoComment", true);
         sharedPreferences.putBoolean("notif_comment", true);
         sharedPreferences.putBoolean("notif_like", true);
-
-
         sharedPreferences.apply();
 
         Utils.deleteTempSharedPreference(mSharedPreferences);
