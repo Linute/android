@@ -339,18 +339,27 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 if(filters != null)
                 for (File f : filters) {
                     Bitmap b = null;
+                    Bitmap scaled = null;
                     b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                     if (b != null) {
                         float scale = (float) metrics.widthPixels / b.getWidth();
 
+                        scaled = Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false);
                         try {
-                            mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
+                            mFilterAdapter.add(scaled);
                         } catch (OutOfMemoryError e) {
                             e.printStackTrace();
                         } catch (NullPointerException np) {
                             np.printStackTrace();
                         }
-                        b.recycle();
+                        finally {
+                            //It turns out the original image may be passed back as an optimisation,
+                            // if the width/height of the resize match the original image
+                            if (b != scaled) {
+                                b.recycle();
+                            }
+                        }
+
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

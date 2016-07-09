@@ -868,29 +868,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-//    //posts:refresh
-//    private Emitter.Listener refresh = new Emitter.Listener() {
-//        @Override
-//        public void call(Object... args) {
-//            try {
-//                final int posts = new JSONObject(args[0].toString()).getInt("posts");
-//
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        NotificationsCounterSingleton.getInstance().setNumOfNewPosts(posts);
-//                        setFeedNotification(posts);
-//                    }
-//                });
-//
-//                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, posts > 0));
-//                NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(posts > 0);
-//
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    };
 
     //posts:refresh
     private Emitter.Listener refresh = new Emitter.Listener() {
