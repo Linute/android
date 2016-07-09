@@ -103,6 +103,21 @@ public class PendingUploadPost implements Parcelable {
         mOwner = in.readString();
     }
 
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
+        dest.writeString(mCollegeId);
+        dest.writeInt(mPrivacy);
+        dest.writeInt(mIsAnonymousCommentsDisabled);
+        dest.writeString(mTitle);
+        dest.writeInt(mLatitude);
+        dest.writeInt(mLongitude);
+        dest.writeInt(mType);
+        dest.writeString(mImagePath);
+        dest.writeString(mVideoPath);
+        dest.writeString(mOwner);
+    }
+
     public static final Creator<PendingUploadPost> CREATOR = new Creator<PendingUploadPost>() {
         @Override
         public PendingUploadPost createFromParcel(Parcel in) {
@@ -121,18 +136,5 @@ public class PendingUploadPost implements Parcelable {
     }
 
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mId);
-        dest.writeString(mCollegeId);
-        dest.writeInt(mPrivacy);
-        dest.writeInt(mIsAnonymousCommentsDisabled);
-        dest.writeString(mTitle);
-        dest.writeInt(mLatitude);
-        dest.writeInt(mLongitude);
-        dest.writeInt(mType);
-        dest.writeString(mImagePath);
-        dest.writeString(mVideoPath);
-        dest.writeString(mOwner);
-    }
+
 }

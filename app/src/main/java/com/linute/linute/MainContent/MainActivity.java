@@ -10,6 +10,7 @@ import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -845,7 +846,6 @@ public class MainActivity extends BaseTaptActivity {
                     NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
                     NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -859,17 +859,17 @@ public class MainActivity extends BaseTaptActivity {
             try {
                 final int posts = new JSONObject(args[0].toString()).getInt("posts");
 
-                if (posts > 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
-                        }
-                    });
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        NotificationsCounterSingleton.getInstance().setNumOfNewPosts(posts);
+                        setFeedNotification(posts);
+                    }
+                });
 
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
-                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
-                }
+                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, posts > 0));
+                NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(posts > 0);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
