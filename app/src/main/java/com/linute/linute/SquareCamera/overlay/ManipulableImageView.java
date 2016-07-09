@@ -167,10 +167,12 @@ public class ManipulableImageView extends ImageView {
                     theirBounds.top -= 10;
                     theirBounds.bottom += 10;
 
-                    if(theirBounds.contains(p.x, p.y) && !isInCollision){
+                    boolean intersects = theirBounds.contains(p.x, p.y);
+
+                    if(intersects && !isInCollision){
                         isInCollision = true;
                         mCollisionListener.onViewCollisionBegin(this);
-                    }else if(!myBounds.intersect(theirBounds) && isInCollision){
+                    }else if(!intersects && isInCollision){
                         isInCollision = false;
                         mCollisionListener.onViewCollisionEnd(this);
                     }

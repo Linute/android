@@ -510,9 +510,22 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected abstract void showProgress(boolean show);
 
+    private boolean isStickerDrawerOpen() {
+        return mStickerDrawer.getVisibility() == View.VISIBLE;
+    }
+
     protected void toggleStickerDrawer() {
         if (mStickerDrawer.isAnimating()) return;
-        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+        if(isStickerDrawerOpen()){
+            mStickerDrawer.setVisibility(View.GONE);
+            mUploadButton.setAlpha(1);
+            mUploadButton.setClickable(true);
+        }else{
+            mStickerDrawer.setVisibility(View.VISIBLE);
+            mUploadButton.setAlpha(.5f);
+            mUploadButton.setClickable(false);
+        }
+//        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
 
     protected void closeStickerDrawer() {
