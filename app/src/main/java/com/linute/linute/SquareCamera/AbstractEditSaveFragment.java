@@ -91,6 +91,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     private StickerDrawerAdapter mStickerDrawerAdapter;
     private WipeViewPager mFilterPager;
 
+
     public static Fragment newInstance(Uri imageUri, boolean fromGallery) {
         Fragment fragment = new EditSavePhotoFragment();
 
@@ -172,11 +173,15 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             vBottom.setLayoutParams(params);
         }
 
-        //save button
+
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadContent();
+                if(isStickerDrawerOpen()){
+                    closeStickerDrawer();
+                }else {
+                    uploadContent();
+                }
             }
         });
 
@@ -526,13 +531,11 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected void openStickerDrawer(){
         mStickerDrawer.setVisibility(View.VISIBLE);
-        mUploadButton.setAlpha(.5f);
-        mUploadButton.setClickable(false);
+        mUploadButton.setAlpha(.3f);
     }
     protected void closeStickerDrawer() {
         mStickerDrawer.setVisibility(View.GONE);
         mUploadButton.setAlpha(1);
-        mUploadButton.setClickable(true);
     }
 
 
