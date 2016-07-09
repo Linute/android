@@ -129,31 +129,32 @@ public class ManipulableImageView extends ImageView {
                 if(mCollisionListener != null) mCollisionListener.onViewPickedUp(this);
             case MotionEvent.ACTION_POINTER_DOWN:
                 id = event.getPointerId(event.getActionIndex());
-                initialX[id] = event.getX();
-                initialY[id] = event.getY();
-                positionX[id] = event.getRawX() - initialX[id];
-                positionY[id] = event.getRawY() - initialY[id];
+                initialX[id] = event.getRawX() - getX();
+                initialY[id] = event.getRawY() - getY();
+                positionX[id] = event.getRawX();
+                positionY[id] = event.getRawX();
                 return true;
 
             case MotionEvent.ACTION_MOVE:
-                id = event.getPointerId(event.getActionIndex());
-                if(id == 0){
+
                     mainX = (int)event.getRawX();
                     mainY = (int)event.getRawY();
-                }
+                
 
-                positionX[id] = event.getRawX() - initialX[id];// + positionX[id];
-                positionY[id] = event.getRawY() - initialY[id];// + positionY[id];
+                positionX[0] = event.getRawX() - initialX[0];// + positionX[id];
+                positionY[0] = event.getRawY() - initialY[0];// + positionY[id];
 
 
                 float posX = positionX[0];
                 float posY = positionY[0];
 
+/*
                 for(int i=0;i<event.getPointerCount();i++){
                     int pid = event.getPointerId(i);
                     posX =(positionX[pid] - posX)/2 + posX;
                     posY =(positionY[pid] - posY)/2 + posY;
                 }
+*/
 
 
                 setX(posX);
