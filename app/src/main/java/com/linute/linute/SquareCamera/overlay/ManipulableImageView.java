@@ -178,6 +178,14 @@ public class ManipulableImageView extends ImageView {
                     }
 
                 }
+                return true;
+            case MotionEvent.ACTION_POINTER_UP:
+                for(int i=0;i<event.getPointerCount();i++){
+                    int pid = event.getPointerId(i);
+                    initialX[pid] = event.getX(i);
+                    initialY[pid] = event.getY(i);
+
+                }
 
 
                 return true;
