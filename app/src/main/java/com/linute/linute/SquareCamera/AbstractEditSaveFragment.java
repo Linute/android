@@ -323,7 +323,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
                 measureOptions.inJustDecodeBounds = true;
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : filterDir.listFiles()) {
+                File[] filters = filterDir.listFiles();
+                if(filters != null)
+                for (File f : filters) {
                     Bitmap b = null;
                     b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                     if (b != null) {
@@ -357,7 +359,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : memeDir.listFiles()) {
+                File[] memes = memeDir.listFiles();
+                if(memes != null)
+                for (File f : memes) {
                     try {
                         mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
                         activity.runOnUiThread(new Runnable() {
