@@ -92,6 +92,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     private StickerDrawerAdapter mStickerDrawerAdapter;
     private WipeViewPager mFilterPager;
 
+
     public static Fragment newInstance(Uri imageUri, boolean fromGallery) {
         Fragment fragment = new EditSavePhotoFragment();
 
@@ -174,11 +175,15 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             vBottom.setLayoutParams(params);
         }
 
-        //save button
+
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadContent();
+                if(isStickerDrawerOpen()){
+                    closeStickerDrawer();
+                }else {
+                    uploadContent();
+                }
             }
         });
 
@@ -219,8 +224,13 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                     }
 
                     @Override
-                    public void onViewCollision(View me) {
-//                        stickerTrashCan.set
+                    public void onViewCollisionBegin(View me) {
+                        stickerTrashCan.setImageResource(R.mipmap.trash_can_open);
+                    }
+
+                    @Override
+                    public void onViewCollisionEnd(View me) {
+                        stickerTrashCan.setImageResource(R.mipmap.trash_can_closed);
                     }
 
                     @Override
@@ -325,7 +335,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
                 measureOptions.inJustDecodeBounds = true;
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : filterDir.listFiles()) {
+                File[] filters = filterDir.listFiles();
+                if(filters != null)
+                for (File f : filters) {
                     Bitmap b = null;
                     b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                     if (b != null) {
@@ -359,7 +371,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : memeDir.listFiles()) {
+                File[] memes = memeDir.listFiles();
+                if(memes != null)
+                for (File f : memes) {
                     try {
                         mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
                         activity.runOnUiThread(new Runnable() {
@@ -503,13 +517,27 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected abstract void showProgress(boolean show);
 
-    protected void toggleStickerDrawer() {
-        if (mStickerDrawer.isAnimating()) return;
-        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    public boolean isStickerDrawerOpen() {
+        return mStickerDrawer.getVisibility() == View.VISIBLE;
     }
 
+    protected void toggleStickerDrawer() {
+        if (mStickerDrawer.isAnimating()) return;
+        if(isStickerDrawerOpen()){
+            closeStickerDrawer();
+        }else{
+            openStickerDrawer();
+        }
+//        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    protected void openStickerDrawer(){
+        mStickerDrawer.setVisibility(View.VISIBLE);
+        mUploadButton.setAlpha(.3f);
+    }
     protected void closeStickerDrawer() {
         mStickerDrawer.setVisibility(View.GONE);
+        mUploadButton.setAlpha(1);
     }
 
 

@@ -30,14 +30,12 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
-
-import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
-
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
@@ -535,6 +533,7 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("posts refresh", refresh);
                     mSocket.on("memes", meme);
                     mSocket.on("filters", filter);
+                    mSocket.on("status colors", statusColors);
                     mSocket.on("blocked", blocked);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
@@ -569,6 +568,8 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.off("posts refresh", refresh);
             mSocket.off("memes", meme);
             mSocket.off("filters", filter);
+            mSocket.off("status colors", statusColors);
+            mSocket.off("blocked", blocked);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -1065,6 +1066,31 @@ public class MainActivity extends BaseTaptActivity {
                             .getBlockedListSingletion()
                             .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous"));
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
+    private Emitter.Listener statusColors = new Emitter.Listener(){
+        @Override
+        public void call(Object... args) {
+            JSONObject object = (JSONObject) args[0];
+            if (object != null) {
+                try {
+                    SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
+                    SharedPreferences.Editor prefs = sharedPrefs.edit();
+                    JSONArray colors = object.getJSONArray("colors");
+                    for(int i = 0;i<colors.length();i++){
+                        JSONObject color = colors.getJSONObject(i);
+                        int tColor = Integer.valueOf(color.getString("text"),16);
+                        int bColor = Integer.valueOf(color.getString("background"), 16);
+                        prefs.putInt("status_color_"+i+"_text", /*(tColor <= 0x01000000 ? */0xFF000000+ tColor/* + 0xFF000000 : tColor)*/);
+                        prefs.putInt("status_color_"+i+"_bg", /*(bColor <= 0x01000000 ? */0xFF000000+ bColor /*+ 0xFF000000 : bColor)*/);
+                    }
+                    prefs.commit();
+
+                }catch(JSONException e){
                     e.printStackTrace();
                 }
             }
