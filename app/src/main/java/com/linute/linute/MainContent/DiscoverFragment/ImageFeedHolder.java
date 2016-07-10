@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -13,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 
 /**
@@ -21,10 +23,8 @@ import com.linute.linute.UtilsAndHelpers.DoubleAndSingleClickListener;
 public class ImageFeedHolder extends BaseFeedHolder {
 
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
-
-
+    public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
-
     protected int mType;
 
     public ImageFeedHolder(final View itemView, Context context) {
@@ -33,67 +33,91 @@ public class ImageFeedHolder extends BaseFeedHolder {
         setUpOnClicks(itemView.findViewById(R.id.parent));
     }
 
-
     protected final void setUpOnClicks(View v) {
-        v.setOnClickListener(new DoubleAndSingleClickListener() {
-
+        v.setOnTouchListener(new CustomOnTouchListener(3200) {
             @Override
-            public void onSingleClick(View v) {
+            protected void onSingleTap() {
+                //Log.i(TAG, "onSingleTap: ");
                 singleClick();
             }
 
             @Override
-            public void onDoubleClick(View v) {
-                final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
-
-                AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
-                a.setDuration(400);
-
-                final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
-                a2.setDuration(200);
-
-                a.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        layer.startAnimation(a2);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-
-                layer.startAnimation(a);
-
-                if (!vLikesHeart.isChecked()) {
-                    vLikesHeart.toggle();
-                }
+            protected void onDoubleTap(float x, float y) {
+                //Log.i(TAG, "onDoubleTap: ");
+                doubleClick();
             }
-        });
 
-        v.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                if (mPost.getType() != Post.POST_TYPE_STATUS) {
-                    MainActivity activity = (MainActivity) mContext;
-                    VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
-                    activity.addFragmentOnTop(
-                            ViewFullScreenFragment.newInstance(
-                                    Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
-                                    mPost.getType()
-                            )
-                    );
-                    vPostImage.getParent().requestDisallowInterceptTouchEvent(true);
-                }
-                return true;
+            protected void onLongPress() {
+                //Log.i(TAG, "onLongPress: ");
+                longPress();
+            }
+
+            @Override
+            protected void onLongPressCancelled(boolean thresholdMet) {
+                cancelLongPress(thresholdMet);
             }
         });
+    }
+
+    private void doubleClick() {
+        final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+
+        AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
+        a.setDuration(400);
+
+        final AlphaAnimation a2 = new AlphaAnimation(0.75f, 0.0f);
+        a2.setDuration(200);
+
+        a.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                layer.startAnimation(a2);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        layer.startAnimation(a);
+
+        if (!vLikesHeart.isChecked()) {
+            vLikesHeart.toggle();
+        }
+    }
+
+    private void longPress() {
+        if (mPost.getType() != Post.POST_TYPE_STATUS) {
+            MainActivity activity = (MainActivity) mContext;
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+            activity.addFragmentOnTop(
+                    ViewFullScreenFragment.newInstance(
+                            Uri.parse(mPost.getType() == Post.POST_TYPE_VIDEO ? mPost.getVideoUrl() : mPost.getImage()),
+                            mPost.getType(),
+                            3000
+                    ),
+                    FULL_VIEW
+            );
+
+            //so parent doesn't intercept touch
+            vPostImage.getParent().requestDisallowInterceptTouchEvent(true);
+        }
+    }
+
+    private void cancelLongPress(boolean thresholdMet) {
+        if (!thresholdMet) {
+            MainActivity activity = (MainActivity) mContext;
+            if (activity != null && activity.getSupportFragmentManager().findFragmentByTag(FULL_VIEW) != null) {
+               activity.getSupportFragmentManager().popBackStack();
+            }
+        }
     }
 
     @Override

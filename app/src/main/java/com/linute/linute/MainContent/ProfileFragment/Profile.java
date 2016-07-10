@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
@@ -22,6 +23,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -52,9 +54,11 @@ public class Profile extends BaseFragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView vRecList;
 
+    private View vUpdateNotification;
+    private TextView vUpdatesCounter;
+
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
-    private boolean mHasNotification;
 
     //we have 2 seperate queries, one for header and one for activities
     //we call notify only after
@@ -169,9 +173,7 @@ public class Profile extends BaseFragment {
         if (mProfileAdapter.titleShown())
             mToolbar.setTitle(user.getFirstName() + " " + user.getLastName());
 
-
-        mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
-        mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+        mToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,20 +186,31 @@ public class Profile extends BaseFragment {
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.add_friend) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null)
-                        activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                    return true;
-                } else if (item.getItemId() == R.id.settings) {
-                    MainActivity activity = (MainActivity) getActivity();
-                    if (activity != null)
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity == null) return false;
+                switch (item.getItemId()) {
+                    case R.id.settings:
                         activity.startEditProfileActivity(SettingActivity.class);
-                    return true;
+                        return true;
                 }
                 return false;
             }
         });
+
+        View update = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null)
+                    activity.addActivityFragment();
+            }
+        });
+        vUpdateNotification = update.findViewById(R.id.notification);
+        vUpdatesCounter = (TextView) vUpdateNotification.findViewById(R.id.notification_count);
+        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        vUpdatesCounter.setText(count < 100 ? count + "" : "+");
 
         //lower the swipe refresh
         mSwipeRefreshLayout.setProgressViewOffset(false, -200, 200);
@@ -552,7 +565,7 @@ public class Profile extends BaseFragment {
     }
 
     @Override
-    public void resetFragment(){
+    public void resetFragment() {
         vRecList.scrollToPosition(0);
     }
 
@@ -561,9 +574,12 @@ public class Profile extends BaseFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotification) {
+            if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
+                int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+                vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+                vUpdatesCounter.setText(count < 100 ? count + "" : "+");
+            } else if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
-                mHasNotification = notificationEvent.hasNotification();
             }
         }
     };

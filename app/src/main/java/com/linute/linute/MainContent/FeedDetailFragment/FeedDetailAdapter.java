@@ -1,12 +1,8 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -19,30 +15,21 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
-import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
 import de.hdodenhof.circleimageview.CircleImageView;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by Arman on 1/13/16.
@@ -56,15 +43,31 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private static final int TYPE_LOAD_MORE = 5;
 
     private Context context;
-    private Dialog mDialog;
 
     private FeedDetail mFeedDetail;
 
     private MentionedTextAdder mMentionedTextAdder;
+    private CommentActions mCommentActions;
+
+    private String mViewerUserId; //userId of person currently viewing page
+    private String mImageSignature;
 
     public FeedDetailAdapter(FeedDetail feedDetail, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
+
+
+        SharedPreferences mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mViewerUserId = mSharedPreferences.getString("userID", "");
+        mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
+    }
+
+    public void setCommentActions(CommentActions actions) {
+        mCommentActions = actions;
+    }
+
+    public boolean getDenySwipe() {
+        return mDenySwipe;
     }
 
     @Override
@@ -132,7 +135,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             return TYPE_STATUS_HEADER;
         }
 
-        if (mFeedDetail.getComments().get(position - 1) == null)  //first item is no, means no comments
+        if (mFeedDetail.getComments().get(position - 1) == null)  //first item is null, means no comments
             return TYPE_NO_COMMENTS;
 
         if (mFeedDetail.getComments().get(position - 1) instanceof Comment) {
@@ -144,10 +147,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private boolean isPositionHeader(int position) {
         return position == 0;
-    }
-
-    public FeedDetail getFeedDetail() {
-        return mFeedDetail;
     }
 
     @Override
@@ -176,26 +175,26 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected TextView vCommentUserText;
         protected TextView vTimeStamp;
 
+        protected TextView vLikesText;
+
         private String mCommenterUserId;
         private String mUserName;
         private String mCommentId;
-
-        private String mViewerUserId; //userId of person currently viewing page
-        private String mImageSignature; //
         private boolean mIsAnon;
+        private boolean mIsLiked;
 
+        private ImageView vFireIcon;
 
         public FeedDetailViewHolder(View itemView) {
             super(itemView);
-
-            SharedPreferences mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-            mViewerUserId = mSharedPreferences.getString("userID", "");
-            mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
-
             mSwipeLayout = (SwipeLayout) itemView.findViewById(R.id.comment_swipe_layout);
+
+            View leftControls = mSwipeLayout.findViewById(R.id.left_controls);
+            View rightControls = mSwipeLayout.findViewById(R.id.right_controls);
+
             mSwipeLayout.setShowMode(SwipeLayout.ShowMode.LayDown);
-            mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, mSwipeLayout.findViewById(R.id.comment_bottom_wrapper));
+            mSwipeLayout.addDrag(SwipeLayout.DragEdge.Right, rightControls);
+            mSwipeLayout.addDrag(SwipeLayout.DragEdge.Left, leftControls);
             mSwipeLayout.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -207,6 +206,16 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vCommentUserName = (TextView) itemView.findViewById(R.id.comment_user_name);
             vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
             vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);
+            vLikesText = (TextView) itemView.findViewById(R.id.num_likes);
+            vFireIcon = (ImageView) itemView.findViewById(R.id.fire_icon);
+
+            vCommentUserName.setOnClickListener(this);
+            vCommentUserImage.setOnClickListener(this);
+            rightControls.findViewById(R.id.comment_delete).setOnClickListener(this);
+            rightControls.findViewById(R.id.comment_reply).setOnClickListener(this);
+            rightControls.findViewById(R.id.comment_reveal).setOnClickListener(this);
+            rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
+            leftControls.setOnClickListener(this);
         }
 
         void bindModel(Comment comment) {
@@ -214,6 +223,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mCommenterUserId = comment.getCommentUserId();
             mUserName = comment.getCommentUserName();
             mCommentId = comment.getCommentPostId();
+            mIsLiked = comment.isLiked();
+
+            mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
 
             if (mIsAnon) {
                 setAnonImage(comment.getAnonImage());
@@ -233,14 +245,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_name_blue));
             }
 
-
-            vCommentUserName.setOnClickListener(this);
-            vCommentUserImage.setOnClickListener(this);
-            mSwipeLayout.findViewById(R.id.comment_delete).setOnClickListener(this);
-            mSwipeLayout.findViewById(R.id.comment_reply).setOnClickListener(this);
-            mSwipeLayout.findViewById(R.id.comment_reveal).setOnClickListener(this);
-            mSwipeLayout.findViewById(R.id.comment_report).setOnClickListener(this);
-
             //setting mentions and comment text
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
                 setUpMentionedOnClicks(comment);
@@ -248,6 +252,26 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserText.setText(comment.getCommentPostText());
             }
 
+            setUpLikes(comment);
+        }
+
+        private void setUpLikes(Comment comment) {
+            if (comment.getNumberOfLikes() > 0) {
+                vLikesText.setText(comment.getNumberOfLikes() + "");
+                if (comment.isLiked())
+                    vFireIcon.setColorFilter(ContextCompat.getColor(context, R.color.red));
+                vFireIcon.setColorFilter(
+                        comment.isLiked() ?
+                                ContextCompat.getColor(context, R.color.red) :
+                                ContextCompat.getColor(context, R.color.twentyfive_black)
+                );
+
+                vLikesText.setVisibility(View.VISIBLE);
+                vFireIcon.setVisibility(View.VISIBLE);
+            } else {
+                vLikesText.setVisibility(View.INVISIBLE);
+                vFireIcon.setVisibility(View.INVISIBLE);
+            }
         }
 
         private void setUpPulloutButtons() {
@@ -258,7 +282,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.GONE);
             } else {
-                //mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.VISIBLE);
 
@@ -266,9 +289,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
 
                     //viewer is owner of post? then can delete anon comments
-                    if (mFeedDetail.getPost().getUserId().equals(mViewerUserId)){
+                    if (mFeedDetail.getPost().getUserId().equals(mViewerUserId)) {
                         mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
-                    }else {
+                    } else {
                         mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.GONE);
                     }
                 } else {
@@ -294,7 +317,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserText.setText(comment.getCommentPostText());
                 return;
             }
-
 
             ForegroundColorSpan fcs = new ForegroundColorSpan(ContextCompat.getColor(context, R.color.secondaryColor)); //color of span
 
@@ -330,7 +352,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
-
             if (v == vCommentUserName || v == vCommentUserImage) {
                 if (!mIsAnon) {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
@@ -339,21 +360,34 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     }
                 }
             } else {
-                if (mDenySwipe) return;
+                if (mDenySwipe || mCommentActions == null) return;
                 switch (v.getId()) {
                     case R.id.comment_reply:
                         mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mUserName, mCommenterUserId, ""));
                         break;
                     case R.id.comment_delete:
-                        showConfirmDelete(getAdapterPosition());
+                        mCommentActions.deleteComment(getAdapterPosition(), mCommentId);
                         break;
                     case R.id.comment_report:
-                        showConfirmReportDialog();
+                        mCommentActions.reportComment(mCommentId);
                         break;
                     case R.id.comment_reveal:
-                        showConfirmRevealDialog(getAdapterPosition());
+                        mCommentActions.revealComment(getAdapterPosition(), mCommentId, mIsAnon);
                         break;
+                    case R.id.left_controls:
+                        Comment c = (Comment) mFeedDetail.getComments().get(getAdapterPosition() - 1);
+                        mIsLiked = c.toggleLiked();
+                        if (mIsLiked) {
+                            c.incrementLikes();
+                            setUpLikes(c);
+                        } else {
+                            c.decrementLikes();
+                            setUpLikes(c);
+                        }
+
+                        mCommentActions.likeComment(mIsLiked, mCommentId);
                 }
+
                 mSwipeLayout.close();
             }
         }
@@ -377,282 +411,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vCommentUserImage);
-        }
-
-
-        private void showConfirmDelete(final int pos) {
-            if (mDenySwipe) return;
-
-            if (context != null) {
-                mDialog = new AlertDialog.Builder(context).setTitle("Delete")
-                        .setMessage("Are you sure you want to delete this comment?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            final int mPos = pos;
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteComment(mPos);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-            }
-        }
-
-        private void deleteComment(int in) {
-            if (mDenySwipe) return;
-
-            final int pos = in - 1;
-            final Comment com = (Comment) mFeedDetail.getComments().get(pos);
-
-            //if viewer is not the owner of the comment, return
-            // exception: anon comments can be deleted by post owner
-            if (!com.getCommentPostId().equals(mCommentId) || (!com.getCommentUserId().equals(mViewerUserId) && !com.isAnon())) return;
-
-            mDenySwipe = true;
-            final ProgressDialog progressDialog = ProgressDialog.show(context, null, "Deleting comment...", true, false);
-
-            new LSDKEvents(context).deleteComment(mCommentId, new Callback() {
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    mDenySwipe = false;
-                    progressDialog.dismiss();
-
-                    final BaseTaptActivity act = (BaseTaptActivity) context;
-                    if (act != null) {
-                        act.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(act, "Failed to delete comment. Could not find connection.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        response.body().close();
-
-                        final BaseTaptActivity act = (BaseTaptActivity) context;
-
-                        if (act != null){
-                            act.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mItemManger.removeShownLayouts(mSwipeLayout);
-                                    mFeedDetail.getComments().remove(pos);
-                                    notifyItemRemoved(pos + 1);
-                                    notifyItemRangeChanged(pos + 1, mFeedDetail.getComments().size() + 1);
-                                    mFeedDetail.refreshCommentCount();
-
-                                    Toast.makeText(context, "Comment deleted", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } else {
-                        Log.i("Comment item delete", "onResponse: " + response.body().string());
-                        final BaseTaptActivity act = (BaseTaptActivity) context;
-
-                        if (act != null) {
-                            act.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(context);
-                                }
-                            });
-                        }
-                    }
-
-                    progressDialog.dismiss();
-                    mDenySwipe = false;
-                }
-            });
-        }
-
-        private void showConfirmRevealDialog(final int pos) {
-
-            if (context != null)
-                mDialog = new AlertDialog.Builder(context).setTitle(mIsAnon ? "Reveal" : "Hide")
-                        .setMessage(mIsAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to make this comment anonymous?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            final int mPos = pos;
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                revealComment(mPos);
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-        }
-
-        private void revealComment(final int in) {
-
-            if (mDenySwipe) return;
-
-            final int pos = in - 1;
-            final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
-
-            //safe check
-            //double check that they are revealing their own comment
-            if (!comment.getCommentUserId().equals(mViewerUserId) || !comment.getCommentPostId().equals(mCommentId)) return;
-
-            final ProgressDialog progressDialog = ProgressDialog.show(context, null, mIsAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
-            mDenySwipe = true;
-
-            new LSDKEvents(context).revealComment(mCommentId, !mIsAnon, new Callback() {
-                final boolean anon = mIsAnon;
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    final BaseTaptActivity act = (BaseTaptActivity) context;
-                    progressDialog.dismiss();
-                    mDenySwipe = false;
-
-                    if (act != null) {
-                        act.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(act, "Failed to change comment. Could not find connection.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                    String res = response.body().string();
-
-                    if (response.isSuccessful()) {
-
-                        try {
-
-                            if (!mIsAnon) { //set new anon image
-                                comment.setAnonImage(new JSONObject(res).getString("anonymousImage"));
-                            }
-
-                            BaseTaptActivity activity = (BaseTaptActivity) context;
-
-                            if (activity != null) {
-                                activity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        comment.setIsAnon(!anon);
-                                        notifyItemChanged(pos + 1);
-                                        Toast.makeText(context, anon ? "Comment revealed" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-
-                        }catch (JSONException e){
-                            final BaseTaptActivity act = (BaseTaptActivity) context;
-                            if (act != null) {
-                                act.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(act, "An error occurred. Please try again later.", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        }
-                    } else {
-                        Log.i("Comment item reveal", "onResponse: " + response.body().string());
-                        final BaseTaptActivity act = (BaseTaptActivity) context;
-                        if (act != null) {
-                            act.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(act, "Failed to change comment. Please try again later.", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-
-                    progressDialog.dismiss();
-                    mDenySwipe = false;
-                }
-            });
-        }
-
-
-        private void showConfirmReportDialog() {
-            if (context != null)
-                mDialog = new AlertDialog.Builder(context).setTitle("Report")
-                        .setMessage("Are you sure you want to report this comment?")
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                reportComment();
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                        .show();
-        }
-
-        private void reportComment() {
-            if (mDenySwipe) return;
-
-            new LSDKEvents(context).reportComment(mCommentId, mViewerUserId, new Callback() {
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    final BaseTaptActivity act = (BaseTaptActivity) context;
-                    if (act != null) {
-                        act.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showBadConnectionToast(act);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        response.body().close();
-                        final BaseTaptActivity act = (BaseTaptActivity) context;
-                        if (act != null) {
-                            act.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(act, "Comment reported", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } else {
-                        Log.i("Comment item report", "onResponse: " + response.body().string());
-                        final BaseTaptActivity act = (BaseTaptActivity) context;
-                        if (act != null) {
-                            act.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showBadConnectionToast(act);
-                                }
-                            });
-                        }
-                    }
-                }
-            });
         }
     }
 
@@ -694,7 +452,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         @Override
         public void onClick(View v) {
             if (!mDenySwipe && !mLoadMoreItem.isLoading() && mLoadMoreCommentsRunnable != null) {
-                closeAllDialogs();
+                if (mCommentActions != null) mCommentActions.closeAllDialogs();
                 vLoadMoreProgressBar.setVisibility(View.VISIBLE);
                 vLoadMoreText.setVisibility(View.INVISIBLE);
                 mLoadMoreItem.setLoading(true);
@@ -711,8 +469,17 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         mItemManger.closeAllItems();
     }
 
-    public void closeAllDialogs(){
-        if (mDialog != null && mDialog.isShowing()) mDialog.dismiss();
+
+    public interface CommentActions {
+        void deleteComment(final int pos, final String id);
+
+        void revealComment(final int pos, final String id, final boolean isAnon);
+
+        void reportComment(final String id);
+
+        void likeComment(final boolean like, final String id);
+
+        void closeAllDialogs();
     }
 
 }

@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 
@@ -31,7 +30,6 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     private boolean videoProcessing = false;
 
     private View vCinemaIcon;
-
 
     public VideoFeedHolder(final View itemView, Context context) {
         super(itemView, context);

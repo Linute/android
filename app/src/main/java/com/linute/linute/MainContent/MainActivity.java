@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.IdRes;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -29,36 +30,42 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
-
-import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
-
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
-
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
+import com.linute.linute.MainContent.Uploading.UploadIntentService;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.socket.client.IO;
@@ -72,7 +79,6 @@ public class MainActivity extends BaseTaptActivity {
     public static final int PHOTO_STATUS_POSTED = 19;
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
-
     private DrawerLayout mDrawerLayout;
 
     //don't change fragment until the drawer is closed, or there will be slight lag
@@ -85,6 +91,7 @@ public class MainActivity extends BaseTaptActivity {
     private BaseFragment[] mFragments; //holds our fragments
 
 
+    private boolean mWatchForRefresh = false;
     private SharedPreferences mSharedPreferences;
 
     private SocketErrorResponse mSocketErrorResponse;
@@ -94,6 +101,7 @@ public class MainActivity extends BaseTaptActivity {
         public static final short FEED = 1;
         public static final short GLOBAL = 2;
         public static final short ACTIVITY = 3;
+        public static final short FIND_FRIENDS = 4;
     }
 
 
@@ -107,13 +115,12 @@ public class MainActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new BaseFragment[4];
+        mWatchForRefresh = false;
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
         mDrawerLayout.addDrawerListener(mMainDrawerListener);
         mNavigationView = (NavigationView) findViewById(R.id.mainActivity_navigation_view);
-
-        //mParentView = findViewById(R.id.mainActivity_fragment_holder);
 
         //profile image and header setup
         loadDrawerHeader();
@@ -130,7 +137,7 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
-                }else {
+                } else {
                     getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
 
@@ -148,11 +155,11 @@ public class MainActivity extends BaseTaptActivity {
                     case R.id.navigation_item_feed:
                         navItemSelected(FRAGMENT_INDEXES.FEED, item);
                         break;
-                    case R.id.navigation_item_activity:
-                        navItemSelected(FRAGMENT_INDEXES.ACTIVITY, item);
-                        break;
                     case R.id.navigation_item_global:
                         navItemSelected(FRAGMENT_INDEXES.GLOBAL, item);
+                        break;
+                    case R.id.navigation_item_find_friends:
+                        navItemSelected(FRAGMENT_INDEXES.FIND_FRIENDS, item);
                         break;
                     default:
                         break;
@@ -169,9 +176,7 @@ public class MainActivity extends BaseTaptActivity {
         mPreviousItem.setChecked(true);
 
         //only loads one fragment
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.FEED))
-                .commit();
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.FEED));
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -186,27 +191,36 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private void navItemSelected(short position, MenuItem item){
-        boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+    private void navItemSelected(short position, MenuItem item) {
+        int backstack = getSupportFragmentManager().getBackStackEntryCount();
 
         if (mPreviousItem != null) {
-            if (mPreviousItem != item || wereItemsInBackStack) {
+            if (mPreviousItem != item || backstack > 1) {
                 mPreviousItem.setChecked(false);
                 item.setChecked(true);
-                replaceContainerWithFragment(getFragment(position));
+                replaceContainerWithFragment(
+                        position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                                FindFriendsChoiceFragment.newInstance(true) :
+                                getFragment(position));
                 mPreviousItem = item;
-            }else {
+                clearBackStack();
+            } else {
                 getFragment(position).resetFragment();
             }
-        }else {
+        } else {
+            if (backstack > 0)
+                clearBackStack();
+
             item.setChecked(true);
-            replaceContainerWithFragment(getFragment(position));
+            replaceContainerWithFragment(
+                    position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                            FindFriendsChoiceFragment.newInstance(true) :
+                            getFragment(position)
+            );
+
             mPreviousItem = item;
         }
 
-        //if there are a lot of other user profile/ events in mainActivity, clear them
-        if (wereItemsInBackStack)
-            clearBackStack();
     }
 
 
@@ -241,23 +255,28 @@ public class MainActivity extends BaseTaptActivity {
     public void replaceContainerWithFragment(final Fragment fragment) {
         //this will only run after drawer is fully closed
         //lags if we don't do this
-        if(mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
+            Log.i(TAG, "replaceContainerWithFragment: open");
             mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
                 @Override
                 public void run() {
                     if (mSafeForFragmentTransaction) {
                         MainActivity.this.getSupportFragmentManager()
                                 .beginTransaction()
+                                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
                                 .replace(R.id.mainActivity_fragment_holder, fragment)
+                                .addToBackStack(PROFILE_OR_EVENT_NAME)
                                 .commit();
                     }
                 }
             });
-        }else{
+        } else {
             if (mSafeForFragmentTransaction) {
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
                         .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .addToBackStack(PROFILE_OR_EVENT_NAME)
                         .commit();
             }
         }
@@ -276,10 +295,11 @@ public class MainActivity extends BaseTaptActivity {
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) { //came back from settings
             setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.PROFILE);
             loadDrawerHeader(); //reload drawer header
-        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) { //posted new pic or status
-            setFragmentOfIndexNeedsUpdating(BaseFragment.FragmentState.NEEDS_UPDATING, FRAGMENT_INDEXES.FEED);
+        } else if (requestCode == PHOTO_STATUS_POSTED && resultCode == RESULT_OK) {
+            Intent intent = new Intent(this, UploadIntentService.class);
+            intent.putExtra(PendingUploadPost.PENDING_POST_KEY, data.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY));
+            startService(intent);
         }
-
         super.onActivityResult(requestCode, resultCode, data);
     }
 
@@ -307,14 +327,13 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     @Override
-    public void addFragmentOnTop(Fragment fragment) {
+    public void addFragmentOnTop(Fragment fragment, String tag) {
         if (!mSafeForFragmentTransaction) return;
         hideKeyboard();
-
         getSupportFragmentManager()
                 .beginTransaction()
                 .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
-                .add(R.id.mainActivity_fragment_holder, fragment)
+                .add(R.id.mainActivity_fragment_holder, fragment, tag)
                 .addToBackStack(PROFILE_OR_EVENT_NAME)
                 .commit();
     }
@@ -374,9 +393,21 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else if((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
-        } else{
+        } else if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
+            if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed)) {
+                clearBackStack();
+                if (mPreviousItem != null) mPreviousItem.setChecked(false);
+                mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+                mPreviousItem.setChecked(true);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.FEED))
+                        .addToBackStack(PROFILE_OR_EVENT_NAME)
+                        .commit();
+            } else {
+                finish();
+            }
+        } else {
             super.onBackPressed();
         }
     }
@@ -401,9 +432,19 @@ public class MainActivity extends BaseTaptActivity {
         setNavItemNotification(R.id.navigation_item_feed, count);
     }
 
-    public void setUpdateNotification(int count) {
-        setNavItemNotification(R.id.navigation_item_activity, count);
-    }
+//    public void setUpdateNotification(int count) {
+//        //setNavItemNotification(R.id.navigation_item_activity, count);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        if (toolbar != null) {
+//            MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
+//            if (updateItem != null) {
+//                updateItem.getActionView().findViewById(R.id.notification).setVisibility(
+//                        count > 0 ? View.VISIBLE : View.GONE
+//                );
+//                ((TextView) updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count) : "+"));
+//            }
+//        }
+//    }
 
     //So we change fragments or activities only after the drawer closes
     private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {
@@ -490,6 +531,9 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("badge", badge);
                     mSocket.on("unread", haveUnread);
                     mSocket.on("posts refresh", refresh);
+                    mSocket.on("memes", meme);
+                    mSocket.on("filters", filter);
+                    mSocket.on("status colors", statusColors);
                     mSocket.on("blocked", blocked);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
@@ -510,6 +554,7 @@ public class MainActivity extends BaseTaptActivity {
     protected void onPause() {
         super.onPause();
 
+        mWatchForRefresh = true;
         mSafeForFragmentTransaction = false;
 
         if (mSocket != null) {
@@ -521,6 +566,10 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.off("badge", badge);
             mSocket.off("unread", haveUnread);
             mSocket.off("posts refresh", refresh);
+            mSocket.off("memes", meme);
+            mSocket.off("filters", filter);
+            mSocket.off("status colors", statusColors);
+            mSocket.off("blocked", blocked);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -613,10 +662,10 @@ public class MainActivity extends BaseTaptActivity {
                         public void run() {
                             //the owner of the post is not blocked
                             if (!BlockedUsersSingleton.getBlockedListSingletion().contains(postObj.getUserId())) {
-                                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
+                                if (!NotificationsCounterSingleton.getInstance().hasNewPosts()) {
                                     NotificationEventBus
                                             .getInstance()
-                                            .setNotification(new NotificationEvent(true));
+                                            .setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
                                 }
 
                                 setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
@@ -628,7 +677,7 @@ public class MainActivity extends BaseTaptActivity {
                             }
                         }
                     });
-                }catch (JSONException | NullPointerException e){
+                } catch (JSONException | NullPointerException e) {
                     e.printStackTrace();
                 }
             }
@@ -642,12 +691,18 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 //message
                 if (activity.getString("action").equals("messager")) {
-                    NewMessageEvent chat = new NewMessageEvent(true);
+                    final NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));
                     chat.setOtherUserId(activity.getString("ownerID"));
                     chat.setOtherUserName(activity.getString("ownerFullName"));
-                    newMessageSnackbar(chat);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            newMessageSnackbar(chat);
+                        }
+                    });
 
                     NewMessageBus.getInstance().setNewMessage(chat);
                 } else {
@@ -657,24 +712,14 @@ public class MainActivity extends BaseTaptActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null) {
-                                    if (!((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update)) {
-                                        if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                            NotificationEventBus
-                                                    .getInstance()
-                                                    .setNotification(new NotificationEvent(true));
-                                        }
+                                NotificationsCounterSingleton.getInstance().incrementActivities();
 
-                                        setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
-                                    }
-                                } else {
-                                    if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                                        NotificationEventBus
-                                                .getInstance()
-                                                .setNotification(new NotificationEvent(true));
-                                    }
-                                    setUpdateNotification(NotificationsCounterSingleton.getInstance().incrementActivities());
-                                }
+                                if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null)
+                                    ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
+
+                                NotificationEventBus
+                                        .getInstance()
+                                        .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
                                     newEventSnackbar(update.getDescription(), update.getPost());
@@ -812,45 +857,41 @@ public class MainActivity extends BaseTaptActivity {
                 NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
 
                 int activities = badge.getInt("activities");
+                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
                 if (activities > 0) {
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
+                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
                     NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
                 }
-
-                NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setUpdateNotification(NotificationsCounterSingleton.getInstance().getNumOfNewActivities());
-                    }
-                });
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     };
 
+
     //posts:refresh
     private Emitter.Listener refresh = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            try {
-                final int posts = new JSONObject(args[0].toString()).getInt("posts");
+            if (mWatchForRefresh) {
+                try {
+                    final int posts = new JSONObject(args[0].toString()).getInt("posts");
+                    if (posts > 0) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
+                            }
+                        });
 
-                if (posts > 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
-                        }
-                    });
-
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(true));
-                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
+                        NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } else {
+                mWatchForRefresh = true;
             }
         }
     };
@@ -882,21 +923,157 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
+    private Emitter.Listener meme = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+            try {
+                JSONObject body = new JSONObject(args[0].toString());
+                JSONArray memes = body.getJSONArray("memes");
+
+                File memeDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
+                memeDir.mkdirs();
+
+
+                for (File f : memeDir.listFiles()) {
+                    for (int i = 0; i < memes.length(); i++) {
+                        String fileName = memes.getString(i);
+                        if (fileName.equals(f)) break;
+                        if (i == memes.length() - 1)
+                            f.delete();
+                    }
+                }
+
+                for (int i = 0; i < memes.length(); i++) {
+                    final String fileName = memes.getString(i);
+                    final File file = new File(memeDir, fileName);
+                    if (!file.exists()) {
+                        try {
+                            file.createNewFile();
+                            File res = Glide.with(MainActivity.this)
+                                    .load(Utils.getMemeImageUrl(fileName))
+                                    .downloadOnly(1080, 1920).get();
+
+                            FileOutputStream fos = new FileOutputStream(file);
+                            FileInputStream fis = new FileInputStream(res);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = fis.read(buf)) > 0) {
+                                fos.write(buf, 0, len);
+                            }
+                            fis.close();
+                            fos.close();
+                        } catch (IOException ioe) {
+                            ioe.printStackTrace();
+                        } catch (ExecutionException ee) {
+                            ee.printStackTrace();
+                        } catch (InterruptedException ie) {
+                            ie.printStackTrace();
+                        }
+
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private Emitter.Listener filter = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                JSONObject body = new JSONObject(args[0].toString());
+                JSONArray filters = body.getJSONArray("filters");
+
+                File filtersDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
+                filtersDir.mkdirs();
+
+
+                for (File f : filtersDir.listFiles()) {
+                    for (int i = 0; i < filters.length(); i++) {
+                        String fileName = filters.getString(i);
+                        if (fileName.equals(f)) break;
+                        if (i == filters.length() - 1)
+                            f.delete();
+                    }
+                }
+
+                for (int i = 0; i < filters.length(); i++) {
+                    final String fileName = filters.getString(i);
+                    final File file = new File(filtersDir, fileName);
+                    if (!file.exists()) {
+                        try {
+                            file.createNewFile();
+                            File res = Glide.with(MainActivity.this)
+                                    .load(Utils.getFilterImageUrl(fileName))
+                                    .downloadOnly(1080, 1920).get();
+
+                            FileOutputStream fos = new FileOutputStream(file);
+                            FileInputStream fis = new FileInputStream(res);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = fis.read(buf)) > 0) {
+                                fos.write(buf, 0, len);
+                            }
+                            fis.close();
+                            fos.close();
+                        } catch (IOException | ExecutionException ioe) {
+                            ioe.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+
+            }
+        }
+    };
+
     private Emitter.Listener blocked = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             JSONObject object = (JSONObject) args[0];
-            if (object != null){
+            if (object != null) {
                 try {
                     BlockedUsersSingleton
                             .getBlockedListSingletion()
-                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous") );
+                            .setBlockedList(object.getJSONArray("real"), object.getJSONArray("anonymous"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
     };
+
+    private Emitter.Listener statusColors = new Emitter.Listener(){
+        @Override
+        public void call(Object... args) {
+            JSONObject object = (JSONObject) args[0];
+            if (object != null) {
+                try {
+                    SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
+                    SharedPreferences.Editor prefs = sharedPrefs.edit();
+                    JSONArray colors = object.getJSONArray("colors");
+                    for(int i = 0;i<colors.length();i++){
+                        JSONObject color = colors.getJSONObject(i);
+                        int tColor = Integer.valueOf(color.getString("text"),16);
+                        int bColor = Integer.valueOf(color.getString("background"), 16);
+                        prefs.putInt("status_color_"+i+"_text", /*(tColor <= 0x01000000 ? */0xFF000000+ tColor/* + 0xFF000000 : tColor)*/);
+                        prefs.putInt("status_color_"+i+"_bg", /*(bColor <= 0x01000000 ? */0xFF000000+ bColor /*+ 0xFF000000 : bColor)*/);
+                    }
+                    prefs.commit();
+
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
+
 
     private void showUpdateSnackbar(String text) {
         final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);
@@ -913,9 +1090,12 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
+    }
+
+    public void addActivityFragment() {
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
     }
 }
 

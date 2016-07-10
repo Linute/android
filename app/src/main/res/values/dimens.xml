@@ -63,6 +63,9 @@
     <dimen name="grid_layout_sep_margin">8dp</dimen>
 
 
+    <dimen name="sticker_size">128dp</dimen>
+
+
     <!--- snackbar
     -->
 

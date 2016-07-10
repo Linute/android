@@ -204,6 +204,7 @@ public class PreLoginActivity extends AppCompatActivity {
                         String responseString = response.body().string();
                         //Log.i(TAG, "onResponse: " + responseString);
                         JSONObject object = new JSONObject(responseString);
+                        Log.i(TAG, "onResponse: "+object.toString());
                         boolean isUnique = object.getBoolean("isUnique");
 
                         final LinuteUser user = new LinuteUser(object);
@@ -302,6 +303,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
     private void persistData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
+
 
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());

@@ -3,18 +3,16 @@ package com.linute.linute.SquareCamera;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Point;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
-import android.view.WindowManager;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -70,6 +68,7 @@ public class ImageUtility {
 
 
     public static Uri savePictureToCache(Context context, Bitmap bitmap) {
+        if (context == null) return  null;
         File image = new File(
                 context.getCacheDir() + File.separator + "temp.jpg");
         // Saving the bitmap
@@ -85,7 +84,7 @@ public class ImageUtility {
             exception.printStackTrace();
         }
 
-        return Uri.parse(image.getAbsolutePath());
+        return Uri.fromFile(image);
     }
 
     public static String getTempFilePath(Context context, String url, String end) throws IOException {
@@ -151,6 +150,20 @@ public class ImageUtility {
             canvas.drawColor(Color.WHITE);
         view.draw(canvas);
         return returnedBitmap;
+    }
+
+    public static Bitmap applyFilter(Bitmap bmpOriginal, ColorMatrix m){
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpNew = Bitmap.createBitmap(width,height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpNew);
+        Paint paint = new Paint();
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(m);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0 , paint);
+        return bmpNew;
     }
 
 }

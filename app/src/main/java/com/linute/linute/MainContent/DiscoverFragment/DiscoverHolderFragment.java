@@ -9,20 +9,23 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -46,8 +49,10 @@ public class DiscoverHolderFragment extends BaseFragment {
     private DiscoverFragment[] mDiscoverFragments;
     private AppBarLayout mAppBarLayout;
 
+    private View mUpdateNotification;
+    private TextView mUpdatesCounter;
+
     private boolean mHasMessage;
-    private boolean mHasNotification;
 
     private View mNotificationIndicator;
 
@@ -80,36 +85,35 @@ public class DiscoverHolderFragment extends BaseFragment {
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
         mToolbar.inflateMenu(R.menu.people_fragment_menu);
 
-        mHasNotification = NotificationsCounterSingleton.getInstance().hasNotifications();
-        mToolbar.setNavigationIcon(mHasNotification ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+        mToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
 
-        View chatActionView = mToolbar.getMenu().getItem(1).getActionView();
-
-        mNotificationIndicator = chatActionView.findViewById(R.id.notification);
-        mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
-
-        mToolbar.getMenu()
-                .getItem(0)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
-
-        chatActionView.setOnClickListener(new View.OnClickListener() {
+        View chat = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
+        chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
-                if (activity != null) {
+                if (activity != null)
                     activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
-                }
             }
         });
+        mNotificationIndicator = chat.findViewById(R.id.notification);
+        mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+
+        View update = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+        update.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null)
+                    activity.addActivityFragment();
+            }
+        });
+        mUpdateNotification = update.findViewById(R.id.notification);
+
+        mUpdatesCounter = (TextView) mUpdateNotification.findViewById(R.id.notification_count);
+        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+        mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        mUpdatesCounter.setText(count < 100 ? count + "" : "+");
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -157,7 +161,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_AND_VIDEO_AND_GALLERY);
+                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
@@ -261,6 +265,11 @@ public class DiscoverHolderFragment extends BaseFragment {
         mDiscoverFragments[0].scrollUp();
     }
 
+
+    /*public SingleVideoPlaybackManager getSinglePlaybackManager() {
+        return mSingleVideoPlaybackManager;
+    }
+*/
     private Subscription mChatSubscription;
 
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
@@ -278,12 +287,13 @@ public class DiscoverHolderFragment extends BaseFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotification) {
+            if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
+                int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+                mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE );
+                mUpdatesCounter.setText(count < 100 ? count + "" : "+");
+            } else if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
-                mHasNotification = notificationEvent.hasNotification();
             }
         }
     };
-
-
 }

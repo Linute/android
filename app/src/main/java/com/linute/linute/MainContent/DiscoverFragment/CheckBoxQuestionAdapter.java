@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,6 +44,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mUserId;
 
     private boolean mSectionTwo;
+
 
     public CheckBoxQuestionAdapter(List<Post> posts, Context context, boolean sectiontwo) {
         super(new MultiChoiceMode());
@@ -109,10 +111,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             if (activity != null) {
                 activity.setFeedNotification(0);
                 NotificationsCounterSingleton.getInstance().setNumOfNewPosts(0);
-
-                if (!NotificationsCounterSingleton.getInstance().hasNotifications()) {
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(false));
-                }
+                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
             }
         }
 

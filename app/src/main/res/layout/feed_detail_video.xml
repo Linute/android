@@ -31,7 +31,11 @@
             android:id="@+id/video"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:scalableType="centerCrop"/>
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:scalableType="centerCrop"
+        />
+
 
         <ImageView
             android:id="@+id/cinema_icon"

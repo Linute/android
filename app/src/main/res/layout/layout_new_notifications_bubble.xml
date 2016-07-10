@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:id="@+id/notification"
+             xmlns:android="http://schemas.android.com/apk/res/android"
+             android:layout_width="16dp"
+             android:layout_height="16dp"
+             android:layout_gravity="top|right"
+             android:layout_marginEnd="1dp"
+             android:layout_marginTop="12dp"
+             android:visibility="gone"
+>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:src="@drawable/circle_indicator"
+    />
+    <TextView
+        android:id="@+id/notification_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:textColor="@color/pure_white"
+        android:textSize="10dp"
+        android:textStyle="bold"/>
+
+
+</FrameLayout>

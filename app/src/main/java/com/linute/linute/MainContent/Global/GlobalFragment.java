@@ -8,9 +8,11 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -19,7 +21,6 @@ import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -55,10 +56,13 @@ public class GlobalFragment extends BaseFragment {
     private AppBarLayout vAppBarLayout;
     private View vNotificationIndicator;
 
+    private TextView vUpdateCounter;
+    private View vUpdateNotification;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mGlobalChoicesAdapter  = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
+        mGlobalChoicesAdapter = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
     }
 
     @Nullable
@@ -69,16 +73,16 @@ public class GlobalFragment extends BaseFragment {
 
         mGlobalChoicesAdapter.setGoToTrend(new GlobalChoicesAdapter.GoToTrend() {
             @Override
-            public void goToTrend(String id) {
+            public void goToTrend(String id, String title) {
                 MainActivity activity = (MainActivity) getActivity();
-                if (activity != null){
-                    activity.addFragmentToContainer(TrendingPostsFragment.newInstance(id), "TREND");
+                if (activity != null) {
+                    activity.addFragmentToContainer(TrendingPostsFragment.newInstance(id, title), "TREND");
                 }
             }
         });
 
         vAppBarLayout = (AppBarLayout) root.findViewById(R.id.appbar_layout);
-        vRecycler = (RecyclerView)root.findViewById(R.id.recycler_view);
+        vRecycler = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swipe_refresh);
         vRecycler.setAdapter(mGlobalChoicesAdapter);
         vRecycler.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
@@ -100,38 +104,39 @@ public class GlobalFragment extends BaseFragment {
             }
         });
 
-        View chatActionView = vToolbar.getMenu().getItem(1).getActionView();
-
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-        mHasNotifications = NotificationsCounterSingleton.getInstance().hasNotifications();
 
-        vToolbar.setNavigationIcon(mHasNotifications ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
-
-        vNotificationIndicator = chatActionView.findViewById(R.id.notification);
-        vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
-
-        vToolbar.getMenu()
-                .getItem(0)
-                .getActionView()
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        MainActivity activity = (MainActivity) getActivity();
-                        if (activity != null) {
-                            activity.addFragmentToContainer(new FindFriendsChoiceFragment());
-                        }
-                    }
-                });
-
-        chatActionView.setOnClickListener(new View.OnClickListener() {
+        View update = vToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
+        update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MainActivity activity = (MainActivity) getActivity();
-                if (activity != null) {
-                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
-                }
+                if (activity != null)
+                    activity.addActivityFragment();
             }
         });
+
+        vUpdateNotification = update.findViewById(R.id.notification);
+        vUpdateCounter = (TextView) vUpdateNotification.findViewById(R.id.notification_count);
+
+        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        vUpdateCounter.setText(count < 100 ? count + "" : "+");
+
+        vToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ?
+                R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
+
+        View chat = vToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
+        chat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null)
+                    activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+            }
+        });
+        vNotificationIndicator = chat.findViewById(R.id.notification);
+        vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
         vSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -147,7 +152,7 @@ public class GlobalFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getFragmentState() == FragmentState.NEEDS_UPDATING){
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             vSwipe.post(new Runnable() {
                 @Override
                 public void run() {
@@ -176,7 +181,7 @@ public class GlobalFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        vAppBarLayout.setExpanded(true,false);
+        vAppBarLayout.setExpanded(true, false);
 
         if (mChatSubscription != null) {
             mChatSubscription.unsubscribe();
@@ -187,7 +192,7 @@ public class GlobalFragment extends BaseFragment {
         }
     }
 
-    public void getChoices(){
+    public void getChoices() {
 
         if (getActivity() == null) return;
 
@@ -196,7 +201,7 @@ public class GlobalFragment extends BaseFragment {
         new LSDKGlobal(getActivity()).getTrending(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -209,7 +214,7 @@ public class GlobalFragment extends BaseFragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
 
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
@@ -218,8 +223,8 @@ public class GlobalFragment extends BaseFragment {
                         ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
                         JSONObject trend;
 
-                        for (int i = 0; i < trends.length() ; i++){
-                            try{
+                        for (int i = 0; i < trends.length(); i++) {
+                            try {
                                 trend = trends.getJSONObject(i);
                                 tempList.add(
                                         new GlobalChoiceItem(
@@ -228,7 +233,7 @@ public class GlobalFragment extends BaseFragment {
                                                 trend.getString("id")
                                         )
                                 );
-                            }catch (JSONException e){
+                            } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -236,7 +241,7 @@ public class GlobalFragment extends BaseFragment {
                         mGlobalChoiceItems.clear();
                         mGlobalChoiceItems.addAll(tempList);
 
-                        if (getActivity() != null){
+                        if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -253,7 +258,7 @@ public class GlobalFragment extends BaseFragment {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        if (getActivity() != null){
+                        if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -263,8 +268,8 @@ public class GlobalFragment extends BaseFragment {
                             });
                         }
                     }
-                }else {
-                    if (getActivity() != null){
+                } else {
+                    if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -279,11 +284,10 @@ public class GlobalFragment extends BaseFragment {
     }
 
     @Override
-    public void resetFragment(){
+    public void resetFragment() {
         vRecycler.scrollToPosition(0);
     }
 
-    private boolean mHasNotifications;
     private boolean mHasMessage;
 
     private Subscription mChatSubscription;
@@ -302,9 +306,12 @@ public class GlobalFragment extends BaseFragment {
     private Action1<NotificationEvent> mNotificationEventAction1 = new Action1<NotificationEvent>() {
         @Override
         public void call(NotificationEvent notificationEvent) {
-            if (notificationEvent.hasNotification() != mHasNotifications) {
+            if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 vToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
-                mHasNotifications = notificationEvent.hasNotification();
+            } else if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
+                int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
+                vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+                vUpdateCounter.setText(count < 100 ? count + "" : "+");
             }
         }
     };

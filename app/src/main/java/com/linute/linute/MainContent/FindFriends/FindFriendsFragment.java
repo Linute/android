@@ -1,11 +1,8 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -32,14 +29,12 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -51,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -78,11 +72,12 @@ public class FindFriendsFragment extends BaseFragment {
     private FriendSearchAdapter mFriendSearchAdapter;
     private String mQueryString; //what's in the search view
 
-
+    // filtered list of users
     private List<FriendSearchUser> mFriendFoundList = new ArrayList<>();
 
+    //for facebook and contacts, this will contain the list of unfiltered users
+    //for search by name, it will contain the most popular people
     private List<FriendSearchUser> mUnfilteredList = new ArrayList<>();
-    //private String mFbToken;
 
     private CallbackManager mCallbackManager;
     private ProgressBar mProgressBar;
@@ -90,9 +85,9 @@ public class FindFriendsFragment extends BaseFragment {
 
     private View mEmptyText;
 
-    private GetContactsInBackground mGetContactsInBackground;
-
     private Handler mMainHandler = new Handler();
+
+    private Call mSearchByNameCall;
 
     public static FindFriendsFragment newInstance(int searchType) {
         FindFriendsFragment fragment = new FindFriendsFragment();
@@ -136,160 +131,146 @@ public class FindFriendsFragment extends BaseFragment {
 
 
         if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
-            //rationaleText.setText("Enter your friend's name in the search bar");
-            rationaleText.setVisibility(View.GONE);
 
-            mProgressBar.setVisibility(View.VISIBLE);
+            if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+                rationaleText.setVisibility(View.GONE);
+                mEmptyText.setVisibility(View.GONE);
+                mProgressBar.setVisibility(View.VISIBLE);
+                new LSDKPeople(rootView.getContext()).getPeople(new HashMap<String, String>(), new Callback() {
 
-            Map<String, String> params = new HashMap<>();
-
-
-            new LSDKPeople(rootView.getContext()).getPeople(params, new Callback(){
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
 //                    Log.i(TAG, response.body().string());
-                    try {
-                        JSONObject json = new JSONObject(response.body().string());
-                        JSONArray events = json.getJSONArray("people");
-                        ArrayList<FriendSearchUser> tempFriends = new ArrayList<FriendSearchUser>();
-                        if (events != null) {
-                            for (int i = 0; i < events.length(); i++) {
-                                tempFriends.add(new FriendSearchUser(events.getJSONObject(i).getJSONObject("owner")));
+                        try {
+                            JSONObject json = new JSONObject(response.body().string());
+                            JSONArray events = json.getJSONArray("people");
+                            ArrayList<FriendSearchUser> tempFriends = new ArrayList<>();
+                            if (events != null) {
+                                for (int i = 0; i < events.length(); i++) {
+                                    tempFriends.add(new FriendSearchUser(events.getJSONObject(i).getJSONObject("owner")));
+                                }
+                            }
+
+                            mUnfilteredList.clear();
+                            mUnfilteredList.addAll(tempFriends);
+
+                            if (getActivity() == null) return;
+
+                            setFragmentState(FragmentState.FINISHED_UPDATING);
+
+                            if (mFriendFoundList.isEmpty()) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (mUnfilteredList.isEmpty()) { //show no results found if empty
+                                            mEmptyText.setVisibility(View.VISIBLE);
+                                        } else if (mEmptyText.getVisibility() == View.VISIBLE) {
+                                            mEmptyText.setVisibility(View.GONE);
+                                        }
+
+                                        //so notify isn't called repeatedly if they don't have to be
+                                        mMainHandler.removeCallbacks(null);
+
+                                        mMainHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mFriendFoundList.addAll(mUnfilteredList);
+                                                mFriendSearchAdapter.notifyDataSetChanged();
+                                            }
+                                        });
+
+                                        mProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
                             }
                         }
 
-                        mFriendFoundList.clear();
-                        mFriendFoundList.addAll(tempFriends);
+                    }
 
+                    @Override
+                    public void onFailure(Call call, IOException e) {
                         if (getActivity() == null) return;
-
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
-                                if (mFriendFoundList.isEmpty()) { //show no results found if empty
-                                    mEmptyText.setVisibility(View.VISIBLE);
-                                } else if (mEmptyText.getVisibility() == View.VISIBLE) {
-                                    mEmptyText.setVisibility(View.GONE);
-                                }
-
-                                //so notify isn't called repeadedly if they don't have to be
-                                mMainHandler.removeCallbacks(null);
-                                mMainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mFriendSearchAdapter.notifyDataSetChanged();
-                                    }
-                                });
+                                Utils.showBadConnectionToast(getActivity());
                                 mProgressBar.setVisibility(View.GONE);
-
                             }
                         });
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Activity activity = getActivity();
-                        if(activity != null){
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mProgressBar.setVisibility(View.GONE);
-                                }
-                            });
-                        }
                     }
-
-                }
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    if (getActivity() == null) return;
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getActivity());
-                            mProgressBar.setVisibility(View.GONE);
-                        }
-                    });
-                }
-            });
+                });
+            } else {
+                mEmptyText.setVisibility(mFriendFoundList.isEmpty() ? View.VISIBLE : View.GONE);
+            }
 
             reloadButton.setVisibility(View.GONE);
-            mRecievedList = true;
-            if (mFriendFoundList.isEmpty()) {
-                if ((mQueryString == null || mQueryString.equals(""))) {
-                    mFindFriendsRationale.setVisibility(View.VISIBLE);
-                } else {
-                    mEmptyText.setVisibility(View.VISIBLE);
-                    mFindFriendsRationale.setVisibility(View.GONE);
-                }
-            } else {
-                mFindFriendsRationale.setVisibility(View.GONE);
-            }
+            mFindFriendsRationale.setVisibility(View.GONE);
+
         } else if (mSearchType == SEARCH_TYPE_FACEBOOK) { //facebook
+
             rationaleText.setText(R.string.facebook_rationale);
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.facebook_blue));
-            reloadButton.setOnClickListener(new View.OnClickListener() {
-                private boolean loaded = false;
 
-                @Override
-                public void onClick(View v) {
-
-                    if (!loaded) {
-                        FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
-                        mCallbackManager = CallbackManager.Factory.create();
-                        setUpFacebookCallback();
-                        loaded = true;
-                    }
-
-                    mFindFriendsRationale.setVisibility(View.GONE);
-                    loginFacebook();
-                }
-            });
-
-            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()) {
-                mFindFriendsRationale.setVisibility(View.GONE);
-                mEmptyText.setVisibility(View.VISIBLE);
-            } else if (mUnfilteredList.isEmpty()) {
+            if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
+                reloadButton.setOnClickListener(new View.OnClickListener() {
+                    private boolean loaded = false;
+
+                    @Override
+                    public void onClick(View v) {
+
+                        if (!loaded) {
+                            FacebookSdk.sdkInitialize(getActivity().getApplicationContext());
+                            mCallbackManager = CallbackManager.Factory.create();
+                            setUpFacebookCallback();
+                            loaded = true;
+                        }
+
+                        mFindFriendsRationale.setVisibility(View.GONE);
+                        loginFacebook();
+                    }
+                });
+            } else {
+                mFindFriendsRationale.setVisibility(View.GONE);
+                if (mFriendFoundList.isEmpty()) {
+                    mEmptyText.setVisibility(View.VISIBLE);
+                }
             }
+
         } else { //contacts. This process takes forever to get emails. We will use async task
             rationaleText.setText(R.string.need_contant_permission);
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.yellow_color));
             reloadButton.setText("Search contacts");
-            reloadButton.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View v) {
-                    mGetContactsInBackground = new GetContactsInBackground();
-                    setUpContactsList();
-                }
-            });
 
-            if (mFriendFoundList.isEmpty() && !mUnfilteredList.isEmpty()) {
-                mFindFriendsRationale.setVisibility(View.GONE);
-                mEmptyText.setVisibility(View.VISIBLE);
-            } else if (mUnfilteredList.isEmpty()) {
+            if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
+                reloadButton.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        setUpContactsList();
+                    }
+                });
+            } else {
+                mFindFriendsRationale.setVisibility(View.GONE);
+                if (mFriendFoundList.isEmpty()) {
+                    mEmptyText.setVisibility(View.VISIBLE);
+                }
             }
         }
         return rootView;
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mGetContactsInBackground != null) { //cancel task
-            mGetContactsInBackground.cancel(true);
-        }
     }
 
     private Handler mSearchHandler = new Handler(); //handles filtering and searchign
@@ -301,10 +282,12 @@ public class FindFriendsFragment extends BaseFragment {
 
             if (getActivity() == null) return;
 
-            new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
+            if (mSearchByNameCall != null) mSearchByNameCall.cancel();
+
+            mSearchByNameCall = new LSDKFriendSearch(getActivity()).searchFriendByName(mQueryString, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    if (getActivity() == null) return;
+                    if (getActivity() == null || call.isCanceled()) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -315,6 +298,8 @@ public class FindFriendsFragment extends BaseFragment {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    if (call.isCanceled()) return;
+
                     String resString = response.body().string();
                     if (response.isSuccessful()) {
                         try {
@@ -329,8 +314,6 @@ public class FindFriendsFragment extends BaseFragment {
                                     tempFriends.add(new FriendSearchUser(friends.getJSONObject(i)));
                                 }
                             }
-
-                            if (mCancelLoad) return;
 
                             mFriendFoundList.clear();
                             mFriendFoundList.addAll(tempFriends);
@@ -378,41 +361,42 @@ public class FindFriendsFragment extends BaseFragment {
     private Runnable mFilterFacebookAndContactsRunnable = new Runnable() {
         @Override
         public void run() {
-            ArrayList<FriendSearchUser> tempFriend = new ArrayList<>();
-
-            if (mQueryString.trim().isEmpty()) {
-                tempFriend.addAll(mUnfilteredList);
-            } else {
-                for (FriendSearchUser user : mUnfilteredList)
-                    if (user.nameContains(mQueryString)) {
-                        tempFriend.add(user);
-                    }
-
-                if (tempFriend.isEmpty() && mEmptyText.getVisibility() == View.GONE) { //empty, show empty text
-                    mEmptyText.setVisibility(View.VISIBLE);
-                }
-            }
-            mFriendFoundList.clear();
-            mFriendFoundList.addAll(tempFriend);
-
-            if (mFriendFoundList.isEmpty()) {
-                mEmptyText.setVisibility(View.VISIBLE);
-            } else if (mEmptyText.getVisibility() == View.VISIBLE) {
-                mEmptyText.setVisibility(View.GONE);
-            }
-
-            mMainHandler.removeCallbacks(null);
+            mMainHandler.removeCallbacksAndMessages(null);
             mMainHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (mQueryString.trim().isEmpty()) {
+                        mFriendFoundList.clear();
+                        mFriendFoundList.addAll(mUnfilteredList);
+                    } else {
+                        ArrayList<FriendSearchUser> tempFriend = new ArrayList<>();
+
+                        for (FriendSearchUser user : mUnfilteredList)
+                            if (user.nameContains(mQueryString)) {
+                                tempFriend.add(user);
+                            }
+
+                        if (tempFriend.isEmpty() && mEmptyText.getVisibility() == View.GONE) { //empty, show empty text
+                            mEmptyText.setVisibility(View.VISIBLE);
+                        }
+
+                        mFriendFoundList.clear();
+                        mFriendFoundList.addAll(tempFriend);
+                    }
+
+
+                    if (mFriendFoundList.isEmpty()) {
+                        mEmptyText.setVisibility(View.VISIBLE);
+                    } else if (mEmptyText.getVisibility() == View.VISIBLE) {
+                        mEmptyText.setVisibility(View.GONE);
+                    }
+
+
                     mFriendSearchAdapter.notifyDataSetChanged();
                 }
             });
         }
     };
-
-
-    private boolean mCancelLoad = false;
 
     //searching by name
     private void searchByName(String newText) {
@@ -422,31 +406,31 @@ public class FindFriendsFragment extends BaseFragment {
         //we will wait to see if user inputs more before running search
         mSearchHandler.removeCallbacks(mSearchByNameRunnable);
         if (newText.isEmpty()) { //no text in search bar
-            mFriendFoundList.clear();
-
             mMainHandler.removeCallbacksAndMessages(null);
+            if (mSearchByNameCall != null) mSearchByNameCall.cancel();
+
             mMainHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    mFriendFoundList.clear();
+                    mFriendFoundList.addAll(mUnfilteredList);
                     mFriendSearchAdapter.notifyDataSetChanged();
                 }
             });
 
-            mCancelLoad = true;
-            mFindFriendsRationale.setVisibility(View.VISIBLE);
             if (mEmptyText.getVisibility() == View.VISIBLE) mEmptyText.setVisibility(View.GONE);
+
         } else {
             if (mFindFriendsRationale.getVisibility() == View.VISIBLE)
                 mFindFriendsRationale.setVisibility(View.GONE);
 
-            mCancelLoad = false;
             mSearchHandler.postDelayed(mSearchByNameRunnable, 300);
         }
     }
 
     //Filter or search TextChangeListners
     private void filterList(String newText) {
-        if (mInRationalText) return;
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) return;
         mQueryString = newText;
         mSearchHandler.removeCallbacks(mFilterFacebookAndContactsRunnable);
         mSearchHandler.postDelayed(mFilterFacebookAndContactsRunnable, 300);
@@ -463,7 +447,7 @@ public class FindFriendsFragment extends BaseFragment {
     }
 
 
-    private boolean mRecievedList = false;
+    //private boolean mRecievedList = false;
 
     private void setUpFacebookList(String token) {
 
@@ -495,12 +479,14 @@ public class FindFriendsFragment extends BaseFragment {
                             mUnfilteredList.clear();
                             for (int i = 0; i < friends.length(); i++) {
                                 FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
-                                mFriendFoundList.add(user);
                                 mUnfilteredList.add(user);
                             }
                         }
 
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
+
                         if (getActivity() == null) return;
+
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -514,11 +500,13 @@ public class FindFriendsFragment extends BaseFragment {
                                 mMainHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
+                                        mFriendFoundList.clear();
+                                        mFriendFoundList.addAll(mUnfilteredList);
                                         mFriendSearchAdapter.notifyDataSetChanged();
                                     }
                                 });
 
-                                mRecievedList = true;
+                                //mRecievedList = true;
                             }
                         });
                     } catch (JSONException e) {
@@ -547,13 +535,10 @@ public class FindFriendsFragment extends BaseFragment {
         //have permissions
         else {
             mFindFriendsRationale.setVisibility(View.GONE);
-            mInRationalText = true; //still need to load contacts
             mProgressBar.setVisibility(View.VISIBLE);
-            mGetContactsInBackground.execute();
+            new GetContactsInBackground().execute();
         }
     }
-
-    private boolean mInRationalText = false; //basically determines if we can type in searchbar
 
     private void loadContacts() {
         JSONArray phoneNumbers = new JSONArray();
@@ -583,7 +568,6 @@ public class FindFriendsFragment extends BaseFragment {
                     if (pCur == null) continue;
 
                     while (pCur.moveToNext()) {
-                        if (mGetContactsInBackground.isCancelled()) break;
                         phoneNumbers.put(pCur.getString(
                                 pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
                     }
@@ -601,7 +585,6 @@ public class FindFriendsFragment extends BaseFragment {
                     if (emailCur == null) continue;
 
                     while (emailCur.moveToNext()) {
-                        if (mGetContactsInBackground.isCancelled()) break;
                         // This would allow you get several email addresses
                         // if the email addresses were stored in an array
 
@@ -644,18 +627,17 @@ public class FindFriendsFragment extends BaseFragment {
                             mUnfilteredList.clear();
                             for (int i = 0; i < friends.length(); i++) {
                                 FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
-                                mFriendFoundList.add(user);
                                 mUnfilteredList.add(user);
                             }
                         }
+
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                //showRetryButton(false);
                                 mProgressBar.setVisibility(View.GONE);
-                                mInRationalText = false;
                                 if (mFriendFoundList.isEmpty()) {
                                     mEmptyText.setVisibility(View.VISIBLE);
                                 }
@@ -664,11 +646,11 @@ public class FindFriendsFragment extends BaseFragment {
                                 mMainHandler.post(new Runnable() {
                                     @Override
                                     public void run() {
+                                        mFriendFoundList.clear();
+                                        mFriendFoundList.addAll(mUnfilteredList);
                                         mFriendSearchAdapter.notifyDataSetChanged();
                                     }
                                 });
-
-                                mRecievedList = true;
                             }
                         });
 
@@ -699,35 +681,28 @@ public class FindFriendsFragment extends BaseFragment {
                     showRationalTextFacebook();
                     return;
                 }
-                if (mInRationalText) {
-                    mInRationalText = false;
-                    mFindFriendsRationale.setVisibility(View.GONE);
-                }
+
+                mFindFriendsRationale.setVisibility(View.GONE);
+
                 setUpFacebookList(loginResult.getAccessToken().getToken());
             }
 
             @Override
             public void onCancel() {
-                if (!mInRationalText)
-                    showRationalTextFacebook();
+                showRationalTextFacebook();
             }
 
             @Override
             public void onError(FacebookException error) {
                 error.printStackTrace();
                 showFacebookErrorToast();
-
-                if (!mInRationalText)
-                    showRationalTextFacebook();
+                showRationalTextFacebook();
             }
         });
 
     }
 
     private void showRationalTextFacebook() {
-        if (mInRationalText) return; //already in rationale text
-
-        mInRationalText = true;
         mFindFriendsRationale.setVisibility(View.VISIBLE);
 
         ((TextView) mFindFriendsRationale.findViewById(R.id.findFriends_rat_text)).setText(R.string.facebook_rationale);
@@ -738,7 +713,6 @@ public class FindFriendsFragment extends BaseFragment {
             public void onClick(View v) {
                 loginFacebook();
                 mFindFriendsRationale.setVisibility(View.GONE);
-                mInRationalText = false;
             }
         });
     }
@@ -786,10 +760,10 @@ public class FindFriendsFragment extends BaseFragment {
     }
 
     public void searchWithQuery(String query) {
-        if (!mRecievedList) return;
         if (mSearchType == SEARCH_TYPE_NAME) {
             searchByName(query);
         } else {
+            if (mUnfilteredList.isEmpty()) return;
             filterList(query);
         }
     }

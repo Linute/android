@@ -5,17 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:contex=".MainActivity">
 
-    <item android:id="@+id/menu_find_friends"
-          app:actionLayout="@layout/toolbar_friend_icon"
-          android:orderInCategory="100"
-          android:title="Find friends"
-          app:showAsAction="ifRoom"
-          />
 
     <item
         android:id="@+id/menu_chat"
         app:actionLayout="@layout/toolbar_message_icon"
         android:orderInCategory="100"
         android:title="Chat"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_updates"
+        app:actionLayout="@layout/toolbar_updates_icon"
+        android:orderInCategory="101"
+        android:title="Updates"
+        android:icon="@drawable/ic_action_turn20"
         app:showAsAction="always"/>
 </menu>

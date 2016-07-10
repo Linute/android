@@ -3,18 +3,17 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <item android:id="@+id/add_friend"
-          android:orderInCategory="1"
-          android:title="Find friends"
-          android:icon="@drawable/ic_action_add"
-          app:showAsAction="always"
-    />
     <item android:id="@+id/settings"
           android:orderInCategory="1"
           android:title="Settings"
           android:icon="@drawable/ic_action_action_settings"
           app:showAsAction="ifRoom"
     />
-
+    <item android:id="@+id/menu_updates"
+        app:actionLayout="@layout/toolbar_updates_icon"
+        android:orderInCategory="101"
+        android:title="Updates"
+        android:icon="@drawable/ic_action_turn20"
+        app:showAsAction="always"/>
 
 </menu>

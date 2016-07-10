@@ -35,7 +35,7 @@ public class Update {
         AlSO_COMMENTED_STATUS,
         ALSO_COMMENTED_IMAGE,
         ALSO_COMMENTED_VIDEO,
-        MATCHED
+        LIKED_COMMENT
     }
 
     private String mActionID;           // id of action
@@ -43,7 +43,7 @@ public class Update {
     private UpdateType mUpdateType;     // type of update
 
     private boolean mIsRead;            //determine if viewer has seen this update before
-
+    private boolean mIsViewed;          //determine if the viewer has opened this update before
 
     //'User' refers to the person performing the action
     // i.e. if 'max liked your picture' -> user = max
@@ -100,6 +100,8 @@ public class Update {
             setUpEvent(json);
 
         mDescription = getStringFromJson(json, "text");
+
+        mIsViewed = getBooleanFromJson(json, "isViewed");
     }
 
     //parse action String and return UpdateType
@@ -135,8 +137,8 @@ public class Update {
                 return UpdateType.ALSO_COMMENTED_IMAGE;
             case "also commented video":
                 return UpdateType.ALSO_COMMENTED_VIDEO;
-            case "matched":
-                return UpdateType.MATCHED;
+            case "liked comment":
+                return UpdateType.LIKED_COMMENT;
             default:
                 return UpdateType.UNDEFINED;
         }
@@ -157,8 +159,7 @@ public class Update {
     public final boolean hasEventInformation(){
         return mUpdateType != UpdateType.UNDEFINED &&
                 mUpdateType != UpdateType.FOLLOWER &&
-                mUpdateType != UpdateType.FRIEND_JOINED &&
-                mUpdateType != UpdateType.MATCHED;
+                mUpdateType != UpdateType.FRIEND_JOINED;
     }
 
     public final boolean hasFriendShipInformation(){
@@ -214,6 +215,12 @@ public class Update {
     public boolean isRead() {
         return mIsRead;
     }
+
+    public boolean isViewed(){
+        return mIsViewed;
+    }
+
+    public void markViewed(){mIsViewed = true;}
 
     public String getEventID() {
         return mPost.getPostId();

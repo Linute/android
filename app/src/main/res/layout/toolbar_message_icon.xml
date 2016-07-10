@@ -14,13 +14,6 @@
         android:layout_gravity="center"
         android:src="@drawable/ic_action_chat"/>
 
-    <ImageView
-        android:id="@+id/notification"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_gravity="top|right"
-        android:layout_marginEnd="1dp"
-        android:layout_marginTop="12dp"
-        android:src="@drawable/circle_indicator"
-        android:visibility="gone"/>
+    <include layout="@layout/layout_new_notifications_bubble"/>
+
 </FrameLayout>
