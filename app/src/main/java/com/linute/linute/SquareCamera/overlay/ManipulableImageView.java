@@ -139,7 +139,7 @@ public class ManipulableImageView extends ImageView {
 
                     mainX = (int)event.getRawX();
                     mainY = (int)event.getRawY();
-                
+
 
                 positionX[0] = event.getRawX() - initialX[0];// + positionX[id];
                 positionY[0] = event.getRawY() - initialY[0];// + positionY[id];
