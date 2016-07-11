@@ -473,7 +473,8 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                         cmd += String.format(Locale.US,
                                 "-filter_complex scale=%d:%d ", newWidth, newHeight);
                     }
-                } else {
+                }
+                {
                     String overlay = saveViewAsImage(mOverlays);
 
                     Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
