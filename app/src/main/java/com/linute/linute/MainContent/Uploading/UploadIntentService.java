@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
@@ -75,7 +73,6 @@ public class UploadIntentService extends IntentService {
 
     private void sendNextFile(PendingUploadPost p) {
         try {
-            Log.i(TAG, "sendNextFile: "+p.getOwner());
             Bitmap image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(p.getImagePath()));
 
             mBuilder.setContentTitle("Preparing for upload")
@@ -181,6 +178,5 @@ public class UploadIntentService extends IntentService {
 
         mNotificationManager.cancel(ID);
         mNotificationManager.notify(notificationId++, mBuilder.build());
-        Log.i(TAG, "failedToPost: "+p.getOwner());
     }
 }

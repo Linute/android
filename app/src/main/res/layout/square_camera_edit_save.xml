@@ -2,21 +2,20 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:background="@color/colorPrimary"
-             android:focusableInTouchMode="true">
+>
 
     <FrameLayout
         android:id="@+id/final_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+    >
 
         <!-- Photos and videos taken/uploaded by user in this view -->
         <FrameLayout
             android:id="@+id/base_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:focusableInTouchMode="true"/>
-
+            android:layout_height="wrap_content"/>
 
         <!--  -->
         <FrameLayout

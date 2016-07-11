@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -25,7 +26,6 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
     public static final String TAG = EditSavePhotoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
     public static final String FROM_GALLERY = "from_gallery";
-    private ImageView vPhotoImageView;
 
     public static Fragment newInstance(Uri imageUri) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -66,7 +66,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
     protected void loadContent(ViewGroup container) {
         //setup ImageView
         final Uri imageUri = getArguments().getParcelable(BITMAP_URI);
-        vPhotoImageView = new MinimumWidthImageView(container.getContext());
+        ImageView vPhotoImageView = new MinimumWidthImageView(container.getContext());
         vPhotoImageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         vPhotoImageView.setAdjustViewBounds(true);
         vPhotoImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
@@ -81,6 +81,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
             //no lag time when loading with this method
             vPhotoImageView.setImageURI(imageUri);
         }
+
         container.addView(vPhotoImageView);
 
     }
@@ -102,7 +103,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         showProgress(true);
         if (getActivity() == null) return;
         if (mReturnType == CameraActivity.RETURN_URI) {
-            Uri image = ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mFromGallery ? vPhotoImageView : mAllContent));
+            Uri image = ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
             if (image != null) {
                 Intent i = new Intent()
                         .putExtra("image", image)
@@ -115,7 +116,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                 getActivity().finish();
             }
         } else {
-            Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mFromGallery ? vPhotoImageView : mAllContent));
+            Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
             if (image != null) {
                 PendingUploadPost pendingUploadPost =
                         new PendingUploadPost(
