@@ -166,7 +166,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private boolean mDenySwipe = false;
 
     //holder for comments
-    public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private SwipeLayout mSwipeLayout;
 
@@ -175,7 +175,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected TextView vCommentUserText;
         protected TextView vTimeStamp;
 
-        protected ImageView vLikeIcon;
         protected TextView vLikesText;
 
         private String mCommenterUserId;
@@ -184,6 +183,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         private boolean mIsAnon;
         private boolean mIsLiked;
 
+        private ImageView vFireIcon;
 
         public FeedDetailViewHolder(View itemView) {
             super(itemView);
@@ -207,6 +207,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
             vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);
             vLikesText = (TextView) itemView.findViewById(R.id.num_likes);
+            vFireIcon = (ImageView) itemView.findViewById(R.id.fire_icon);
 
             vCommentUserName.setOnClickListener(this);
             vCommentUserImage.setOnClickListener(this);
@@ -214,9 +215,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             rightControls.findViewById(R.id.comment_reply).setOnClickListener(this);
             rightControls.findViewById(R.id.comment_reveal).setOnClickListener(this);
             rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
-            leftControls.setOnClickListener(this);
-
-            vLikeIcon = (ImageView) leftControls.findViewById(R.id.like);
             leftControls.setOnClickListener(this);
         }
 
@@ -226,6 +224,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mUserName = comment.getCommentUserName();
             mCommentId = comment.getCommentPostId();
             mIsLiked = comment.isLiked();
+
+            mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
 
             if (mIsAnon) {
                 setAnonImage(comment.getAnonImage());
@@ -252,8 +252,26 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserText.setText(comment.getCommentPostText());
             }
 
-            vLikeIcon.setImageResource(mIsLiked ? R.drawable.ic_fire_on : R.drawable.ic_fire_off);
-            vLikesText.setText(comment.getNumberOfLikes() + "");
+            setUpLikes(comment);
+        }
+
+        private void setUpLikes(Comment comment) {
+            if (comment.getNumberOfLikes() > 0) {
+                vLikesText.setText(comment.getNumberOfLikes() + "");
+                if (comment.isLiked())
+                    vFireIcon.setColorFilter(ContextCompat.getColor(context, R.color.red));
+                vFireIcon.setColorFilter(
+                        comment.isLiked() ?
+                                ContextCompat.getColor(context, R.color.red) :
+                                ContextCompat.getColor(context, R.color.twentyfive_black)
+                );
+
+                vLikesText.setVisibility(View.VISIBLE);
+                vFireIcon.setVisibility(View.VISIBLE);
+            } else {
+                vLikesText.setVisibility(View.INVISIBLE);
+                vFireIcon.setVisibility(View.INVISIBLE);
+            }
         }
 
         private void setUpPulloutButtons() {
@@ -357,27 +375,22 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         mCommentActions.revealComment(getAdapterPosition(), mCommentId, mIsAnon);
                         break;
                     case R.id.left_controls:
-                        Comment c = (Comment)mFeedDetail.getComments().get(getAdapterPosition() - 1);
+                        Comment c = (Comment) mFeedDetail.getComments().get(getAdapterPosition() - 1);
                         mIsLiked = c.toggleLiked();
-                        if (mIsLiked){
+                        if (mIsLiked) {
                             c.incrementLikes();
-                            vLikeIcon.setImageResource(R.drawable.ic_fire_on);
-                            vLikesText.setText(c.getNumberOfLikes() + "");
-                        } else{
+                            setUpLikes(c);
+                        } else {
                             c.decrementLikes();
-                            vLikeIcon.setImageResource(R.drawable.ic_fire_off);
-                            vLikesText.setText(c.getNumberOfLikes()+ "");
+                            setUpLikes(c);
                         }
 
                         mCommentActions.likeComment(mIsLiked, mCommentId);
-                        return;
                 }
+
                 mSwipeLayout.close();
             }
         }
-
-
-
 
 
         public void setProfileImage(String image) {

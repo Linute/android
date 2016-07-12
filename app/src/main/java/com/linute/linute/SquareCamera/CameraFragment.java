@@ -139,7 +139,14 @@ public class CameraFragment extends Fragment {
             mStatusButton.setVisibility(View.INVISIBLE);
         } else if (mCameraType == CameraActivity.CAMERA_EVERYTHING_NO_STATUS){
             mStatusButton.setVisibility(View.INVISIBLE);
-        } else{
+            mGalleryButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
+                        ((CameraActivity) getActivity()).launchFragment(GalleryFragment.newInstance(), GalleryFragment.TAG);
+                }
+            });
+        } else {
             mGalleryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

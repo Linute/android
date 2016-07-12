@@ -23,7 +23,6 @@ public class ConfirmProfilePicture extends Fragment {
     public static final String TAG = ConfirmProfilePicture.class.getSimpleName();
 
     private Uri mImageUri;
-    private ImageView vImageView;
 
 
     public static ConfirmProfilePicture newInstance(Uri uri){
@@ -52,7 +51,7 @@ public class ConfirmProfilePicture extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_confirm_profile, container, false);
-        vImageView = (ImageView) root.findViewById(R.id.imageView);
+        ImageView vImageView = (ImageView) root.findViewById(R.id.imageView);
 
         Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {

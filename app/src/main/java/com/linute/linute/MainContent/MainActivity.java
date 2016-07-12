@@ -79,7 +79,6 @@ public class MainActivity extends BaseTaptActivity {
     public static final int PHOTO_STATUS_POSTED = 19;
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
-
     private DrawerLayout mDrawerLayout;
 
     //don't change fragment until the drawer is closed, or there will be slight lag
@@ -92,6 +91,7 @@ public class MainActivity extends BaseTaptActivity {
     private BaseFragment[] mFragments; //holds our fragments
 
 
+    private boolean mWatchForRefresh = false;
     private SharedPreferences mSharedPreferences;
 
     private SocketErrorResponse mSocketErrorResponse;
@@ -115,6 +115,7 @@ public class MainActivity extends BaseTaptActivity {
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new BaseFragment[4];
+        mWatchForRefresh = false;
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
         mMainDrawerListener = new MainDrawerListener();
@@ -129,19 +130,18 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
-
                 boolean hasBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
 
                 if (mPreviousItem != null) { //profile doesn't get checked
+                    if (hasBackStack)
+                        clearBackStack();
+
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
                 } else {
                     getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
-
-                if (hasBackStack)
-                    clearBackStack();
             }
         });
 
@@ -175,9 +175,7 @@ public class MainActivity extends BaseTaptActivity {
         mPreviousItem.setChecked(true);
 
         //only loads one fragment
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.FEED))
-                .commit();
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.FEED));
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -193,34 +191,26 @@ public class MainActivity extends BaseTaptActivity {
 
 
     private void navItemSelected(short position, MenuItem item) {
-        boolean wereItemsInBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        int backstack = getSupportFragmentManager().getBackStackEntryCount();
 
         if (mPreviousItem != null) {
-            if (mPreviousItem != item || wereItemsInBackStack) {
+            if (mPreviousItem != item || backstack > 1) {
                 mPreviousItem.setChecked(false);
-                item.setChecked(true);
-                replaceContainerWithFragment(
-                        position == FRAGMENT_INDEXES.FIND_FRIENDS ?
-                                FindFriendsChoiceFragment.newInstance(true) :
-                                getFragment(position));
-                mPreviousItem = item;
             } else {
-                getFragment(position).resetFragment();
+                if (position != FRAGMENT_INDEXES.FIND_FRIENDS)
+                    getFragment(position).resetFragment();
+                return;
             }
-        } else {
-            item.setChecked(true);
-            replaceContainerWithFragment(
-                    position == FRAGMENT_INDEXES.FIND_FRIENDS ?
-                            FindFriendsChoiceFragment.newInstance(true) :
-                            getFragment(position)
-            );
-
-            mPreviousItem = item;
         }
 
-        //if there are a lot of other user profile/ events in mainActivity, clear them
-        if (wereItemsInBackStack)
-            clearBackStack();
+        mPreviousItem = item;
+        mPreviousItem.setChecked(true);
+        replaceContainerWithFragment(
+                position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                        FindFriendsChoiceFragment.newInstance(true) :
+                        getFragment(position));
+
+        clearBackStack();
     }
 
 
@@ -262,7 +252,9 @@ public class MainActivity extends BaseTaptActivity {
                     if (mSafeForFragmentTransaction) {
                         MainActivity.this.getSupportFragmentManager()
                                 .beginTransaction()
+                                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
                                 .replace(R.id.mainActivity_fragment_holder, fragment)
+                                .addToBackStack(PROFILE_OR_EVENT_NAME)
                                 .commit();
                     }
                 }
@@ -271,7 +263,9 @@ public class MainActivity extends BaseTaptActivity {
             if (mSafeForFragmentTransaction) {
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
+                        .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
                         .replace(R.id.mainActivity_fragment_holder, fragment)
+                        .addToBackStack(PROFILE_OR_EVENT_NAME)
                         .commit();
             }
         }
@@ -388,8 +382,20 @@ public class MainActivity extends BaseTaptActivity {
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
-        } else if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) && getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            navItemSelected(FRAGMENT_INDEXES.FEED, mNavigationView.getMenu().findItem(R.id.navigation_item_feed));
+        } else if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
+            if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed)) {
+                clearBackStack();
+                if (mPreviousItem != null) mPreviousItem.setChecked(false);
+                mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
+                mPreviousItem.setChecked(true);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainActivity_fragment_holder, getFragment(FRAGMENT_INDEXES.FEED))
+                        .addToBackStack(PROFILE_OR_EVENT_NAME)
+                        .commit();
+            } else {
+                finish();
+            }
         } else {
             super.onBackPressed();
         }
@@ -537,6 +543,7 @@ public class MainActivity extends BaseTaptActivity {
     protected void onPause() {
         super.onPause();
 
+        mWatchForRefresh = true;
         mSafeForFragmentTransaction = false;
 
         if (mSocket != null) {
@@ -689,7 +696,6 @@ public class MainActivity extends BaseTaptActivity {
                     NewMessageBus.getInstance().setNewMessage(chat);
                 } else {
                     final Update update = new Update(activity);
-                    Log.i(TAG, "call: ello");
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
 
                         runOnUiThread(new Runnable() {
@@ -741,6 +747,10 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addActivityFragment();
+
                 addFragmentToContainer(FeedDetailPage.newInstance(post));
                 sn.dismiss();
             }
@@ -754,6 +764,10 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addActivityFragment();
+
                 addFragmentToContainer(TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId()));
                 sn.dismiss();
             }
@@ -770,13 +784,13 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void checkIntent(Intent intent) {
-
         int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
         if (type == LinuteConstants.FEED_DETAIL) {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -785,7 +799,8 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -845,33 +860,36 @@ public class MainActivity extends BaseTaptActivity {
                     NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
                     NotificationsCounterSingleton.getInstance().setUpdatesNeedsRefreshing(true);
                 }
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     };
 
+
     //posts:refresh
     private Emitter.Listener refresh = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            try {
-                final int posts = new JSONObject(args[0].toString()).getInt("posts");
+            if (mWatchForRefresh) {
+                try {
+                    final int posts = new JSONObject(args[0].toString()).getInt("posts");
+                    if (posts > 0) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
+                            }
+                        });
 
-                if (posts > 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
-                        }
-                    });
-
-                    NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
-                    NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                        NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, true));
+                        NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            } else {
+                mWatchForRefresh = true;
             }
         }
     };
@@ -906,7 +924,6 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener meme = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-
             try {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
@@ -998,12 +1015,10 @@ public class MainActivity extends BaseTaptActivity {
                             }
                             fis.close();
                             fos.close();
-                        } catch (IOException ioe) {
+                        } catch (IOException | ExecutionException ioe) {
                             ioe.printStackTrace();
-                        } catch (ExecutionException ee) {
-                            ee.printStackTrace();
-                        } catch (InterruptedException ie) {
-                            ie.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
 
                     }
@@ -1077,7 +1092,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void addActivityFragment() {
-        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY), UpdatesFragment.TAG);
     }
 }
 

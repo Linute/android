@@ -18,9 +18,9 @@ import okhttp3.Callback;
 public class LSDKUser {
 
     // where user information will be
-    private static SharedPreferences mSharedPreferences;
+    private SharedPreferences mSharedPreferences;
 
-    private static String mToken;
+    private String mToken;
 
     public LSDKUser(Context context) {
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);

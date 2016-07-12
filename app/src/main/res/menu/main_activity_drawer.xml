@@ -21,7 +21,7 @@
             android:id="@+id/navigation_item_find_friends"
             android:icon="@drawable/ic_action_add"
             android:title="Find Friends"
-            android:checkable="false"
+            android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
     </group>

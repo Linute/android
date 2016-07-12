@@ -76,6 +76,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected String mCollegeId;
     protected String mUserId;
+    protected String mUserToken;
 
     protected View mUploadButton;
 
@@ -90,6 +91,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     protected OverlayWipeAdapter mFilterAdapter;
     private StickerDrawerAdapter mStickerDrawerAdapter;
     private WipeViewPager mFilterPager;
+
+    protected boolean mFromGallery;
 
     public static Fragment newInstance(Uri imageUri, boolean fromGallery) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -108,6 +111,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     public AbstractEditSaveFragment() {
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -120,10 +124,10 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
+        mUserToken = sharedPreferences.getString("userToken", "");
 
         mAllContent = view.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) view.findViewById(R.id.base_content);
@@ -139,17 +143,21 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mProgressBar.getVisibility() != View.VISIBLE)
-                    showConfirmDialog();
+                    backPressed();
             }
         });
 
         View stickerDrawerHandle = mToolbar.findViewById(R.id.sticker_drawer_handle);
-        stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggleStickerDrawer();
-            }
-        });
+        if (mFromGallery) {
+            stickerDrawerHandle.setVisibility(View.GONE);
+        } else {
+            stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    toggleStickerDrawer();
+                }
+            });
+        }
 
 
         mEditText = (CustomBackPressedEditText) view.findViewById(R.id.editFragment_title_text);
@@ -172,11 +180,15 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             vBottom.setLayoutParams(params);
         }
 
-        //save button
+
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                uploadContent();
+                if (isStickerDrawerOpen()) {
+                    closeStickerDrawer();
+                } else {
+                    uploadContent();
+                }
             }
         });
 
@@ -185,63 +197,69 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mStickerContainer = (CoordinatorLayout) view.findViewById(R.id.stickers_container);
 
         mStickerDrawer = (RecyclerView) view.findViewById(R.id.sticker_drawer);
-        mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        mStickerDrawer.setLayoutManager(new GridLayoutManager(getContext(), 3));
         mStickerDrawerAdapter = new StickerDrawerAdapter();
         mStickerDrawer.setAdapter(mStickerDrawerAdapter);
 
         final ImageView stickerTrashCan = (ImageView) view.findViewById(R.id.sticker_trash);
-
         final DisplayMetrics metrics = getResources().getDisplayMetrics();
-
-
-        mStickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
-            @Override
-            public void onStickerSelected(final Bitmap sticker) {
-                ManipulableImageView stickerIV = new ManipulableImageView(getContext());
-                stickerIV.setImageBitmap(sticker);
-                stickerIV.setX(metrics.widthPixels / 10);
-                stickerIV.setY(metrics.heightPixels / 10);
-
-
-                stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
-                    @Override
-                    public void onViewPickedUp(View me) {
-                        mToolbar.setVisibility(View.GONE);
-                        stickerTrashCan.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onViewDropped(View me) {
-                        mToolbar.setVisibility(View.VISIBLE);
-                        stickerTrashCan.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onViewCollision(View me) {
-//                        stickerTrashCan.set
-                    }
-
-                    @Override
-                    public void onViewDropCollision(View me) {
-                        mStickerContainer.removeView(me);
-                    }
-
-                    @Override
-                    public View getCollisionSensor() {
-                        return stickerTrashCan;
-                    }
-                });
-
-
-                mStickerContainer.addView(stickerIV);
-                closeStickerDrawer();
-            }
-        });
-
 
         //setup Filters pager and adapter
         mFilterPager = (WipeViewPager) view.findViewById(R.id.filter_overlay);
-        mFilterAdapter = new OverlayWipeAdapter();
+
+        if (!mFromGallery) {
+            mStickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
+                @Override
+                public void onStickerSelected(final Bitmap sticker) {
+                    ManipulableImageView stickerLayout = new ManipulableImageView(getContext());
+                    stickerLayout.setImageBitmap(sticker);
+                    stickerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//                    stickerLayout.setX(metrics.widthPixels / 10);
+//                    stickerLayout.setY(metrics.heightPixels / 10);
+
+
+                    stickerLayout.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
+                        @Override
+                        public void onViewPickedUp(View me) {
+                            mToolbar.setVisibility(View.GONE);
+                            stickerTrashCan.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onViewDropped(View me) {
+                            mToolbar.setVisibility(View.VISIBLE);
+                            stickerTrashCan.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onViewCollisionBegin(View me) {
+                            stickerTrashCan.setImageResource(R.mipmap.trash_can_open);
+                        }
+
+                        @Override
+                        public void onViewCollisionEnd(View me) {
+                            stickerTrashCan.setImageResource(R.mipmap.trash_can_closed);
+                        }
+
+                        @Override
+                        public void onViewDropCollision(View me) {
+                            mStickerContainer.removeView(me);
+                        }
+
+                        @Override
+                        public View getCollisionSensor() {
+                            return stickerTrashCan;
+                        }
+                    });
+
+
+                    mStickerContainer.addView(stickerLayout);
+                    closeStickerDrawer();
+                }
+            });
+
+
+            mFilterAdapter = new OverlayWipeAdapter();
 
       /*  new Thread(new Runnable() {
             @Override
@@ -260,47 +278,73 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         }).start();*/
 
-        mFilterPager.setWipeAdapter(mFilterAdapter);
+            mFilterPager.setWipeAdapter(mFilterAdapter);
 
-        mFilterPager.setOnTouchListener(new View.OnTouchListener() {
-            long timeDown = 0;
-            int x, y;
+            mFilterPager.setOnTouchListener(new View.OnTouchListener() {
+                long timeDown = 0;
+                int x, y;
 
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                    timeDown = System.currentTimeMillis();
-                    x = (int) motionEvent.getRawX();
-                    y = (int) motionEvent.getRawY();
-                }
-                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
-                        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                            mEditText.setVisibility(View.VISIBLE);
-                            mEditText.requestFocus();
-                            showKeyboard();
-                            //mCanMove = false; //can't mvoe strip while in edit
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                        timeDown = System.currentTimeMillis();
+                        x = (int) motionEvent.getRawX();
+                        y = (int) motionEvent.getRawY();
+                    }
+                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                        if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
+                            toggleEditText();
                         }
                     }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
 
+        } else {
+            mFilterPager.setVisibility(View.GONE);
 
-        if (!overlaysLoaded)
+            mAllContent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleEditText();
+                }
+            });
+        }
+
+        if (!overlaysLoaded && !mFromGallery)
             loadOverlays();
-        loadContent(mContentContainer);
 
+        loadContent(mContentContainer);
         setUpEditText();
+    }
+
+
+    public void toggleEditText(){
+        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+            mEditText.setVisibility(View.VISIBLE);
+            mEditText.requestFocus();
+            showKeyboard();
+            //mCanMove = false; //can't mvoe strip while in edit
+        } else if (mEditText.getVisibility() == View.VISIBLE) {
+            mEditText.setVisibility(View.GONE);
+            if (!mEditText.getText().toString().trim().isEmpty()) {
+                mTextView.setText(mEditText.getText().toString());
+                mTextView.setVisibility(View.VISIBLE);
+            }
+            hideKeyboard();
+        }
     }
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mFromGallery = getArguments().getBoolean(FROM_GALLERY);
+        }
+
         //load filters async
-        if (!overlaysLoaded)
+        if (!overlaysLoaded && !mFromGallery)
             loadOverlays();
     }
 
@@ -323,28 +367,38 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 final BitmapFactory.Options measureOptions = new BitmapFactory.Options();
                 measureOptions.inJustDecodeBounds = true;
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : filterDir.listFiles()) {
-                    Bitmap b = null;
-                    b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                    if (b != null) {
-                        float scale = (float) metrics.widthPixels / b.getWidth();
+                File[] filters = filterDir.listFiles();
+                if (filters != null)
+                    for (File f : filters) {
+                        Bitmap b = null;
+                        Bitmap scaled = null;
+                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                        if (b != null) {
+                            float scale = (float) metrics.widthPixels / b.getWidth();
 
-                        try {
-                            mFilterAdapter.add(Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false));
-                        } catch (OutOfMemoryError e) {
-                            e.printStackTrace();
-                        } catch (NullPointerException np) {
-                            np.printStackTrace();
-                        }
-                        b.recycle();
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mFilterPager.invalidate();
+                            scaled = Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false);
+                            try {
+                                mFilterAdapter.add(scaled);
+                            } catch (OutOfMemoryError e) {
+                                e.printStackTrace();
+                            } catch (NullPointerException np) {
+                                np.printStackTrace();
+                            } finally {
+                                //It turns out the original image may be passed back as an optimisation,
+                                // if the width/height of the resize match the original image
+                                if (b != scaled) {
+                                    b.recycle();
+                                }
                             }
-                        });
+
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mFilterPager.invalidate();
+                                }
+                            });
+                        }
                     }
-                }
 
             }
         }).start();
@@ -357,27 +411,29 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
-                for (File f : memeDir.listFiles()) {
-                    try {
-                        mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mStickerDrawerAdapter.notifyDataSetChanged();
-                            }
-                        });
-                    } catch (OutOfMemoryError e) {
-                        e.printStackTrace();
-                    } catch (NullPointerException np) {
-                        np.printStackTrace();
+                File[] memes = memeDir.listFiles();
+                if (memes != null)
+                    for (File f : memes) {
+                        try {
+                            mStickerDrawerAdapter.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mStickerDrawerAdapter.notifyDataSetChanged();
+                                }
+                            });
+                        } catch (OutOfMemoryError e) {
+                            e.printStackTrace();
+                        } catch (NullPointerException np) {
+                            np.printStackTrace();
+                        }
                     }
-                }
             }
 
         }).start();
     }
 
-    private void showConfirmDialog() {
+    protected void showConfirmDialog() {
         if (mEditText.getVisibility() == View.VISIBLE) {
             mEditText.setVisibility(View.GONE);
             if (!mEditText.getText().toString().trim().isEmpty()) {
@@ -451,12 +507,13 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
+                        Log.i(TAG, "onTouch: "+mAllContent.getHeight()+ " "+mAllContent.getWidth());
                         prevY = event.getY();
                         totalMovement = 0;
                         if (bottomMargin == -1) {
                             if (mContentContainer.getHeight() >= mHasSoftKeySingleton.getSize().y) {
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mUploadButton.getBottom();
+                                topMargin = mToolbar.getBottom();
                             } else {
                                 bottomMargin = 0;
                                 topMargin = 0;
@@ -481,8 +538,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
                         if (mTextMargin <= topMargin) { //over the top edge
                             mTextMargin = topMargin;
-                        } else if (mTextMargin > mContentContainer.getHeight() - bottomMargin - v.getHeight()) { //under the bottom edge
-                            mTextMargin = mContentContainer.getHeight() - bottomMargin - v.getHeight();
+                        } else if (mTextMargin > mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight()) { //under the bottom edge
+                            mTextMargin = mContentContainer.getHeight()+ mContentContainer.getTop() - bottomMargin - v.getHeight();
                         }
 
                         params.setMargins(0, mTextMargin, 0, 0); //set new margin
@@ -501,13 +558,31 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected abstract void showProgress(boolean show);
 
+    protected abstract void backPressed();
+
+    public boolean isStickerDrawerOpen() {
+        return mStickerDrawer.getVisibility() == View.VISIBLE;
+    }
+
     protected void toggleStickerDrawer() {
         if (mStickerDrawer.isAnimating()) return;
-        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+        if (isStickerDrawerOpen()) {
+            closeStickerDrawer();
+        } else {
+            openStickerDrawer();
+        }
+//        mStickerDrawer.setVisibility(mStickerDrawer.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    protected void openStickerDrawer() {
+        if (mFromGallery) return;
+        mStickerDrawer.setVisibility(View.VISIBLE);
+        mUploadButton.setAlpha(.3f);
     }
 
     protected void closeStickerDrawer() {
         mStickerDrawer.setVisibility(View.GONE);
+        mUploadButton.setAlpha(1);
     }
 
 
@@ -575,8 +650,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mFilterAdapter.destroy();
-        mStickerDrawerAdapter.destroy();
+        if (mFilterAdapter != null) mFilterAdapter.destroy();
+        if (mStickerDrawerAdapter != null) mStickerDrawerAdapter.destroy();
     }
 
     @Override

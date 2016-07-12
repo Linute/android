@@ -19,6 +19,8 @@
 -dontwarn okio.**
 -dontwarn com.makeramen.roundedimageview.**
 -dontwarn sun.misc.Unsafe
+-dontwarn com.mongodb.**
+-dontwarn org.bson.**
 
 ## rxjava
 -keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {

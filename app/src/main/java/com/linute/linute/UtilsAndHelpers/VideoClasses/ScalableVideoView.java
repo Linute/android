@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RawRes;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
@@ -73,6 +74,12 @@ public class ScalableVideoView extends TextureView implements TextureView.Surfac
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.i("test", "onMeasure: "+widthMeasureSpec + " h "+heightMeasureSpec );
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
     @Override

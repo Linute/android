@@ -3,6 +3,7 @@ package com.linute.linute.UtilsAndHelpers;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 
@@ -32,7 +33,6 @@ public class MinimumWidthImageView extends ImageView {
     //if width is longer AND width/height has higher ratio than 16/9, make it a square
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         Drawable d = getDrawable();
         if (d != null && d.getIntrinsicWidth() > d.getIntrinsicHeight()
                 && (d.getIntrinsicWidth() * 9 > d.getIntrinsicHeight() * 16)) {

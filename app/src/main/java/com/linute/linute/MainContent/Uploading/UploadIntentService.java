@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.R;
@@ -21,6 +20,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Random;
 
 import okhttp3.Response;
 
@@ -54,6 +54,7 @@ public class UploadIntentService extends IntentService {
         mBuilder = new NotificationCompat.Builder(this);
         mBuilder.setSmallIcon(android.R.drawable.stat_sys_upload);
         mPendingFiles = 0;
+        notificationId = new Random().nextInt();
     }
 
     @Override
@@ -73,10 +74,11 @@ public class UploadIntentService extends IntentService {
     private void sendNextFile(PendingUploadPost p) {
         try {
             Bitmap image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(p.getImagePath()));
+
             mBuilder.setContentTitle("Preparing for upload")
                     .setContentText("")
+                    .setLargeIcon(Bitmap.createScaledBitmap(image, 100, (int)(100f * (float) image.getHeight() / image.getWidth()), false))
                     .setProgress(0, 0, true)
-                    .setLargeIcon(image)
                     .setAutoCancel(false)
                     .setContentIntent(null);
 
@@ -114,7 +116,7 @@ public class UploadIntentService extends IntentService {
                 params.put("videos", videoArray);
             }
 
-            Response r = new LSDKEvents(this).postEvent(params, new CountingRequestBody.Listener() {
+            Response r = new LSDKEvents(this).postEvent(p.getUserToken(), params, new CountingRequestBody.Listener() {
                 @Override
                 public void onRequestProgress(long bytesWritten, long contentLength) {
                     mBuilder.setContentTitle("Uploading content")
@@ -134,10 +136,14 @@ public class UploadIntentService extends IntentService {
             } else {
                 failedToPost(p);
             }
+
+            image.recycle();
         } catch (IOException e) {
             failedToPost(p);
+
         }
         --mPendingFiles;
+
     }
 
     private String getPostText(int type) {

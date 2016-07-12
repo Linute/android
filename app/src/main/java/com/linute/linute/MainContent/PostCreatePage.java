@@ -151,8 +151,6 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         mTextFrame = root.findViewById(R.id.post_create_frame);
 
-
-
         mPostColorSelectorViews[0] = root.findViewById(R.id.post_create_0);
         mPostColorSelectorViews[1] = root.findViewById(R.id.post_create_1);
         mPostColorSelectorViews[2] = root.findViewById(R.id.post_create_2);
@@ -160,19 +158,25 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         mPostColorSelectorViews[4] = root.findViewById(R.id.post_create_4);
         mPostColorSelectorViews[5] = root.findViewById(R.id.post_create_5);
 
+        //wont let me generate signed apk if using same id
         SharedPreferences sharedPrefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
-
-        for(int i = 0; i< mPostColorSelectorViews.length; i++){
-
-            mPostTextColors[i] = sharedPrefs.getInt("status_color_"+i+"_text", 0xFF000000);
-            mPostBackgroundColors[i] = sharedPrefs.getInt("status_color_"+i+"_bg", 0xFF000000);
-            View postColorSelectorView = mPostColorSelectorViews[i];
-            postColorSelectorView.setBackgroundColor(mPostBackgroundColors[i]);
-            ((TextView)postColorSelectorView.findViewById(R.id.selector_text)).setTextColor(mPostTextColors[i]);
-            postColorSelectorView.setOnClickListener(this);
-        }
+        setItem(R.id.selector_text0, 0, sharedPrefs);
+        setItem(R.id.selector_text1, 1, sharedPrefs);
+        setItem(R.id.selector_text2, 2, sharedPrefs);
+        setItem(R.id.selector_text3, 3, sharedPrefs);
+        setItem(R.id.selector_text4, 4, sharedPrefs);
+        setItem(R.id.selector_text5, 5, sharedPrefs);
 
         return root;
+    }
+
+    private void setItem(int res, int index, SharedPreferences preferences){
+        mPostTextColors[index] = preferences.getInt("status_color_"+index+"_text", 0xFF000000);
+        mPostBackgroundColors[index] = preferences.getInt("status_color_"+index+"_bg", 0xFF000000);
+        View postColorSelectorView = mPostColorSelectorViews[index];
+        postColorSelectorView.setBackgroundColor(mPostBackgroundColors[index]);
+        ((TextView)postColorSelectorView.findViewById(res)).setTextColor(mPostTextColors[index]);
+        postColorSelectorView.setOnClickListener(this);
     }
 
 
@@ -236,14 +240,16 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                             0,
                             image.toString(),
                             null,
-                            mSharedPreferences.getString("userID", "")
+                            mSharedPreferences.getString("userID", ""),
+                            mSharedPreferences.getString("userToken","")
                     );
 
+            Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
             Intent result = new Intent();
             result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
             getActivity().setResult(RESULT_OK, result);
             getActivity().finish();
-        }else {
+        } else {
             Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);

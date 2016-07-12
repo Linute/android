@@ -2,19 +2,19 @@ package com.linute.linute.SquareCamera;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.MinimumWidthImageView;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.bson.types.ObjectId;
 
@@ -26,7 +26,6 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
     public static final String TAG = EditSavePhotoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
     public static final String FROM_GALLERY = "from_gallery";
-
 
     public static Fragment newInstance(Uri imageUri) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -62,29 +61,34 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    protected void backPressed() {
+        CameraActivity activity = (CameraActivity) getActivity();
+        if (activity!=null) activity.clearBackStack();
+    }
+
 
     @Override
     protected void loadContent(ViewGroup container) {
         //setup ImageView
         final Uri imageUri = getArguments().getParcelable(BITMAP_URI);
-        boolean fromGallery = getArguments().getBoolean(FROM_GALLERY, false);
-        final ImageView photoImageView = new MinimumWidthImageView(container.getContext());
-        photoImageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        photoImageView.setAdjustViewBounds(true);
-        photoImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        photoImageView.setBackgroundColor(getResources().getColor(R.color.pure_black));
+        ImageView vPhotoImageView = new MinimumWidthImageView(container.getContext());
+        vPhotoImageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        vPhotoImageView.setAdjustViewBounds(true);
+        vPhotoImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        vPhotoImageView.setBackgroundColor(getResources().getColor(R.color.pure_black));
 
-        if (fromGallery) {
+        if (mFromGallery) {
             Glide.with(this)
                     .load(imageUri)
-                    .dontAnimate()
-                    .into(photoImageView);
+                    .into(vPhotoImageView);
         } else {
             //when taken from our camera, no need to resize
             //no lag time when loading with this method
-            photoImageView.setImageURI(imageUri);
+            vPhotoImageView.setImageURI(imageUri);
         }
-        container.addView(photoImageView);
+
+        container.addView(vPhotoImageView);
 
     }
 
@@ -120,22 +124,24 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         } else {
             Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
             if (image != null) {
-                    PendingUploadPost pendingUploadPost =
-                                    new PendingUploadPost(
-                                                    ObjectId.get().toString(),
-                                                    mCollegeId,
-                                                    (mAnonSwitch.isChecked() ? 1 : 0),
-                                                    mAnonComments.isChecked() ? 0 : 1,
-                                                    mEditText.getText().toString(),
-                                                    1,
-                                                    image.toString(),
-                                                    null,
-                                                    mUserId
-                                                    );
-                    Intent result = new Intent();
-                    result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
-                    getActivity().setResult(Activity.RESULT_OK, result);
-                    getActivity().finish();
+                PendingUploadPost pendingUploadPost =
+                        new PendingUploadPost(
+                                ObjectId.get().toString(),
+                                mCollegeId,
+                                (mAnonSwitch.isChecked() ? 1 : 0),
+                                mAnonComments.isChecked() ? 0 : 1,
+                                mEditText.getText().toString(),
+                                1,
+                                image.toString(),
+                                null,
+                                mUserId,
+                                mUserToken
+                        );
+                Intent result = new Intent();
+                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
+                Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
+                getActivity().setResult(Activity.RESULT_OK, result);
+                getActivity().finish();
             }
         }
     }

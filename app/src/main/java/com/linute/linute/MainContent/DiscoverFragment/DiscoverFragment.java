@@ -73,7 +73,6 @@ public class DiscoverFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
 
@@ -138,7 +137,6 @@ public class DiscoverFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-
         DiscoverHolderFragment fragment = (DiscoverHolderFragment) getParentFragment();
 
         if (fragment == null) return;
@@ -384,14 +382,14 @@ public class DiscoverFragment extends BaseFragment {
                                                 }
                                             });
 
-                                            NotificationsCounterSingleton t = NotificationsCounterSingleton.getInstance();
-                                            t.setDiscoverNeedsRefreshing(false);
-                                            if (t.hasNewPosts()) {
+                                            if (!mSectionTwo) {
+                                                NotificationsCounterSingleton t = NotificationsCounterSingleton.getInstance();
+                                                t.setDiscoverNeedsRefreshing(false);
+
                                                 t.setNumOfNewPosts(0);
                                                 activity.setFeedNotification(0);
-                                                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER,false));
+                                                NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
                                             }
-
                                             refreshLayout.setRefreshing(false);
                                         }
                                     }
@@ -430,7 +428,6 @@ public class DiscoverFragment extends BaseFragment {
 
     public void scrollUp() {
         recList.scrollToPosition(0);
-
         if (!mSectionTwo && NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing() && !refreshLayout.isRefreshing()) {
             refreshFeed();
         }
@@ -448,7 +445,8 @@ public class DiscoverFragment extends BaseFragment {
             }
         });
 
-        if (mEmptyView.getVisibility() == View.VISIBLE) mEmptyView.setVisibility(View.GONE);
+        if (mEmptyView != null && mEmptyView.getVisibility() == View.VISIBLE)
+            mEmptyView.setVisibility(View.GONE);
 
         return true;
     }

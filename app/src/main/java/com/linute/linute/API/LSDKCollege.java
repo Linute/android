@@ -14,7 +14,7 @@ import okhttp3.Callback;
  */
 public class LSDKCollege {
 
-    private static String mToken;
+    private String mToken;
 
 
     public LSDKCollege(Context context) {

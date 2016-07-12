@@ -328,7 +328,11 @@ public class LinuteLoginFragment extends Fragment {
         if (getActivity() == null) return;
 
         JSONObject response = new JSONObject(responseString);
-        SharedPreferences.Editor sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
+
+        Log.i(TAG, "saveCredentials: "+response.toString());
+
+        SharedPreferences.Editor sharedPreferences = getActivity().
+                getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();
 
         try {
             JSONObject settings = response.getJSONObject("notificationSettings");
@@ -370,8 +374,6 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
         sharedPreferences.putBoolean("isLoggedIn", true);
         sharedPreferences.apply();
-
-
     }
 
     public boolean getBooleanFromJSONObj(String key, JSONObject obj){
