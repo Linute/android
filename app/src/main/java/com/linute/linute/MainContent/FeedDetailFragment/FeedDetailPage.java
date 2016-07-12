@@ -1698,5 +1698,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         });
     }
+
+
+    public String getPostId(){
+        if (mFeedDetail == null) return  null;
+        return mFeedDetail.getPostId();
+    }
 }
 

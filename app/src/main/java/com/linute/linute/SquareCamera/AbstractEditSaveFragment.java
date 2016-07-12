@@ -143,7 +143,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mProgressBar.getVisibility() != View.VISIBLE)
-                    showConfirmDialog();
+                    backPressed();
             }
         });
 
@@ -556,6 +556,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     protected abstract void uploadContent();
 
     protected abstract void showProgress(boolean show);
+
+    protected abstract void backPressed();
 
     public boolean isStickerDrawerOpen() {
         return mStickerDrawer.getVisibility() == View.VISIBLE;

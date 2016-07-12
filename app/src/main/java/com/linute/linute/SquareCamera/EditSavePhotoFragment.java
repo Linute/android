@@ -61,6 +61,12 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    @Override
+    protected void backPressed() {
+        CameraActivity activity = (CameraActivity) getActivity();
+        if (activity!=null) activity.clearBackStack();
+    }
+
 
     @Override
     protected void loadContent(ViewGroup container) {

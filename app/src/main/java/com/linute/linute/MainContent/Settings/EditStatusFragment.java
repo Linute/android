@@ -7,12 +7,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -43,9 +43,6 @@ public class EditStatusFragment extends Fragment {
     private ProgressBar mProgressBar;
     private EditText mStatusText;
     private Button mSaveButton;
-    private TextView mCharCountTV;
-
-
 
     @Nullable
     @Override
@@ -54,12 +51,23 @@ public class EditStatusFragment extends Fragment {
 
         mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
-        ((EditProfileInfoActivity)getActivity()).setTitle("Status");
+        ((EditProfileInfoActivity) getActivity()).setTitle("Bio");
         bindView(rootView);
         setDefaultValues();
         setUpOnClickListeners();
-        setUpEditTextMaxLines();
 
+        mStatusText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    if (getActivity() == null) return false;
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(mStatusText.getWindowToken(), 0);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         return rootView;
     }
@@ -68,13 +76,11 @@ public class EditStatusFragment extends Fragment {
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.editstatus_progressbar);
         mSaveButton = (Button) rootView.findViewById(R.id.editstatus_save);
         mStatusText = (EditText) rootView.findViewById(R.id.editstatus_status_text);
-        mCharCountTV = (TextView) rootView.findViewById(R.id.text_char_count);
     }
 
     private void setDefaultValues() {
         String status = mSharedPreferences.getString("status", ""); //if there is a status, set it as default
-        if (!status.equals(""))
-            mStatusText.append(status);
+        mStatusText.append(status);
     }
 
 
@@ -89,40 +95,13 @@ public class EditStatusFragment extends Fragment {
 
     private static final int MAX_CHARACTERS = 200;
 
-    //sets max line number to 3
-    private void setUpEditTextMaxLines() {
-        updateCharCountView(mStatusText.getText());
-        mStatusText.addTextChangedListener(new TextWatcher() {
-            private String text;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                text = s.toString();
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if(s.length() > MAX_CHARACTERS){
-                    mStatusText.setText(text);
-                }
-                updateCharCountView(s);
-            }
-        });
-    }
-
-
-    private void updateCharCountView(Editable s){
-        mCharCountTV.setText(String.valueOf(MAX_CHARACTERS-s.length()));
-        mCharCountTV.setTextColor((s.length() >= MAX_CHARACTERS ? 0xFFCC0000 : 0xFFCCCCCC));
-    }
-
     private void saveStatus() {
         String status = mStatusText.getText().toString();
+
+        if (status.length() > MAX_CHARACTERS || mStatusText.getLineCount() > 5) {
+            mStatusText.setError("Must be less than 5 lines and less than 200 characters");
+            return;
+        }
 
         //if no changes made, do nothing
         if (!changesMadeToStatus(status)) return;
@@ -182,7 +161,7 @@ public class EditStatusFragment extends Fragment {
 
                 } else {
                     Log.e(TAG, response.body().string());
-                    if(getActivity() == null) return;
+                    if (getActivity() == null) return;
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -233,6 +212,16 @@ public class EditStatusFragment extends Fragment {
             mStatusText.setFocusableInTouchMode(true);
         } else {
             mStatusText.setFocusable(false);
+        }
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mStatusText.hasFocus() && getActivity() != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mStatusText.getWindowToken(), 0);
         }
     }
 
