@@ -22,8 +22,8 @@ android {
         applicationId "com.linute.linute"
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 31
-        versionName "1.7.5.3"
+        versionCode 1
+        versionName "0.1"
     }
     buildTypes {
         release {
@@ -64,6 +64,10 @@ dependencies {
 
     //new
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.2.2'
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.4-beta2'
 
 }
 

@@ -35,7 +35,7 @@ import rx.schedulers.Schedulers;
  * Created by QiFeng on 1/25/16.
  */
 
-public class FindFriendsChoiceFragment extends Fragment {
+public class FindFriendsChoiceFragment extends BaseFragment {
 
     public static final String TAG = FindFriendsChoiceFragment.class.getSimpleName();
     public static final String ONLY_FRAGMENT_IN_STACK = "key_only_frag_in_stack";

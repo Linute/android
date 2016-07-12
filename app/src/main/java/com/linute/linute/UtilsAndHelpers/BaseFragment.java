@@ -3,6 +3,9 @@ package com.linute.linute.UtilsAndHelpers;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.linute.linute.TaptApplication;
+import com.squareup.leakcanary.RefWatcher;
+
 
 /**
  * Created by QiFeng on 1/22/16.
@@ -52,5 +55,12 @@ public class BaseFragment extends Fragment {
 
     public void resetFragment(){
 
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+//        RefWatcher refWatcher = TaptApplication.getRefWatcher(getActivity());
+//        refWatcher.watch(this);
     }
 }
