@@ -143,7 +143,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mProgressBar.getVisibility() != View.VISIBLE)
-                    showConfirmDialog();
+                    backPressed();
             }
         });
 
@@ -293,28 +293,46 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                     }
                     if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                         if (System.currentTimeMillis() - timeDown < 1500 && Math.abs(motionEvent.getRawX() - x) < 10 && Math.abs(motionEvent.getRawY() - y) < 10) {
-                            if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
-                                mEditText.setVisibility(View.VISIBLE);
-                                mEditText.requestFocus();
-                                showKeyboard();
-                                //mCanMove = false; //can't mvoe strip while in edit
-                            }
+                            toggleEditText();
                         }
                     }
                     return false;
                 }
             });
 
-            setUpEditText();
-
-        }else {
+        } else {
             mFilterPager.setVisibility(View.GONE);
+
+            mAllContent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleEditText();
+                }
+            });
         }
 
         if (!overlaysLoaded && !mFromGallery)
             loadOverlays();
-        loadContent(mContentContainer);
 
+        loadContent(mContentContainer);
+        setUpEditText();
+    }
+
+
+    public void toggleEditText(){
+        if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
+            mEditText.setVisibility(View.VISIBLE);
+            mEditText.requestFocus();
+            showKeyboard();
+            //mCanMove = false; //can't mvoe strip while in edit
+        } else if (mEditText.getVisibility() == View.VISIBLE) {
+            mEditText.setVisibility(View.GONE);
+            if (!mEditText.getText().toString().trim().isEmpty()) {
+                mTextView.setText(mEditText.getText().toString());
+                mTextView.setVisibility(View.VISIBLE);
+            }
+            hideKeyboard();
+        }
     }
 
 
@@ -489,12 +507,13 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
+                        Log.i(TAG, "onTouch: "+mAllContent.getHeight()+ " "+mAllContent.getWidth());
                         prevY = event.getY();
                         totalMovement = 0;
                         if (bottomMargin == -1) {
                             if (mContentContainer.getHeight() >= mHasSoftKeySingleton.getSize().y) {
                                 bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mUploadButton.getBottom();
+                                topMargin = mToolbar.getBottom();
                             } else {
                                 bottomMargin = 0;
                                 topMargin = 0;
@@ -519,8 +538,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
                         if (mTextMargin <= topMargin) { //over the top edge
                             mTextMargin = topMargin;
-                        } else if (mTextMargin > mContentContainer.getHeight() - bottomMargin - v.getHeight()) { //under the bottom edge
-                            mTextMargin = mContentContainer.getHeight() - bottomMargin - v.getHeight();
+                        } else if (mTextMargin > mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight()) { //under the bottom edge
+                            mTextMargin = mContentContainer.getHeight()+ mContentContainer.getTop() - bottomMargin - v.getHeight();
                         }
 
                         params.setMargins(0, mTextMargin, 0, 0); //set new margin
@@ -538,6 +557,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     protected abstract void uploadContent();
 
     protected abstract void showProgress(boolean show);
+
+    protected abstract void backPressed();
 
     public boolean isStickerDrawerOpen() {
         return mStickerDrawer.getVisibility() == View.VISIBLE;
@@ -629,7 +650,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mFilterAdapter != null)mFilterAdapter.destroy();
+        if (mFilterAdapter != null) mFilterAdapter.destroy();
         if (mStickerDrawerAdapter != null) mStickerDrawerAdapter.destroy();
     }
 
