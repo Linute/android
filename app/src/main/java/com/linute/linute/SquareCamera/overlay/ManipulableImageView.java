@@ -2,12 +2,9 @@ package com.linute.linute.SquareCamera.overlay;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -21,6 +18,8 @@ public class ManipulableImageView extends FrameLayout {
 
 
     private ImageView mImageView;
+    private Bitmap image;
+    private Bitmap flipped;
 
     public ManipulableImageView(Context context) {
         super(context);
@@ -37,10 +36,9 @@ public class ManipulableImageView extends FrameLayout {
         init(context);
     }
 
-
-    private Paint mPaint;
-
-
+  /*  Paint bPaint;
+    Paint rPaint;
+*/
     private void init(Context context) {
         mImageView = new ImageView(context);
 
@@ -48,16 +46,32 @@ public class ManipulableImageView extends FrameLayout {
         mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         mImageView.setX(100);
         mImageView.setY(100);
-        mPaint = new Paint();
-        mPaint.setColor(0xFFFF0000);
-        mPaint.setStrokeWidth(5);
 
+      /*  bPaint = new Paint();
+        bPaint.setColor(0xFF0000FF);
+        bPaint.setStrokeWidth(10);
+        rPaint = new Paint();
+        rPaint.setColor(0xFFFF0000);*/
     }
+/*
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        canvas.drawRect(collisionRect, rPaint);
+        canvas.drawPoint(mainX, mainY, bPaint);
+    }
+*/
 
     private ViewManipulationListener mCollisionListener;
 
     public void setManipulationListener(ViewManipulationListener collisionListener) {
         mCollisionListener = collisionListener;
+        mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
+        collisionRect.left -= 10;
+        collisionRect.right += 10;
+        collisionRect.top -= 10;
+        collisionRect.bottom += 10;
     }
 
 
@@ -99,37 +113,22 @@ public class ManipulableImageView extends FrameLayout {
 
     RotationGestureDetector mRotationGestureDetector = new RotationGestureDetector(new RotationGestureDetector.OnRotationGestureListener() {
         @Override
-        public void OnRotation(RotationGestureDetector rotationDetector) {
+        public void onRotation(RotationGestureDetector rotationDetector) {
 //            mImageView.setRotation(-mScaleXFlip * rotationDetector.getAngle() + getRotation());
             Matrix m = mImageView.getImageMatrix();
+
             mSubRotation = rotationDetector.getAngle();
             m.setRotate(-mScaleXFlip * (mTotalRotation + mSubRotation), mImageView.getWidth() / 2, mImageView.getHeight() / 2);
             mImageView.setImageMatrix(m);
             mImageView.invalidate();
         }
+
+        @Override
+        public void onRotationStarted(RotationGestureDetector rotationDetector) {
+            mTotalRotation += mSubRotation;
+            mSubRotation = 0;
+        }
     });
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, mPaint);
-        super.draw(canvas);
-    }
-
-    @Override
-    public void dispatchDraw(Canvas canvas) {
-        super.dispatchDraw(canvas);
-        canvas.save();
-        canvas.drawRect(rect, mPaint);
-
-        canvas.restore();
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        canvas.drawRect(rect.left, rect.top, rect.right, rect.bottom, mPaint);
-        canvas.drawRect(rect, mPaint);
-        super.draw(canvas);
-    }
 
 
     float[] initialX = new float[10];
@@ -143,6 +142,7 @@ public class ManipulableImageView extends FrameLayout {
     boolean isInCollision = false;
 
     Rect rect = new Rect();
+    Rect collisionRect = new Rect();
 
 
     boolean isTouched = false;
@@ -157,8 +157,6 @@ public class ManipulableImageView extends FrameLayout {
 
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
 
-            Log.i("AAA", rect.toString());
-            Log.i("AAA", (int) event.getX() + "," + (int) event.getY());
             if (rect.contains((int) event.getX(), (int) event.getY())) {
                 isTouched = true;
             } else {
@@ -166,13 +164,17 @@ public class ManipulableImageView extends FrameLayout {
             }
 
 
+            //double tap
             long time = event.getDownTime();
 
             if (time - timeDown < 500) {
                 mScaleXFlip *= -1;
-                mImageView.setScaleX(mTotalScale * mScaleXFlip);
+                mImageView.setImageBitmap(mScaleXFlip == -1 ? flipped : image);
+                mImageView.invalidate();
+                timeDown = 0;
+            } else {
+                timeDown = time;
             }
-            timeDown = time;
             if (mCollisionListener != null) mCollisionListener.onViewPickedUp(this);
         }
 
@@ -181,10 +183,7 @@ public class ManipulableImageView extends FrameLayout {
         }
 
 
-        if (!mRotationGestureDetector.onTouchEvent(event)) {
-            mTotalRotation += mSubRotation;
-            mSubRotation = 0;
-        }
+        mRotationGestureDetector.onTouchEvent(event);
 
         mScaleGestureDetector.onTouchEvent(event);
 
@@ -195,74 +194,57 @@ public class ManipulableImageView extends FrameLayout {
             case MotionEvent.ACTION_DOWN:
 
             case MotionEvent.ACTION_POINTER_DOWN:
-                id = event.getPointerId(event.getActionIndex());
-                initialX[id] = event.getRawX() - mImageView.getX();
-                initialY[id] = event.getRawY() - mImageView.getY();
-                positionX[id] = event.getRawX();
-                positionY[id] = event.getRawX();
+                int index = event.getActionIndex();
+                id = event.getPointerId(index);
+                initialX[id] = event.getX(index) - mImageView.getX();
+                initialY[id] = event.getY(index) - mImageView.getY();
+                positionX[id] = event.getX(index) - initialX[id];
+                positionY[id] = event.getY(index) - initialY[id];
+
+
+                refreshPosition(event);
                 return true;
 
             case MotionEvent.ACTION_MOVE:
 
 
-//                positionX[0] = event.getRawX() - initialX[0];// + positionX[id];
-//                positionY[0] = event.getRawY() - initialY[0];// + positionY[id];
-
-                for (int i = 0; i < event.getPointerCount(); i++) {
-                    int pid = event.getPointerId(i);
-                    positionX[pid] = event.getX(i) - initialX[0];
-                    positionY[pid] = event.getY(i) - initialY[0];
-                }
-
-
-                float posX = 0;
-                float posY = 0;
-
-                for (int i = 0; i < event.getPointerCount(); i++) {
-                    int pid = event.getPointerId(i);
-                    posX += positionX[pid];
-                    posY += positionY[pid];
-//                    posX =(positionX[pid] - posX)/2 + posX;
-//                    posY =(positionY[pid] - posY)/2 + posY;
-                }
-
-                posX /= event.getPointerCount();
-                posY /= event.getPointerCount();
-
-
-                mImageView.setX(posX);
-                mImageView.setY(posY);
+                refreshPosition(event);
 
                 if (mCollisionListener != null) {
-                    mCollisionListener.getCollisionSensor().getHitRect(rect);
-                    rect.left -= 10;
-                    rect.right += 10;
-                    rect.top -= 10;
-                    rect.bottom += 10;
 
-                    boolean intersects = rect.contains(mainX, mainY);
 
-                    if (intersects && !isInCollision) {
-                        isInCollision = true;
-                        mCollisionListener.onViewCollisionBegin(this);
-                    } else if (!intersects && isInCollision) {
-                        isInCollision = false;
-                        mCollisionListener.onViewCollisionEnd(this);
+                    try {
+                        mainX = (int) event.getX(0);
+                        mainY = (int) event.getY(0);
+
+                        mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
+                        collisionRect.left -= 10;
+                        collisionRect.right += 10;
+                        collisionRect.top -= 10;
+                        collisionRect.bottom += 10;
+
+                        boolean intersects = collisionRect.contains(mainX, mainY);
+
+                        if (intersects && !isInCollision) {
+                            isInCollision = true;
+                            mCollisionListener.onViewCollisionBegin(this);
+                        } else if (!intersects && isInCollision) {
+                            isInCollision = false;
+                            mCollisionListener.onViewCollisionEnd(this);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
                     }
+
 
                 }
                 return true;
             case MotionEvent.ACTION_POINTER_UP:
-               /* for (int i = 0; i < event.getPointerCount(); i++) {
-                    int pid = event.getPointerId(i);
-                    initialX[pid] = event.getX(i);
-                    initialY[pid] = event.getY(i);
-                }
-*/
-                if (event.getActionIndex() == 1) {
-                    mTotalRotation += mSubRotation;
-                    mSubRotation = 0;
-                }
+                id = event.getPointerId(event.getActionIndex());
+                initialX[id] = 0;
+                initialY[id] = 0;
+                positionX[id] = 0;
+                positionY[id] = 0;
 
                 return true;
             case MotionEvent.ACTION_UP:
@@ -282,36 +264,31 @@ public class ManipulableImageView extends FrameLayout {
 
     }
 
+    private void refreshPosition(MotionEvent event) {
+        float posX = mImageView.getX();
+        float posY = mImageView.getY();
+        float nPosX, nPosY;
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            int pid = event.getPointerId(i);
+            nPosX = event.getX(i) - initialX[pid];
+            nPosY = event.getY(i) - initialY[pid];
 
-    private static boolean isViewContains(View view, int rx, int ry) {
-        int[] l = new int[2];
-        view.getLocationOnScreen(l);
-        int x = l[0];
-        int y = l[1];
-        int w = (int) (view.getWidth() * view.getScaleX());
-        int h = (int) (view.getHeight() * view.getScaleY());
 
-        Log.i("AAA", x + " " + y + " " + w + " " + h);
+            posX += (nPosX - positionX[pid]) / event.getPointerCount();
+            posY += (nPosY - positionY[pid]) / event.getPointerCount();
 
-        if (rx < x || rx > x + w || ry < y || ry > y + h) {
-            return false;
+            positionX[pid] = nPosX;
+            positionY[pid] = nPosY;
         }
-        return true;
+
+
+        mImageView.setX(posX);
+        mImageView.setY(posY);
     }
 
 
     private Rect getImageBounds(Rect rect) {
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mImageView.getClipBounds(rect);
-
-        } else {*/
-        int[] l = new int[2];
-        mImageView.getLocationOnScreen(l);
-        rect.left = l[0];
-        rect.right = (int) (rect.left + (mImageView.getWidth() * mImageView.getScaleX() * mScaleXFlip));
-        rect.top = l[1];
-        rect.bottom = (int) (rect.top + (mImageView.getHeight() * mImageView.getScaleY()));
-//        }
+        mImageView.getHitRect(rect);
         return rect;
     }
 
@@ -323,6 +300,10 @@ public class ManipulableImageView extends FrameLayout {
             bigD = bitmap.getHeight();
         }
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(bigD, bigD));
+        this.image = bitmap;
+        Matrix m = new Matrix();
+        m.setScale(-1, 1);
+        this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
     }
 
     public interface ViewManipulationListener {

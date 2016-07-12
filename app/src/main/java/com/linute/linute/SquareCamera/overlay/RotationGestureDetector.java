@@ -34,6 +34,9 @@ public class RotationGestureDetector {
                 sY = event.getY(event.findPointerIndex(ptrID1));
                 fX = event.getX(event.findPointerIndex(ptrID2));
                 fY = event.getY(event.findPointerIndex(ptrID2));
+                if(mListener != null){
+                    mListener.onRotationStarted(this);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if(ptrID1 != INVALID_POINTER_ID && ptrID2 != INVALID_POINTER_ID){
@@ -46,7 +49,7 @@ public class RotationGestureDetector {
                     mAngle = angleBetweenLines(fX, fY, sX, sY, nfX, nfY, nsX, nsY);
 
                     if (mListener != null) {
-                        mListener.OnRotation(this);
+                        mListener.onRotation(this);
                     }
                 }
                 break;
@@ -76,6 +79,7 @@ public class RotationGestureDetector {
     }
 
     public static interface OnRotationGestureListener {
-        public void OnRotation(RotationGestureDetector rotationDetector);
+        public void onRotationStarted(RotationGestureDetector rotationDetector);
+        public void onRotation(RotationGestureDetector rotationDetector);
     }
 }
