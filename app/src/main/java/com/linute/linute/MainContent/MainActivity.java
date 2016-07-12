@@ -130,19 +130,18 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
-
                 boolean hasBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
 
                 if (mPreviousItem != null) { //profile doesn't get checked
+                    if (hasBackStack)
+                        clearBackStack();
+
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
                 } else {
                     getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                 }
-
-                if (hasBackStack)
-                    clearBackStack();
             }
         });
 
@@ -197,30 +196,21 @@ public class MainActivity extends BaseTaptActivity {
         if (mPreviousItem != null) {
             if (mPreviousItem != item || backstack > 1) {
                 mPreviousItem.setChecked(false);
-                item.setChecked(true);
-                replaceContainerWithFragment(
-                        position == FRAGMENT_INDEXES.FIND_FRIENDS ?
-                                FindFriendsChoiceFragment.newInstance(true) :
-                                getFragment(position));
-                mPreviousItem = item;
-                clearBackStack();
             } else {
-                getFragment(position).resetFragment();
+                if (position != FRAGMENT_INDEXES.FIND_FRIENDS)
+                    getFragment(position).resetFragment();
+                return;
             }
-        } else {
-            if (backstack > 0)
-                clearBackStack();
-
-            item.setChecked(true);
-            replaceContainerWithFragment(
-                    position == FRAGMENT_INDEXES.FIND_FRIENDS ?
-                            FindFriendsChoiceFragment.newInstance(true) :
-                            getFragment(position)
-            );
-
-            mPreviousItem = item;
         }
 
+        mPreviousItem = item;
+        mPreviousItem.setChecked(true);
+        replaceContainerWithFragment(
+                position == FRAGMENT_INDEXES.FIND_FRIENDS ?
+                        FindFriendsChoiceFragment.newInstance(true) :
+                        getFragment(position));
+
+        clearBackStack();
     }
 
 
@@ -256,7 +246,6 @@ public class MainActivity extends BaseTaptActivity {
         //this will only run after drawer is fully closed
         //lags if we don't do this
         if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
-            Log.i(TAG, "replaceContainerWithFragment: open");
             mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
                 @Override
                 public void run() {
@@ -758,6 +747,10 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addActivityFragment();
+
                 addFragmentToContainer(FeedDetailPage.newInstance(post));
                 sn.dismiss();
             }
@@ -771,6 +764,10 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addActivityFragment();
+
                 addFragmentToContainer(TaptUserProfileFragment.newInstance(update.getUserFullName(), update.getUserId()));
                 sn.dismiss();
             }
@@ -787,13 +784,13 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void checkIntent(Intent intent) {
-
         int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
         if (type == LinuteConstants.FEED_DETAIL) {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")
                 ));
@@ -802,7 +799,8 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("user");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                    addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
@@ -926,7 +924,6 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener meme = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-
             try {
                 JSONObject body = new JSONObject(args[0].toString());
                 JSONArray memes = body.getJSONArray("memes");
@@ -1095,7 +1092,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     public void addActivityFragment() {
-        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
+        addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY), UpdatesFragment.TAG);
     }
 }
 

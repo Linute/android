@@ -199,7 +199,8 @@ public class CameraActivity extends AppCompatActivity {
             } else if (savePhotoFragment != null) {
                 if (savePhotoFragment.isStickerDrawerOpen()) {
                     savePhotoFragment.closeStickerDrawer();
-                } else savePhotoFragment.showConfirmDialog();
+                } else
+                    savePhotoFragment.backPressed();
             } else {
                 clearBackStack();
             }

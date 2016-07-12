@@ -36,8 +36,7 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableType;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
 
@@ -51,8 +50,6 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-
-//import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 
 /**
@@ -84,7 +81,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     private ProgressDialog mProgressDialog;
 
-    private ScalableVideoView mSquareVideoView;
+    private TextureVideoView mVideoView;
 //    private CustomBackPressedEditText mEditText;
 //    private TextView mTextView;
 
@@ -213,7 +210,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                         }
                     });
         }
-
     }
 
 
@@ -221,57 +217,56 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     protected void loadContent(ViewGroup container) {
         mVideoDimen = getArguments().getParcelable(VIDEO_DIMEN);
 
-        View view = getView();
-
         mPlaying = new CheckBox(getContext());
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 
         mPlaying.setLayoutParams(params);
         mPlaying.setChecked(true);
         mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
-
+        mVideoView = new TextureVideoView(getContext());
 
         mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) mSquareVideoView.start();
-                else mSquareVideoView.pause();
+                if (isChecked) mVideoView.start();
+                else mVideoView.pause();
             }
         });
 
         vBottom.addView(mPlaying);
 
-
         mVideoLink = getArguments().getParcelable(BITMAP_URI);
+        mVideoView.setBackgroundResource(R.color.pure_black);
 
-        mSquareVideoView = new ScalableVideoView(container.getContext());
+        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        mSquareVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        if (mVideoDimen.isFrontFacing) mVideoView.setScaleX(-1);
 
-        if (mVideoDimen.isFrontFacing) mSquareVideoView.setScaleX(-1);
-
-        try {
-            mSquareVideoView.setDataSource(getContext(),mVideoLink);
-            mSquareVideoView.setScalableType(ScalableType.FIT_CENTER);
-            mSquareVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    if(!mSquareVideoView.isVideoStopped()) {
-                        mSquareVideoView.start();
-                    }
-                }
-            });
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        mSquareVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        mVideoView.setVideoURI(mVideoLink);
+        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onCompletion(MediaPlayer mp) {
-                if (mPlaying.isChecked()) mSquareVideoView.start();
+            public void onPrepared(MediaPlayer mp) {
+                mVideoView.start();
             }
         });
-        container.addView(mSquareVideoView);
+//            mSquareVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
+//                @Override
+//                public void onPrepared(MediaPlayer mp) {
+//                    Log.i(TAG, "onPrepared: "+mSquareVideoView.getHeight()+" "+mSquareVideoView.getWidth());
+//                    if(!mSquareVideoView.isVideoStopped()) {
+//                        mSquareVideoView.start();
+//                    }
+//                }
+//            });
+
+        mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                if (mPlaying.isChecked()) mVideoView.start();
+            }
+        });
+        container.addView(mVideoView);
     }
 
     @Override
@@ -294,6 +289,11 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         } else if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
+    }
+
+    @Override
+    protected void backPressed() {
+        showConfirmDialog();
     }
 
     /*
@@ -394,6 +394,12 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         }
     */
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mPlaying != null)
+            mPlaying.setChecked(false);
+    }
 
     @Override
     public void onDestroy() {
@@ -453,13 +459,51 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                     }
                 }
 
-                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
-                Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
+                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                //Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
+                //Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
 
 
-                if (mTextView.getVisibility() == View.GONE) {
+//                if (mTextView.getVisibility() == View.GONE) {
+//
+//                    if (mVideoDimen.isFrontFacing) {
+//                        cmd += String.format(Locale.US,
+//                                "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
+//                    } else {
+//                        cmd += String.format(Locale.US,
+//                                "-filter_complex scale=%d:%d ", newWidth, newHeight);
+//                    }
+//                }
+//                {
+                String overlay = saveViewAsImage(mOverlays);
 
+                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
+                //Log.i(TAG, "call: " + mTextView.getTop());
+
+                if (overlay != null) {
+                    cmd += "-i " + overlay + " -filter_complex ";
+                    //scale vid
+                    cmd += String.format(Locale.US,
+                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
+
+                    if (mVideoDimen.isFrontFacing) {
+                        //rotate vid
+                        cmd += "[rot]hflip[tran];";
+                    }
+
+                    if (isPortrait()) {
+                        cmd += String.format(Locale.US,
+                                "[1:v]scale=-1:%d[over];", newHeight);
+                    } else {
+                        cmd += String.format(Locale.US,
+                                "[1:v]scale=%d:-1[over];", newWidth);
+                    }
+
+                    Point coord = new Point(0, 0);
+                    //overlay
+                    cmd += String.format(Locale.US,
+                            "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
+                } else {
                     if (mVideoDimen.isFrontFacing) {
                         cmd += String.format(Locale.US,
                                 "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
@@ -467,45 +511,8 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                         cmd += String.format(Locale.US,
                                 "-filter_complex scale=%d:%d ", newWidth, newHeight);
                     }
-                } else {
-                    String overlay = saveViewAsImage(mOverlays);
-
-                    Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
-                    Log.i(TAG, "call: " + mTextView.getTop());
-
-                    if (overlay != null) {
-                        cmd += "-i " + overlay + " -filter_complex ";
-                        //scale vid
-                        cmd += String.format(Locale.US,
-                                "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
-
-                        if (mVideoDimen.isFrontFacing) {
-                            //rotate vid
-                            cmd += "[rot]hflip[tran];";
-                        }
-
-                        if (isPortrait()) {
-                            cmd += String.format(Locale.US,
-                                    "[1:v]scale=-1:%d[over];", newHeight);
-                        } else {
-                            cmd += String.format(Locale.US,
-                                    "[1:v]scale=%d:-1[over];", newWidth);
-                        }
-
-                        Point coord = new Point(0, 0);
-                        //overlay
-                        cmd += String.format(Locale.US,
-                                "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
-                    } else {
-                        if (mVideoDimen.isFrontFacing) {
-                            cmd += String.format(Locale.US,
-                                    "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
-                        } else {
-                            cmd += String.format(Locale.US,
-                                    "-filter_complex scale=%d:%d ", newWidth, newHeight);
-                        }
-                    }
                 }
+                //}
 
                 cmd += "-preset superfast "; //good idea to set threads?
                 cmd += String.format(Locale.US,

@@ -49,7 +49,6 @@ public class LSDKEvents {
 
     public Response postEvent(String token, Map<String, Object> param, CountingRequestBody.Listener listener) throws IOException {
         Map<String, String> header = API_Methods.getMainHeader(token);
-        Log.i("test", "postEvent: token "+token);
         return API_Methods.postWithProgress("events", header, param, listener);
     }
 
