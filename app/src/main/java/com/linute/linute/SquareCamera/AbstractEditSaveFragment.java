@@ -211,13 +211,14 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             mStickerDrawerAdapter.setStickerListener(new StickerDrawerAdapter.StickerListener() {
                 @Override
                 public void onStickerSelected(final Bitmap sticker) {
-                    ManipulableImageView stickerIV = new ManipulableImageView(getContext());
-                    stickerIV.setImageBitmap(sticker);
-                    stickerIV.setX(metrics.widthPixels / 10);
-                    stickerIV.setY(metrics.heightPixels / 10);
+                    ManipulableImageView stickerLayout = new ManipulableImageView(getContext());
+                    stickerLayout.setImageBitmap(sticker);
+                    stickerLayout.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//                    stickerLayout.setX(metrics.widthPixels / 10);
+//                    stickerLayout.setY(metrics.heightPixels / 10);
 
 
-                    stickerIV.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
+                    stickerLayout.setManipulationListener(new ManipulableImageView.ViewManipulationListener() {
                         @Override
                         public void onViewPickedUp(View me) {
                             mToolbar.setVisibility(View.GONE);
@@ -252,7 +253,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                     });
 
 
-                    mStickerContainer.addView(stickerIV);
+                    mStickerContainer.addView(stickerLayout);
                     closeStickerDrawer();
                 }
             });
