@@ -195,6 +195,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public static class User implements Parcelable {
         public final String id;
         public final String name;
+        public String profileImage;
+
+        public User(String id, String name, String profileImage) {
+            this.id = id;
+            this.name = name;
+            this.profileImage = profileImage;
+        }
 
         public User(String id, String name) {
             this.id = id;
@@ -210,12 +217,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         public void writeToParcel(Parcel parcel, int i) {
             parcel.writeString(id);
             parcel.writeString(name);
+            parcel.writeString(profileImage);
         }
 
         public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
             @Override
             public User createFromParcel(Parcel parcel) {
                 return new User(
+                        parcel.readString(),
                         parcel.readString(),
                         parcel.readString()
                 );
@@ -830,7 +839,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        // Log.i(TAG, "onResponse: " + object.toString(4));
+                         Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -938,7 +947,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        //Log.i(TAG, "onResponse: " + object.toString(4));
+                        Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
