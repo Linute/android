@@ -93,12 +93,16 @@ public class DiscoverFragment extends BaseFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
-                mPosts,
-                getContext(),
-                Glide.with(this),
-                mSectionTwo
-        );
+        if (mCheckBoxChoiceCapableAdapters == null) {
+            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
+                    mPosts,
+                    getContext(),
+                    Glide.with(this),
+                    mSectionTwo
+            );
+        }else {
+            mCheckBoxChoiceCapableAdapters.setRequestManager(Glide.with(this));
+        }
 
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 

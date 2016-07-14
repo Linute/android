@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -18,6 +17,13 @@ import com.linute.linute.UtilsAndHelpers.MinimumWidthImageView;
 
 import org.bson.types.ObjectId;
 
+import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action1;
+
+import static rx.schedulers.Schedulers.io;
+import static rx.android.schedulers.AndroidSchedulers.mainThread;
+
 /**
  *
  */
@@ -26,6 +32,8 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
     public static final String TAG = EditSavePhotoFragment.class.getSimpleName();
     public static final String BITMAP_URI = "bitmap_Uri";
     public static final String FROM_GALLERY = "from_gallery";
+
+    private Subscription mSubscription;
 
     public static Fragment newInstance(Uri imageUri) {
         Fragment fragment = new EditSavePhotoFragment();
@@ -64,7 +72,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
     @Override
     protected void backPressed() {
         CameraActivity activity = (CameraActivity) getActivity();
-        if (activity!=null) activity.clearBackStack();
+        if (activity != null) activity.clearBackStack();
     }
 
 
@@ -108,42 +116,71 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
 
         showProgress(true);
         if (getActivity() == null) return;
+
+
         if (mReturnType == CameraActivity.RETURN_URI) {
-            Uri image = ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
-            if (image != null) {
-                Intent i = new Intent()
-                        .putExtra("image", image)
-                        .putExtra("type", CameraActivity.IMAGE)
-                        .putExtra("title", mEditText.getText().toString());
-                getActivity().setResult(Activity.RESULT_OK, i);
-                getActivity().finish();
-            } else {
-                getActivity().setResult(Activity.RESULT_CANCELED);
-                getActivity().finish();
-            }
+            mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mAllContent)))
+                    .observeOn(io())
+                    .subscribeOn(mainThread())
+                    .subscribe(new Action1<Uri>() {
+                        @Override
+                        public void call(Uri uri) {
+                            if (uri != null) {
+                                Intent i = new Intent()
+                                        .putExtra("image", uri)
+                                        .putExtra("type", CameraActivity.IMAGE)
+                                        .putExtra("title", mEditText.getText().toString());
+                                getActivity().setResult(Activity.RESULT_OK, i);
+                                getActivity().finish();
+                            } else {
+                                if (getActivity() != null) {
+                                    Toast.makeText(getActivity(), "An error occured while saving the image", Toast.LENGTH_SHORT).show();
+                                    showProgress(false);
+                                }
+                            }
+                        }
+                    });
         } else {
-            Uri image = ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent));
-            if (image != null) {
-                PendingUploadPost pendingUploadPost =
-                        new PendingUploadPost(
-                                ObjectId.get().toString(),
-                                mCollegeId,
-                                (mAnonSwitch.isChecked() ? 1 : 0),
-                                mAnonComments.isChecked() ? 0 : 1,
-                                mEditText.getText().toString(),
-                                1,
-                                image.toString(),
-                                null,
-                                mUserId,
-                                mUserToken
-                        );
-                Intent result = new Intent();
-                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
-                Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
-                getActivity().setResult(Activity.RESULT_OK, result);
-                getActivity().finish();
-            }
+            mSubscription = Observable.just(ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent)))
+                    .observeOn(io())
+                    .subscribeOn(mainThread())
+                    .subscribe(new Action1<Uri>() {
+                        @Override
+                        public void call(Uri uri) {
+                            if (uri != null) {
+                                PendingUploadPost pendingUploadPost =
+                                        new PendingUploadPost(
+                                                ObjectId.get().toString(),
+                                                mCollegeId,
+                                                (mAnonSwitch.isChecked() ? 1 : 0),
+                                                mAnonComments.isChecked() ? 0 : 1,
+                                                mEditText.getText().toString(),
+                                                1,
+                                                uri.toString(),
+                                                null,
+                                                mUserId,
+                                                mUserToken
+                                        );
+                                Intent result = new Intent();
+                                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
+                                Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
+                                getActivity().setResult(Activity.RESULT_OK, result);
+                                getActivity().finish();
+                            }else {
+                                if (getActivity() != null) {
+                                    Toast.makeText(getActivity(), "An error occured while saving the image", Toast.LENGTH_SHORT).show();
+                                    showProgress(false);
+                                }
+                            }
+                        }
+                    });
         }
     }
 
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mSubscription != null) mSubscription.unsubscribe();
+    }
 }

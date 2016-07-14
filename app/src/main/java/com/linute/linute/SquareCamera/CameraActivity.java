@@ -19,10 +19,6 @@ import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_EVERYTHING = 11; // everything
-    public final static int CAMERA_JUST_CAMERA = 12;  //just camera; no gallery or video option
-    public final static int CAMERA_EVERYTHING_NO_STATUS = 13;
-
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
 
@@ -34,7 +30,7 @@ public class CameraActivity extends AppCompatActivity {
     public final static String RETURN_TYPE = "send_to_url";
     public final static String CAMERA_TYPE = "camera_type";
 
-    private int mCameraType;
+    private CameraType mCameraType;
     private int mReturnType;
 
     public static final String TAG = CameraActivity.class.getSimpleName();
@@ -56,10 +52,13 @@ public class CameraActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         if (i != null) {
-            mCameraType = i.getIntExtra(CAMERA_TYPE, CAMERA_JUST_CAMERA);
+            mCameraType = i.getParcelableExtra(CAMERA_TYPE);
+            if (mCameraType == null)
+                mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
+
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
         } else {
-            mCameraType = CAMERA_JUST_CAMERA;
+            mCameraType =  new CameraType(CameraType.CAMERA_PICTURE);
             mReturnType = RETURN_URI;
         }
 
@@ -87,14 +86,14 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("returnType", mReturnType);
-        outState.putInt("cameraType", mCameraType);
+        outState.putParcelable("cameraType", mCameraType);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mCameraType = savedInstanceState.getInt("cameraType");
+        mCameraType = savedInstanceState.getParcelable("cameraType");
         mReturnType = savedInstanceState.getInt("returnType");
     }
 
@@ -111,7 +110,7 @@ public class CameraActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (mCameraType == CAMERA_EVERYTHING) {
+        if (mCameraType.contains(CameraType.CAMERA_VIDEO)) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.RECORD_AUDIO);
             }
@@ -210,7 +209,7 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    public int getCameraType() {
+    public CameraType getCameraType() {
         return mCameraType;
     }
 

@@ -10,6 +10,10 @@ import java.util.List;
  * Created by Arman on 1/13/16.
  */
 public class Comment {
+
+    public static final short COMMENT_TEXT = 0;
+    public static final short COMMENT_IMAGE = 1;
+
     private String mCommentUserId;
     private String mCommentUserProfileImage;
     private String mCommentUserName;
@@ -20,6 +24,9 @@ public class Comment {
     private boolean mIsLiked;
     private String mAnonImage;
     private int mNumberOfLikes;
+
+    private String mImageUrl;
+    private int mType;
 
 
     private List<MentionedPersonLight> mMentionedPeople;
@@ -35,6 +42,7 @@ public class Comment {
         mMentionedPeople = new ArrayList<>();
         mDateLong = 0;
         mNumberOfLikes = 0;
+        mType = 0;
     }
 
     public Comment(String commentUserId,
@@ -47,7 +55,8 @@ public class Comment {
                    List<MentionedPersonLight> mentionedPeople,
                    long date,
                    boolean isLiked,
-                   int numberOfLikes
+                   int numberOfLikes,
+                   String imageUrl
     ) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
@@ -60,7 +69,8 @@ public class Comment {
         mDateLong = date;
         mIsLiked = isLiked;
         mNumberOfLikes = numberOfLikes;
-
+        mImageUrl = imageUrl;
+        mType = imageUrl == null ? 0 : 1;
     }
 
     public String getCommentUserId() {
@@ -127,6 +137,16 @@ public class Comment {
     public void setAnonImage(String image){
         mAnonImage = image;
     }
+
+    public String getImageUrl() {
+        return mImageUrl;
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+
 
     public static class MentionedPersonLight{
 

@@ -16,6 +16,7 @@ import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -112,7 +113,7 @@ public class FriendsListFragment extends BaseFragment {
                          Log.i(TAG, "Empty List Text Clicked (No Followers)");
                          BaseTaptActivity acc = (BaseTaptActivity)getActivity();
                          Intent i = new Intent(getActivity(), CameraActivity.class);
-                         i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING);
+                         i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
                          i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                          acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
                      }

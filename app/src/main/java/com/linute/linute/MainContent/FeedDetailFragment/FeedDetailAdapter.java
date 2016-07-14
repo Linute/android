@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
@@ -11,6 +12,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
+import com.bumptech.glide.util.Util;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -29,18 +32,22 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import static android.text.util.Linkify.EMAIL_ADDRESSES;
+import static android.text.util.Linkify.WEB_URLS;
+import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAGE;
 
 /**
  * Created by Arman on 1/13/16.
  */
+
 public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHolder> {
     private static final int TYPE_IMAGE_HEADER = 0;
     private static final int TYPE_STATUS_HEADER = 1;
-    private static final int TYPE_ITEM = 2;
-    private static final int TYPE_NO_COMMENTS = 3;
-    private static final int TYPE_VIDEO_HEADER = 4;
-    private static final int TYPE_LOAD_MORE = 5;
+    private static final int TYPE_COMMENT_TEXT = 2;
+    private static final int TYPE_COMMENT_IMAGE = 3;
+    private static final int TYPE_NO_COMMENTS = 4;
+    private static final int TYPE_VIDEO_HEADER = 5;
+    private static final int TYPE_LOAD_MORE = 6;
 
     private Context context;
 
@@ -76,8 +83,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         switch (viewType) {
-            case TYPE_ITEM:
-                return new FeedDetailViewHolder(LayoutInflater.
+            case TYPE_COMMENT_TEXT:
+                return new FeedDetailViewHolderText(LayoutInflater.
+                        from(parent.getContext()).
+                        inflate(R.layout.fragment_feed_detail_page_list_item, parent, false));
+            case TYPE_COMMENT_IMAGE:
+                return new FeedDetailViewHolderImage(LayoutInflater.
                         from(parent.getContext()).
                         inflate(R.layout.fragment_feed_detail_page_list_item, parent, false));
             case TYPE_IMAGE_HEADER:
@@ -115,9 +126,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView((LoadMoreItem) mFeedDetail.getComments().get(0));
-
-        } else if (holder instanceof FeedDetailViewHolder) {
-            ((FeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
+        } else if (holder instanceof BaseFeedDetailViewHolder) {
+            ((BaseFeedDetailViewHolder) holder).bindModel((Comment) mFeedDetail.getComments().get(position - 1));
             mItemManger.bindView(holder.itemView, position);
         } else if (holder instanceof FeedDetailHeaderImageViewHolder) {
             ((FeedDetailHeaderImageViewHolder) holder).bindModel(mFeedDetail.getPost());
@@ -147,7 +157,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             return TYPE_NO_COMMENTS;
 
         if (mFeedDetail.getComments().get(position - 1) instanceof Comment) {
-            return TYPE_ITEM;
+            if (((Comment) mFeedDetail.getComments().get(position - 1)).getType() == Comment.COMMENT_IMAGE)
+                return TYPE_COMMENT_IMAGE;
+            else
+                return TYPE_COMMENT_TEXT;
+
         } else {
             return TYPE_LOAD_MORE;
         }
@@ -171,33 +185,30 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         mDenySwipe = deny;
     }
 
-    public void clearContext(){
+    public void clearContext() {
         context = null;
     }
 
     private boolean mDenySwipe = false;
 
     //holder for comments
-    public class FeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
+    public abstract class BaseFeedDetailViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private SwipeLayout mSwipeLayout;
 
-        protected CircleImageView vCommentUserImage;
+        protected ImageView vCommentUserImage;
         protected TextView vCommentUserName;
-        protected TextView vCommentUserText;
         protected TextView vTimeStamp;
-
         protected TextView vLikesText;
-
         private String mCommenterUserId;
         private String mUserName;
         private String mCommentId;
         private boolean mIsAnon;
         private boolean mIsLiked;
-
         private ImageView vFireIcon;
 
-        public FeedDetailViewHolder(View itemView) {
+        protected abstract void bindContent(Comment comment);
+
+        public BaseFeedDetailViewHolder(View itemView) {
             super(itemView);
             mSwipeLayout = (SwipeLayout) itemView.findViewById(R.id.comment_swipe_layout);
 
@@ -214,9 +225,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 }
             });
 
-            vCommentUserImage = (CircleImageView) itemView.findViewById(R.id.comment_user_image);
+            vCommentUserImage = (ImageView) itemView.findViewById(R.id.comment_user_image);
             vCommentUserName = (TextView) itemView.findViewById(R.id.comment_user_name);
-            vCommentUserText = (TextView) itemView.findViewById(R.id.comment);
             vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);
             vLikesText = (TextView) itemView.findViewById(R.id.num_likes);
             vFireIcon = (ImageView) itemView.findViewById(R.id.fire_icon);
@@ -229,6 +239,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
             leftControls.setOnClickListener(this);
         }
+
 
         void bindModel(Comment comment) {
             mIsAnon = comment.isAnon();
@@ -257,14 +268,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_name_blue));
             }
 
-            //setting mentions and comment text
-            if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
-                setUpMentionedOnClicks(comment);
-            } else { //set text to comment's text
-                vCommentUserText.setText(comment.getCommentPostText());
-            }
-
             setUpLikes(comment);
+            bindContent(comment);
         }
 
         private void setUpLikes(Comment comment) {
@@ -312,54 +317,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 }
             }
 
-        }
-
-        private void setUpMentionedOnClicks(Comment comment) {
-            String commentText = comment.getCommentPostText();
-            SpannableString commentSpannable = new SpannableString(commentText);
-
-            int startSearchAtIndex = 0; //start search from
-
-            // assumes the list comes back in the order people were tagged.
-            // i.e. if text is: "@AndrewBee @JonathanI hello there" , the List will have the order {Andrew, Jonathan}
-            // this way we won't look for @JonathanI at index 0 when we know it will come after @Andrew
-
-            final BaseTaptActivity activity = (BaseTaptActivity) context;
-            if (activity == null) {
-                vCommentUserText.setText(comment.getCommentPostText());
-                return;
-            }
-
-            ForegroundColorSpan fcs = new ForegroundColorSpan(ContextCompat.getColor(context, R.color.secondaryColor)); //color of span
-
-            for (final Comment.MentionedPersonLight person : comment.getMentionedPeople()) {
-                int start = commentText.indexOf(person.getFormatedFullName(), startSearchAtIndex);
-
-                if (start != -1) { //-1 if string not found
-
-                    int end = person.getFormatedFullName().length() + start;
-                    startSearchAtIndex = end; //next mention will come after the end of this one
-
-                    ClickableSpan clickableSpan = new ClickableSpan() { //what happens when clicked
-                        @Override
-                        public void onClick(View widget) {
-                            activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(person.getFullName(), person.getId()));
-                        }
-
-                        @Override
-                        public void updateDrawState(TextPaint ds) {
-                            super.updateDrawState(ds);
-                            ds.setUnderlineText(false);
-                        }
-                    };
-
-                    commentSpannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    commentSpannable.setSpan(fcs, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                }
-            }
-
-            vCommentUserText.setText(commentSpannable);
-            vCommentUserText.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
         @Override
@@ -423,6 +380,124 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vCommentUserImage);
+        }
+    }
+
+    public class FeedDetailViewHolderText extends BaseFeedDetailViewHolder {
+
+        protected TextView vCommentText;
+
+        public FeedDetailViewHolderText(View itemView) {
+            super(itemView);
+
+            vCommentText = new TextView(context);
+            vCommentText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            vCommentText.setAutoLinkMask(WEB_URLS | EMAIL_ADDRESSES);
+            vCommentText.setTextColor(ContextCompat.getColor(context, R.color.eighty_black));
+            vCommentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            ((ViewGroup) itemView.findViewById(R.id.content)).addView(vCommentText);
+
+        }
+
+        @Override
+        protected void bindContent(Comment comment) {
+            //setting mentions and comment text
+            if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
+                setUpMentionedOnClicks(comment);
+            } else { //set text to comment's text
+                vCommentText.setText(comment.getCommentPostText());
+            }
+        }
+
+
+        private void setUpMentionedOnClicks(Comment comment) {
+            String commentText = comment.getCommentPostText();
+            SpannableString commentSpannable = new SpannableString(commentText);
+
+            int startSearchAtIndex = 0; //start search from
+
+            // assumes the list comes back in the order people were tagged.
+            // i.e. if text is: "@AndrewBee @JonathanI hello there" , the List will have the order {Andrew, Jonathan}
+            // this way we won't look for @JonathanI at index 0 when we know it will come after @Andrew
+
+            final BaseTaptActivity activity = (BaseTaptActivity) context;
+            if (activity == null) {
+                vCommentText.setText(comment.getCommentPostText());
+                return;
+            }
+
+            ForegroundColorSpan fcs = new ForegroundColorSpan(ContextCompat.getColor(context, R.color.secondaryColor)); //color of span
+
+            for (final Comment.MentionedPersonLight person : comment.getMentionedPeople()) {
+                int start = commentText.indexOf(person.getFormatedFullName(), startSearchAtIndex);
+
+                if (start != -1) { //-1 if string not found
+
+                    int end = person.getFormatedFullName().length() + start;
+                    startSearchAtIndex = end; //next mention will come after the end of this one
+
+                    ClickableSpan clickableSpan = new ClickableSpan() { //what happens when clicked
+                        @Override
+                        public void onClick(View widget) {
+                            activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(person.getFullName(), person.getId()));
+                        }
+
+                        @Override
+                        public void updateDrawState(TextPaint ds) {
+                            super.updateDrawState(ds);
+                            ds.setUnderlineText(false);
+                        }
+                    };
+
+                    commentSpannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    commentSpannable.setSpan(fcs, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            vCommentText.setText(commentSpannable);
+            vCommentText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+    }
+
+
+    public class FeedDetailViewHolderImage extends BaseFeedDetailViewHolder {
+
+        protected ImageView vImageView;
+        private String mImageUrl;
+
+
+        public FeedDetailViewHolderImage(View itemView) {
+            super(itemView);
+            vImageView = new ImageView(context);
+            int size = (int) context.getResources().getDimension(R.dimen.comment_image_size);
+            vImageView.setLayoutParams(new ViewGroup.LayoutParams(size, size));
+            ((ViewGroup)itemView.findViewById(R.id.content)).addView(vImageView);
+
+            vImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BaseTaptActivity activity = (BaseTaptActivity) context;
+                    if (activity != null && mImageUrl != null) {
+                        activity.addFragmentOnTop(
+                                ViewFullScreenFragment.newInstance(
+                                        Uri.parse(mImageUrl),
+                                        POST_TYPE_IMAGE,
+                                        0
+                                ),
+                                "full_view"
+                        );
+                    }
+                }
+            });
+
+        }
+
+        @Override
+        protected void bindContent(Comment comment) {
+            mImageUrl = Utils.getCommentImageUrl(comment.getImageUrl());
+            mRequestManager.load(mImageUrl)
+                    .placeholder(R.color.seperator_color)
+                    .into(vImageView);
         }
     }
 

@@ -32,7 +32,7 @@ public class API_Methods {
     //private static String HOST = "api.tapt.io";
     public static final String HOST = "devapi2.tapt.io";
 
-    public static final String VERSION = "v1.4.2";
+    public static final String VERSION = "v1.4.3";
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");

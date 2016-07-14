@@ -733,7 +733,8 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
+        if (mVideoProcessSubscription != null) mVideoProcessSubscription.unsubscribe();
     }
 }

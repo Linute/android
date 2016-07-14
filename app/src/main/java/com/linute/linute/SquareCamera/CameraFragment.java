@@ -58,7 +58,7 @@ public class CameraFragment extends Fragment {
     public static final String CAMERA_ID_KEY = "camera_id";
     public static final String CAMERA_FLASH_KEY = "flash_on";
 
-    private int mCameraType;
+    private CameraType mCameraType;
     private int mCameraID;
     private boolean mFlashOn;
 
@@ -134,11 +134,9 @@ public class CameraFragment extends Fragment {
         mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
         mStatusButton = root.findViewById(R.id.new_post);
 
-        if (mCameraType == CameraActivity.CAMERA_JUST_CAMERA) {
-            mGalleryButton.setVisibility(View.INVISIBLE);
-            mStatusButton.setVisibility(View.INVISIBLE);
-        } else if (mCameraType == CameraActivity.CAMERA_EVERYTHING_NO_STATUS){
-            mStatusButton.setVisibility(View.INVISIBLE);
+
+        if (mCameraType.contains(CameraType.CAMERA_GALLERY)){
+            mGalleryButton.setVisibility(View.VISIBLE);
             mGalleryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -146,14 +144,9 @@ public class CameraFragment extends Fragment {
                         ((CameraActivity) getActivity()).launchFragment(GalleryFragment.newInstance(), GalleryFragment.TAG);
                 }
             });
-        } else {
-            mGalleryButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
-                        ((CameraActivity) getActivity()).launchFragment(GalleryFragment.newInstance(), GalleryFragment.TAG);
-                }
-            });
+        }else mGalleryButton.setVisibility(View.INVISIBLE);
+
+        if (mCameraType.contains(CameraType.CAMERA_STATUS)){
             mStatusButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -162,7 +155,8 @@ public class CameraFragment extends Fragment {
                     }
                 }
             });
-        }
+        } else mStatusButton.setVisibility(View.INVISIBLE);
+
 
         mCameraTopButtons = root.findViewById(R.id.toolbar);
         ((Toolbar) mCameraTopButtons).setNavigationOnClickListener(new View.OnClickListener() {
@@ -180,6 +174,7 @@ public class CameraFragment extends Fragment {
             params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
             bottom.setLayoutParams(params);
         }
+
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
         mFocusCircle = root.findViewById(R.id.focus);
 
@@ -242,7 +237,7 @@ public class CameraFragment extends Fragment {
         mPreviewView.setOnTouched(new CustomCameraPreview.OnFocus() {
             @Override
             public void onFocusStart(float x, float y) {
-                float center = (float)mFocusCircle.getWidth() / 2;
+                float center = (float) mFocusCircle.getWidth() / 2;
                 mFocusCircle.setX(x - center);
                 mFocusCircle.setY(y - center);
                 mFocusCircle.setAlpha(0);
@@ -295,7 +290,7 @@ public class CameraFragment extends Fragment {
             }
         });
 
-        if (mCameraType == CameraActivity.CAMERA_JUST_CAMERA) {
+        if (!mCameraType.contains(CameraType.CAMERA_VIDEO)) {
             mTakePhotoBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -318,7 +313,7 @@ public class CameraFragment extends Fragment {
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getActionMasked()){
+                    switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_UP:
                             mRecordHandler.removeCallbacks(mRunnable);
                             mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
@@ -364,16 +359,13 @@ public class CameraFragment extends Fragment {
         if (hide && mCameraTopButtons.getVisibility() == View.VISIBLE) {
             mCameraTopButtons.setVisibility(View.INVISIBLE);
 
-            if (mCameraType == CameraActivity.CAMERA_EVERYTHING) {
-                mGalleryButton.setVisibility(View.INVISIBLE);
-                mStatusButton.setVisibility(View.INVISIBLE);
-            }
+            if (mCameraType.contains(CameraType.CAMERA_STATUS)) mStatusButton.setVisibility(View.INVISIBLE);
+            if (mCameraType.contains(CameraType.CAMERA_GALLERY)) mGalleryButton.setVisibility(View.INVISIBLE);
         } else if (!hide && mCameraTopButtons.getVisibility() == View.INVISIBLE) {
             mCameraTopButtons.setVisibility(View.VISIBLE);
-            if (mCameraType == CameraActivity.CAMERA_EVERYTHING) {
-                mGalleryButton.setVisibility(View.VISIBLE);
-                mStatusButton.setVisibility(View.VISIBLE);
-            }
+
+            if (mCameraType.contains(CameraType.CAMERA_STATUS)) mStatusButton.setVisibility(View.VISIBLE);
+            if (mCameraType.contains(CameraType.CAMERA_GALLERY)) mGalleryButton.setVisibility(View.VISIBLE);
         }
     }
 

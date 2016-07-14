@@ -71,17 +71,14 @@
 
         <ImageView
             android:id="@+id/send_button"
-            android:layout_width="56dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
             android:layout_gravity="bottom|end"
             android:alpha="0.25"
             android:background="?attr/selectableItemBackground"
-            android:paddingBottom="8dp"
-            android:paddingEnd="12dp"
-            android:paddingStart="12dp"
-            android:paddingTop="8dp"
+            android:layout_margin="4dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/icon_send" />
+            android:src="@drawable/ic_send" />
 
     </LinearLayout>
 

@@ -58,6 +58,11 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
         mUserId = sharedPreferences.getString("userID", "");
     }
 
+
+    public void setRequestManager(RequestManager manager){
+        mRequestManager = manager;
+    }
+
     public void setGetMoreFeed(LoadMoreViewHolder.OnLoadMore moreFeed) {
         mGetMoreFeed = moreFeed;
     }

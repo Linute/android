@@ -3,9 +3,6 @@ package com.linute.linute.UtilsAndHelpers;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
-import com.linute.linute.TaptApplication;
-import com.squareup.leakcanary.RefWatcher;
-
 
 /**
  * Created by QiFeng on 1/22/16.

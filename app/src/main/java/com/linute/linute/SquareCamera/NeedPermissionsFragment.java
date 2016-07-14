@@ -36,9 +36,9 @@ public class NeedPermissionsFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        int cameraType = ((CameraActivity) getActivity()).getCameraType();
+        CameraType cameraType = ((CameraActivity) getActivity()).getCameraType();
 
-        if (cameraType == CameraActivity.CAMERA_EVERYTHING_NO_STATUS){
+        if (!cameraType.contains(CameraType.CAMERA_STATUS)){
             view.findViewById(R.id.post).setVisibility(View.GONE);
         }else {
             view.findViewById(R.id.new_post).setOnClickListener(new View.OnClickListener() {

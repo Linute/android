@@ -1,16 +1,9 @@
 package com.linute.linute.UtilsAndHelpers;
 
-import android.app.Fragment;
 import android.content.Intent;
 
 
 public class ImageUtils {
-
-    public static void pickUsing(Fragment fragment, int requestCode) {
-        fragment.startActivityForResult(
-                createChooserIntent(),
-                requestCode);
-    }
 
     public static void pickUsing(android.support.v4.app.Fragment fragment, int requestCode){
         fragment.startActivityForResult(
