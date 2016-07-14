@@ -3,13 +3,12 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
@@ -44,11 +43,13 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private String mUserId;
 
     private boolean mSectionTwo;
+    private RequestManager mRequestManager;
 
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, boolean sectiontwo) {
+    public CheckBoxQuestionAdapter(List<Post> posts, Context context, RequestManager manager, boolean sectiontwo) {
         super(new MultiChoiceMode());
         mSectionTwo = sectiontwo;
+        mRequestManager = manager;
         mPosts = posts;
         this.context = context;
 
@@ -73,19 +74,23 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
             case IMAGE_POST:
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
-                        context
+                        context,
+                        mRequestManager
                 );
 
             case VIDEO_POST:
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
-                        context
+                        context,
+                        mRequestManager
                 );
 
             default: //status post
                 return new StatusFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
-                        context);
+                        context,
+                        mRequestManager
+                );
         }
     }
 

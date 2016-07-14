@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
@@ -80,13 +81,6 @@ public class DiscoverFragment extends BaseFragment {
             mSectionTwo = getArguments().getBoolean(SECTION_KEY);
         }
 
-        if (mCheckBoxChoiceCapableAdapters == null) {
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
-                    mPosts,
-                    getContext(),
-                    mSectionTwo
-            );
-        }
     }
 
     //called when fragment drawn the first time
@@ -98,6 +92,13 @@ public class DiscoverFragment extends BaseFragment {
         final View rootView = inflater.inflate(
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
+
+        mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
+                mPosts,
+                getContext(),
+                Glide.with(this),
+                mSectionTwo
+        );
 
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 

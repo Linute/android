@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.content.Context;
 import android.view.View;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -15,8 +16,8 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
     public static final String TAG = FeedDetailHeaderImageViewHolder.class.getSimpleName();
 
 
-    public FeedDetailHeaderImageViewHolder(final View itemView, Context context) {
-        super(itemView, context);
+    public FeedDetailHeaderImageViewHolder(final View itemView, Context context, RequestManager manager) {
+        super(itemView, context, manager);
     }
 
     @Override

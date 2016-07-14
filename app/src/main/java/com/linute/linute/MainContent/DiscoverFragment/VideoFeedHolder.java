@@ -8,6 +8,7 @@ import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -31,8 +32,8 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
 
     private View vCinemaIcon;
 
-    public VideoFeedHolder(final View itemView, Context context) {
-        super(itemView, context);
+    public VideoFeedHolder(final View itemView, Context context, RequestManager manager) {
+        super(itemView, context, manager);
         //weird thing with this library where we have to seat a source before we do anything else
         vSquareVideoView = (ScalableVideoView) itemView.findViewById(R.id.video);
         vSquareVideoView.setHideVideo(this);

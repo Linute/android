@@ -313,24 +313,44 @@ public class CameraFragment extends Fragment {
                     }
                 };
 
+                float mMovement;
+                float mYPosition;
+
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if ((event.getAction() == MotionEvent.ACTION_UP)) {
-                        mRecordHandler.removeCallbacks(mRunnable);
-                        mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
-                        if (!mVideoProcessing) {
-                            if (mIsRecording) {
-                                new StopCamera().execute();
-                            } else {
-                                takePicture();
-                            }
-                        }
-                    } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        if (!mIsRecording && !mVideoProcessing) {
-                            mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
+                    switch (event.getActionMasked()){
+                        case MotionEvent.ACTION_UP:
                             mRecordHandler.removeCallbacks(mRunnable);
-                            mRecordHandler.postDelayed(mRunnable, 600);
-                        }
+                            mTakePhotoBtn.setImageResource(R.drawable.square_camera_unselected);
+                            if (!mVideoProcessing) {
+                                if (mIsRecording) {
+                                    new StopCamera().execute();
+                                } else {
+                                    takePicture();
+                                }
+                            }
+                            break;
+
+                        case MotionEvent.ACTION_DOWN:
+                            mYPosition = event.getY();
+                            mMovement = 0;
+                            if (!mIsRecording && !mVideoProcessing) {
+                                mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
+                                mRecordHandler.removeCallbacks(mRunnable);
+                                mRecordHandler.postDelayed(mRunnable, 600);
+                            }
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+                            if (mIsRecording) {
+                                mMovement += mYPosition - event.getY();
+                                mYPosition = event.getY();
+                                if (mMovement > 5 || mMovement < -5) {
+                                    mPreviewView.zoom(mMovement > 0 ? 2 : -2);
+                                    mMovement = 0;
+                                }
+                            }
+                            break;
                     }
                     return true;
                 }

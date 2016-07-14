@@ -9,7 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
@@ -42,12 +42,13 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     private String mUserId;
     private String mImageSignature;
+    protected RequestManager mRequestManager;
 
     protected Post mPost;
 
-    public BaseFeedHolder(final View itemView, Context context) {
+    public BaseFeedHolder(final View itemView, Context context, RequestManager manager) {
         super(itemView);
-
+        mRequestManager = manager;
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID","");
@@ -139,7 +140,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
 
     protected void getProfileImage(String image) {
-        Glide.with(mContext)
+        mRequestManager
                 .load(image)
                 .dontAnimate()
                 .signature(new StringSignature(mImageSignature))
@@ -149,7 +150,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     }
 
     protected void getAnonImage(String image){
-        Glide.with(mContext)
+        mRequestManager
                 .load(image)
                 .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)

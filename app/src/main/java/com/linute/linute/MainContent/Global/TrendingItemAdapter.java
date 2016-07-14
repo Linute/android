@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
@@ -40,13 +41,15 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     String mTrendId;
 
     short mFooterState = 0;
+    private RequestManager mRequestManager;
 
 
     LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
 
-    TrendingItemAdapter(List<Post> posts, Context context, LoadMoreViewHolder.OnLoadMore o, String trendId) {
+    TrendingItemAdapter(List<Post> posts, Context context, LoadMoreViewHolder.OnLoadMore o, RequestManager manager,String trendId) {
         mContext = context;
+        mRequestManager = manager;
         mPosts = posts;
         mOnLoadMore = o;
         mTrendId = trendId;
@@ -62,9 +65,11 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         if (viewType == Post.POST_TYPE_VIDEO) {
-            return new VideoTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item_video, parent, false), mContext);
+            return new VideoTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item_video, parent, false),
+                    mContext, mRequestManager);
         } else if (viewType == Post.POST_TYPE_IMAGE) {
-            return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false), mContext);
+            return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false),
+                    mContext, mRequestManager);
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
                     "",
@@ -125,8 +130,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public class BaseTrendViewHolder extends ImageFeedHolder {
         protected TextView vCollegeText;
 
-        public BaseTrendViewHolder(View itemView, Context context) {
-            super(itemView, context);
+        public BaseTrendViewHolder(View itemView, Context context, RequestManager requestManager) {
+            super(itemView, context, requestManager);
             vCollegeText = (TextView) itemView.findViewById(R.id.college_name);
         }
 
@@ -144,8 +149,8 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         protected TextView vCollegeName;
 
-        public VideoTrendViewHolder(View itemView, Context context) {
-            super(itemView, context);
+        public VideoTrendViewHolder(View itemView, Context context, RequestManager manager) {
+            super(itemView, context, manager);
             vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
         }
 

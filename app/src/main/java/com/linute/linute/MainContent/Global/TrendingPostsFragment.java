@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
@@ -37,7 +38,7 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingPostsFragment extends BaseFragment{
+public class TrendingPostsFragment extends BaseFragment {
 
     private static final String ID_KEY = "id_key";
     private static final String TITLE_KEY = "title_key";
@@ -73,7 +74,9 @@ public class TrendingPostsFragment extends BaseFragment{
             mTrendId = getArguments().getString(ID_KEY);
             mTitleString = getArguments().getString(TITLE_KEY);
         }
-        mTrendingAdapter = new TrendingItemAdapter(mPostList, getContext(),
+        mTrendingAdapter = new TrendingItemAdapter(
+                mPostList,
+                getContext(),
                 new LoadMoreViewHolder.OnLoadMore() {
                     @Override
                     public void loadMore() {
@@ -82,7 +85,10 @@ public class TrendingPostsFragment extends BaseFragment{
                             loadMoreFeedFromServer();
                         }
                     }
-                }, mTrendId);
+                },
+                Glide.with(this),
+                mTrendId
+        );
     }
 
     @Nullable
@@ -128,14 +134,13 @@ public class TrendingPostsFragment extends BaseFragment{
     }
 
 
-
     @Override
     public void onResume() {
         super.onResume();
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getPosts();
-        }else {
-            if (mPostList.isEmpty()){
+        } else {
+            if (mPostList.isEmpty()) {
                 mRetry.setVisibility(View.VISIBLE);
                 mProgressBar.setVisibility(View.GONE);
             }

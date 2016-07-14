@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.daimajia.swipe.SwipeLayout;
@@ -52,10 +52,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     private String mViewerUserId; //userId of person currently viewing page
     private String mImageSignature;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context) {
+    private RequestManager mRequestManager;
+
+    public FeedDetailAdapter(FeedDetail feedDetail, Context context, RequestManager manager) {
         this.context = context;
         mFeedDetail = feedDetail;
-
+        mRequestManager = manager;
 
         SharedPreferences mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mViewerUserId = mSharedPreferences.getString("userID", "");
@@ -81,15 +83,21 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             case TYPE_IMAGE_HEADER:
                 return new FeedDetailHeaderImageViewHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.feed_detail_header_image, parent, false), context);
+                        .inflate(R.layout.feed_detail_header_image, parent, false),
+                        context,
+                        mRequestManager);
             case TYPE_STATUS_HEADER:
                 return new FeedDetailHeaderStatusViewHolder(
                         LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.feed_detail_header_status, parent, false), context);
+                                .inflate(R.layout.feed_detail_header_status, parent, false),
+                        context,
+                        mRequestManager);
             case TYPE_VIDEO_HEADER:
                 return new FeedDetailHeaderVideoViewHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.feed_detail_header_video, parent, false), context);
+                        .inflate(R.layout.feed_detail_header_video, parent, false),
+                        context,
+                        mRequestManager);
             case TYPE_LOAD_MORE:
                 return new LoadMoreViewHolder(LayoutInflater
                         .from(parent.getContext())
@@ -161,6 +169,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     public void setDenySwipe(boolean deny) {
         mDenySwipe = deny;
+    }
+
+    public void clearContext(){
+        context = null;
     }
 
     private boolean mDenySwipe = false;
@@ -394,7 +406,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
 
         public void setProfileImage(String image) {
-            Glide.with(context)
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(image))
                     .asBitmap()
                     .signature(new StringSignature(mImageSignature))
@@ -404,7 +416,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
         public void setAnonImage(String image) {
-            Glide.with(context)
+            mRequestManager
                     .load(image == null || image.equals("") ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(image))
                     .asBitmap()
                     .signature(new StringSignature(mImageSignature))

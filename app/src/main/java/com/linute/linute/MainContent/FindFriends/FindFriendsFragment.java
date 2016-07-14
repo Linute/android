@@ -22,6 +22,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -124,11 +125,10 @@ public class FindFriendsFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList, false);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(this),mFriendFoundList);
 
         recyclerView.setAdapter(mFriendSearchAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
-
 
         if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
 
@@ -766,6 +766,12 @@ public class FindFriendsFragment extends BaseFragment {
             if (mUnfilteredList.isEmpty()) return;
             filterList(query);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mFriendSearchAdapter != null) mFriendSearchAdapter.clearContext();
     }
 }
 

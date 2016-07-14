@@ -174,7 +174,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), Glide.with(this));
         mFeedDetailAdapter.setCommentActions(this);
         recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -1215,7 +1215,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
             public void bindView(final MentionedPerson person) {
                 mName.setText(person.getFullname());
-                Glide.with(mProfileImageView.getContext())
+                Glide.with(FeedDetailPage.this)
                         .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
                         .signature(new StringSignature(mImageSignature))
@@ -1703,6 +1703,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     public String getPostId(){
         if (mFeedDetail == null) return  null;
         return mFeedDetail.getPostId();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFeedDetailAdapter != null) mFeedDetailAdapter.clearContext();
     }
 }
 
