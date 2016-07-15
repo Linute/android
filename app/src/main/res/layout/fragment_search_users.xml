@@ -4,7 +4,7 @@
               android:layout_height="match_parent"
               android:background="@color/white"
               android:orientation="vertical"
-              tools:context="com.linute.linute.MainContent.Chat.SearchUsers">
+              tools:context=".MainContent.Chat.CreateChatFragment">
 
 
     <android.support.v7.widget.Toolbar android:id="@+id/search_user_toolbar"
@@ -25,6 +25,11 @@
 
     </android.support.v7.widget.Toolbar>
 
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/selected_users"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/search_users"

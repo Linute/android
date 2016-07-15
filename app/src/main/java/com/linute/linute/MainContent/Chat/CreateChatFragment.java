@@ -36,11 +36,11 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class SearchUsers extends Fragment {
+public class CreateChatFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TAG = SearchUsers.class.getSimpleName();
+    private static final String TAG = CreateChatFragment.class.getSimpleName();
 
-    private SearchAdapter mSearchAdapter;
+    private UserSelectAdapter mSearchAdapter;
 
     private List<SearchUser> mSearchUserList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
@@ -49,7 +49,7 @@ public class SearchUsers extends Fragment {
 
     private Handler mHandler = new Handler();
 
-    public SearchUsers() {
+    public CreateChatFragment() {
         // Required empty public constructor
     }
 
@@ -77,7 +77,7 @@ public class SearchUsers extends Fragment {
             }
         });
 
-        mSearchAdapter = new SearchAdapter(getActivity(), mSearchUserList);
+        mSearchAdapter = new UserSelectAdapter(getActivity(), mSearchUserList);
 
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
         recList.setHasFixedSize(true);
@@ -85,6 +85,18 @@ public class SearchUsers extends Fragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
         recList.setAdapter(mSearchAdapter);
+
+        mSearchAdapter.setOnUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
+            @Override
+            public void onUserSelected(SearchUser user) {
+               /* BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    activity.getSupportFragmentManager().popBackStack();
+                    activity.addFragmentToContainer(ChatFragment.newInstance(null, user.getUserName(), user.getUserId()));
+                }*/
+
+            }
+        });
 
         editText = (EditText) view.findViewById(R.id.search_users_entry);
         editText.addTextChangedListener(new TextWatcher() {
