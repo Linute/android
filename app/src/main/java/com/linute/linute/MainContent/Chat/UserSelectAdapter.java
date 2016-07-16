@@ -51,7 +51,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         ((SearchViewHolder) holder).bindModel(getUser(position));
         holder.itemView.setBackgroundColor(position < mSelectedUsers.size() ? 0x2284CFDF : 0);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +59,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             public void onClick(View view) {
                 moveUser(holder.getAdapterPosition());
                 if (mOnUserSelectedListener != null) {
-                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
+                    mOnUserSelectedListener.onUserSelected(getUser(position));
                 }
             }
         });
