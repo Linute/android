@@ -142,8 +142,8 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                     });
         } else {
             mSubscription = Observable.just(ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mAllContent)))
-                    .observeOn(io())
-                    .subscribeOn(mainThread())
+                    .subscribeOn(io())
+                    .observeOn(mainThread())
                     .subscribe(new Action1<Uri>() {
                         @Override
                         public void call(Uri uri) {
@@ -164,6 +164,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                                 Intent result = new Intent();
                                 result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
                                 Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
+
                                 getActivity().setResult(Activity.RESULT_OK, result);
                                 getActivity().finish();
                             }else {

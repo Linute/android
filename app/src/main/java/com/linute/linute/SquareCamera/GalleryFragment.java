@@ -18,6 +18,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,6 +71,7 @@ public class GalleryFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_IMAGE_OR_VID) { //got an image
             Uri uri = data.getData();
+            Log.i(TAG, "onActivityResult: "+uri.toString());
             if (uri.toString().contains("image")) { //selected image
                 if (getActivity() != null) {
                     try {

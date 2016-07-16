@@ -48,7 +48,10 @@
     <color name="user_comment_color">#56bb1d</color>
     <color name="snackbar_background_color">#323232</color>
     <color name="notification_color">#CC2786BB</color>
-    <color name="facebook_blue">#385b88</color>
+
+    <color name="facebook_blue">#B3385b88</color>
+    <color name="trans_secondary">#B367CDC9</color>
+
     <color name="yellow_color">#FBB72E</color>
     <color name="green_color">#239F85</color>
     <color name="blue_color">#84CFDF</color>

@@ -8,8 +8,9 @@
 
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
+                  android:layout_gravity="top"
+                  android:layout_marginTop="64dp"
                   android:gravity="center"
-                  android:layout_gravity="center"
                   android:orientation="vertical">
 
         <TextView android:layout_width="wrap_content"
@@ -37,27 +38,28 @@
     <LinearLayout android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_gravity="bottom"
+                  android:orientation="vertical"
                   android:weightSum="2">
 
         <Button android:id="@+id/preLogin_facebook_login"
-                android:layout_width="0px"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:alpha="0.75"
                 android:background="@color/facebook_blue"
                 android:foreground="?android:selectableItemBackground"
+                android:padding="28dp"
+                android:textStyle="bold"
                 android:text="Facebook"
                 android:textColor="@color/pure_white"
         />
 
         <Button
             android:id="@+id/prelogin_linute_login"
-            android:layout_width="0px"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:alpha="0.75"
-            android:background="@color/secondaryColor"
+            android:background="@color/trans_secondary"
             android:foreground="?android:selectableItemBackground"
+            android:padding="28dp"
+            android:textStyle="bold"
             android:text="sign in"
             android:textColor="@color/pure_white"
         />

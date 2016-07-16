@@ -291,6 +291,7 @@ public class CameraFragment extends Fragment {
         });
 
         if (!mCameraType.contains(CameraType.CAMERA_VIDEO)) {
+            mTakePhotoBtn.setImageResource(R.drawable.camera_button);
             mTakePhotoBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
