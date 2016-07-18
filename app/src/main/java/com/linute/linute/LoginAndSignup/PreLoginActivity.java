@@ -92,7 +92,7 @@ public class PreLoginActivity extends AppCompatActivity {
             });
 
         if (savedInstanceState == null)
-            replaceFragment(new PreLoginFragment());
+            replaceFragment(new SignUpChoicesFragment());
 
     }
 
@@ -148,6 +148,10 @@ public class PreLoginActivity extends AppCompatActivity {
 
     public void selectForgotPassword() {
         addFragment(new ForgotPasswordFragment());
+    }
+
+    public void selectSignIn(){
+        addFragment(new PreLoginFragment());
     }
 
     private void setUpFacebookCallback() {

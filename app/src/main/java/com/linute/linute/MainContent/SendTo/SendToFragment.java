@@ -31,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -59,6 +60,7 @@ public class SendToFragment extends BaseFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
+    private OnSendItems mOnSendItems;
 
     // we currently have to make 2 api calls : one to retrieve list of trends and one to retrieve list
     //   friends. We won't show list until both api calls have finished
@@ -90,6 +92,10 @@ public class SendToFragment extends BaseFragment {
 
     }
 
+
+    public void setOnSendItems(OnSendItems onSendItems){
+        mOnSendItems = onSendItems;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -465,37 +471,48 @@ public class SendToFragment extends BaseFragment {
     }
 
     public void sendItems() {
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty() || activity == null)
-            return;
+        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty()) return;
 
-        JSONArray people = new JSONArray();
-        JSONArray trends = new JSONArray();
-        for (SendToItem sendToItem : mSendToAdapter.getCheckedItems()) {
-            if (sendToItem.getType() == SendToItem.TYPE_PERSON) {
-                people.put(sendToItem.getId());
-            } else if (sendToItem.getType() == SendToItem.TYPE_TREND) {
-                trends.put(sendToItem.getId());
+        if (mOnSendItems != null){
+            mOnSendItems.sendItems(mSendToAdapter.getCheckedItems());
+        } else {
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity == null) return;
+
+            JSONArray people = new JSONArray();
+            JSONArray trends = new JSONArray();
+            for (SendToItem sendToItem : mSendToAdapter.getCheckedItems()) {
+                if (sendToItem.getType() == SendToItem.TYPE_PERSON) {
+                    people.put(sendToItem.getId());
+                } else if (sendToItem.getType() == SendToItem.TYPE_TREND) {
+                    trends.put(sendToItem.getId());
+                }
+            }
+
+            JSONObject send = new JSONObject();
+            try {
+                send.put("users", people);
+                send.put("trends", trends);
+                send.put("post", mPostId);
+
+                if (!activity.socketConnected()) {
+                    Utils.showBadConnectionToast(activity);
+                } else {
+                    activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
+                    Toast.makeText(activity, "Post has been shared", Toast.LENGTH_SHORT).show();
+                    getFragmentManager().popBackStack();
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
+    }
 
-        JSONObject send = new JSONObject();
-        try {
-            send.put("users", people);
-            send.put("trends", trends);
-            send.put("post", mPostId);
 
-            if (!activity.socketConnected()) {
-                Utils.showBadConnectionToast(activity);
-            } else {
-                activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
-                Toast.makeText(activity, "Post has been shared", Toast.LENGTH_SHORT).show();
-                getFragmentManager().popBackStack();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
+
+    public interface OnSendItems{
+        public void sendItems(HashSet<SendToItem> items);
     }
 
 

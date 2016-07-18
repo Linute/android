@@ -52,6 +52,13 @@ public class PreLoginFragment extends Fragment {
             }
         });
 
+        rootView.findViewById(R.id.back_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
         return rootView;
     }
 }
