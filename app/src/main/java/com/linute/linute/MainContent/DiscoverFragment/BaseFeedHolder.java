@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -39,6 +40,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected RoundedImageView vUserImage;
     protected Context mContext;
+    protected View vShareButton;
 
     private String mUserId;
     private String mImageSignature;
@@ -46,7 +48,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected Post mPost;
 
-    public BaseFeedHolder(final View itemView, Context context, RequestManager manager) {
+    public BaseFeedHolder(final View itemView, final Context context, RequestManager manager) {
         super(itemView);
         mRequestManager = manager;
         mContext = context;
@@ -63,6 +65,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vUserImage = (RoundedImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vShareButton = itemView.findViewById(R.id.share);
 
         //vLikesHeart.setClickable(false);
         vLikesHeart.setOnCheckedChangeListener(this);
@@ -71,6 +74,14 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
+        vShareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                if (activity != null && mPost != null)
+                    activity.addFragmentOnTop(SendToFragment.newInstance(mPost.getPostId()), "send_to");
+            }
+        });
     }
 
     public void bindModel(Post post){

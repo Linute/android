@@ -1,20 +1,40 @@
 package com.linute.linute.MainContent.SendTo;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.API.LSDKGlobal;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 /**
  * Created by QiFeng on 7/15/16.
@@ -26,16 +46,33 @@ public class SendToFragment extends BaseFragment {
 
     private ArrayList<SendToItem> mSendToItems = new ArrayList<>();
     private SendToAdapter mSendToAdapter;
+
     private String mPostId;
+    private String mUserId;
+
+    private Handler mHandler = new Handler();
+
+    private View vProgress;
+    private View vErrorText;
+
+    private int mSkip = 0;
+    private boolean mCanLoadMore = true;
+
+    //todo progressView
+
+    // we currently have to make 2 api calls : one to retrieve list of trends and one to retrieve list
+    //   friends. We won't show list until both api calls have finished
+    private boolean mGotResponseForApiCall = false;
 
 
     /**
      * Use this constructor!
+     *
      * @param postId - the id of the post being shared
      * @return fragment
      */
 
-    public static SendToFragment newInstance(String postId){
+    public static SendToFragment newInstance(String postId) {
         SendToFragment fragment = new SendToFragment();
         Bundle bundle = new Bundle();
         bundle.putString(POST_ID_KEY, postId);
@@ -48,7 +85,7 @@ public class SendToFragment extends BaseFragment {
      * Please don't use this constructor,
      * use newInstance(postId) instead
      */
-    public SendToFragment(){
+    public SendToFragment() {
 
     }
 
@@ -59,22 +96,43 @@ public class SendToFragment extends BaseFragment {
         if (getArguments() != null)
             mPostId = getArguments().getString(POST_ID_KEY);
 
+        mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_send_to, container, false);
+
+        vProgress = root.findViewById(R.id.progress);
+        vErrorText = root.findViewById(R.id.error_text);
+
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         final Button vSendButton = (Button) root.findViewById(R.id.send_button);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
-        if (mSendToAdapter == null){
+        ((Toolbar) root.findViewById(R.id.toolbar)).setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
+        if (mSendToAdapter == null) {
             mSendToAdapter = new SendToAdapter(getContext(), Glide.with(this), mSendToItems);
-        }else {
+        } else {
             mSendToAdapter.setRequestManager(Glide.with(this));
         }
+
+        mSendToAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
+            @Override
+            public void loadMore() {
+                if (mCanLoadMore) {
+                    loadMoreUsers();
+                }
+            }
+        });
 
         mSendToAdapter.setButtonAction(new SendToAdapter.ButtonAction() {
             @Override
@@ -85,6 +143,8 @@ public class SendToFragment extends BaseFragment {
 
         vSendButton.setAlpha(mSendToAdapter.getCheckedItems().isEmpty() ? 0.5f : 1f);
 
+        recyclerView.setAdapter(mSendToAdapter);
+
         vSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,28 +152,331 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING)
+            showProgress(true);
+
         return root;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (getFragmentState() == FragmentState.NEEDS_UPDATING){
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getSendToList();
+        } else if (mSendToItems.isEmpty()) {
+            showErrorText(true);
         }
     }
 
     private void getSendToList() {
-        //// TODO: 7/15/16 API CALL
+        if (getContext() == null) return;
+
+        //get trends
+        new LSDKGlobal(getContext()).getTrending(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null && mGotResponseForApiCall) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+
+                            if (mSendToItems.isEmpty())
+                                showErrorText(true);
+
+                            setFragmentState(FragmentState.FINISHED_UPDATING);
+                        }
+                    });
+                }
+                mGotResponseForApiCall = true;
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
+                        final ArrayList<SendToItem> tempTrends = new ArrayList<>();
+                        JSONObject trend;
+
+                        for (int i = 0; i < trends.length(); i++) {
+                            trend = trends.getJSONObject(i);
+                            tempTrends.add(
+                                    new SendToItem(
+                                            SendToItem.TYPE_TREND,
+                                            trend.getString("name"),
+                                            trend.getString("id"),
+                                            trend.getString("image")
+                                    )
+                            );
+                        }
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSendToItems.addAll(0, tempTrends);
+                                            if (mGotResponseForApiCall) {
+                                                showProgress(false);
+                                                mSendToAdapter.notifyDataSetChanged();
+                                                setFragmentState(FragmentState.FINISHED_UPDATING);
+
+                                                if (mSendToItems.isEmpty())
+                                                    showErrorText(true);
+                                            } else
+                                                mGotResponseForApiCall = true;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runServerError();
+                    }
+
+                } else {
+                    Log.d(TAG, "onResponse: " + response.body().string());
+                    runServerError();
+                }
+            }
+        });
+
+
+        //get friends
+        new LSDKFriends(getActivity()).getUsers(mUserId, mSkip, 20, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null && mGotResponseForApiCall) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+
+                            if (mSendToItems.isEmpty())
+                                showErrorText(true);
+
+                            setFragmentState(FragmentState.FINISHED_UPDATING);
+                        }
+                    });
+                }
+                mGotResponseForApiCall = true;
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                if (response.isSuccessful()) {
+                    try {
+                        JSONObject object = new JSONObject(response.body().string());
+
+                        //mSkip = object.getInt("skip");
+
+                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
+
+                        JSONArray users = object.getJSONArray("users");
+                        mCanLoadMore = users.length() >= 20;
+
+                        for (int i = 0; i < users.length(); i++) {
+                            tempItems.add(
+                                    new SendToItem(
+                                            SendToItem.TYPE_PERSON,
+                                            users.getJSONObject(i).getString("fullName"),
+                                            users.getJSONObject(i).getString("id"),
+                                            users.getJSONObject(i).getString("profileImage")
+                                    )
+                            );
+                        }
+
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSendToItems.addAll(tempItems);
+                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+                                            mSkip += 20;
+
+                                            if (mGotResponseForApiCall) {
+                                                showProgress(false);
+                                                mSendToAdapter.notifyDataSetChanged();
+                                                setFragmentState(FragmentState.FINISHED_UPDATING);
+
+                                                if (mSendToItems.isEmpty())
+                                                    showErrorText(true);
+                                            } else
+                                                mGotResponseForApiCall = true;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        runServerError();
+                    }
+                } else {
+                    Log.d(TAG, "onResponse: " + response.body().string());
+                    runServerError();
+                }
+            }
+        });
     }
 
-    public void sendItems(){
-        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty()) return;
 
-        Log.d(TAG, "sendItems: sent");
-        //// TODO: 7/15/16 send items
+    private void loadMoreUsers() {
+        if (getContext() == null) return;
+
+
+
+        new LSDKFriends(getContext()).getUsers(mUserId, mSkip, 20, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("users");
+
+                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
+
+                        for (int i = 0; i < users.length(); i++) {
+                            tempItems.add(
+                                    new SendToItem(
+                                            SendToItem.TYPE_PERSON,
+                                            users.getJSONObject(i).getString("fullName"),
+                                            users.getJSONObject(i).getString("id"),
+                                            users.getJSONObject(i).getString("profileImage")
+                                    )
+                            );
+                        }
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            int start = mSendToItems.size();
+                                            mSendToItems.addAll(tempItems);
+                                            mCanLoadMore = tempItems.size() >= 20;
+                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+                                            mSkip += 20;
+
+                                            mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
+                                            setFragmentState(FragmentState.FINISHED_UPDATING);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+
+                } else {
+                    Log.d(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
+
+    private void showProgress(boolean show) {
+        vProgress.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private void showErrorText(boolean show) {
+        vErrorText.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
+
+    private void runServerError() {
+        if (getActivity() != null && mGotResponseForApiCall) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Utils.showServerErrorToast(getActivity());
+
+                    if (mSendToItems.isEmpty())
+                        showErrorText(true);
+
+                    setFragmentState(FragmentState.FINISHED_UPDATING);
+                }
+            });
+        }
+        mGotResponseForApiCall = true;
+    }
+
+    public void sendItems() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty() || activity == null)
+            return;
+
+        JSONArray people = new JSONArray();
+        JSONArray trends = new JSONArray();
+        for (SendToItem sendToItem : mSendToAdapter.getCheckedItems()) {
+            if (sendToItem.getType() == SendToItem.TYPE_PERSON) {
+                people.put(sendToItem.getId());
+            } else if (sendToItem.getType() == SendToItem.TYPE_TREND) {
+                trends.put(sendToItem.getId());
+            }
+        }
+
+        JSONObject send = new JSONObject();
+        try {
+            send.put("users", people);
+            send.put("trends", trends);
+            send.put("post", mPostId);
+
+            if (!activity.socketConnected()) {
+                Utils.showBadConnectionToast(activity);
+            } else {
+                activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
+                Toast.makeText(activity, "Post has been shared", Toast.LENGTH_SHORT).show();
+                getFragmentManager().popBackStack();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 }

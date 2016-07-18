@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -22,7 +23,7 @@ import java.util.HashSet;
 /**
  * Created by QiFeng on 7/15/16.
  */
-public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendToViewHolder> {
+public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ArrayList<SendToItem> mSendToItems;
     private RequestManager mRequestManager;
@@ -30,6 +31,8 @@ public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendTo
     private ButtonAction mButtonAction;
 
     private StringSignature mImageSignature;
+    private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
+    private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
     public SendToAdapter(Context context, RequestManager manager, ArrayList<SendToItem> sendToItems) {
         mSendToItems = sendToItems;
@@ -41,27 +44,46 @@ public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendTo
         );
     }
 
+    public void setLoadState(short state){
+        mLoadState = state;
+    }
+
+    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore){
+        mOnLoadMore = onLoadMore;
+    }
+
     @Override
-    public BaseSendToViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == SendToItem.TYPE_PERSON)
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == LoadMoreViewHolder.FOOTER){
+            return new LoadMoreViewHolder(
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
+                    "",
+                    ""
+            );
+        }
+        else if (viewType == SendToItem.TYPE_PERSON)
             return new SendToPersonViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
             );
         else
-            //// TODO: 7/15/16 change layout
             return new SendToTrendViewHolder(
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to_trend, parent, false)
             );
     }
 
     @Override
-    public void onBindViewHolder(BaseSendToViewHolder holder, int position) {
-        holder.bindViews(mSendToItems.get(position));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof BaseSendToViewHolder)
+            ((BaseSendToViewHolder)holder).bindViews(mSendToItems.get(position));
+        else if (holder instanceof LoadMoreViewHolder){
+            ((LoadMoreViewHolder)holder).bindView(mLoadState);
+            if (mOnLoadMore != null) mOnLoadMore.loadMore();
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mSendToItems.size();
+        return mSendToItems.size() > 0 ? mSendToItems.size() + 1 : 0;
     }
 
     public void setRequestManager(RequestManager manager) {
@@ -80,7 +102,7 @@ public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendTo
 
     @Override
     public int getItemViewType(int position) {
-        return mSendToItems.get(position).getType();
+        return position == mSendToItems.size() ? LoadMoreViewHolder.FOOTER : mSendToItems.get(position).getType();
     }
 
     public abstract class BaseSendToViewHolder extends RecyclerView.ViewHolder {
@@ -140,14 +162,13 @@ public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendTo
 
         @Override
         public void loadImage(SendToItem item) {
-            if (item.getType() == SendToItem.TYPE_PERSON) {
-                mRequestManager.load(Utils.getImageUrlOfUser(item.getImage()))
-                        .dontAnimate()
-                        .signature(mImageSignature)
-                        .placeholder(R.drawable.image_loading_background)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                        .into(vImage);
-            }
+            mRequestManager.load(Utils.getImageUrlOfUser(item.getImage()))
+                    .dontAnimate()
+                    .signature(mImageSignature)
+                    .placeholder(R.drawable.image_loading_background)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .into(vImage);
+
         }
     }
 
@@ -159,7 +180,11 @@ public class SendToAdapter extends RecyclerView.Adapter<SendToAdapter.BaseSendTo
 
         @Override
         public void loadImage(SendToItem item) {
-            //// TODO: 7/15/16
+            mRequestManager.load(Utils.getTrendsImageURL(item.getImage()))
+                    .dontAnimate()
+                    .placeholder(R.color.seperator_color)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .into(vImage);
         }
     }
 
