@@ -295,7 +295,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 } else {
                     Intent i = new Intent(getActivity(), CameraActivity.class);
                     i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_GALLERY));
-                    i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+                    i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
                     startActivityForResult(i, CAMERA_REQUEST);
                 }
             }
@@ -346,6 +346,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     private Uri mImageUri;
     private String mOverlayText;
+    private boolean mPrivacy;
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAMERA_REQUEST){
@@ -353,9 +354,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 mImageUri = data.getParcelableExtra("image");
                 mOverlayText = data.getStringExtra("title");
                 if (mOverlayText == null) mOverlayText = "";
+                mPrivacy = data.getBooleanExtra("privacy", false);
             }else {
                 mImageUri = null;
                 mOverlayText = "";
+                mPrivacy = false;
             }
         }
     }
@@ -367,10 +370,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             comment.put("text", mOverlayText);
             comment.put("room", mFeedDetail.getPostId());
 
-            comment.put("privacy", mFeedDetail.getPost().isCommentAnonDisabled() ?
-                    0 :
-                    mCheckBox.isChecked() ? 1 : 0
-            );
+            comment.put("privacy", mPrivacy ? 1 : 0);
 
             JSONArray images = new JSONArray();
 
@@ -390,9 +390,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
         }catch (JSONException | IOException e){
             e.printStackTrace();
-            mOverlayText = "";
-            mImageUri = null;
         }
+
+        mOverlayText = "";
+        mImageUri = null;
+        mPrivacy = false;
     }
 
     @Override

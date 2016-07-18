@@ -583,10 +583,11 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                     @Override
                     public void onNext(Uri image) {
 
-                        if (mReturnType == CameraActivity.RETURN_URI) {
+                        if (mReturnType != CameraActivity.RETURN_URI_AND_PRIVACY) {
                             Intent i = new Intent()
                                     .putExtra("video", Uri.parse(outputFile))
                                     .putExtra("image", image)
+                                    .putExtra("privacy", mAnonSwitch.isChecked())
                                     .putExtra("type", CameraActivity.VIDEO)
                                     .putExtra("title", mTextView.getText().toString());
 
@@ -594,7 +595,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                             getActivity().setResult(Activity.RESULT_OK, i);
                             getActivity().finish();
                         } else {
-
                             uploadVideo(image.toString(), outputFile);
                         }
                     }

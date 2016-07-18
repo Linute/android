@@ -470,6 +470,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vImageView = new ImageView(context);
             int size = (int) context.getResources().getDimension(R.dimen.comment_image_size);
             vImageView.setLayoutParams(new ViewGroup.LayoutParams(size, size));
+            vImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             ((ViewGroup)itemView.findViewById(R.id.content)).addView(vImageView);
 
             vImageView.setOnClickListener(new View.OnClickListener() {

@@ -118,7 +118,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
         if (getActivity() == null) return;
 
 
-        if (mReturnType == CameraActivity.RETURN_URI) {
+        if (mReturnType != CameraActivity.SEND_POST) {
             mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mAllContent)))
                     .observeOn(io())
                     .subscribeOn(mainThread())
@@ -129,6 +129,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                                 Intent i = new Intent()
                                         .putExtra("image", uri)
                                         .putExtra("type", CameraActivity.IMAGE)
+                                        .putExtra("privacy", mAnonSwitch.isChecked())
                                         .putExtra("title", mEditText.getText().toString());
                                 getActivity().setResult(Activity.RESULT_OK, i);
                                 getActivity().finish();

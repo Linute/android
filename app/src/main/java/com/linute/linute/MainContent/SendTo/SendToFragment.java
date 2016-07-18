@@ -43,12 +43,14 @@ public class SendToFragment extends BaseFragment {
 
     public static final String TAG = SendToFragment.class.getSimpleName();
     public static final String POST_ID_KEY = "send_post_id_key";
+    public static final String SHOW_TRENDING ="show_trending";
 
     private ArrayList<SendToItem> mSendToItems = new ArrayList<>();
     private SendToAdapter mSendToAdapter;
 
     private String mPostId;
     private String mUserId;
+    private boolean mShowTrend;
 
     private Handler mHandler = new Handler();
 
@@ -57,8 +59,6 @@ public class SendToFragment extends BaseFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
-
-    //todo progressView
 
     // we currently have to make 2 api calls : one to retrieve list of trends and one to retrieve list
     //   friends. We won't show list until both api calls have finished
@@ -72,10 +72,11 @@ public class SendToFragment extends BaseFragment {
      * @return fragment
      */
 
-    public static SendToFragment newInstance(String postId) {
+    public static SendToFragment newInstance(String postId, boolean showTrending) {
         SendToFragment fragment = new SendToFragment();
         Bundle bundle = new Bundle();
         bundle.putString(POST_ID_KEY, postId);
+        bundle.putBoolean(SHOW_TRENDING, showTrending);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -83,7 +84,7 @@ public class SendToFragment extends BaseFragment {
 
     /**
      * Please don't use this constructor,
-     * use newInstance(postId) instead
+     * use newInstance(postId, showTrend) instead
      */
     public SendToFragment() {
 
@@ -93,9 +94,10 @@ public class SendToFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null)
+        if (getArguments() != null) {
             mPostId = getArguments().getString(POST_ID_KEY);
-
+            mShowTrend = getArguments().getBoolean(SHOW_TRENDING);
+        }
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
     }
 
@@ -171,6 +173,17 @@ public class SendToFragment extends BaseFragment {
     private void getSendToList() {
         if (getContext() == null) return;
 
+        if (mShowTrend)
+            getTrends();
+        else
+            mGotResponseForApiCall = true;
+
+        getFriends();
+
+    }
+
+
+    private void getTrends(){
         //get trends
         new LSDKGlobal(getContext()).getTrending(new Callback() {
             @Override
@@ -244,10 +257,11 @@ public class SendToFragment extends BaseFragment {
                 }
             }
         });
+    }
 
-
+    private void getFriends(){
         //get friends
-        new LSDKFriends(getActivity()).getUsers(mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getActivity()).getSendTo(mUserId, mSkip, 20, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null && mGotResponseForApiCall) {
@@ -273,20 +287,24 @@ public class SendToFragment extends BaseFragment {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
 
+                        // Log.i(TAG, "onResponse: "+object.toString(4));
                         //mSkip = object.getInt("skip");
 
                         final ArrayList<SendToItem> tempItems = new ArrayList<>();
 
-                        JSONArray users = object.getJSONArray("users");
+                        JSONArray users = object.getJSONArray("friends");
                         mCanLoadMore = users.length() >= 20;
 
+                        JSONObject user;
+
                         for (int i = 0; i < users.length(); i++) {
+                            user = users.getJSONObject(i).getJSONObject("user");
                             tempItems.add(
                                     new SendToItem(
                                             SendToItem.TYPE_PERSON,
-                                            users.getJSONObject(i).getString("fullName"),
-                                            users.getJSONObject(i).getString("id"),
-                                            users.getJSONObject(i).getString("profileImage")
+                                            user.getString("fullName"),
+                                            user.getString("id"),
+                                            user.getString("profileImage")
                                     )
                             );
                         }
@@ -336,7 +354,7 @@ public class SendToFragment extends BaseFragment {
 
 
 
-        new LSDKFriends(getContext()).getUsers(mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getContext()).getSendTo(mUserId, mSkip, 20, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -353,17 +371,19 @@ public class SendToFragment extends BaseFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("users");
+                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("friends");
 
                         final ArrayList<SendToItem> tempItems = new ArrayList<>();
 
+                        JSONObject user;
                         for (int i = 0; i < users.length(); i++) {
+                            user = users.getJSONObject(i).getJSONObject("user");
                             tempItems.add(
                                     new SendToItem(
                                             SendToItem.TYPE_PERSON,
-                                            users.getJSONObject(i).getString("fullName"),
-                                            users.getJSONObject(i).getString("id"),
-                                            users.getJSONObject(i).getString("profileImage")
+                                            user.getString("fullName"),
+                                            user.getString("id"),
+                                            user.getString("profileImage")
                                     )
                             );
                         }

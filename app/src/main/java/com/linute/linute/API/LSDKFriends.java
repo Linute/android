@@ -47,13 +47,13 @@ public class LSDKFriends {
         return API_Methods.get(new String[] {"friends"},header, param, callback);
     }
 
-    public Call getUsers(String userId, int skip, int limit, Callback callback){
+    public Call getSendTo(String userId, int skip, int limit, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         Map<String, String> param = new HashMap<>();
         param.put("owner", userId);
         param.put("limit",limit+"");
         if (skip > 0) param.put("skip", skip+"");
 
-        return API_Methods.get(new String[]{"users"}, header, param, callback);
+        return API_Methods.get(new String[]{"friends"}, header, param, callback);
     }
 }

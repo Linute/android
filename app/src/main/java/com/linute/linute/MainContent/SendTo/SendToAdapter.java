@@ -23,6 +23,7 @@ import java.util.HashSet;
 /**
  * Created by QiFeng on 7/15/16.
  */
+
 public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private ArrayList<SendToItem> mSendToItems;
@@ -44,24 +45,23 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         );
     }
 
-    public void setLoadState(short state){
+    public void setLoadState(short state) {
         mLoadState = state;
     }
 
-    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore){
+    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore) {
         mOnLoadMore = onLoadMore;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == LoadMoreViewHolder.FOOTER){
+        if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
                     "",
                     ""
             );
-        }
-        else if (viewType == SendToItem.TYPE_PERSON)
+        } else if (viewType == SendToItem.TYPE_PERSON)
             return new SendToPersonViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
             );
@@ -74,9 +74,9 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof BaseSendToViewHolder)
-            ((BaseSendToViewHolder)holder).bindViews(mSendToItems.get(position));
-        else if (holder instanceof LoadMoreViewHolder){
-            ((LoadMoreViewHolder)holder).bindView(mLoadState);
+            ((BaseSendToViewHolder) holder).bindViews(mSendToItems.get(position));
+        else if (holder instanceof LoadMoreViewHolder) {
+            ((LoadMoreViewHolder) holder).bindView(mLoadState);
             if (mOnLoadMore != null) mOnLoadMore.loadMore();
         }
     }
@@ -117,7 +117,6 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             vImage = (ImageView) itemView.findViewById(R.id.image);
             vName = (TextView) itemView.findViewById(R.id.name);
             vCheckBox = (ToggleImageView) itemView.findViewById(R.id.toggle);
-            vCheckBox.setImageViews(R.drawable.send_to_checkbox_off, R.drawable.send_to_checkbox_on);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -154,10 +153,9 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
 
     public class SendToPersonViewHolder extends BaseSendToViewHolder {
-
-
         public SendToPersonViewHolder(View itemView) {
             super(itemView);
+            vCheckBox.setImageViews(R.drawable.send_to_checkbox_off, R.drawable.send_to_checkbox_on);
         }
 
         @Override
@@ -173,9 +171,9 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     public class SendToTrendViewHolder extends BaseSendToViewHolder {
-
         public SendToTrendViewHolder(View itemView) {
             super(itemView);
+            vCheckBox.setImageViews(android.R.color.transparent, R.color.secondaryColor);
         }
 
         @Override

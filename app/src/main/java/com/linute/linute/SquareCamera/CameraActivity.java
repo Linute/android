@@ -17,10 +17,12 @@ import com.linute.linute.R;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class CameraActivity extends AppCompatActivity {
 
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
+    public final static int RETURN_URI_AND_PRIVACY = 16;
 
     public final static int IMAGE = 1;
     public final static int VIDEO = 2;
@@ -58,7 +60,7 @@ public class CameraActivity extends AppCompatActivity {
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
         } else {
-            mCameraType =  new CameraType(CameraType.CAMERA_PICTURE);
+            mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
             mReturnType = RETURN_URI;
         }
 

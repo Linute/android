@@ -1,6 +1,5 @@
 package com.linute.linute.SquareCamera;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -31,10 +30,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
 import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
@@ -42,18 +37,7 @@ import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
 import com.linute.linute.SquareCamera.overlay.WipeViewPager;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.Utils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
-import java.net.URISyntaxException;
-
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 
 /**
  *
@@ -169,6 +153,8 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         if (mReturnType == CameraActivity.SEND_POST) {
             vBottom.findViewById(R.id.comments).setVisibility(View.VISIBLE);
             vBottom.findViewById(R.id.anon).setVisibility(View.VISIBLE);
+        } else if (mReturnType == CameraActivity.RETURN_URI_AND_PRIVACY) {
+            vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
         } else {
             vBottom.findViewById(R.id.anon).setVisibility(View.INVISIBLE);
             vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
@@ -318,7 +304,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     }
 
 
-    public void toggleEditText(){
+    public void toggleEditText() {
         if (mEditText.getVisibility() == View.GONE && mTextView.getVisibility() == View.GONE) {
             mEditText.setVisibility(View.VISIBLE);
             mEditText.requestFocus();
@@ -506,7 +492,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
-                        Log.i(TAG, "onTouch: "+mAllContent.getHeight()+ " "+mAllContent.getWidth());
+                        Log.i(TAG, "onTouch: " + mAllContent.getHeight() + " " + mAllContent.getWidth());
                         prevY = event.getY();
                         totalMovement = 0;
                         if (bottomMargin == -1) {
@@ -538,7 +524,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                         if (mTextMargin <= topMargin) { //over the top edge
                             mTextMargin = topMargin;
                         } else if (mTextMargin > mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight()) { //under the bottom edge
-                            mTextMargin = mContentContainer.getHeight()+ mContentContainer.getTop() - bottomMargin - v.getHeight();
+                            mTextMargin = mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight();
                         }
 
                         params.setMargins(0, mTextMargin, 0, 0); //set new margin
@@ -596,54 +582,9 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         imm.hideSoftInputFromWindow(mContentContainer.getWindowToken(), 0);
     }
 
-
-    protected Socket mSocket;
-    protected boolean mConnecting = false;
-
     @Override
     public void onResume() {
         super.onResume();
-
-        if (mReturnType != CameraActivity.RETURN_URI) { //don't connect if we don't have to
-            if (getActivity() == null) return;
-
-            if (mSocket == null || !mSocket.connected() && !mConnecting) {
-                mConnecting = true;
-
-                {
-                    try {
-                        IO.Options op = new IO.Options();
-                        DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(getActivity());
-                        op.query =
-                                "token=" + getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "") +
-                                        "&deviceToken=" + device.getDeviceToken() +
-                                        "&udid=" + device.getUdid() +
-                                        "&version=" + device.getVersionName() +
-                                        "&build=" + device.getVersionCode() +
-                                        "&os=" + device.getOS() +
-                                        "&platform=" + device.getType() +
-                                        "&api=" + API_Methods.VERSION +
-                                        "&model=" + device.getModel();
-
-                        op.reconnectionDelay = 5;
-                        op.secure = true;
-
-                        op.transports = new String[]{WebSocket.NAME};
-
-                        mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                    } catch (URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.on(Socket.EVENT_ERROR, eventError);
-                mSocket.on("new post", newPost);
-                mSocket.connect();
-                mConnecting = false;
-            }
-        }
     }
 
     @Override
@@ -657,17 +598,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
-        if (mReturnType != CameraActivity.RETURN_URI) {
-            if (mSocket != null) {
-
-                mSocket.disconnect();
-                mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-                mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                mSocket.off(Socket.EVENT_ERROR, eventError);
-                mSocket.off("new post", newPost);
-            }
-        }
-
         if (mEditText.getVisibility() == View.VISIBLE) {
             hideKeyboard();
             mEditText.setVisibility(View.GONE);
@@ -677,55 +607,4 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         }
     }
-
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
-
-
-    //event ERROR
-    private Emitter.Listener eventError = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            Log.i(TAG, "call: " + args[0]);
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Utils.showServerErrorToast(getActivity());
-                    showProgress(false);
-                }
-            });
-        }
-    };
-
-    //new post was posted; we aren't sure if we're the one that posted it. must check
-    private Emitter.Listener newPost = new Emitter.Listener() {
-
-        @Override
-        public void call(Object... args) {
-            if (getActivity() == null) return;
-
-            try {
-                String owner = new JSONObject(args[0].toString()).getJSONObject("owner").getString("id");
-                if (owner.equals(mUserId)) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            getActivity().setResult(Activity.RESULT_OK);
-                            Toast.makeText(getActivity(), "Photo has been posted", Toast.LENGTH_SHORT).show();
-                            getActivity().finish();
-                        }
-                    });
-                }
-            } catch (JSONException e) {
-                Log.i(TAG, "call: error in newPost Listener");
-            }
-        }
-    };
-
 }
