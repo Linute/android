@@ -1,18 +1,15 @@
 package com.linute.linute.MainContent.Chat;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Arman on 1/16/16.
  */
-public class Rooms {
+public class ChatRoom {
 
     private String mRoomId;
 
-    private String mUserId; //id of person youre talking to
-    private String mUserName; //person youre talking to
-    private String mUserImage; //image of user youre talking to
+    public final ArrayList<User> users;
 
     private String mLastMessage; //last message
 
@@ -22,7 +19,8 @@ public class Rooms {
 
     private long mTime;
 
-    public Rooms() {
+
+/*public ChatRoom() {
         mRoomId = "";
         mUserId = "";
         mUserName = "";
@@ -31,25 +29,24 @@ public class Rooms {
         mHasUnread = false;
         mTime = 0;
         //mChatHeadList = new ArrayList<>();
-    }
+    }*/
 
 
     //, int usersCount, ArrayList<ChatHead> chatHeadList
 
-    public Rooms(String roomId,
-                 String userId,
-                 String userName,
-                 String lastMessage,
-                 String userImage,
-                 boolean hasUnread,
-                 long time
+    public ChatRoom(String roomId,
+                    String userId,
+                    String userName,
+                    String lastMessage,
+                    String userImage,
+                    boolean hasUnread,
+                    long time
     ) {
 
         mRoomId = roomId;
-        mUserId = userId;
-        mUserName = userName;
+        users = new ArrayList<>();
+        users.add(new User(userId, userName, userImage));
         mLastMessage = lastMessage;
-        mUserImage = userImage;
         mHasUnread = hasUnread;
         mTime = time;
 
@@ -57,17 +54,32 @@ public class Rooms {
         //mChatHeadList = chatHeadList;
     }
 
+
+    public ChatRoom(String mRoomId, ArrayList<User> users, String mLastMessage, boolean mHasUnread, long mTime) {
+        this.mRoomId = mRoomId;
+        this.users = users;
+        this.mLastMessage = mLastMessage;
+        this.mHasUnread = mHasUnread;
+        this.mTime = mTime;
+    }
+
+
+    public String getRoomName(){
+        String name = "";
+        for(int i = 0; i<users.size();i++){
+            name += users.get(i).userName;
+            if(i != users.size()-1){
+                name += ", ";
+            }
+        }
+        return name;
+    }
+
     public String getRoomId() {
         return mRoomId;
     }
 
-    public String getUserId() {
-        return mUserId;
-    }
 
-    public String getUserName() {
-        return mUserName;
-    }
 
     public String getLastMessage() {
         return mLastMessage;
@@ -76,10 +88,6 @@ public class Rooms {
     public void setLastMessage(String message)
     {
         mLastMessage = message;
-    }
-
-    public String getUserImage() {
-        return mUserImage;
     }
 
     public boolean hasUnread() {
@@ -98,7 +106,7 @@ public class Rooms {
         mTime = time;
     }
 
-    public void merge(Rooms rooms){
+    public void merge(ChatRoom rooms){
         mLastMessage = rooms.getLastMessage();
         mTime = rooms.getTime();
         mHasUnread = rooms.hasUnread();
@@ -106,11 +114,11 @@ public class Rooms {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Rooms)) {
+        if (!(o instanceof ChatRoom)) {
             return false;
         }
 
-        return mRoomId.equals(((Rooms) o).mRoomId);
+        return mRoomId.equals(((ChatRoom) o).mRoomId);
     }
 
 

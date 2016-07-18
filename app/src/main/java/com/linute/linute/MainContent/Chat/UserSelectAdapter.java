@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -27,15 +28,15 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final String TAG = UserSelectAdapter.class.getSimpleName();
     private String mImageSign;
     private Context aContext;
-    protected List<SearchUser> mSelectedUsers;
-    protected List<SearchUser> mSearchUserList;
+    protected ArrayList<User> mSelectedUsers;
+    protected List<User> mSearchUserList;
     private OnUserSelectedListener mOnUserSelectedListener;
 
     public void setOnUserSelectedListener(OnUserSelectedListener onUserSelectedListener) {
         this.mOnUserSelectedListener = onUserSelectedListener;
     }
 
-    public UserSelectAdapter(Context aContext, List<SearchUser> searchUserList) {
+    public UserSelectAdapter(Context aContext, List<User> searchUserList) {
         this.aContext = aContext;
         mSelectedUsers = new ArrayList<>();
         mSearchUserList = searchUserList;
@@ -57,15 +58,18 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                moveUser(holder.getAdapterPosition());
+
+                int position = holder.getAdapterPosition();
+                Toast.makeText(aContext, position + "", Toast.LENGTH_SHORT).show();
+                moveUser(position);
                 if (mOnUserSelectedListener != null) {
-                    mOnUserSelectedListener.onUserSelected(getUser(position));
+//                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
                 }
             }
         });
     }
 
-    private SearchUser getUser(int position) {
+    private User getUser(int position) {
         if (position < mSelectedUsers.size()) {
             return mSelectedUsers.get(position);
         } else {
@@ -74,7 +78,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     private void moveUser(int position) {
-        SearchUser user = getUser(position);
+        User user = getUser(position);
 
         if (mSelectedUsers.contains(user)) {
             int existPos = mSelectedUsers.indexOf(user);
@@ -85,7 +89,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             notifyItemInserted(mSelectedUsers.size() - 1);
         }
 
-        //todo remove selected users from search list
+        //todo remove selected users from search list (also needs to be done for incoming list)
     }
 
     @Override
@@ -93,7 +97,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         return mSelectedUsers.size() + mSearchUserList.size();
     }
 
-    public List<SearchUser> getSelectedUsers(){
+    public ArrayList<User> getSelectedUsers() {
         return mSelectedUsers;
     }
 
@@ -114,23 +118,23 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
 
-        void bindModel(SearchUser user) {
+        void bindModel(User user) {
             Glide.with(aContext)
-                    .load(Utils.getImageUrlOfUser(user.getUserImage()))
+                    .load(Utils.getImageUrlOfUser(user.userImage))
                     .dontAnimate()
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            mUserId = user.getUserId();
-            mUserName = user.getUserName();
+            mUserId = user.userId;
+            mUserName = user.userName;
 
-            vUserName.setText(user.getUserName());
+            vUserName.setText(user.userName);
         }
     }
 
     public interface OnUserSelectedListener {
-        void onUserSelected(SearchUser user);
+        void onUserSelected(User user);
     }
 }

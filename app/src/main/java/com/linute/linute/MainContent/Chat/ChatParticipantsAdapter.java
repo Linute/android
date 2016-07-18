@@ -22,7 +22,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     private static final int TYPE_ADD = 0;
     private static final int TYPE_PARTICIPANT = 1;
 
-    private ArrayList<ChatFragment.User> mParticipants;
+    private ArrayList<User> mParticipants;
 
     public void setAddPeopleListener(View.OnClickListener addPeopleListener) {
         this.mAddPeopleListener = addPeopleListener;
@@ -31,7 +31,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     private View.OnClickListener mAddPeopleListener;
 
 
-    public ChatParticipantsAdapter(ArrayList<ChatFragment.User> participants) {
+    public ChatParticipantsAdapter(ArrayList<User> participants) {
         this.mParticipants = participants;
     }
 
@@ -61,7 +61,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    public ChatFragment.User getItem(int position){
+    public User getItem(int position){
         //-1 to accommodate for add-participant list item
         return mParticipants.get(position-1);
     }
@@ -87,11 +87,11 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
             nameTV = (TextView) itemView.findViewById(R.id.participant_name);
         }
 
-        public void bind(ChatFragment.User user){
+        public void bind(User user){
             Glide.with(itemView.getContext())
-                    .load(Utils.getImageUrlOfUser(user.profileImage))
+                    .load(Utils.getImageUrlOfUser(user.userImage))
                     .into(profileImageIV);
-            nameTV.setText(user.name);
+            nameTV.setText(user.userName);
         }
     }
 

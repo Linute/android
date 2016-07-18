@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -46,6 +44,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,6 +76,13 @@ import static android.app.Activity.RESULT_OK;
  * Use the {@link ChatFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
+
+//:room:add users
+    //:room:delete users
+
+    //room:
+    //users: [;    ]
 public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
@@ -95,6 +101,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     //private static final int TYPING_TIMER_LENGTH = 600;
 
     private String mRoomId;
+    private boolean mRoomExists = true;
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
@@ -181,7 +188,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         args.putString(ROOM_ID, roomId);
 
         ArrayList<User> users = new ArrayList<>(1);
-        users.add(new User(otherPersonId, otherPersonName));
+        users.add(new User(otherPersonId, otherPersonName, ""));
         args.putParcelableArrayList(ARG_USERS, users);
 //        args.putString(OTHER_PERSON_NAME, otherPersonName);
 //        args.putString(OTHER_PERSON_ID, otherPersonId);
@@ -192,51 +199,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         return fragment;
     }
 
-    public static class User implements Parcelable {
-        public final String id;
-        public final String name;
-        public String profileImage;
-
-        public User(String id, String name, String profileImage) {
-            this.id = id;
-            this.name = name;
-            this.profileImage = profileImage;
-        }
-
-        public User(String id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel parcel, int i) {
-            parcel.writeString(id);
-            parcel.writeString(name);
-            parcel.writeString(profileImage);
-        }
-
-        public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
-            @Override
-            public User createFromParcel(Parcel parcel) {
-                return new User(
-                        parcel.readString(),
-                        parcel.readString(),
-                        parcel.readString()
-                );
-            }
-
-            @Override
-            public User[] newArray(int i) {
-                return new User[i];
-            }
-        };
-    }
-
 
     public static ChatFragment newInstance(String roomId, User... users) {
         ChatFragment fragment = new ChatFragment();
@@ -244,6 +206,15 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         ArrayList<User> usersList = new ArrayList<>(users.length);
         args.putString(ROOM_ID, roomId);
         args.putParcelableArrayList(ARG_USERS, usersList);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ChatFragment newInstance(String roomId, ArrayList<User> userList) {
+        ChatFragment fragment = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putString(ROOM_ID, roomId);
+        args.putParcelableArrayList(ARG_USERS, userList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -292,7 +263,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     MainActivity activity = (MainActivity) getActivity();
                     if (activity != null) {
 //                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance());
-                        Log.i("AAA", mUsers.toString());
                     }
                 }
             });
@@ -506,7 +476,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         vSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                attemptSend();
+                attemptSend(mInputMessageView.getText().toString().trim());
+                mInputMessageView.setText("");
             }
         });
 
@@ -814,11 +785,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         setFragmentState(FragmentState.LOADING_DATA);
         mProgressBar.setVisibility(View.VISIBLE);
 
-        JSONArray users = new JSONArray();
+        final JSONArray users = new JSONArray();
         for (User user : mUsers) {
-            users.put(user.id);
+            users.put(user.userId);
         }
         users.put(mUserId);
+
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -839,9 +811,33 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                         Log.i(TAG, "onResponse: " + object.toString(4));
+                        Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
+
+
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+
+                        if (mRoomId.equals("null")) {
+                            mRoomExists = false;
+                            mRoomId = ObjectId.get().toString();
+                            joinRoom(activity, false);
+                            //room doesn't exist, we stop loading.
+                            //next message sent will create the room
+                            if (activity != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+//                                        Utils.showServerErrorToast(getActivity());
+                                        mProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+//                            createRoom();
+                            return;
+                        }
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
+
 
                         JSONArray messages = object.getJSONArray("messages");
                         mSkip = object.getInt("totalCount") - 20;
@@ -856,7 +852,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
                         }
 
-                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                         if (activity != null) {
                             joinRoom(activity, false);
 
@@ -917,6 +912,60 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
     }
 
+    private void createRoom(final String message) {
+//        mRoomId = ObjectId.get().toString();
+
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+//        joinRoom(activity, false);
+
+
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+//                    Utils.showServerErrorToast(getActivity());
+                    mProgressBar.setVisibility(View.GONE);
+
+                    BaseTaptActivity activity1 = (BaseTaptActivity) getActivity();
+                    if (activity1 == null || !activity1.socketConnected() || mUserId == null
+                            || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
+                        return;
+                    }
+
+                    if (TextUtils.isEmpty(message)) {
+                        mInputMessageView.requestFocus();
+                        return;
+                    }
+
+                    newMessage = new JSONObject();
+
+                    JSONArray users = new JSONArray();
+                    for (User user : mUsers) {
+                        users.put(user.userId);
+                    }
+                    users.put(mUserId);
+
+                    try {
+                        newMessage.put("id", ObjectId.get().toString());
+                        newMessage.put("room", mRoomId);
+                        newMessage.put("users", users);
+                        newMessage.put("message", message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    // perform the sending message attempt.
+                    activity1.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+                }
+            });
+        }
+
+
+        setFragmentState(FragmentState.FINISHED_UPDATING);
+
+    }
+
     private void getChat() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
@@ -957,9 +1006,15 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
-                        if (mOtherPersonProfileImage == null && mUserId != null) {
+                        mUsers.clear();
+//                        if (mOtherPersonProfileImage == null && mUserId != null) {
                             for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
+                                mUsers.add(new User(
+                                        user.getString("id"),
+                                        user.getString("fullName"),
+                                        user.getString("profileImage")
+                                ));
                                 if (!mUserId.equals(user.getString("id"))) {
                                     mOtherPersonProfileImage = user.getString("profileImage");
                                     Activity activity = getActivity();
@@ -974,7 +1029,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     break;
                                 }
                             }
-                        }
+//                        }
 
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
@@ -1208,25 +1263,36 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //        }
 //    }
 
-    private void attemptSend() {
+    private void attemptSend(String message) {
+
+        if(!mRoomExists){
+            createRoom(message);
+            return;
+        }
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null || !activity.socketConnected() || mUserId == null
-                || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE)
+                || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
+        }
 
-        String message = mInputMessageView.getText().toString().trim();
         if (TextUtils.isEmpty(message)) {
             mInputMessageView.requestFocus();
             return;
         }
 
-        mInputMessageView.setText("");
         newMessage = new JSONObject();
 
+        JSONArray users = new JSONArray();
+        for (User user : mUsers) {
+            users.put(user.userId);
+        }
+        users.put(mUserId);
+
         try {
+            newMessage.put("id", ObjectId.get().toString());
             newMessage.put("room", mRoomId);
-            newMessage.put("user", mUserId);
+//            newMessage.put("users", users);
             newMessage.put("message", message);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -1694,13 +1760,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (isOneOnOne()) {
             String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
             for (User user : mUsers) {
-                if (user.id != me) {
-                    builder.append(user.name);
+                if (user.userId != me) {
+                    builder.append(user.userName);
                 }
             }
         } else {
             for (int i = 0; i < mUsers.size(); i++) {
-                builder.append(mUsers.get(i).name);
+                builder.append(mUsers.get(i).userName);
                 if (i != mUsers.size() - 1) {
                     builder.append(" ,");
                 }

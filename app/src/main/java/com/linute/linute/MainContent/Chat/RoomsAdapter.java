@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -32,13 +31,13 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private static final String TAG = RoomsAdapter.class.getSimpleName();
 
     private Context aContext;
-    private List<Rooms> mRoomsList;
+    private List<ChatRoom> mRoomsList;
     private SharedPreferences mSharedPreferences;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
     private short mLoadingMoreState = LoadMoreViewHolder.STATE_LOADING;
     private DeleteRoom mDeleteRoom;
 
-    public RoomsAdapter(Context aContext, List<Rooms> roomsList) {
+    public RoomsAdapter(Context aContext, List<ChatRoom> roomsList) {
         this.aContext = aContext;
         mRoomsList = roomsList;
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -100,7 +99,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         protected TextView vLastMessage;
         protected View vHasUnreadIcon;
         protected TextView vTimeStamp;
-        protected Rooms mRooms;
+        protected ChatRoom mRooms;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
@@ -122,8 +121,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
                                         mRooms.getRoomId(),
-                                        mRooms.getUserName(),
-                                        mRooms.getUserId()
+                                        mRooms.users
                                 )
                         );
                     }
@@ -134,7 +132,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    final Rooms room = mRooms;
+                    final ChatRoom room = mRooms;
                     new AlertDialog.Builder(aContext).setTitle("Messages")
                             .setItems(new String[]{"Delete"}, new DialogInterface.OnClickListener() {
                                 @Override
@@ -151,20 +149,20 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             });
         }
 
-        void bindModel(Rooms room) {
+        void bindModel(ChatRoom room) {
 
             mRooms = room;
 
             //set image
             Glide.with(aContext)
-                    .load(Utils.getImageUrlOfUser(room.getUserImage()))
+                    .load(Utils.getImageUrlOfUser(room.users.get(0).userImage))
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.color.pure_black)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setText(room.getUserName());
+            vUserName.setText(room.getRoomName());
             vLastMessage.setText(room.getLastMessage());
             vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
 
@@ -177,6 +175,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public interface DeleteRoom{
-        void deleteRoom(int position, Rooms room);
+        void deleteRoom(int position, ChatRoom room);
     }
 }

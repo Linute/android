@@ -37,7 +37,7 @@ public class ChatSettingsFragment extends BaseFragment {
     private static final String ARG_ROOM_ID = "roomId";
 
     private String mRoomId;
-    private ArrayList<ChatFragment.User> mParticipants = new ArrayList<>();
+    private ArrayList<User> mParticipants = new ArrayList<>();
     private ChatParticipantsAdapter mParticipantsAdapter;
 
     public static ChatSettingsFragment newInstance(String roomId){
@@ -73,7 +73,7 @@ public class ChatSettingsFragment extends BaseFragment {
                     mParticipants.clear();
                     for(int i=0;i<users.length();i++){
                         JSONObject user = users.getJSONObject(i);
-                        mParticipants.add(new ChatFragment.User(
+                        mParticipants.add(new User(
                                 user.getString("id"),
                                 user.getString("fullName"),
                                 user.getString("profileImage")

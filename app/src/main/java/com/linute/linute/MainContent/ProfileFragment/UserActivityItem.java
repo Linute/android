@@ -24,7 +24,7 @@ import java.util.TimeZone;
 public class UserActivityItem{
 
 //    private String mProfileImagePath;   //exact url to image
-//    private String mUserName;           //first name and last
+//    private String userName;           //first name and last
 //    private String mDescription;        //user hosted or attended event
 //    private String mEventImagePath;     //exact url to image of event
 //    private boolean isImagePost;

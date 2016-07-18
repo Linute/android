@@ -12,6 +12,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -19,9 +20,11 @@ import android.widget.EditText;
 
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.bson.types.ObjectId;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +45,7 @@ public class CreateChatFragment extends Fragment {
 
     private UserSelectAdapter mSearchAdapter;
 
-    private List<SearchUser> mSearchUserList = new ArrayList<>();
+    private List<User> mSearchUserList = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
 
     private EditText editText;
@@ -77,6 +80,53 @@ public class CreateChatFragment extends Fragment {
             }
         });
 
+        toolbar.inflateMenu(R.menu.menu_create_chat);
+        toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+
+                JSONObject newMessage = new JSONObject();
+
+                ArrayList<User> selectedUsers = mSearchAdapter.getSelectedUsers();
+                JSONArray users = new JSONArray();
+                for(User user:selectedUsers){
+                    users.put(user.userId);
+                }
+                String mUserId = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+                users.put(mUserId);
+
+                try {
+                    newMessage.put("id", ObjectId.get().toString());
+                    newMessage.put("room", ObjectId.get().toString());
+                    newMessage.put("users", users);
+                    newMessage.put("message", "Created Room");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    Log.i("AAA", newMessage.toString(4));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                // perform the sending message attempt.
+//                activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, selectedUsers));
+                return true;
+            }
+        });
+
+        /*
+        View createConvoView = toolbar.findViewById(R.id.menu_item_create);
+        createConvoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                activity.replaceContainerWithFragment(new ChatFragment());
+            }
+        });
+*/
         mSearchAdapter = new UserSelectAdapter(getActivity(), mSearchUserList);
 
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
@@ -88,7 +138,7 @@ public class CreateChatFragment extends Fragment {
 
         mSearchAdapter.setOnUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
             @Override
-            public void onUserSelected(SearchUser user) {
+            public void onUserSelected(User user) {
                /* BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
                     activity.getSupportFragmentManager().popBackStack();
@@ -166,7 +216,7 @@ public class CreateChatFragment extends Fragment {
                 } else {
 
 //                    mSearchUserList.clear();
-                    ArrayList<SearchUser> tempUsers = new ArrayList<>();
+                    ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray friends;
                     try {
@@ -175,10 +225,10 @@ public class CreateChatFragment extends Fragment {
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
-                            tempUsers.add(new SearchUser(
+                            tempUsers.add(new User(
                                     user.getString("id"),
-                                    user.getString("profileImage"),
-                                    user.getString("fullName")));
+                                    user.getString("fullName"), user.getString("profileImage")
+                            ));
                         }
 
                         mSearchUserList.clear();

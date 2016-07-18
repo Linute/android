@@ -57,7 +57,7 @@ public class RoomsActivityFragment extends BaseFragment {
 
     private RoomsAdapter mRoomsAdapter;
 
-    private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
+    private List<ChatRoom> mRoomsList = new ArrayList<>(); //list of rooms
     private String mUserId;
 
     private View mEmptyText;
@@ -94,7 +94,7 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.rooms_toolbar);
-        toolbar.setTitle("Inbox");
+        toolbar.setTitle("Messenger");
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,6 +112,7 @@ public class RoomsActivityFragment extends BaseFragment {
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
                     activity.addFragmentToContainer(new CreateChatFragment());
+
                 }
             }
         });
@@ -133,7 +134,7 @@ public class RoomsActivityFragment extends BaseFragment {
         });
         mRoomsAdapter.setDeleteRoom(new RoomsAdapter.DeleteRoom() {
             @Override
-            public void deleteRoom(int position, Rooms room) {
+            public void deleteRoom(int position, ChatRoom room) {
                 RoomsActivityFragment.this.deleteRoom(position, room);
             }
         });
@@ -219,6 +220,13 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         JSONObject jsonObj = new JSONObject(resString);
 
+
+                        String a = jsonObj.toString(4);
+                        for (String b:a.split("\n")){
+                            Log.i(TAG, b);
+                        }
+
+
                         mSkip = jsonObj.getInt("skip");
 
                         JSONArray rooms = jsonObj.getJSONArray("rooms");
@@ -228,7 +236,7 @@ public class RoomsActivityFragment extends BaseFragment {
                         boolean hasUnreadMessage;
 
                         JSONObject room;
-                        JSONObject user;
+                        JSONArray usersJson;
                         JSONArray messages;
                         JSONArray tempArray;
 
@@ -238,13 +246,23 @@ public class RoomsActivityFragment extends BaseFragment {
                         Date date;
 
                         SimpleDateFormat format = Utils.getDateFormat();
-                        final ArrayList<Rooms> tempRooms = new ArrayList<>();
+                        final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
 
                         for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
-                            user = room.getJSONArray("users").getJSONObject(0);
+                            usersJson = room.getJSONArray("users");
+                            ArrayList<User> usersList = new ArrayList<User>();
+                            for(int u = 0;u<usersJson.length();u++){
+                                JSONObject userJson = usersJson.getJSONObject(u);
+                                usersList.add(new User(
+                                        userJson.getString("id"),
+                                        userJson.getString("fullName"),
+                                        userJson.getString("profileImage")
+                                ));
+                            }
+
 
                             messages = room.getJSONArray("messages"); //list of messages in room
 
@@ -293,12 +311,10 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
                             //Throws error but still runs correctly... weird
-                            tempRooms.add(new Rooms(
+                            tempRooms.add(new ChatRoom(
                                     room.getString("id"),
-                                    user.getString("id"),
-                                    user.getString("fullName"),
+                                    usersList,
                                     lastMessage,
-                                    user.getString("profileImage"),
                                     hasUnreadMessage,
                                     date == null ? 0 : date.getTime()
                             ));
@@ -428,7 +444,7 @@ public class RoomsActivityFragment extends BaseFragment {
                         boolean hasUnreadMessage;
 
                         JSONObject room;
-                        JSONObject user;
+                        JSONArray users;
                         JSONArray messages;
 
                         JSONObject message;
@@ -436,14 +452,24 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         Date date;
 
-                        final ArrayList<Rooms> tempRooms = new ArrayList<>();
+                        final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
                         SimpleDateFormat format = Utils.getDateFormat();
 
                         for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
-                            user = room.getJSONArray("users").getJSONObject(0);
+                            users = room.getJSONArray("users");
+
+                            ArrayList<User> usersList = new ArrayList<User>();
+                            for(int u = 0; u < users.length(); u++){
+                                JSONObject user = users.getJSONObject(u);
+                                usersList.add(new User(
+                                        user.getString("id"),
+                                        user.getString("name"),
+                                        user.getString("profileImage")
+                                ));
+                            }
 
                             messages = room.getJSONArray("messages"); //list of messages in room
 
@@ -484,12 +510,10 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
                             //Throws error but still runs correctly... weird
-                            tempRooms.add(new Rooms(
+                            tempRooms.add(new ChatRoom(
                                     room.getString("id"),
-                                    user.getString("id"),
-                                    user.getString("fullName"),
+                                    usersList,
                                     lastMessage,
-                                    user.getString("profileImage"),
                                     hasUnreadMessage,
                                     date == null ? 0 : date.getTime()
                             ));
@@ -553,7 +577,7 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-                final Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
+                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -581,7 +605,7 @@ public class RoomsActivityFragment extends BaseFragment {
     };
 
 
-    private void deleteRoom(final int position, final Rooms room){
+    private void deleteRoom(final int position, final ChatRoom room){
         final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             JSONObject object = new JSONObject();
