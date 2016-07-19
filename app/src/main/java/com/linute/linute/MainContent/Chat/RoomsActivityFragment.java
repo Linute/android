@@ -111,7 +111,7 @@ public class RoomsActivityFragment extends BaseFragment {
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    activity.addFragmentToContainer(new CreateChatFragment());
+                    activity.replaceContainerWithFragment(new CreateChatFragment());
 
                 }
             }
