@@ -4,7 +4,7 @@
     android:layout_height="48dp"
     android:orientation="horizontal">
 
-    <ImageView
+    <com.linute.linute.UtilsAndHelpers.RoundedCornerImageView
         android:id="@+id/participant_image"
         android:padding="6dp"
         android:layout_width="48dp"

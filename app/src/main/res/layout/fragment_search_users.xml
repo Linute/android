@@ -30,6 +30,11 @@
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/selected_users"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/search_users"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

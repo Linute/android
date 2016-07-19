@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mikhail on 7/12/16.
@@ -22,7 +22,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     private static final int TYPE_ADD = 0;
     private static final int TYPE_PARTICIPANT = 1;
 
-    private ArrayList<User> mParticipants;
+    private List<User> mParticipants;
 
     public void setAddPeopleListener(View.OnClickListener addPeopleListener) {
         this.mAddPeopleListener = addPeopleListener;
@@ -31,7 +31,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     private View.OnClickListener mAddPeopleListener;
 
 
-    public ChatParticipantsAdapter(ArrayList<User> participants) {
+    public ChatParticipantsAdapter(List<User> participants) {
         this.mParticipants = participants;
     }
 
@@ -90,6 +90,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         public void bind(User user){
             Glide.with(itemView.getContext())
                     .load(Utils.getImageUrlOfUser(user.userImage))
+                    .asBitmap()
                     .into(profileImageIV);
             nameTV.setText(user.userName);
         }

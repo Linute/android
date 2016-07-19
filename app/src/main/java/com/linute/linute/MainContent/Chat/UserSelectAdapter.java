@@ -5,9 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -16,10 +16,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/19/16.
@@ -28,7 +25,6 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private static final String TAG = UserSelectAdapter.class.getSimpleName();
     private String mImageSign;
     private Context aContext;
-    protected ArrayList<User> mSelectedUsers;
     protected List<User> mSearchUserList;
     private OnUserSelectedListener mOnUserSelectedListener;
 
@@ -38,7 +34,6 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     public UserSelectAdapter(Context aContext, List<User> searchUserList) {
         this.aContext = aContext;
-        mSelectedUsers = new ArrayList<>();
         mSearchUserList = searchUserList;
         mImageSign = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
 
@@ -54,56 +49,31 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         ((SearchViewHolder) holder).bindModel(getUser(position));
-        holder.itemView.setBackgroundColor(position < mSelectedUsers.size() ? 0x2284CFDF : 0);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 int position = holder.getAdapterPosition();
-                Toast.makeText(aContext, position + "", Toast.LENGTH_SHORT).show();
-                moveUser(position);
                 if (mOnUserSelectedListener != null) {
-//                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
+                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
                 }
             }
         });
     }
 
     private User getUser(int position) {
-        if (position < mSelectedUsers.size()) {
-            return mSelectedUsers.get(position);
-        } else {
-            return mSearchUserList.get(position - mSelectedUsers.size());
-        }
+        return mSearchUserList.get(position);
     }
 
-    private void moveUser(int position) {
-        User user = getUser(position);
-
-        if (mSelectedUsers.contains(user)) {
-            int existPos = mSelectedUsers.indexOf(user);
-            mSelectedUsers.remove(user);
-            notifyItemRemoved(existPos);
-        } else {
-            mSelectedUsers.add(user);
-            notifyItemInserted(mSelectedUsers.size() - 1);
-        }
-
-        //todo remove selected users from search list (also needs to be done for incoming list)
-    }
 
     @Override
     public int getItemCount() {
-        return mSelectedUsers.size() + mSearchUserList.size();
-    }
-
-    public ArrayList<User> getSelectedUsers() {
-        return mSelectedUsers;
+        return mSearchUserList.size();
     }
 
     class SearchViewHolder extends RecyclerView.ViewHolder {
         protected LinearLayout vSearchItemLinear;
-        protected CircleImageView vUserImage;
+        protected ImageView vUserImage;
         protected TextView vUserName;
         protected String mUserId;
         protected String mUserName;
@@ -112,7 +82,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             super(itemView);
 
             vSearchItemLinear = (LinearLayout) itemView.findViewById(R.id.search_users_list_layout);
-            vUserImage = (CircleImageView) itemView.findViewById(R.id.search_users_list_image);
+            vUserImage = (ImageView) itemView.findViewById(R.id.search_users_list_image);
             vUserName = (TextView) itemView.findViewById(R.id.search_users_list_name);
 
         }
@@ -121,6 +91,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         void bindModel(User user) {
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(user.userImage))
+                    .asBitmap()
                     .dontAnimate()
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.drawable.image_loading_background)

@@ -8,7 +8,7 @@
               android:layout_height="wrap_content"
               android:orientation="horizontal">
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.linute.linute.UtilsAndHelpers.RoundedCornerImageView
         android:id="@+id/search_users_list_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
