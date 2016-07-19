@@ -79,10 +79,12 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
         });
 
         toolbar.inflateMenu(R.menu.menu_create_chat);
+
         toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+
                 activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
                 return true;
             }

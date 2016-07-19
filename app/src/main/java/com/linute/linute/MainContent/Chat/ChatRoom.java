@@ -1,5 +1,9 @@
 package com.linute.linute.MainContent.Chat;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -53,6 +57,8 @@ public class ChatRoom {
         //mUsersCount = usersCount;
         //mChatHeadList = chatHeadList;
     }
+
+//    public ChatRoom
 
 
     public ChatRoom(String mRoomId, ArrayList<User> users, String mLastMessage, boolean mHasUnread, long mTime) {
@@ -125,5 +131,27 @@ public class ChatRoom {
     @Override
     public int hashCode() {
         return mRoomId.hashCode();
+    }
+
+    public static ChatRoom fromJSON(JSONObject json) throws JSONException {
+        JSONArray usersJson = json.getJSONArray("users");
+        ArrayList<User> usersList = new ArrayList<User>();
+        for(int u = 0;u<usersJson.length();u++){
+            JSONObject userJson = usersJson.getJSONObject(u);
+            usersList.add(new User(
+                    userJson.getString("id"),
+                    userJson.getString("fullName"),
+                    userJson.getString("profileImage")
+            ));
+        }
+
+
+        return new ChatRoom(
+                json.getString("id"),
+                usersList,
+                "",
+                false,
+                0
+        );
     }
 }

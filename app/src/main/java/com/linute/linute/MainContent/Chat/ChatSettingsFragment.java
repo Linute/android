@@ -30,11 +30,13 @@ import okhttp3.Response;
 /**
  * Created by mikhail on 7/8/16.
  */
-public class ChatSettingsFragment extends BaseFragment {
+public class ChatSettingsFragment extends BaseFragment{
 
     public static final String TAG = "ChatSettingsFragment";
 
     private static final String ARG_ROOM_ID = "roomId";
+
+    private ChatRoom mChatRoom;
 
     private String mRoomId;
     private ArrayList<User> mParticipants = new ArrayList<>();
@@ -67,6 +69,14 @@ public class ChatSettingsFragment extends BaseFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     JSONObject chat = new JSONObject(response.body().string());
+
+                    mChatRoom = ChatRoom.fromJSON(chat);
+
+                    String chatString = chat.toString(4);
+                    for(String s:chatString.split("\n")){
+                        Log.i("AAA", s);
+                    }
+
                     JSONObject room = chat.getJSONObject("room");
                     JSONArray users = room.getJSONArray("users");
 
@@ -123,4 +133,9 @@ public class ChatSettingsFragment extends BaseFragment {
             mParticipantsAdapter.notifyDataSetChanged();
         }
     }
+
+
+
+
+
 }
