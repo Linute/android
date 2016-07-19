@@ -512,7 +512,7 @@ public class SendToFragment extends BaseFragment {
 
 
     public interface OnSendItems{
-        public void sendItems(HashSet<SendToItem> items);
+        void sendItems(HashSet<SendToItem> items);
     }
 
 

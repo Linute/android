@@ -130,15 +130,18 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
-
-                if (getSupportFragmentManager().getBackStackEntryCount() > 1) clearBackStack();
-
                 if (mPreviousItem != null) { //profile doesn't get checked
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 0) clearBackStack();
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
                 } else {
-                    getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 1){
+                        clearBackStack();
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                    }else {
+                        getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
+                    }
                 }
             }
         });
