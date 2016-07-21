@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,10 +89,12 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
 
         public void bind(User user){
+            String imageUrlOfUser = Utils.getImageUrlOfUser(user.userImage);
             Glide.with(itemView.getContext())
-                    .load(Utils.getImageUrlOfUser(user.userImage))
-                    .asBitmap()
+                    .load(imageUrlOfUser)
+//                    .asBitmap()
                     .into(profileImageIV);
+            Log.i("AAA", "asd " + imageUrlOfUser);
             nameTV.setText(user.userName);
         }
     }
@@ -107,10 +110,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
 
         public void bind(){
-            profileImageIV.setImageResource(R.drawable.ic_action_add);
+            profileImageIV.setImageResource(R.mipmap.ic_add_blue);
             nameTV.setText("Add People");
-
-
         }
 
         public interface AddClickPeopleListener{

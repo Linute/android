@@ -14,7 +14,9 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="160dp">
+        android:layout_height="160dp"
+        android:background="@color/grey_color"
+        >
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/setting_group_image"
             android:layout_width="match_parent"
@@ -23,7 +25,11 @@
             android:layout_gravity="center"
             />
     </FrameLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF000000"
+        />
     <TextView
         android:id="@+id/setting_group_name"
         android:layout_width="wrap_content"
@@ -32,6 +38,11 @@
         android:paddingStart="16dp"
         android:textSize="20sp"
         android:gravity="center_vertical"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF000000"
+        />
     <TextView
         android:id="@+id/setting_notifications_button"
         android:layout_width="match_parent"
@@ -41,14 +52,17 @@
         android:textSize="20sp"
         android:gravity="center_vertical"
         />
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF000000"
+        />
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list_participants"
         android:layout_width="match_parent"
+        android:layout_marginTop="8dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingStart="16dp"
-        />
+        android:layout_weight="1" />
 
     <TextView
         android:id="@+id/setting_leave_group"

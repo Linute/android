@@ -70,7 +70,7 @@ public class ChatSettingsFragment extends BaseFragment{
                 try {
                     JSONObject chat = new JSONObject(response.body().string());
 
-                    mChatRoom = ChatRoom.fromJSON(chat);
+                    mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
                     String chatString = chat.toString(4);
                     for(String s:chatString.split("\n")){
@@ -105,6 +105,7 @@ public class ChatSettingsFragment extends BaseFragment{
                 }
             }
         });
+        display();
     }
 
     @Nullable
@@ -131,6 +132,12 @@ public class ChatSettingsFragment extends BaseFragment{
             mParticipantsAdapter = new ChatParticipantsAdapter(mParticipants);
             participantsRV.setAdapter(mParticipantsAdapter);
             mParticipantsAdapter.notifyDataSetChanged();
+            mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    
+                }
+            });
         }
     }
 
