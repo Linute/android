@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -135,13 +136,38 @@ public class ChatSettingsFragment extends BaseFragment{
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    
+                    BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                    CreateChatFragment createChatFragment = CreateChatFragment.newInstance(mParticipants);
+                    createChatFragment.setOnUsersSelectedListener(new CreateChatFragment.OnUsersSelectedListener() {
+                        @Override
+                        public void onUsersSelected(ArrayList<User> users) {
+                            try {
+                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                JSONObject paramsJSON = new JSONObject();
+                                JSONArray usersJSON = new JSONArray();
+                                for (User user : users) {
+                                    usersJSON.put(user.userId);
+                                }
+                                paramsJSON.put("users", usersJSON);
+                                paramsJSON.put("room", mRoomId);
+                                activity.emitSocket(":room:add users", paramsJSON);
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    activity.replaceContainerWithFragment(createChatFragment);
                 }
             });
         }
     }
 
 
+    //:room:add users
+    //:room:delete users
+
+    //room:
+    //users: [;    ]
 
 
 

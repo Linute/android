@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,6 +48,8 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
 
     private ArrayList<User> mSelectedUsers = new ArrayList<>();
     private List<User> mSearchUserList = new ArrayList<>();
+
+    private ArrayList<User> mLockedUsers;
     private SharedPreferences mSharedPreferences;
 
     private EditText editText;
@@ -54,6 +57,26 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
     private Handler mHandler = new Handler();
     private RecyclerView mSelectedRV;
     private RecyclerView mSearchRV;
+
+    private final static String KEY_LOCKED_USERS = "selected";
+
+
+    public static CreateChatFragment newInstance(ArrayList<User> lockedUsers){
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
+        CreateChatFragment createChatFragment = new CreateChatFragment();
+        createChatFragment.setArguments(arguments);
+        return createChatFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        if(arguments != null) {
+            mLockedUsers = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,7 +108,11 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
             public boolean onMenuItemClick(MenuItem menuItem) {
                 BaseTaptActivity activity = (BaseTaptActivity)getActivity();
 
-                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
+                activity.getSupportFragmentManager().popBackStack();
+                if(mUsersSelectedListener != null){
+                    mUsersSelectedListener.onUsersSelected(mSelectedUsers);
+                }
+//                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
                 return true;
             }
         });
@@ -100,6 +127,8 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
 
 
         mSearchAdapter = new UserSelectAdapter(getActivity(), mSearchUserList);
+        mSearchAdapter.setLockedUserList(mLockedUsers);
+        mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
         mSearchRV.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -133,13 +162,21 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
 
     @Override
     public void onUserSelected(User user) {
-        if(!mSelectedUsers.contains(user)) {
+        int pos = User.findUser(mSelectedUsers, user);
+
+        if(pos == -1) {
             mSelectedUsers.add(user);
            // mSearchUserList.remove(user);
             mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
             mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size()-1);
             editText.setText("");
 //            mSearchAdapter.notifyDataSetChanged();
+        }else{
+            mSelectedUsers.remove(pos);
+            mSelectedRV.getLayoutManager().scrollToPosition(pos);
+            mSelectedAdapter.notifyItemRemoved(pos);
+            editText.setText("");
+
         }
     }
 
@@ -199,12 +236,20 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
-                            if(findUser(mSelectedUsers, user.getString("id")) == -1) {
+                            tempUsers.add(new User(
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    user.getString("profileImage")
+                            ));
+                            /*if(findUser(mSelectedUsers, user.getString("id")) != -1) {
                                 tempUsers.add(new User(
                                         user.getString("id"),
                                         user.getString("fullName"), user.getString("profileImage")
                                 ));
-                            }
+                            }else if(findUser(mLockedUsers, user.getString("id")) != -1){
+                                tempUsers.add(new User)
+                            }*/
+
                         }
 
                         mSearchUserList.clear();
@@ -241,24 +286,15 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
         });
     }
 
-    protected int findUser(ArrayList<User> users, User searchUser){
-        for(int i=0;i<users.size();i++){
-            User user = users.get(i);
-            if(user.userId.equals(searchUser.userId)){
-                return i;
-            }
-        }
-        return -1;
+
+    private OnUsersSelectedListener mUsersSelectedListener;
+
+    public void setOnUsersSelectedListener(OnUsersSelectedListener listener){
+        mUsersSelectedListener = listener;
     }
 
-    protected int findUser(ArrayList<User> users, String id){
-        for(int i=0;i<users.size();i++){
-            User user = users.get(i);
-            if(user.userId.equals(id)){
-                return i;
-            }
-        }
-        return -1;
+    interface OnUsersSelectedListener{
+        void onUsersSelected(ArrayList<User> users);
     }
 
 }

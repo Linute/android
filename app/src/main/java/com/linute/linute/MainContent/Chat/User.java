@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.Chat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 /**
  * Created by Arman on 1/19/16.
  */
@@ -48,5 +50,20 @@ public class User implements Parcelable{
             return new User[i];
         }
     };
+
+    public static int findUser(List<User> users, User searchUser){
+        return findUser(users, searchUser.userId);
+    }
+
+    public static int findUser(List<User> users, String id){
+        if(users == null) return -1;
+        for(int i=0;i<users.size();i++){
+            User user = users.get(i);
+            if(user.userId.equals(id)){
+                return i;
+            }
+        }
+        return -1;
+    }
 
 }

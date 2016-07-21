@@ -78,11 +78,6 @@ import static android.app.Activity.RESULT_OK;
  */
 
 
-//:room:add users
-    //:room:delete users
-
-    //room:
-    //users: [;    ]
 public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();

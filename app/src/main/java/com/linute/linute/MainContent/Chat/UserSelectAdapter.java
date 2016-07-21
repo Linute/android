@@ -26,6 +26,10 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private String mImageSign;
     private Context aContext;
     protected List<User> mSearchUserList;
+
+
+    protected List<User> mLockedUserList;
+    protected List<User> mSelectedUserList;
     private OnUserSelectedListener mOnUserSelectedListener;
 
     public void setOnUserSelectedListener(OnUserSelectedListener onUserSelectedListener) {
@@ -48,13 +52,20 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        ((SearchViewHolder) holder).bindModel(getUser(position));
+        final User user = getUser(position);
+        ItemStatus status =
+                User.findUser(mSelectedUserList, user) != -1 ?
+                        ItemStatus.Selected :
+                User.findUser(mLockedUserList, user) != -1 ?
+                        ItemStatus.Locked :
+                //else
+                        ItemStatus.None;
+
+        ((SearchViewHolder) holder).bindModel(user, status);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                int position = holder.getAdapterPosition();
-                if (mOnUserSelectedListener != null) {
+                if (mOnUserSelectedListener != null && User.findUser(mLockedUserList, user) == -1) {
                     mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
                 }
             }
@@ -69,6 +80,12 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public int getItemCount() {
         return mSearchUserList.size();
+    }
+
+    public enum ItemStatus{
+        None,
+        Selected,
+        Locked
     }
 
     class SearchViewHolder extends RecyclerView.ViewHolder {
@@ -88,7 +105,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
 
 
-        void bindModel(User user) {
+        void bindModel(User user, ItemStatus status) {
             Glide.with(aContext)
                     .load(Utils.getImageUrlOfUser(user.userImage))
                     .asBitmap()
@@ -102,7 +119,32 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             mUserName = user.userName;
 
             vUserName.setText(user.userName);
+
+            switch (status){
+                case None:
+                    itemView.setClickable(true);
+                    itemView.setBackgroundColor(0);
+                    break;
+                case Selected:
+                    itemView.setClickable(true);
+                    itemView.setBackgroundColor(0x4484CFDF);
+                    break;
+                case Locked:
+                    itemView.setClickable(false);
+                    itemView.setBackgroundColor(0x1184CFDF);
+
+                    break;
+            }
         }
+    }
+
+
+    public void setLockedUserList(List<User> mLockedUserList) {
+        this.mLockedUserList = mLockedUserList;
+    }
+
+    public void setSelectedUserList(List<User> mSelectedUserList) {
+        this.mSelectedUserList = mSelectedUserList;
     }
 
     public interface OnUserSelectedListener {
