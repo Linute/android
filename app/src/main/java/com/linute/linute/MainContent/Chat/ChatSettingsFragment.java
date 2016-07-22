@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -42,6 +43,7 @@ public class ChatSettingsFragment extends BaseFragment{
 
     private static final String ARG_ROOM_ID = "roomId";
     public static final int MENU_USER_DELETE = 0;
+    public static final String KEY_USER = "KEY_USER";
 
     private ChatRoom mChatRoom;
 
@@ -150,7 +152,10 @@ public class ChatSettingsFragment extends BaseFragment{
                 @Override
                 public void onCreateContextMenu(ContextMenu contextMenu, User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
                     contextMenu.setHeaderTitle(user.userName);
-                    contextMenu.add(0, MENU_USER_DELETE,0,"Delete");
+                    MenuItem item =contextMenu.add(0, MENU_USER_DELETE,0,"Delete");
+                    Intent i = new Intent();
+                    i.putExtra(KEY_USER, user);
+                    item.setIntent(i);
                 }
             });
 
@@ -170,12 +175,13 @@ public class ChatSettingsFragment extends BaseFragment{
                                 for (User user : users) {
                                     usersJSON.put(user.userId);
                                 }
-                                paramsJSON.put("users", usersJSON);
                                 paramsJSON.put("room", mRoomId);
-                                activity.emitSocket(API_Methods.VERSION+ ":room:add users", paramsJSON);
+                                paramsJSON.put("users", usersJSON);
+
+                                activity.emitSocket(API_Methods.VERSION+ ":rooms:add users", paramsJSON);
                                 //TODO add users
 
-                                Log.i("AAA","add user");
+                                Log.i("AAA","add user \n" + paramsJSON.toString(4));
                             }catch (JSONException e){
                                 e.printStackTrace();
                             }
@@ -193,6 +199,25 @@ public class ChatSettingsFragment extends BaseFragment{
             case MENU_USER_DELETE:
                 Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
                 //TODO remove user
+                try {
+                    User user = item.getIntent().getExtras().getParcelable(KEY_USER);
+
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                    JSONObject paramsJSON = new JSONObject();
+                    JSONArray usersJSON = new JSONArray();
+                    usersJSON.put(user.userId);
+                    paramsJSON.put("room", mRoomId);
+                    paramsJSON.put("users", usersJSON);
+
+
+                    activity.emitSocket(API_Methods.VERSION+ ":rooms:delete users", paramsJSON);
+                    //TODO add users
+
+                    Log.i("AAA","delete user \n" + paramsJSON.toString(4));
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+
 
 
             default:
