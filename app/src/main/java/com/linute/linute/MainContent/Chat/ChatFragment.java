@@ -40,6 +40,7 @@ import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -574,6 +575,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         activity.connectSocket("delivered", onDelivered);
         activity.connectSocket("messages refresh", onRefresh);
 
+        activity.connectSocket("add users", onAddUsers);
+
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
         delivered = new JSONObject();
@@ -719,6 +722,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.disconnectSocket("error", onError);
             activity.disconnectSocket("delivered", onDelivered);
             activity.disconnectSocket("messages refresh", onRefresh);
+            activity.disconnectSocket("add users", onAddUsers);
+
         }
     }
 
@@ -774,6 +779,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return false;
         }
     };
+
+
 
 
     private void getRoomAndChat() {
@@ -1500,6 +1507,31 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
                 }
             });
+        }
+    };
+
+    private Emitter.Listener onAddUsers = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.i("AAA", args[0].toString());
+            try {
+                JSONObject event = new JSONObject(args[0].toString());
+                JSONArray users = event.getJSONArray("users");
+                if(getView() != null) {
+                    StringBuilder names = new StringBuilder();
+                    for(int i=0;i<users.length();i++){
+                        names.append(users.getJSONObject(i).getString("firstName"));
+                    }
+                    CustomSnackbar.make(getView(), " Added", CustomSnackbar.LENGTH_SHORT).show();
+
+                }
+
+            }catch(JSONException e){
+
+                if(getView() != null)
+                    CustomSnackbar.make(getView(), "User(s) Added", CustomSnackbar.LENGTH_SHORT).show();
+            }
+
         }
     };
 

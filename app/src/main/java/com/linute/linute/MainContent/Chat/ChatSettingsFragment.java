@@ -37,7 +37,7 @@ import okhttp3.Response;
 /**
  * Created by mikhail on 7/8/16.
  */
-public class ChatSettingsFragment extends BaseFragment{
+public class ChatSettingsFragment extends BaseFragment {
 
     public static final String TAG = "ChatSettingsFragment";
 
@@ -51,7 +51,7 @@ public class ChatSettingsFragment extends BaseFragment{
     private ArrayList<User> mParticipants = new ArrayList<>();
     private ChatParticipantsAdapter mParticipantsAdapter;
 
-    public static ChatSettingsFragment newInstance(String roomId){
+    public static ChatSettingsFragment newInstance(String roomId) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ROOM_ID, roomId);
@@ -85,7 +85,7 @@ public class ChatSettingsFragment extends BaseFragment{
                     JSONArray users = room.getJSONArray("users");
 
                     mParticipants.clear();
-                    for(int i=0;i<users.length();i++){
+                    for (int i = 0; i < users.length(); i++) {
                         JSONObject user = users.getJSONObject(i);
                         mParticipants.add(new User(
                                 user.getString("id"),
@@ -130,11 +130,11 @@ public class ChatSettingsFragment extends BaseFragment{
         super.onCreateContextMenu(menu, v, menuInfo);
     }*/
 
-    public void display(){
+    public void display() {
         View view = getView();
-        if(view == null) return;
+        if (view == null) return;
 
-        if(mParticipants != null) {
+        if (mParticipants != null) {
             RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
             participantsRV.setLayoutManager(new LinearLayoutManager(getContext()));
             mParticipantsAdapter = new ChatParticipantsAdapter(mParticipants);
@@ -144,17 +144,42 @@ public class ChatSettingsFragment extends BaseFragment{
             mParticipantsAdapter.setUserClickListener(new ChatParticipantsAdapter.OnUserClickListener() {
                 @Override
                 public void OnUserClick(User user) {
-                    BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.userName, user.userId);
                     activity.addFragmentToContainer(fragment);
                 }
 
                 @Override
-                public void onCreateContextMenu(ContextMenu contextMenu, User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                public void onCreateContextMenu(ContextMenu contextMenu,final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
                     contextMenu.setHeaderTitle(user.userName);
-                    MenuItem item =contextMenu.add(0, MENU_USER_DELETE,0,"Delete");
+                    MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     Intent i = new Intent();
                     i.putExtra(KEY_USER, user);
+                    item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem menuItem) {
+                            Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
+                            try {
+                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                JSONObject paramsJSON = new JSONObject();
+                                JSONArray usersJSON = new JSONArray();
+                                usersJSON.put(user.userId);
+                                paramsJSON.put("room", mRoomId);
+                                paramsJSON.put("users", usersJSON);
+
+
+                                activity.emitSocket(API_Methods.VERSION + ":rooms:delete users", paramsJSON);
+                                //TODO add users
+
+                                Log.i("AAA", "delete user \n" + paramsJSON.toString(4));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                return false;
+                            }
+                            return true;
+
+                        }
+                    });
                     item.setIntent(i);
                 }
             });
@@ -163,7 +188,7 @@ public class ChatSettingsFragment extends BaseFragment{
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     SelectUserFragment selectUserFragment = SelectUserFragment.newInstance(mParticipants);
                     selectUserFragment.setOnUsersSelectedListener(new SelectUserFragment.OnUsersSelectedListener() {
                         @Override
@@ -178,11 +203,11 @@ public class ChatSettingsFragment extends BaseFragment{
                                 paramsJSON.put("room", mRoomId);
                                 paramsJSON.put("users", usersJSON);
 
-                                activity.emitSocket(API_Methods.VERSION+ ":rooms:add users", paramsJSON);
+                                activity.emitSocket(API_Methods.VERSION + ":rooms:add users", paramsJSON);
                                 //TODO add users
 
-                                Log.i("AAA","add user \n" + paramsJSON.toString(4));
-                            }catch (JSONException e){
+                                Log.i("AAA", "add user \n" + paramsJSON.toString(4));
+                            } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
@@ -193,44 +218,12 @@ public class ChatSettingsFragment extends BaseFragment{
         }
     }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case MENU_USER_DELETE:
-                Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
-                //TODO remove user
-                try {
-                    User user = item.getIntent().getExtras().getParcelable(KEY_USER);
-
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    JSONObject paramsJSON = new JSONObject();
-                    JSONArray usersJSON = new JSONArray();
-                    usersJSON.put(user.userId);
-                    paramsJSON.put("room", mRoomId);
-                    paramsJSON.put("users", usersJSON);
-
-
-                    activity.emitSocket(API_Methods.VERSION+ ":rooms:delete users", paramsJSON);
-                    //TODO add users
-
-                    Log.i("AAA","delete user \n" + paramsJSON.toString(4));
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-
-
-
-            default:
-                return super.onContextItemSelected(item);
-        }
-    }
 
     //:room:add users
     //:room:delete users
 
     //room:
     //users: [;    ]
-
 
 
 }
