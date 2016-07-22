@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,11 +26,19 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     private List<User> mParticipants;
 
+    private View.OnClickListener mAddPeopleListener;
+    private OnUserClickListener mUserClickListener;
+
+
     public void setAddPeopleListener(View.OnClickListener addPeopleListener) {
         this.mAddPeopleListener = addPeopleListener;
     }
 
-    private View.OnClickListener mAddPeopleListener;
+    public void setUserClickListener(OnUserClickListener mPeopleClickListener) {
+        this.mUserClickListener = mPeopleClickListener;
+    }
+
+
 
 
     public ChatParticipantsAdapter(List<User> participants) {
@@ -52,7 +61,24 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)){
             case TYPE_PARTICIPANT:
+                final User user = getItem(position);
                 ((ParticipantVH)holder).bind(getItem(position));
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if(mUserClickListener != null){
+                            mUserClickListener.OnUserClick(user);
+                        }
+                    }
+                });
+                holder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                    @Override
+                    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                        if(mUserClickListener != null) {
+                            mUserClickListener.onCreateContextMenu(contextMenu,user,contextMenuInfo);
+                        }
+                    }
+                });
                 return;
             case TYPE_ADD:
                 ((AddVH)holder).bind();
@@ -114,10 +140,12 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
             nameTV.setText("Add People");
         }
 
-        public interface AddClickPeopleListener{
-            public void onAddPeoplClick();
-        }
+    }
 
+
+    interface OnUserClickListener {
+        void OnUserClick(User user);
+        void onCreateContextMenu(ContextMenu contextMenu, User user, ContextMenu.ContextMenuInfo contextMenuInfo);
     }
 
 

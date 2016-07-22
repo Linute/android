@@ -6,11 +6,15 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -36,6 +40,7 @@ public class ChatSettingsFragment extends BaseFragment{
     public static final String TAG = "ChatSettingsFragment";
 
     private static final String ARG_ROOM_ID = "roomId";
+    public static final int MENU_USER_DELETE = 0;
 
     private ChatRoom mChatRoom;
 
@@ -122,6 +127,11 @@ public class ChatSettingsFragment extends BaseFragment{
         display();
     }
 
+   /* @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }*/
+
     public void display(){
         View view = getView();
         Log.i("AAA", mParticipants + " " + view);
@@ -133,6 +143,23 @@ public class ChatSettingsFragment extends BaseFragment{
             mParticipantsAdapter = new ChatParticipantsAdapter(mParticipants);
             participantsRV.setAdapter(mParticipantsAdapter);
             mParticipantsAdapter.notifyDataSetChanged();
+
+            mParticipantsAdapter.setUserClickListener(new ChatParticipantsAdapter.OnUserClickListener() {
+                @Override
+                public void OnUserClick(User user) {
+                    BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.userName, user.userId);
+                    activity.addFragmentToContainer(fragment);
+                }
+
+                @Override
+                public void onCreateContextMenu(ContextMenu contextMenu, User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                    contextMenu.setHeaderTitle(user.userName);
+                    contextMenu.add(0, MENU_USER_DELETE,0,"Delete");
+                }
+            });
+
+
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -162,6 +189,18 @@ public class ChatSettingsFragment extends BaseFragment{
         }
     }
 
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_USER_DELETE:
+                Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
+
+
+
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
 
     //:room:add users
     //:room:delete users
