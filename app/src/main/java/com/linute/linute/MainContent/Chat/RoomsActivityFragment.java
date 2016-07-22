@@ -15,8 +15,8 @@ import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -229,12 +229,6 @@ public class RoomsActivityFragment extends BaseFragment {
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
-
-
-                        String a = jsonObj.toString(4);
-                        for (String b:a.split("\n")){
-                            Log.i(TAG, b);
-                        }
 
 
                         mSkip = jsonObj.getInt("skip");

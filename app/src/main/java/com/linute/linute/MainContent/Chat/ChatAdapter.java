@@ -18,6 +18,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAGE;
@@ -33,6 +34,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
+    private Map<String, User> mUsers;
 
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
@@ -41,10 +43,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
     //private SharedPreferences aSharedPreferences;
 
-    public ChatAdapter(Context aContext, List<Chat> aChatList) {
+    public ChatAdapter(Context aContext, List<Chat> aChatList, Map<String, User> users) {
         this.aContext = aContext;
         this.aChatList = aChatList;
+        this.mUsers = users;
     }
+
+
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -74,7 +79,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
-            ((ChatViewHolder) holder).bindModel(aChatList.get(position - 1));
+            Chat chat = aChatList.get(position - 1);
+            ((ChatViewHolder) holder).bindModel(chat, isHead(position));
         }else if (holder instanceof LoadMoreViewHolder){
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
@@ -98,6 +104,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
     }
 
+    public boolean isHead(int position){
+        return position == 2 || !aChatList.get(position-2).getOwnerId().equals(aChatList.get(position-1).getOwnerId());
+    }
+
     public void setFooterState(short footerState) {
         mFooterState = footerState;
     }
@@ -106,6 +116,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected TextView vUserMessage;
         protected TextView vUserTime;
         protected ImageView vActionImage;
+        protected ImageView vProfileImage;
 
         protected ImageView vImage;
         protected View vFrame;
@@ -120,6 +131,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
             vFrame = itemView.findViewById(R.id.frame);
             vImage = (ImageView) itemView.findViewById(R.id.image);
+            vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -150,9 +162,23 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             });
         }
 
-        void bindModel(Chat chat) {
+        void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
+            if(chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
+                if (isHead) {
+                    User u = mUsers.get(chat.getOwnerId());
+                    if (u != null) {
+                        Glide.with(itemView.getContext())
+                                .load(Utils.getImageUrlOfUser(u.userImage))
+                                .into(vProfileImage);
+                    } else {
+                        vProfileImage.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    vProfileImage.setVisibility(View.INVISIBLE);
+                }
+            }
             switch (chat.getMessageType()) {
                 case Chat.MESSAGE_IMAGE:
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);

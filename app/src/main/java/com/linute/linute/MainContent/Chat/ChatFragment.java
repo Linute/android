@@ -137,6 +137,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private Handler mHandler = new Handler();
     private LinearLayoutManager mLinearLayoutManager;
+    private Map<String, User> mUserMap;
 
     //private SharedPreferences mSharedPreferences;
 
@@ -158,7 +159,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        mChatAdapter = new ChatAdapter(getActivity(), mChatList);
+        mUserMap = new HashMap<>();
+        mChatAdapter = new ChatAdapter(getActivity(), mChatList, mUserMap);
         //mChatHeadList = new ArrayList<>();
         //mChatHeadAddedList = new ArrayList<>();
     }
@@ -225,6 +227,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
 
             mUsers = getArguments().getParcelableArrayList(ARG_USERS);
+            for(User user:mUsers){
+                mUserMap.put(user.userId, user);
+            }
         }
     }
 
@@ -1115,7 +1120,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void addMessage(JSONObject data) throws JSONException {
-//        Log.d(TAG, "addMessage: " + data.toString(4));
+        Log.d(TAG, "addMessage: " + data.toString(4));
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 

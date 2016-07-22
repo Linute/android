@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
@@ -78,11 +79,6 @@ public class ChatSettingsFragment extends BaseFragment{
 
                     mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
-                    String chatString = chat.toString(4);
-                    for(String s:chatString.split("\n")){
-                        Log.i("AAA", s);
-                    }
-
                     JSONObject room = chat.getJSONObject("room");
                     JSONArray users = room.getJSONArray("users");
 
@@ -134,7 +130,6 @@ public class ChatSettingsFragment extends BaseFragment{
 
     public void display(){
         View view = getView();
-        Log.i("AAA", mParticipants + " " + view);
         if(view == null) return;
 
         if(mParticipants != null) {
@@ -177,9 +172,10 @@ public class ChatSettingsFragment extends BaseFragment{
                                 }
                                 paramsJSON.put("users", usersJSON);
                                 paramsJSON.put("room", mRoomId);
-                                activity.emitSocket(":room:add users", paramsJSON);
+                                activity.emitSocket(API_Methods.VERSION+ ":room:add users", paramsJSON);
                                 //TODO add users
 
+                                Log.i("AAA","add user");
                             }catch (JSONException e){
                                 e.printStackTrace();
                             }

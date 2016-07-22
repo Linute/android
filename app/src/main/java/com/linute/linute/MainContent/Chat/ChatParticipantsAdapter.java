@@ -120,7 +120,6 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
                     .load(imageUrlOfUser)
 //                    .asBitmap()
                     .into(profileImageIV);
-            Log.i("AAA", "asd " + imageUrlOfUser);
             nameTV.setText(user.userName);
         }
     }

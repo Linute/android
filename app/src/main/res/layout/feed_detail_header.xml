@@ -20,7 +20,7 @@
         android:src="@drawable/image_loading_background"
         app:riv_border_color="@color/seperator_color"
         app:riv_border_width="1dp"
-        app:riv_corner_radius="2dp"/>
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
 
     <TextView

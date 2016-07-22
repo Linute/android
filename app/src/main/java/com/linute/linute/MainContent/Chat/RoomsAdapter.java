@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -19,10 +20,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by Arman on 1/20/16.
@@ -94,7 +92,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     class RoomsViewHolder extends RecyclerView.ViewHolder {
-        protected CircleImageView vUserImage;
+        protected ImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
         protected View vHasUnreadIcon;
@@ -104,7 +102,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public RoomsViewHolder(View itemView) {
             super(itemView);
 
-            vUserImage = (CircleImageView) itemView.findViewById(R.id.rooms_user_image);
+            vUserImage = (ImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
             vHasUnreadIcon = itemView.findViewById(R.id.room_unread);

@@ -10,7 +10,7 @@
         android:layout_margin="6dp"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        app:riv_corner_radius="6dp"
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"
         />
 
     <TextView
