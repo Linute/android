@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
-    tools:context=".MainContent.Chat.CreateChatFragment">
+    tools:context=".MainContent.Chat.SelectUserFragment">
 
 
     <android.support.v7.widget.Toolbar

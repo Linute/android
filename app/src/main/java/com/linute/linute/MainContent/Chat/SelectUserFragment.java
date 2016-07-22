@@ -39,9 +39,9 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class CreateChatFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
+public class SelectUserFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TAG = CreateChatFragment.class.getSimpleName();
+    private static final String TAG = SelectUserFragment.class.getSimpleName();
 
     private UserSelectAdapter mSearchAdapter;
     private SelectedUsersAdapter mSelectedAdapter;
@@ -61,12 +61,12 @@ public class CreateChatFragment extends Fragment implements UserSelectAdapter.On
     private final static String KEY_LOCKED_USERS = "selected";
 
 
-    public static CreateChatFragment newInstance(ArrayList<User> lockedUsers){
+    public static SelectUserFragment newInstance(ArrayList<User> lockedUsers){
         Bundle arguments = new Bundle();
         arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
-        CreateChatFragment createChatFragment = new CreateChatFragment();
-        createChatFragment.setArguments(arguments);
-        return createChatFragment;
+        SelectUserFragment selectUserFragment = new SelectUserFragment();
+        selectUserFragment.setArguments(arguments);
+        return selectUserFragment;
     }
 
     @Override

@@ -164,8 +164,8 @@ public class ChatSettingsFragment extends BaseFragment{
                 @Override
                 public void onClick(View view) {
                     BaseTaptActivity activity = (BaseTaptActivity)getActivity();
-                    CreateChatFragment createChatFragment = CreateChatFragment.newInstance(mParticipants);
-                    createChatFragment.setOnUsersSelectedListener(new CreateChatFragment.OnUsersSelectedListener() {
+                    SelectUserFragment selectUserFragment = SelectUserFragment.newInstance(mParticipants);
+                    selectUserFragment.setOnUsersSelectedListener(new SelectUserFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
                             try {
@@ -178,12 +178,14 @@ public class ChatSettingsFragment extends BaseFragment{
                                 paramsJSON.put("users", usersJSON);
                                 paramsJSON.put("room", mRoomId);
                                 activity.emitSocket(":room:add users", paramsJSON);
+                                //TODO add users
+
                             }catch (JSONException e){
                                 e.printStackTrace();
                             }
                         }
                     });
-                    activity.replaceContainerWithFragment(createChatFragment);
+                    activity.replaceContainerWithFragment(selectUserFragment);
                 }
             });
         }
@@ -194,7 +196,7 @@ public class ChatSettingsFragment extends BaseFragment{
         switch (item.getItemId()) {
             case MENU_USER_DELETE:
                 Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
-
+                //TODO remove user
 
 
             default:
