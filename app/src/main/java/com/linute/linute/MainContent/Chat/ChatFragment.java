@@ -919,59 +919,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
     }
 
-    private void createRoom(final String message) {
-//        mRoomId = ObjectId.get().toString();
 
-        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
-//        joinRoom(activity, false);
-
-
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-//                    Utils.showServerErrorToast(getActivity());
-                    mProgressBar.setVisibility(View.GONE);
-
-                    BaseTaptActivity activity1 = (BaseTaptActivity) getActivity();
-                    if (activity1 == null || !activity1.socketConnected() || mUserId == null
-                            || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
-                        return;
-                    }
-
-                    if (TextUtils.isEmpty(message)) {
-                        mInputMessageView.requestFocus();
-                        return;
-                    }
-
-                    newMessage = new JSONObject();
-
-                    JSONArray users = new JSONArray();
-                    for (User user : mUsers) {
-                        users.put(user.userId);
-                    }
-                    users.put(mUserId);
-
-                    try {
-                        newMessage.put("id", ObjectId.get().toString());
-                        newMessage.put("room", mRoomId);
-                        newMessage.put("users", users);
-                        newMessage.put("message", message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-
-                    // perform the sending message attempt.
-                    activity1.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
-                }
-            });
-        }
-
-
-        setFragmentState(FragmentState.FINISHED_UPDATING);
-
-    }
 
     private void getChat() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
@@ -1308,6 +1256,60 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+    }
+
+    private void createRoom(final String message) {
+//        mRoomId = ObjectId.get().toString();
+
+        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+//        joinRoom(activity, false);
+
+
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+//                    Utils.showServerErrorToast(getActivity());
+                    mProgressBar.setVisibility(View.GONE);
+
+                    BaseTaptActivity activity1 = (BaseTaptActivity) getActivity();
+                    if (activity1 == null || !activity1.socketConnected() || mUserId == null
+                            || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
+                        return;
+                    }
+
+                    if (TextUtils.isEmpty(message)) {
+                        mInputMessageView.requestFocus();
+                        return;
+                    }
+
+                    newMessage = new JSONObject();
+
+                    JSONArray users = new JSONArray();
+                    for (User user : mUsers) {
+                        users.put(user.userId);
+                    }
+                    users.put(mUserId);
+
+                    try {
+                        newMessage.put("id", ObjectId.get().toString());
+                        newMessage.put("room", mRoomId);
+                        newMessage.put("users", users);
+                        newMessage.put("message", message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        return;
+                    }
+
+                    // perform the sending message attempt.
+                    activity1.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+                }
+            });
+        }
+
+
+        setFragmentState(FragmentState.FINISHED_UPDATING);
+
     }
 
 

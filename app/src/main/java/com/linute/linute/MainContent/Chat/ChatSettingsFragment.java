@@ -117,14 +117,57 @@ public class ChatSettingsFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_chat_settings, container, false);
+
     }
 
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        View notificationsView = view.findViewById(R.id.setting_notifications_button);
+        notificationsView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                final int selected = 0;
+                String[] durText = new String[]{"1 Hour", "8 Hours", "24 Hours", "Until I ummute"};
+                int[] durValues = new int[]{60, 8 * 60, 24 * 60, 0};
+
+                new MuteDialog(view.getContext(), durText, durValues)
+                        .setDurationSelectedListener(new MuteDialog.DurationSelectedListener() {
+                            @Override
+                            public void onDurationSelected(int item) {
+                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                if (activity != null) {
+                                    try {
+                                        JSONObject jsonParams = new JSONObject();
+                                        jsonParams.put("mute", true);
+                                        jsonParams.put("room", mRoomId);
+                                        jsonParams.put("time", item);
+                                        activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                        Log.i("AAA", "mute");
+                                    }catch(JSONException e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        })
+                        .create().show();
+            }
+        });
+
         display();
     }
+
+    /*
+    * i added version + ':rooms:mute’ for disable push notification for each room
+
+{
+mute: true|false,
+room: id of room
+}
+    *
+    * */
 
    /* @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -248,7 +291,7 @@ public class ChatSettingsFragment extends BaseFragment {
                         try {
                             JSONObject event = new JSONObject(args[0].toString());
                             JSONArray users = event.getJSONArray("users");
-                            final int oldSize = mParticipants.size();
+//                            final int oldSize = mParticipants.size();
                             for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
                                 mParticipants.add(new User(
@@ -259,7 +302,7 @@ public class ChatSettingsFragment extends BaseFragment {
                             }
 
 //                            mParticipantsAdapter.notifyItemRangeInserted(oldSize, mParticipants.size() - 1);
-mParticipantsAdapter.notifyDataSetChanged();
+                            mParticipantsAdapter.notifyDataSetChanged();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -296,7 +339,7 @@ mParticipantsAdapter.notifyDataSetChanged();
                             }
 
                             for (int i : removedPositions) {
-                                mParticipantsAdapter.notifyItemRemoved(i+1);
+                                mParticipantsAdapter.notifyItemRemoved(i + 1);
                             }
 //                            mParticipantsAdapter.notifyDataSetChanged();
 

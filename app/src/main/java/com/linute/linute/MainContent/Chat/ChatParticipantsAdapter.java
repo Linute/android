@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,9 +49,9 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType){
             case TYPE_ADD:
-                return new AddVH(inflater.inflate(R.layout.fragment_chat_settings_participant, parent, false));
+                return new AddVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
             case TYPE_PARTICIPANT:
-                return new ParticipantVH(inflater.inflate(R.layout.fragment_chat_settings_participant, parent, false));
+                return new ParticipantVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
         }
         return null;
     }
@@ -110,8 +109,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         public ParticipantVH(View itemView) {
             super(itemView);
-            profileImageIV = (ImageView)itemView.findViewById(R.id.participant_image);
-            nameTV = (TextView) itemView.findViewById(R.id.participant_name);
+            profileImageIV = (ImageView)itemView.findViewById(R.id.search_users_list_image);
+            nameTV = (TextView) itemView.findViewById(R.id.search_users_list_name);
         }
 
         public void bind(User user){
@@ -130,8 +129,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         public AddVH(View itemView) {
             super(itemView);
-            profileImageIV = (ImageView)itemView.findViewById(R.id.participant_image);
-            nameTV = (TextView) itemView.findViewById(R.id.participant_name);
+            profileImageIV = (ImageView)itemView.findViewById(R.id.search_users_list_image);
+            nameTV = (TextView) itemView.findViewById(R.id.search_users_list_name);
         }
 
         public void bind(){
