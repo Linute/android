@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.socket.emitter.Emitter;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -150,7 +151,7 @@ public class ChatSettingsFragment extends BaseFragment {
                 }
 
                 @Override
-                public void onCreateContextMenu(ContextMenu contextMenu,final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
                     contextMenu.setHeaderTitle(user.userName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     Intent i = new Intent();
@@ -218,6 +219,97 @@ public class ChatSettingsFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        activity.connectSocket("add users", onAddUsers);
+        activity.connectSocket("delete users", onDeleteUsers);
+
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        activity.disconnectSocket("add users", onAddUsers);
+        activity.disconnectSocket("delete users", onDeleteUsers);
+    }
+
+    private Emitter.Listener onAddUsers = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject event = new JSONObject(args[0].toString());
+                            JSONArray users = event.getJSONArray("users");
+                            final int oldSize = mParticipants.size();
+                            for (int i = 0; i < users.length(); i++) {
+                                JSONObject user = users.getJSONObject(i);
+                                mParticipants.add(new User(
+                                        user.getString("id"),
+                                        user.getString("fullName"),
+                                        user.getString("profileImage")
+                                ));
+                            }
+
+//                            mParticipantsAdapter.notifyItemRangeInserted(oldSize, mParticipants.size() - 1);
+mParticipantsAdapter.notifyDataSetChanged();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }
+    };
+
+    private Emitter.Listener onDeleteUsers = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject event = new JSONObject(args[0].toString());
+                            JSONArray users = event.getJSONArray("users");
+
+                            final int[] removedPositions = new int[users.length()];
+                            for (int i = 0; i < users.length(); i++) {
+                                JSONObject user = users.getJSONObject(0);
+                                for (int j = 0; j < mParticipants.size(); j++) {
+                                    if (user.getString("id").equals(mParticipants.get(j).userId)) {
+                                        removedPositions[i] = j;
+                                        mParticipants.remove(j);
+                                        break;
+                                    }
+                                }
+                            }
+
+                            for (int i : removedPositions) {
+                                mParticipantsAdapter.notifyItemRemoved(i+1);
+                            }
+//                            mParticipantsAdapter.notifyDataSetChanged();
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                });
+            }
+        }
+    };
 
     //:room:add users
     //:room:delete users
