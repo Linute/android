@@ -1,9 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
-import android.content.Intent;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -43,19 +45,30 @@ public class ChatSettingsFragment extends BaseFragment {
     public static final String TAG = "ChatSettingsFragment";
 
     private static final String ARG_ROOM_ID = "roomId";
+    public static final String ARG_USER = "userId";
     public static final int MENU_USER_DELETE = 0;
-    public static final String KEY_USER = "KEY_USER";
-
-    private ChatRoom mChatRoom;
+    public static final int NO_MUTE = 0;
 
     private String mRoomId;
-    private ArrayList<User> mParticipants = new ArrayList<>();
-    private ChatParticipantsAdapter mParticipantsAdapter;
+    private String mUserId;
 
-    public static ChatSettingsFragment newInstance(String roomId) {
+
+    private ChatRoom mChatRoom;
+    private User mUser;
+    private ArrayList<User> mParticipants = new ArrayList<>();
+    private long mMuteRelease = 0;
+
+
+    private ChatParticipantsAdapter mParticipantsAdapter;
+    public static final String[] MUTE_OPTIONS_TEXT = new String[]{"1 Hour", "8 Hours", "24 Hours", "Until I Unmute"};
+    public static final Integer[] MUTE_OPTIONS_VALUES = new Integer[]{60, 8 * 60, 24 * 60, -1};
+    private TextView mNotificationSettingsView;
+
+    public static ChatSettingsFragment newInstance(String roomId, String userId) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ROOM_ID, roomId);
+        args.putString(ARG_USER, userId);
         fragment.setArguments(args);
 
         return fragment;
@@ -66,6 +79,7 @@ public class ChatSettingsFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mRoomId = getArguments().getString(ARG_ROOM_ID);
+            mUserId = getArguments().getString(ARG_USER);
         }
         Map<String, String> params = new HashMap<>();
         params.put("room", mRoomId);
@@ -79,20 +93,43 @@ public class ChatSettingsFragment extends BaseFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     JSONObject chat = new JSONObject(response.body().string());
+                    Log.d(TAG, chat.toString(4));
 
                     mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
                     JSONObject room = chat.getJSONObject("room");
                     JSONArray users = room.getJSONArray("users");
 
+                    JSONArray muteList = room.getJSONArray("mute");
+                    JSONObject mute = null;
+
+                    if(muteList != null)
+                    for(int i = 0; i < muteList.length();i++){
+                        if(muteList.getJSONObject(i).getString("user").equals(mUserId)){
+                            mute = muteList.getJSONObject(i);
+                            break;
+                        }
+                    }
+                    if (mute != null) {
+                        mMuteRelease = mute.getLong("time");
+                    }
+
                     mParticipants.clear();
                     for (int i = 0; i < users.length(); i++) {
                         JSONObject user = users.getJSONObject(i);
-                        mParticipants.add(new User(
-                                user.getString("id"),
-                                user.getString("fullName"),
-                                user.getString("profileImage")
-                        ));
+                        if (user.getString("id").equals(mUserId)) {
+                            mUser = new User(
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    user.getString("profileImage")
+                            );
+                        } else {
+                            mParticipants.add(new User(
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    user.getString("profileImage")
+                            ));
+                        }
                     }
 
                 } catch (JSONException e) {
@@ -124,37 +161,6 @@ public class ChatSettingsFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        View notificationsView = view.findViewById(R.id.setting_notifications_button);
-        notificationsView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                final int selected = 0;
-                String[] durText = new String[]{"1 Hour", "8 Hours", "24 Hours", "Until I ummute"};
-                int[] durValues = new int[]{60, 8 * 60, 24 * 60, 0};
-
-                new MuteDialog(view.getContext(), durText, durValues)
-                        .setDurationSelectedListener(new MuteDialog.DurationSelectedListener() {
-                            @Override
-                            public void onDurationSelected(int item) {
-                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                                if (activity != null) {
-                                    try {
-                                        JSONObject jsonParams = new JSONObject();
-                                        jsonParams.put("mute", true);
-                                        jsonParams.put("room", mRoomId);
-                                        jsonParams.put("time", item);
-                                        activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
-                                        Log.i("AAA", "mute");
-                                    }catch(JSONException e){
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        })
-                        .create().show();
-            }
-        });
 
         display();
     }
@@ -197,25 +203,12 @@ room: id of room
                 public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
                     contextMenu.setHeaderTitle(user.userName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
-                    Intent i = new Intent();
-                    i.putExtra(KEY_USER, user);
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem menuItem) {
                             Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
                             try {
-                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                                JSONObject paramsJSON = new JSONObject();
-                                JSONArray usersJSON = new JSONArray();
-                                usersJSON.put(user.userId);
-                                paramsJSON.put("room", mRoomId);
-                                paramsJSON.put("users", usersJSON);
-
-
-                                activity.emitSocket(API_Methods.VERSION + ":rooms:delete users", paramsJSON);
-                                //TODO add users
-
-                                Log.i("AAA", "delete user \n" + paramsJSON.toString(4));
+                                deleteUser(user);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 return false;
@@ -224,7 +217,6 @@ room: id of room
 
                         }
                     });
-                    item.setIntent(i);
                 }
             });
 
@@ -238,19 +230,7 @@ room: id of room
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
                             try {
-                                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                                JSONObject paramsJSON = new JSONObject();
-                                JSONArray usersJSON = new JSONArray();
-                                for (User user : users) {
-                                    usersJSON.put(user.userId);
-                                }
-                                paramsJSON.put("room", mRoomId);
-                                paramsJSON.put("users", usersJSON);
-
-                                activity.emitSocket(API_Methods.VERSION + ":rooms:add users", paramsJSON);
-                                //TODO add users
-
-                                Log.i("AAA", "add user \n" + paramsJSON.toString(4));
+                                addUsers(users);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -260,6 +240,121 @@ room: id of room
                 }
             });
         }
+
+
+        mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
+        updateNotificationView();
+        mNotificationSettingsView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+
+                if (mMuteRelease == NO_MUTE) {
+                    new RadioButtonDialog<>(view.getContext(), MUTE_OPTIONS_TEXT, MUTE_OPTIONS_VALUES)
+                            .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
+                                @Override
+                                public void onDurationSelected(Integer item) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", true);
+                                            jsonParams.put("room", mRoomId);
+                                            jsonParams.put("time", item);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
+                                            updateNotificationView();
+
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .create().show();
+                }else{
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Unmute this chat?")
+                            .setPositiveButton("Unmute", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", false);
+                                            jsonParams.put("room", mRoomId);
+                                            jsonParams.put("time", 0);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            mMuteRelease = 0;
+                                            updateNotificationView();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create().show();
+                }
+            }
+        });
+
+
+        View leaveGroupView = view.findViewById(R.id.setting_leave_group);
+        leaveGroupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Leave Group")
+                        .setMessage("If you leave the group, you will lose access to the chat log. You can be added back to the group")
+                        .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                try {
+                                    deleteUser(mUser);
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                                getActivity().getSupportFragmentManager().popBackStack();
+                                getActivity().getSupportFragmentManager().popBackStack();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create().show();
+            }
+        });
+
+
+    }
+
+    private void updateNotificationView() {
+        if(mNotificationSettingsView == null) return;
+        mNotificationSettingsView.setText(mMuteRelease == NO_MUTE ? "Mute Chat" : "Unmute Chat");
+    }
+
+    private void deleteUser(User user) throws JSONException {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        JSONObject paramsJSON = new JSONObject();
+        JSONArray usersJSON = new JSONArray();
+        usersJSON.put(user.userId);
+        paramsJSON.put("room", mRoomId);
+        paramsJSON.put("users", usersJSON);
+
+
+        activity.emitSocket(API_Methods.VERSION + ":rooms:delete users", paramsJSON);
+    }
+
+    private void addUsers(ArrayList<User> users) throws JSONException {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        JSONObject paramsJSON = new JSONObject();
+        JSONArray usersJSON = new JSONArray();
+        for (User user : users) {
+            usersJSON.put(user.userId);
+        }
+        paramsJSON.put("room", mRoomId);
+        paramsJSON.put("users", usersJSON);
+
+        activity.emitSocket(API_Methods.VERSION + ":rooms:add users", paramsJSON);
     }
 
     @Override

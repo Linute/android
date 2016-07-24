@@ -161,10 +161,10 @@ public class SelectUserFragment extends Fragment implements UserSelectAdapter.On
     }
 
     @Override
-    public void onUserSelected(User user) {
-        int pos = User.findUser(mSelectedUsers, user);
+    public void onUserSelected(User user, int adapterPosition) {
+        int listPosition = User.findUser(mSelectedUsers, user);
 
-        if(pos == -1) {
+        if(listPosition == -1) {
             mSelectedUsers.add(user);
            // mSearchUserList.remove(user);
             mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
@@ -172,12 +172,13 @@ public class SelectUserFragment extends Fragment implements UserSelectAdapter.On
             editText.setText("");
 //            mSearchAdapter.notifyDataSetChanged();
         }else{
-            mSelectedUsers.remove(pos);
-            mSelectedRV.getLayoutManager().scrollToPosition(pos);
-            mSelectedAdapter.notifyItemRemoved(pos);
+            mSelectedUsers.remove(listPosition);
+            mSelectedRV.getLayoutManager().scrollToPosition(listPosition);
+            mSelectedAdapter.notifyItemRemoved(listPosition);
             editText.setText("");
 
         }
+        mSearchAdapter.notifyItemChanged(adapterPosition);
     }
 
     @Override

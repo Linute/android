@@ -66,7 +66,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             @Override
             public void onClick(View view) {
                 if (mOnUserSelectedListener != null && User.findUser(mLockedUserList, user) == -1) {
-                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()));
+                    mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()), holder.getAdapterPosition());
                 }
             }
         });
@@ -148,6 +148,6 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public interface OnUserSelectedListener {
-        void onUserSelected(User user);
+        void onUserSelected(User user, int position);
     }
 }

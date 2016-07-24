@@ -274,7 +274,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId));
+                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId, mUserId));
             }
         });
 

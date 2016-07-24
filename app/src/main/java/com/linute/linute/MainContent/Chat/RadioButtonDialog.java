@@ -7,19 +7,19 @@ import android.support.v7.app.AlertDialog;
 /**
  * Created by mikhail on 7/23/16.
  */
-public class MuteDialog extends AlertDialog.Builder{
+public class RadioButtonDialog<T> extends AlertDialog.Builder{
 
     private int mSelectedItem = 0;
-    private int[] mItemValues;
+    private T[] mItemValues;
 
-    private DurationSelectedListener mDurationSelectedListener;
+    private DurationSelectedListener<T> mDurationSelectedListener;
 
-    public MuteDialog setDurationSelectedListener(DurationSelectedListener mDurationSelectedListener) {
+    public RadioButtonDialog setDurationSelectedListener(DurationSelectedListener<T> mDurationSelectedListener) {
         this.mDurationSelectedListener = mDurationSelectedListener;
         return this;
     }
 
-    public MuteDialog(Context context, String[] itemText, int[] itemValues) {
+    public RadioButtonDialog(Context context, String[] itemText, T[] itemValues) {
         super(context);
         this.mItemValues = itemValues;
         setSingleChoiceItems(itemText, mSelectedItem, new DialogInterface.OnClickListener() {
@@ -45,7 +45,7 @@ public class MuteDialog extends AlertDialog.Builder{
                 });
     }
 
-    interface DurationSelectedListener{
-        void onDurationSelected(int item);
+    interface DurationSelectedListener<T>{
+        void onDurationSelected(T item);
     }
 }
