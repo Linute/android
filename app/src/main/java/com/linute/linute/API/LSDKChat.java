@@ -3,9 +3,12 @@ package com.linute.linute.API;
 import android.content.Context;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,5 +50,23 @@ public class LSDKChat {
         Map<String, Object> params = new HashMap<>();
         params.put("users", users);
         return API_Methods.post("rooms", header, params, callback);
+    }
+
+    public Call setGroupNameAndPhoto(String roomId, String name, String imagePath, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>();
+        if(name != null) {
+            params.put("name", name);
+        }
+        if(imagePath != null) {
+            try {
+                params.put("image", Utils.encodeFileBase64(new File(imagePath)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return API_Methods.put("/rooms/"+roomId,header, params, callback);
+
     }
 }

@@ -185,6 +185,14 @@ public class Utils {
         return "http://images.linute.com/profiles/anonymous/"+image;
     }
 
+    public static String getChatImageUrl(String image){
+        return "http://images.linute.com/rooms/original/"+image;
+    }
+
+    public static String getChatThumbnailUrl(String image){
+        return "http://images.linute.com/rooms/thumbnail/"+image;
+    }
+
     public static String getFilterImageUrl(String image){
         return "http://images.linute.com/filters/"+image;
     }

@@ -1,6 +1,9 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
@@ -13,15 +16,19 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,12 +55,15 @@ public class ChatSettingsFragment extends BaseFragment {
     public static final String ARG_USER = "userId";
     public static final int MENU_USER_DELETE = 0;
     public static final int NO_MUTE = 0;
+    public static final int REQUEST_PHOTO = 1;
 
     private String mRoomId;
     private String mUserId;
 
 
     private ChatRoom mChatRoom;
+    private String mRoomName;
+    private String mRoomImage;
     private User mUser;
     private ArrayList<User> mParticipants = new ArrayList<>();
     private long mMuteRelease = 0;
@@ -98,7 +108,9 @@ public class ChatSettingsFragment extends BaseFragment {
                     mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
                     JSONObject room = chat.getJSONObject("room");
-                    JSONArray users = room.getJSONArray("users");
+
+                    mRoomName = room.getString("name");
+                    mRoomImage = room.getString("image");
 
                     JSONArray muteList = room.getJSONArray("mute");
                     JSONObject mute = null;
@@ -113,6 +125,8 @@ public class ChatSettingsFragment extends BaseFragment {
                     if (mute != null) {
                         mMuteRelease = mute.getLong("time");
                     }
+
+                    JSONArray users = room.getJSONArray("users");
 
                     mParticipants.clear();
                     for (int i = 0; i < users.length(); i++) {
@@ -220,7 +234,6 @@ room: id of room
                 }
             });
 
-
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -240,6 +253,53 @@ room: id of room
                 }
             });
         }
+
+        ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
+        Glide.with(getContext())
+                .load(Utils.getChatImageUrl(mRoomImage))
+                .into(groupImageSettingView);
+
+        groupImageSettingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent getPhotoIntent = new Intent();
+                getPhotoIntent.setType("image/*");
+                getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
+                getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+            }
+        });
+
+
+        View groupNameSettingView = view.findViewById(R.id.setting_group_name);
+        groupNameSettingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final EditTextDialog editTextDialog = new EditTextDialog(getContext());
+                editTextDialog
+                        .setValue(mRoomName)
+                        .setTitle("Set Group Name")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                mRoomName = editTextDialog.getValue();
+                                new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, editTextDialog.getValue(), null, new Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        e.printStackTrace();
+                                    }
+
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        Log.d(TAG, response.toString());
+                                    }
+                                });
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create().show();
+            }
+        });
 
 
         mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
@@ -300,6 +360,9 @@ room: id of room
         });
 
 
+
+
+
         View leaveGroupView = view.findViewById(R.id.setting_leave_group);
         leaveGroupView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -323,6 +386,9 @@ room: id of room
                         .create().show();
             }
         });
+
+
+
 
 
     }
@@ -448,6 +514,30 @@ room: id of room
             }
         }
     };
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_PHOTO) {
+            Uri uri = data.getData();
+            Uri path = Uri.parse(GalleryFragment.getPath(getActivity(), uri));
+
+            new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, null, path.getPath(), new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    Log.d(TAG, response.toString());
+                }
+            });
+        }
+
+
+    }
 
     //:room:add users
     //:room:delete users

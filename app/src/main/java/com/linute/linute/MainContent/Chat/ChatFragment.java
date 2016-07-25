@@ -101,6 +101,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
+    private String mChatName;
+    private String mChatImage;
     //    private String mOtherPersonName; //name of person youre talking to
     private String mOtherPersonProfileImage;
 
@@ -746,13 +748,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
 
 
-        if (mOtherPersonProfileImage == null) {
+        if (isOneOnOne() && mOtherPersonProfileImage == null) {
             otherPersonIconIV.setVisibility(View.GONE);
-
-        } else {
+            return;
+        }
+        if(isOneOnOne()){
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
+                    .dontAnimate()
+                    .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                    .placeholder(R.drawable.image_loading_background)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .listener(mGlideListener)
+                    .into(otherPersonIconIV);
+        }else{
+            Context context = rootV.getContext();
+            Glide.with(context)
+                    .load(Utils.getImageUrlOfUser(mChatImage))
                     .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
@@ -1799,10 +1812,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         } else {
-            for (int i = 0; i < mUsers.size(); i++) {
-                builder.append(mUsers.get(i).userName);
-                if (i != mUsers.size() - 1) {
-                    builder.append(" ,");
+            if(!"".equals(mChatName)){
+                return mChatName;
+            }else {
+                for (int i = 0; i < mUsers.size(); i++) {
+                    builder.append(mUsers.get(i).userName);
+                    if (i != mUsers.size() - 1) {
+                        builder.append(", ");
+                    }
                 }
             }
         }
