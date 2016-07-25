@@ -33,8 +33,8 @@
             android:layout_marginBottom="4dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="@color/user_comment_color"
-            android:textSize="@dimen/body_font_size"
+            android:textColor="@color/eighty_black"
+            android:textSize="@dimen/header_font_size"
             android:textStyle="bold"
             tools:text="Naomi Test"/>
 

@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -162,6 +163,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
+            vUserName.setTypeface((mRooms.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
             vUserName.setText(room.getRoomName());
             vLastMessage.setText(room.getLastMessage());
             vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));

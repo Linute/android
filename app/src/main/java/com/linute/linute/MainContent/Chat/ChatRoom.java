@@ -23,6 +23,9 @@ public class ChatRoom {
 
     private long mTime;
 
+    private boolean mIsMuted;
+    private long mMutedUntil;
+
 
 /*public ChatRoom() {
         mRoomId = "";
@@ -58,8 +61,30 @@ public class ChatRoom {
         //mChatHeadList = chatHeadList;
     }
 
-//    public ChatRoom
 
+
+    public ChatRoom(String roomId,
+                    String userId,
+                    String userName,
+                    String lastMessage,
+                    String userImage,
+                    boolean hasUnread,
+                    long time,
+                    boolean isMuted,
+                    long mutedUntil
+    ) {
+
+        mRoomId = roomId;
+        users = new ArrayList<>();
+        users.add(new User(userId, userName, userImage));
+        mLastMessage = lastMessage;
+        mHasUnread = hasUnread;
+        mTime = time;
+        mIsMuted = isMuted;
+        mMutedUntil = mutedUntil;
+        //mUsersCount = usersCount;
+        //mChatHeadList = chatHeadList;
+    }
 
     public ChatRoom(String mRoomId, ArrayList<User> users, String mLastMessage, boolean mHasUnread, long mTime) {
         this.mRoomId = mRoomId;
