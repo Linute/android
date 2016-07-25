@@ -49,7 +49,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch (viewType){
             case TYPE_ADD:
-                return new AddVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
+                return new AddVH(inflater.inflate(R.layout.fragment_chat_settings_add_user, parent, false));
             case TYPE_PARTICIPANT:
                 return new ParticipantVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
         }

@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -116,6 +117,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     if (activity != null) {
                         //mark all as read
                         mRooms.setHasUnread(false);
+                        Log.i("AAA", ""+mRooms.users);
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
                                         mRooms.getRoomId(),

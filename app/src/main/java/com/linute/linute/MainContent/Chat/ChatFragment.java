@@ -200,7 +200,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
 
-    public static ChatFragment newInstance(String roomId, User... users) {
+    /*public static ChatFragment newInstance(String roomId, User... users) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
         ArrayList<User> usersList = new ArrayList<>(users.length);
@@ -209,7 +209,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         fragment.setArguments(args);
         return fragment;
     }
-
+*/
     public static ChatFragment newInstance(String roomId, ArrayList<User> userList) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
@@ -768,7 +768,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             if (!"".equals(mChatImage)) {
                 Context context = rootV.getContext();
                 Glide.with(context)
-                        .load(Utils.getImageUrlOfUser(mChatImage))
+                        .load(Utils.getChatThumbnailUrl(mChatImage))
                         .dontAnimate()
                         .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                         .placeholder(R.drawable.image_loading_background)
@@ -816,7 +816,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (User user : mUsers) {
             users.put(user.userId);
         }
-        users.put(mUserId);
+//        users.put(mUserId);
 
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
             @Override

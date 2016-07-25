@@ -73,6 +73,7 @@ public class ChatSettingsFragment extends BaseFragment {
     public static final String[] MUTE_OPTIONS_TEXT = new String[]{"1 Hour", "8 Hours", "24 Hours", "Until I Unmute"};
     public static final Integer[] MUTE_OPTIONS_VALUES = new Integer[]{60, 8 * 60, 24 * 60, 0};
     private TextView mNotificationSettingsView;
+    private TextView mNotificationSettingsIndicatorView;
 
     public static ChatSettingsFragment newInstance(String roomId, String userId) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
@@ -112,7 +113,7 @@ public class ChatSettingsFragment extends BaseFragment {
                     mRoomName = room.getString("name");
                     mRoomImage = room.getString("image");
 
-                    JSONArray muteList = room.getJSONArray("mute");
+                    /*JSONArray muteList = room.getJSONArray("mute");
                     JSONObject mute = null;
 
                     if(muteList != null)
@@ -124,6 +125,15 @@ public class ChatSettingsFragment extends BaseFragment {
                     }
                     if (mute != null) {
                         mMuteRelease = mute.getLong("time");
+                    }*/
+
+                    Object mute = room.get("unMuteAt");
+                    if(mute != null){
+                        try {
+                            mMuteRelease = Long.valueOf(mute.toString());
+                        }catch (NumberFormatException e){
+
+                        }
                     }
 
                     JSONArray users = room.getJSONArray("users");
@@ -314,6 +324,7 @@ room: id of room
 
 
         mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
+        mNotificationSettingsIndicatorView = (TextView)view.findViewById(R.id.setting_notifications_indicator);
         updateNotificationView();
         mNotificationSettingsView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -405,8 +416,8 @@ room: id of room
     }
 
     private void updateNotificationView() {
-        if(mNotificationSettingsView == null) return;
-        mNotificationSettingsView.setText(mMuteRelease == NO_MUTE ? "Mute Chat" : "Unmute Chat");
+        if(mNotificationSettingsIndicatorView == null) return;
+        mNotificationSettingsIndicatorView.setText(mMuteRelease == NO_MUTE ? "On" : "Off");
     }
 
     private void deleteUser(User user) throws JSONException {
