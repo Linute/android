@@ -765,15 +765,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     .listener(mGlideListener)
                     .into(otherPersonIconIV);
         } else {
-            Context context = rootV.getContext();
-            Glide.with(context)
-                    .load(Utils.getImageUrlOfUser(mChatImage))
-                    .dontAnimate()
-                    .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
-                    .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                    .listener(mGlideListener)
-                    .into(otherPersonIconIV);
+            if (!"".equals(mChatImage)) {
+                Context context = rootV.getContext();
+                Glide.with(context)
+                        .load(Utils.getImageUrlOfUser(mChatImage))
+                        .dontAnimate()
+                        .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                        .placeholder(R.drawable.image_loading_background)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                        .listener(mGlideListener)
+                        .into(otherPersonIconIV);
+            }else {
+                otherPersonIconIV.setImageResource(R.mipmap.ic_default_group);
+            }
         }
     }
 

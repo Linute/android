@@ -255,10 +255,13 @@ room: id of room
         }
 
         ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
-        Glide.with(getContext())
-                .load(Utils.getChatImageUrl(mRoomImage))
-                .into(groupImageSettingView);
-
+        if(!"".equals(mRoomImage)) {
+            Glide.with(getContext())
+                    .load(Utils.getChatImageUrl(mRoomImage))
+                    .into(groupImageSettingView);
+        }else{
+            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
+        }
         groupImageSettingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
