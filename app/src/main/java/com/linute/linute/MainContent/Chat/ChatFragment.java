@@ -230,7 +230,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
 
             mUsers = getArguments().getParcelableArrayList(ARG_USERS);
-            for(User user:mUsers){
+            for (User user : mUsers) {
                 mUserMap.put(user.userId, user);
             }
         }
@@ -535,8 +535,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public void onResume() {
         super.onResume();
 
-        updateRoomIconView();
-
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
@@ -557,10 +555,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             joinRoom(activity, true);
 
             //finished loading and there were no messages
-            if (getFragmentState() == FragmentState.FINISHED_UPDATING && mChatList.isEmpty()) {
-                vEmptyChatView.setVisibility(View.VISIBLE);
-            }
         }
+
+        if (getFragmentState() == FragmentState.FINISHED_UPDATING && mChatList.isEmpty()) {
+            vEmptyChatView.setVisibility(View.VISIBLE);
+        }
+
+        updateRoomIconView();
+
     }
 
     public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
@@ -752,7 +754,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             otherPersonIconIV.setVisibility(View.GONE);
             return;
         }
-        if(isOneOnOne()){
+        if (isOneOnOne()) {
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
@@ -762,7 +764,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .listener(mGlideListener)
                     .into(otherPersonIconIV);
-        }else{
+        } else {
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mChatImage))
@@ -792,8 +794,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return false;
         }
     };
-
-
 
 
     private void getRoomAndChat() {
@@ -838,6 +838,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
 
+                        //room doesn't exist
                         if (mRoomId.equals("null")) {
                             mRoomExists = false;
                             mRoomId = ObjectId.get().toString();
@@ -848,12 +849,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-//                                        Utils.showServerErrorToast(getActivity());
                                         mProgressBar.setVisibility(View.GONE);
                                     }
                                 });
                             }
-//                            createRoom();
                             return;
                         }
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
@@ -933,7 +932,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
 
-
     private void getChat() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
@@ -976,27 +974,27 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
                         mUsers.clear();
 //                        if (mOtherPersonProfileImage == null && mUserId != null) {
-                            for (int i = 0; i < users.length(); i++) {
-                                JSONObject user = users.getJSONObject(i);
-                                mUsers.add(new User(
-                                        user.getString("id"),
-                                        user.getString("fullName"),
-                                        user.getString("profileImage")
-                                ));
-                                if (!mUserId.equals(user.getString("id"))) {
-                                    mOtherPersonProfileImage = user.getString("profileImage");
-                                    Activity activity = getActivity();
-                                    if (activity != null) {
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                updateRoomIconView();
-                                            }
-                                        });
-                                    }
-                                    break;
+                        for (int i = 0; i < users.length(); i++) {
+                            JSONObject user = users.getJSONObject(i);
+                            mUsers.add(new User(
+                                    user.getString("id"),
+                                    user.getString("fullName"),
+                                    user.getString("profileImage")
+                            ));
+                            if (!mUserId.equals(user.getString("id"))) {
+                                mOtherPersonProfileImage = user.getString("profileImage");
+                                Activity activity = getActivity();
+                                if (activity != null) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            updateRoomIconView();
+                                        }
+                                    });
                                 }
+                                break;
                             }
+                        }
 //                        }
 
                         if (mSkip <= 0) {
@@ -1233,7 +1231,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private void attemptSend(String message) {
 
-        if(!mRoomExists){
+        if (!mRoomExists) {
             createRoom(message);
             return;
         }
@@ -1274,55 +1272,41 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void createRoom(final String message) {
 //        mRoomId = ObjectId.get().toString();
 
-        BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 //        joinRoom(activity, false);
 
 
-        if (getActivity() != null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-//                    Utils.showServerErrorToast(getActivity());
-                    mProgressBar.setVisibility(View.GONE);
-
-                    BaseTaptActivity activity1 = (BaseTaptActivity) getActivity();
-                    if (activity1 == null || !activity1.socketConnected() || mUserId == null
-                            || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
-                        return;
-                    }
-
-                    if (TextUtils.isEmpty(message)) {
-                        mInputMessageView.requestFocus();
-                        return;
-                    }
-
-                    newMessage = new JSONObject();
-
-                    JSONArray users = new JSONArray();
-                    for (User user : mUsers) {
-                        users.put(user.userId);
-                    }
-                    users.put(mUserId);
-
-                    try {
-                        newMessage.put("id", ObjectId.get().toString());
-                        newMessage.put("room", mRoomId);
-                        newMessage.put("users", users);
-                        newMessage.put("message", message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        return;
-                    }
-
-                    // perform the sending message attempt.
-                    activity1.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
-                }
-            });
+        if (!activity.socketConnected() || mUserId == null
+                || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
+            return;
         }
 
+        if (TextUtils.isEmpty(message)) {
+            mInputMessageView.requestFocus();
+            return;
+        }
 
-        setFragmentState(FragmentState.FINISHED_UPDATING);
+        newMessage = new JSONObject();
 
+        JSONArray users = new JSONArray();
+        for (User user : mUsers) {
+            users.put(user.userId);
+        }
+        users.put(mUserId);
+
+        try {
+            newMessage.put("id", ObjectId.get().toString());
+            newMessage.put("room", mRoomId);
+            newMessage.put("users", users);
+            newMessage.put("message", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // perform the sending message attempt.
+        activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+//        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
 
@@ -1532,18 +1516,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 JSONObject event = new JSONObject(args[0].toString());
                 JSONArray users = event.getJSONArray("users");
-                if(getView() != null) {
+                if (getView() != null) {
                     StringBuilder names = new StringBuilder();
-                    for(int i=0;i<users.length();i++){
+                    for (int i = 0; i < users.length(); i++) {
                         names.append(users.getJSONObject(i).getString("firstName"));
                     }
                     CustomSnackbar.make(getView(), " Added", CustomSnackbar.LENGTH_SHORT).show();
 
                 }
 
-            }catch(JSONException e){
+            } catch (JSONException e) {
 
-                if(getView() != null)
+                if (getView() != null)
                     CustomSnackbar.make(getView(), "User(s) Added", CustomSnackbar.LENGTH_SHORT).show();
             }
 
@@ -1812,9 +1796,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         } else {
-            if(!"".equals(mChatName)){
+            if (!"".equals(mChatName)) {
                 return mChatName;
-            }else {
+            } else {
                 for (int i = 0; i < mUsers.size(); i++) {
                     builder.append(mUsers.get(i).userName);
                     if (i != mUsers.size() - 1) {
