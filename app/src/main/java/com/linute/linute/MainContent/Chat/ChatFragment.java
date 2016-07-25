@@ -321,7 +321,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                updateTopHeader();
+                updateTopTimeHeader();
             }
         });
         final int width = getResources().getDisplayMetrics().widthPixels;
@@ -548,9 +548,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
 
-            getChat();
+            getRoomAndChat();//Chat();
 
-            joinRoom(activity, false);
+//            joinRoom(activity, false);
         } else {
             joinRoom(activity, true);
 
@@ -779,6 +779,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 otherPersonIconIV.setImageResource(R.mipmap.ic_default_group);
             }
         }
+
+        TextView chatNameView = (TextView)toolbar.findViewById(R.id.toolbar_chat_user_name);
+        chatNameView.setText(getChatName());
     }
 
     private RequestListener<String, GlideDrawable> mGlideListener = new RequestListener<String, GlideDrawable>() {
@@ -833,20 +836,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
                         Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 
 
-                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
 
 
                         //room doesn't exist
                         if (mRoomId.equals("null")) {
                             mRoomExists = false;
                             mRoomId = ObjectId.get().toString();
-                            joinRoom(activity, false);
+                            joinRoom(activity, true);
+                            mCanLoadMore = false;
+                            mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+
                             //room doesn't exist, we stop loading.
                             //next message sent will create the room
                             if (activity != null) {
@@ -857,7 +864,21 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     }
                                 });
                             }
+                            setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
+                        }else{
+                            mChatName = object.getString("name");
+                            mChatImage = object.getString("image");
+
+                            if (activity != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        updateRoomIconView();
+                                    }
+                                });
+                            }
+
                         }
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
@@ -890,7 +911,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
-                                        updateTopHeader();
+                                        updateTopTimeHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -908,6 +929,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             }
                         }
                     } catch (JSONException e) {
+                        e.printStackTrace();
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -1021,7 +1043,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
 
-                                        updateTopHeader();
+                                        updateTopTimeHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -1167,7 +1189,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
-                updateTopHeader();
+                updateTopTimeHeader();
             }
         });
 
@@ -1310,6 +1332,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+        mRoomExists = true;
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
@@ -1485,7 +1508,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                getChat();
+                                getRoomAndChat();
                             }
                         });
             } catch (JSONException e) {
@@ -1516,7 +1539,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onAddUsers = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i("AAA", args[0].toString());
+//            Log.d(TAG, args[0].toString());
             try {
                 JSONObject event = new JSONObject(args[0].toString());
                 JSONArray users = event.getJSONArray("users");
@@ -1636,7 +1659,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         public void run() {
                                             mChatList.addAll(0, tempChatList);
 
-                                            updateTopHeader();
+                                            updateTopTimeHeader();
 
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
@@ -1777,7 +1800,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     }
 
-    private void updateTopHeader() {
+    private void updateTopTimeHeader() {
         //-1 to compensate for footer
         int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition() - 1;
 
@@ -1800,7 +1823,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         } else {
-            if (!"".equals(mChatName)) {
+            if (!"".equals(mChatName) && mChatName != null) {
                 return mChatName;
             } else {
                 for (int i = 0; i < mUsers.size(); i++) {

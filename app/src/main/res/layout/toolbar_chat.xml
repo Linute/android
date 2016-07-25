@@ -11,6 +11,7 @@
         android:layout_height="@dimen/profile_image_radius"
         android:gravity="center_vertical"
         app:riv_corner_radius="@dimen/user_icon_corner_radius"
+        android:scaleType="centerCrop"
           />
     <TextView
         android:id="@+id/toolbar_chat_user_name"
