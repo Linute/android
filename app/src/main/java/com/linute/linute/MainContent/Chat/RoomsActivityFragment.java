@@ -121,7 +121,7 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         }
                     });
-                    activity.replaceContainerWithFragment(selectUserFragment);
+                    activity.addFragmentToContainer(selectUserFragment);
 
                 }
             }
@@ -229,6 +229,7 @@ public class RoomsActivityFragment extends BaseFragment {
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
+                        Log.d(TAG, jsonObj.toString(4));
 
 
                         mSkip = jsonObj.getInt("skip");
@@ -249,6 +250,12 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         Date date;
 
+                        String name;
+                        String image;
+
+                        boolean isMuted;
+                        long mutedUntil;
+
                         SimpleDateFormat format = Utils.getDateFormat();
                         final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
 
@@ -256,6 +263,11 @@ public class RoomsActivityFragment extends BaseFragment {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
+
+                            name = room.getString("name");
+                            image = room.getString("image");
+
+
                             usersJson = room.getJSONArray("users");
                             ArrayList<User> usersList = new ArrayList<User>();
                             for(int u = 0;u<usersJson.length();u++){
@@ -266,6 +278,8 @@ public class RoomsActivityFragment extends BaseFragment {
                                         userJson.getString("profileImage")
                                 ));
                             }
+
+
 
 
                             messages = room.getJSONArray("messages"); //list of messages in room
@@ -321,6 +335,7 @@ public class RoomsActivityFragment extends BaseFragment {
                                     lastMessage,
                                     hasUnreadMessage,
                                     date == null ? 0 : date.getTime()
+
                             ));
                             // ,
 //                                    users.length() + 1,  // add yourself

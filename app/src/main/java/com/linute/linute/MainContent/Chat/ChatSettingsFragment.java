@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -271,56 +272,8 @@ room: id of room
             });
         }
 
-        ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
-        if(!"".equals(mRoomImage)) {
-            Glide.with(getContext())
-                    .load(Utils.getChatImageUrl(mRoomImage))
-                    .into(groupImageSettingView);
-        }else{
-            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
-            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
-        }
-        groupImageSettingView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent getPhotoIntent = new Intent();
-                getPhotoIntent.setType("image/*");
-                getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
-                getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
-            }
-        });
-
-
-        View groupNameSettingView = view.findViewById(R.id.setting_group_name);
-        groupNameSettingView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final EditTextDialog editTextDialog = new EditTextDialog(getContext());
-                editTextDialog
-                        .setValue(mRoomName)
-                        .setTitle("Set Group Name")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener(){
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                mRoomName = editTextDialog.getValue();
-                                new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, editTextDialog.getValue(), null, new Callback() {
-                                    @Override
-                                    public void onFailure(Call call, IOException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    @Override
-                                    public void onResponse(Call call, Response response) throws IOException {
-                                        Log.d(TAG, response.toString());
-                                    }
-                                });
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create().show();
-            }
-        });
+        updateGroupPhoto(view);
+        updateGroupName(view);
 
 
         mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
@@ -413,6 +366,51 @@ room: id of room
 
 
 
+    }
+
+    private void updateGroupName(View view) {
+        View groupNameSettingView = view.findViewById(R.id.setting_group_name);
+        groupNameSettingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final EditTextDialog editTextDialog = new EditTextDialog(getContext());
+                editTextDialog
+                        .setValue(mRoomName)
+                        .setTitle("Set Group Name")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                mRoomName = editTextDialog.getValue();
+                                setGroupNameAndPhoto(editTextDialog.getValue(), null);
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create().show();
+            }
+        });
+    }
+
+    private void updateGroupPhoto(View view) {
+        ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
+        if(!"".equals(mRoomImage)) {
+            Glide.with(getContext())
+                    .load(Utils.getChatImageUrl(mRoomImage))
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(groupImageSettingView);
+        }else{
+            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
+            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
+        }
+        groupImageSettingView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent getPhotoIntent = new Intent();
+                getPhotoIntent.setType("image/*");
+                getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
+                getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+            }
+        });
     }
 
     private void updateNotificationView() {
@@ -544,22 +542,48 @@ room: id of room
         if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_PHOTO) {
             Uri uri = data.getData();
             Uri path = Uri.parse(GalleryFragment.getPath(getActivity(), uri));
-
-            new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, null, path.getPath(), new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    Log.d(TAG, response.toString());
-                }
-            });
+            setGroupNameAndPhoto(null, path.getPath());
         }
 
 
     }
+
+    private void setGroupNameAndPhoto(String name, String photo){
+        new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, name, photo, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                Utils.showServerErrorToast(getContext());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+
+                    JSONObject object = new JSONObject(response.body().string());
+
+                    Log.d(TAG, object.toString(4));
+
+                    mRoomImage = object.getString("image");
+                    mRoomName = object.getString("name");
+                    Activity activity = getActivity();
+                    final View view = getView();
+                    if(activity != null && view != null){
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateGroupName(view);
+                                updateGroupPhoto(view);
+                            }
+                        });
+                    }
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
 
     //:room:add users
     //:room:delete users

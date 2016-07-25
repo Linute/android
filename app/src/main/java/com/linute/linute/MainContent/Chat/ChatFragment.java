@@ -101,6 +101,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
+
+    public static final int CHAT_TYPE_DM = 0;
+    public static final int CHAT_TYPE_GROUP = 0;
+
+    private int mChatType;
     private String mChatName;
     private String mChatImage;
     //    private String mOtherPersonName; //name of person youre talking to
@@ -259,7 +264,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
-        if (isOneOnOne()) {
+        if (isDM()) {
             toolbar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -545,14 +550,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         if (mRoomId == null) { //occurs when we didn't come from room fragment
             getRoomAndChat();
+            Log.i("AAA","A");
+
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            Log.i("AAA","B");
 
-            getRoomAndChat();//Chat();
+            getChat();//Chat();
 
 //            joinRoom(activity, false);
         } else {
-            joinRoom(activity, true);
+            Log.i("AAA","C");
+            getChat();
+//            joinRoom(activity, true);
 
             //finished loading and there were no messages
         }
@@ -750,21 +760,26 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
 
 
-        if (isOneOnOne() && mOtherPersonProfileImage == null) {
+        if (isDM() && mOtherPersonProfileImage == null) {
             otherPersonIconIV.setVisibility(View.GONE);
             return;
         }
-        if (isOneOnOne()) {
+        if (isDM()) {
+            otherPersonIconIV.setVisibility(View.VISIBLE);
+
             Context context = rootV.getContext();
             Glide.with(context)
                     .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
                     .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
                     .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                     //only cache the scaled image
                     .listener(mGlideListener)
                     .into(otherPersonIconIV);
         } else {
+            otherPersonIconIV.setVisibility(View.VISIBLE);
+
             if (!"".equals(mChatImage)) {
                 Context context = rootV.getContext();
                 Glide.with(context)
@@ -816,7 +831,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (User user : mUsers) {
             users.put(user.userId);
         }
-//        users.put(mUserId);
+        users.put(mUserId);
 
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
             @Override
@@ -867,6 +882,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
                         }else{
+                            mChatType = object.getInt("type");
                             mChatName = object.getString("name");
                             mChatImage = object.getString("image");
 
@@ -965,6 +981,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         chat.put(ROOM_ID, mRoomId);
 
 
+
+
         setFragmentState(FragmentState.LOADING_DATA);
         if (mChatList.isEmpty()) mProgressBar.setVisibility(View.VISIBLE);
 
@@ -985,10 +1003,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -1009,7 +1027,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             ));
                             if (!mUserId.equals(user.getString("id"))) {
                                 mOtherPersonProfileImage = user.getString("profileImage");
-                                Activity activity = getActivity();
                                 if (activity != null) {
                                     activity.runOnUiThread(new Runnable() {
                                         @Override
@@ -1021,6 +1038,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 break;
                             }
                         }
+
+                        JSONObject room = object.getJSONObject("room");
+
+                        mChatType = room.getInt("type");
+                        mChatName = room.getString("name");
+                        mChatImage = room.getString("image");
+
+                        Log.i("AAA", mChatName);
+
+                        if (activity != null) {
+                            joinRoom(activity, false);
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    updateRoomIconView();
+                                }
+                            });
+                        }
 //                        }
 
                         if (mSkip <= 0) {
@@ -1028,7 +1063,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
                         }
 
-                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                         if (activity != null) {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -1069,7 +1103,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                         if (activity != null) {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -1575,8 +1608,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private boolean mLoadingMoreMessages = false;
 
-    private boolean isOneOnOne() {
-        return mUsers.size() <= 2;
+    private boolean isDM() {
+        return mChatType == CHAT_TYPE_DM;
     }
 
     @Override
@@ -1815,7 +1848,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public String getChatName() {
 
         StringBuilder builder = new StringBuilder();
-        if (isOneOnOne()) {
+        if (isDM()) {
             String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
             for (User user : mUsers) {
                 if (user.userId != me) {
