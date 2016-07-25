@@ -71,7 +71,7 @@ public class ChatSettingsFragment extends BaseFragment {
 
     private ChatParticipantsAdapter mParticipantsAdapter;
     public static final String[] MUTE_OPTIONS_TEXT = new String[]{"1 Hour", "8 Hours", "24 Hours", "Until I Unmute"};
-    public static final Integer[] MUTE_OPTIONS_VALUES = new Integer[]{60, 8 * 60, 24 * 60, -1};
+    public static final Integer[] MUTE_OPTIONS_VALUES = new Integer[]{60, 8 * 60, 24 * 60, 0};
     private TextView mNotificationSettingsView;
 
     public static ChatSettingsFragment newInstance(String roomId, String userId) {
@@ -200,7 +200,14 @@ room: id of room
 
         if (mParticipants != null) {
             RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
-            participantsRV.setLayoutManager(new LinearLayoutManager(getContext()));
+            LinearLayoutManager llm = new LinearLayoutManager(getContext()){
+                @Override
+                public boolean canScrollVertically() {
+                    return false;
+                }
+            };
+            llm.setAutoMeasureEnabled(true);
+            participantsRV.setLayoutManager(llm);
             mParticipantsAdapter = new ChatParticipantsAdapter(mParticipants);
             participantsRV.setAdapter(mParticipantsAdapter);
             mParticipantsAdapter.notifyDataSetChanged();
@@ -260,6 +267,7 @@ room: id of room
                     .load(Utils.getChatImageUrl(mRoomImage))
                     .into(groupImageSettingView);
         }else{
+            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
             groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
         }
         groupImageSettingView.setOnClickListener(new View.OnClickListener() {

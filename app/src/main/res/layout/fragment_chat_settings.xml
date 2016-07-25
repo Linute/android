@@ -1,77 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:fillViewport="true"
+    >
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/chat_fragment_toolbar"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+        android:orientation="vertical"
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="160dp"
-        android:background="@color/grey_color"
         >
-        <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/setting_group_image"
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/chat_fragment_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="32dp"
-            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:background="@color/grey_color"
+            android:padding="16dp">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/setting_group_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/setting_group_name"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="Group Name"
+            android:textColor="@color/eighty_black"
+            android:textSize="20sp" />
+
+
+        <TextView
+            android:id="@+id/setting_notifications_button"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+
+            android:text="Mute Notifications"
+            android:textColor="@color/eighty_black"
+            android:textSize="20sp" />
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list_participants"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             />
-    </FrameLayout>
-
-    <TextView
-        android:id="@+id/setting_group_name"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Group Name"
-        android:paddingStart="16dp"
-        android:textSize="20sp"
-        android:textColor="@color/eighty_black"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:gravity="center_vertical"/>
 
 
-    <TextView
-        android:id="@+id/setting_notifications_button"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="Mute Notifications"
-        android:paddingStart="16dp"
-        android:textColor="@color/eighty_black"
 
-        android:textSize="20sp"
-        android:background="?attr/selectableItemBackground"
-        android:gravity="center_vertical"
-        />
+        <TextView
+            android:id="@+id/setting_leave_group"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:text="Leave Group"
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/list_participants"
-        android:layout_width="match_parent"
-        android:layout_marginTop="8dp"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+            android:textColor="#FFFF0000"
+            android:textSize="20sp"
 
-    <TextView
-        android:id="@+id/setting_leave_group"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:textColor="#FFFF0000"
-        android:text="Leave Group"
-        android:paddingStart="16dp"
-        android:textSize="20sp"
-        android:background="?attr/selectableItemBackground"
+            />
 
-        android:layout_gravity="bottom"
-        android:gravity="center_vertical"
 
-        />
+    </LinearLayout>
 
-</LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
