@@ -254,7 +254,6 @@ public class RoomsActivityFragment extends BaseFragment {
                         String image;
 
                         boolean isMuted;
-                        long mutedUntil;
 
                         SimpleDateFormat format = Utils.getDateFormat();
                         final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
@@ -268,7 +267,17 @@ public class RoomsActivityFragment extends BaseFragment {
                             image = room.getString("image");
 
                             isMuted = room.getBoolean("isMuted");
-                            mutedUntil = room.getLong("unMuteAt");
+
+                            long mutedUntil = 0;
+                            Object unMuteAt = room.get("unMuteAt");
+
+                            if(unMuteAt != null) {
+                                try {
+                                    mutedUntil = Long.getLong(unMuteAt.toString());
+                                }
+                                catch (NumberFormatException e){}
+                                catch (NullPointerException np){}
+                            }
 
 
                             usersJson = room.getJSONArray("users");
