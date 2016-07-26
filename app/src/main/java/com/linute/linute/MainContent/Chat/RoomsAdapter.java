@@ -102,6 +102,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 //        protected View vHasUnreadIcon;
         protected TextView vTimeStamp;
         protected ChatRoom mRoom;
+        protected View vIsMuted;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
@@ -111,6 +112,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
 //            vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
             vTimeStamp = (TextView) itemView.findViewById(R.id.room_time_stamp);
+            vIsMuted = itemView.findViewById(R.id.room_is_muted);
 
             //when room clicked, takes user to chat fragment
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -168,6 +170,14 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vUserName.setText(room.getRoomName());
             vLastMessage.setText(room.getLastMessage());
             vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
+            vIsMuted.setVisibility(mRoom.isMuted() ? View.VISIBLE : View.INVISIBLE);
+
+            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+
+
 
             vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
             vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));

@@ -116,6 +116,10 @@ public class ChatRoom {
         mLastMessage = message;
     }
 
+    public boolean isMuted(){
+        return mIsMuted;
+    }
+
     public boolean hasUnread() {
         return mHasUnread;
     }
