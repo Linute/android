@@ -29,6 +29,8 @@ import java.util.List;
  */
 public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = RoomsAdapter.class.getSimpleName();
+    public static final int COLOR_READ = 0xFF000000;
+    public static final int COLOR_UNREAD = 0xFF444444;
 
     private Context aContext;
     private List<ChatRoom> mRoomsList;
@@ -97,9 +99,9 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         protected ImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
-        protected View vHasUnreadIcon;
+//        protected View vHasUnreadIcon;
         protected TextView vTimeStamp;
-        protected ChatRoom mRooms;
+        protected ChatRoom mRoom;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
@@ -107,7 +109,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vUserImage = (ImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
-            vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
+//            vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
             vTimeStamp = (TextView) itemView.findViewById(R.id.room_time_stamp);
 
             //when room clicked, takes user to chat fragment
@@ -117,12 +119,12 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         //mark all as read
-                        mRooms.setHasUnread(false);
-                        Log.i("AAA", ""+mRooms.users);
+                        mRoom.setHasUnread(false);
+                        Log.i("AAA", ""+ mRoom.users);
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
-                                        mRooms.getRoomId(),
-                                        mRooms.users
+                                        mRoom.getRoomId(),
+                                        mRoom.users
                                 )
                         );
                     }
@@ -133,7 +135,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    final ChatRoom room = mRooms;
+                    final ChatRoom room = mRoom;
                     new AlertDialog.Builder(aContext).setTitle("Messages")
                             .setItems(new String[]{"Delete"}, new DialogInterface.OnClickListener() {
                                 @Override
@@ -152,27 +154,32 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
         void bindModel(ChatRoom room) {
 
-            mRooms = room;
+            mRoom = room;
 
             //set image
             Glide.with(aContext)
-                    .load(Utils.getImageUrlOfUser(room.users.get(0).userImage))
+                    .load(room.getRoomImageUrl())
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.color.pure_black)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setTypeface((mRooms.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
             vUserName.setText(room.getRoomName());
             vLastMessage.setText(room.getLastMessage());
             vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
 
+            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+
+
             //show unread icon
-            if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE)
+           /* if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE)
                 vHasUnreadIcon.setVisibility(View.VISIBLE);
             else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE)
-                vHasUnreadIcon.setVisibility(View.INVISIBLE);
+                vHasUnreadIcon.setVisibility(View.INVISIBLE);*/
         }
     }
 
