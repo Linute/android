@@ -251,9 +251,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
 
         View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
-        TextView ChatName = (TextView) otherPersonHeader.findViewById(R.id.toolbar_chat_user_name);
-        ChatName.setText(getChatName());
-        updateRoomIconView();
+
         toolbar.addView(otherPersonHeader);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -263,6 +261,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     getActivity().onBackPressed();
             }
         });
+        updateToolbar();
 
         if (isDM()) {
             toolbar.setOnClickListener(new View.OnClickListener() {
@@ -571,7 +570,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             vEmptyChatView.setVisibility(View.VISIBLE);
         }
 
-        updateRoomIconView();
+        updateToolbar();
 
     }
 
@@ -753,7 +752,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
     }
 
-    private void updateRoomIconView() {
+    private void updateToolbar() {
         View rootV = getView();
         if (rootV == null) return;
         Toolbar toolbar = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
@@ -796,7 +795,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         TextView chatNameView = (TextView)toolbar.findViewById(R.id.toolbar_chat_user_name);
-        chatNameView.setText(getChatName());
+        String chatName = getChatName();
+        Log.i("AAB", chatName);
+        chatNameView.setText(chatName);
     }
 
     private RequestListener<String, GlideDrawable> mGlideListener = new RequestListener<String, GlideDrawable>() {
@@ -890,7 +891,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        updateRoomIconView();
+                                        updateToolbar();
                                     }
                                 });
                             }
@@ -1007,6 +1008,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
                         JSONObject object = new JSONObject(response.body().string());
+
                         JSONArray messages = object.getJSONArray("messages");
 
                         mSkip = object.getInt("skip");
@@ -1016,6 +1018,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
+                        Log.d("AAA", users.toString());
                         mUsers.clear();
 //                        if (mOtherPersonProfileImage == null && mUserId != null) {
                         for (int i = 0; i < users.length(); i++) {
@@ -1027,15 +1030,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             ));
                             if (!mUserId.equals(user.getString("id"))) {
                                 mOtherPersonProfileImage = user.getString("profileImage");
-                                if (activity != null) {
-                                    activity.runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            updateRoomIconView();
-                                        }
-                                    });
-                                }
-                                break;
                             }
                         }
 
@@ -1052,7 +1046,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    updateRoomIconView();
+                                    updateToolbar();
                                 }
                             });
                         }
@@ -1666,7 +1660,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         activity.runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                updateRoomIconView();
+                                                updateToolbar();
                                             }
                                         });
                                     }
@@ -1847,6 +1841,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public String getChatName() {
 
+        Log.i("AAA", isDM()+" isDM");
         StringBuilder builder = new StringBuilder();
         if (isDM()) {
             String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
@@ -1856,9 +1851,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         } else {
+            Log.i("AAA", mChatName);
+
             if (!"".equals(mChatName) && mChatName != null) {
                 return mChatName;
             } else {
+                Log.i("AAA", mUsers.size() + " size");
                 for (int i = 0; i < mUsers.size(); i++) {
                     builder.append(mUsers.get(i).userName);
                     if (i != mUsers.size() - 1) {

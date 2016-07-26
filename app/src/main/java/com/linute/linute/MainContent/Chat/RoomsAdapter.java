@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
@@ -159,12 +161,25 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             mRoom = room;
 
             //set image
-            Glide.with(aContext)
-                    .load(room.getRoomImageUrl())
+
+
+            RequestManager reqMan = Glide.with(aContext);
+            DrawableTypeRequest dReq;
+            String image = mRoom.getRoomImage();
+            if(room.isDM()){
+                dReq = reqMan.load(Utils.getImageUrlOfUser(image));
+            }else{
+                if("".equals(image) || image == null){
+                    dReq = reqMan.load(R.mipmap.ic_default_group);
+                }else{
+                    dReq = reqMan.load(Utils.getChatImageUrl(image));
+                }
+            }
+            dReq
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.color.pure_black)
-                    .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                    .diskCacheStrategy(DiskCacheStrategy.NONE) //only cache the scaled image
                     .into(vUserImage);
 
             vUserName.setText(room.getRoomName());

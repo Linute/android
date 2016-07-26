@@ -1,7 +1,5 @@
 package com.linute.linute.MainContent.Chat;
 
-import com.linute.linute.UtilsAndHelpers.Utils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +27,11 @@ public class ChatRoom {
 
     private long mTime;
 
+    private int mRoomType;
+
+    public static final int ROOM_TYPE_DM = 0;
+    public static final int ROOM_TYPE_GROUP = 1;
+
     private boolean mIsMuted;
     private long mMutedUntil;
 
@@ -50,6 +53,7 @@ public class ChatRoom {
 
 
     public ChatRoom(String roomId,
+                    int roomType,
                     String roomName,
                     String roomImage,
                     ArrayList<User> users,
@@ -60,6 +64,7 @@ public class ChatRoom {
                     long mutedUntil
     ) {
         mRoomId = roomId;
+        mRoomType = roomType;
         mRoomName = roomName;
         mRoomImage = roomImage;
         this.users = users;
@@ -101,13 +106,15 @@ public class ChatRoom {
         return mRoomId;
     }
 
-    public String getRoomImageUrl(){
+    public String getRoomImage(){
         //if no set room image
-        if("".equals(mRoomImage) || mRoomImage == null){
-            return Utils.getImageUrlOfUser(users.get(0).userImage);
-        }else{
-            return Utils.getChatImageUrl(mRoomImage);
+        switch (mRoomType){
+            case ROOM_TYPE_DM:
+                return users.get(0).userImage;
+            case ROOM_TYPE_GROUP:
+                    return mRoomImage;
         }
+        return null;
     }
 
 
@@ -122,6 +129,10 @@ public class ChatRoom {
 
     public boolean isMuted(){
         return mIsMuted;
+    }
+
+    public boolean isDM(){
+        return mRoomType == ROOM_TYPE_DM;
     }
 
     public boolean hasUnread() {

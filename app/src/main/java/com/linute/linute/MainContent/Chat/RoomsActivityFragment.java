@@ -253,6 +253,8 @@ public class RoomsActivityFragment extends BaseFragment {
                         String name;
                         String image;
 
+                        int type;
+
                         boolean isMuted;
 
                         SimpleDateFormat format = Utils.getDateFormat();
@@ -265,6 +267,8 @@ public class RoomsActivityFragment extends BaseFragment {
 
                             name = room.getString("name");
                             image = room.getString("image");
+
+                            type = room.getInt("type");
 
                             isMuted = room.getBoolean("isMuted");
 
@@ -343,6 +347,7 @@ public class RoomsActivityFragment extends BaseFragment {
                             //Throws error but still runs correctly... weird
                             tempRooms.add(new ChatRoom(
                                     room.getString("id"),
+                                    type,
                                     name,
                                     image,
                                     usersList,
@@ -611,7 +616,7 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), "","", null, event.getMessage(), true, new Date().getTime(), false, 0);
+                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), 0, "","", null, event.getMessage(), true, new Date().getTime(), false, 0);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
