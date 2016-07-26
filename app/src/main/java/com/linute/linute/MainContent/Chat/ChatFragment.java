@@ -1203,7 +1203,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     Chat header = new Chat(
                             chat.getRoomId(),
                             chat.getDate(),
-                            chat.getOwnerId(),
+                            "",
                             "-1",
                             (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
                             true,
