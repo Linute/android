@@ -7,6 +7,7 @@ public class SendToItem {
 
     public static final short TYPE_PERSON = 0;
     public static final short TYPE_TREND = 1;
+    public static final short TYPE_CAMPUS = 2;
 
     private String mName;
     private String mId;

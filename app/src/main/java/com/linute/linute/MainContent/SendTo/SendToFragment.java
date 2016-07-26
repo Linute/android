@@ -1,6 +1,9 @@
 package com.linute.linute.MainContent.SendTo;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -11,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -18,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.API.LSDKGlobal;
+import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -31,7 +36,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -44,14 +48,15 @@ public class SendToFragment extends BaseFragment {
 
     public static final String TAG = SendToFragment.class.getSimpleName();
     public static final String POST_ID_KEY = "send_post_id_key";
-    public static final String SHOW_TRENDING ="show_trending";
+    public static final String PENDING_POST = "show_trending";
 
     private ArrayList<SendToItem> mSendToItems = new ArrayList<>();
+    private ArrayList<SendToItem> mTrendsItems = new ArrayList<>();
+
     private SendToAdapter mSendToAdapter;
 
     private String mPostId;
     private String mUserId;
-    private boolean mShowTrend;
 
     private Handler mHandler = new Handler();
 
@@ -60,7 +65,10 @@ public class SendToFragment extends BaseFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
-    private OnSendItems mOnSendItems;
+
+    private Button vSendButton;
+
+    private PendingUploadPost mPendingUploadPost;
 
     // we currently have to make 2 api calls : one to retrieve list of trends and one to retrieve list
     //   friends. We won't show list until both api calls have finished
@@ -74,11 +82,18 @@ public class SendToFragment extends BaseFragment {
      * @return fragment
      */
 
-    public static SendToFragment newInstance(String postId, boolean showTrending) {
+    public static SendToFragment newInstance(String postId) {
         SendToFragment fragment = new SendToFragment();
         Bundle bundle = new Bundle();
         bundle.putString(POST_ID_KEY, postId);
-        bundle.putBoolean(SHOW_TRENDING, showTrending);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    public static SendToFragment newInstance(PendingUploadPost post) {
+        SendToFragment fragment = new SendToFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(PENDING_POST, post);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -92,19 +107,17 @@ public class SendToFragment extends BaseFragment {
 
     }
 
-
-    public void setOnSendItems(OnSendItems onSendItems){
-        mOnSendItems = onSendItems;
-    }
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mPostId = getArguments().getString(POST_ID_KEY);
-            mShowTrend = getArguments().getBoolean(SHOW_TRENDING);
+            mPendingUploadPost = getArguments().getParcelable(PENDING_POST);
         }
-        mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+
+        SharedPreferences preferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+        mUserId = preferences.getString("userID", "");
     }
 
     @Nullable
@@ -116,16 +129,19 @@ public class SendToFragment extends BaseFragment {
         vErrorText = root.findViewById(R.id.error_text);
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
-        final Button vSendButton = (Button) root.findViewById(R.id.send_button);
+        vSendButton = (Button) root.findViewById(R.id.send_button);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
-        ((Toolbar) root.findViewById(R.id.toolbar)).setNavigationOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getFragmentManager().popBackStack();
             }
         });
+
+        if (mPendingUploadPost != null) toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         if (mSendToAdapter == null) {
             mSendToAdapter = new SendToAdapter(getContext(), Glide.with(this), mSendToItems);
@@ -145,11 +161,33 @@ public class SendToFragment extends BaseFragment {
         mSendToAdapter.setButtonAction(new SendToAdapter.ButtonAction() {
             @Override
             public void turnOnButton(boolean turnOn) {
-                vSendButton.setAlpha(turnOn ? 1f : 0.5f);
+                vSendButton.setBackgroundResource(turnOn ? R.color.yellow_color : R.color.twentyfive_black);
             }
         });
 
-        vSendButton.setAlpha(mSendToAdapter.getCheckedItems().isEmpty() ? 0.5f : 1f);
+        mSendToAdapter.setOnCollegeViewHolderTouched(new SendToAdapter.OnCollegeViewHolderTouched() {
+            @Override
+            public void viewHolderTouched(final boolean active) {
+                if (mTrendsItems.isEmpty()) return;
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (active) {
+                            mSendToItems.addAll(1, mTrendsItems);
+                            mSendToAdapter.notifyItemRangeInserted(1, mTrendsItems.size());
+                        } else {
+                            for (int i = 0; i < mTrendsItems.size(); i++)
+                                mSendToItems.remove(1);
+                            mSendToAdapter.notifyItemRangeRemoved(1, mTrendsItems.size());
+                        }
+                    }
+                });
+            }
+        });
+
+        vSendButton.setBackgroundResource(mSendToAdapter.getCheckedItems().isEmpty()
+                ? R.color.twentyfive_black : R.color.yellow_color);
 
         recyclerView.setAdapter(mSendToAdapter);
 
@@ -169,6 +207,9 @@ public class SendToFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (mPendingUploadPost != null)
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getSendToList();
         } else if (mSendToItems.isEmpty()) {
@@ -176,10 +217,19 @@ public class SendToFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mPendingUploadPost != null)
+            getActivity().getWindow()
+                    .setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+    }
+
     private void getSendToList() {
         if (getContext() == null) return;
 
-        if (mShowTrend)
+        if (mPendingUploadPost != null)
             getTrends();
         else
             mGotResponseForApiCall = true;
@@ -189,7 +239,7 @@ public class SendToFragment extends BaseFragment {
     }
 
 
-    private void getTrends(){
+    private void getTrends() {
         //get trends
         new LSDKGlobal(getContext()).getTrending(new Callback() {
             @Override
@@ -216,6 +266,7 @@ public class SendToFragment extends BaseFragment {
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
                         final ArrayList<SendToItem> tempTrends = new ArrayList<>();
+
                         JSONObject trend;
 
                         for (int i = 0; i < trends.length(); i++) {
@@ -237,7 +288,24 @@ public class SendToFragment extends BaseFragment {
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mSendToItems.addAll(0, tempTrends);
+                                            final SendToItem item = new SendToItem(
+                                                    SendToItem.TYPE_CAMPUS,
+                                                    "My Campus",
+                                                    mPendingUploadPost.getCollegeId(),
+                                                    ""
+                                            );
+                                            item.setChecked(true);
+
+                                            vSendButton.setBackgroundResource(R.color.yellow_color);
+
+                                            mSendToItems.add(0, item);
+                                            mSendToItems.addAll(1, tempTrends);
+                                            mTrendsItems = tempTrends;
+
+                                            mSendToAdapter.getCheckedItems()
+                                                    .get(SendToAdapter.COLLEGE_AND_TRENDS)
+                                                    .add(item);
+
                                             if (mGotResponseForApiCall) {
                                                 showProgress(false);
                                                 mSendToAdapter.notifyDataSetChanged();
@@ -265,9 +333,9 @@ public class SendToFragment extends BaseFragment {
         });
     }
 
-    private void getFriends(){
+    private void getFriends() {
         //get friends
-        new LSDKFriends(getActivity()).getSendTo(mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getActivity()).getSendTo("", mUserId, mSkip, 20, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null && mGotResponseForApiCall) {
@@ -358,9 +426,7 @@ public class SendToFragment extends BaseFragment {
     private void loadMoreUsers() {
         if (getContext() == null) return;
 
-
-
-        new LSDKFriends(getContext()).getSendTo(mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getContext()).getSendTo("", mUserId, mSkip, 20, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -406,7 +472,6 @@ public class SendToFragment extends BaseFragment {
                                             mCanLoadMore = tempItems.size() >= 20;
                                             mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
                                             mSkip += 20;
-
                                             mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
                                             setFragmentState(FragmentState.FINISHED_UPDATING);
                                         }
@@ -473,24 +538,55 @@ public class SendToFragment extends BaseFragment {
     public void sendItems() {
         if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty()) return;
 
-        if (mOnSendItems != null){
-            mOnSendItems.sendItems(mSendToAdapter.getCheckedItems());
+        if (mPendingUploadPost != null) {
+            ArrayList<String> mTrends = new ArrayList<>();
+            ArrayList<String> mPeople = new ArrayList<>();
+            boolean collegeIsChecked = false;
+
+
+            for (SendToItem item : mSendToAdapter.getCheckedItems().get(SendToAdapter.COLLEGE_AND_TRENDS)) {
+                if (item.getType() == SendToItem.TYPE_CAMPUS)
+                    collegeIsChecked = true;
+                else
+                    mTrends.add(item.getId());
+            }
+
+            for (SendToItem item : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE))
+                mPeople.add(item.getId());
+
+            if (collegeIsChecked) {
+                mPendingUploadPost.setShareParams(mPeople, mTrends);
+            } else {
+                mPendingUploadPost.setCollege(null);
+                mPendingUploadPost.setShareParams(mPeople, new ArrayList<String>());
+            }
+
+            Intent result = new Intent();
+            result.putExtra(PendingUploadPost.PENDING_POST_KEY, mPendingUploadPost);
+            Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
+
+            getActivity().setResult(Activity.RESULT_OK, result);
+            getActivity().finish();
+
         } else {
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity == null) return;
 
             JSONArray people = new JSONArray();
             JSONArray trends = new JSONArray();
-            for (SendToItem sendToItem : mSendToAdapter.getCheckedItems()) {
-                if (sendToItem.getType() == SendToItem.TYPE_PERSON) {
-                    people.put(sendToItem.getId());
-                } else if (sendToItem.getType() == SendToItem.TYPE_TREND) {
+
+            for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.COLLEGE_AND_TRENDS))
+                if (sendToItem.getType() == SendToItem.TYPE_TREND)
                     trends.put(sendToItem.getId());
-                }
-            }
+
+
+            for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE))
+                people.put(sendToItem.getId());
+
 
             JSONObject send = new JSONObject();
             try {
+                send.put("college", null);
                 send.put("users", people);
                 send.put("trends", trends);
                 send.put("post", mPostId);
@@ -507,13 +603,4 @@ public class SendToFragment extends BaseFragment {
             }
         }
     }
-
-
-
-
-    public interface OnSendItems{
-        void sendItems(HashSet<SendToItem> items);
-    }
-
-
 }

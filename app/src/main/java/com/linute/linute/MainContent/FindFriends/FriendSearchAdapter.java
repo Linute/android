@@ -43,14 +43,14 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
     private SharedPreferences mSharedPreferences;
 
 
-    public FriendSearchAdapter(Context context, RequestManager manager,List<FriendSearchUser> mSearchList) {
+    public FriendSearchAdapter(Context context, RequestManager manager, List<FriendSearchUser> mSearchList) {
         mFriendSearchList = mSearchList;
         mContext = context;
         mRequestManager = manager;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void clearContext(){
+    public void clearContext() {
         mContext = null;
     }
 
@@ -109,21 +109,18 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
 
         private void setUpOnClickListeners() {
-
-            //setup profile pic and name
-            View.OnClickListener goToProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mFriendSearchUser == null) return;
-                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                    if (activity != null) {
-                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+            itemView.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mFriendSearchUser == null) return;
+                            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                            if (activity != null) {
+                                activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+                            }
+                        }
                     }
-                }
-            };
-
-            mNameView.setOnClickListener(goToProfile);
-            mProfileImage.setOnClickListener(goToProfile);
+            );
 
             //the add or message button
             mAddButton.setOnClickListener(new View.OnClickListener() { //when pressed
@@ -171,7 +168,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
                             @Override
                             public void onResponse(Call call, Response response) throws IOException {
-                                Log.i("Update Adapter", "onResponse: " + response.body().string());
+                               // Log.i("Update Adapter", "onResponse: " + response.body().string());
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     user.setFollowing(false);
 
@@ -186,6 +183,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                                         }
                                     });
                                 }
+                                response.body().close();
                             }
                         });
                     }

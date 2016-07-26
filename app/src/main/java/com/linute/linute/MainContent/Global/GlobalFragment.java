@@ -59,6 +59,8 @@ public class GlobalFragment extends BaseFragment {
     private TextView vUpdateCounter;
     private View vUpdateNotification;
 
+    private View vEmpty;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +83,7 @@ public class GlobalFragment extends BaseFragment {
             }
         });
 
+        vEmpty = root.findViewById(R.id.empty_view);
         vAppBarLayout = (AppBarLayout) root.findViewById(R.id.appbar_layout);
         vRecycler = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swipe_refresh);
@@ -160,6 +163,8 @@ public class GlobalFragment extends BaseFragment {
                 }
             });
             getChoices();
+        }else if (mGlobalChoiceItems.isEmpty()){
+            vEmpty.setVisibility(View.VISIBLE);
         }
 
         mChatSubscription = NewMessageBus
@@ -251,6 +256,7 @@ public class GlobalFragment extends BaseFragment {
                                         @Override
                                         public void run() {
                                             mGlobalChoicesAdapter.notifyDataSetChanged();
+                                            vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
                                     });
                                 }

@@ -8,7 +8,7 @@ import android.widget.ImageView;
 /**
  * Created by QiFeng on 7/14/16.
  */
-public class ToggleImageView extends ImageView{
+public class ToggleImageView extends ImageView {
 
     private int[] mResIds = new int[2];
     private boolean mActive = false;
@@ -26,20 +26,18 @@ public class ToggleImageView extends ImageView{
     }
 
 
-    public void setImageViews(@DrawableRes int inactive, @DrawableRes int active){
+    public void setImageViews(@DrawableRes int inactive, @DrawableRes int active) {
         mResIds[0] = inactive;
         mResIds[1] = active;
     }
 
-    public boolean isActive(){
+    public boolean isActive() {
         return mActive;
     }
 
 
-    public void setActive(boolean active){
-        if (active != mActive){
-            mActive = active;
-            setImageResource(mResIds[mActive ? 1 : 0]);
-        }
+    public void setActive(boolean active) {
+        mActive = active;
+        setImageResource(mResIds[mActive ? 1 : 0]);
     }
 }

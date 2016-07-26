@@ -12,6 +12,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
 
 import java.util.ArrayList;
@@ -26,19 +27,21 @@ public class CameraActivity extends AppCompatActivity {
 
     public final static int IMAGE = 1;
     public final static int VIDEO = 2;
+    public final static int ALL = 3;
 
     //if we get send url, we will send result to url,
     //    else, we'll send back a uri
     public final static String RETURN_TYPE = "send_to_url";
     public final static String CAMERA_TYPE = "camera_type";
+    public final static String GALLERY_TYPE = "gallery_filters";
 
     private CameraType mCameraType;
     private int mReturnType;
+    private int mGalleryType;
 
     public static final String TAG = CameraActivity.class.getSimpleName();
 
     protected boolean mHasWriteAndCameraPermission = false;
-
 
     /**
      * need the following intent:
@@ -59,9 +62,11 @@ public class CameraActivity extends AppCompatActivity {
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
+            mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
             mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
             mReturnType = RETURN_URI;
+            mGalleryType = ALL;
         }
 
         requestPermissions();
@@ -185,23 +190,20 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            // Maybe there is a better way to do this
-            // When back pressed, we need to ask: "are you sure you want to discard this"
-            EditSaveVideoFragment saveVideoFragment =
-                    (EditSaveVideoFragment) getSupportFragmentManager().findFragmentByTag(EditSaveVideoFragment.TAG);
-            EditSavePhotoFragment savePhotoFragment =
-                    (EditSavePhotoFragment) getSupportFragmentManager().findFragmentByTag(EditSavePhotoFragment.TAG);
+            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null){
+                getSupportFragmentManager().popBackStack();
+                return;
+            }
 
-            if (saveVideoFragment != null) {
-                if (saveVideoFragment.isStickerDrawerOpen()) {
-                    saveVideoFragment.closeStickerDrawer();
-                } else
-                    saveVideoFragment.showConfirmDialog();
-            } else if (savePhotoFragment != null) {
-                if (savePhotoFragment.isStickerDrawerOpen()) {
-                    savePhotoFragment.closeStickerDrawer();
-                } else
-                    savePhotoFragment.backPressed();
+            AbstractEditSaveFragment fragment = (AbstractEditSaveFragment) getSupportFragmentManager()
+                    .findFragmentByTag(AbstractEditSaveFragment.TAG);
+
+            if (fragment != null){
+                if (fragment.isStickerDrawerOpen()){
+                    fragment.closeStickerDrawer();
+                }else {
+                    fragment.backPressed();
+                }
             } else {
                 clearBackStack();
             }
@@ -217,5 +219,9 @@ public class CameraActivity extends AppCompatActivity {
 
     public int getReturnType() {
         return mReturnType;
+    }
+
+    public int getGalleryType(){
+        return mGalleryType;
     }
 }

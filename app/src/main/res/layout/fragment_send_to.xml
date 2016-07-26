@@ -13,8 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
         app:navigationIcon="@drawable/ic_action_navigation_close"
-        app:title="Send to"
         app:titleTextColor="@color/pure_white"
+        app:title="Send to"
     />
 
 

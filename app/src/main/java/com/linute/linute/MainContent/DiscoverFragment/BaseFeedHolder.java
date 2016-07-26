@@ -79,7 +79,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
             public void onClick(View v) {
                 BaseTaptActivity activity = (BaseTaptActivity) mContext;
                 if (activity != null && mPost != null)
-                    activity.addFragmentOnTop(SendToFragment.newInstance(mPost.getPostId(), false), "send_to");
+                    activity.addFragmentOnTop(SendToFragment.newInstance(mPost.getPostId()), "send_to");
             }
         });
     }

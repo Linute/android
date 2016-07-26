@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.SendTo;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,17 +29,27 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private ArrayList<SendToItem> mSendToItems;
     private RequestManager mRequestManager;
-    private HashSet<SendToItem> mCheckedItems;
+
+    public final static short COLLEGE_AND_TRENDS = 0;
+    public final static short PEOPLE = 1;
+    private ArrayList<HashSet<SendToItem>> mCheckedItems;
+
     private ButtonAction mButtonAction;
+    private OnCollegeViewHolderTouched mOnCollegeViewHolderTouched;
 
     private StringSignature mImageSignature;
     private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
+    private boolean mCollegeSelected = true;
+
     public SendToAdapter(Context context, RequestManager manager, ArrayList<SendToItem> sendToItems) {
         mSendToItems = sendToItems;
         mRequestManager = manager;
-        mCheckedItems = new HashSet<>();
+
+        mCheckedItems = new ArrayList<>(2);
+        mCheckedItems.add(new HashSet<SendToItem>());
+        mCheckedItems.add(new HashSet<SendToItem>());
 
         mImageSignature = new StringSignature(
                 context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")
@@ -53,16 +64,24 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mOnLoadMore = onLoadMore;
     }
 
+    public void setOnCollegeViewHolderTouched(OnCollegeViewHolderTouched touched) {
+        mOnCollegeViewHolderTouched = touched;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == LoadMoreViewHolder.FOOTER) {
+        if (viewType == LoadMoreViewHolder.FOOTER)
             return new LoadMoreViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
                     "",
                     ""
             );
-        } else if (viewType == SendToItem.TYPE_PERSON)
+        else if (viewType == SendToItem.TYPE_PERSON)
             return new SendToPersonViewHolder(
+                    LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
+            );
+        else if (viewType == SendToItem.TYPE_CAMPUS)
+            return new SendToCollegeViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
             );
         else
@@ -95,7 +114,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mButtonAction = buttonAction;
     }
 
-    public HashSet<SendToItem> getCheckedItems() {
+    public ArrayList<HashSet<SendToItem>> getCheckedItems() {
         return mCheckedItems;
     }
 
@@ -121,27 +140,76 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (mSendToItem.getType() == SendToItem.TYPE_TREND && !mCollegeSelected)
+                        return;
+
                     if (vCheckBox.isActive()) {
-                        vCheckBox.setActive(false);
-                        mCheckedItems.remove(mSendToItem);
-                        mSendToItem.setChecked(false);
-                        if (mCheckedItems.isEmpty() && mButtonAction != null)
+
+                        if (mSendToItem.getType() == SendToItem.TYPE_CAMPUS){
+                            mCollegeSelected = false;
+
+                            for (SendToItem item : mCheckedItems.get(COLLEGE_AND_TRENDS))
+                                item.setChecked(false);
+
+                            mCheckedItems.get(COLLEGE_AND_TRENDS).clear();
+
+                            if (mOnCollegeViewHolderTouched != null)
+                                mOnCollegeViewHolderTouched.viewHolderTouched(false);
+
+                        }
+                        else {
+                            mCheckedItems
+                                    .get(mSendToItem.getType() == SendToItem.TYPE_PERSON ? PEOPLE : COLLEGE_AND_TRENDS)
+                                    .remove(mSendToItem);
+
+                            mSendToItem.setChecked(false);
+                        }
+
+
+                        int size = 0;
+                        for (HashSet<SendToItem> set : mCheckedItems)
+                            size += set.size();
+
+                        if (size == 0 && mButtonAction != null)
                             mButtonAction.turnOnButton(false);
+
+                        vCheckBox.setActive(false);
                     } else {
                         vCheckBox.setActive(true);
-                        mCheckedItems.add(mSendToItem);
-                        mSendToItem.setChecked(true);
-                        if (!mCheckedItems.isEmpty() && mButtonAction != null)
+
+                        int size = 0;
+                        for (HashSet<SendToItem> sets : mCheckedItems)
+                            size += sets.size();
+
+                        if (mSendToItem.getType() == SendToItem.TYPE_PERSON){
+                            mCheckedItems
+                                    .get(PEOPLE)
+                                    .add(mSendToItem);
+                        }
+                        else{
+                            if (mSendToItem.getType() == SendToItem.TYPE_CAMPUS) {
+                                if (mOnCollegeViewHolderTouched != null)
+                                    mOnCollegeViewHolderTouched.viewHolderTouched(true);
+                                mCollegeSelected = true;
+                            }
+
+                            mCheckedItems
+                                    .get(COLLEGE_AND_TRENDS)
+                                    .add(mSendToItem);
+                        }
+
+
+                        if (size == 0 && mButtonAction != null)
                             mButtonAction.turnOnButton(true);
+
+                        mSendToItem.setChecked(true);
                     }
                 }
             });
         }
 
-
         public void bindViews(SendToItem item) {
             mSendToItem = item;
-
             vCheckBox.setActive(item.isChecked());
             vName.setText(item.getName());
             loadImage(item);
@@ -166,7 +234,6 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vImage);
-
         }
     }
 
@@ -186,8 +253,27 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
     }
 
+    public class SendToCollegeViewHolder extends BaseSendToViewHolder {
+        public SendToCollegeViewHolder(View itemView) {
+            super(itemView);
+            vCheckBox.setImageViews(R.drawable.send_to_checkbox_off, R.drawable.send_to_checkbox_on);
+        }
+
+        @Override
+        public void loadImage(SendToItem item) {
+            mRequestManager.load(R.drawable.ic_cap)
+                    .dontAnimate()
+                    .placeholder(R.color.seperator_color)
+                    .into(vImage);
+        }
+    }
+
 
     public interface ButtonAction {
         void turnOnButton(boolean turnOn);
+    }
+
+    public interface OnCollegeViewHolderTouched {
+        void viewHolderTouched(boolean active);
     }
 }

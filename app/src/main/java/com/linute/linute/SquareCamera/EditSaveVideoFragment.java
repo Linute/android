@@ -33,6 +33,7 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -622,11 +623,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         );
 
         showProgress(false);
-        Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
-        Intent result = new Intent();
-        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
-        getActivity().setResult(Activity.RESULT_OK, result);
-        getActivity().finish();
+        ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
     }
 
 

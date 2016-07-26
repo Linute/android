@@ -97,6 +97,14 @@ public class UploadIntentService extends IntentService {
             coord.put(p.getLatitude());
             coord.put(p.getLongitude());
 
+            JSONObject share = new JSONObject();
+            JSONArray trend = new JSONArray(p.getTrends());
+            JSONArray people = new JSONArray(p.getPeople());
+            share.put("trends", trend);
+            share.put("users", people);
+
+            params.put("share", share);
+
             try {
                 jsonObject.put("coordinates", coord);
                 params.put("geo", jsonObject);
@@ -138,7 +146,7 @@ public class UploadIntentService extends IntentService {
             }
 
             image.recycle();
-        } catch (IOException e) {
+        } catch (IOException|JSONException e) {
             failedToPost(p);
 
         }

@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.Uploading;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 /**
  * Created by QiFeng on 6/25/16.
  */
@@ -22,6 +24,9 @@ public class PendingUploadPost implements Parcelable {
     private String mVideoPath;
     private String mOwner;
     private String mUserToken;
+
+    private ArrayList<String> mTrends;
+    private ArrayList<String> mPeople;
 
     public PendingUploadPost(String id,
                              String collegeId,
@@ -46,6 +51,24 @@ public class PendingUploadPost implements Parcelable {
         mVideoPath = videoPath;
         mOwner = owner;
         mUserToken = userToken;
+    }
+
+    public void setCollege(String collegeId){
+        mCollegeId = collegeId;
+    }
+
+
+    public ArrayList<String> getPeople() {
+        return mPeople;
+    }
+
+    public ArrayList<String> getTrends() {
+        return mTrends;
+    }
+
+    public void setShareParams(ArrayList<String> people, ArrayList<String> trends){
+        mPeople = people;
+        mTrends = trends;
     }
 
     public String getId() {
@@ -109,6 +132,10 @@ public class PendingUploadPost implements Parcelable {
         mVideoPath = in.readString();
         mOwner = in.readString();
         mUserToken = in.readString();
+        mPeople = new ArrayList<>();
+        in.readStringList(mPeople);
+        mTrends = new ArrayList<>();
+        in.readStringList(mTrends);
     }
 
     @Override
@@ -125,6 +152,8 @@ public class PendingUploadPost implements Parcelable {
         dest.writeString(mVideoPath);
         dest.writeString(mOwner);
         dest.writeString(mUserToken);
+        dest.writeStringList(mPeople);
+        dest.writeStringList(mTrends);
     }
 
     public static final Creator<PendingUploadPost> CREATOR = new Creator<PendingUploadPost>() {

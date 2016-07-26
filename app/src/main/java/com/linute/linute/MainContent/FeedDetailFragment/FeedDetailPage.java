@@ -296,6 +296,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     Intent i = new Intent(getActivity(), CameraActivity.class);
                     i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_GALLERY));
                     i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+                    i.putExtra(CameraActivity.GALLERY_TYPE, CameraActivity.IMAGE);
                     startActivityForResult(i, CAMERA_REQUEST);
                 }
             }

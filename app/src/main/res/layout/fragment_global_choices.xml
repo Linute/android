@@ -6,32 +6,46 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.design.widget.AppBarLayout android:id="@+id/appbar_layout"
-                                                android:layout_width="match_parent"
-                                                android:layout_height="?attr/actionBarSize"
-                                                app:elevation="4dp">
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:elevation="4dp">
 
 
-        <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
-                                           android:layout_width="match_parent"
-                                           android:layout_height="?attr/actionBarSize"
-                                           android:background="@color/colorPrimary"
-                                           app:layout_scrollFlags="scroll|enterAlways|snap"
-                                           app:title="Globally Trending"
-                                           app:titleTextColor="@color/pure_white"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:title="Globally Trending"
+            app:titleTextColor="@color/pure_white"
         />
 
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh"
-                                                  android:layout_width="match_parent"
-                                                  android:layout_height="match_parent"
-                                                  app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    >
-
-        <android.support.v7.widget.RecyclerView android:id="@+id/recycler_view"
-                                                android:layout_width="match_parent"
-                                                android:layout_height="match_parent"/>
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </android.support.v4.widget.SwipeRefreshLayout>
+
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Nothing is trending right now"
+        android:textSize="@dimen/header_font_size"
+        android:visibility="gone"
+    />
+
 
 </android.support.design.widget.CoordinatorLayout>
