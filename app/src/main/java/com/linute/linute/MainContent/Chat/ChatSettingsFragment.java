@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.Chat;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -35,6 +37,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -536,13 +540,29 @@ room: id of room
     };
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_PHOTO) {
-            Uri uri = data.getData();
-            Uri path = Uri.parse(GalleryFragment.getPath(getActivity(), uri));
-            setGroupNameAndPhoto(null, path.getPath());
+
+            new Thread(new Runnable() {
+                //do this in a new thread because lots of processing
+                @Override
+                public void run() {
+                    Uri uri = data.getData();
+                    Uri path = Uri.parse(GalleryFragment.getPath(getActivity(), uri));
+                    try {
+                        Bitmap bmp = BitmapFactory.decodeFile(path.getPath());
+                        FileOutputStream fos = new FileOutputStream(path.getPath());
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 10, fos);
+
+                    }catch(FileNotFoundException e){
+                        e.printStackTrace();
+                    }
+
+                    setGroupNameAndPhoto(null, path.getPath());
+                }
+            }).start();
         }
 
 
