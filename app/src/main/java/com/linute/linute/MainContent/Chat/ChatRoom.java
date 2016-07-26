@@ -83,14 +83,18 @@ public class ChatRoom {
 
 
     public String getRoomName(){
-        String name = "";
-        for(int i = 0; i<users.size();i++){
-            name += users.get(i).userName;
-            if(i != users.size()-1){
-                name += ", ";
+        if("".equals(mRoomName) || mRoomName == null) {
+            String name = "";
+            for (int i = 0; i < users.size(); i++) {
+                name += users.get(i).userName;
+                if (i != users.size() - 1) {
+                    name += ", ";
+                }
             }
+            return name;
+        }else{
+            return mRoomName;
         }
-        return name;
     }
 
     public String getRoomId() {
