@@ -787,7 +787,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         .listener(mGlideListener)
                         .into(otherPersonIconIV);
             }else {
-                otherPersonIconIV.setImageResource(R.mipmap.ic_default_group);
+                otherPersonIconIV.setImageResource(R.drawable.group_icon_inbox);
             }
         }
 
@@ -1837,12 +1837,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         StringBuilder builder = new StringBuilder();
         if (isDM()) {
-            String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
+
+            Log.i("AAA", mUserId);
             for (User user : mUsers) {
-                if (user.userId != me) {
+                if (!user.userId.equals(mUserId)) {
                     builder.append(user.userName);
                 }
             }
+            return builder.toString();
         } else {
 
             if (!"".equals(mChatName) && mChatName != null) {

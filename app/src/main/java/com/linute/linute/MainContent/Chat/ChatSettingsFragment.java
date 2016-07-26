@@ -402,8 +402,7 @@ room: id of room
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(groupImageSettingView);
         }else{
-            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
-            groupImageSettingView.setImageResource(R.mipmap.ic_default_group);
+            groupImageSettingView.setImageResource(R.drawable.group_icon_inbox);
         }
         groupImageSettingView.setOnClickListener(new View.OnClickListener() {
             @Override

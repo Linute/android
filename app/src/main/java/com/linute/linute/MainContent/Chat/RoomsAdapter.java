@@ -168,7 +168,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 dReq = reqMan.load(Utils.getImageUrlOfUser(image));
             }else{
                 if("".equals(image) || image == null){
-                    dReq = reqMan.load(R.mipmap.ic_default_group);
+                    dReq = reqMan.load(R.drawable.group_icon_inbox);
                 }else{
                     dReq = reqMan.load(Utils.getChatImageUrl(image));
                 }
