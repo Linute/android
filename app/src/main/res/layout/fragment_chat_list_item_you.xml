@@ -38,6 +38,7 @@
             android:scaleType="centerInside"
             android:layout_gravity="center_vertical"
             app:riv_corner_radius="@dimen/user_icon_corner_radius"
+            android:layout_marginRight="4dp"
             />
 
     <FrameLayout

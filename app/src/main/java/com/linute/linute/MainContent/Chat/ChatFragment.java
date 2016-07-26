@@ -549,17 +549,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         if (mRoomId == null) { //occurs when we didn't come from room fragment
             getRoomAndChat();
-            Log.i("AAA","A");
 
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
-            Log.i("AAA","B");
 
             getChat();//Chat();
 
 //            joinRoom(activity, false);
         } else {
-            Log.i("AAA","C");
             getChat();
 //            joinRoom(activity, true);
 
@@ -796,7 +793,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         TextView chatNameView = (TextView)toolbar.findViewById(R.id.toolbar_chat_user_name);
         String chatName = getChatName();
-        Log.i("AAB", chatName);
         chatNameView.setText(chatName);
     }
 
@@ -1018,7 +1014,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
                         JSONArray users = object.getJSONObject("room").getJSONArray("users");
-                        Log.d("AAA", users.toString());
                         mUsers.clear();
 //                        if (mOtherPersonProfileImage == null && mUserId != null) {
                         for (int i = 0; i < users.length(); i++) {
@@ -1039,7 +1034,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mChatName = room.getString("name");
                         mChatImage = room.getString("image");
 
-                        Log.i("AAA", mChatName);
 
                         if (activity != null) {
                             joinRoom(activity, false);
@@ -1189,7 +1183,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         Chat header = new Chat(
                                 previousMessage.getRoomId(),
                                 previousMessage.getDate(),
-                                previousMessage.getOwnerId(),
+                                "",
                                 "-1",
                                 (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
                                 true,
@@ -1841,7 +1835,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public String getChatName() {
 
-        Log.i("AAA", isDM()+" isDM");
         StringBuilder builder = new StringBuilder();
         if (isDM()) {
             String me = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
@@ -1851,12 +1844,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         } else {
-            Log.i("AAA", mChatName);
 
             if (!"".equals(mChatName) && mChatName != null) {
                 return mChatName;
             } else {
-                Log.i("AAA", mUsers.size() + " size");
                 for (int i = 0; i < mUsers.size(); i++) {
                     builder.append(mUsers.get(i).userName);
                     if (i != mUsers.size() - 1) {

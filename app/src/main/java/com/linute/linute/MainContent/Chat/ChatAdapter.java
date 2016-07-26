@@ -105,7 +105,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public boolean isHead(int position){
-        return position == 2 || !aChatList.get(position-2).getOwnerId().equals(aChatList.get(position-1).getOwnerId());
+        Chat chat1 = aChatList.get(position - 1);
+        Chat chat2 = aChatList.get(position - 2);
+        return position == 2 || !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
     public void setFooterState(short footerState) {
