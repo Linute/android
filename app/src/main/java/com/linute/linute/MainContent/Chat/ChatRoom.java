@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +14,10 @@ import java.util.ArrayList;
 public class ChatRoom {
 
     private String mRoomId;
+
+    private String mRoomName;
+    private String mRoomImage;
+
 
     public final ArrayList<User> users;
 
@@ -41,42 +47,22 @@ public class ChatRoom {
 
     //, int usersCount, ArrayList<ChatHead> chatHeadList
 
-    public ChatRoom(String roomId,
-                    String userId,
-                    String userName,
-                    String lastMessage,
-                    String userImage,
-                    boolean hasUnread,
-                    long time
-    ) {
-
-        mRoomId = roomId;
-        users = new ArrayList<>();
-        users.add(new User(userId, userName, userImage));
-        mLastMessage = lastMessage;
-        mHasUnread = hasUnread;
-        mTime = time;
-
-        //mUsersCount = usersCount;
-        //mChatHeadList = chatHeadList;
-    }
-
 
 
     public ChatRoom(String roomId,
-                    String userId,
-                    String userName,
+                    String roomName,
+                    String roomImage,
+                    ArrayList<User> users,
                     String lastMessage,
-                    String userImage,
                     boolean hasUnread,
                     long time,
                     boolean isMuted,
                     long mutedUntil
     ) {
-
         mRoomId = roomId;
-        users = new ArrayList<>();
-        users.add(new User(userId, userName, userImage));
+        mRoomName = roomName;
+        mRoomImage = roomImage;
+        this.users = users;
         mLastMessage = lastMessage;
         mHasUnread = hasUnread;
         mTime = time;
@@ -95,6 +81,7 @@ public class ChatRoom {
     }
 
 
+
     public String getRoomName(){
         String name = "";
         for(int i = 0; i<users.size();i++){
@@ -110,6 +97,14 @@ public class ChatRoom {
         return mRoomId;
     }
 
+    public String getRoomImageUrl(){
+        //if no set room image
+        if("".equals(mRoomImage) || mRoomImage == null){
+            return Utils.getImageUrlOfUser(users.get(0).userImage);
+        }else{
+            return Utils.getChatImageUrl(mRoomImage);
+        }
+    }
 
 
     public String getLastMessage() {
@@ -119,6 +114,10 @@ public class ChatRoom {
     public void setLastMessage(String message)
     {
         mLastMessage = message;
+    }
+
+    public boolean isMuted(){
+        return mIsMuted;
     }
 
     public boolean hasUnread() {

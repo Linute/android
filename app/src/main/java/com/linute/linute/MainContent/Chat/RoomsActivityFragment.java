@@ -267,6 +267,9 @@ public class RoomsActivityFragment extends BaseFragment {
                             name = room.getString("name");
                             image = room.getString("image");
 
+                            isMuted = room.getBoolean("isMuted");
+                            mutedUntil = room.getLong("unMuteAt");
+
 
                             usersJson = room.getJSONArray("users");
                             ArrayList<User> usersList = new ArrayList<User>();
@@ -331,11 +334,14 @@ public class RoomsActivityFragment extends BaseFragment {
                             //Throws error but still runs correctly... weird
                             tempRooms.add(new ChatRoom(
                                     room.getString("id"),
+                                    name,
+                                    image,
                                     usersList,
                                     lastMessage,
                                     hasUnreadMessage,
-                                    date == null ? 0 : date.getTime()
-
+                                    date == null ? 0 : date.getTime(),
+                                    isMuted,
+                                    mutedUntil
                             ));
                             // ,
 //                                    users.length() + 1,  // add yourself
@@ -596,7 +602,7 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
+                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), "","", null, event.getMessage(), true, new Date().getTime(), false, 0);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
