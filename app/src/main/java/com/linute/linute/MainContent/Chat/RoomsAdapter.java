@@ -12,9 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
@@ -161,19 +159,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             //set image
 
 
-            RequestManager reqMan = Glide.with(aContext);
-            DrawableTypeRequest dReq;
-            String image = mRoom.getRoomImage();
-            if(room.isDM()){
-                dReq = reqMan.load(Utils.getImageUrlOfUser(image));
-            }else{
-                if("".equals(image) || image == null){
-                    dReq = reqMan.load(R.drawable.group_icon_inbox);
-                }else{
-                    dReq = reqMan.load(Utils.getChatImageUrl(image));
-                }
-            }
-            dReq
+            Glide.with(aContext)
+                    .load(room.getRoomImage())
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.color.pure_black)

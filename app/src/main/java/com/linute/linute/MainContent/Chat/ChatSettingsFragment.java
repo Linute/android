@@ -396,14 +396,11 @@ room: id of room
 
     private void updateGroupPhoto(View view) {
         ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
-        if(!"".equals(mRoomImage)) {
             Glide.with(getContext())
-                    .load(Utils.getChatImageUrl(mRoomImage))
+                    .load(mRoomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(groupImageSettingView);
-        }else{
-            groupImageSettingView.setImageResource(R.drawable.group_icon_inbox);
-        }
+
         groupImageSettingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

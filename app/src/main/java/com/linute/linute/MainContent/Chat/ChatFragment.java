@@ -760,38 +760,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             otherPersonIconIV.setVisibility(View.GONE);
             return;
         }
-        if (isDM()) {
-            otherPersonIconIV.setVisibility(View.VISIBLE);
+        otherPersonIconIV.setVisibility(View.VISIBLE);
 
-            Context context = rootV.getContext();
-            Glide.with(context)
-                    .load(Utils.getImageUrlOfUser(mOtherPersonProfileImage))
-                    .dontAnimate()
-                    .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
-                    .placeholder(R.drawable.image_loading_background)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                     //only cache the scaled image
-                    .listener(mGlideListener)
-                    .into(otherPersonIconIV);
-        } else {
-            otherPersonIconIV.setVisibility(View.VISIBLE);
+        Context context = rootV.getContext();
+        Glide.with(context)
+                .load(mChatImage)
+                .dontAnimate()
+                .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
+                .placeholder(R.drawable.image_loading_background)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
+                .listener(mGlideListener)
+                .into(otherPersonIconIV);
 
-            if (!"".equals(mChatImage)) {
-                Context context = rootV.getContext();
-                Glide.with(context)
-                        .load(Utils.getChatThumbnailUrl(mChatImage))
-                        .dontAnimate()
-                        .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
-                        .placeholder(R.drawable.image_loading_background)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                        .listener(mGlideListener)
-                        .into(otherPersonIconIV);
-            }else {
-                otherPersonIconIV.setImageResource(R.drawable.group_icon_inbox);
-            }
-        }
-
-        TextView chatNameView = (TextView)toolbar.findViewById(R.id.toolbar_chat_user_name);
+        TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_user_name);
         String chatName = getChatName();
         chatNameView.setText(chatName);
     }
@@ -855,9 +836,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mRoomId = object.getString("id");
 
 
-
-
-
                         //room doesn't exist
                         if (mRoomId.equals("null")) {
                             mRoomExists = false;
@@ -878,7 +856,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             }
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
-                        }else{
+                        } else {
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
                             mChatImage = object.getString("image");
@@ -976,8 +954,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         Map<String, String> chat = new HashMap<>();
         chat.put(ROOM_ID, mRoomId);
-
-
 
 
         setFragmentState(FragmentState.LOADING_DATA);
@@ -1837,8 +1813,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         StringBuilder builder = new StringBuilder();
         if (isDM()) {
-
-            Log.i("AAA", mUserId);
             for (User user : mUsers) {
                 if (!user.userId.equals(mUserId)) {
                     builder.append(user.userName);

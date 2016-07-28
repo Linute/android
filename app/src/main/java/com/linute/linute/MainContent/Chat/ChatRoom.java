@@ -108,13 +108,7 @@ public class ChatRoom {
 
     public String getRoomImage(){
         //if no set room image
-        switch (mRoomType){
-            case ROOM_TYPE_DM:
-                return users.get(0).userImage;
-            case ROOM_TYPE_GROUP:
-                    return mRoomImage;
-        }
-        return null;
+        return mRoomImage;
     }
 
 
