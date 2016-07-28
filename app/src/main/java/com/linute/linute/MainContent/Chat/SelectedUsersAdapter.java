@@ -24,6 +24,9 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         this.mUsers = mUsers;
     }
 
+    private UserSelectAdapter.OnUserSelectedListener mUserSelectedListener;
+
+
 
     @Override
     public UserVH onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -32,8 +35,16 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
     }
 
     @Override
-    public void onBindViewHolder(UserVH holder, int position) {
+    public void onBindViewHolder(final UserVH holder, int position) {
         holder.bind(mUsers.get(position));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mUserSelectedListener != null){
+                    mUserSelectedListener.onUserSelected(mUsers.get(holder.getAdapterPosition()), holder.getAdapterPosition());
+                }
+            }
+        });
     }
 
     @Override
@@ -58,5 +69,8 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         }
     }
 
+    public void setUserSelectedListener(UserSelectAdapter.OnUserSelectedListener mUserSelectedListener) {
+        this.mUserSelectedListener = mUserSelectedListener;
+    }
 
 }

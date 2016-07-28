@@ -39,9 +39,9 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class SelectUserFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
+public class SelectUsersFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TAG = SelectUserFragment.class.getSimpleName();
+    private static final String TAG = SelectUsersFragment.class.getSimpleName();
 
     private UserSelectAdapter mSearchAdapter;
     private SelectedUsersAdapter mSelectedAdapter;
@@ -61,10 +61,10 @@ public class SelectUserFragment extends Fragment implements UserSelectAdapter.On
     private final static String KEY_LOCKED_USERS = "selected";
 
 
-    public static SelectUserFragment newInstance(ArrayList<User> lockedUsers){
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers){
         Bundle arguments = new Bundle();
         arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
-        SelectUserFragment selectUserFragment = new SelectUserFragment();
+        SelectUsersFragment selectUserFragment = new SelectUsersFragment();
         selectUserFragment.setArguments(arguments);
         return selectUserFragment;
     }
@@ -118,12 +118,6 @@ public class SelectUserFragment extends Fragment implements UserSelectAdapter.On
         });
 
 
-        mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
-        mSelectedRV = (RecyclerView) view.findViewById(R.id.selected_users);
-        LinearLayoutManager selectedLLM = new LinearLayoutManager(getActivity());
-        selectedLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
-        mSelectedRV.setLayoutManager(selectedLLM);
-        mSelectedRV.setAdapter(mSelectedAdapter);
 
 
         mSearchAdapter = new UserSelectAdapter(getActivity(), mSearchUserList);
@@ -131,13 +125,28 @@ public class SelectUserFragment extends Fragment implements UserSelectAdapter.On
         mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
         mSearchRV.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        final LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mSearchRV.setLayoutManager(llm);
         mSearchRV.setAdapter(mSearchAdapter);
-
-
         mSearchAdapter.setOnUserSelectedListener(this);
+
+        mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
+        mSelectedRV = (RecyclerView) view.findViewById(R.id.selected_users);
+        LinearLayoutManager selectedLLM = new LinearLayoutManager(getActivity());
+        selectedLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mSelectedRV.setLayoutManager(selectedLLM);
+        mSelectedRV.setAdapter(mSelectedAdapter);
+
+        mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
+            @Override
+            public void onUserSelected(User user, int position) {
+                mSearchUserList.add(0, user);
+                llm.scrollToPosition(0);
+
+            }
+        });
+
 
         editText = (EditText) view.findViewById(R.id.search_users_entry);
         editText.addTextChangedListener(new TextWatcher() {

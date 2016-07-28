@@ -260,8 +260,8 @@ room: id of room
                 @Override
                 public void onClick(View view) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    SelectUserFragment selectUserFragment = SelectUserFragment.newInstance(mParticipants);
-                    selectUserFragment.setOnUsersSelectedListener(new SelectUserFragment.OnUsersSelectedListener() {
+                    SelectUsersFragment selectUserFragment = SelectUsersFragment.newInstance(mParticipants);
+                    selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
                             try {

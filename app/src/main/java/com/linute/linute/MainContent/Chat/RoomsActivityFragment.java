@@ -111,9 +111,9 @@ public class RoomsActivityFragment extends BaseFragment {
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    SelectUserFragment selectUserFragment = new SelectUserFragment();
+                    SelectUsersFragment selectUserFragment = new SelectUsersFragment();
                     //callback for when the user finishes selecting users
-                    selectUserFragment.setOnUsersSelectedListener(new SelectUserFragment.OnUsersSelectedListener() {
+                    selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
                             BaseTaptActivity activity = (BaseTaptActivity)getActivity();
