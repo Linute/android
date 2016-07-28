@@ -1,51 +1,40 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mikhail on 7/28/16.
  */
-public class UserGroupSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class UserGroupSearchAdapter extends UserSelectAdapter {
 
 
 
-    public ArrayList<ChatRoom> roomsList;
-    public ArrayList<User> usersList;
+    public List<ChatRoom> mSearchRoomsList;
 
-    private boolean showRooms;
 
     private static final int TYPE_ITEM = 0;
 
     private static final int TYPE_HEADER = 1;
 
 
-    public UserGroupSearchAdapter() {
-        this.roomsList = new ArrayList<>(0);
-        this.usersList = new ArrayList<>(0);
-        showRooms = true;
+
+    public UserGroupSearchAdapter(Context context, List<ChatRoom> roomsList, List<User> usersList) {
+        super(context, usersList);
+        this.mSearchRoomsList = roomsList;
     }
 
 
-    public UserGroupSearchAdapter(ArrayList<ChatRoom> roomsList, ArrayList<User> usersList) {
-        this.roomsList = roomsList;
-        this.usersList = usersList;
-        showRooms = true;
-    }
-
-
-
-    public
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -60,13 +49,31 @@ public class UserGroupSearchAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)){
             case TYPE_ITEM:
                 if(position <getPeopleHeaderPosition()){
-                    ((ItemVH)holder).bind(roomsList.get(position-1));
+                    ((ItemVH)holder).bindModel(getChat(position));
                 }else{
-                    ((ItemVH)holder).bind(roomsList.get(position-roomsList.size()-1));
+                    final User user = getUser(position);
+                    ItemStatus status =
+                            User.findUser(mSelectedUserList, user) != -1 ?
+                                    ItemStatus.Selected :
+                                    User.findUser(mLockedUserList, user) != -1 ?
+                                            ItemStatus.Locked :
+                                            //else
+                                            ItemStatus.None;
+
+                    ((SearchViewHolder) holder).bindModel(user, status);
+                    holder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (mOnUserSelectedListener != null && User.findUser(mLockedUserList, user) == -1) {
+                                mOnUserSelectedListener.onUserSelected(getUser(holder.getAdapterPosition()), holder.getAdapterPosition());
+                            }
+                        }
+                    });
+                    ((ItemVH)holder).bindModel(user);
                 }
                 return;
             case TYPE_HEADER:
@@ -78,6 +85,14 @@ public class UserGroupSearchAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
+    private ChatRoom getChat(int position) {
+        return mSearchRoomsList.get(position-1);
+    }
+
+    @Override
+    protected User getUser(int position) {
+        return mSearchUserList.get(position-mSearchRoomsList.size()-1);
+    }
 
     @Override
     public int getItemViewType(int position) {
@@ -88,37 +103,34 @@ public class UserGroupSearchAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         }
     }
 
-    private int getRoomsHeaderPosition(){return 0;}
-    private int getPeopleHeaderPosition(){return roomsList.size()+1;}
+    private int getRoomsHeaderPosition(){return mSearchRoomsList.size() == 0 ? -1 : 0;}
+    private int getPeopleHeaderPosition(){return mSearchUserList.size() == 0 ? -1 : mSearchRoomsList.size()+1;}
 
     @Override
     public int getItemCount() {
-        return roomsList.size()+usersList.size()+2 /*+2 for headers*/;
+        return mSearchRoomsList.size()+mSearchUserList.size()
+                +(mSearchRoomsList.size() == 0 ? 0 : 1)
+                +(mSearchUserList.size() == 0 ? 0 : 1)
+                /*+2 for headers*/;
     }
 
-    public static class ItemVH extends RecyclerView.ViewHolder {
-        ImageView ivProfile;
-        TextView tvName;
+    public class ItemVH extends SearchViewHolder{
 
         public ItemVH(View itemView) {
             super(itemView);
-
-            ivProfile = (ImageView) itemView.findViewById(R.id.search_users_list_image);
-            tvName = (TextView) itemView.findViewById(R.id.search_users_list_name);
         }
 
-        public void bind(User user) {
-            Glide.with(itemView.getContext())
-                    .load(Utils.getImageUrlOfUser(user.userImage))
-                    .into(ivProfile);
-            tvName.setText(user.userName);
+        public void bindModel(User user) {
+            bindModel(user, ItemStatus.None);
         }
 
-        public void bind(ChatRoom chat) {
+        public void bindModel(ChatRoom chat) {
             Glide.with(itemView.getContext())
                     .load(chat.getRoomImage())
-                    .into(ivProfile);
-            tvName.setText(chat.getRoomName());
+                    .signature(new StringSignature(mImageSign))
+                    .into(vUserImage);
+            vUserName.setText(chat.getRoomName());
+            itemView.setBackgroundColor(0);
         }
     }
 
