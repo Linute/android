@@ -138,10 +138,6 @@ public class PreLoginActivity extends AppCompatActivity {
         LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Arrays.asList("user_friends", "public_profile", "email"));
     }
 
-    public void selectedTaptLogin() {
-        addFragment(new LinuteLoginFragment());
-    }
-
     public void selectedSignup() {
         addFragment(new LinuteSignUpFragment());
     }
@@ -151,7 +147,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     public void selectSignIn(){
-        addFragment(new PreLoginFragment());
+        addFragment(new LinuteLoginFragment());
     }
 
     private void setUpFacebookCallback() {
@@ -208,7 +204,7 @@ public class PreLoginActivity extends AppCompatActivity {
                         String responseString = response.body().string();
                         //Log.i(TAG, "onResponse: " + responseString);
                         JSONObject object = new JSONObject(responseString);
-                        Log.i(TAG, "onResponse: "+object.toString());
+                        //Log.i(TAG, "onResponse: "+object.toString());
                         boolean isUnique = object.getBoolean("isUnique");
 
                         final LinuteUser user = new LinuteUser(object);

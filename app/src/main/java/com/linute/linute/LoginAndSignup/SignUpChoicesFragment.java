@@ -38,10 +38,7 @@ public class SignUpChoicesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_signup_options, container, false);
 
-        View facebookLogin = rootView.findViewById(R.id.preLogin_facebook_login);
-        View taptLogin = rootView.findViewById(R.id.prelogin_linute_login);
-
-        facebookLogin.setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.facebook_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
@@ -51,7 +48,7 @@ public class SignUpChoicesFragment extends Fragment {
             }
         });
 
-        taptLogin.setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.linute_sign_up).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();

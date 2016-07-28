@@ -44,8 +44,7 @@ import okhttp3.Response;
 public class LinuteLoginFragment extends Fragment {
 
 
-    public static final String TAG = "LoginFragment";
-
+    public static final String TAG = LinuteLoginFragment.class.getSimpleName();
     private boolean mCheckingCredentials = false;
 
     // UI references.
@@ -82,21 +81,17 @@ public class LinuteLoginFragment extends Fragment {
             }
         });
 
-        View createAccount = rootView.findViewById(R.id.signin_create_button);
-        createAccount.setOnClickListener(new OnClickListener() {
+        rootView.findViewById(R.id.facebook_login).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
                 if (activity != null && mSafeForButtonAction) {
-                    activity.selectedSignup();
+                    activity.selectedFacebookLogin();
                 }
             }
         });
 
-
-        View forgotPassword = rootView.findViewById(R.id.login_forgot_pass);
-
-        forgotPassword.setOnClickListener(new OnClickListener() {
+        rootView.findViewById(R.id.login_forgot_pass).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PreLoginActivity activity = (PreLoginActivity) getActivity();
