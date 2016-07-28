@@ -249,6 +249,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                     JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
+                        Log.d(TAG, jsonObject.toString(4));
                         friends = jsonObject.getJSONArray("users");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {

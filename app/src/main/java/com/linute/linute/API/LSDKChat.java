@@ -41,7 +41,7 @@ public class LSDKChat {
     public Call getUsersAndRooms(Map<String, Object> param, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
-        String path = "rooms";
+        String path = "rooms/search";
         return API_Methods.post(path, header, param, callback);
     }
 
