@@ -588,6 +588,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             typingJson.put("room", mRoomId);
             typingJson.put("user", mUserId);
 
+            if(mRoomId == null){
+                Log.e(TAG, "You're a nigger, Harry!");
+            }
             joinLeft.put("room", mRoomId);
             joinLeft.put("user", mUserId);
 
@@ -709,6 +712,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null && mUserId != null && mRoomId != null) {
+
+            //because Max keeps complaining the we send him nulls into :messages:left
+            try {
+                joinLeft.put("room", mRoomId);
+                joinLeft.put("user", mUserId);
+            }catch(JSONException e){e.printStackTrace();}
             activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
 
             activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -789,8 +798,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         users.put(mUserId);
 
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
+
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "getroomchat failure");
+
                 setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -805,6 +817,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                Log.i(TAG, "getroomchat response");
+
                 if (response.isSuccessful()) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
@@ -939,6 +953,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         new LSDKChat(getActivity()).getChat(chat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+                Log.i(TAG, "getchat failure");
+
                 setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -956,6 +972,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (response.isSuccessful()) {
                     try {
+
+                        Log.i(TAG, "getchat response");
+
                         JSONObject object = new JSONObject(response.body().string());
 
                         JSONArray messages = object.getJSONArray("messages");
@@ -1017,7 +1036,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
-
                                         updateTopTimeHeader();
                                     }
 

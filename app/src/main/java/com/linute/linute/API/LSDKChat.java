@@ -41,7 +41,7 @@ public class LSDKChat {
 
     public Call getChat(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-        String[] path = {"n"};
+        String[] path = {"messages"};
         return API_Methods.get(path, header, param, callback);
     }
 
