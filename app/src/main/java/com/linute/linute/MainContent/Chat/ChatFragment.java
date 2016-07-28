@@ -23,13 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.MainActivity;
@@ -775,23 +771,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         chatNameView.setText(chatName);
     }
 
-    private RequestListener<String, GlideDrawable> mGlideListener = new RequestListener<String, GlideDrawable>() {
-        @Override
-        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-
-            return false;
-        }
-
-        @Override
-        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-            View rootV = getView();
-            if (rootV == null) return false;
-            Toolbar toolbar = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
-            ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
-            otherPersonIconIV.setVisibility(View.VISIBLE);
-            return false;
-        }
-    };
 
 
     private void getRoomAndChat() {

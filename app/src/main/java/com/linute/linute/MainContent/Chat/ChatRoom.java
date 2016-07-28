@@ -125,6 +125,10 @@ public class ChatRoom {
         return mIsMuted;
     }
 
+    public void setMute(boolean isMuted, long mutedUntil){
+        mIsMuted = isMuted;
+    }
+
     public boolean isDM(){
         return mRoomType == ROOM_TYPE_DM;
     }

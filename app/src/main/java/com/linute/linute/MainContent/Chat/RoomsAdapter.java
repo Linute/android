@@ -1,11 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +35,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private SharedPreferences mSharedPreferences;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
     private short mLoadingMoreState = LoadMoreViewHolder.STATE_LOADING;
-    private DeleteRoom mDeleteRoom;
+    private RoomContextMenuCreator mRoomContextMenuCreator;
 
     public RoomsAdapter(Context aContext, List<ChatRoom> roomsList) {
         this.aContext = aContext;
@@ -44,8 +43,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void setDeleteRoom(DeleteRoom deleteRoom){
-        mDeleteRoom = deleteRoom;
+    public void setContextMenuCreator(RoomContextMenuCreator creator){
+        mRoomContextMenuCreator = creator;
     }
 
     public void setLoadMore(LoadMoreViewHolder.OnLoadMore load) {
@@ -71,9 +70,17 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof RoomsViewHolder) {
             ((RoomsViewHolder) holder).bindModel(mRoomsList.get(position));
+            if(mRoomContextMenuCreator != null) {
+                holder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                    @Override
+                    public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                        mRoomContextMenuCreator.onCreateContextMenu(contextMenu, mRoomsList.get(holder.getAdapterPosition()), holder.getAdapterPosition(), contextMenuInfo);
+                    }
+                });
+            }
         } else {
             //bind view, tells it which to show: footer or text
             ((LoadMoreViewHolder) holder).bindView(mLoadingMoreState);
@@ -131,25 +138,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 }
             });
 
-            //when long pressed, gives option to user to delete conversation log
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    final ChatRoom room = mRoom;
-                    new AlertDialog.Builder(aContext).setTitle("Messages")
-                            .setItems(new String[]{"Delete"}, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    if (which == 0) {
-                                        if (room != null && mDeleteRoom != null) {
-                                            mDeleteRoom.deleteRoom(getAdapterPosition(), room);
-                                        }
-                                    }
-                                }
-                            }).show();
-                    return true;
-                }
-            });
+
         }
 
         void bindModel(ChatRoom room) {
@@ -185,6 +174,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
 
 
+
             //show unread icon
            /* if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE)
                 vHasUnreadIcon.setVisibility(View.VISIBLE);
@@ -193,7 +183,14 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public interface DeleteRoom{
-        void deleteRoom(int position, ChatRoom room);
+
+
+
+
+
+
+
+    public interface RoomContextMenuCreator{
+        void onCreateContextMenu(ContextMenu contextMenu, ChatRoom room, int position, ContextMenu.ContextMenuInfo contextMenuInfo);
     }
 }

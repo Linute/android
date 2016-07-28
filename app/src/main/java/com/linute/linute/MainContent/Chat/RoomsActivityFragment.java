@@ -1,15 +1,19 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -52,7 +56,7 @@ import rx.schedulers.Schedulers;
  * i.e. chatroom with max, chat room with nabeel.
  * You can click to see your convo with max or convo with nabeel
  */
-public class RoomsActivityFragment extends BaseFragment {
+public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.RoomContextMenuCreator{
     public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
     private RoomsAdapter mRoomsAdapter;
@@ -142,12 +146,7 @@ public class RoomsActivityFragment extends BaseFragment {
                     getMoreRooms();
             }
         });
-        mRoomsAdapter.setDeleteRoom(new RoomsAdapter.DeleteRoom() {
-            @Override
-            public void deleteRoom(int position, ChatRoom room) {
-                RoomsActivityFragment.this.deleteRoom(position, room);
-            }
-        });
+        mRoomsAdapter.setContextMenuCreator(this);
 
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.rooms_list);
@@ -699,4 +698,75 @@ public class RoomsActivityFragment extends BaseFragment {
             }
         }
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu contextMenu, final ChatRoom room, final int position, ContextMenu.ContextMenuInfo contextMenuInfo) {
+        contextMenu.setHeaderTitle(room.getRoomName());
+        MenuItem delete = contextMenu.add("Delete");
+        delete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                deleteRoom(position, room);
+                return true;
+            }
+        });
+        MenuItem mute = contextMenu.add(room.isMuted()?"Unmute":"Mute");
+        mute.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if (!room.isMuted()) {
+                    new RadioButtonDialog<>(getContext(), ChatSettingsFragment.MUTE_OPTIONS_TEXT,ChatSettingsFragment.MUTE_OPTIONS_VALUES)
+                            .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
+                                @Override
+                                public void onDurationSelected(Integer item) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", true);
+                                            jsonParams.put("room", room.getRoomId());
+                                            jsonParams.put("time", item);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+//                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
+//                                            updateNotificationView();
+                                            room.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
+                                            mRoomsAdapter.notifyItemChanged(position);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .create().show();
+                }else{
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Unmute this chat?")
+                            .setPositiveButton("Unmute", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", false);
+                                            jsonParams.put("room", room.getRoomId());
+                                            jsonParams.put("time", 0);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            room.setMute(false, 0);
+                                            mRoomsAdapter.notifyItemChanged(position);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create().show();
+                }
+                return true;
+            }
+        });
+    }
+
+
 }
