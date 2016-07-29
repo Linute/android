@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +42,8 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
             @Override
             public void onClick(View view) {
                 if(mUserSelectedListener != null){
+                    int position = holder.getAdapterPosition();
+                    Log.i("AAA", position+"");
                     mUserSelectedListener.onUserSelected(mUsers.get(holder.getAdapterPosition()), holder.getAdapterPosition());
                 }
             }

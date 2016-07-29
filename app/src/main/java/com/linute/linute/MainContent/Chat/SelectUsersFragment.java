@@ -202,9 +202,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
     private void getUsers(String searchWord) {
         LSDKChat users = new LSDKChat(getActivity());
-        Map<String, Object> newChat = new HashMap<>();
+        Map<String, String> newChat = new HashMap<>();
 //        newChat.put("owner", mSharedPreferences.getString("userID", null));
-
 
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
@@ -214,9 +213,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         for(User user:mSelectedUsers){
             usersJson.put(user);
         }
-        newChat.put("users", usersJson);
+//        newChat.put("users", usersJson);
 
-        users.getUsersAndRooms(newChat, new Callback() {
+        users.getUsers(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null){
@@ -242,14 +241,14 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                         });
                     }
                 } else {
-
 //                    mSearchUserList.clear();
                     ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        friends = jsonObject.getJSONArray("users");
+                        Log.d("AAA", jsonObject.toString(4));
+                        friends = jsonObject.getJSONArray("friends");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
