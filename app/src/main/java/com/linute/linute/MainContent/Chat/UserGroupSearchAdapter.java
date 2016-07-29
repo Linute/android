@@ -41,7 +41,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch(viewType){
             case TYPE_ITEM:
-                return new ItemVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
+                return new ItemVH(inflater.inflate(R.layout.list_item_user_w_college, parent, false));
             case TYPE_HEADER:
                 return new HeaderVH(inflater.inflate(R.layout.list_header, parent, false));
         }
@@ -64,7 +64,6 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
                                             //else
                                             ItemStatus.None;
 
-                    ((SearchViewHolder) holder).bindModel(user, status);
                     holder.itemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -73,7 +72,8 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
                             }
                         }
                     });
-                    ((ItemVH)holder).bindModel(user);
+
+                    ((ItemVH)holder).bindModel(user, status);
                 }
                 return;
             case TYPE_HEADER:
@@ -116,12 +116,17 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
 
     public class ItemVH extends SearchViewHolder{
 
+        protected TextView tvCollege;
+
         public ItemVH(View itemView) {
             super(itemView);
+
+            tvCollege = (TextView)itemView.findViewById(R.id.text_college);
         }
 
-        public void bindModel(User user) {
-            bindModel(user, ItemStatus.None);
+        public void bindModel(User user, ItemStatus status) {
+            super.bindModel(user, status);
+            tvCollege.setText(user.collegeName);
         }
 
         public void bindModel(ChatRoom chat) {

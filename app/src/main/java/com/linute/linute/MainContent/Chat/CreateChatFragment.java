@@ -36,7 +36,6 @@ public class CreateChatFragment extends SelectUsersFragment {
 
     @Override
     protected void search(String searchWord) {
-        Log.i("AAA", "call");
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, Object> newChat = new HashMap<>();
 //        newChat.put("owner", mSharedPreferences.getString("userID", null));
@@ -50,7 +49,7 @@ public class CreateChatFragment extends SelectUsersFragment {
 
         JSONArray usersJson = new JSONArray();
         for(User user:mSelectedUsers){
-            usersJson.put(user);
+            usersJson.put(user.userId);
         }
         newChat.put("users", usersJson);
 
@@ -83,18 +82,33 @@ public class CreateChatFragment extends SelectUsersFragment {
 //                    mSearchUserList.clear();
                     ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
-                    JSONArray friends;
+                    JSONArray usersJson;
+                    JSONArray roomsJson;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        Log.d(TAG, jsonObject.toString(4));
-                        friends = jsonObject.getJSONArray("users");
+
+                        for(String s:jsonObject.toString(4).split("\n")){
+                            Log.d("AAA", s);
+                        }
+//                        Log.d(TAG, jsonObject.toString(4));
+                        usersJson = jsonObject.getJSONArray("users");
                         JSONObject user;
-                        for (int i = 0; i < friends.length(); i++) {
-                            user = ((JSONObject) friends.get(i));
+                        for (int i = 0; i < usersJson.length(); i++) {
+                            user = ((JSONObject) usersJson.get(i));
+
+                            String collegeName;
+                            if(!user.isNull("college")) {
+                                collegeName = user.getJSONObject("college").getString("name");
+
+                            }else{
+                                collegeName = "";
+                            }
+
                             tempUsers.add(new User(
                                     user.getString("id"),
                                     user.getString("fullName"),
-                                    user.getString("profileImage")
+                                    user.getString("profileImage"),
+                                    collegeName
                             ));
                             /*if(findUser(mSelectedUsers, user.getString("id")) != -1) {
                                 tempUsers.add(new User(
@@ -109,6 +123,13 @@ public class CreateChatFragment extends SelectUsersFragment {
 
                         mSearchUserList.clear();
                         mSearchUserList.addAll(tempUsers);
+
+
+                        roomsJson = jsonObject.getJSONArray("rooms");
+
+
+
+
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {

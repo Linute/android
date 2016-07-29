@@ -711,7 +711,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity != null && mUserId != null && mRoomId != null) {
+        if (joinLeft != null && activity != null && mUserId != null && mRoomId != null) {
 
             //because Max keeps complaining the we send him nulls into :messages:left
             try {
