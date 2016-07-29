@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:background="@color/colorPrimary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="what's your name?"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="40sp"
+        android:textStyle="bold"
+    />
+
+    <EditText
+        android:id="@+id/fname_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:hint="@string/first_name_hint"
+        android:inputType="textPersonName|textCapWords"
+        android:lines="1"
+        android:maxLength="16"
+        android:textColor="@color/fifty_white"
+        android:textColorHint="@color/thirtyfive_white"
+        android:textSize="14sp"
+        android:theme="@style/MyEditTextTheme"/>
+
+
+    <EditText
+        android:id="@+id/lname_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:hint="@string/last_name_hint"
+        android:inputType="textPersonName|textCapWords"
+        android:lines="1"
+        android:maxLength="16"
+        android:textColor="@color/fifty_white"
+        android:textColorHint="@color/thirtyfive_white"
+        android:textSize="14sp"
+        android:theme="@style/MyEditTextTheme"/>
+
+    <android.support.v4.widget.Space
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/sign_up_button"
+        android:text="1 of 4"
+        android:textColor="@drawable/signup_button_text"
+    />
+</LinearLayout>

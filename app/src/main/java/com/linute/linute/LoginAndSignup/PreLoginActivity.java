@@ -25,6 +25,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.LoginAndSignup.SignUpFragments.SignUpParentFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -57,6 +58,8 @@ public class PreLoginActivity extends AppCompatActivity {
     private String mFBToken;
 
     private CallbackManager mCallbackManager;
+
+    private OnBackPressed mOnBackPressed;
 
 
     @Override
@@ -92,7 +95,7 @@ public class PreLoginActivity extends AppCompatActivity {
             });
 
         if (savedInstanceState == null)
-            replaceFragment(new SignUpChoicesFragment());
+            replaceFragment(new PreloginChoicesFragment());
 
     }
 
@@ -121,14 +124,14 @@ public class PreLoginActivity extends AppCompatActivity {
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out );
         transaction.replace(R.id.login_activity_fragment_frame, fragment);
         transaction.commit();
     }
 
     public void addFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.frag_fade_in, R.anim.frag_fade_out);
+        transaction.setCustomAnimations(R.anim.frag_fade_in, R.anim.frag_fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.login_activity_fragment_frame, fragment).addToBackStack(null);
         transaction.commit();
     }
@@ -139,7 +142,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     public void selectedSignup() {
-        addFragment(new LinuteSignUpFragment());
+        addFragment(new SignUpParentFragment());
     }
 
     public void selectForgotPassword() {
@@ -169,7 +172,6 @@ public class PreLoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-                return;
             }
 
             @Override
@@ -415,6 +417,24 @@ public class PreLoginActivity extends AppCompatActivity {
         finish();
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (mOnBackPressed != null){
+            mOnBackPressed.onBack();
+        }else {
+            super.onBackPressed();
+        }
+    }
+
+    public void setOnBackPressed(OnBackPressed onBackPressed){
+        mOnBackPressed = onBackPressed;
+    }
+
+
+    public interface OnBackPressed{
+        void onBack();
+    }
 
 }
 

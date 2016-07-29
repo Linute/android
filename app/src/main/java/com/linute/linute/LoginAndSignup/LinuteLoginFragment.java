@@ -73,7 +73,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView = (EditText) rootView.findViewById(R.id.signin_email_password_text);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.signin_progress_bar);
 
-        mSigninButton =  rootView.findViewById(R.id.signin_signin_button);
+        mSigninButton =  rootView.findViewById(R.id.log_in);
         mSigninButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -85,16 +85,18 @@
             android:id="@+id/frameLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp">
 
-            <ImageView
-                android:id="@+id/signin_signin_button"
-                android:layout_width="125dp"
+            <Button
+                android:id="@+id/log_in"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/login_button"
-            />
+                android:background="@drawable/sign_up_button"
+                android:paddingEnd="32dp"
+                android:paddingStart="32dp"
+                android:text="Sign in"
+                android:textColor="@drawable/signup_button_text"/>
 
             <ProgressBar
                 android:id="@+id/signin_progress_bar"

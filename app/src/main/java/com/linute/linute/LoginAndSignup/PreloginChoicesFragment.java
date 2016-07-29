@@ -21,9 +21,9 @@ import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 /**
  * Created by QiFeng on 7/18/16.
  */
-public class SignUpChoicesFragment extends Fragment {
+public class PreloginChoicesFragment extends Fragment {
 
-    public SignUpChoicesFragment() {
+    public PreloginChoicesFragment() {
 
     }
 

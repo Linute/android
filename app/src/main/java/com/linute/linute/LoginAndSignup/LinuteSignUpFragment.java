@@ -199,19 +199,19 @@ public class LinuteSignUpFragment extends Fragment {
         mProgressBar3 = root.findViewById(R.id.resend_progress);
 
         mSubmitButton = root.findViewById(R.id.signUp_submit_butt);
-        mVerifyLayer = root.findViewById(R.id.signup_verify_layer);
+       // mVerifyLayer = root.findViewById(R.id.signup_verify_layer);
 
         mEmailConfirmTextView = (TextView) root.findViewById(R.id.signUp_email_confirm_text_view);
     }
 
     private void setUpOnClickListeners() {
 
-        mVerifyLayer.findViewById(R.id.signup_get_verify_code_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkEmailAndGetPinCode();
-            }
-        });
+//        mVerifyLayer.findViewById(R.id.signup_get_verify_code_button).setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                checkEmailAndGetPinCode();
+//            }
+//        });
 
         //attempt to sign up when button pressed
         mSubmitButton.setOnClickListener(new OnClickListener() {

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:background="@color/colorPrimary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="what's your .edu email?"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="40sp"
+        android:textStyle="bold"
+    />
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:hint=".edu email"
+        android:imeOptions="actionDone"
+        android:inputType="textEmailAddress"
+        android:lines="1"
+        android:singleLine="true"
+        android:textColor="@color/fifty_white"
+        android:textColorHint="@color/thirtyfive_white"
+        android:textSize="14sp"
+        android:theme="@style/MyEditTextTheme"/>
+
+
+    <TextView
+        android:id="@+id/suggest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:text="Click to add domain"
+        android:textColor="@color/pure_white"
+        android:textSize="@dimen/body_font_size"
+        android:textStyle="bold"
+    />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_weight="1"/>
+
+
+    <FrameLayout android:layout_width="wrap_content"
+                 android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/sign_up_button"
+            android:text="3 of 4"
+            android:textColor="@drawable/signup_button_text"
+        />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"/>
+
+    </FrameLayout>
+
+</LinearLayout>
