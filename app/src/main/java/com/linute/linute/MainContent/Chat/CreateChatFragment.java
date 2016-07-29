@@ -90,7 +90,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                         friends = jsonObject.getJSONArray("users");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
-                            user = ((JSONObject) friends.get(i)).getJSONObject("user");
+                            user = ((JSONObject) friends.get(i));
                             tempUsers.add(new User(
                                     user.getString("id"),
                                     user.getString("fullName"),

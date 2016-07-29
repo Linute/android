@@ -52,7 +52,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)){
             case TYPE_ITEM:
-                if(position <getPeopleHeaderPosition()){
+                if(position < getPeopleHeaderPosition()){
                     ((ItemVH)holder).bindModel(getChat(position));
                 }else{
                     final User user = getUser(position);
@@ -91,7 +91,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
 
     @Override
     protected User getUser(int position) {
-        return mSearchUserList.get(position-mSearchRoomsList.size()-1);
+        return mSearchUserList.get(position-mSearchRoomsList.size()-(mSearchRoomsList.size() == 0 ? 0 : 1) - 1);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
     }
 
     private int getRoomsHeaderPosition(){return mSearchRoomsList.size() == 0 ? -1 : 0;}
-    private int getPeopleHeaderPosition(){return mSearchUserList.size() == 0 ? -1 : mSearchRoomsList.size()+1;}
+    private int getPeopleHeaderPosition(){return mSearchUserList.size() == 0 ? -1 : mSearchRoomsList.size() == 0 ? 0 : mSearchRoomsList.size()+1;}
 
     @Override
     public int getItemCount() {
