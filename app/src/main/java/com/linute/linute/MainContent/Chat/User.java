@@ -13,14 +13,25 @@ public class User implements Parcelable{
     public final String userImage;
     public final String userName;
 
+    public final String collegeName;
+
 //    public User() {
 //        userId = userImage = userName = "";
 //    }
+
 
     public User(String userId, String userName, String userImage) {
         this.userId = userId;
         this.userImage = userImage;
         this.userName = userName;
+        this.collegeName = null;
+    }
+
+    public User(String userId, String userName, String userImage, String collegeName) {
+        this.userId = userId;
+        this.userImage = userImage;
+        this.userName = userName;
+        this.collegeName = collegeName;
     }
 
     @Override
@@ -33,12 +44,14 @@ public class User implements Parcelable{
         parcel.writeString(userId);
         parcel.writeString(userName);
         parcel.writeString(userImage);
+        parcel.writeString(collegeName);
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
         @Override
         public User createFromParcel(Parcel parcel) {
             return new User(
+                    parcel.readString(),
                     parcel.readString(),
                     parcel.readString(),
                     parcel.readString()

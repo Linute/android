@@ -115,7 +115,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    SelectUsersFragment selectUserFragment = new SelectUsersFragment();
+                    SelectUsersFragment selectUserFragment = new CreateChatFragment();
                     //callback for when the user finishes selecting users
                     selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override

@@ -23,21 +23,19 @@ import java.util.List;
  */
 public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = UserSelectAdapter.class.getSimpleName();
-    private String mImageSign;
-    private Context aContext;
+    protected String mImageSign;
     protected List<User> mSearchUserList;
 
 
     protected List<User> mLockedUserList;
     protected List<User> mSelectedUserList;
-    private OnUserSelectedListener mOnUserSelectedListener;
+    protected OnUserSelectedListener mOnUserSelectedListener;
 
     public void setOnUserSelectedListener(OnUserSelectedListener onUserSelectedListener) {
         this.mOnUserSelectedListener = onUserSelectedListener;
     }
 
     public UserSelectAdapter(Context aContext, List<User> searchUserList) {
-        this.aContext = aContext;
         mSearchUserList = searchUserList;
         mImageSign = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
 
@@ -72,7 +70,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         });
     }
 
-    private User getUser(int position) {
+    protected User getUser(int position) {
         return mSearchUserList.get(position);
     }
 
@@ -88,12 +86,10 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         Locked
     }
 
-    class SearchViewHolder extends RecyclerView.ViewHolder {
+    public class SearchViewHolder extends RecyclerView.ViewHolder {
         protected LinearLayout vSearchItemLinear;
         protected ImageView vUserImage;
         protected TextView vUserName;
-        protected String mUserId;
-        protected String mUserName;
 
         public SearchViewHolder(View itemView) {
             super(itemView);
@@ -106,17 +102,13 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
 
         void bindModel(User user, ItemStatus status) {
-            Glide.with(aContext)
+            Glide.with(itemView.getContext())
                     .load(Utils.getImageUrlOfUser(user.userImage))
-                    .asBitmap()
                     .dontAnimate()
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
-
-            mUserId = user.userId;
-            mUserName = user.userName;
 
             vUserName.setText(user.userName);
 

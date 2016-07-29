@@ -43,23 +43,23 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = SelectUsersFragment.class.getSimpleName();
 
-    private UserSelectAdapter mSearchAdapter;
-    private SelectedUsersAdapter mSelectedAdapter;
+    protected UserSelectAdapter mSearchAdapter;
+    protected SelectedUsersAdapter mSelectedAdapter;
 
-    private ArrayList<User> mSelectedUsers = new ArrayList<>();
-    private List<User> mSearchUserList = new ArrayList<>();
+    protected ArrayList<User> mSelectedUsers = new ArrayList<>();
+    protected List<User> mSearchUserList = new ArrayList<>();
 
-    private ArrayList<User> mLockedUsers;
-    private SharedPreferences mSharedPreferences;
+    protected ArrayList<User> mLockedUsers;
 
     private EditText editText;
 
-    private Handler mHandler = new Handler();
-    private RecyclerView mSelectedRV;
-    private RecyclerView mSearchRV;
+    protected Handler mHandler = new Handler();
+    protected RecyclerView mSelectedRV;
+    protected RecyclerView mSearchRV;
 
     private final static String KEY_LOCKED_USERS = "selected";
 
+    SharedPreferences mSharedPreferences;
 
     public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers){
         Bundle arguments = new Bundle();
@@ -76,13 +76,13 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         if(arguments != null) {
             mLockedUsers = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
         }
+        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return inflater.inflate(R.layout.fragment_search_users, container, false);
     }
 
@@ -118,9 +118,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
 
 
-
-
-        mSearchAdapter = new UserSelectAdapter(getActivity(), mSearchUserList);
+        mSearchAdapter = createSearchAdapter();
         mSearchAdapter.setLockedUserList(mLockedUsers);
         mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
@@ -157,7 +155,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                getUsers(s.toString());
+                search(s.toString());
             }
 
             @Override
@@ -166,7 +164,11 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
             }
         });
 
-        getUsers("");
+        search("");
+    }
+
+    protected UserSelectAdapter createSearchAdapter() {
+        return new UserSelectAdapter(getActivity(), mSearchUserList);
     }
 
     @Override
@@ -200,20 +202,12 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         }
     }
 
-    private void getUsers(String searchWord) {
+    protected void search(String searchWord) {
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, String> newChat = new HashMap<>();
-//        newChat.put("owner", mSharedPreferences.getString("userID", null));
-
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
         }
-
-        JSONArray usersJson = new JSONArray();
-        for(User user:mSelectedUsers){
-            usersJson.put(user);
-        }
-//        newChat.put("users", usersJson);
 
         users.getUsers(newChat, new Callback() {
             @Override
@@ -247,7 +241,6 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                     JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        Log.d("AAA", jsonObject.toString(4));
                         friends = jsonObject.getJSONArray("friends");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
