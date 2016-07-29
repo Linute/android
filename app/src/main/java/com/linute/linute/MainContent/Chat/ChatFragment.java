@@ -508,7 +508,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
 
         vPreChat = view.findViewById(R.id.pre_chat);
-        vPreChat.setVisibility(false ? View.VISIBLE : View.GONE); //TODO some condition for prechat
+        vPreChat.setVisibility(View.GONE); //TODO some condition for prechat
 
         vPreChat.findViewById(R.id.button_accept).setOnClickListener(new View.OnClickListener() {
             @Override
