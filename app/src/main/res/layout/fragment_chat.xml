@@ -48,6 +48,8 @@
 
         />
 
+
+
     <LinearLayout
         android:id="@id/message_container"
         android:layout_width="match_parent"
@@ -92,6 +94,44 @@
             android:scaleType="fitCenter"
             android:src="@drawable/icon_send" />
 
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pre_chat"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        >
+
+        <TextView
+            android:id="@+id/button_accept"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FF0000FF"
+            android:gravity="center"
+            android:text="Accept"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp"
+            android:textAllCaps="true"
+            />
+
+        <TextView
+            android:id="@+id/button_decline"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFF0000"
+            android:gravity="center"
+            android:text="Decline"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp"
+            android:textAllCaps="true"
+
+            />
     </LinearLayout>
 
 

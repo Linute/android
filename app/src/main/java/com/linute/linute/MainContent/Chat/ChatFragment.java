@@ -122,6 +122,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private View vSendButton;
 
+    View vPreChat;
 
     private List<Chat> mChatList = new ArrayList<>();
 
@@ -505,6 +506,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         });
+
+        vPreChat = view.findViewById(R.id.pre_chat);
+        vPreChat.setVisibility(false ? View.VISIBLE : View.GONE); //TODO some condition for prechat
+
+        vPreChat.findViewById(R.id.button_accept).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
+        vPreChat.findViewById(R.id.button_decline).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
     }
 
     @Override
@@ -588,7 +607,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             typingJson.put("room", mRoomId);
             typingJson.put("user", mUserId);
 
-            if(mRoomId == null){
+            if (mRoomId == null) {
                 Log.e(TAG, "You're a nigger, Harry!");
             }
             joinLeft.put("room", mRoomId);
@@ -717,7 +736,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 joinLeft.put("room", mRoomId);
                 joinLeft.put("user", mUserId);
-            }catch(JSONException e){e.printStackTrace();}
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
 
             activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -779,7 +800,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         String chatName = getChatName();
         chatNameView.setText(chatName);
     }
-
 
 
     private void getRoomAndChat() {
