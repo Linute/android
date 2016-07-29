@@ -259,13 +259,15 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         SimpleDateFormat format = Utils.getDateFormat();
                         final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
 
+
                         for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
 
+
                             name = room.getString("name");
-                            image = room.getString("image");
+                            image = room.getJSONObject("profileImage").getString("thumbnail");
 
                             type = room.getInt("type");
 
