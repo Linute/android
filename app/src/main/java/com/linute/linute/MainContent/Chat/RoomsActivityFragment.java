@@ -115,7 +115,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    SelectUsersFragment selectUserFragment = new CreateChatFragment();
+                    CreateChatFragment selectUserFragment = new CreateChatFragment();
                     //callback for when the user finishes selecting users
                     selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
@@ -123,6 +123,13 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             BaseTaptActivity activity = (BaseTaptActivity)getActivity();
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
 
+                        }
+                    });
+                    selectUserFragment.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                        @Override
+                        public void onRoomSelected(ChatRoom room) {
+                            BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), room.users));
                         }
                     });
                     activity.addFragmentToContainer(selectUserFragment);

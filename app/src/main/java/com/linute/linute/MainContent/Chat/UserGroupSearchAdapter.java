@@ -22,6 +22,9 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
 
     public List<ChatRoom> mSearchRoomsList;
 
+    private OnRoomSelectedListener onRoomSelectedListener;
+
+
 
     private static final int TYPE_ITEM = 0;
 
@@ -34,7 +37,9 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         this.mSearchRoomsList = roomsList;
     }
 
-
+    public void setOnRoomSelectedListener(OnRoomSelectedListener onRoomSelectedListener) {
+        this.onRoomSelectedListener = onRoomSelectedListener;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,6 +59,14 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
             case TYPE_ITEM:
                 if(position < getPeopleHeaderPosition()){
                     ((ItemVH)holder).bindModel(getChat(position));
+                    holder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if(onRoomSelectedListener != null){
+                                onRoomSelectedListener.onRoomSelected(getChat(holder.getAdapterPosition()));
+                            }
+                        }
+                    });
                 }else{
                     final User user = getUser(position);
                     ItemStatus status =
@@ -135,6 +148,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
                     .signature(new StringSignature(mImageSign))
                     .into(vUserImage);
             vUserName.setText(chat.getRoomName());
+            tvCollege.setText(chat.users.size() + " Members");
             itemView.setBackgroundColor(0);
         }
     }
@@ -152,5 +166,8 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         }
     }
 
+    public interface OnRoomSelectedListener{
+        public void onRoomSelected(ChatRoom room);
+    }
 
 }
