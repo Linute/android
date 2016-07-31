@@ -110,14 +110,14 @@ public class ChatSettingsFragment extends BaseFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 try {
                     JSONObject chat = new JSONObject(response.body().string());
-                    Log.d(TAG, chat.toString(4));
+
 
                     mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
                     JSONObject room = chat.getJSONObject("room");
 
                     mRoomName = room.getString("name");
-                    mRoomImage = room.getString("image");
+                    mRoomImage = room.getJSONObject("profileImage").getString("original");
 
                     /*JSONArray muteList = room.getJSONArray("mute");
                     JSONObject mute = null;
