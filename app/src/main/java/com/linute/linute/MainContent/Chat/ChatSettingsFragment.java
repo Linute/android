@@ -268,6 +268,9 @@ room: id of room
                 }
             });
 
+            Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+            toolbar.setTitle(mRoomName);
+
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
