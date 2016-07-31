@@ -25,10 +25,11 @@
 
     <TextView
         android:id="@+id/feedDetail_user_name"
-        android:layout_width="0dp"
+        android:layout_width="0px"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
+        android:ellipsize="end"
         android:singleLine="true"
         android:textColor="@color/secondaryColor"
         android:textSize="@dimen/header_font_size"
@@ -39,12 +40,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:layout_margin="@dimen/half_margin"
         android:singleLine="true"
         android:textColor="@color/twentyfive_black"
         android:textSize="@dimen/sub_font_size"
         tools:text="1m"
     />
 
+    <ImageView
+        android:id="@+id/share"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_vertical|end"
+        android:padding="8dp"
+        android:src="@drawable/ic_share_arrow"
+    />
 
 </LinearLayout>

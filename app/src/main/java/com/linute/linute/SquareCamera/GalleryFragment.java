@@ -18,6 +18,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import com.linute.linute.R;
 
 
 public class GalleryFragment extends Fragment {
+
     public static final String TAG = GalleryFragment.class.getSimpleName();
 
     private int SELECT_IMAGE_OR_VID = 9;
@@ -70,6 +72,7 @@ public class GalleryFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_IMAGE_OR_VID) { //got an image
             Uri uri = data.getData();
+            Log.i(TAG, "onActivityResult: "+uri.toString());
             if (uri.toString().contains("image")) { //selected image
                 if (getActivity() != null) {
                     try {
@@ -281,13 +284,24 @@ public class GalleryFragment extends Fragment {
     private void getImageOrVideo() {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/* video/*");
-        if (Build.VERSION.SDK_INT >= 19) {
-            String[] mimetypes = {"image/*", "video/*"};
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        if (((CameraActivity) getActivity()).getGalleryType() == CameraActivity.IMAGE){
+            intent.setType("image/*");
+            if (Build.VERSION.SDK_INT >= 19) {
+                String[] mimetypes = {"image/*"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+            }
+
+            startActivityForResult(Intent.createChooser(intent,
+                    "Select image"), SELECT_IMAGE_OR_VID);
+        }else {
+            intent.setType("image/* video/*");
+            if (Build.VERSION.SDK_INT >= 19) {
+                String[] mimetypes = {"image/*", "video/*"};
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+            }
+            startActivityForResult(Intent.createChooser(intent,
+                    "Select image or video"), SELECT_IMAGE_OR_VID);
         }
-        startActivityForResult(Intent.createChooser(intent,
-                "Select image or video"), SELECT_IMAGE_OR_VID);
     }
 
     //Permissions

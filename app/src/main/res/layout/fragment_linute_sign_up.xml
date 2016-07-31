@@ -1,14 +1,16 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:app="http://schemas.android.com/apk/res-auto"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:background="@color/eighty_black"
-             tools:context=".LoginAndSignup.LinuteSignUpFragment">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/eighty_black"
+    tools:context=".LoginAndSignup.LinuteSignUpFragment">
 
-    <ViewFlipper android:id="@+id/signUp_view_flipper"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+    <ViewFlipper
+        android:id="@+id/signUp_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
 
         <RelativeLayout
@@ -21,17 +23,19 @@
             android:gravity="center"
         >
 
-            <FrameLayout android:id="@+id/create_prof_image"
-                         android:layout_width="wrap_content"
-                         android:layout_height="wrap_content"
-                         android:layout_centerHorizontal="true"
-                         android:layout_marginBottom="16dp"
-                         android:layout_marginTop="16dp">
+            <FrameLayout
+                android:id="@+id/create_prof_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp">
 
-                <ImageView android:layout_width="102dp"
-                           android:layout_height="102dp"
-                           android:layout_gravity="center"
-                           android:src="@drawable/photo_rad"/>
+                <ImageView
+                    android:layout_width="102dp"
+                    android:layout_height="102dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/photo_rad"/>
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/signup_profile_pic_view"
@@ -47,12 +51,13 @@
             </FrameLayout>
 
 
-            <LinearLayout android:id="@+id/name_create_parent"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:layout_below="@id/create_prof_image"
-                          android:orientation="horizontal"
-                          android:weightSum="2">
+            <LinearLayout
+                android:id="@+id/name_create_parent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/create_prof_image"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
                 <EditText
                     android:id="@+id/signup_fname_text"
@@ -120,18 +125,20 @@
                 android:textSize="14sp"
                 android:theme="@style/MyEditTextTheme"/>
 
-            <LinearLayout android:id="@+id/signup_verify_layer"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:layout_below="@id/signup_password"
-                          android:gravity="center"
-                          android:weightSum="9">
+            <LinearLayout
+                android:id="@+id/signup_verify_layer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/signup_password"
+                android:gravity="center"
+                android:weightSum="9">
 
-                <ImageView android:id="@+id/signup_get_verify_code_button"
-                           android:layout_width="0px"
-                           android:layout_height="wrap_content"
-                           android:layout_weight="3"
-                           android:src="@drawable/create_sign_up_button"
+                <ImageView
+                    android:id="@+id/signup_get_verify_code_button"
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:src="@drawable/create_sign_up_button"
                 />
             </LinearLayout>
 
@@ -147,53 +154,57 @@
                 android:visibility="gone"
             />
 
-            <TextView android:id="@+id/agree_text"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_below="@id/signup_verify_layer"
-                      android:layout_marginBottom="8dp"
-                      android:layout_marginEnd="8dp"
-                      android:layout_marginStart="8dp"
-                      android:layout_marginTop="8dp"
-                      android:gravity="center"
-                      android:text="@string/create_account_agree"
-                      android:textColor="@color/fifty_white"
-                      android:textSize="@dimen/sub_font_size"
+            <TextView
+                android:id="@+id/agree_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/signup_verify_layer"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/create_account_agree"
+                android:textColor="@color/fifty_white"
+                android:textSize="@dimen/sub_font_size"
             />
 
-            <LinearLayout android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:layout_below="@id/agree_text"
-                          android:layout_marginBottom="8dp"
-                          android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                          android:layout_marginStart="@dimen/activity_horizontal_margin"
-                          android:layout_marginTop="4dp"
-                          android:orientation="horizontal"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/agree_text"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal"
             >
-                <TextView android:id="@+id/create_privacy_policy"
-                          android:layout_width="0px"
-                          android:layout_height="wrap_content"
-                          android:layout_weight="1"
-                          android:background="@null"
-                          android:gravity="center"
-                          android:paddingBottom="8dp"
-                          android:paddingTop="8dp"
-                          android:text="Privacy Policy"
-                          android:textColor="@color/secondaryColor"
-                          android:textSize="@dimen/sub_font_size"
+                <TextView
+                    android:id="@+id/create_privacy_policy"
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:gravity="center"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp"
+                    android:text="Privacy Policy"
+                    android:textColor="@color/secondaryColor"
+                    android:textSize="@dimen/sub_font_size"
                 />
 
-                <TextView android:id="@+id/create_terms_of_services"
-                          android:layout_width="0px"
-                          android:layout_height="wrap_content"
-                          android:layout_weight="1"
-                          android:background="@null"
-                          android:gravity="center"
-                          android:paddingBottom="8dp"
-                          android:paddingTop="8dp"
-                          android:text="Terms of service"
-                          android:textColor="@color/secondaryColor"
-                          android:textSize="@dimen/sub_font_size"
+                <TextView
+                    android:id="@+id/create_terms_of_services"
+                    android:layout_width="0px"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:gravity="center"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp"
+                    android:text="Terms of service"
+                    android:textColor="@color/secondaryColor"
+                    android:textSize="@dimen/sub_font_size"
                 />
 
             </LinearLayout>
@@ -201,40 +212,44 @@
         </RelativeLayout>
 
 
-        <LinearLayout android:id="@+id/signUp_verify_form"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:layout_marginBottom="24dp"
-                      android:layout_marginTop="180dp"
-                      android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/signUp_verify_form"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="180dp"
+            android:orientation="vertical">
 
-            <TextView android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginLeft="32dp"
-                      android:layout_marginRight="32dp"
-                      android:gravity="center"
-                      android:text="A verification code was sent to:"
-                      android:textColor="@color/thirtyfive_white"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:gravity="center"
+                android:text="A verification code was sent to:"
+                android:textColor="@color/thirtyfive_white"/>
 
-            <TextView android:id="@+id/signUp_email_confirm_text_view"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginBottom="5dp"
-                      android:layout_marginLeft="32dp"
-                      android:layout_marginRight="32dp"
-                      android:layout_marginTop="5dp"
-                      android:gravity="center"
-                      android:textColor="@color/secondaryColor"
-                      android:textStyle="bold"
-                      tools:text="blahblah@cuny.edu"/>
+            <TextView
+                android:id="@+id/signUp_email_confirm_text_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:layout_marginTop="5dp"
+                android:gravity="center"
+                android:textColor="@color/secondaryColor"
+                android:textStyle="bold"
+                tools:text="blahblah@cuny.edu"/>
 
-            <TextView android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:layout_marginLeft="32dp"
-                      android:layout_marginRight="32dp"
-                      android:gravity="center"
-                      android:text="Please enter the code below. (Note: The email might have been marked as spam)"
-                      android:textColor="@color/thirtyfive_white"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:gravity="center"
+                android:text="Please enter the code below. (Note: The email might have been marked as spam)"
+                android:textColor="@color/thirtyfive_white"/>
 
             <EditText
                 android:id="@+id/signUp_verify_code"
@@ -259,12 +274,13 @@
                 android:layout_height="60dp"
                 android:gravity="center_horizontal">
 
-                <ImageView android:id="@+id/signUp_submit_butt"
-                           android:layout_width="120dp"
-                           android:layout_height="60dp"
-                           android:layout_gravity="center"
-                           android:src="@drawable/verify_button"
-                           android:textAllCaps="true"/>
+                <ImageView
+                    android:id="@+id/signUp_submit_butt"
+                    android:layout_width="120dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/verify_button"
+                    android:textAllCaps="true"/>
 
                 <ProgressBar
                     android:id="@+id/signUp_progress_bar2"
@@ -278,19 +294,21 @@
             </FrameLayout>
 
 
-            <FrameLayout android:layout_width="match_parent"
-                         android:layout_height="match_parent"
-                         android:layout_gravity="center_horizontal|bottom">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal|bottom">
 
-                <TextView android:id="@+id/resend"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:layout_gravity="center_horizontal|bottom"
-                          android:layout_marginBottom="16dp"
-                          android:padding="16dp"
-                          android:text="Resend"
-                          android:textColor="@color/fifty_white"
-                          android:textSize="@dimen/header_font_size"
+                <TextView
+                    android:id="@+id/resend"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal|bottom"
+                    android:layout_marginBottom="16dp"
+                    android:padding="16dp"
+                    android:text="Resend"
+                    android:textColor="@color/fifty_white"
+                    android:textSize="@dimen/header_font_size"
                 />
 
                 <ProgressBar
@@ -309,12 +327,13 @@
 
     </ViewFlipper>
 
-    <ImageView android:id="@+id/signUp_back_button"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:alpha="0.35"
-               android:padding="@dimen/activity_horizontal_margin"
-               android:src="@drawable/ic_action_navigation_arrow_back_inverted"
-               android:foreground="?selectableItemBackgroundBorderless"
+    <ImageView
+        android:id="@+id/signUp_back_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.35"
+        android:foreground="?selectableItemBackgroundBorderless"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 </FrameLayout>

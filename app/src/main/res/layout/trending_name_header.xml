@@ -24,8 +24,9 @@
 
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0px"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         android:gravity="center_vertical"
         android:orientation="vertical"
     >
@@ -44,11 +45,11 @@
                 android:textSize="@dimen/header_font_size"
                 tools:text="John Snow"/>
 
+
             <TextView
                 android:id="@+id/feedDetail_time_stamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
                 android:ellipsize="end"
                 android:singleLine="true"
@@ -62,7 +63,6 @@
             android:id="@+id/college_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/activity_horizontal_margin"
             android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="@dimen/sub_font_size"
@@ -70,5 +70,13 @@
         />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/share"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_vertical"
+        android:padding="8dp"
+        android:src="@drawable/ic_share_arrow"
+    />
 
 </LinearLayout>

@@ -196,8 +196,13 @@ public class Utils {
     public static String getFilterImageUrl(String image){
         return "http://images.linute.com/filters/"+image;
     }
+
     public static String getMemeImageUrl(String image){
         return "http://images.linute.com/memes/"+image;
+    }
+
+    public static String getCommentImageUrl(String image){
+        return "http://images.linute.com/comments/original/"+image;
     }
 
 

@@ -32,6 +32,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -294,7 +295,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING_NO_STATUS);
+                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
                 startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
             }
@@ -488,7 +489,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onClick(View v) {
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, CameraActivity.CAMERA_EVERYTHING_NO_STATUS);
+                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_VIDEO).add(CameraType.CAMERA_GALLERY));
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
                 startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
             }

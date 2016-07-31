@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.content.Context;
 import android.view.View;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.StatusFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -15,8 +16,8 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
 
     public static final String TAG = FeedDetailHeaderStatusViewHolder.class.getSimpleName();
 
-    public FeedDetailHeaderStatusViewHolder(View view, Context context ){
-        super(view, context);
+    public FeedDetailHeaderStatusViewHolder(View view, Context context, RequestManager manager){
+        super(view, context, manager);
     }
 
     @Override

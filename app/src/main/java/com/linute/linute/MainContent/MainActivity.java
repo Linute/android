@@ -130,17 +130,18 @@ public class MainActivity extends BaseTaptActivity {
             @Override
             public void onClick(View v) {
                 mDrawerLayout.closeDrawers();
-                boolean hasBackStack = getSupportFragmentManager().getBackStackEntryCount() > 0;
-
                 if (mPreviousItem != null) { //profile doesn't get checked
-                    if (hasBackStack)
-                        clearBackStack();
-
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 0) clearBackStack();
                     mPreviousItem.setChecked(false);
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
                 } else {
-                    getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 1){
+                        clearBackStack();
+                        replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
+                    }else {
+                        getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
+                    }
                 }
             }
         });
@@ -421,19 +422,6 @@ public class MainActivity extends BaseTaptActivity {
         setNavItemNotification(R.id.navigation_item_feed, count);
     }
 
-//    public void setUpdateNotification(int count) {
-//        //setNavItemNotification(R.id.navigation_item_activity, count);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        if (toolbar != null) {
-//            MenuItem updateItem = toolbar.getMenu().findItem(R.id.menu_updates);
-//            if (updateItem != null) {
-//                updateItem.getActionView().findViewById(R.id.notification).setVisibility(
-//                        count > 0 ? View.VISIBLE : View.GONE
-//                );
-//                ((TextView) updateItem.getActionView().findViewById(R.id.notification_count)).setText((count < 100 ? String.valueOf(count) : "+"));
-//            }
-//        }
-//    }
 
     //So we change fragments or activities only after the drawer closes
     private class MainDrawerListener extends DrawerLayout.SimpleDrawerListener {

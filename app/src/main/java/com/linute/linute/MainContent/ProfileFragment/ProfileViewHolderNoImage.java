@@ -16,7 +16,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private Context mContext;
-
     private TextView mTextView;
 
     //private View vAnonIcon;

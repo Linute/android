@@ -33,6 +33,7 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -583,10 +584,11 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                     @Override
                     public void onNext(Uri image) {
 
-                        if (mReturnType == CameraActivity.RETURN_URI) {
+                        if (mReturnType != CameraActivity.RETURN_URI_AND_PRIVACY) {
                             Intent i = new Intent()
                                     .putExtra("video", Uri.parse(outputFile))
                                     .putExtra("image", image)
+                                    .putExtra("privacy", mAnonSwitch.isChecked())
                                     .putExtra("type", CameraActivity.VIDEO)
                                     .putExtra("title", mTextView.getText().toString());
 
@@ -594,7 +596,6 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
                             getActivity().setResult(Activity.RESULT_OK, i);
                             getActivity().finish();
                         } else {
-
                             uploadVideo(image.toString(), outputFile);
                         }
                     }
@@ -622,11 +623,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         );
 
         showProgress(false);
-        Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
-        Intent result = new Intent();
-        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
-        getActivity().setResult(Activity.RESULT_OK, result);
-        getActivity().finish();
+        ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
     }
 
 
@@ -733,7 +730,8 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
+    public void onStop() {
+        super.onStop();
+        if (mVideoProcessSubscription != null) mVideoProcessSubscription.unsubscribe();
     }
 }

@@ -2,7 +2,6 @@ package com.linute.linute.MainContent;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -27,8 +26,10 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
@@ -37,7 +38,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import org.bson.types.ObjectId;
 
 import static android.app.Activity.RESULT_CANCELED;
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
@@ -244,11 +244,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                             mSharedPreferences.getString("userToken","")
                     );
 
-            Toast.makeText(getActivity(), "Uploading in background...", Toast.LENGTH_SHORT).show();
-            Intent result = new Intent();
-            result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
-            getActivity().setResult(RESULT_OK, result);
-            getActivity().finish();
+            ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
         } else {
             Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);

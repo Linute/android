@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.content.Context;
 import android.view.View;
 
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -13,8 +14,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
  */
 public class FeedDetailHeaderVideoViewHolder extends VideoFeedHolder {
 
-    public FeedDetailHeaderVideoViewHolder(View view, Context context){
-        super(view, context);
+    public FeedDetailHeaderVideoViewHolder(View view, Context context, RequestManager manager){
+        super(view, context, manager);
     }
 
     @Override

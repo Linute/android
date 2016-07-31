@@ -26,7 +26,6 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
-
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
@@ -106,12 +105,6 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
-
-        <activity
-            android:name=".UtilsAndHelpers.CropActivity.CropActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
         <activity
             android:name=".MainContent.Settings.SettingActivity"
             android:configChanges="orientation"

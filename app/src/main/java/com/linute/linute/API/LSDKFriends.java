@@ -19,11 +19,11 @@ public class LSDKFriends {
 
 
     public LSDKFriends(Context context) {
-        mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
+        mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
     }
 
 
-    public Call getFriends(String userId, boolean following, String skip, Callback callback){
+    public Call getFriends(String userId, boolean following, String skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> param = new HashMap<>();
@@ -32,10 +32,10 @@ public class LSDKFriends {
         param.put("limit", "25");
         param.put("skip", skip);
 
-        return API_Methods.get(new String[] {"activities"},header, param, callback);
+        return API_Methods.get(new String[]{"activities"}, header, param, callback);
     }
 
-    public Call getFriendsForMention(String userId, String fullname, String skip, Callback callback){
+    public Call getFriendsForMention(String userId, String fullname, String skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
         Map<String, String> param = new HashMap<>();
@@ -44,6 +44,20 @@ public class LSDKFriends {
         param.put("skip", skip);
         param.put("fullName", fullname);
 
-        return API_Methods.get(new String[] {"friends"},header, param, callback);
+        return API_Methods.get(new String[]{"friends"}, header, param, callback);
+    }
+
+    public Call getSendTo(String name, String userId, int skip, int limit, Callback callback) {
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, String> param = new HashMap<>();
+
+        if (!name.isEmpty())
+            param.put("fullName", name);
+
+        param.put("owner", userId);
+        param.put("limit", limit + "");
+        if (skip > 0) param.put("skip", skip + "");
+
+        return API_Methods.get(new String[]{"friends"}, header, param, callback);
     }
 }

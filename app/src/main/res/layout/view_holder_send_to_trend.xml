@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="72dp">
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        tools:src="@color/colorPrimary"
+    />
+
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/pure_white"
+        android:textSize="@dimen/header_font_size"
+        tools:text="Mike Hunt Smells Bad (VERY VERY BAD)"
+    />
+
+
+    <com.linute.linute.UtilsAndHelpers.ToggleImageView
+        android:id="@+id/toggle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical|end"
+        android:alpha="0.4"
+        android:src="@color/secondaryColor"/>
+
+</FrameLayout>

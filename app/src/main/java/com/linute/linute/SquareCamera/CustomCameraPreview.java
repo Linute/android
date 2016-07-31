@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.TextureView;
 
@@ -14,7 +13,7 @@ import java.util.List;
 /**
  *
  */
-public class CustomCameraPreview extends TextureView{
+public class CustomCameraPreview extends TextureView {
 
     public static final String TAG = CustomCameraPreview.class.getSimpleName();
 
@@ -67,6 +66,10 @@ public class CustomCameraPreview extends TextureView{
         mCamera = camera;
     }
 
+    private float mMovement = 0;
+    private float mYPosition = 0;
+    private boolean mMoved = false;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -76,25 +79,55 @@ public class CustomCameraPreview extends TextureView{
                 mIsFocus = true;
                 mLastTouchX = event.getX();
                 mLastTouchY = event.getY();
+                mYPosition = mLastTouchY;
+                mMovement = 0;
+                mMoved = false;
                 break;
             }
             case MotionEvent.ACTION_UP: {
-                if (mIsFocus && mIsFocusReady) {
+                if (mIsFocus && mIsFocusReady && !mMoved) {
                     handleFocus(mCamera.getParameters());
                 }
                 break;
             }
             case MotionEvent.ACTION_POINTER_DOWN: {
-                if (mCamera!=null) mCamera.cancelAutoFocus();
+                if (mCamera != null) mCamera.cancelAutoFocus();
                 mIsFocus = false;
                 break;
             }
+            case MotionEvent.ACTION_MOVE:
+                mMovement += mYPosition - event.getY();
+                mYPosition = event.getY();
+                if (mMovement > 5 || mMovement < -5) {
+                    mMoved = true;
+                    zoom(mMovement > 0 ? 2 : -2);
+                    mMovement = 0;
+                }
+                break;
             case MotionEvent.ACTION_CANCEL: {
                 break;
             }
         }
 
         return true;
+    }
+
+
+    public void zoom(int deltaZoom) {
+        try {
+            Camera.Parameters param = mCamera.getParameters();
+            int newZoom = param.getZoom() + deltaZoom;
+
+//            Log.i(TAG, "zoom: max " + param.getMaxZoom());
+//            Log.i(TAG, "zoom: new zoom " + newZoom);
+
+            if (newZoom > param.getMaxZoom() || newZoom < 0) return;
+
+            param.setZoom(newZoom);
+            mCamera.setParameters(param);
+        }catch (RuntimeException e){
+            //don't want the spam
+        }
     }
 
 
@@ -107,8 +140,8 @@ public class CustomCameraPreview extends TextureView{
                 && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
             //Log.d(TAG, mFocusAreas.size() + "");
 
-            setFocusArea(x,y);
-            if (mOnFocus != null) mOnFocus.onFocusStart(x,y);
+            setFocusArea(x, y);
+            if (mOnFocus != null) mOnFocus.onFocusStart(x, y);
             params.setFocusAreas(mFocusAreas);
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             mCamera.setParameters(params);
@@ -133,26 +166,27 @@ public class CustomCameraPreview extends TextureView{
 
     private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
         int result;
-        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>FOCUS_MAX_BOUND){
-            if (touchCoordinateInCameraReper>0){
-                result = FOCUS_MAX_BOUND - focusAreaSize/2;
+        if (Math.abs(touchCoordinateInCameraReper) + focusAreaSize / 2 > FOCUS_MAX_BOUND) {
+            if (touchCoordinateInCameraReper > 0) {
+                result = FOCUS_MAX_BOUND - focusAreaSize / 2;
             } else {
-                result = FOCUS_MIN_BOUND + focusAreaSize/2;
+                result = FOCUS_MIN_BOUND + focusAreaSize / 2;
             }
-        } else{
-            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        } else {
+            result = touchCoordinateInCameraReper - focusAreaSize / 2;
         }
         return result;
     }
 
     private OnFocus mOnFocus;
 
-    public void setOnTouched(OnFocus foc){
+    public void setOnTouched(OnFocus foc) {
         mOnFocus = foc;
     }
 
-    public interface OnFocus{
+    public interface OnFocus {
         void onFocusStart(float x, float y);
+
         void onFocusFinished();
     }
 }

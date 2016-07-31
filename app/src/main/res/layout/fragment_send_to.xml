@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    android:orientation="vertical">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:navigationIcon="@drawable/ic_action_navigation_close"
+        app:titleTextColor="@color/pure_white"
+        app:title="Send to"
+    />
+
+
+    <Button
+        android:id="@+id/send_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/yellow_color"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="send"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="@dimen/header_font_size"
+        android:textStyle="bold"
+    />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/send_button"
+        android:layout_below="@id/toolbar"/>
+
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+    />
+
+    <TextView
+        android:id="@+id/error_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="64dp"
+        android:text="Tap to reload"
+        android:textSize="24sp"
+        android:visibility="gone"
+    />
+
+</RelativeLayout>

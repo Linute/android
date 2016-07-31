@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
@@ -38,21 +38,20 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
     private List<FriendSearchUser> mFriendSearchList;
     private Context mContext;
-
-    //private int mImageSize;
+    private RequestManager mRequestManager;
 
     private SharedPreferences mSharedPreferences;
 
-    private boolean mInInviteMode = false;
 
-
-    public FriendSearchAdapter(Context context, List<FriendSearchUser> mSearchList, boolean inInviteMode) {
+    public FriendSearchAdapter(Context context, RequestManager manager, List<FriendSearchUser> mSearchList) {
         mFriendSearchList = mSearchList;
         mContext = context;
-        //mImageSize = mContext.getResources().getDimensionPixelSize(R.dimen.friend_search_profile_radius);
-
+        mRequestManager = manager;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mInInviteMode = inInviteMode;
+    }
+
+    public void clearContext() {
+        mContext = null;
     }
 
 
@@ -96,7 +95,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
             mNameView.setText(user.getFullName());
 
-            Glide.with(mContext)
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
@@ -110,22 +109,18 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
 
         private void setUpOnClickListeners() {
-
-            //setup profile pic and name
-            View.OnClickListener goToProfile = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mFriendSearchUser == null) return;
-
-                    BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                    if (activity != null) {
-                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+            itemView.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (mFriendSearchUser == null) return;
+                            BaseTaptActivity activity = (BaseTaptActivity) mContext;
+                            if (activity != null) {
+                                activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+                            }
+                        }
                     }
-                }
-            };
-
-            mNameView.setOnClickListener(goToProfile);
-            mProfileImage.setOnClickListener(goToProfile);
+            );
 
             //the add or message button
             mAddButton.setOnClickListener(new View.OnClickListener() { //when pressed
@@ -173,7 +168,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
                             @Override
                             public void onResponse(Call call, Response response) throws IOException {
-                                Log.i("Update Adapter", "onResponse: " + response.body().string());
+                               // Log.i("Update Adapter", "onResponse: " + response.body().string());
                                 if (!response.isSuccessful()) { //unsuccessful, undo button change
                                     user.setFollowing(false);
 
@@ -188,12 +183,13 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                                         }
                                     });
                                 }
+                                response.body().close();
                             }
                         });
                     }
                 }
             });
         }
-
     }
+
 }

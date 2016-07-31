@@ -53,4 +53,11 @@ public class BaseFragment extends Fragment {
     public void resetFragment(){
 
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+//        RefWatcher refWatcher = TaptApplication.getRefWatcher(getActivity());
+//        refWatcher.watch(this);
+    }
 }

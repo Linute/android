@@ -325,7 +325,7 @@ public class LinuteSignUpFragment extends Fragment {
                     try {
                         String stringResp = response.body().string();
                         mPinCode = (new JSONObject(stringResp).getString("pinCode"));
-                        Log.i(TAG, "onResponse: " + stringResp);
+                        //Log.i(TAG, "onResponse: " + stringResp);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {

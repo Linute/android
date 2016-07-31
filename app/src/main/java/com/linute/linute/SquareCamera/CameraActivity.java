@@ -12,35 +12,36 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CameraActivity extends AppCompatActivity {
 
-    public final static int CAMERA_EVERYTHING = 11; // everything
-    public final static int CAMERA_JUST_CAMERA = 12;  //just camera; no gallery or video option
-    public final static int CAMERA_EVERYTHING_NO_STATUS = 13;
+public class CameraActivity extends AppCompatActivity {
 
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
+    public final static int RETURN_URI_AND_PRIVACY = 16;
 
     public final static int IMAGE = 1;
     public final static int VIDEO = 2;
+    public final static int ALL = 3;
 
     //if we get send url, we will send result to url,
     //    else, we'll send back a uri
     public final static String RETURN_TYPE = "send_to_url";
     public final static String CAMERA_TYPE = "camera_type";
+    public final static String GALLERY_TYPE = "gallery_filters";
 
-    private int mCameraType;
+    private CameraType mCameraType;
     private int mReturnType;
+    private int mGalleryType;
 
     public static final String TAG = CameraActivity.class.getSimpleName();
 
     protected boolean mHasWriteAndCameraPermission = false;
-
 
     /**
      * need the following intent:
@@ -56,11 +57,16 @@ public class CameraActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         if (i != null) {
-            mCameraType = i.getIntExtra(CAMERA_TYPE, CAMERA_JUST_CAMERA);
+            mCameraType = i.getParcelableExtra(CAMERA_TYPE);
+            if (mCameraType == null)
+                mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
+
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
+            mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
-            mCameraType = CAMERA_JUST_CAMERA;
+            mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
             mReturnType = RETURN_URI;
+            mGalleryType = ALL;
         }
 
         requestPermissions();
@@ -87,14 +93,14 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("returnType", mReturnType);
-        outState.putInt("cameraType", mCameraType);
+        outState.putParcelable("cameraType", mCameraType);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mCameraType = savedInstanceState.getInt("cameraType");
+        mCameraType = savedInstanceState.getParcelable("cameraType");
         mReturnType = savedInstanceState.getInt("returnType");
     }
 
@@ -111,7 +117,7 @@ public class CameraActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (mCameraType == CAMERA_EVERYTHING) {
+        if (mCameraType.contains(CameraType.CAMERA_VIDEO)) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.RECORD_AUDIO);
             }
@@ -184,23 +190,20 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            // Maybe there is a better way to do this
-            // When back pressed, we need to ask: "are you sure you want to discard this"
-            EditSaveVideoFragment saveVideoFragment =
-                    (EditSaveVideoFragment) getSupportFragmentManager().findFragmentByTag(EditSaveVideoFragment.TAG);
-            EditSavePhotoFragment savePhotoFragment =
-                    (EditSavePhotoFragment) getSupportFragmentManager().findFragmentByTag(EditSavePhotoFragment.TAG);
+            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null){
+                getSupportFragmentManager().popBackStack();
+                return;
+            }
 
-            if (saveVideoFragment != null) {
-                if (saveVideoFragment.isStickerDrawerOpen()) {
-                    saveVideoFragment.closeStickerDrawer();
-                } else
-                    saveVideoFragment.showConfirmDialog();
-            } else if (savePhotoFragment != null) {
-                if (savePhotoFragment.isStickerDrawerOpen()) {
-                    savePhotoFragment.closeStickerDrawer();
-                } else
-                    savePhotoFragment.backPressed();
+            AbstractEditSaveFragment fragment = (AbstractEditSaveFragment) getSupportFragmentManager()
+                    .findFragmentByTag(AbstractEditSaveFragment.TAG);
+
+            if (fragment != null){
+                if (fragment.isStickerDrawerOpen()){
+                    fragment.closeStickerDrawer();
+                }else {
+                    fragment.backPressed();
+                }
             } else {
                 clearBackStack();
             }
@@ -210,11 +213,15 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-    public int getCameraType() {
+    public CameraType getCameraType() {
         return mCameraType;
     }
 
     public int getReturnType() {
         return mReturnType;
+    }
+
+    public int getGalleryType(){
+        return mGalleryType;
     }
 }

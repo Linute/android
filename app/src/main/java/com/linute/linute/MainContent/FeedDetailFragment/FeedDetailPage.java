@@ -3,9 +3,12 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -44,11 +47,13 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -71,6 +76,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by Arman on 1/11/16.
  */
@@ -78,6 +85,7 @@ import okhttp3.Response;
 public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
 
+    private static final int CAMERA_REQUEST = 65;
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
@@ -87,14 +95,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private MentionsEditText mCommentEditText;
 
     private View mAnonCheckBoxContainer;
-    private View mSendButtonContainer;
 
     private RecyclerView mMentionedList;
 
     private MentionedPersonAdapter mMentionedPersonAdapter;
 
     private View mProgressbar;
-    private View mSendButton;
+    private ToggleImageView mSendButton;
 
     private CheckBox mCheckBox;
 
@@ -167,6 +174,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         });
 
+        mProgressbar = rootView.findViewById(R.id.comment_progressbar);
+        mSendButton = (ToggleImageView) rootView.findViewById(R.id.feed_detail_send_comment);
+        mSendButton.setImageViews(R.drawable.ic_upload_picture, R.drawable.ic_send);
 
         //comments recyclerview
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
@@ -174,7 +184,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity());
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), Glide.with(this));
         mFeedDetailAdapter.setCommentActions(this);
         recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -208,9 +218,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
         mMentionedList.setAdapter(mMentionedPersonAdapter);
 
-        mSendButtonContainer = rootView.findViewById(R.id.comment_send_button_container);
-        mSendButtonContainer.setEnabled(false);
-
         mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -223,13 +230,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!s.toString().trim().equals("")) {
-                    mSendButtonContainer.setEnabled(true);
-                    mSendButton.setAlpha((float) 1);
-                } else {
-                    mSendButtonContainer.findViewById(R.id.comment_send_button_container).setEnabled(false);
-                    mSendButton.setAlpha((float) 0.25);
-                }
+                mSendButton.setActive(!s.toString().trim().isEmpty());
             }
         });
 
@@ -237,7 +238,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (MotionEvent.ACTION_UP == event.getAction())
-                    //recList.scrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
                     recList.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -286,15 +286,18 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         });
 
-
-        mProgressbar = rootView.findViewById(R.id.comment_progressbar);
-        mSendButton = rootView.findViewById(R.id.feed_detail_send_comment);
-
-        rootView.findViewById(R.id.comment_send_button_container).setOnClickListener(new View.OnClickListener() {
+        mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mSendButton.getVisibility() == View.VISIBLE) {
+                if (!mCommentsRetrieved) return;
+                if (mSendButton.isActive()) {
                     sendComment();
+                } else {
+                    Intent i = new Intent(getActivity(), CameraActivity.class);
+                    i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_GALLERY));
+                    i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+                    i.putExtra(CameraActivity.GALLERY_TYPE, CameraActivity.IMAGE);
+                    startActivityForResult(i, CAMERA_REQUEST);
                 }
             }
         });
@@ -337,8 +340,63 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (!mCommentsRetrieved) {
             displayCommentsAndPost();
         }
+
+        if (mImageUri != null) sendPicture();
     }
 
+
+    private Uri mImageUri;
+    private String mOverlayText;
+    private boolean mPrivacy;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAMERA_REQUEST){
+            if (resultCode == RESULT_OK){
+                mImageUri = data.getParcelableExtra("image");
+                mOverlayText = data.getStringExtra("title");
+                if (mOverlayText == null) mOverlayText = "";
+                mPrivacy = data.getBooleanExtra("privacy", false);
+            }else {
+                mImageUri = null;
+                mOverlayText = "";
+                mPrivacy = false;
+            }
+        }
+    }
+
+    private void sendPicture(){
+        try {
+            JSONObject comment = new JSONObject();
+            comment.put("user", mViewId);
+            comment.put("text", mOverlayText);
+            comment.put("room", mFeedDetail.getPostId());
+
+            comment.put("privacy", mPrivacy ? 1 : 0);
+
+            JSONArray images = new JSONArray();
+
+            //get bitmap from uri
+            images.put(Utils.encodeImageBase64(
+                    MediaStore.Images.Media.getBitmap(getActivity().getContentResolver()
+                            , mImageUri)));
+
+            comment.put("mentions", new JSONArray());
+            comment.put("images", images);
+            mSendButton.setVisibility(View.GONE);
+            mProgressbar.setVisibility(View.VISIBLE);
+            mCommentEditText.setText("");
+
+            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+            if (activity == null) return;
+            activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
+        }catch (JSONException | IOException e){
+            e.printStackTrace();
+        }
+
+        mOverlayText = "";
+        mImageUri = null;
+        mPrivacy = false;
+    }
 
     @Override
     public void onPause() {
@@ -379,6 +437,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
     }
+
 
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
@@ -427,6 +486,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     final ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
 
+                    //Log.i(TAG, "onResponse: " + comments.toString(4));
+
                     Date myDate;
                     SimpleDateFormat format = Utils.getDateFormat();
 
@@ -471,7 +532,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                                 mentionedPersonLightArrayList,
                                                 myDate == null ? 0 : myDate.getTime(),
                                                 comments.getJSONObject(i).getBoolean("isLiked"),
-                                                comments.getJSONObject(i).getInt("numberOfLikes")
+                                                comments.getJSONObject(i).getInt("numberOfLikes"),
+                                                getImageUrl(comments.getJSONObject(i).getJSONArray("images"))
                                         )
                                 );
                     }
@@ -516,6 +578,17 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
 
         });
+    }
+
+
+    private String getImageUrl(JSONArray images) {
+        if (images == null || images.length() == 0) return null;
+        try {
+            return images.getString(0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 
@@ -627,7 +700,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                                         mentionedPersonLightArrayList,
                                                         myDate == null ? 0 : myDate.getTime(),
                                                         comments.getJSONObject(i).getBoolean("isLiked"),
-                                                        comments.getJSONObject(i).getInt("numberOfLikes")
+                                                        comments.getJSONObject(i).getInt("numberOfLikes"),
+                                                        getImageUrl(comments.getJSONObject(i).getJSONArray("images"))
                                                 )
                                         );
                             }
@@ -792,7 +866,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     private void deletePost() {
         if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
-
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
 
         new LSDKEvents(getActivity()).deleteEvent(mFeedDetail.getPostId(), new Callback() {
@@ -968,11 +1041,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     private void revealPost() {
         if (getActivity() == null || !mViewId.equals(mFeedDetail.getPostUserId())) return;
-
         final boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
-
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
-
         new LSDKEvents(getActivity()).revealEvent(mFeedDetail.getPostId(), !isAnon, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -1048,7 +1118,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     /* MENTIONS CODE */
 
-    private final String BUCKET = "MENTIONS";
     private Handler mSearchHandler = new Handler();
     private String mQueryString = "";
     private boolean mDisplayList = false;
@@ -1159,6 +1228,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         }
 
+        String BUCKET = "MENTIONS";
         return Collections.singletonList(BUCKET);
     }
 
@@ -1215,7 +1285,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
             public void bindView(final MentionedPerson person) {
                 mName.setText(person.getFullname());
-                Glide.with(mProfileImageView.getContext())
+                Glide.with(FeedDetailPage.this)
                         .load(Utils.getImageUrlOfUser(person.getProfileImage()))
                         .asBitmap()
                         .signature(new StringSignature(mImageSignature))
@@ -1286,10 +1356,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     );
                 }
 
+                JSONObject owner = object.getJSONObject("owner");
+
                 final Comment com = new Comment(
-                        object.getJSONObject("owner").getString("id"),
-                        object.getJSONObject("owner").getString("profileImage"),
-                        object.getJSONObject("owner").getString("fullName"),
+                        owner.getString("id"),
+                        owner.getString("profileImage"),
+                        owner.getString("fullName"),
                         object.getString("text"),
                         object.getString("id"),
                         object.getInt("privacy") == 1,
@@ -1297,7 +1369,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                         mentionedPersonLightArrayList,
                         myDate.getTime(),
                         false,
-                        0
+                        0,
+                        getImageUrl(object.getJSONArray("images"))
                 );
 
                 if (getActivity() != null) {
@@ -1326,9 +1399,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                     mFeedDetail.getComments().add(com);
                                     mFeedDetail.refreshCommentCount();
 
-                                    if (notifyChange){
+                                    if (notifyChange) {
                                         mFeedDetailAdapter.notifyDataSetChanged();
-                                    }else {
+                                    } else {
                                         mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     }
 
@@ -1645,7 +1718,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 JSONObject obj = new JSONObject();
                 obj.put("comment", id);
                 obj.put("liked", like);
-                activity.emitSocket(API_Methods.VERSION +":comments:liked", obj);
+                activity.emitSocket(API_Methods.VERSION + ":comments:liked", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -1699,10 +1772,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         });
     }
 
-
-    public String getPostId(){
-        if (mFeedDetail == null) return  null;
-        return mFeedDetail.getPostId();
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFeedDetailAdapter != null) mFeedDetailAdapter.clearContext();
     }
 }
 
