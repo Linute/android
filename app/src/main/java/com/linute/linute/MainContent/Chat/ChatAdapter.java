@@ -80,7 +80,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
             Chat chat = aChatList.get(position - 1);
-            ((ChatViewHolder) holder).bindModel(chat, isHead(position));
+            ((ChatViewHolder) holder).bindModel(chat, isHead(position-1));
         }else if (holder instanceof LoadMoreViewHolder){
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
@@ -96,7 +96,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //+1 for load more loader
     @Override
     public int getItemCount() {
+       /* for(int pos = 0; pos < (aChatList.size() == 0 ? 0 : aChatList.size()+1); pos++){
+            Log.i("AAA", pos+" "+isHead(pos) + " "+aChatList.get(pos-1)chat.getMessage());
+        }
+        */
+
         return aChatList.size() == 0 ? 0 : aChatList.size()+1;
+
     }
 
     @Override
@@ -105,9 +111,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public boolean isHead(int position){
-        Chat chat1 = aChatList.get(position - 1);
-        Chat chat2 = aChatList.get(position - 2);
-        return position == 2 || !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
+        if(position+1 >= aChatList.size()) return true;
+        Chat chat1 = aChatList.get(position);
+        Chat chat2 = aChatList.get(position+1);
+        return position == getItemCount()-1 || !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
     public void setFooterState(short footerState) {
@@ -119,6 +126,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected TextView vUserTime;
         protected ImageView vActionImage;
         protected ImageView vProfileImage;
+        protected TextView vUserName;
 
         protected ImageView vImage;
         protected View vFrame;
@@ -134,6 +142,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vFrame = itemView.findViewById(R.id.frame);
             vImage = (ImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
+            vUserName = (TextView) itemView.findViewById(R.id.user_name);
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -171,13 +180,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 if (isHead) {
                     User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
+                        vUserName.setVisibility(View.VISIBLE);
+                        vProfileImage.setVisibility(View.VISIBLE);
+                        vUserName.setText(u.userName);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .into(vProfileImage);
                     } else {
+                        vUserName.setVisibility(View.GONE);
                         vProfileImage.setVisibility(View.INVISIBLE);
                     }
                 } else {
+                    vUserName.setVisibility(View.GONE);
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
             }
