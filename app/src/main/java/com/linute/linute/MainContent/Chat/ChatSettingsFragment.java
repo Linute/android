@@ -1,14 +1,19 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -62,6 +67,7 @@ public class ChatSettingsFragment extends BaseFragment {
     public static final int MENU_USER_DELETE = 0;
     public static final int NO_MUTE = 0;
     public static final int REQUEST_PHOTO = 1;
+    public static final int REQUEST_PERMISSION_STORAGE = 5;
 
     private String mRoomId;
     private String mUserId;
@@ -449,14 +455,26 @@ room: id of room
             groupImageSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent getPhotoIntent = new Intent();
-                    getPhotoIntent.setType("image/*");
-                    getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
-                    getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                    startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+
+                    if(PermissionChecker.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+
+                            ActivityCompat.requestPermissions(getActivity(),
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                    REQUEST_PERMISSION_STORAGE);
+                    }else{
+                        startGetImageActivity();
+                    }
                 }
             });
         }
+    }
+
+    protected void startGetImageActivity() {
+        Intent getPhotoIntent = new Intent();
+        getPhotoIntent.setType("image/*");
+        getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
+        getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
     }
 
     private void updateNotificationView() {
@@ -497,6 +515,16 @@ room: id of room
         activity.connectSocket("delete users", onDeleteUsers);
 
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == REQUEST_PERMISSION_STORAGE){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                startGetImageActivity();
+            }
+        }
     }
 
     @Override
