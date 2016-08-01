@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -111,10 +110,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public boolean isHead(int position){
-        if(position+1 >= aChatList.size()) return true;
+        if(position == 0) return true;
         Chat chat1 = aChatList.get(position);
-        Chat chat2 = aChatList.get(position+1);
-        return position == getItemCount()-1 || !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
+        Chat chat2 = aChatList.get(position-1);
+        return !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
     public void setFooterState(short footerState) {

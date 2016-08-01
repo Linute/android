@@ -11,6 +11,17 @@
     android:clipChildren="true"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:layout_gravity="center_vertical"
+        android:text="User Name"
+        android:textColor="#ff9f9f9f"
+        android:textSize="12sp"
+        android:visibility="visible"
+        android:layout_marginLeft="56dp" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -38,7 +49,7 @@
             android:id="@+id/profile_image"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_gravity="bottom|center_horizontal"
+            android:layout_gravity="top|center_horizontal"
             android:layout_marginRight="4dp"
             android:scaleType="centerInside"
             app:riv_corner_radius="@dimen/user_icon_corner_radius" />
@@ -86,16 +97,6 @@
 
         </FrameLayout>
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/user_name"
-        android:layout_width="wrap_content"
-        android:layout_height="16dp"
-        android:layout_gravity="center_vertical"
-        android:text="User Name"
-        android:textColor="#ff9f9f9f"
-        android:textSize="12sp"
-        android:visibility="gone" />
 
 
 </LinearLayout>
