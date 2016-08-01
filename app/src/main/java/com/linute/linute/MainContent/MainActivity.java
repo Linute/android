@@ -797,8 +797,10 @@ public class MainActivity extends BaseTaptActivity {
             String userName = intent.getStringExtra("ownerFullName");
             mSafeForFragmentTransaction = true;
             addFragmentToContainer(new RoomsActivityFragment());
-            addFragmentToContainer(ChatFragment.newInstance(room == null || room.isEmpty() ? null : room,
-                    userName, userId.isEmpty() ? null : userId));
+            addFragmentToContainer(ChatFragment.newInstance(
+                    room == null || room.isEmpty() ? null : room,
+                    room == null || room.isEmpty() ? userName : "",
+                    userId.isEmpty() ? null : userId));
         }
     }
 
