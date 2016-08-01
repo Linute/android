@@ -139,7 +139,10 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
             @Override
             public void onUserSelected(User user, int position) {
-                mSearchUserList.add(0, user);
+                if(!mSearchUserList.get(0).userId.equals(user.userId)) {
+                    mSearchUserList.add(0, user);
+                    mSearchAdapter.notifyDataSetChanged();
+                }
                 llm.scrollToPosition(0);
 
             }
@@ -204,12 +207,17 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
     protected void search(String searchWord) {
         LSDKChat users = new LSDKChat(getActivity());
-        Map<String, String> newChat = new HashMap<>();
+        Map<String, Object> newChat = new HashMap<>();
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
         }
 
-        users.getUsers(newChat, new Callback() {
+        newChat.put("users", new JSONArray());
+
+
+
+
+        users.getUsersAndRooms(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null){
@@ -241,10 +249,11 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                     JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        friends = jsonObject.getJSONArray("friends");
+                        Log.d(TAG, jsonObject.toString(4));
+                        friends = jsonObject.getJSONArray("users");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
-                            user = ((JSONObject) friends.get(i)).getJSONObject("user");
+                            user = friends.getJSONObject(i);
                             tempUsers.add(new User(
                                     user.getString("id"),
                                     user.getString("fullName"),
