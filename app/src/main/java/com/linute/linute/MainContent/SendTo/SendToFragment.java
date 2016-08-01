@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -61,7 +62,7 @@ public class SendToFragment extends BaseFragment {
     private Handler mHandler = new Handler();
 
     private View vProgress;
-    private View vErrorText;
+    private TextView vErrorText;
 
     private int mSkip = 0;
     private boolean mCanLoadMore = true;
@@ -126,7 +127,7 @@ public class SendToFragment extends BaseFragment {
         View root = inflater.inflate(R.layout.fragment_send_to, container, false);
 
         vProgress = root.findViewById(R.id.progress);
-        vErrorText = root.findViewById(R.id.error_text);
+        vErrorText = (TextView)root.findViewById(R.id.error_text);
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSendButton = (Button) root.findViewById(R.id.send_button);
@@ -141,7 +142,8 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
-        if (mPendingUploadPost != null) toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        if (mPendingUploadPost != null)
+            toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         if (mSendToAdapter == null) {
             mSendToAdapter = new SendToAdapter(getContext(), Glide.with(this), mSendToItems);
@@ -186,7 +188,7 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
-        vSendButton.setBackgroundResource(mSendToAdapter.getCheckedItems().isEmpty()
+        vSendButton.setBackgroundResource(mSendToAdapter.checkedItemsIsEmpty()
                 ? R.color.twentyfive_black : R.color.yellow_color);
 
         recyclerView.setAdapter(mSendToAdapter);
@@ -213,7 +215,7 @@ public class SendToFragment extends BaseFragment {
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getSendToList();
         } else if (mSendToItems.isEmpty()) {
-            showErrorText(true);
+            showEmpty(true);
         }
     }
 
@@ -312,7 +314,7 @@ public class SendToFragment extends BaseFragment {
                                                 setFragmentState(FragmentState.FINISHED_UPDATING);
 
                                                 if (mSendToItems.isEmpty())
-                                                    showErrorText(true);
+                                                    showEmpty(true);
                                             } else
                                                 mGotResponseForApiCall = true;
                                         }
@@ -401,7 +403,7 @@ public class SendToFragment extends BaseFragment {
                                                 setFragmentState(FragmentState.FINISHED_UPDATING);
 
                                                 if (mSendToItems.isEmpty())
-                                                    showErrorText(true);
+                                                    showEmpty(true);
                                             } else
                                                 mGotResponseForApiCall = true;
                                         }
@@ -514,7 +516,22 @@ public class SendToFragment extends BaseFragment {
     }
 
     private void showErrorText(boolean show) {
-        vErrorText.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        if (show) {
+            vErrorText.setText("Tap to reload");
+            vErrorText.setVisibility(View.VISIBLE);
+        }else {
+            vErrorText.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    private void showEmpty(boolean show) {
+        if (show) {
+            vErrorText.setText("Empty list");
+            vErrorText.setVisibility(View.VISIBLE);
+        }else {
+            vErrorText.setVisibility(View.GONE);
+        }
     }
 
 
@@ -536,7 +553,9 @@ public class SendToFragment extends BaseFragment {
     }
 
     public void sendItems() {
-        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty()) return;
+
+        if (mSendToAdapter == null || mSendToAdapter.checkedItemsIsEmpty()) return;
+
 
         if (mPendingUploadPost != null) {
             ArrayList<String> mTrends = new ArrayList<>();

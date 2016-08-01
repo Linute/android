@@ -4,6 +4,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.linute.linute.LoginAndSignup.College;
+
 /**
  * Created by QiFeng on 7/28/16.
  */
@@ -12,28 +14,26 @@ public class SignUpInfo implements Parcelable{
     private String mFirstName;
     private String mLastName;
     private String mEmail;
-    private String mCollegeId;
-    private String mCollegeName;
+    private College mCollege;
     private Uri mImage;
-
+    private String mPassword;
 
     public SignUpInfo() {
         mFirstName = "";
         mLastName = "";
-        mCollegeName = "";
+        mCollege = null;
         mEmail = "";
-        mCollegeId = null;
         mImage = null;
+        mPassword = "";
     }
-
 
     protected SignUpInfo(Parcel in) {
         mFirstName = in.readString();
         mLastName = in.readString();
         mEmail = in.readString();
-        mCollegeId = in.readString();
-        mCollegeName = in.readString();
+        mCollege = in.readParcelable(College.class.getClassLoader());
         mImage = in.readParcelable(Uri.class.getClassLoader());
+        mPassword = in.readString();
     }
 
     public static final Creator<SignUpInfo> CREATOR = new Creator<SignUpInfo>() {
@@ -72,28 +72,28 @@ public class SignUpInfo implements Parcelable{
         mEmail = email;
     }
 
-    public String getCollegeId() {
-        return mCollegeId;
-    }
-
-    public void setCollegeId(String collegeId) {
-        mCollegeId = collegeId;
-    }
-
-    public String getCollegeName() {
-        return mCollegeName;
-    }
-
-    public void setCollegeName(String collegeName) {
-        mCollegeName = collegeName;
-    }
-
     public Uri getImage() {
         return mImage;
     }
 
     public void setImage(Uri image) {
         mImage = image;
+    }
+
+    public College getCollege() {
+        return mCollege;
+    }
+
+    public void setCollege(College college) {
+        mCollege = college;
+    }
+
+    public String getPassword() {
+        return mPassword;
+    }
+
+    public void setPassword(String password) {
+        mPassword = password;
     }
 
     @Override
@@ -106,8 +106,8 @@ public class SignUpInfo implements Parcelable{
         dest.writeString(mFirstName);
         dest.writeString(mLastName);
         dest.writeString(mEmail);
-        dest.writeString(mCollegeId);
-        dest.writeString(mCollegeName);
+        dest.writeParcelable(mCollege, 0);
         dest.writeParcelable(mImage, 0);
+        dest.writeString(mPassword);
     }
 }

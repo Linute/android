@@ -27,7 +27,7 @@
         android:inputType="textPersonName|textCapWords"
         android:lines="1"
         android:maxLength="16"
-        android:textColor="@color/fifty_white"
+        android:textColor="@color/pure_white"
         android:textColorHint="@color/thirtyfive_white"
         android:textSize="14sp"
         android:theme="@style/MyEditTextTheme"/>
@@ -43,7 +43,7 @@
         android:inputType="textPersonName|textCapWords"
         android:lines="1"
         android:maxLength="16"
-        android:textColor="@color/fifty_white"
+        android:textColor="@color/pure_white"
         android:textColorHint="@color/thirtyfive_white"
         android:textSize="14sp"
         android:theme="@style/MyEditTextTheme"/>

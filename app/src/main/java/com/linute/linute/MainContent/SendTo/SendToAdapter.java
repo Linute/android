@@ -276,4 +276,8 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public interface OnCollegeViewHolderTouched {
         void viewHolderTouched(boolean active);
     }
+
+    public boolean checkedItemsIsEmpty(){
+        return mCheckedItems.get(COLLEGE_AND_TRENDS).size() + mCheckedItems.get(PEOPLE).size() == 0;
+    }
 }

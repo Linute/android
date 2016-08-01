@@ -1,25 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="MaterialSearchView">
-        <attr name="searchBackground" format="integer" />
-        <attr name="searchVoiceIcon" format="integer" />
-        <attr name="searchCloseIcon" format="integer" />
-        <attr name="searchBackIcon" format="integer" />
-        <attr name="searchSuggestionIcon" format="integer" />
-        <attr name="searchSuggestionBackground" format="integer" />
-        <attr name="android:hint" />
-        <attr name="android:textColor" />
-        <attr name="android:textColorHint" />
-    </declare-styleable>
-
-
     <declare-styleable name="CustomSnackbarLayout">
         <attr name="android:maxWidth"/>
         <attr name="elevation"/>
         <attr name="cmaxActionInlineWidth" format="dimension"/>
     </declare-styleable>
-
-
 
     <!--video view attributes-->
     <declare-styleable name="scaleStyle">
@@ -55,6 +40,10 @@
             <enum name="centerInside" value="24"/>
             <enum name="endInside" value="25"/>
         </attr>
+    </declare-styleable>
+    
+    <declare-styleable name="pin_code_input">
+        <attr name="numberOfSlots" format="integer"/>
     </declare-styleable>
 
 </resources>

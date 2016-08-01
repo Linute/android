@@ -104,9 +104,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        //Log.d(TAG, message);
-
-
+        //Log.d(TAG, message)
 
         String message = data.getString("message");
         //int type = gettNotificationType(data.getString("action"));
@@ -116,7 +114,6 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-
                 .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setColor(Color.BLACK)
                 .setContentTitle("Tapt")
@@ -165,18 +162,18 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent;
 
         //Log.i(TAG, "action : "  + action);
-        Log.i(TAG, "sendNotification: " + data.toString());
+       // Log.i(TAG, "sendNotification: " + data.toString());
 
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
 
-
-        if (action == null) {
-            intent = new Intent(this, isLoggedIn ? MainActivity.class : PreLoginActivity.class);
+        if (!isLoggedIn) {
+            intent = new Intent(this, PreLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return intent;
         }
-        if (!isLoggedIn) {
-            intent = new Intent(this, PreLoginActivity.class);
+
+        if (action == null) {
+            intent = new Intent(this,  MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return intent;
         }

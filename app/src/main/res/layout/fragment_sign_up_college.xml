@@ -18,68 +18,53 @@
         android:textStyle="bold"
     />
 
-    <EditText
+    <com.linute.linute.UtilsAndHelpers.NoSuggestionEditText
         android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:hint="Seach for colleges"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:hint="College"
         android:imeOptions="actionDone"
         android:lines="1"
         android:maxLines="1"
         android:singleLine="true"
-        android:textColor="@color/fifty_white"
+        android:textColor="@color/pure_white"
         android:textColorHint="@color/thirtyfive_white"
         android:textSize="14sp"
         android:theme="@style/MyEditTextTheme"/>
 
 
-    <FrameLayout
+    <TextView
+        android:id="@+id/nearby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:drawableLeft="@drawable/ic_action_communication_location_on"
+        android:gravity="center"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="Nearby colleges"
+        android:textColor="@color/secondaryColor"/>
+
+    <android.support.v4.widget.Space
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:visibility="gone"/>
+        android:layout_height="0px"
+        android:layout_weight="1"
+    />
 
 
-        <TextView
-            android:id="@+id/nearby"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:drawableLeft="@drawable/ic_action_communication_location_on"
-            android:gravity="center"
-            android:text="Nearby colleges"
-            android:textColor="@color/secondaryColor"/>
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/sign_up_button"
+        android:text="2 of 4"
+        android:textColor="@drawable/signup_button_text"
+    />
 
-
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:visibility="gone"
-        />
-
-
-        <TextView
-            android:id="@+id/empty_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="@dimen/double_margin"
-            android:text="No results found"
-            android:textColor="@color/pure_white"
-            android:visibility="gone"
-        />
-
-    </FrameLayout>
 </LinearLayout>

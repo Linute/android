@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,19 +31,19 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 7/29/16.
  */
-class SignUpEmailFragment extends Fragment {
+public class SignUpEmailFragment extends Fragment {
 
     public static final String TAG = SignUpEmailFragment.class.getSimpleName();
     public static final String COLLEGE_KEY = "email_frag_college_key";
 
-    private EditText vEditText;
+    private EditText vEmail;
+    private EditText vPassword;
     private View vButton;
     private View vProgress;
 
     private College mCollege;
 
     private SignUpInfo mSignUpInfo;
-    private SignUpEmailAdapter mSignUpEmailAdapter;
 
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.edu", Pattern.CASE_INSENSITIVE);
@@ -68,75 +66,73 @@ class SignUpEmailFragment extends Fragment {
         if (getArguments() != null)
             mCollege = getArguments().getParcelable(COLLEGE_KEY);
 
-        mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
-
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_sign_up_email, container, false);
-        View vSuggestionsText = root.findViewById(R.id.suggest);
-        RecyclerView vRecyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
-        vRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        View vSuggestionsText = root.findViewById(R.id.suggestions);
 
-        vEditText = (EditText) root.findViewById(R.id.email);
-        vEditText.setText(mSignUpInfo.getEmail());
+        mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
 
-        if (mSignUpEmailAdapter == null) {
-            mSignUpEmailAdapter = new SignUpEmailAdapter(mCollege.getIncludedEmails(), new SignUpEmailAdapter.EmailSelected() {
-                @Override
-                public void onEmailSelected(String email) {
-                    String text = vEditText.getText().toString().trim();
-                    if (text.contains("@")) {
-                        text = text.split("@")[0];
-                    }
-                    text += email;
-                    vEditText.setText(text);
-                }
-            });
-        }
+        vEmail = (EditText) root.findViewById(R.id.email);
+        vEmail.setText(mSignUpInfo.getEmail());
 
-        vRecyclerView.setAdapter(mSignUpEmailAdapter);
+        vPassword = (EditText) root.findViewById(R.id.password);
 
-        vRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING && vEditText.hasFocus())
-                    hideKeyboard();
-            }
-        });
+        if (mSignUpInfo instanceof FBSignUpInfo) vPassword.setVisibility(View.GONE);
 
         if (mCollege.getIncludedEmails().isEmpty()) {
-            vRecyclerView.setVisibility(View.GONE);
             vSuggestionsText.setVisibility(View.GONE);
         } else {
-            vRecyclerView.setVisibility(View.VISIBLE);
             vSuggestionsText.setVisibility(View.VISIBLE);
+            vSuggestionsText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showEmailOptions();
+                }
+            });
+            vEmail.setHint(mCollege.getIncludedEmails().get(0));
         }
 
         vButton = root.findViewById(R.id.button);
         vButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                vEditText.setError(null);
-                String email = vEditText.getText().toString().trim().toLowerCase();
+                vEmail.setError(null);
+                vPassword.setError(null);
+                String email = vEmail.getText().toString().trim().toLowerCase();
 
                 if (!VALID_EMAIL_ADDRESS_REGEX.matcher(email).matches()) {
-                    vEditText.setError("Invalid edu email");
+                    vEmail.setError("Invalid edu email");
+                    vEmail.requestFocus();
                     return;
                 }
 
 
                 for (String suf : mCollege.getExcludedEmails()) {
-                    if (email.endsWith(suf)) {
-                        vEditText.setError("This email is blocked");
+                    if (email.endsWith(suf.toLowerCase())) {
+                        vEmail.setError("This email is blocked");
+                        vEmail.requestFocus();
                         return;
                     }
                 }
 
-                showConfirm(email);
+                String password;
+
+                if (mSignUpInfo instanceof FBSignUpInfo) {
+                    password = ((FBSignUpInfo) mSignUpInfo).getSocialFB();
+                } else {
+                    password = vPassword.getText().toString();
+                    if (!isValidPassword(password)) {
+                        vPassword.setError("Passwords must be longer than 6 characters");
+                        vPassword.requestFocus();
+                        return;
+                    }
+                }
+
+                showConfirm(email, password);
 
             }
         });
@@ -147,6 +143,11 @@ class SignUpEmailFragment extends Fragment {
     }
 
 
+    private boolean isValidPassword(String pass) {
+        return !pass.isEmpty() && !pass.contains(" ");
+    }
+
+
     @Override
     public void onStop() {
         super.onStop();
@@ -154,11 +155,37 @@ class SignUpEmailFragment extends Fragment {
     }
 
 
-    private void showConfirm(final String email){
+    private void showEmailOptions() {
+        if (getContext() == null) return;
+        new AlertDialog.Builder(getContext())
+                .setTitle("Suggested Emails")
+                .setItems(mCollege.getIncludedEmails().toArray(new String[mCollege.getIncludedEmails().size()]),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                emailSelected(mCollege.getIncludedEmails().get(which));
+                            }
+                        })
+                .show();
+    }
+
+
+    private void emailSelected(String email) {
+        String text = vEmail.getText().toString().trim();
+
+        if (text.contains("@"))
+            text = text.split("@")[0];
+
+        text += email;
+        vEmail.setText(text);
+    }
+
+
+    private void showConfirm(final String email, final String password) {
         if (getActivity() != null) {
             new AlertDialog.Builder(getActivity())
                     .setTitle("Confirm")
-                    .setMessage("A pin code will be sent to "+email+". Is this the correct email address?")
+                    .setMessage("A pin code will be sent to " + email + ". Is this the correct email address?")
                     .setNegativeButton("no", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -168,14 +195,18 @@ class SignUpEmailFragment extends Fragment {
                     .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            checkEmail(email);
+                            // TODO: 7/31/16 remove
+                            checkEmail(email, password);
+                            //goToNext(email, password);
                         }
                     }).show();
         }
     }
 
-    public void checkEmail(final String email) {
+    public void checkEmail(final String email, final String password) {
         if (getActivity() != null) {
+
+            showProgress(true);
             new LSDKUser(getActivity()).isUniqueEmail(email, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -195,6 +226,7 @@ class SignUpEmailFragment extends Fragment {
                     if (response.code() == 200) { //email was good
                         response.body().close();
                         mSignUpInfo.setEmail(email);
+                        mSignUpInfo.setPassword(password);
                         getPinCode();
                     } else if (response.code() == 404) { //another error
                         response.body().close();
@@ -203,7 +235,8 @@ class SignUpEmailFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     showProgress(false);
-                                    vEditText.setError("Email has already been taken");
+                                    vEmail.setError("Email has already been taken");
+                                    vEmail.requestFocus();
                                 }
                             });
                         }
@@ -246,7 +279,7 @@ class SignUpEmailFragment extends Fragment {
                     try {
                         String stringResp = response.body().string();
                         final String pin = (new JSONObject(stringResp).getString("pinCode"));
-                        //Log.i(TAG, "onResponse: " + stringResp);
+                        //Log.d(TAG, "onResponse: " + stringResp);
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
@@ -254,7 +287,7 @@ class SignUpEmailFragment extends Fragment {
                             public void run() {
                                 showProgress(false);
                                 SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-                                if (frag != null){
+                                if (frag != null) {
                                     frag.addFragment(SignUpPinFragment.newInstance(pin), SignUpPinFragment.TAG);
                                 }
                             }
@@ -290,8 +323,13 @@ class SignUpEmailFragment extends Fragment {
 
     private void hideKeyboard() {
         if (getActivity() == null) return;
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(vEditText.getWindowToken(), 0);
+
+        View v = getActivity().getCurrentFocus();
+
+        if (v != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
     }
 
 
@@ -304,4 +342,18 @@ class SignUpEmailFragment extends Fragment {
             vProgress.setVisibility(View.GONE);
         }
     }
+
+
+    //test code
+
+    private void goToNext(String email, String password) {
+        mSignUpInfo.setEmail(email);
+        mSignUpInfo.setPassword(password);
+
+        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+        if (frag != null) {
+            frag.addFragment(SignUpPinFragment.newInstance("1234"), SignUpPinFragment.TAG);
+        }
+    }
+
 }

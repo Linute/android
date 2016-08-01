@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pure_white"
+    tools:context="com.linute.linute.LoginAndSignup.CollegePickerActivity">
+
+
+    <com.linute.linute.UtilsAndHelpers.MaterialSearchToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:background="@color/pure_white"
+        app:navigationIcon="@drawable/ic_action_navigation_arrow_back"/>
+
+
+    <View
+        android:id="@+id/elevation"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/toolbar"
+        android:background="@color/seperator_color"/>
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/collegePicker_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/elevation"/>
+
+    <TextView
+        android:id="@+id/collegePicker_empty_results"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/elevation"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="48dp"
+        android:textSize="20sp"
+        android:text="No Colleges Found"
+        android:visibility="gone"
+    />
+
+    <ProgressBar
+        android:id="@+id/collegePicker_progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/elevation"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp"
+        android:visibility="gone"/>
+
+</RelativeLayout>

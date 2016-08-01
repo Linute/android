@@ -1,4 +1,4 @@
-package com.linute.linute.LoginAndSignup.SignUpFragments;
+package com.linute.linute.LoginAndSignup.SignUpFragments.CollegeSearch;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,7 +30,7 @@ public class SignUpCollegeAdapter extends RecyclerView.Adapter<CollegeListAdapte
     @Override
     public CollegeListAdapter.CollegeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new CollegeListAdapter.CollegeViewHolder(LayoutInflater.from(parent.getContext()).
-                inflate(R.layout.college_list_item, parent, false));
+                inflate(R.layout.college_picker_item, parent, false));
     }
 
     @Override

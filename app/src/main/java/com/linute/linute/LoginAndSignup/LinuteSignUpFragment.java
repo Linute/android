@@ -567,7 +567,6 @@ public class LinuteSignUpFragment extends Fragment {
                 }
             }
 
-
             userInfo.put("timeZone", Utils.getTimeZone());
 
             //try to create user

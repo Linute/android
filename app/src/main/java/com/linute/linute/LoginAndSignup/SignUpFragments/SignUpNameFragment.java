@@ -16,7 +16,7 @@ import com.linute.linute.R;
 /**
  * Created by QiFeng on 7/28/16.
  */
-class SignUpNameFragment extends Fragment implements View.OnClickListener{
+public class SignUpNameFragment extends Fragment implements View.OnClickListener{
 
     public static final String TAG = SignUpNameFragment.class.getSimpleName();
 
@@ -25,17 +25,12 @@ class SignUpNameFragment extends Fragment implements View.OnClickListener{
     private EditText vFirstName;
     private EditText vLastName;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_sign_up_name, container, false);
 
+        mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
         vFirstName = (EditText) root.findViewById(R.id.fname_text);
         vLastName = (EditText) root.findViewById(R.id.lname_text);
         root.findViewById(R.id.button).setOnClickListener(this);

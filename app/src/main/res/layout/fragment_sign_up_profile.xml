@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:background="@color/colorPrimary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="Profile photo"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="40sp"
+        android:textStyle="bold"
+    />
+
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/profile_image"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/double_margin"
+        android:src="@drawable/ic_large_poop"
+        app:riv_border_color="@color/secondaryColor"
+        app:riv_border_width="1dp"
+        app:riv_corner_radius="4dp"
+    />
+
+    <TextView
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="-12dp"
+        android:background="@drawable/rounded_button"
+        android:drawableLeft="@drawable/ic_camera_icon"
+        android:drawablePadding="4dp"
+        android:paddingBottom="4dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="4dp"
+        android:text="Edit"
+        android:textColor="@color/pure_white"
+        android:textStyle="bold"
+    />
+
+
+    <android.support.v4.widget.Space
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"/>
+
+
+    <Button
+        android:id="@+id/create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/sign_up_button"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:text="Create account"
+        android:textColor="@drawable/signup_button_text"
+    />
+
+
+</LinearLayout>

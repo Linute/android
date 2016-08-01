@@ -25,6 +25,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.LoginAndSignup.SignUpFragments.FBSignUpInfo;
 import com.linute.linute.LoginAndSignup.SignUpFragments.SignUpParentFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -61,6 +62,8 @@ public class PreLoginActivity extends AppCompatActivity {
 
     private OnBackPressed mOnBackPressed;
 
+    private View vChat;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,10 +80,10 @@ public class PreLoginActivity extends AppCompatActivity {
         setUpFacebookCallback();
 
 
-        View v = findViewById(R.id.chat_button);
+        vChat = findViewById(R.id.chat_button);
 
-        if (v != null)
-            v.setOnClickListener(new View.OnClickListener() {
+        if (vChat != null)
+            vChat.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(Intent.ACTION_SENDTO);
@@ -99,6 +102,10 @@ public class PreLoginActivity extends AppCompatActivity {
 
     }
 
+
+    public void showChat(boolean show) {
+        vChat.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
 
     @Override
     protected void onPostResume() {
@@ -124,7 +131,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
     public void replaceFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out );
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.replace(R.id.login_activity_fragment_frame, fragment);
         transaction.commit();
     }
@@ -149,7 +156,7 @@ public class PreLoginActivity extends AppCompatActivity {
         addFragment(new ForgotPasswordFragment());
     }
 
-    public void selectSignIn(){
+    public void selectSignIn() {
         addFragment(new LinuteLoginFragment());
     }
 
@@ -212,8 +219,23 @@ public class PreLoginActivity extends AppCompatActivity {
                         final LinuteUser user = new LinuteUser(object);
 
                         if (isUnique) {
-                            persistTempData(user);
-                            goToFBSignUpFragment(progress);
+                            FBSignUpInfo info = new FBSignUpInfo(
+                                    user.getUserID(),
+                                    user.getSex(),
+                                    user.getSocialFacebook(),
+                                    user.getDob(),
+                                    user.getRegistrationType());
+
+                            info.setFirstName(user.getFirstName());
+                            info.setLastName(user.getLastName());
+
+                            if (user.getEmail().endsWith(".edu"))
+                                info.setEmail(user.getEmail());
+
+                            if (user.getProfileImage() != null && !user.getProfileImage().isEmpty())
+                                info.setImage(Uri.parse(user.getProfileImage()));
+
+                            goToFBSignUpFragment(progress, info);
                         }
 
                         //has signed up already and using edu email
@@ -306,7 +328,6 @@ public class PreLoginActivity extends AppCompatActivity {
     private void persistData(LinuteUser user) {
         SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).edit();
 
-
         sharedPreferences.putString("profileImage", user.getProfileImage());
         sharedPreferences.putString("userID", user.getUserID());
         sharedPreferences.putString("firstName", user.getFirstName());
@@ -351,21 +372,22 @@ public class PreLoginActivity extends AppCompatActivity {
         sharedPreferences.apply();
     }
 
-    private void persistTempData(LinuteUser user) {
-        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
-
-        sharedPreferences.putString("userID", user.getUserID());
-        sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
-        sharedPreferences.putInt("sex", user.getSex());
-        sharedPreferences.putString("dob", user.getDob());
-        sharedPreferences.putString("registrationType", user.getRegistrationType());
-        sharedPreferences.putString("profileImage", user.getProfileImage());
-        sharedPreferences.putString("firstName", user.getFirstName());
-        sharedPreferences.putString("lastName", user.getLastName());
-        sharedPreferences.putString("email", user.getEmail());
-
-        sharedPreferences.apply();
-    }
+//    private void persistTempData(LinuteUser user) {
+//        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
+//
+//
+//        sharedPreferences.putString("userID", user.getUserID());
+//        sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
+//        sharedPreferences.putInt("sex", user.getSex());
+//        sharedPreferences.putString("dob", user.getDob());
+//        sharedPreferences.putString("registrationType", user.getRegistrationType());
+//        sharedPreferences.putString("profileImage", user.getProfileImage());
+//        sharedPreferences.putString("firstName", user.getFirstName());
+//        sharedPreferences.putString("lastName", user.getLastName());
+//        sharedPreferences.putString("email", user.getEmail());
+//
+//        sharedPreferences.apply();
+//    }
 
 
     private void goToNextActivity(final Class nextActivity) {
@@ -380,12 +402,12 @@ public class PreLoginActivity extends AppCompatActivity {
         });
     }
 
-    private void goToFBSignUpFragment(final ProgressDialog progressDialog) {
+    private void goToFBSignUpFragment(final ProgressDialog progressDialog, final FBSignUpInfo info) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 progressDialog.dismiss();
-                addFragment(new FacebookSignUpFragment());
+                addFragment(SignUpParentFragment.newInstance(info));
             }
         });
     }
@@ -420,19 +442,19 @@ public class PreLoginActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mOnBackPressed != null){
+        if (mOnBackPressed != null) {
             mOnBackPressed.onBack();
-        }else {
+        } else {
             super.onBackPressed();
         }
     }
 
-    public void setOnBackPressed(OnBackPressed onBackPressed){
+    public void setOnBackPressed(OnBackPressed onBackPressed) {
         mOnBackPressed = onBackPressed;
     }
 
 
-    public interface OnBackPressed{
+    public interface OnBackPressed {
         void onBack();
     }
 

@@ -265,7 +265,6 @@ public class FacebookSignUpFragment extends Fragment {
         } else {
             update(newInfo);
         }
-
     }
 
     private void update(Map<String, Object> params) {

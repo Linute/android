@@ -20,8 +20,10 @@ public class SignUpParentFragment extends Fragment {
 
     public final static String TAG = SignUpParentFragment.class.getSimpleName();
     public static final String SIGN_UP_INFO = "sign_up_info";
+    public static final String INFO = "parent_info";
     private SignUpInfo mSignUpInfo;
 
+    private Toolbar vToolbar;
 
     public static SignUpParentFragment newInstance(SignUpInfo signUpInfo) {
         SignUpParentFragment fragment = new SignUpParentFragment();
@@ -31,6 +33,19 @@ public class SignUpParentFragment extends Fragment {
         return fragment;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(INFO, mSignUpInfo);
+    }
+
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null)
+            mSignUpInfo = savedInstanceState.getParcelable(INFO);
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,7 +67,7 @@ public class SignUpParentFragment extends Fragment {
         if (activity != null) activity.setOnBackPressed(new PreLoginActivity.OnBackPressed() {
             @Override
             public void onBack() {
-                backpressed();
+                backPressed();
             }
         });
     }
@@ -69,10 +84,11 @@ public class SignUpParentFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_sign_up_parent, container, false);
 
-        ((Toolbar) root.findViewById(R.id.toolbar)).setNavigationOnClickListener(new View.OnClickListener() {
+        vToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        vToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                backpressed();
+                backPressed();
             }
         });
 
@@ -100,7 +116,22 @@ public class SignUpParentFragment extends Fragment {
                 .commit();
     }
 
-    public void backpressed(){
+
+    public void addToTop(Fragment fragment, String tag){
+        getChildFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold, R.anim.hold, R.anim.frag_fade_out)
+                .add(R.id.fragment_container, fragment, tag)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void showToolbar(boolean show){
+        vToolbar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+
+    public void backPressed(){
         if (getChildFragmentManager().getBackStackEntryCount() == 0)
             getFragmentManager().popBackStack();
         else getChildFragmentManager().popBackStack();

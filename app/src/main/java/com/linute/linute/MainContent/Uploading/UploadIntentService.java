@@ -10,7 +10,10 @@ import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 
 import com.linute.linute.API.LSDKEvents;
+import com.linute.linute.LoginAndSignup.PreLoginActivity;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -79,6 +82,7 @@ public class UploadIntentService extends IntentService {
                     .setContentText("")
                     .setLargeIcon(Bitmap.createScaledBitmap(image, 100, (int)(100f * (float) image.getHeight() / image.getWidth()), false))
                     .setProgress(0, 0, true)
+                    .setContentIntent(null)
                     .setAutoCancel(false)
                     .setContentIntent(null);
 
@@ -139,6 +143,8 @@ public class UploadIntentService extends IntentService {
                         .setContentText("")
                         .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                         .setProgress(0, 0, false)
+                        .setAutoCancel(true)
+                        .setContentIntent(getIntent(p.getId()))
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
             } else {
@@ -151,8 +157,26 @@ public class UploadIntentService extends IntentService {
 
         }
         --mPendingFiles;
-
     }
+
+    private PendingIntent getIntent(String eventID){
+        Intent intent;
+        boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
+        if (!isLoggedIn){
+            intent = new Intent(this, PreLoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        }else {
+            intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            intent.putExtra("NOTIFICATION", LinuteConstants.FEED_DETAIL);
+            intent.putExtra("show_update", false);
+            intent.putExtra("event", eventID);
+        }
+
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+    }
+
 
     private String getPostText(int type) {
         String text;
