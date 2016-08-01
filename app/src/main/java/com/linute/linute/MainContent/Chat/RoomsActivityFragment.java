@@ -1,22 +1,26 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -52,12 +56,12 @@ import rx.schedulers.Schedulers;
  * i.e. chatroom with max, chat room with nabeel.
  * You can click to see your convo with max or convo with nabeel
  */
-public class RoomsActivityFragment extends BaseFragment {
+public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.RoomContextMenuCreator{
     public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
     private RoomsAdapter mRoomsAdapter;
 
-    private List<Rooms> mRoomsList = new ArrayList<>(); //list of rooms
+    private List<ChatRoom> mRoomsList = new ArrayList<>(); //list of rooms
     private String mUserId;
 
     private View mEmptyText;
@@ -94,7 +98,7 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.rooms_toolbar);
-        toolbar.setTitle("Inbox");
+        toolbar.setTitle("Messenger");
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +115,25 @@ public class RoomsActivityFragment extends BaseFragment {
                 // Create fragment and give it an argument specifying the article it should show
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    activity.addFragmentToContainer(new SearchUsers());
+                    CreateChatFragment selectUserFragment = new CreateChatFragment();
+                    //callback for when the user finishes selecting users
+                    selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
+                        @Override
+                        public void onUsersSelected(ArrayList<User> users) {
+                            BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
+
+                        }
+                    });
+                    selectUserFragment.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                        @Override
+                        public void onRoomSelected(ChatRoom room) {
+                            BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), room.users));
+                        }
+                    });
+                    activity.addFragmentToContainer(selectUserFragment);
+
                 }
             }
         });
@@ -131,12 +153,7 @@ public class RoomsActivityFragment extends BaseFragment {
                     getMoreRooms();
             }
         });
-        mRoomsAdapter.setDeleteRoom(new RoomsAdapter.DeleteRoom() {
-            @Override
-            public void deleteRoom(int position, Rooms room) {
-                RoomsActivityFragment.this.deleteRoom(position, room);
-            }
-        });
+        mRoomsAdapter.setContextMenuCreator(this);
 
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.rooms_list);
@@ -218,6 +235,8 @@ public class RoomsActivityFragment extends BaseFragment {
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
+                        Log.d(TAG, jsonObj.toString(4));
+
 
                         mSkip = jsonObj.getInt("skip");
 
@@ -228,7 +247,7 @@ public class RoomsActivityFragment extends BaseFragment {
                         boolean hasUnreadMessage;
 
                         JSONObject room;
-                        JSONObject user;
+                        JSONArray usersJson;
                         JSONArray messages;
                         JSONArray tempArray;
 
@@ -237,14 +256,55 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         Date date;
 
+                        String name;
+                        String image;
+
+                        int type;
+
+                        boolean isMuted;
+
                         SimpleDateFormat format = Utils.getDateFormat();
-                        final ArrayList<Rooms> tempRooms = new ArrayList<>();
+                        final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
+
 
                         for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
-                            user = room.getJSONArray("users").getJSONObject(0);
+
+
+                            name = room.getString("name");
+                            image = room.getJSONObject("profileImage").getString("thumbnail");
+
+                            type = room.getInt("type");
+
+                            isMuted = room.getBoolean("isMuted");
+
+                            long mutedUntil = 0;
+                            Object unMuteAt = room.get("unMuteAt");
+
+                            if(unMuteAt != null) {
+                                try {
+                                    mutedUntil = Long.getLong(unMuteAt.toString());
+                                }
+                                catch (NumberFormatException e){}
+                                catch (NullPointerException np){}
+                            }
+
+
+                            usersJson = room.getJSONArray("users");
+                            ArrayList<User> usersList = new ArrayList<User>();
+                            for(int u = 0;u<usersJson.length();u++){
+                                JSONObject userJson = usersJson.getJSONObject(u);
+                                usersList.add(new User(
+                                        userJson.getString("id"),
+                                        userJson.getString("fullName"),
+                                        userJson.getString("profileImage")
+                                ));
+                            }
+
+
+
 
                             messages = room.getJSONArray("messages"); //list of messages in room
 
@@ -293,14 +353,17 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
                             //Throws error but still runs correctly... weird
-                            tempRooms.add(new Rooms(
+                            tempRooms.add(new ChatRoom(
                                     room.getString("id"),
-                                    user.getString("id"),
-                                    user.getString("fullName"),
+                                    type,
+                                    name,
+                                    image,
+                                    usersList,
                                     lastMessage,
-                                    user.getString("profileImage"),
                                     hasUnreadMessage,
-                                    date == null ? 0 : date.getTime()
+                                    date == null ? 0 : date.getTime(),
+                                    isMuted,
+                                    mutedUntil
                             ));
                             // ,
 //                                    users.length() + 1,  // add yourself
@@ -428,7 +491,7 @@ public class RoomsActivityFragment extends BaseFragment {
                         boolean hasUnreadMessage;
 
                         JSONObject room;
-                        JSONObject user;
+                        JSONArray users;
                         JSONArray messages;
 
                         JSONObject message;
@@ -436,14 +499,24 @@ public class RoomsActivityFragment extends BaseFragment {
 
                         Date date;
 
-                        final ArrayList<Rooms> tempRooms = new ArrayList<>();
+                        final ArrayList<ChatRoom> tempRooms = new ArrayList<>();
                         SimpleDateFormat format = Utils.getDateFormat();
 
                         for (int i = rooms.length() - 1; i >= 0; i--) {
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
-                            user = room.getJSONArray("users").getJSONObject(0);
+                            users = room.getJSONArray("users");
+
+                            ArrayList<User> usersList = new ArrayList<User>();
+                            for(int u = 0; u < users.length(); u++){
+                                JSONObject user = users.getJSONObject(u);
+                                usersList.add(new User(
+                                        user.getString("id"),
+                                        user.getString("name"),
+                                        user.getString("profileImage")
+                                ));
+                            }
 
                             messages = room.getJSONArray("messages"); //list of messages in room
 
@@ -484,12 +557,10 @@ public class RoomsActivityFragment extends BaseFragment {
 
 
                             //Throws error but still runs correctly... weird
-                            tempRooms.add(new Rooms(
+                            tempRooms.add(new ChatRoom(
                                     room.getString("id"),
-                                    user.getString("id"),
-                                    user.getString("fullName"),
+                                    usersList,
                                     lastMessage,
-                                    user.getString("profileImage"),
                                     hasUnreadMessage,
                                     date == null ? 0 : date.getTime()
                             ));
@@ -553,7 +624,7 @@ public class RoomsActivityFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-                final Rooms tempRoom = new Rooms(event.getRoomId(), "", "", event.getMessage(), "", true, new Date().getTime());
+                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), 0, "","", null, event.getMessage(), true, new Date().getTime(), false, 0);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -581,7 +652,7 @@ public class RoomsActivityFragment extends BaseFragment {
     };
 
 
-    private void deleteRoom(final int position, final Rooms room){
+    private void deleteRoom(final int position, final ChatRoom room){
         final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             JSONObject object = new JSONObject();
@@ -636,4 +707,75 @@ public class RoomsActivityFragment extends BaseFragment {
             }
         }
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu contextMenu, final ChatRoom room, final int position, ContextMenu.ContextMenuInfo contextMenuInfo) {
+        contextMenu.setHeaderTitle(room.getRoomName());
+        MenuItem delete = contextMenu.add("Delete");
+        delete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                deleteRoom(position, room);
+                return true;
+            }
+        });
+        MenuItem mute = contextMenu.add(room.isMuted()?"Unmute":"Mute");
+        mute.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                if (!room.isMuted()) {
+                    new RadioButtonDialog<>(getContext(), ChatSettingsFragment.MUTE_OPTIONS_TEXT,ChatSettingsFragment.MUTE_OPTIONS_VALUES)
+                            .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
+                                @Override
+                                public void onDurationSelected(Integer item) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", true);
+                                            jsonParams.put("room", room.getRoomId());
+                                            jsonParams.put("time", item);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+//                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
+//                                            updateNotificationView();
+                                            room.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
+                                            mRoomsAdapter.notifyItemChanged(position);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .create().show();
+                }else{
+                    new AlertDialog.Builder(getContext())
+                            .setTitle("Unmute this chat?")
+                            .setPositiveButton("Unmute", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                                    if (activity != null) {
+                                        try {
+                                            JSONObject jsonParams = new JSONObject();
+                                            jsonParams.put("mute", false);
+                                            jsonParams.put("room", room.getRoomId());
+                                            jsonParams.put("time", 0);
+                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            room.setMute(false, 0);
+                                            mRoomsAdapter.notifyItemChanged(position);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create().show();
+                }
+                return true;
+            }
+        });
+    }
+
+
 }

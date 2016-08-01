@@ -1,7 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2b3139"
+    android:background="@color/pure_white"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -10,7 +10,16 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" >
+        <ImageView
+            android:id="@+id/toolbar_chat_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_action_action_settings"
+            android:layout_gravity="right"
+            android:padding="8dp"
+            />
+        </android.support.v7.widget.Toolbar>
 
     <!-- RecyclerView needs to be in FrameLayout to contain the destructive power of clipChildren=false-->
     <FrameLayout
@@ -38,6 +47,8 @@
         android:visibility="gone"
 
         />
+
+
 
     <LinearLayout
         android:id="@id/message_container"
@@ -80,6 +91,44 @@
             android:scaleType="fitCenter"
             android:src="@drawable/ic_send" />
 
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pre_chat"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        >
+
+        <TextView
+            android:id="@+id/button_accept"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FF0000FF"
+            android:gravity="center"
+            android:text="Accept"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp"
+            android:textAllCaps="true"
+            />
+
+        <TextView
+            android:id="@+id/button_decline"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFF0000"
+            android:gravity="center"
+            android:text="Decline"
+            android:textColor="@color/pure_white"
+            android:textSize="20sp"
+            android:textAllCaps="true"
+
+            />
     </LinearLayout>
 
 

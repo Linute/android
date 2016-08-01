@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -20,10 +22,8 @@ import android.widget.EditText;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,29 +39,50 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class SearchUsers extends Fragment {
+public class SelectUsersFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String TAG = SearchUsers.class.getSimpleName();
+    private static final String TAG = SelectUsersFragment.class.getSimpleName();
 
-    private SearchAdapter mSearchAdapter;
+    protected UserSelectAdapter mSearchAdapter;
+    protected SelectedUsersAdapter mSelectedAdapter;
 
-    private List<SearchUser> mSearchUserList = new ArrayList<>();
-    private SharedPreferences mSharedPreferences;
+    protected ArrayList<User> mSelectedUsers = new ArrayList<>();
+    protected List<User> mSearchUserList = new ArrayList<>();
+
+    protected ArrayList<User> mLockedUsers;
 
     private EditText editText;
 
-    private Handler mHandler = new Handler();
+    protected Handler mHandler = new Handler();
+    protected RecyclerView mSelectedRV;
+    protected RecyclerView mSearchRV;
 
-    public SearchUsers() {
-        // Required empty public constructor
+    private final static String KEY_LOCKED_USERS = "selected";
+
+    SharedPreferences mSharedPreferences;
+
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers){
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
+        SelectUsersFragment selectUserFragment = new SelectUsersFragment();
+        selectUserFragment.setArguments(arguments);
+        return selectUserFragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
+        if(arguments != null) {
+            mLockedUsers = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+        }
+        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         return inflater.inflate(R.layout.fragment_search_users, container, false);
     }
 
@@ -80,14 +101,50 @@ public class SearchUsers extends Fragment {
             }
         });
 
-        mSearchAdapter = new SearchAdapter(getActivity(), mSearchUserList);
+        toolbar.inflateMenu(R.menu.menu_create_chat);
 
-        RecyclerView recList = (RecyclerView) view.findViewById(R.id.search_users);
-        recList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+
+                activity.getSupportFragmentManager().popBackStack();
+                if(mUsersSelectedListener != null){
+                    mUsersSelectedListener.onUsersSelected(mSelectedUsers);
+                }
+//                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
+                return true;
+            }
+        });
+
+
+        mSearchAdapter = createSearchAdapter();
+        mSearchAdapter.setLockedUserList(mLockedUsers);
+        mSearchAdapter.setSelectedUserList(mSelectedUsers);
+        mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
+        mSearchRV.setHasFixedSize(true);
+        final LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recList.setLayoutManager(llm);
-        recList.setAdapter(mSearchAdapter);
+        mSearchRV.setLayoutManager(llm);
+        mSearchRV.setAdapter(mSearchAdapter);
+        mSearchAdapter.setOnUserSelectedListener(this);
+
+        mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
+        mSelectedRV = (RecyclerView) view.findViewById(R.id.selected_users);
+        LinearLayoutManager selectedLLM = new LinearLayoutManager(getActivity());
+        selectedLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
+        mSelectedRV.setLayoutManager(selectedLLM);
+        mSelectedRV.setAdapter(mSelectedAdapter);
+
+        mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
+            @Override
+            public void onUserSelected(User user, int position) {
+                mSearchUserList.add(0, user);
+                llm.scrollToPosition(0);
+
+            }
+        });
+
 
         editText = (EditText) view.findViewById(R.id.search_users_entry);
         editText.addTextChangedListener(new TextWatcher() {
@@ -98,7 +155,7 @@ public class SearchUsers extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                getUsers(s.toString());
+                search(s.toString());
             }
 
             @Override
@@ -107,7 +164,32 @@ public class SearchUsers extends Fragment {
             }
         });
 
-        getUsers("");
+        search("");
+    }
+
+    protected UserSelectAdapter createSearchAdapter() {
+        return new UserSelectAdapter(getActivity(), mSearchUserList);
+    }
+
+    @Override
+    public void onUserSelected(User user, int adapterPosition) {
+        int listPosition = User.findUser(mSelectedUsers, user);
+
+        if(listPosition == -1) {
+            mSelectedUsers.add(user);
+           // mSearchUserList.remove(user);
+            mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
+            mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size()-1);
+            editText.setText("");
+//            mSearchAdapter.notifyDataSetChanged();
+        }else{
+            mSelectedUsers.remove(listPosition);
+            mSelectedRV.getLayoutManager().scrollToPosition(listPosition);
+            mSelectedAdapter.notifyItemRemoved(listPosition);
+            editText.setText("");
+
+        }
+        mSearchAdapter.notifyItemChanged(adapterPosition);
     }
 
     @Override
@@ -120,11 +202,9 @@ public class SearchUsers extends Fragment {
         }
     }
 
-    private void getUsers(String searchWord) {
+    protected void search(String searchWord) {
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, String> newChat = new HashMap<>();
-        newChat.put("owner", mSharedPreferences.getString("userID", null));
-
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
         }
@@ -156,7 +236,7 @@ public class SearchUsers extends Fragment {
                     }
                 } else {
 //                    mSearchUserList.clear();
-                    ArrayList<SearchUser> tempUsers = new ArrayList<>();
+                    ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray friends;
                     try {
@@ -165,10 +245,20 @@ public class SearchUsers extends Fragment {
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = ((JSONObject) friends.get(i)).getJSONObject("user");
-                            tempUsers.add(new SearchUser(
+                            tempUsers.add(new User(
                                     user.getString("id"),
-                                    user.getString("profileImage"),
-                                    user.getString("fullName")));
+                                    user.getString("fullName"),
+                                    user.getString("profileImage")
+                            ));
+                            /*if(findUser(mSelectedUsers, user.getString("id")) != -1) {
+                                tempUsers.add(new User(
+                                        user.getString("id"),
+                                        user.getString("fullName"), user.getString("profileImage")
+                                ));
+                            }else if(findUser(mLockedUsers, user.getString("id")) != -1){
+                                tempUsers.add(new User)
+                            }*/
+
                         }
 
                         mSearchUserList.clear();
@@ -203,6 +293,17 @@ public class SearchUsers extends Fragment {
                 }
             }
         });
+    }
+
+
+    private OnUsersSelectedListener mUsersSelectedListener;
+
+    public void setOnUsersSelectedListener(OnUsersSelectedListener listener){
+        mUsersSelectedListener = listener;
+    }
+
+    interface OnUsersSelectedListener{
+        void onUsersSelected(ArrayList<User> users);
     }
 
 }

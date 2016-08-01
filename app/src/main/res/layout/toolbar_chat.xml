@@ -5,22 +5,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal">
-    <de.hdodenhof.circleimageview.CircleImageView
+    <!--this space is necessary so that the chat image doesn't get cut, not sure why-->
+    <Space
+        android:layout_gravity="left"
+        android:layout_width="16dp"
+        android:layout_height="match_parent" />
+    <!--<com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/toolbar_chat_user_icon"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:gravity="center_vertical"
-        app:civ_border_color="@color/colorPrimary"
-        app:civ_border_width="1dp"
-          />
+        android:layout_gravity="center"
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"
+        android:scaleType="centerCrop"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+          />-->
     <TextView
         android:id="@+id/toolbar_chat_user_name"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:gravity="center_vertical"
         android:textSize="16sp"
         android:textColor="@color/pure_white"
         android:paddingLeft="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         />
     <!--balances out "up" arrow, making room information to be properly centered-->
     <Space

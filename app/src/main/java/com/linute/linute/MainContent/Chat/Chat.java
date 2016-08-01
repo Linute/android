@@ -11,6 +11,7 @@ public class Chat {
     public static final int TYPE_MESSAGE_OTHER_PERSON = 1;
     public static final int TYPE_ACTION_TYPING = 2;
     public static final int TYPE_DATE_HEADER = 3;
+    public static final int TYPE_SYSTEM_MESSAGE = 4;
 
     public static final int MESSAGE_TEXT = 0;
     public static final int MESSAGE_VIDEO = 2;

@@ -18,6 +18,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.text.DateFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static com.linute.linute.MainContent.DiscoverFragment.Post.POST_TYPE_IMAGE;
@@ -33,6 +34,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
+    private Map<String, User> mUsers;
 
     static {
         mDateFormat.setTimeZone(TimeZone.getDefault());
@@ -41,10 +43,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //private HashMap<Integer, ArrayList<ChatHead>> aChatHeadsMap;
     //private SharedPreferences aSharedPreferences;
 
-    public ChatAdapter(Context aContext, List<Chat> aChatList) {
+    public ChatAdapter(Context aContext, List<Chat> aChatList, Map<String, User> users) {
         this.aContext = aContext;
         this.aChatList = aChatList;
+        this.mUsers = users;
     }
+
+
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,7 +71,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 );
             case Chat.TYPE_DATE_HEADER:
                 return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
+            case Chat.TYPE_SYSTEM_MESSAGE:
+                return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
+
         }
+
 
         return null;
     }
@@ -74,7 +83,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
-            ((ChatViewHolder) holder).bindModel(aChatList.get(position - 1));
+            Chat chat = aChatList.get(position - 1);
+            ((ChatViewHolder) holder).bindModel(chat, isHead(position-1));
         }else if (holder instanceof LoadMoreViewHolder){
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
@@ -91,11 +101,19 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public int getItemCount() {
         return aChatList.size() == 0 ? 0 : aChatList.size()+1;
+
     }
 
     @Override
     public int getItemViewType(int position) {
         return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
+    }
+
+    public boolean isHead(int position){
+        if(position == 0) return true;
+        Chat chat1 = aChatList.get(position);
+        Chat chat2 = aChatList.get(position-1);
+        return !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
     public void setFooterState(short footerState) {
@@ -106,6 +124,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected TextView vUserMessage;
         protected TextView vUserTime;
         protected ImageView vActionImage;
+        protected ImageView vReadReceipt;
+        protected ImageView vProfileImage;
+        protected TextView vUserName;
 
         protected ImageView vImage;
         protected View vFrame;
@@ -118,8 +139,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vUserMessage = (TextView) itemView.findViewById(R.id.chat_user_message);
             vUserTime = (TextView) itemView.findViewById(R.id.chat_user_time);
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
+            vReadReceipt = (ImageView) itemView.findViewById(R.id.read_receipt);
             vFrame = itemView.findViewById(R.id.frame);
             vImage = (ImageView) itemView.findViewById(R.id.image);
+            vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
+            vUserName = (TextView) itemView.findViewById(R.id.user_name);
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -150,9 +174,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             });
         }
 
-        void bindModel(Chat chat) {
+        void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
+            if(chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
+                if (isHead) {
+                    User u = mUsers.get(chat.getOwnerId());
+                    if (u != null) {
+                        vUserName.setVisibility(View.VISIBLE);
+                        vProfileImage.setVisibility(View.VISIBLE);
+                        vUserName.setText(u.userName);
+                        Glide.with(itemView.getContext())
+                                .load(Utils.getImageUrlOfUser(u.userImage))
+                                .into(vProfileImage);
+                    } else {
+                        vUserName.setVisibility(View.GONE);
+                        vProfileImage.setVisibility(View.INVISIBLE);
+                    }
+                } else {
+                    vUserName.setVisibility(View.GONE);
+                    vProfileImage.setVisibility(View.INVISIBLE);
+                }
+            }
             switch (chat.getMessageType()) {
                 case Chat.MESSAGE_IMAGE:
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
@@ -179,6 +222,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             if (chat.getType() == Chat.TYPE_MESSAGE_ME) {
                 vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat);
+//                vReadReceipt.setImageResource(chat.isRead() ? R.drawable.chat_read_receipt_read : R.drawable.chat_read_receipt_delivered);
             }
 
             if (chat.getDate() != null) {
