@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
     android:layout_marginEnd="48dp"
     android:layout_marginStart="12dp"
     android:layout_marginTop="4dp"
@@ -94,8 +93,9 @@
         android:layout_height="16dp"
         android:layout_gravity="center_vertical"
         android:text="User Name"
-        android:textColor="#CCCCCCCC"
-        android:textSize="12sp" />
+        android:textColor="#ff9f9f9f"
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 
 </LinearLayout>
