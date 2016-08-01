@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +72,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 );
             case Chat.TYPE_DATE_HEADER:
                 return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
+            case Chat.TYPE_SYSTEM_MESSAGE:
+                return new DateHeaderHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_chat_list_item_date_header, parent, false));
+
         }
+
 
         return null;
     }
@@ -96,11 +101,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //+1 for load more loader
     @Override
     public int getItemCount() {
-       /* for(int pos = 0; pos < (aChatList.size() == 0 ? 0 : aChatList.size()+1); pos++){
-            Log.i("AAA", pos+" "+isHead(pos) + " "+aChatList.get(pos-1)chat.getMessage());
-        }
-        */
-
         return aChatList.size() == 0 ? 0 : aChatList.size()+1;
 
     }

@@ -1756,6 +1756,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         viewerIsOwnerOfMessage
                 );
 
+
+
                 if (!messageBeenRead) {
                     listOfUnreadMessages.put(chat.getMessageId());
                 }
@@ -1771,6 +1773,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         chat.setMessageType(Chat.MESSAGE_IMAGE);
                     }
                 }
+
+                if(message.getInt("type") == 1){
+                    chat.setType(Chat.TYPE_SYSTEM_MESSAGE);
+                }
+
 
                 if (intoChatList.size() > 0) {
                     Chat previousMessage = intoChatList.get(intoChatList.size() - 1);
