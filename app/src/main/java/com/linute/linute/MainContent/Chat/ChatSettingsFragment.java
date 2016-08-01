@@ -67,7 +67,7 @@ public class ChatSettingsFragment extends BaseFragment {
     private String mUserId;
 
 
-    private ChatRoom mChatRoom;
+    private int mType = ChatRoom.ROOM_TYPE_GROUP;
     private String mRoomName;
     private String mRoomImage;
     private User mUser;
@@ -112,12 +112,13 @@ public class ChatSettingsFragment extends BaseFragment {
                     JSONObject chat = new JSONObject(response.body().string());
 
 
-                    mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
+//                    mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
 
                     JSONObject room = chat.getJSONObject("room");
 
                     mRoomName = room.getString("name");
                     mRoomImage = room.getJSONObject("profileImage").getString("original");
+                    mType = room.getInt("type");
 
                     /*JSONArray muteList = room.getJSONArray("mute");
                     JSONObject mute = null;
@@ -225,8 +226,18 @@ room: id of room
         View view = getView();
         if (view == null) return;
 
+        RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
+        View leaveGroupView = view.findViewById(R.id.setting_leave_group);
+        mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
+        mNotificationSettingsIndicatorView = (TextView)view.findViewById(R.id.setting_notifications_indicator);
+
+
+        if(mType == ChatRoom.ROOM_TYPE_DM){
+            participantsRV.setVisibility(View.GONE);
+            leaveGroupView.setVisibility(View.GONE);
+
+        }
         if (mParticipants != null) {
-            RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
             LinearLayoutManager llm = new LinearLayoutManager(getContext()){
                 @Override
                 public boolean canScrollVertically() {
@@ -295,8 +306,6 @@ room: id of room
         updateGroupName(view);
 
 
-        mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
-        mNotificationSettingsIndicatorView = (TextView)view.findViewById(R.id.setting_notifications_indicator);
         updateNotificationView();
         mNotificationSettingsView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -357,7 +366,6 @@ room: id of room
 
 
 
-        View leaveGroupView = view.findViewById(R.id.setting_leave_group);
         leaveGroupView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -389,43 +397,51 @@ room: id of room
 
     private void updateGroupName(View view) {
         View groupNameSettingView = view.findViewById(R.id.setting_group_name);
-        groupNameSettingView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                final EditTextDialog editTextDialog = new EditTextDialog(getContext());
-                editTextDialog
-                        .setValue(mRoomName)
-                        .setTitle("Set Group Name")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener(){
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+        if(mType == ChatRoom.ROOM_TYPE_DM){
+            view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
+        }else {
+            groupNameSettingView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final EditTextDialog editTextDialog = new EditTextDialog(getContext());
+                    editTextDialog
+                            .setValue(mRoomName)
+                            .setTitle("Set Group Name")
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 //                                mRoomName = editTextDialog.getValue();
-                                setGroupNameAndPhoto(editTextDialog.getValue(), null);
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create().show();
-            }
-        });
+                                    setGroupNameAndPhoto(editTextDialog.getValue(), null);
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create().show();
+                }
+            });
+        }
     }
 
     private void updateGroupPhoto(View view) {
         ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
+        if(mType == ChatRoom.ROOM_TYPE_DM){
+            view.findViewById(R.id.setting_group_image_container).setVisibility(View.GONE);
+        }else {
             Glide.with(getContext())
                     .load(mRoomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .into(groupImageSettingView);
 
-        groupImageSettingView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent getPhotoIntent = new Intent();
-                getPhotoIntent.setType("image/*");
-                getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
-                getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
-                startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
-            }
-        });
+            groupImageSettingView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent getPhotoIntent = new Intent();
+                    getPhotoIntent.setType("image/*");
+                    getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
+                    getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
+                    startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+                }
+            });
+        }
     }
 
     private void updateNotificationView() {

@@ -22,6 +22,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
         <FrameLayout
+            android:id="@+id/setting_group_image_container"
             android:layout_width="match_parent"
             android:layout_height="240dp"
             android:background="#FFCCCCCC"
@@ -38,6 +39,7 @@
         </FrameLayout>
 
         <LinearLayout
+            android:id="@+id/setting_group_name_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
