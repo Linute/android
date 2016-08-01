@@ -125,6 +125,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected TextView vUserMessage;
         protected TextView vUserTime;
         protected ImageView vActionImage;
+        protected ImageView vReadReceipt;
         protected ImageView vProfileImage;
         protected TextView vUserName;
 
@@ -139,6 +140,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vUserMessage = (TextView) itemView.findViewById(R.id.chat_user_message);
             vUserTime = (TextView) itemView.findViewById(R.id.chat_user_time);
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
+            vReadReceipt = (ImageView) itemView.findViewById(R.id.read_receipt);
             vFrame = itemView.findViewById(R.id.frame);
             vImage = (ImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
@@ -221,6 +223,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             if (chat.getType() == Chat.TYPE_MESSAGE_ME) {
                 vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat);
+//                vReadReceipt.setImageResource(chat.isRead() ? R.drawable.chat_read_receipt_read : R.drawable.chat_read_receipt_delivered);
             }
 
             if (chat.getDate() != null) {
