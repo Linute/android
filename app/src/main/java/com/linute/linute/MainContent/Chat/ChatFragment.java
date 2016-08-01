@@ -97,7 +97,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private ArrayList<User> mUsers;
 
     public static final int CHAT_TYPE_DM = 0;
-    public static final int CHAT_TYPE_GROUP = 0;
+    public static final int CHAT_TYPE_GROUP = 1;
 
     private int mChatType;
     private String mChatName;
