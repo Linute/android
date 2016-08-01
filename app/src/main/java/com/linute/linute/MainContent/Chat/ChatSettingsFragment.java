@@ -135,10 +135,10 @@ public class ChatSettingsFragment extends BaseFragment {
                     }*/
 
                     Object mute = room.get("unMuteAt");
-                    if(mute != null){
+                    if (mute != null) {
                         try {
                             mMuteRelease = Long.valueOf(mute.toString());
-                        }catch (NumberFormatException e){
+                        } catch (NumberFormatException e) {
 
                         }
                     }
@@ -152,13 +152,17 @@ public class ChatSettingsFragment extends BaseFragment {
                             mUser = new User(
                                     user.getString("id"),
                                     user.getString("fullName"),
-                                    user.getString("profileImage")
+                                    user.getString("profileImage"),
+                                    user.getJSONObject("college").getString("name")
+
                             );
                         } else {
                             mParticipants.add(new User(
                                     user.getString("id"),
                                     user.getString("fullName"),
-                                    user.getString("profileImage")
+                                    user.getString("profileImage"),
+                                    user.getJSONObject("college").getString("name")
+
                             ));
                         }
                     }
@@ -193,13 +197,13 @@ public class ChatSettingsFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FragmentActivity activity = getActivity();
-                if (activity!= null) {
+                if (activity != null) {
                     activity.getSupportFragmentManager().popBackStack();
                 }
             }
@@ -228,17 +232,25 @@ room: id of room
 
         RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
         View leaveGroupView = view.findViewById(R.id.setting_leave_group);
-        mNotificationSettingsView = (TextView)view.findViewById(R.id.setting_notifications_button);
-        mNotificationSettingsIndicatorView = (TextView)view.findViewById(R.id.setting_notifications_indicator);
+        mNotificationSettingsView = (TextView) view.findViewById(R.id.setting_notifications_button);
+        mNotificationSettingsIndicatorView = (TextView) view.findViewById(R.id.setting_notifications_indicator);
+        View DMHeader = view.findViewById(R.id.dm_header);
+        View DMDivider = view.findViewById(R.id.dm_divider);
 
 
-        if(mType == ChatRoom.ROOM_TYPE_DM){
+        if (mType == ChatRoom.ROOM_TYPE_DM) {
             participantsRV.setVisibility(View.GONE);
             leaveGroupView.setVisibility(View.GONE);
-
+            DMHeader.setVisibility(View.VISIBLE);
+            DMDivider.setVisibility(View.VISIBLE);
+        } else {
+            participantsRV.setVisibility(View.VISIBLE);
+            leaveGroupView.setVisibility(View.VISIBLE);
+            DMHeader.setVisibility(View.GONE);
+            DMDivider.setVisibility(View.GONE);
         }
         if (mParticipants != null) {
-            LinearLayoutManager llm = new LinearLayoutManager(getContext()){
+            LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
                 @Override
                 public boolean canScrollVertically() {
                     return false;
@@ -279,7 +291,7 @@ room: id of room
                 }
             });
 
-            Toolbar toolbar = (Toolbar)view.findViewById(R.id.toolbar);
+            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
             toolbar.setTitle(mRoomName);
 
             mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
@@ -302,8 +314,8 @@ room: id of room
             });
         }
 
-        updateGroupPhoto(view);
-        updateGroupName(view);
+        updateRoomPhoto(view);
+        updateRoomName(view);
 
 
         updateNotificationView();
@@ -334,7 +346,7 @@ room: id of room
                                 }
                             })
                             .create().show();
-                }else{
+                } else {
                     new AlertDialog.Builder(getContext())
                             .setTitle("Unmute this chat?")
                             .setPositiveButton("Unmute", new DialogInterface.OnClickListener() {
@@ -363,9 +375,6 @@ room: id of room
         });
 
 
-
-
-
         leaveGroupView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -390,16 +399,17 @@ room: id of room
         });
 
 
-
-
-
     }
 
-    private void updateGroupName(View view) {
+    private void updateRoomName(View view) {
         View groupNameSettingView = view.findViewById(R.id.setting_group_name);
-        if(mType == ChatRoom.ROOM_TYPE_DM){
+        if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
-        }else {
+            User u = mParticipants.get(0);
+
+            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.userName);
+            ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
+        } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -421,11 +431,16 @@ room: id of room
         }
     }
 
-    private void updateGroupPhoto(View view) {
-        ImageView groupImageSettingView = (ImageView)view.findViewById(R.id.setting_group_image);
-        if(mType == ChatRoom.ROOM_TYPE_DM){
+    private void updateRoomPhoto(View view) {
+        ImageView groupImageSettingView = (ImageView) view.findViewById(R.id.setting_group_image);
+        if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_image_container).setVisibility(View.GONE);
-        }else {
+            User u = mParticipants.get(0);
+
+            Glide.with(getContext())
+                    .load(Utils.getImageUrlOfUser(u.userImage))
+                    .into(((ImageView) view.findViewById(R.id.dm_user_icon)));
+        } else {
             Glide.with(getContext())
                     .load(mRoomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -445,7 +460,7 @@ room: id of room
     }
 
     private void updateNotificationView() {
-        if(mNotificationSettingsIndicatorView == null) return;
+        if (mNotificationSettingsIndicatorView == null) return;
         mNotificationSettingsIndicatorView.setText(mMuteRelease == NO_MUTE ? "On" : "Off");
     }
 
@@ -509,7 +524,8 @@ room: id of room
                                 mParticipants.add(new User(
                                         user.getString("id"),
                                         user.getString("fullName"),
-                                        user.getString("profileImage")
+                                        user.getString("profileImage"),
+                                        user.getJSONObject("college").getString("name")
                                 ));
                             }
 
@@ -570,7 +586,7 @@ room: id of room
     public void onActivityResult(int requestCode, int resultCode, final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode == Activity.RESULT_OK && requestCode == REQUEST_PHOTO) {
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_PHOTO) {
 
             new Thread(new Runnable() {
                 //do this in a new thread because lots of processing
@@ -583,7 +599,7 @@ room: id of room
                         FileOutputStream fos = new FileOutputStream(path.getPath());
                         bmp.compress(Bitmap.CompressFormat.JPEG, 10, fos);
 
-                    }catch(FileNotFoundException e){
+                    } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
 
@@ -595,7 +611,7 @@ room: id of room
 
     }
 
-    private void setGroupNameAndPhoto(String name, String photo){
+    private void setGroupNameAndPhoto(String name, String photo) {
         new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, name, photo, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -615,16 +631,16 @@ room: id of room
                     mRoomName = object.getString("name");
                     Activity activity = getActivity();
                     final View view = getView();
-                    if(activity != null && view != null){
+                    if (activity != null && view != null) {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateGroupName(view);
-                                updateGroupPhoto(view);
+                                updateRoomName(view);
+                                updateRoomPhoto(view);
                             }
                         });
                     }
-                }catch(JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
