@@ -797,7 +797,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 .listener(mGlideListener)
                 .into(otherPersonIconIV);*/
 
-        TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_user_name);
+        TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_name);
         String chatName = getChatName();
         chatNameView.setText(chatName);
     }
