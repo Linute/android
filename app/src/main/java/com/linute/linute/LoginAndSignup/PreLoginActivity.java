@@ -372,23 +372,6 @@ public class PreLoginActivity extends AppCompatActivity {
         sharedPreferences.apply();
     }
 
-//    private void persistTempData(LinuteUser user) {
-//        SharedPreferences.Editor sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE).edit();
-//
-//
-//        sharedPreferences.putString("userID", user.getUserID());
-//        sharedPreferences.putString("socialFacebook", user.getSocialFacebook());
-//        sharedPreferences.putInt("sex", user.getSex());
-//        sharedPreferences.putString("dob", user.getDob());
-//        sharedPreferences.putString("registrationType", user.getRegistrationType());
-//        sharedPreferences.putString("profileImage", user.getProfileImage());
-//        sharedPreferences.putString("firstName", user.getFirstName());
-//        sharedPreferences.putString("lastName", user.getLastName());
-//        sharedPreferences.putString("email", user.getEmail());
-//
-//        sharedPreferences.apply();
-//    }
-
 
     private void goToNextActivity(final Class nextActivity) {
         runOnUiThread(new Runnable() {

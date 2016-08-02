@@ -59,7 +59,6 @@ public class OverlayWipeAdapter implements WipeViewPager.WipeAdapter {
     }
 
     public void destroy() {
-        Log.i("test", "destroyed: ");
         for (Bitmap b : mOverlays) {
             if (b != null)
                 b.recycle();

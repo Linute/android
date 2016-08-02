@@ -126,7 +126,7 @@ public class SendToFragment extends BaseFragment {
         View root = inflater.inflate(R.layout.fragment_send_to, container, false);
 
         vProgress = root.findViewById(R.id.progress);
-        vErrorText = (TextView)root.findViewById(R.id.error_text);
+        vErrorText = (TextView) root.findViewById(R.id.error_text);
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSendButton = (Button) root.findViewById(R.id.send_button);
@@ -212,10 +212,37 @@ public class SendToFragment extends BaseFragment {
             getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            if (mPendingUploadPost != null) addCollege();
             getSendToList();
         } else if (mSendToItems.isEmpty()) {
             showEmpty(true);
         }
+    }
+
+
+    private void addCollege() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final SendToItem item = new SendToItem(
+                        SendToItem.TYPE_CAMPUS,
+                        "My Campus",
+                        mPendingUploadPost.getCollegeId(),
+                        ""
+                );
+                item.setChecked(true);
+
+                vSendButton.setBackgroundResource(R.color.yellow_color);
+
+                mSendToItems.add(0, item);
+
+                mSendToAdapter.getCheckedItems()
+                        .get(SendToAdapter.COLLEGE_AND_TRENDS)
+                        .add(item);
+
+                mSendToAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
@@ -251,8 +278,10 @@ public class SendToFragment extends BaseFragment {
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
 
-                            if (mSendToItems.isEmpty())
+                            if (mSendToItems.isEmpty()) {
                                 showErrorText(true);
+                                showProgress(false);
+                            }
 
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                         }
@@ -289,23 +318,9 @@ public class SendToFragment extends BaseFragment {
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            final SendToItem item = new SendToItem(
-                                                    SendToItem.TYPE_CAMPUS,
-                                                    "My Campus",
-                                                    mPendingUploadPost.getCollegeId(),
-                                                    ""
-                                            );
-                                            item.setChecked(true);
 
-                                            vSendButton.setBackgroundResource(R.color.yellow_color);
-
-                                            mSendToItems.add(0, item);
                                             mSendToItems.addAll(1, tempTrends);
                                             mTrendsItems = tempTrends;
-
-                                            mSendToAdapter.getCheckedItems()
-                                                    .get(SendToAdapter.COLLEGE_AND_TRENDS)
-                                                    .add(item);
 
                                             if (mGotResponseForApiCall) {
                                                 showProgress(false);
@@ -345,8 +360,10 @@ public class SendToFragment extends BaseFragment {
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
 
-                            if (mSendToItems.isEmpty())
+                            if (mSendToItems.isEmpty()) {
                                 showErrorText(true);
+                                showProgress(false);
+                            }
 
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                         }
@@ -518,7 +535,15 @@ public class SendToFragment extends BaseFragment {
         if (show) {
             vErrorText.setText("Tap to reload");
             vErrorText.setVisibility(View.VISIBLE);
-        }else {
+            vErrorText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showProgress(true);
+                    showErrorText(false);
+                    getSendToList();
+                }
+            });
+        } else {
             vErrorText.setVisibility(View.INVISIBLE);
         }
 
@@ -528,7 +553,8 @@ public class SendToFragment extends BaseFragment {
         if (show) {
             vErrorText.setText("Empty list");
             vErrorText.setVisibility(View.VISIBLE);
-        }else {
+            vErrorText.setOnClickListener(null);
+        } else {
             vErrorText.setVisibility(View.GONE);
         }
     }
@@ -541,8 +567,10 @@ public class SendToFragment extends BaseFragment {
                 public void run() {
                     Utils.showServerErrorToast(getActivity());
 
-                    if (mSendToItems.isEmpty())
+                    if (mSendToItems.isEmpty()) {
                         showErrorText(true);
+                        showProgress(false);
+                    }
 
                     setFragmentState(FragmentState.FINISHED_UPDATING);
                 }

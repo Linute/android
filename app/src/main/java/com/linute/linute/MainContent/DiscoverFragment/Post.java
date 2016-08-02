@@ -67,6 +67,11 @@ public class Post implements Parcelable {
         mPostMuted = false;
     }
 
+
+    public Post(String postId){
+        mPostId = postId;
+    }
+
     /**
      * @param jsonObject  - post json object
      */
@@ -256,10 +261,6 @@ public class Post implements Parcelable {
         return Utils.getTimeAgoString(mPostTime);
     }
 
-    public long getPostLongTime() {
-        return mPostTime;
-    }
-
     public String getPostId() {
         return mPostId;
     }
@@ -300,17 +301,13 @@ public class Post implements Parcelable {
         mUserName = name;
     }
 
-//    public void setPostId(String id){
-//        mPostId = id;
-//    }
-//
-//    public void setPostUserId(){
-//        mPo
-//    }
-
     @Override
     public String toString() {
         return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
+    }
+
+    public void setTitle(String title) {
+        mTitle = title;
     }
 
     public void setProfileImage(String profileImage) {
@@ -325,6 +322,25 @@ public class Post implements Parcelable {
         mAnonImage = anonImage;
     }
 
+    public void setUserId(String userId) {
+        mUserId = userId;
+    }
+
+    public void setUserImage(String userImage) {
+        mUserImage = userImage;
+    }
+
+    public void setVideoURL(String videoURL) {
+        mVideoURL = videoURL;
+    }
+
+    public void setImage(String image) {
+        mImage = image;
+    }
+
+    public void setType(int type) {
+        mType = type;
+    }
 
     public boolean isPostHidden() {
         return mPostHidden;

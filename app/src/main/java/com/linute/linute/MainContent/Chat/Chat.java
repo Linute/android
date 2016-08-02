@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.Chat;
 
 
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+
 import java.util.Date;
 
 /**
@@ -31,6 +33,7 @@ public class Chat {
     private int mMessageType;
     private String mImageId;
     private String mVideoId;
+    private Post mPost;
 
 
     /**
@@ -115,6 +118,13 @@ public class Chat {
         return mMessage;
     }
 
+    public Post getPost() {
+        return mPost;
+    }
+
+    public void setPost(Post post) {
+        mPost = post;
+    }
 
     public int getType() {
         return mType;

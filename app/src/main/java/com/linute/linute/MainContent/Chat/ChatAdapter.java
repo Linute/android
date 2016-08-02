@@ -10,11 +10,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.linute.linute.API.API_Methods;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.makeramen.roundedimageview.Corner;
+import com.makeramen.roundedimageview.RoundedImageView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.util.List;
@@ -34,6 +43,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private LoadMoreViewHolder.OnLoadMore mLoadMoreListener;
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
 
+    private String mUserId;
+
     private Map<String, User> mUsers;
 
     static {
@@ -47,8 +58,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.aContext = aContext;
         this.aChatList = aChatList;
         this.mUsers = users;
-    }
 
+        mUserId = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+    }
 
 
     @Override
@@ -56,11 +68,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
                 return new ChatViewHolder(LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.fragment_chat_list_item_me, parent, false));
+                        .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                return  new ChatViewHolder(LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.fragment_chat_list_item_you, parent, false));
-
+                return new ChatViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_chat_list_item_you, parent, false));
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
                         LayoutInflater.from(parent.getContext())
@@ -84,12 +95,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
             Chat chat = aChatList.get(position - 1);
-            ((ChatViewHolder) holder).bindModel(chat, isHead(position-1));
-        }else if (holder instanceof LoadMoreViewHolder){
+            ((ChatViewHolder) holder).bindModel(chat, isHead(position - 1));
+        } else if (holder instanceof LoadMoreViewHolder) {
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
-        }else if(holder instanceof  DateHeaderHolder){
-            ((DateHeaderHolder)holder).dateTV.setText(aChatList.get(position-1).getMessage());
+        } else if (holder instanceof DateHeaderHolder) {
+            ((DateHeaderHolder) holder).dateTV.setText(aChatList.get(position - 1).getMessage());
         }
     }
 
@@ -100,7 +111,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //+1 for load more loader
     @Override
     public int getItemCount() {
-        return aChatList.size() == 0 ? 0 : aChatList.size()+1;
+        return aChatList.size() == 0 ? 0 : aChatList.size() + 1;
 
     }
 
@@ -109,10 +120,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
     }
 
-    public boolean isHead(int position){
-        if(position == 0) return true;
+    public boolean isHead(int position) {
+        if (position == 0) return true;
         Chat chat1 = aChatList.get(position);
-        Chat chat2 = aChatList.get(position-1);
+        Chat chat2 = aChatList.get(position - 1);
         return !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
@@ -128,11 +139,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected ImageView vProfileImage;
         protected TextView vUserName;
 
-        protected ImageView vImage;
+        protected RoundedImageView vImage;
         protected View vFrame;
+        protected View vLikeBar;
 
         private int mType;
         private String mUrl;
+
+        private Post mPost;
 
         public ChatViewHolder(View itemView) {
             super(itemView);
@@ -141,34 +155,65 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
             vReadReceipt = (ImageView) itemView.findViewById(R.id.read_receipt);
             vFrame = itemView.findViewById(R.id.frame);
-            vImage = (ImageView) itemView.findViewById(R.id.image);
+            vImage = (RoundedImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
+
             vUserName = (TextView) itemView.findViewById(R.id.user_name);
+            vLikeBar = vFrame.findViewById(R.id.action_bar);
+
+            final ToggleImageView checkbox = (ToggleImageView) vLikeBar.findViewById(R.id.checkbox);
+            checkbox.setImageViews(R.drawable.ic_fire_off, R.drawable.ic_fire_on);
+            checkbox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    BaseTaptActivity activity = (BaseTaptActivity) aContext;
+                    if (activity != null && mPost != null) {
+                        try {
+
+                            boolean emit = false;
+
+                            if (checkbox.isActive() && mPost.isPostLiked()) {
+                                checkbox.setActive(false);
+                                mPost.setPostLiked(false);
+                                emit = true;
+                            } else if (!checkbox.isActive() && !mPost.isPostLiked()) {
+                                checkbox.setActive(true);
+                                mPost.setPostLiked(true);
+                                emit = true;
+                            }
+                            if (emit) {
+                                JSONObject body = new JSONObject();
+                                body.put("user", mUserId);
+                                body.put("room", mPost.getPostId());
+                                activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
+                            }
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    BaseTaptActivity activity = (BaseTaptActivity) aContext;
-                    if (activity != null) {
-                        if (mType == Chat.MESSAGE_IMAGE) {
-                            activity.addFragmentOnTop(
-                                    ViewFullScreenFragment.newInstance(
-                                            Uri.parse(Utils.getMessageImageURL(mUrl)),
-                                            POST_TYPE_IMAGE,
-                                            0
-                                    ),
-                                    "full_view"
-                            );
-                        } else if (mType == Chat.MESSAGE_VIDEO) {
-                           activity.addFragmentOnTop(
-                                   ViewFullScreenFragment.newInstance(
-                                           Uri.parse(Utils.getMessageVideoURL(mUrl)),
-                                           POST_TYPE_VIDEO,
-                                           0
-                                   ),
-                                   "full_view"
-                           );
-                        }
+                    int type = -1;
+                    if (mType == Chat.MESSAGE_IMAGE || mType == Chat.MESSAGE_SHARE_IMAGE)
+                        type = POST_TYPE_IMAGE;
+                    else if (mType == Chat.MESSAGE_VIDEO || mType == Chat.MESSAGE_SHARE_VIDEO)
+                        type = POST_TYPE_VIDEO;
+
+                    if (type != -1) {
+                        BaseTaptActivity activity = (BaseTaptActivity) aContext;
+                        activity.addFragmentOnTop(
+                                ViewFullScreenFragment.newInstance(
+                                        Uri.parse(mUrl),
+                                        type,
+                                        0
+                                ),
+                                "full_view"
+                        );
                     }
                 }
             });
@@ -177,7 +222,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
-            if(chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
+            if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
                 if (isHead) {
                     User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
@@ -186,6 +231,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         vUserName.setText(u.userName);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
+                                .asBitmap()
                                 .into(vProfileImage);
                     } else {
                         vUserName.setVisibility(View.GONE);
@@ -196,26 +242,51 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
             }
+
+
             switch (chat.getMessageType()) {
-                case Chat.MESSAGE_IMAGE:
+                case Chat.MESSAGE_SHARE_IMAGE:
+                    vFrame.setVisibility(View.VISIBLE);
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
+                    vUserMessage.setVisibility(View.GONE);
+                    showShareStuff(chat.getPost());
+                    setImage(chat.getPost().getImage());
+                    mUrl = chat.getPost().getImage();
+                    mPost = chat.getPost();
+                    break;
+                case Chat.MESSAGE_SHARE_VIDEO:
+                    vFrame.setVisibility(View.VISIBLE);
+                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
+                    vUserMessage.setVisibility(View.GONE);
+                    showShareStuff(chat.getPost());
+                    setImage(chat.getPost().getImage());
+                    mUrl = chat.getPost().getVideoUrl();
+                    mPost = chat.getPost();
+                    break;
+                case Chat.MESSAGE_IMAGE:
                     vFrame.setVisibility(View.VISIBLE);
                     vUserMessage.setVisibility(View.GONE);
-                    setImage(chat.getImageId());
-                    mUrl = chat.getImageId();
+                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
+                    hideShareStuff();
+                    mUrl = Utils.getMessageImageURL(chat.getImageId());
+                    setImage(mUrl);
+                    mPost = null;
                     break;
                 case Chat.MESSAGE_VIDEO:
-                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
                     vFrame.setVisibility(View.VISIBLE);
                     vUserMessage.setVisibility(View.GONE);
-                    setImage(chat.getImageId());
-                    mUrl = chat.getVideoId();
+                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
+                    hideShareStuff();
+                    setImage(Utils.getMessageImageURL(chat.getImageId()));
+                    mUrl = Utils.getMessageVideoURL(chat.getVideoId());
+                    mPost = null;
                     break;
                 default:
                     vFrame.setVisibility(View.GONE);
                     vUserMessage.setVisibility(View.VISIBLE);
                     vUserMessage.setText(chat.getMessage());
                     mUrl = "";
+                    mPost = null;
                     break;
             }
 
@@ -235,22 +306,55 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         }
 
+        private void hideShareStuff() {
+            vLikeBar.setVisibility(View.GONE);
+            vImage.setCornerRadius(vImage.getCornerRadius(Corner.TOP_RIGHT));
+        }
+
+        private void showShareStuff(Post post) {
+            vLikeBar.setVisibility(View.VISIBLE);
+
+            vImage.setCornerRadius(Corner.BOTTOM_RIGHT, 0);
+            vImage.setCornerRadius(Corner.BOTTOM_LEFT, 0);
+
+            String url;
+            String name;
+
+            if (post.getPrivacy() == 1) {
+                url = post.getAnonImage();
+                name = "Anonymous";
+            } else {
+                url = post.getUserImage();
+                name = post.getUserName();
+            }
+
+            Glide.with(itemView.getContext())
+                    .load(url)
+                    .asBitmap()
+                    .dontAnimate()
+                    .into((ImageView) vLikeBar.findViewById(R.id.post_profile));
+
+            ((TextView) vLikeBar.findViewById(R.id.post_name)).setText(name);
+            ((ToggleImageView) vLikeBar.findViewById(R.id.checkbox)).setActive(post.isPostLiked());
+        }
 
         private void setImage(String image) {
+            vImage.setImageResource(android.R.color.transparent);
             Glide.with(aContext)
-                    .load(Utils.getMessageImageURL(image))
+                    .load(image)
+                    .asBitmap()
                     .dontAnimate()
                     .placeholder(R.drawable.chat_backgrounds)
                     .into(vImage);
         }
     }
 
-    public class DateHeaderHolder extends RecyclerView.ViewHolder{
+    public class DateHeaderHolder extends RecyclerView.ViewHolder {
         TextView dateTV;
 
         public DateHeaderHolder(View itemView) {
             super(itemView);
-            dateTV = (TextView)itemView.findViewById(R.id.text_date);
+            dateTV = (TextView) itemView.findViewById(R.id.text_date);
         }
     }
 

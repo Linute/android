@@ -27,7 +27,7 @@ import org.json.JSONObject;
 /**
  * Created by QiFeng on 3/8/16.
  */
-public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener  {
+public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.OnCheckedChangeListener, View.OnClickListener {
 
     protected View vLikeButton;
     protected View vCommentButton;
@@ -53,7 +53,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         mRequestManager = manager;
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mUserId = mSharedPreferences.getString("userID","");
+        mUserId = mSharedPreferences.getString("userID", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
@@ -84,7 +84,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         });
     }
 
-    public void bindModel(Post post){
+    public void bindModel(Post post) {
         mPost = post;
 
         if (post.getPrivacy() == 0) {
@@ -99,52 +99,37 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText("Like (" + post.getNumLike() + ")");
         vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
-        ((ImageView)vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
+        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
                 R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
     }
 
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-        if (mPost == null) return;
+        BaseTaptActivity activity = (BaseTaptActivity) mContext;
+        if (mPost == null || activity == null) return;
+        boolean emit = false;
 
         if (isChecked && !mPost.isPostLiked()) {
-
-            BaseTaptActivity activity = (BaseTaptActivity) mContext;
-            if (activity != null) {
-                try {
-                    JSONObject body = new JSONObject();
-                    body.put("user", mUserId);
-                    body.put("room", mPost.getPostId());
-
-                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
-
-                    mPost.setPostLiked(true);
-                    mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) + 1);
-                    vLikesText.setText("Like ("+mPost.getNumLike()+")");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
+            mPost.setPostLiked(true);
+            mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) + 1);
+            vLikesText.setText("Like (" + mPost.getNumLike() + ")");
+            emit = true;
         } else if (!isChecked && mPost.isPostLiked()) {
+            mPost.setPostLiked(false);
+            mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) - 1);
+            vLikesText.setText("Like (" + mPost.getNumLike() + ")");
+            emit = true;
+        }
 
-            BaseTaptActivity activity = (BaseTaptActivity) mContext;
-            if (activity != null) {
-                try {
-                    JSONObject body = new JSONObject();
-                    body.put("user", mUserId);
-                    body.put("room", mPost.getPostId());
-
-                    activity.emitSocket(API_Methods.VERSION+":posts:like", body);
-
-                    mPost.setPostLiked(false);
-                    mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) - 1);
-                    vLikesText.setText("Like ("+mPost.getNumLike()+")");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+        if (emit) {
+            try {
+                JSONObject body = new JSONObject();
+                body.put("user", mUserId);
+                body.put("room", mPost.getPostId());
+                activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -160,7 +145,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
                 .into(vUserImage);
     }
 
-    protected void getAnonImage(String image){
+    protected void getAnonImage(String image) {
         mRequestManager
                 .load(image)
                 .dontAnimate()
@@ -169,7 +154,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
                 .into(vUserImage);
     }
 
-    protected String getUserId(){
+    protected String getUserId() {
         return mUserId;
     }
 
@@ -193,8 +178,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         //like button pressed
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
-        }
-        else if (v == vCommentButton) {
+        } else if (v == vCommentButton) {
             activity.addFragmentToContainer(
                     FeedDetailPage.newInstance(mPost)
             );

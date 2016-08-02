@@ -71,6 +71,7 @@ public class UploadIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         PendingUploadPost p = intent.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY);
         if (p != null) {
+            Log.i(TAG, "onHandleIntent: "+p.getId());
             sendNextFile(p);
         }
     }
@@ -161,7 +162,6 @@ public class UploadIntentService extends IntentService {
         if (!isLoggedIn) {
             intent = new Intent(this, PreLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
         } else {
             intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -170,7 +170,7 @@ public class UploadIntentService extends IntentService {
             intent.putExtra("event", eventID);
         }
 
-        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
 
@@ -202,7 +202,7 @@ public class UploadIntentService extends IntentService {
                 .setContentTitle("File failed to upload")
                 .setContentText("Tap to retry")
                 .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getService(this, 0, i, PendingIntent.FLAG_ONE_SHOT));
+                .setContentIntent(PendingIntent.getService(this, 0, i, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT));
 
         mNotificationManager.cancel(ID);
         mNotificationManager.notify(notificationId++, mBuilder.build());

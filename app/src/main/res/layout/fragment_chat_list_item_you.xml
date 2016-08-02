@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginEnd="48dp"
-    android:layout_marginStart="12dp"
-    android:layout_marginTop="4dp"
-    android:clipChildren="true"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginEnd="48dp"
+              android:layout_marginStart="12dp"
+              android:layout_marginTop="4dp"
+              android:clipChildren="true"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="16dp"
         android:layout_gravity="center_vertical"
+        android:layout_marginLeft="56dp"
         android:text="User Name"
         android:textColor="#ff9f9f9f"
         android:textSize="12sp"
-        android:visibility="visible"
-        android:layout_marginLeft="56dp" />
+        android:visibility="visible"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -42,7 +42,7 @@
                 android:gravity="end|center_vertical"
                 android:textColor="@color/seperator_color"
                 android:textSize="@dimen/sub_font_size"
-                tools:text="3:00AM" />
+                tools:text="3:00AM"/>
         </LinearLayout>
 
         <com.makeramen.roundedimageview.RoundedImageView
@@ -52,35 +52,82 @@
             android:layout_gravity="top|center_horizontal"
             android:layout_marginRight="4dp"
             android:scaleType="centerInside"
-            app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+            app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+            <LinearLayout
                 android:id="@+id/frame"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="start"
-                android:visibility="gone">
+                android:background="@drawable/chat_item_you"
+                android:orientation="vertical"
+                android:visibility="gone"
+            >
 
-                <com.makeramen.roundedimageview.RoundedImageView
-                    android:id="@+id/image"
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:scaleType="centerCrop"
-                    app:riv_corner_radius="2dp" />
+                <FrameLayout
+                    android:layout_width="160dp"
+                    android:layout_height="160dp">
 
-                <ImageView
-                    android:id="@+id/cinema_icon"
-                    android:layout_width="wrap_content"
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:id="@+id/image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        app:riv_corner_radius="@dimen/user_icon_corner_radius"
+                    />
+
+                    <ImageView
+                        android:id="@+id/cinema_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_cinema"/>
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/action_bar"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_cinema" />
+                    android:orientation="horizontal">
 
-            </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:id="@+id/post_profile"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_margin="4dp"
+                        app:riv_corner_radius="2dp"
+                    />
+
+                    <TextView
+                        android:id="@+id/post_name"
+                        android:layout_width="0px"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:lines="1"
+                        android:text="Test teset dsfdsf dsfsd dsf "
+                        android:textSize="12sp"/>
+
+
+                    <com.linute.linute.UtilsAndHelpers.ToggleImageView
+                        android:id="@+id/checkbox"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_margin="4dp"
+                        android:src="@drawable/ic_fire_on"
+                    />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/chat_user_message"
@@ -92,11 +139,9 @@
                 android:padding="12dp"
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/body_font_size"
-                tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df " />
+                tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "/>
 
 
         </FrameLayout>
     </LinearLayout>
-
-
 </LinearLayout>

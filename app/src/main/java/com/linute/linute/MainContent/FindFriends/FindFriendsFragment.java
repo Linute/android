@@ -130,6 +130,17 @@ public class FindFriendsFragment extends BaseFragment {
         recyclerView.setAdapter(mFriendSearchAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING){
+                    FindFriendsChoiceFragment fragment = (FindFriendsChoiceFragment) getParentFragment();
+                    if (fragment != null) fragment.hideKeyboard();
+                }
+            }
+        });
+
         if (mSearchType == SEARCH_TYPE_NAME) { //if search by name, we need init text
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
@@ -252,7 +263,6 @@ public class FindFriendsFragment extends BaseFragment {
             rationaleText.setText(R.string.need_contant_permission);
             reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.yellow_color));
             reloadButton.setText("Search contacts");
-
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);

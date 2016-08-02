@@ -5,9 +5,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 
 
@@ -35,21 +32,6 @@ public class NeedPermissionsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        CameraType cameraType = ((CameraActivity) getActivity()).getCameraType();
-
-        if (!cameraType.contains(CameraType.CAMERA_STATUS)){
-            view.findViewById(R.id.post).setVisibility(View.GONE);
-        }else {
-            view.findViewById(R.id.new_post).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    CameraActivity cameraActivity = (CameraActivity) getActivity();
-                    if (cameraActivity != null)
-                        cameraActivity.launchFragment(new PostCreatePage(), PostCreatePage.TAG);
-                }
-            });
-        }
 
         view.findViewById(R.id.needPermission_text_button).setOnClickListener(new View.OnClickListener() {
             @Override

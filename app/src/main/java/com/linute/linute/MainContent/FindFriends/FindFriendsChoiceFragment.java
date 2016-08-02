@@ -190,17 +190,21 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     @Override
     public void onPause() {
         super.onPause();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity != null) {
-            //hide keyboard
-            if (mSearchView.hasFocus()) {
-                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
-            }
-        }
+
+        hideKeyboard();
 
         if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
+        }
+    }
+
+    public void hideKeyboard(){
+        if (getActivity() != null) {
+            //hide keyboard
+            if (mSearchView.hasFocus()) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mSearchView.getWindowToken(), 0);
+            }
         }
     }
 

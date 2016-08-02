@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -844,7 +845,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "onResponse: " + object.toString(4));
+                        //Log.i(TAG, "onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 
 
@@ -1722,6 +1723,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         String owner;
         Date time;
         JSONArray imageAndVideo;
+        JSONObject post = null;
 
         boolean viewerIsOwnerOfMessage;
         boolean messageBeenRead;
@@ -1731,7 +1733,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (int i = 0; i < messages.length(); i++) {
             try {
                 message = messages.getJSONObject(i);
-                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
+
+                Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
+
                 owner = message.getJSONObject("owner").getString("id");
                 viewerIsOwnerOfMessage = owner.equals(mUserId);
 
@@ -1758,24 +1762,40 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 );
 
 
-
                 if (!messageBeenRead) {
                     listOfUnreadMessages.put(chat.getMessageId());
                 }
 
-                imageAndVideo = message.getJSONArray("images");
-                if (imageAndVideo.length() > 0) {
-                    chat.setImageId(imageAndVideo.getString(0));
-                    imageAndVideo = message.getJSONArray("videos");
+
+                try {
+                    post = message.getJSONObject("post");
+                    if (post != null) {
+                        chat.setPost(getPost(post));
+                        chat.setMessageType(
+                                chat.getPost().getType() == Post.POST_TYPE_VIDEO ?
+                                        Chat.MESSAGE_SHARE_VIDEO :
+                                        Chat.MESSAGE_SHARE_IMAGE
+                        );
+                    }
+                } catch (JSONException e) {
+                    Log.d(TAG, "parseMessagesJSON: no value for post");
+                }
+
+                if (post == null) {
+                    imageAndVideo = message.getJSONArray("images");
                     if (imageAndVideo.length() > 0) {
-                        chat.setVideoId(imageAndVideo.getString(0));
-                        chat.setMessageType(Chat.MESSAGE_VIDEO);
-                    } else {
-                        chat.setMessageType(Chat.MESSAGE_IMAGE);
+                        chat.setImageId(imageAndVideo.getString(0));
+                        imageAndVideo = message.getJSONArray("videos");
+                        if (imageAndVideo.length() > 0) {
+                            chat.setVideoId(imageAndVideo.getString(0));
+                            chat.setMessageType(Chat.MESSAGE_VIDEO);
+                        } else {
+                            chat.setMessageType(Chat.MESSAGE_IMAGE);
+                        }
                     }
                 }
 
-                if(message.getInt("type") == 1){
+                if (message.getInt("type") == 1) {
                     chat.setType(Chat.TYPE_SYSTEM_MESSAGE);
                 }
 
@@ -1813,12 +1833,42 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 intoChatList.add(chat);
 
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+    }
 
+
+    private Post getPost(JSONObject obj) throws JSONException {
+
+        Post p = new Post(obj.getString("id"));
+
+        JSONObject owner = obj.getJSONObject("owner");
+        p.setUserId(owner.getString("id"));
+        p.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));
+        p.setUserImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
+        p.setUserName(owner.getString("fullName"));
+
+        p.setPostPrivacy(obj.getInt("privacy"));
+
+        int type = obj.getInt("type");
+        p.setType(type);
+
+        JSONArray images = obj.getJSONArray("images");
+        if (images != null && images.length() > 0) {
+            p.setImage(Utils.getEventImageURL(images.getString(0)));
+        }
+
+        images = obj.getJSONArray("videos");
+        if (images != null && images.length() > 0) {
+            p.setVideoURL(Utils.getVideoURL(images.getString(0)));
+        }
+
+        p.setPostLiked(obj.getBoolean("isLiked"));
+        p.setTitle(obj.getString("title"));
+
+        return p;
     }
 
     private void updateTopTimeHeader() {
