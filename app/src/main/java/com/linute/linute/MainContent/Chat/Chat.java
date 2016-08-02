@@ -16,6 +16,9 @@ public class Chat {
     public static final int MESSAGE_TEXT = 0;
     public static final int MESSAGE_VIDEO = 2;
     public static final int MESSAGE_IMAGE = 1;
+    public static final int MESSAGE_SHARE_IMAGE = 3;
+    public static final int MESSAGE_SHARE_VIDEO = 4;
+
     //public static final int TYPE_CHAT_HEAD = 3;
 
     private String mRoomId;
