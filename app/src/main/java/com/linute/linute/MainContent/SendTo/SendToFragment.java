@@ -28,7 +28,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -64,8 +63,8 @@ public class SendToFragment extends BaseFragment {
     private View vProgress;
     private TextView vErrorText;
 
-    private int mSkip = 0;
-    private boolean mCanLoadMore = true;
+    //private int mSkip = 0;
+    //private boolean mCanLoadMore = true;
 
     private Button vSendButton;
 
@@ -151,14 +150,14 @@ public class SendToFragment extends BaseFragment {
             mSendToAdapter.setRequestManager(Glide.with(this));
         }
 
-        mSendToAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
-            @Override
-            public void loadMore() {
-                if (mCanLoadMore) {
-                    loadMoreUsers();
-                }
-            }
-        });
+//        mSendToAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
+//            @Override
+//            public void loadMore() {
+//                if (mCanLoadMore) {
+//                    loadMoreUsers();
+//                }
+//            }
+//        });
 
         mSendToAdapter.setButtonAction(new SendToAdapter.ButtonAction() {
             @Override
@@ -337,7 +336,7 @@ public class SendToFragment extends BaseFragment {
 
     private void getFriends() {
         //get friends
-        new LSDKFriends(getActivity()).getSendTo("", mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getActivity()).getSendTo("", mUserId, /*mSkip, 20,*/ new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null && mGotResponseForApiCall) {
@@ -369,7 +368,7 @@ public class SendToFragment extends BaseFragment {
                         final ArrayList<SendToItem> tempItems = new ArrayList<>();
 
                         JSONArray users = object.getJSONArray("friends");
-                        mCanLoadMore = users.length() >= 20;
+                        //mCanLoadMore = users.length() >= 20;
 
                         JSONObject user;
 
@@ -394,8 +393,8 @@ public class SendToFragment extends BaseFragment {
                                         @Override
                                         public void run() {
                                             mSendToItems.addAll(tempItems);
-                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
-                                            mSkip += 20;
+//                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+//                                            mSkip += 20;
 
                                             if (mGotResponseForApiCall) {
                                                 showProgress(false);
@@ -425,90 +424,90 @@ public class SendToFragment extends BaseFragment {
     }
 
 
-    private void loadMoreUsers() {
-        if (getContext() == null) return;
-
-        new LSDKFriends(getContext()).getSendTo("", mUserId, mSkip, 20, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getActivity());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("friends");
-
-                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
-
-                        JSONObject user;
-                        for (int i = 0; i < users.length(); i++) {
-                            user = users.getJSONObject(i).getJSONObject("user");
-                            tempItems.add(
-                                    new SendToItem(
-                                            SendToItem.TYPE_PERSON,
-                                            user.getString("fullName"),
-                                            user.getString("id"),
-                                            user.getString("profileImage")
-                                    )
-                            );
-                        }
-
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            int start = mSendToItems.size();
-                                            mSendToItems.addAll(tempItems);
-                                            mCanLoadMore = tempItems.size() >= 20;
-                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
-                                            mSkip += 20;
-                                            mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
-                                            setFragmentState(FragmentState.FINISHED_UPDATING);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(getActivity());
-                                }
-                            });
-                        }
-                    }
-
-                } else {
-                    Log.d(TAG, "onResponse: " + response.body().string());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                            }
-                        });
-                    }
-                }
-            }
-        });
-    }
+//    private void loadMoreUsers() {
+//        if (getContext() == null) return;
+//
+//        new LSDKFriends(getContext()).getSendTo("", mUserId, mSkip, 20, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                if (getActivity() != null) {
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Utils.showBadConnectionToast(getActivity());
+//                        }
+//                    });
+//                }
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (response.isSuccessful()) {
+//                    try {
+//                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("friends");
+//
+//                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
+//
+//                        JSONObject user;
+//                        for (int i = 0; i < users.length(); i++) {
+//                            user = users.getJSONObject(i).getJSONObject("user");
+//                            tempItems.add(
+//                                    new SendToItem(
+//                                            SendToItem.TYPE_PERSON,
+//                                            user.getString("fullName"),
+//                                            user.getString("id"),
+//                                            user.getString("profileImage")
+//                                    )
+//                            );
+//                        }
+//
+//                        if (getActivity() != null) {
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mHandler.post(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            int start = mSendToItems.size();
+//                                            mSendToItems.addAll(tempItems);
+//                                            mCanLoadMore = tempItems.size() >= 20;
+//                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+//                                            mSkip += 20;
+//                                            mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
+//                                            setFragmentState(FragmentState.FINISHED_UPDATING);
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        }
+//
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                        if (getActivity() != null) {
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    Utils.showServerErrorToast(getActivity());
+//                                }
+//                            });
+//                        }
+//                    }
+//
+//                } else {
+//                    Log.d(TAG, "onResponse: " + response.body().string());
+//                    if (getActivity() != null) {
+//                        getActivity().runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Utils.showServerErrorToast(getActivity());
+//                            }
+//                        });
+//                    }
+//                }
+//            }
+//        });
+//    }
 
 
     private void showProgress(boolean show) {

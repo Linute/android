@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -80,7 +81,7 @@ public class UploadIntentService extends IntentService {
 
             mBuilder.setContentTitle("Preparing for upload")
                     .setContentText("")
-                    .setLargeIcon(Bitmap.createScaledBitmap(image, 100, (int)(100f * (float) image.getHeight() / image.getWidth()), false))
+                    .setLargeIcon(Bitmap.createScaledBitmap(image, 100, (int) (100f * (float) image.getHeight() / image.getWidth()), false))
                     .setProgress(0, 0, true)
                     .setContentIntent(null)
                     .setAutoCancel(false)
@@ -101,13 +102,8 @@ public class UploadIntentService extends IntentService {
             coord.put(p.getLatitude());
             coord.put(p.getLongitude());
 
-            JSONObject share = new JSONObject();
-            JSONArray trend = new JSONArray(p.getTrends());
-            JSONArray people = new JSONArray(p.getPeople());
-            share.put("trends", trend);
-            share.put("users", people);
-
-            params.put("share", share);
+            params.put("trends", new JSONArray(p.getTrends()));
+            params.put("users", new JSONArray(p.getPeople()));
 
             try {
                 jsonObject.put("coordinates", coord);
@@ -152,21 +148,21 @@ public class UploadIntentService extends IntentService {
             }
 
             image.recycle();
-        } catch (IOException|JSONException e) {
+        } catch (IOException e) {
             failedToPost(p);
 
         }
         --mPendingFiles;
     }
 
-    private PendingIntent getIntent(String eventID){
+    private PendingIntent getIntent(String eventID) {
         Intent intent;
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
-        if (!isLoggedIn){
+        if (!isLoggedIn) {
             intent = new Intent(this, PreLoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        }else {
+        } else {
             intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.putExtra("NOTIFICATION", LinuteConstants.FEED_DETAIL);

@@ -119,7 +119,6 @@ public class CameraFragment extends Fragment {
         }
 
         mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
-        mCameraType = ((CameraActivity) getActivity()).getCameraType();
     }
 
     @Override
@@ -127,6 +126,8 @@ public class CameraFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View root = inflater.inflate(R.layout.square_camera_take_photo, container, false);
+
+        mCameraType = ((CameraActivity) getActivity()).getCameraType();
 
         mTakePhotoBtn = (ImageView) root.findViewById(R.id.capture_image_button);
         mFlashTop = root.findViewById(R.id.flash_top);

@@ -1731,6 +1731,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (int i = 0; i < messages.length(); i++) {
             try {
                 message = messages.getJSONObject(i);
+                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
                 owner = message.getJSONObject("owner").getString("id");
                 viewerIsOwnerOfMessage = owner.equals(mUserId);
 
