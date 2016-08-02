@@ -28,9 +28,8 @@
         android:layout_marginLeft="16dp"
         android:ellipsize="end"
         android:lines="1"
-        android:textColor="@color/user_comment_color"
+        android:textColor="@color/eighty_black"
         android:textSize="16sp"
-        android:textStyle="bold"
         tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs" />
 
 </LinearLayout>
