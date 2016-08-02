@@ -72,7 +72,7 @@ public class GalleryFragment extends Fragment {
 
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_IMAGE_OR_VID) { //got an image
             Uri uri = data.getData();
-            Log.i(TAG, "onActivityResult: "+uri.toString());
+            //Log.i(TAG, "onActivityResult: "+uri.toString());
             if (uri.toString().contains("image")) { //selected image
                 if (getActivity() != null) {
                     try {

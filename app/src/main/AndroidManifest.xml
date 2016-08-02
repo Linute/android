@@ -65,7 +65,7 @@
             android:configChanges="orientation"
             android:label="@string/title_activity_pre_login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme.FullScreen"/>
         <activity
             android:name=".LaunchActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"

@@ -219,12 +219,12 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
                         @Override
                         public void onViewCollisionBegin(View me) {
-                            stickerTrashCan.setImageResource(R.mipmap.trash_can_open);
+                            stickerTrashCan.setImageResource(R.drawable.trash_can_open);
                         }
 
                         @Override
                         public void onViewCollisionEnd(View me) {
-                            stickerTrashCan.setImageResource(R.mipmap.trash_can_closed);
+                            stickerTrashCan.setImageResource(R.drawable.trash_can_closed);
                         }
 
                         @Override

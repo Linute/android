@@ -55,15 +55,18 @@ public class CollegeListAdapter extends RecyclerView.Adapter<CollegeListAdapter.
 
     public static class CollegeViewHolder extends RecyclerView.ViewHolder{
         public TextView mCollegeName;
+        public TextView mCollegeAddress;
 
         public CollegeViewHolder(View itemView) {
             super(itemView);
 
             mCollegeName = (TextView) itemView.findViewById(R.id.collegePicker_item_name_text);
+            mCollegeAddress = (TextView) itemView.findViewById(R.id.college_address);
         }
 
         public void bindView(final College college){
             mCollegeName.setText(college.getCollegeName());
+            mCollegeAddress.setText(college.getAddress());
         }
     }
 }

@@ -62,13 +62,14 @@ public class LaunchActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Fabric.with(this, new Crashlytics());
-        //setContentView(R.layout.activity_launch);
+
+        if (!BuildConfig.DEBUG) {
+            Log.i(TAG, "onCreate: Crashlytics initialized");
+            Fabric.with(this, new Crashlytics());
+        }
 
         generateNewSigniture();
         updateLocationIfPossible();
-
-//        mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         //set broadcast receiver
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {

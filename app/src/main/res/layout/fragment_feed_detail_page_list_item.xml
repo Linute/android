@@ -180,23 +180,6 @@
                 />
 
             </RelativeLayout>
-
-            <!--<TextView-->
-            <!--android:id="@+id/comment"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:autoLink="web|email"-->
-            <!--android:textColor="@color/eighty_black"-->
-            <!--android:textSize="@dimen/sub_font_size"-->
-            <!--tools:text="test test test teest test testtest test test testtest "/>-->
-
-            <!--<ImageView-->
-                <!--android:layout_width="60dp"-->
-                <!--android:layout_height="60dp"-->
-                <!--android:layout_marginTop="2dp"-->
-                <!--android:src="@drawable/background"-->
-            <!--/>-->
-
         </LinearLayout>
     </LinearLayout>
 </com.daimajia.swipe.SwipeLayout>

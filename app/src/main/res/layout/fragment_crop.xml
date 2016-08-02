@@ -19,6 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
         android:background="@android:color/transparent"
+        app:title="Crop"
+        app:titleTextColor="@color/pure_white"
         app:navigationIcon="@drawable/ic_action_navigation_close"/>
 
 </FrameLayout>

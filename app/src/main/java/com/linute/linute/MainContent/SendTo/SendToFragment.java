@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -27,7 +28,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -61,10 +61,10 @@ public class SendToFragment extends BaseFragment {
     private Handler mHandler = new Handler();
 
     private View vProgress;
-    private View vErrorText;
+    private TextView vErrorText;
 
-    private int mSkip = 0;
-    private boolean mCanLoadMore = true;
+    //private int mSkip = 0;
+    //private boolean mCanLoadMore = true;
 
     private Button vSendButton;
 
@@ -126,7 +126,7 @@ public class SendToFragment extends BaseFragment {
         View root = inflater.inflate(R.layout.fragment_send_to, container, false);
 
         vProgress = root.findViewById(R.id.progress);
-        vErrorText = root.findViewById(R.id.error_text);
+        vErrorText = (TextView)root.findViewById(R.id.error_text);
 
         RecyclerView recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSendButton = (Button) root.findViewById(R.id.send_button);
@@ -141,7 +141,8 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
-        if (mPendingUploadPost != null) toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        if (mPendingUploadPost != null)
+            toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         if (mSendToAdapter == null) {
             mSendToAdapter = new SendToAdapter(getContext(), Glide.with(this), mSendToItems);
@@ -149,14 +150,14 @@ public class SendToFragment extends BaseFragment {
             mSendToAdapter.setRequestManager(Glide.with(this));
         }
 
-        mSendToAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
-            @Override
-            public void loadMore() {
-                if (mCanLoadMore) {
-                    loadMoreUsers();
-                }
-            }
-        });
+//        mSendToAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
+//            @Override
+//            public void loadMore() {
+//                if (mCanLoadMore) {
+//                    loadMoreUsers();
+//                }
+//            }
+//        });
 
         mSendToAdapter.setButtonAction(new SendToAdapter.ButtonAction() {
             @Override
@@ -186,7 +187,7 @@ public class SendToFragment extends BaseFragment {
             }
         });
 
-        vSendButton.setBackgroundResource(mSendToAdapter.getCheckedItems().isEmpty()
+        vSendButton.setBackgroundResource(mSendToAdapter.checkedItemsIsEmpty()
                 ? R.color.twentyfive_black : R.color.yellow_color);
 
         recyclerView.setAdapter(mSendToAdapter);
@@ -213,7 +214,7 @@ public class SendToFragment extends BaseFragment {
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             getSendToList();
         } else if (mSendToItems.isEmpty()) {
-            showErrorText(true);
+            showEmpty(true);
         }
     }
 
@@ -312,7 +313,7 @@ public class SendToFragment extends BaseFragment {
                                                 setFragmentState(FragmentState.FINISHED_UPDATING);
 
                                                 if (mSendToItems.isEmpty())
-                                                    showErrorText(true);
+                                                    showEmpty(true);
                                             } else
                                                 mGotResponseForApiCall = true;
                                         }
@@ -335,7 +336,7 @@ public class SendToFragment extends BaseFragment {
 
     private void getFriends() {
         //get friends
-        new LSDKFriends(getActivity()).getSendTo("", mUserId, mSkip, 20, new Callback() {
+        new LSDKFriends(getActivity()).getSendTo("", mUserId, /*mSkip, 20,*/ new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null && mGotResponseForApiCall) {
@@ -367,7 +368,7 @@ public class SendToFragment extends BaseFragment {
                         final ArrayList<SendToItem> tempItems = new ArrayList<>();
 
                         JSONArray users = object.getJSONArray("friends");
-                        mCanLoadMore = users.length() >= 20;
+                        //mCanLoadMore = users.length() >= 20;
 
                         JSONObject user;
 
@@ -392,8 +393,8 @@ public class SendToFragment extends BaseFragment {
                                         @Override
                                         public void run() {
                                             mSendToItems.addAll(tempItems);
-                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
-                                            mSkip += 20;
+//                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+//                                            mSkip += 20;
 
                                             if (mGotResponseForApiCall) {
                                                 showProgress(false);
@@ -401,7 +402,7 @@ public class SendToFragment extends BaseFragment {
                                                 setFragmentState(FragmentState.FINISHED_UPDATING);
 
                                                 if (mSendToItems.isEmpty())
-                                                    showErrorText(true);
+                                                    showEmpty(true);
                                             } else
                                                 mGotResponseForApiCall = true;
                                         }
@@ -423,90 +424,90 @@ public class SendToFragment extends BaseFragment {
     }
 
 
-    private void loadMoreUsers() {
-        if (getContext() == null) return;
-
-        new LSDKFriends(getContext()).getSendTo("", mUserId, mSkip, 20, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getActivity());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("friends");
-
-                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
-
-                        JSONObject user;
-                        for (int i = 0; i < users.length(); i++) {
-                            user = users.getJSONObject(i).getJSONObject("user");
-                            tempItems.add(
-                                    new SendToItem(
-                                            SendToItem.TYPE_PERSON,
-                                            user.getString("fullName"),
-                                            user.getString("id"),
-                                            user.getString("profileImage")
-                                    )
-                            );
-                        }
-
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            int start = mSendToItems.size();
-                                            mSendToItems.addAll(tempItems);
-                                            mCanLoadMore = tempItems.size() >= 20;
-                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
-                                            mSkip += 20;
-                                            mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
-                                            setFragmentState(FragmentState.FINISHED_UPDATING);
-                                        }
-                                    });
-                                }
-                            });
-                        }
-
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(getActivity());
-                                }
-                            });
-                        }
-                    }
-
-                } else {
-                    Log.d(TAG, "onResponse: " + response.body().string());
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                            }
-                        });
-                    }
-                }
-            }
-        });
-    }
+//    private void loadMoreUsers() {
+//        if (getContext() == null) return;
+//
+//        new LSDKFriends(getContext()).getSendTo("", mUserId, mSkip, 20, new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//                if (getActivity() != null) {
+//                    getActivity().runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Utils.showBadConnectionToast(getActivity());
+//                        }
+//                    });
+//                }
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                if (response.isSuccessful()) {
+//                    try {
+//                        JSONArray users = new JSONObject(response.body().string()).getJSONArray("friends");
+//
+//                        final ArrayList<SendToItem> tempItems = new ArrayList<>();
+//
+//                        JSONObject user;
+//                        for (int i = 0; i < users.length(); i++) {
+//                            user = users.getJSONObject(i).getJSONObject("user");
+//                            tempItems.add(
+//                                    new SendToItem(
+//                                            SendToItem.TYPE_PERSON,
+//                                            user.getString("fullName"),
+//                                            user.getString("id"),
+//                                            user.getString("profileImage")
+//                                    )
+//                            );
+//                        }
+//
+//                        if (getActivity() != null) {
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    mHandler.post(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            int start = mSendToItems.size();
+//                                            mSendToItems.addAll(tempItems);
+//                                            mCanLoadMore = tempItems.size() >= 20;
+//                                            mSendToAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
+//                                            mSkip += 20;
+//                                            mSendToAdapter.notifyItemRangeInserted(start, tempItems.size());
+//                                            setFragmentState(FragmentState.FINISHED_UPDATING);
+//                                        }
+//                                    });
+//                                }
+//                            });
+//                        }
+//
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                        if (getActivity() != null) {
+//                            getActivity().runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    Utils.showServerErrorToast(getActivity());
+//                                }
+//                            });
+//                        }
+//                    }
+//
+//                } else {
+//                    Log.d(TAG, "onResponse: " + response.body().string());
+//                    if (getActivity() != null) {
+//                        getActivity().runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                Utils.showServerErrorToast(getActivity());
+//                            }
+//                        });
+//                    }
+//                }
+//            }
+//        });
+//    }
 
 
     private void showProgress(boolean show) {
@@ -514,7 +515,22 @@ public class SendToFragment extends BaseFragment {
     }
 
     private void showErrorText(boolean show) {
-        vErrorText.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+        if (show) {
+            vErrorText.setText("Tap to reload");
+            vErrorText.setVisibility(View.VISIBLE);
+        }else {
+            vErrorText.setVisibility(View.INVISIBLE);
+        }
+
+    }
+
+    private void showEmpty(boolean show) {
+        if (show) {
+            vErrorText.setText("Empty list");
+            vErrorText.setVisibility(View.VISIBLE);
+        }else {
+            vErrorText.setVisibility(View.GONE);
+        }
     }
 
 
@@ -536,7 +552,9 @@ public class SendToFragment extends BaseFragment {
     }
 
     public void sendItems() {
-        if (mSendToAdapter == null || mSendToAdapter.getCheckedItems().isEmpty()) return;
+
+        if (mSendToAdapter == null || mSendToAdapter.checkedItemsIsEmpty()) return;
+
 
         if (mPendingUploadPost != null) {
             ArrayList<String> mTrends = new ArrayList<>();

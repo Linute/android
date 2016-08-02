@@ -170,7 +170,11 @@ public class CollegePickerActivity extends AppCompatActivity implements SearchVi
                         ArrayList<College> tempColleges = new ArrayList<>();
 
                         for (int i = 0; i < colleges.length(); i++) { //add new college results
-                            tempColleges.add(new College(colleges.getJSONObject(i)));
+                            try {
+                                tempColleges.add(new College(colleges.getJSONObject(i)));
+                            }catch (JSONException e){
+                                e.printStackTrace();
+                            }
                         }
 
                         mColleges.clear(); //clear colleges

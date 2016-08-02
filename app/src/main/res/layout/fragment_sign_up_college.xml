@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:background="@color/colorPrimary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="pick your campus"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="40sp"
+        android:textStyle="bold"
+    />
+
+    <com.linute.linute.UtilsAndHelpers.NoSuggestionEditText
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:ellipsize="end"
+        android:focusable="false"
+        android:hint="College"
+        android:imeOptions="actionDone"
+        android:lines="1"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textColor="@color/pure_white"
+        android:textColorHint="@color/thirtyfive_white"
+        android:textSize="14sp"
+        android:theme="@style/MyEditTextTheme"/>
+
+
+    <TextView
+        android:id="@+id/nearby"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:drawableLeft="@drawable/ic_action_communication_location_on"
+        android:gravity="center"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:text="Nearby colleges"
+        android:textColor="@color/secondaryColor"/>
+
+    <android.support.v4.widget.Space
+        android:layout_width="match_parent"
+        android:layout_height="0px"
+        android:layout_weight="1"
+    />
+
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/sign_up_button"
+        android:text="2 of 4"
+        android:textColor="@drawable/signup_button_text"
+    />
+
+</LinearLayout>

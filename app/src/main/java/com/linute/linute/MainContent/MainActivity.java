@@ -777,7 +777,8 @@ public class MainActivity extends BaseTaptActivity {
             String id = intent.getStringExtra("event");
             if (id != null) {
                 mSafeForFragmentTransaction = true;
-                if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
+                boolean showUpdateFrag = intent.getBooleanExtra("show_update", true);
+                if (showUpdateFrag && getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
                     addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY));
                 addFragmentToContainer(FeedDetailPage.newInstance(
                         new Post("", id, null, "")

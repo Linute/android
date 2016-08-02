@@ -38,8 +38,8 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private OnCollegeViewHolderTouched mOnCollegeViewHolderTouched;
 
     private StringSignature mImageSignature;
-    private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
-    private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
+    //private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
+    //private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
     private boolean mCollegeSelected = true;
 
@@ -56,13 +56,13 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         );
     }
 
-    public void setLoadState(short state) {
-        mLoadState = state;
-    }
-
-    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore) {
-        mOnLoadMore = onLoadMore;
-    }
+//    public void setLoadState(short state) {
+//        mLoadState = state;
+//    }
+//
+//    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore) {
+//        mOnLoadMore = onLoadMore;
+//    }
 
     public void setOnCollegeViewHolderTouched(OnCollegeViewHolderTouched touched) {
         mOnCollegeViewHolderTouched = touched;
@@ -70,13 +70,14 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == LoadMoreViewHolder.FOOTER)
-            return new LoadMoreViewHolder(
-                    LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
-                    "",
-                    ""
-            );
-        else if (viewType == SendToItem.TYPE_PERSON)
+//        if (viewType == LoadMoreViewHolder.FOOTER)
+//            return new LoadMoreViewHolder(
+//                    LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
+//                    "",
+//                    ""
+//            );
+//        else
+        if (viewType == SendToItem.TYPE_PERSON)
             return new SendToPersonViewHolder(
                     LayoutInflater.from(parent.getContext()).inflate(R.layout.view_holder_send_to, parent, false)
             );
@@ -94,15 +95,15 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof BaseSendToViewHolder)
             ((BaseSendToViewHolder) holder).bindViews(mSendToItems.get(position));
-        else if (holder instanceof LoadMoreViewHolder) {
-            ((LoadMoreViewHolder) holder).bindView(mLoadState);
-            if (mOnLoadMore != null) mOnLoadMore.loadMore();
-        }
+//        else if (holder instanceof LoadMoreViewHolder) {
+//            ((LoadMoreViewHolder) holder).bindView(mLoadState);
+//            if (mOnLoadMore != null) mOnLoadMore.loadMore();
+//        }
     }
 
     @Override
     public int getItemCount() {
-        return mSendToItems.size() > 0 ? mSendToItems.size() + 1 : 0;
+        return mSendToItems.size(); /*> 0 ? mSendToItems.size() + 1 : 0;*/
     }
 
     public void setRequestManager(RequestManager manager) {
@@ -121,7 +122,7 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public int getItemViewType(int position) {
-        return position == mSendToItems.size() ? LoadMoreViewHolder.FOOTER : mSendToItems.get(position).getType();
+        return mSendToItems.get(position).getType(); //position == mSendToItems.size() ? LoadMoreViewHolder.FOOTER : mSendToItems.get(position).getType();
     }
 
     public abstract class BaseSendToViewHolder extends RecyclerView.ViewHolder {
@@ -275,5 +276,9 @@ public class SendToAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public interface OnCollegeViewHolderTouched {
         void viewHolderTouched(boolean active);
+    }
+
+    public boolean checkedItemsIsEmpty(){
+        return mCheckedItems.get(COLLEGE_AND_TRENDS).isEmpty() && mCheckedItems.get(PEOPLE).isEmpty();
     }
 }

@@ -7,16 +7,18 @@
     tools:context="com.linute.linute.LoginAndSignup.CollegePickerActivity">
 
 
-    <android.support.v7.widget.SearchView android:id="@+id/collegePicker_search_view"
-                                          android:layout_width="match_parent"
-                                          android:layout_height="wrap_content"
-        />
+    <android.support.v7.widget.SearchView
+        android:id="@+id/collegePicker_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+    />
 
 
-    <android.support.v7.widget.RecyclerView android:id="@+id/collegePicker_recycler_view"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:layout_below="@id/collegePicker_search_view"/>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/collegePicker_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/collegePicker_search_view"/>
 
     <TextView android:id="@+id/collegePicker_empty_results"
               android:layout_width="wrap_content"
@@ -27,7 +29,7 @@
               android:gravity="center"
               android:textSize="20sp"
               tools:text="No Colleges Found"
-        />
+    />
 
     <ProgressBar
         android:id="@+id/collegePicker_progress_bar"

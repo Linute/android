@@ -1,5 +1,7 @@
 package com.linute.linute.API;
 
+import android.util.Log;
+
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -57,6 +59,7 @@ public class API_Methods {
                 .scheme(SCHEME)
                 .host(HOST)
                 .addPathSegment(VERSION);
+
         if (path != null) {
             for (String p : path) {
                 if (p != null) {
@@ -74,7 +77,6 @@ public class API_Methods {
         HttpUrl request = url.build();
         Call call = client.newCall(new Request.Builder().url(request).headers(requestHeaders).build());
         call.enqueue(callback);
-
         return call;
     }
 
