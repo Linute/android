@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true"
-    android:background="#FFFFFFFF">
+    android:background="#FFede7e7">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,7 +25,6 @@
             android:id="@+id/setting_group_image_container"
             android:layout_width="match_parent"
             android:layout_height="240dp"
-            android:background="#FFCCCCCC"
             android:padding="16dp">
 
             <com.makeramen.roundedimageview.RoundedImageView
@@ -37,12 +36,60 @@
                 app:riv_corner_radius="@dimen/user_icon_corner_radius"
                 />
         </FrameLayout>
+        
+        <RelativeLayout
+            android:id="@+id/dm_header"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:orientation="horizontal"
+            android:background="@color/pure_white"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/dm_user_icon"
+                android:layout_width="@dimen/profile_image_radius"
+                android:layout_height="@dimen/profile_image_radius"
+                app:riv_corner_radius="@dimen/user_icon_corner_radius"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp" />
+            <TextView
+                android:id="@+id/dm_user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_toEndOf="@id/dm_user_icon"
+                android:text="User Name"
+                android:phoneNumber="true"
+                android:textColor="@color/grey_color" />
+            <TextView
+                android:id="@+id/dm_user_college"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minLines="1"
+                android:textSize="14sp"
+                android:text="User College"
+                android:layout_toEndOf="@id/dm_user_icon"
+                android:layout_below="@+id/dm_user_name"/>
+
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/dm_divider"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:visibility="gone"
+            />
 
         <LinearLayout
             android:id="@+id/setting_group_name_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
+            android:background="@color/pure_white"
             android:orientation="horizontal">
             <ImageView
                 android:layout_width="32dp"
@@ -71,6 +118,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="16dp"
+            android:background="@color/pure_white"
+
             android:orientation="horizontal">
             <ImageView
                 android:layout_width="32dp"
@@ -109,17 +158,23 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="24dp"
-            android:background="#FFCCCCCC"/>
+            />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_participants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@color/pure_white"
             />
 
 
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/pure_white"
+            >
         <TextView
             android:id="@+id/setting_leave_group"
             android:layout_width="match_parent"
@@ -128,11 +183,11 @@
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:text="Leave Group"
-
             android:textColor="#FFFF0000"
             android:textSize="20sp"
 
             />
+        </FrameLayout>
 
 
     </LinearLayout>
