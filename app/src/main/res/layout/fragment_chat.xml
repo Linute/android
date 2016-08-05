@@ -1,8 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/pure_white"
-    android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/pure_white"
+                android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/chat_fragment_toolbar"
@@ -10,22 +10,22 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark" >
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
         <ImageView
             android:id="@+id/toolbar_chat_settings"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_action_action_settings"
             android:layout_gravity="right"
             android:padding="8dp"
-            />
-        </android.support.v7.widget.Toolbar>
+            android:src="@drawable/ic_action_action_settings"
+        />
+    </android.support.v7.widget.Toolbar>
 
     <!-- RecyclerView needs to be in FrameLayout to contain the destructive power of clipChildren=false-->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/message_container"
+        android:layout_above="@+id/separation_line"
         android:layout_below="@+id/top_date_header"
         android:clipChildren="false">
 
@@ -34,7 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
-            android:scrollbars="none" />
+            android:scrollbars="none"/>
     </FrameLayout>
 
     <include
@@ -46,52 +46,58 @@
         android:text="Today"
         android:visibility="gone"
 
-        />
+    />
 
 
-
+    <View
+        android:id="@id/separation_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/message_container"
+        android:background="@color/seperator_color"
+    />
     <LinearLayout
         android:id="@id/message_container"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/pure_white">
-
 
         <ImageView
             android:id="@+id/attach"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_gravity="center_vertical"
-            android:padding="4dp"
-            android:src="@drawable/ic_upload_picture" />
+            android:layout_gravity="bottom"
+            android:layout_margin="4dp"
+            android:background="?attr/selectableItemBackground"
+            android:src="@drawable/ic_upload_picture"/>
 
         <EditText
             android:id="@+id/message_input"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
             android:background="@null"
             android:hint="@string/prompt_message"
-            android:inputType="textCapSentences|textShortMessage|textMultiLine"
+            android:inputType="textCapSentences|textMultiLine"
             android:maxLines="3"
             android:paddingBottom="12dp"
             android:paddingTop="12dp"
             android:singleLine="false"
-            android:textSize="@dimen/body_font_size" />
+            android:textColorHint="@color/seperator_color"
+            android:textSize="@dimen/body_font_size"/>
 
         <ImageView
             android:id="@+id/send_button"
             android:layout_width="40dp"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:layout_gravity="bottom|end"
+            android:layout_margin="4dp"
             android:alpha="0.25"
             android:background="?attr/selectableItemBackground"
-            android:layout_margin="4dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_send" />
-
-
+            android:src="@drawable/ic_send"/>
 
     </LinearLayout>
 
@@ -99,9 +105,10 @@
         android:id="@+id/pre_chat"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        >
+        android:orientation="horizontal"
+        android:visibility="gone"
+    >
 
         <TextView
             android:id="@+id/button_accept"
@@ -111,10 +118,10 @@
             android:background="#FF0000FF"
             android:gravity="center"
             android:text="Accept"
+            android:textAllCaps="true"
             android:textColor="@color/pure_white"
             android:textSize="20sp"
-            android:textAllCaps="true"
-            />
+        />
 
         <TextView
             android:id="@+id/button_decline"
@@ -124,11 +131,11 @@
             android:background="#FFFF0000"
             android:gravity="center"
             android:text="Decline"
+            android:textAllCaps="true"
             android:textColor="@color/pure_white"
             android:textSize="20sp"
-            android:textAllCaps="true"
 
-            />
+        />
     </LinearLayout>
 
 
@@ -139,7 +146,7 @@
         android:layout_centerInParent="true"
         android:text="No message history."
         android:textColor="@color/pure_white"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
     <ProgressBar
         android:id="@+id/chat_load_progress"
@@ -147,7 +154,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 
 </RelativeLayout>

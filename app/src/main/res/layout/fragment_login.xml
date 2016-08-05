@@ -92,11 +92,12 @@
                 android:id="@+id/log_in"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/sign_up_button"
+                android:background="@drawable/inactive_button"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:paddingEnd="32dp"
                 android:paddingStart="32dp"
-                android:text="Sign in"
-                android:textColor="@drawable/signup_button_text"/>
+                android:text="log in"
+                android:textColor="@color/secondaryColor"/>
 
             <ProgressBar
                 android:id="@+id/signin_progress_bar"
@@ -108,7 +109,6 @@
 
         </FrameLayout>
     </LinearLayout>
-
 
     <Button android:id="@+id/facebook_login"
             android:layout_width="match_parent"
@@ -123,6 +123,5 @@
             android:textColor="@color/pure_white"
             android:textStyle="bold"
     />
-
 
 </FrameLayout>

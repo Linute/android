@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
+import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -166,57 +168,98 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             checkbox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    BaseTaptActivity activity = (BaseTaptActivity) aContext;
-                    if (activity != null && mPost != null) {
-                        try {
-
-                            boolean emit = false;
-
-                            if (checkbox.isActive() && mPost.isPostLiked()) {
-                                checkbox.setActive(false);
-                                mPost.setPostLiked(false);
-                                emit = true;
-                            } else if (!checkbox.isActive() && !mPost.isPostLiked()) {
-                                checkbox.setActive(true);
-                                mPost.setPostLiked(true);
-                                emit = true;
-                            }
-                            if (emit) {
-                                JSONObject body = new JSONObject();
-                                body.put("user", mUserId);
-                                body.put("room", mPost.getPostId());
-                                activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
-                            }
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    likePost(checkbox);
                 }
             });
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int type = -1;
-                    if (mType == Chat.MESSAGE_IMAGE || mType == Chat.MESSAGE_SHARE_IMAGE)
-                        type = POST_TYPE_IMAGE;
-                    else if (mType == Chat.MESSAGE_VIDEO || mType == Chat.MESSAGE_SHARE_VIDEO)
-                        type = POST_TYPE_VIDEO;
-
-                    if (type != -1) {
-                        BaseTaptActivity activity = (BaseTaptActivity) aContext;
-                        activity.addFragmentOnTop(
-                                ViewFullScreenFragment.newInstance(
-                                        Uri.parse(mUrl),
-                                        type,
-                                        0
-                                ),
-                                "full_view"
-                        );
-                    }
+                    imageClicked();
                 }
             });
+
+            vLikeBar.findViewById(R.id.post_profile).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mPost != null && mPost.getPrivacy() == 0)
+                        goToProfile(mPost.getUserName(), mPost.getUserId());
+                }
+            });
+
+            vLikeBar.findViewById(R.id.post_name).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mPost != null && mPost.getPrivacy() == 0)
+                        goToProfile(mPost.getUserName(), mPost.getUserId());
+                }
+            });
+        }
+
+
+        private void likePost(ToggleImageView checkbox){
+            BaseTaptActivity activity = (BaseTaptActivity) aContext;
+            if (activity != null && mPost != null) {
+                try {
+
+                    boolean emit = false;
+
+                    if (checkbox.isActive() && mPost.isPostLiked()) {
+                        checkbox.setActive(false);
+                        mPost.setPostLiked(false);
+                        emit = true;
+                    } else if (!checkbox.isActive() && !mPost.isPostLiked()) {
+                        checkbox.setActive(true);
+                        mPost.setPostLiked(true);
+                        emit = true;
+                    }
+                    if (emit) {
+                        JSONObject body = new JSONObject();
+                        body.put("user", mUserId);
+                        body.put("room", mPost.getPostId());
+                        activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+
+        private void imageClicked(){
+            if(mPost != null){
+                ((BaseTaptActivity) aContext).addFragmentToContainer(
+                        FeedDetailPage.newInstance(mPost),
+                        "full_view"
+                );
+            }else {
+                int type = -1;
+
+                if (mType == Chat.MESSAGE_IMAGE)
+                    type = POST_TYPE_IMAGE;
+                else if (mType == Chat.MESSAGE_VIDEO)
+                    type = POST_TYPE_VIDEO;
+
+                if (type != -1) {
+                    ((BaseTaptActivity) aContext).addFragmentOnTop(
+                            ViewFullScreenFragment.newInstance(
+                                    Uri.parse(mUrl),
+                                    type,
+                                    0
+                            ),
+                            "full_view"
+                    );
+                }
+            }
+        }
+
+
+        private void goToProfile(String name, String id){
+            ((BaseTaptActivity) aContext).addFragmentToContainer(
+                    TaptUserProfileFragment.newInstance(name, id),
+                    "full_view"
+            );
         }
 
         void bindModel(Chat chat, boolean isHead) {

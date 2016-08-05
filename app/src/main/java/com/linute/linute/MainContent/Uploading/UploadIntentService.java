@@ -71,7 +71,6 @@ public class UploadIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         PendingUploadPost p = intent.getParcelableExtra(PendingUploadPost.PENDING_POST_KEY);
         if (p != null) {
-            Log.i(TAG, "onHandleIntent: "+p.getId());
             sendNextFile(p);
         }
     }
@@ -141,7 +140,7 @@ public class UploadIntentService extends IntentService {
                         .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                         .setProgress(0, 0, false)
                         .setAutoCancel(true)
-                        .setContentIntent(getIntent(p.getId()))
+                        .setContentIntent(getIntent(p.getId(), p.getCollegeId()))
                         .setContentText(getPostText(p.getType()));
                 mNotificationManager.notify(ID, mBuilder.build());
             } else {
@@ -156,7 +155,7 @@ public class UploadIntentService extends IntentService {
         --mPendingFiles;
     }
 
-    private PendingIntent getIntent(String eventID) {
+    private PendingIntent getIntent(String eventID, String college) {
         Intent intent;
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
         if (!isLoggedIn) {
@@ -168,6 +167,7 @@ public class UploadIntentService extends IntentService {
             intent.putExtra("NOTIFICATION", LinuteConstants.FEED_DETAIL);
             intent.putExtra("show_update", false);
             intent.putExtra("event", eventID);
+
         }
 
         return PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT | PendingIntent.FLAG_UPDATE_CURRENT);

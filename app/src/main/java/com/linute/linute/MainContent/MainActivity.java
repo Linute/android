@@ -682,6 +682,7 @@ public class MainActivity extends BaseTaptActivity {
                     });
 
                     NewMessageBus.getInstance().setNewMessage(chat);
+                    NotificationsCounterSingleton.getInstance().setHasMessage(true);
                 } else {
                     final Update update = new Update(activity);
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {

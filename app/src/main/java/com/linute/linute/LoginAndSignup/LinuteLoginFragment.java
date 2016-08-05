@@ -8,16 +8,18 @@ import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
-
-import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
@@ -51,7 +53,7 @@ public class LinuteLoginFragment extends Fragment {
     private EditText mEmailView;
     private EditText mPasswordView;
     private ProgressBar mProgressBar;
-    private View mSigninButton;
+    private Button mSigninButton;
 
     private boolean mSafeForButtonAction = true;
 
@@ -73,13 +75,37 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView = (EditText) rootView.findViewById(R.id.signin_email_password_text);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.signin_progress_bar);
 
-        mSigninButton =  rootView.findViewById(R.id.log_in);
+        mSigninButton =  (Button) rootView.findViewById(R.id.log_in);
         mSigninButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
+
+        TextWatcher textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() > 6){
+                    mSigninButton.setBackgroundResource(R.drawable.active_button);
+                    mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.pure_white));
+                }else {
+                    mSigninButton.setBackgroundResource(R.drawable.inactive_button);
+                    mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.secondaryColor));
+                }
+            }
+        };
+
+        mEmailView.addTextChangedListener(textWatcher);
+        mPasswordView.addTextChangedListener(textWatcher);
 
         rootView.findViewById(R.id.facebook_login).setOnClickListener(new OnClickListener() {
             @Override

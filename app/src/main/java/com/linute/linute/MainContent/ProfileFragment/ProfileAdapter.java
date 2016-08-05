@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.LSDKPeople;
@@ -53,9 +53,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context context;
     private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
     private LinuteUser mUser;
+    private RequestManager mRequestManager;
 
     private String mUserid;
-
     private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
 
 
@@ -64,7 +64,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private TitleTextListener mTitleTextListener;
 
 
-    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
+    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user,Context context) {
         this.context = context;
         mUserid = context
                 .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
@@ -73,13 +73,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mUser = user;
     }
 
+    public void setRequestManager(RequestManager manager){
+        mRequestManager = manager;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_ITEM_WITH_IMAGE) {
             //inflate your layout and pass it to view holder
             return new ProfileViewHolder(LayoutInflater.
                     from(parent.getContext()).
-                    inflate(R.layout.profile_grid_item_2, parent, false), context);
+                    inflate(R.layout.profile_grid_item_2, parent, false), context, mRequestManager);
         } else if (viewType == TYPE_ITEM_WITHOUT_IMAGE) {
             return new ProfileViewHolderNoImage(LayoutInflater.
                     from(parent.getContext()).
@@ -195,7 +199,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         void bindModel(LinuteUser user) {
-            Glide.with(context)
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(user.getProfileImage()))
                     .dontAnimate()
                     .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))

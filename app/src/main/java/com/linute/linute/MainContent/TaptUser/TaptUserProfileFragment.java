@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
@@ -145,6 +146,7 @@ public class TaptUserProfileFragment extends BaseFragment {
             });
         }
 
+        mProfileAdapter.setRequestManager(Glide.with(this));
 
         recList.setAdapter(mProfileAdapter);
 

@@ -15,6 +15,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     public static final String TAG = PostCreatePage.class.getSimpleName();
 
     private CustomBackPressedEditText mPostEditText;
+    private TextView mTextView;
     private View mTextFrame;
 
     private View mPostButton;
@@ -85,6 +87,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                     getActivity().setResult(RESULT_CANCELED);
                     getActivity().finish();
                 } else {
+                    showTextView();
                     showConfirmDialog();
                 }
             }
@@ -93,24 +96,43 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         toolbar.setTitle("Status");
 
         mPostEditText = (CustomBackPressedEditText) root.findViewById(R.id.post_create_text);
+        mTextView = (TextView) root.findViewById(R.id.textView);
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mPostEditText.hasFocus()) {
                     hideKeyboard();
                     mPostEditText.clearFocus();
+                    if (!mPostEditText.getText().toString().isEmpty())
+                        showTextView();
                 } else {
                     postContent();
                 }
             }
         });
 
-        mPostEditText.setTypeface(Typeface.createFromAsset(getActivity().getAssets(),
-                "Lato-LightItalic.ttf"));
+        mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mTextView.setVisibility(View.GONE);
+                mPostEditText.setVisibility(View.VISIBLE);
+                mPostEditText.requestFocus();
+                showKeyboard();
+            }
+        });
+
+        Typeface font = Typeface.createFromAsset(getActivity().getAssets(),
+                "Lato-LightItalic.ttf");
+        mPostEditText.setTypeface(font);
+        mTextView.setTypeface(font);
+
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
                 hideKeyboard();
+                if (!mPostEditText.getText().toString().isEmpty()){
+                    showTextView();
+                }
             }
         });
 
@@ -119,6 +141,8 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     hideKeyboard();
+                    if (!mPostEditText.getText().toString().isEmpty())
+                        showTextView();
                 }
                 return false;
             }
@@ -170,12 +194,12 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         return root;
     }
 
-    private void setItem(int res, int index, SharedPreferences preferences){
-        mPostTextColors[index] = preferences.getInt("status_color_"+index+"_text", 0xFF000000);
-        mPostBackgroundColors[index] = preferences.getInt("status_color_"+index+"_bg", 0xFF000000);
+    private void setItem(int res, int index, SharedPreferences preferences) {
+        mPostTextColors[index] = preferences.getInt("status_color_" + index + "_text", 0xFF000000);
+        mPostBackgroundColors[index] = preferences.getInt("status_color_" + index + "_bg", 0xFF000000);
         View postColorSelectorView = mPostColorSelectorViews[index];
         postColorSelectorView.setBackgroundColor(mPostBackgroundColors[index]);
-        ((TextView)postColorSelectorView.findViewById(res)).setTextColor(mPostTextColors[index]);
+        ((TextView) postColorSelectorView.findViewById(res)).setTextColor(mPostTextColors[index]);
         postColorSelectorView.setOnClickListener(this);
     }
 
@@ -218,8 +242,9 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     }
 
     private void postContent() {
-
-        if (getActivity() == null || mPostInProgress || mPostEditText.getText().toString().trim().equals(""))
+        if (getActivity() == null ||
+                mPostInProgress ||
+                mPostEditText.getText().toString().trim().isEmpty())
             return;
 
         mPostInProgress = true;
@@ -241,37 +266,17 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                             image.toString(),
                             null,
                             mSharedPreferences.getString("userID", ""),
-                            mSharedPreferences.getString("userToken","")
+                            mSharedPreferences.getString("userToken", "")
                     );
 
             ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
+            mPostInProgress = false;
         } else {
             Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);
             mPostInProgress = false;
         }
-
-//            JSONObject postData = new JSONObject();
-//            postData.put("college", mSharedPreferences.getString("collegeId", ""));
-//            postData.put("privacy", (vAnonPost.isChecked() ? 1 : 0) + "");
-//            postData.put("isAnonymousCommentsDisabled", vAnonComments.isChecked() ? 0 : 1);
-//            postData.put("title", mPostEditText.getText().toString());
-//
-//            JSONArray coord = new JSONArray();
-//            JSONObject jsonObject = new JSONObject();
-//            coord.put(0);
-//            coord.put(0);
-//            jsonObject.put("coordinates", coord);
-//
-//            postData.put("geo", jsonObject);
-//            postData.put("type", "0");
-//            postData.put("owner", mSharedPreferences.getString("userID", ""));
-//
-//            JSONArray imageArray = new JSONArray();
-//            imageArray.put(Utils.encodeImageBase64(Bitmap.createScaledBitmap(getBitmapFromView(mTextFrame), 720, 720, true)));
-//            postData.put("images", imageArray);
-
     }
 
     @Override
@@ -316,6 +321,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
 
         mPostEditText.setTextColor(textColor);
+        mTextView.setTextColor(textColor);
         mTextFrame.setBackgroundColor(backgroundColor);
     }
 
@@ -325,6 +331,18 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
         mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
+    }
+
+    private void showKeyboard() {
+        if (getActivity() == null) return;
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mPostEditText, InputMethodManager.SHOW_IMPLICIT);
+    }
+
+    private void showTextView() {
+        mTextView.setText(mPostEditText.getText().toString());
+        mTextView.setVisibility(View.VISIBLE);
+        mPostEditText.setVisibility(View.GONE);
     }
 
 

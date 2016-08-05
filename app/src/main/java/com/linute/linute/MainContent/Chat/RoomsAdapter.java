@@ -158,7 +158,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             vUserName.setText(room.getRoomName());
             vLastMessage.setText(room.getLastMessage());
-            vTimeStamp.setText(room.getTime() == 0 ? "" : Utils.getTimeAgoString(room.getTime()));
+            vTimeStamp.setText(Utils.getRoomDateFormat(room.getTime()));
             vIsMuted.setVisibility(mRoom.isMuted() ? View.VISIBLE : View.INVISIBLE);
 
             vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));

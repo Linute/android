@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/search_users_list_layout"
-    android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:background="?android:selectableItemBackground"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingBottom="20dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="20dp">
+<LinearLayout android:id="@+id/search_users_list_layout"
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground"
+              android:clickable="true"
+              android:orientation="horizontal"
+              android:paddingBottom="20dp"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:paddingTop="20dp">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/search_users_list_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
-        app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/search_users_list_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:ellipsize="end"
             android:lines="1"
-            android:textSize="16sp"
             android:textColor="@color/eighty_black"
-            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs" />
+            android:textSize="16sp"
+            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"/>
 
         <TextView
             android:id="@+id/text_college"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:ellipsize="end"
             android:lines="1"
             android:textSize="14sp"
-            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs" />
+            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"/>
 
     </LinearLayout>
 

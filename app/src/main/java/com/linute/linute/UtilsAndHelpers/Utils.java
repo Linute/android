@@ -29,7 +29,6 @@ import java.util.TimeZone;
 public class Utils {
     public static String CONTENT_TYPE = "application/json";
 
-
     public static SimpleDateFormat getDateFormat(){
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         f.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -213,6 +212,23 @@ public class Utils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static String getRoomDateFormat(long before){
+        if (before == 0) return  "";
+        SimpleDateFormat simpleDateformat;
+
+        long diff = new Date().getTime() - before;
+
+        if (diff < DateUtils.DAY_IN_MILLIS){
+            simpleDateformat = new SimpleDateFormat("h:mm a");
+        }else if(diff < DateUtils.WEEK_IN_MILLIS){
+            simpleDateformat = new SimpleDateFormat("EEE");
+        }else {
+            simpleDateformat = new SimpleDateFormat("MMM d");
+        }
+
+        return simpleDateformat.format(new Date(before));
     }
 
     //returns a nicely formated string about when event occurred

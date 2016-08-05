@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,7 +13,6 @@
         android:layout_height="match_parent"
         android:foreground="?android:selectableItemBackground"
         android:scaleType="centerCrop"
-        app:riv_corner_radius="@dimen/post_create_corner_radius"
         tools:src="@drawable/image_loading_background"
     />
 

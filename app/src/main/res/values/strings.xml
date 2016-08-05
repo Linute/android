@@ -159,7 +159,7 @@
     <string name="no_campus_post">Your school hasn\'t posted anything yet</string>
 
     <string name="action_send">Send</string>
-    <string name="prompt_message">Message</string>
+    <string name="prompt_message">Type a message…</string>
     <string name="error_connect">Failed to connect with server. Make sure you have internet!</string>
     <string name="user_action_typing">is typing</string>
     <string name="find_people_near_you">Tapt needs access to your location so we can find friends

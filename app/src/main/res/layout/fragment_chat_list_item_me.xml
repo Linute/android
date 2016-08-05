@@ -49,7 +49,7 @@
             android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:background="@drawable/chat_item_me"
+            android:background="@drawable/chat_item_you"
             android:clipChildren="true"
             android:orientation="vertical"
             android:visibility="visible">

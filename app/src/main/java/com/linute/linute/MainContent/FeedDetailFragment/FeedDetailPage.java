@@ -770,7 +770,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                         public void onClick(DialogInterface dialog, int which) {
                             switch (which) {
                                 case 0:
-                                    showMuteConfirmation();
+                                    toggleMute();
                                     break;
                                 case 1:
                                     showHideConfirmation();
@@ -938,29 +938,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 })
                 .show();
     }
-
-
-    public void showMuteConfirmation() {
-        if (getActivity() == null || !mCommentsRetrieved) return;
-
-        mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(mFeedDetail.getPost().isPostMuted() ? "Unsilence" : "Silence")
-                .setMessage(mFeedDetail.getPost().isPostMuted() ? "This will turn on future notifications for this post." : "This will turn off future notifications for any activity on this post.")
-                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        toggleMute();
-                    }
-                })
-                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
-    }
-
 
     private void toggleMute() {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();

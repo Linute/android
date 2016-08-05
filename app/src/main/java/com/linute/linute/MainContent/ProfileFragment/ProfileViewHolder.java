@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
@@ -35,8 +35,10 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
     private View vGradient;
     private View vMovieIcon;
 
+    private RequestManager mRequestManager;
 
-    public ProfileViewHolder(View itemView, final Context context) {
+
+    public ProfileViewHolder(View itemView, final Context context, RequestManager manager) {
         super(itemView);
 
         mContext = context;
@@ -44,6 +46,8 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
         vGradient = itemView.findViewById(R.id.gradient);
         vAnonIcon = itemView.findViewById(R.id.anon_icon);
         vMovieIcon = itemView.findViewById(R.id.movie_icon);
+        mRequestManager = manager;
+
         itemView.setOnClickListener(this);
         itemView.setOnLongClickListener(this);
         itemView.setOnTouchListener(
@@ -66,7 +70,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
     void bindModel(UserActivityItem userActivityItem) {
         //profile image on the right
-        Glide.with(mContext)
+        mRequestManager
                 .load(userActivityItem.getEventImagePath())
                 .dontAnimate()
                 .placeholder(R.drawable.image_loading_background)
