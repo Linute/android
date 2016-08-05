@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -17,7 +18,9 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,8 +34,8 @@ import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.SquareCamera.CameraType;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -50,6 +53,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +129,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     View vPreChat;
 
+    private Map<String, Chat> mPendingChats = new HashMap<>();
+    private Map<String, Chat> mFailedChats = new HashMap<>();
     private List<Chat> mChatList = new ArrayList<>();
 
     private View vEmptyChatView;
@@ -141,6 +147,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Handler mHandler = new Handler();
     private LinearLayoutManager mLinearLayoutManager;
     private Map<String, User> mUserMap;
+    private boolean mConnected;
 
     //private SharedPreferences mSharedPreferences;
 
@@ -238,7 +245,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
@@ -284,6 +291,32 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         //when reaches end of list, we want to try to load more
         mChatAdapter.setLoadMoreListener(this);
+        mChatAdapter.setmErrorContextMenuListener(new ChatAdapter.ErrorContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, final Chat chat) {
+                contextMenu.add("Retry").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        mPendingChats.remove(chat.getMessageId());
+                        mChatList.remove(chat);
+                        mChatAdapter.notifyDataSetChanged();
+//                        if(!mConnected) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        joinRoom(activity, true);
+                            activity.connect();
+//                        }
+//                        attemptSend(chat.getMessage());
+                        return true;
+                    }
+                });
+                contextMenu.add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        return false;
+                    }
+                });
+            }
+        });
 
         vEmptyChatView = view.findViewById(R.id.empty_view_messanger);
         mProgressBar = view.findViewById(R.id.chat_load_progress);
@@ -586,6 +619,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
 
+        Log.i("AAA", "conect");
+
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
         activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         activity.connectSocket("new message", onNewMessage);
@@ -595,10 +630,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         activity.connectSocket("joined", onJoin);
         activity.connectSocket("left", onLeave);
         activity.connectSocket("error", onError);
+        activity.connectSocket("reconnect", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.i("AAA", Arrays.toString(args));
+            }
+        });
+        activity.connectSocket("reconnectAttempt", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.i("AAA", Arrays.toString(args));
+            }
+        });
         activity.connectSocket("delivered", onDelivered);
         activity.connectSocket("messages refresh", onRefresh);
 
         activity.connectSocket("add users", onAddUsers);
+
+        mConnected = true;
 
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
@@ -1275,8 +1324,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return;
         }
 
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !activity.socketConnected() || mUserId == null
+        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity == null || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
         }
@@ -1294,8 +1343,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
         users.put(mUserId);
 
+        String messageId = ObjectId.get().toString();
         try {
-            newMessage.put("id", ObjectId.get().toString());
+            newMessage.put("id", messageId);
             newMessage.put("room", mRoomId);
 //            newMessage.put("users", users);
             newMessage.put("message", message);
@@ -1303,6 +1353,45 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             e.printStackTrace();
             return;
         }
+
+        final Chat newChat = new Chat(
+                mRoomId,
+                new Date(),
+                mUserId,
+                messageId,
+                message,
+                false,
+                true
+        );
+
+
+        mChatList.add(newChat);
+        mChatAdapter.notifyItemInserted(mChatList.size());
+        scrollToBottom();
+        mPendingChats.put(newChat.getMessageId(), newChat);
+        Log.i("AAA", messageId + " add");
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mPendingChats.containsKey(newChat.getMessageId())) {
+                    FragmentActivity activity1 = getActivity();
+                    if (activity1 != null) {
+                        activity1.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mChatAdapter != null) {
+                                    newChat.hasError = true;
+                                    mChatAdapter.notifyDataSetChanged();
+                                }
+                                Toast.makeText(getContext(), "NIGGER?", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            }
+        }, 3000);
+
 
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
@@ -1366,6 +1455,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mConnected = false;
                     Toast.makeText(getActivity(),
                             R.string.error_connect, Toast.LENGTH_LONG).show();
                 }
@@ -1389,8 +1479,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             removeTyping();
 
                             try {
-                                addMessage(data);
-                                delivered.put("id", data.getString("id"));
+                                String id = data.getString("id");
+                                Log.i("AAA", id + " remove");
+                                if (mPendingChats.containsKey(id)) {
+                                    mPendingChats.remove(id);
+                                } else {
+                                    addMessage(data);
+                                }
+                                delivered.put("id", id);
                                 activity.emitSocket(API_Methods.VERSION + ":messages:delivered", delivered);
 
                                 if (vEmptyChatView.getVisibility() == View.VISIBLE)
@@ -1477,7 +1573,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Utils.showServerErrorToast(getActivity());
+//                    Utils.showServerErrorToast(getActivity());
                 }
             });
         }
@@ -1731,7 +1827,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (int i = 0; i < messages.length(); i++) {
             try {
                 message = messages.getJSONObject(i);
-                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
+//                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
                 owner = message.getJSONObject("owner").getString("id");
                 viewerIsOwnerOfMessage = owner.equals(mUserId);
 
@@ -1758,7 +1854,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 );
 
 
-
                 if (!messageBeenRead) {
                     listOfUnreadMessages.put(chat.getMessageId());
                 }
@@ -1775,7 +1870,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
                 }
 
-                if(message.getInt("type") == 1){
+                if (message.getInt("type") == 1) {
                     chat.setType(Chat.TYPE_SYSTEM_MESSAGE);
                 }
 

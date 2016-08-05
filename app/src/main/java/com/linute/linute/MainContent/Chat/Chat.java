@@ -29,6 +29,8 @@ public class Chat {
     private String mImageId;
     private String mVideoId;
 
+    public boolean hasError = false;
+
 
     /**
      * @param type - use this constructer for others

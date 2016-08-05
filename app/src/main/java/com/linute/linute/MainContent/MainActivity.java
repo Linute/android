@@ -495,9 +495,10 @@ public class MainActivity extends BaseTaptActivity {
                                     "&api=" + API_Methods.VERSION +
                                     "&model=" + device.getModel();
 
-                    op.reconnectionDelay = 5;
+                    op.reconnectionDelay = 10;
                     op.secure = true;
                     op.transports = new String[]{WebSocket.NAME};
+                    op.reconnectionAttempts = 2;
 
                     mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
 
@@ -525,6 +526,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         }
     }
+
 
 
     @Override
@@ -571,6 +573,12 @@ public class MainActivity extends BaseTaptActivity {
     public void disconnectSocket(String event, Emitter.Listener emitter) {
         if (mSocket != null) {
             mSocket.off(event, emitter);
+        }
+    }
+
+    public void connect(){
+        if(mSocket != null && !socketConnected()){
+            mSocket.connect();
         }
     }
 
