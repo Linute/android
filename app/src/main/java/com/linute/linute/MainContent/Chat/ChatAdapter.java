@@ -50,16 +50,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
 
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case Chat.TYPE_MESSAGE_ME:
                 return new ChatViewHolder(LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.fragment_chat_list_item_me, parent, false));
+                        .inflate(R.layout.fragment_chat_list_item_me, parent, false));
             case Chat.TYPE_MESSAGE_OTHER_PERSON:
-                return  new ChatViewHolder(LayoutInflater.from(parent.getContext())
-                                .inflate(R.layout.fragment_chat_list_item_you, parent, false));
+                return new ChatViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.fragment_chat_list_item_you, parent, false));
 
             case Chat.TYPE_ACTION_TYPING:
                 return new ChatActionHolder(
@@ -84,12 +83,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof ChatViewHolder) {
             Chat chat = aChatList.get(position - 1);
-            ((ChatViewHolder) holder).bindModel(chat, isHead(position-1));
-        }else if (holder instanceof LoadMoreViewHolder){
+            ((ChatViewHolder) holder).bindModel(chat, isHead(position - 1));
+        } else if (holder instanceof LoadMoreViewHolder) {
             if (mLoadMoreListener != null) mLoadMoreListener.loadMore();
             ((LoadMoreViewHolder) holder).bindView(mFooterState);
-        }else if(holder instanceof  DateHeaderHolder){
-            ((DateHeaderHolder)holder).dateTV.setText(aChatList.get(position-1).getMessage());
+        } else if (holder instanceof DateHeaderHolder) {
+            ((DateHeaderHolder) holder).dateTV.setText(aChatList.get(position - 1).getMessage());
         }
     }
 
@@ -100,7 +99,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     //+1 for load more loader
     @Override
     public int getItemCount() {
-        return aChatList.size() == 0 ? 0 : aChatList.size()+1;
+        return aChatList.size() == 0 ? 0 : aChatList.size() + 1;
 
     }
 
@@ -109,10 +108,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return position == 0 ? LoadMoreViewHolder.FOOTER : aChatList.get(position - 1).getType();
     }
 
-    public boolean isHead(int position){
-        if(position == 0) return true;
+    public boolean isHead(int position) {
+        if (position == 0) return true;
         Chat chat1 = aChatList.get(position);
-        Chat chat2 = aChatList.get(position-1);
+        Chat chat2 = aChatList.get(position - 1);
         return !chat2.getOwnerId().equals(chat1.getOwnerId()) || chat2.getType() == Chat.TYPE_DATE_HEADER;
     }
 
@@ -131,6 +130,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected ImageView vImage;
         protected View vFrame;
 
+        protected View vMessageBubble;
+
         private int mType;
         private String mUrl;
 
@@ -144,6 +145,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vImage = (ImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
             vUserName = (TextView) itemView.findViewById(R.id.user_name);
+            vMessageBubble = itemView.findViewById(R.id.message_content);
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -160,14 +162,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                                     "full_view"
                             );
                         } else if (mType == Chat.MESSAGE_VIDEO) {
-                           activity.addFragmentOnTop(
-                                   ViewFullScreenFragment.newInstance(
-                                           Uri.parse(Utils.getMessageVideoURL(mUrl)),
-                                           POST_TYPE_VIDEO,
-                                           0
-                                   ),
-                                   "full_view"
-                           );
+                            activity.addFragmentOnTop(
+                                    ViewFullScreenFragment.newInstance(
+                                            Uri.parse(Utils.getMessageVideoURL(mUrl)),
+                                            POST_TYPE_VIDEO,
+                                            0
+                                    ),
+                                    "full_view"
+                            );
                         }
                     }
                 }
@@ -177,13 +179,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
-            if(chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
-                if (isHead) {
+
+            if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
+//                itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, vMessageBubble.getHeight()));
+                 if (isHead) {
                     User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
                         vUserName.setVisibility(View.VISIBLE);
                         vProfileImage.setVisibility(View.VISIBLE);
-                        vUserName.setText(u.userName);
+                        vUserName.setText(u.userName.split(" ")[0]);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .into(vProfileImage);
@@ -245,12 +249,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    public class DateHeaderHolder extends RecyclerView.ViewHolder{
+    public class DateHeaderHolder extends RecyclerView.ViewHolder {
         TextView dateTV;
 
         public DateHeaderHolder(View itemView) {
             super(itemView);
-            dateTV = (TextView)itemView.findViewById(R.id.text_date);
+            dateTV = (TextView) itemView.findViewById(R.id.text_date);
         }
     }
 

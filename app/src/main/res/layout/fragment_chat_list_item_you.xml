@@ -1,63 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="48dp"
-    android:layout_marginStart="12dp"
-    android:layout_marginTop="4dp"
-    android:clipChildren="true"
-    android:orientation="vertical">
+    android:layout_marginTop="2dp"
+    android:layout_marginRight="48dp"
+    android:clipChildren="false"
+    >k
+
+
+    <LinearLayout
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|end"
+        android:layout_toLeftOf="@+id/profile_image"
+        android:layout_marginLeft="-150dp"
+        android:layout_alignTop="@+id/message_content">
+
+        <TextView
+            android:id="@+id/chat_user_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end|center_vertical"
+            android:text="3:00AM"
+            android:textColor="@color/seperator_color"
+            android:textSize="@dimen/sub_font_size" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/user_name"
-        android:layout_width="wrap_content"
-        android:layout_height="16dp"
-        android:layout_gravity="center_vertical"
-        android:text="User Name"
-        android:textColor="#ff9f9f9f"
-        android:textSize="12sp"
-        android:visibility="visible"
-        android:layout_marginLeft="56dp" />
-
-    <LinearLayout
+        style="@style/fragment_chat_subtext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_toRightOf="@+id/profile_image"
+        android:text="User Name"
+        android:visibility="gone"
+        android:paddingLeft="@dimen/chat_message_bubble_padding"
+        android:layout_alignParentTop="true"
+        />
 
-        <LinearLayout
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="-150dp"
-            android:gravity="center_vertical|end"
-            android:padding="12dp">
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/profile_image"
+        android:layout_width="@dimen/chat_profile_photo_diameter"
+        android:layout_height="@dimen/chat_profile_photo_diameter"
+        android:layout_gravity="center"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:scaleType="centerInside"
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"
+        android:layout_below="@id/user_name"
+        android:layout_alignParentLeft="true"
+        android:visibility="invisible" />
 
-            <TextView
-                android:id="@+id/chat_user_time"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:gravity="end|center_vertical"
-                android:textColor="@color/seperator_color"
-                android:textSize="@dimen/sub_font_size"
-                tools:text="3:00AM" />
-        </LinearLayout>
 
-        <com.makeramen.roundedimageview.RoundedImageView
-            android:id="@+id/profile_image"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="top|center_horizontal"
-            android:layout_marginRight="4dp"
-            android:scaleType="centerInside"
-            app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+    <LinearLayout
+        android:id="@+id/message_content"
+        android:layout_below="@id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_toRightOf="@id/profile_image"
+        >
+
 
 
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            >
 
             <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
                 android:id="@+id/frame"
@@ -86,17 +99,20 @@
                 android:id="@+id/chat_user_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start"
                 android:autoLink="web|email"
+
                 android:background="@drawable/chat_item_you"
-                android:padding="12dp"
+                android:padding="@dimen/chat_message_bubble_padding"
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/body_font_size"
-                tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df " />
+                tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
+                android:maxWidth="266dp"
+                android:minHeight="@dimen/chat_profile_photo_diameter"
+                android:layout_gravity="top|left" />
 
 
         </FrameLayout>
     </LinearLayout>
+</RelativeLayout>
 
 
-</LinearLayout>

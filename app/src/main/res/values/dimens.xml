@@ -89,5 +89,7 @@
 
     <dimen name="comment_image_size">60dp</dimen>
     <dimen name="message_bubble_corner_radius">8dp</dimen>
+    <dimen name="chat_message_bubble_padding">8dp</dimen>
+    <dimen name="chat_profile_photo_diameter">32dp</dimen>
 
 </resources>
