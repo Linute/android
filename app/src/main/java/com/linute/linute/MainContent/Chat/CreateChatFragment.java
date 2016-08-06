@@ -28,7 +28,6 @@ public class CreateChatFragment extends SelectUsersFragment {
 
     private static final String TAG = CreateChatFragment.class.getSimpleName();
 
-
     UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener;
 
     public void setOnRoomSelectedListener(UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener) {
@@ -47,10 +46,6 @@ public class CreateChatFragment extends SelectUsersFragment {
     protected void search(String searchWord) {
         LSDKChat users = new LSDKChat(getActivity());
         Map<String, Object> newChat = new HashMap<>();
-//        newChat.put("owner", mSharedPreferences.getString("userID", null));
-
-//        newChat.put("owner", mSharedPreferences.getString("userID", null));
-
 
         if (!searchWord.equals("")) {
             newChat.put("fullName", searchWord);
@@ -60,6 +55,7 @@ public class CreateChatFragment extends SelectUsersFragment {
         for(User user:mSelectedUsers){
             usersJson.put(user.userId);
         }
+
         newChat.put("users", usersJson);
 
         users.getUsersAndRooms(newChat, new Callback() {
@@ -115,7 +111,8 @@ public class CreateChatFragment extends SelectUsersFragment {
 
                             tempUsers.add(new User(
                                     user.getString("id"),
-                                    user.getString("fullName"),
+                                    user.getString("firstName"),
+                                    user.getString("lastName"),
                                     user.getString("profileImage"),/*.getString("thumbnail"),*/
                                     collegeName
                             ));

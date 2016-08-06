@@ -16,7 +16,6 @@ public class ChatRoom {
     private String mRoomName;
     private String mRoomImage;
 
-
     public final ArrayList<User> users;
 
     private String mLastMessage; //last message

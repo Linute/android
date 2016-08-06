@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -137,6 +138,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         public void bindModel(User user, ItemStatus status) {
             super.bindModel(user, status);
             tvCollege.setText(user.collegeName);
+            Log.i("test2", "bindModel: "+user.collegeName);
         }
 
         public void bindModel(ChatRoom chat) {

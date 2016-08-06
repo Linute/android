@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,7 +111,10 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setText(user.firstName+" "+user.lastName);
+
+            String name = user.firstName+" "+user.lastName;
+            Log.i(TAG, "bindModel: "+name);
+            vUserName.setText(name);
 
             switch (status){
                 case None:

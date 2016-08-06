@@ -1,94 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rooms_list_linear"
-    android:layout_width="match_parent"
-    android:layout_height="72dp"
-    android:background="?android:selectableItemBackground"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp">
+<LinearLayout android:id="@+id/rooms_list_linear"
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="?android:selectableItemBackground"
+              android:orientation="horizontal">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/rooms_user_image"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/icon_user"
-        app:riv_corner_radius="@dimen/user_icon_corner_radius"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         android:cropToPadding="false"
-        android:padding="4dp"
-        android:layout_gravity="center"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:src="@drawable/icon_user"
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
     <LinearLayout
-        android:layout_width="0px"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical"
-        android:layout_marginLeft="8dp">
-
-
-        <TextView
-            android:id="@+id/rooms_user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/eighty_black"
-            android:textSize="@dimen/header_font_size"
-            android:textStyle="bold"
-            tools:text="Naomi Test" />
-
-
-        <TextView
-            android:id="@+id/rooms_user_last_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="@color/fifty_black"
-            android:textSize="@dimen/sub_font_size"
-            tools:text="Hey there JobHey there JobHey there JobHey there JobHey there Job" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/feed_end_layer"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
+        android:layout_gravity="center_vertical"
+        android:layout_marginBottom="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/room_time_stamp"
-            android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_weight="1"
-            android:text="12:30 PM"
-            android:lines="1"
-            android:textColor="@color/twentyfive_black"
-            android:textSize="@dimen/sub_font_size"
-            android:gravity="center_vertical" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal">
 
-       <!-- <ImageView
-            android:id="@+id/room_unread"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/unread_message_blue_circle" />-->
+            <TextView
+                android:id="@+id/rooms_user_name"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/eighty_black"
+                android:textSize="@dimen/header_font_size"
+                android:textStyle="bold"
+                tools:text="Naomi Test"/>
 
-        <ImageView
-            android:id="@+id/room_is_muted"
-            android:layout_width="16dp"
-            android:layout_height="32dp"
-            android:src="@mipmap/ic_chat_muted"
-            android:scaleType="centerInside"
-            android:visibility="visible" />
+            <TextView
+                android:id="@+id/room_time_stamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:lines="1"
+                android:text="12:30 PM"
+                android:textColor="@color/twentyfive_black"
+                android:textSize="@dimen/sub_font_size"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/rooms_user_last_message"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/fifty_black"
+                android:textSize="@dimen/sub_font_size"
+                tools:text="Hey there JobHey there JobHey there JobHey there JobHey there Job"/>
+
+
+            <ImageView
+                android:id="@+id/room_is_muted"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="16dp"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:scaleType="centerInside"
+                android:src="@mipmap/ic_chat_muted"
+                android:visibility="visible"/>
+
+
+        </LinearLayout>
 
     </LinearLayout>
-
 
 </LinearLayout>
