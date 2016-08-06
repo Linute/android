@@ -18,12 +18,9 @@ import java.util.List;
  */
 public class UserGroupSearchAdapter extends UserSelectAdapter {
 
-
-
     public List<ChatRoom> mSearchRoomsList;
 
     private OnRoomSelectedListener onRoomSelectedListener;
-
 
 
     private static final int TYPE_ITEM = 0;

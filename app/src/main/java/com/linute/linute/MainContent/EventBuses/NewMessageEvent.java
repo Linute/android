@@ -9,7 +9,8 @@ public class NewMessageEvent {
     private String mRoomId;
     private String mMessage;
     private String mOtherUserId;
-    private String mOtherUserName;
+    private String mOtherUserFirstName;
+    private String mOtherUserLastName;
 
     public NewMessageEvent(boolean hasNewMessageMessage){
         mHasNewMessage = hasNewMessageMessage;
@@ -41,11 +42,24 @@ public class NewMessageEvent {
     }
 
     public String getOtherUserName() {
-        return mOtherUserName;
+        return mOtherUserFirstName+ " "+mOtherUserLastName;
     }
 
-    public void setOtherUserName(String otherUserName) {
-        mOtherUserName = otherUserName;
+    public void setOtherUserFirstName(String otherUserName) {
+        mOtherUserFirstName = otherUserName;
+    }
+
+
+    public void setOtherUserLastName(String otherUserName) {
+        mOtherUserLastName = otherUserName;
+    }
+
+    public String getOtherUserFirstName() {
+        return mOtherUserFirstName;
+    }
+
+    public String getOtherUserLastName() {
+        return mOtherUserLastName;
     }
 
     public boolean hasNewMessage(){

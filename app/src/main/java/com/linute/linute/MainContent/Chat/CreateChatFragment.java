@@ -240,7 +240,8 @@ public class CreateChatFragment extends SelectUsersFragment {
                                 JSONObject userJSON = roomUsersJson.getJSONObject(u);
                                 usersList.add(new User(
                                         userJSON.getString("id"),
-                                        userJSON.getString("fullName"),
+                                        userJSON.getString("firstName"),
+                                        userJSON.getString("lastName"),
                                         userJSON.getString("profileImage")
                                 ));
                             }

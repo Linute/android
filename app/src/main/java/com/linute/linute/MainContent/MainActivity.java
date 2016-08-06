@@ -666,13 +666,15 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
+                Log.i(TAG, "call: "+activity.toString(4));
                 //message
                 if (activity.getString("action").equals("messager")) {
                     final NewMessageEvent chat = new NewMessageEvent(true);
                     chat.setRoomId(activity.getString("room"));
                     chat.setMessage(activity.getString("text"));
                     chat.setOtherUserId(activity.getString("ownerID"));
-                    chat.setOtherUserName(activity.getString("ownerFullName"));
+                    chat.setOtherUserFirstName(activity.getString("ownerFirstName"));
+                    chat.setOtherUserLastName(activity.getString("ownerLastName"));
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -720,8 +722,12 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addFragmentToContainer(ChatFragment.newInstance(chatEvent.getRoomId(),
-                        chatEvent.getOtherUserName(), chatEvent.getOtherUserId()));
+                addFragmentToContainer(ChatFragment.newInstance(
+                        chatEvent.getRoomId(),
+                        chatEvent.getOtherUserFirstName(),
+                        chatEvent.getOtherUserLastName(),
+                        chatEvent.getOtherUserId())
+                );
 
                 sn.dismiss();
             }
@@ -796,12 +802,16 @@ public class MainActivity extends BaseTaptActivity {
         } else if (type == LinuteConstants.MESSAGE) {
             String room = intent.getStringExtra("room");
             String userId = intent.getStringExtra("ownerID");
-            String userName = intent.getStringExtra("ownerFullName");
+            String firstName = intent.getStringExtra("ownerFistName");
+            String lastName = intent.getStringExtra("ownerLastName");
             mSafeForFragmentTransaction = true;
+
+            boolean empty = room == null || room.isEmpty();
             addFragmentToContainer(new RoomsActivityFragment());
             addFragmentToContainer(ChatFragment.newInstance(
-                    room == null || room.isEmpty() ? null : room,
-                    room == null || room.isEmpty() ? userName : "",
+                    empty ? null : room,
+                    empty ? firstName : "",
+                    empty ? lastName : "",
                     userId.isEmpty() ? null : userId));
         }
     }
@@ -952,12 +962,8 @@ public class MainActivity extends BaseTaptActivity {
                             }
                             fis.close();
                             fos.close();
-                        } catch (IOException ioe) {
+                        } catch (IOException | InterruptedException | ExecutionException ioe) {
                             ioe.printStackTrace();
-                        } catch (ExecutionException ee) {
-                            ee.printStackTrace();
-                        } catch (InterruptedException ie) {
-                            ie.printStackTrace();
                         }
 
                     }

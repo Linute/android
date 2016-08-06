@@ -166,12 +166,10 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
             vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
 
-
-
-            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
-            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+//            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+//            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+//            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+//            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
 
 
 

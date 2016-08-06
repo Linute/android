@@ -174,13 +174,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
      * this fragment using the provided parameters.
      *
      * @param roomId          id of room.
-     * @param otherPersonName full name of person youre talking to.
+     * @param otherPersonFirstName first name of person youre talking to.
+     * @param otherPersonLastName  last name
      * @param otherPersonId   id of person youre talking to
      * @return A new instance of fragment ChatFragment.
      */
-    //, int roomUsersCnt, ArrayList<ChatHead> chatHeadList
     public static ChatFragment newInstance(String roomId,
-                                           String otherPersonName,
+                                           String otherPersonFirstName,
+                                           String otherPersonLastName,
                                            String otherPersonId) {
 
         ChatFragment fragment = new ChatFragment();
@@ -189,28 +190,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         args.putString(ROOM_ID, roomId);
 
         ArrayList<User> users = new ArrayList<>(1);
-        users.add(new User(otherPersonId, otherPersonName, ""));
+        users.add(new User(otherPersonId, otherPersonFirstName,otherPersonLastName, ""));
         args.putParcelableArrayList(ARG_USERS, users);
-//        args.putString(OTHER_PERSON_NAME, otherPersonName);
-//        args.putString(OTHER_PERSON_ID, otherPersonId);
-
-        //args.putInt(USER_COUNT, roomUsersCnt);
-        //args.putParcelableArrayList(CHAT_HEADS, chatHeadList);
         fragment.setArguments(args);
         return fragment;
     }
 
 
-    /*public static ChatFragment newInstance(String roomId, User... users) {
-        ChatFragment fragment = new ChatFragment();
-        Bundle args = new Bundle();
-        ArrayList<User> usersList = new ArrayList<>(users.length);
-        args.putString(ROOM_ID, roomId);
-        args.putParcelableArrayList(ARG_USERS, usersList);
-        fragment.setArguments(args);
-        return fragment;
-    }
-*/
     public static ChatFragment newInstance(String roomId, ArrayList<User> userList) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
@@ -246,9 +232,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
 
-        View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
-
-        toolbar.addView(otherPersonHeader);
+        //View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
+        //toolbar.addView(otherPersonHeader);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,7 +242,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     getActivity().onBackPressed();
             }
         });
-        updateToolbar();
+
+        //updateToolbar();
 
         if (isDM()) {
             toolbar.setOnClickListener(new View.OnClickListener() {
@@ -777,8 +763,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void updateToolbar() {
         View rootV = getView();
         if (rootV == null) return;
-        Toolbar toolbar = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
-
+        String title = getChatName();
+        Log.i(TAG, "updateToolbar: "+title);
+        ((Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar)).setTitle(title);
 
        /*
         ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
@@ -798,9 +785,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 .listener(mGlideListener)
                 .into(otherPersonIconIV);*/
 
-        TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_name);
-        String chatName = getChatName();
-        chatNameView.setText(chatName);
+        //TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_name);
+        //String chatName = getChatName();
+        //chatNameView.setText(chatName);
+
     }
 
 
@@ -839,13 +827,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.i(TAG, "getroomchat response");
-
                 if (response.isSuccessful()) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        //Log.i(TAG, "onResponse: " + object.toString(4));
+                        Log.i(TAG, "getroomandchat onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 
 
@@ -886,6 +872,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         }
 //                        mOtherPersonProfileImage = object.getJSONObject("room").getJSONObject("owner").getString("profileImage");
 
+                        JSONArray users = object.getJSONArray("users");
+                        JSONObject user;
+                        for (int i = 0 ; i < users.length() ; i++){
+                            user = users.getJSONObject(i);
+                            mUserMap.get(user.getString("id")).userImage = user.getString("profileImage");
+                        }
 
                         JSONArray messages = object.getJSONArray("messages");
                         mSkip = object.getInt("totalCount") - 20;
@@ -995,9 +987,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (response.isSuccessful()) {
                     try {
 
-                        Log.i(TAG, "getchat response");
+                        //Log.i(TAG, "getchat get chat");
 
                         JSONObject object = new JSONObject(response.body().string());
+
+                        Log.i(TAG, "get chat onResponse: "+object.toString(4));
 
                         JSONArray messages = object.getJSONArray("messages");
 
@@ -1014,7 +1008,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             JSONObject user = users.getJSONObject(i);
                             mUsers.add(new User(
                                     user.getString("id"),
-                                    user.getString("fullName"),
+                                    user.getString("firstName"),
+                                    user.getString("lastName"),
                                     user.getString("profileImage")
                             ));
                             if (!mUserId.equals(user.getString("id"))) {
@@ -1720,7 +1715,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         // final ArrayList<Chat> intoChatList = new ArrayList<>();
         JSONObject message;
         Chat chat;
-        String owner;
+        JSONObject owner;
+        String ownerId;
         Date time;
         JSONArray imageAndVideo;
         JSONObject post = null;
@@ -1734,10 +1730,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 message = messages.getJSONObject(i);
 
-                Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
+                //Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
 
-                owner = message.getJSONObject("owner").getString("id");
-                viewerIsOwnerOfMessage = owner.equals(mUserId);
+                owner = message.getJSONObject("owner");
+                ownerId = owner.getString("id");
+                viewerIsOwnerOfMessage = ownerId.equals(mUserId);
 
                 messageBeenRead = true;
 
@@ -1754,7 +1751,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 chat = new Chat(
                         message.getString("room"),
                         time,
-                        owner,
+                        ownerId,
                         message.getString("id"),
                         message.getString("text"),
                         messageBeenRead,
@@ -1884,12 +1881,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
     public String getChatName() {
-
         StringBuilder builder = new StringBuilder();
-        if (isDM()) {
+        if (mUsers.size() <= 1) {
             for (User user : mUsers) {
                 if (!user.userId.equals(mUserId)) {
-                    builder.append(user.userName);
+                    builder.append(user.firstName);
+                    builder.append(" ");
+                    builder.append(user.lastName);
                 }
             }
             return builder.toString();
@@ -1899,7 +1897,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 return mChatName;
             } else {
                 for (int i = 0; i < mUsers.size(); i++) {
-                    builder.append(mUsers.get(i).userName);
+                    builder.append(mUsers.get(i).firstName);
                     if (i != mUsers.size() - 1) {
                         builder.append(", ");
                     }

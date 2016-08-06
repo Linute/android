@@ -96,9 +96,11 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
-        //Log.d(TAG, message)
+        Log.d(TAG, data.toString());
 
         String message = data.getString("message");
+
+
         //int type = gettNotificationType(data.getString("action"));
         //String name = data.getString("ownerFullName");
         boolean isAnon = "1".equals(data.getString("privacy"));
@@ -123,9 +125,7 @@ public class MyGcmListenerService extends GcmListenerService {
                                 : Utils.getImageUrlOfUser(String.valueOf(profileImage))
                         );
                 image = Glide.with(this).load(url).downloadOnly(64, 64).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             if (image != null)
@@ -183,7 +183,8 @@ public class MyGcmListenerService extends GcmListenerService {
         if (type == LinuteConstants.MESSAGE) {
             intent.putExtra("NOTIFICATION", type);
             intent.putExtra("ownerID", data.getString("ownerID"));
-            intent.putExtra("ownerFullName", data.getString("ownerFullName"));
+            intent.putExtra("ownerFirstName", data.getString("ownerFullName"));
+            intent.putExtra("ownerLastName", data.getString("ownerLastName"));
             intent.putExtra("room", data.getString("room"));
 
         } else if (type == LinuteConstants.FEED_DETAIL) {

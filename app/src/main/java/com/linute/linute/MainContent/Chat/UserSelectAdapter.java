@@ -110,7 +110,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setText(user.userName);
+            vUserName.setText(user.firstName+" "+user.lastName);
 
             switch (status){
                 case None:

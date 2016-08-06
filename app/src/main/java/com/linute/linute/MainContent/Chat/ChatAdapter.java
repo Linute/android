@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -271,7 +272,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (u != null) {
                         vUserName.setVisibility(View.VISIBLE);
                         vProfileImage.setVisibility(View.VISIBLE);
-                        vUserName.setText(u.userName);
+                        vUserName.setText(u.firstName+" "+u.lastName);
+                       // Log.i("TEST", "bindModel: "+u.userImage);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .asBitmap()

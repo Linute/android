@@ -235,7 +235,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
-                        Log.d(TAG, jsonObj.toString(4));
+                        //Log.d(TAG, jsonObj.toString(4));
 
 
                         mSkip = jsonObj.getInt("skip");
@@ -287,8 +287,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 try {
                                     mutedUntil = Long.getLong(unMuteAt.toString());
                                 }
-                                catch (NumberFormatException e){}
-                                catch (NullPointerException np){}
+                                catch (NumberFormatException | NullPointerException e){}
                             }
 
 
@@ -298,7 +297,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 JSONObject userJson = usersJson.getJSONObject(u);
                                 usersList.add(new User(
                                         userJson.getString("id"),
-                                        userJson.getString("fullName"),
+                                        userJson.getString("firstName"),
+                                        userJson.getString("lastName"),
                                         userJson.getString("profileImage")
                                 ));
                             }
@@ -483,6 +483,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
+                        //Log.i(TAG, "onResponse: "+jsonObj.toString(4));
 
                         JSONArray rooms = jsonObj.getJSONArray("rooms");
 
@@ -513,7 +514,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 JSONObject user = users.getJSONObject(u);
                                 usersList.add(new User(
                                         user.getString("id"),
-                                        user.getString("name"),
+                                        user.getString("firstName"),
+                                        user.getString("lastName"),
                                         user.getString("profileImage")
                                 ));
                             }

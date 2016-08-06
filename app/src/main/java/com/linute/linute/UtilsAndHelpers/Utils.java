@@ -224,8 +224,10 @@ public class Utils {
             simpleDateformat = new SimpleDateFormat("h:mm a");
         }else if(diff < DateUtils.WEEK_IN_MILLIS){
             simpleDateformat = new SimpleDateFormat("EEE");
-        }else {
+        }else if (diff < DateUtils.YEAR_IN_MILLIS){
             simpleDateformat = new SimpleDateFormat("MMM d");
+        }else {
+            simpleDateformat = new SimpleDateFormat("YYYY");
         }
 
         return simpleDateformat.format(new Date(before));

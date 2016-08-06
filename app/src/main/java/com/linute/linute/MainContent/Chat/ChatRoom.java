@@ -89,9 +89,14 @@ public class ChatRoom {
 
     public String getRoomName(){
         if("".equals(mRoomName) || mRoomName == null) {
+
+            if (users.size() == 1){
+                return users.get(0).firstName + " " +users.get(0).lastName;
+            }
+
             String name = "";
             for (int i = 0; i < users.size(); i++) {
-                name += users.get(i).userName;
+                name += users.get(i).firstName;
                 if (i != users.size() - 1) {
                     name += ", ";
                 }
@@ -177,7 +182,8 @@ public class ChatRoom {
             JSONObject userJson = usersJson.getJSONObject(u);
             usersList.add(new User(
                     userJson.getString("id"),
-                    userJson.getString("fullName"),
+                    userJson.getString("firstName"),
+                    userJson.getString("lastName"),
                     userJson.getString("profileImage")
             ));
         }

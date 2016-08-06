@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,7 +120,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
                     .load(imageUrlOfUser)
 //                    .asBitmap()
                     .into(profileImageIV);
-            nameTV.setText(user.userName);
+            nameTV.setText(user.firstName + " " + user.lastName);
         }
     }
 

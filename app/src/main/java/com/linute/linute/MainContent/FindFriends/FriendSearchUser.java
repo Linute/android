@@ -13,6 +13,8 @@ public class FriendSearchUser implements Parcelable{
 
     private String mProfileImage;
     private String mUserId;
+    private String mFirstName;
+    private String mLastName;
     private String mFullName;
     private boolean mIsFollowing = false;
 
@@ -21,7 +23,13 @@ public class FriendSearchUser implements Parcelable{
         mProfileImage = getStringFromJson("profileImage", json);
         mUserId = getStringFromJson("id", json);
 
-        mFullName = getStringFromJson("fullName", json);
+        mFirstName = getStringFromJson("firstName", json);
+        mLastName = getStringFromJson("lastName", json);
+
+        if (mFirstName == null) mFirstName = "";
+        if (mLastName == null) mLastName = "";
+
+        mFullName = mFirstName + " "+ mLastName;
 
         JSONObject friend = getJsonObjectFromJson("friend", json);
 
@@ -86,6 +94,14 @@ public class FriendSearchUser implements Parcelable{
         return mFullName;
     }
 
+    public String getFirstName() {
+        return mFirstName;
+    }
+
+    public String getLastName() {
+        return mLastName;
+    }
+
     public boolean nameContains(String pre){
         return mFullName.toLowerCase().contains(pre.toLowerCase());
     }
@@ -99,15 +115,19 @@ public class FriendSearchUser implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mProfileImage);
         dest.writeString(mUserId);
-        dest.writeString(mFullName);
+        dest.writeString(mFirstName);
+        dest.writeString(mLastName);
         dest.writeByte((byte) (mIsFollowing ? 1 : 0));
     }
 
     private FriendSearchUser(Parcel in){
         mProfileImage = in.readString();
         mUserId = in.readString();
-        mFullName = in.readString();
+        mFirstName = in.readString();
+        mLastName = in.readString();
         mIsFollowing = in.readByte() != 0;
+
+        mFullName = mFirstName + " " + mLastName;
     }
 
     public static final Creator<FriendSearchUser> CREATOR = new Creator<FriendSearchUser>() {

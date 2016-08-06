@@ -133,7 +133,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     if (mFriendSearchUser.isFollowing()) {
                         BaseTaptActivity activity = (BaseTaptActivity) mContext;
                         if (activity != null) {
-                            activity.addFragmentToContainer(ChatFragment.newInstance(null, mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+                            activity.addFragmentToContainer(ChatFragment.newInstance(null, mFriendSearchUser.getFirstName(), mFriendSearchUser.getLastName(), mFriendSearchUser.getUserId()));
                         }
                     }
 

@@ -272,13 +272,13 @@ room: id of room
                 @Override
                 public void OnUserClick(User user) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.userName, user.userId);
+                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.firstName+ " "+user.lastName, user.userId);
                     activity.addFragmentToContainer(fragment);
                 }
 
                 @Override
                 public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                    contextMenu.setHeaderTitle(user.userName);
+                    contextMenu.setHeaderTitle(user.firstName+ " "+user.lastName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
@@ -415,7 +415,7 @@ room: id of room
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
             User u = mParticipants.get(0);
 
-            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.userName);
+            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.firstName+ " "+u.lastName);
             ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
         } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {

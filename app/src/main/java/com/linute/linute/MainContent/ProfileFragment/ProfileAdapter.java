@@ -249,7 +249,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         activity.addFragmentToContainer(ChatFragment
                                 .newInstance(
                                         null
-                                        , mUser.getFirstName() + " " + mUser.getLastName()
+                                        , mUser.getFirstName()
+                                        , mUser.getLastName()
                                         , mUser.getUserID()));
                     }
                 }
