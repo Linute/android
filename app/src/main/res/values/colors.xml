@@ -4,7 +4,7 @@
     <color name="secondaryColor">#67CDC9</color>
 
 
-    <color name="red">#ed5564</color>
+    <color name="red">#FB284C</color>
 
     <color name="toolbar_color">#142029</color>
     <color name="colorPrimaryDark">#0f181e</color>
@@ -57,6 +57,7 @@
     <color name="blue_color">#84CFDF</color>
 
     <color name="chat_subtext">#ff9b9b9b</color>
+    <color name="chat_setting_divider">#EDE7E7</color>
 
 </resources>
 

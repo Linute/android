@@ -157,7 +157,8 @@ public class ChatSettingsFragment extends BaseFragment {
                         if (user.getString("id").equals(mUserId)) {
                             mUser = new User(
                                     user.getString("id"),
-                                    user.getString("fullName"),
+                                    user.getString("firstName"),
+                                    user.getString("lastName"),
                                     user.getString("profileImage"),
                                     user.getJSONObject("college").getString("name")
 
@@ -165,7 +166,8 @@ public class ChatSettingsFragment extends BaseFragment {
                         } else {
                             mParticipants.add(new User(
                                     user.getString("id"),
-                                    user.getString("fullName"),
+                                    user.getString("firstName"),
+                                    user.getString("lastName"),
                                     user.getString("profileImage"),
                                     user.getJSONObject("college").getString("name")
 
@@ -553,7 +555,8 @@ room: id of room
                                 JSONObject user = users.getJSONObject(i);
                                 mParticipants.add(new User(
                                         user.getString("id"),
-                                        user.getString("fullName"),
+                                        user.getString("firstName"),
+                                        user.getString("lastName"),
                                         user.getString("profileImage"),
                                         user.getJSONObject("college").getString("name")
                                 ));
