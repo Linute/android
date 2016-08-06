@@ -231,9 +231,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         Toolbar toolbar = (Toolbar) view.findViewById(R.id.chat_fragment_toolbar);
-
-        //View otherPersonHeader = inflater.inflate(R.layout.toolbar_chat, toolbar, false);
-        //toolbar.addView(otherPersonHeader);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -763,9 +760,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void updateToolbar() {
         View rootV = getView();
         if (rootV == null) return;
+
         String title = getChatName();
         Log.i(TAG, "updateToolbar: "+title);
         ((Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar)).setTitle(title);
+
 
        /*
         ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
@@ -784,10 +783,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                 .listener(mGlideListener)
                 .into(otherPersonIconIV);*/
-
-        //TextView chatNameView = (TextView) toolbar.findViewById(R.id.toolbar_chat_name);
-        //String chatName = getChatName();
-        //chatNameView.setText(chatName);
 
     }
 

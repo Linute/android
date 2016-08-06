@@ -56,5 +56,7 @@
     <color name="green_color">#239F85</color>
     <color name="blue_color">#84CFDF</color>
 
+    <color name="chat_subtext">#ff9b9b9b</color>
+
 </resources>
 

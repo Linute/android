@@ -11,6 +11,7 @@
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
         <ImageView
             android:id="@+id/toolbar_chat_settings"
             android:layout_width="wrap_content"
@@ -34,7 +35,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
-            android:scrollbars="none"/>
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"
+            android:paddingTop="16dp"
+            android:scrollbars="none"
+        />
     </FrameLayout>
 
     <include
@@ -48,7 +53,6 @@
 
     />
 
-
     <View
         android:id="@id/separation_line"
         android:layout_width="match_parent"
@@ -56,6 +60,7 @@
         android:layout_above="@+id/message_container"
         android:background="@color/seperator_color"
     />
+
     <LinearLayout
         android:id="@id/message_container"
         android:layout_width="match_parent"
@@ -100,6 +105,12 @@
             android:src="@drawable/ic_send"/>
 
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/message_container"
+        android:background="@color/chat_subtext"
+    />
 
     <LinearLayout
         android:id="@+id/pre_chat"

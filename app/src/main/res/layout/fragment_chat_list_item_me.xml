@@ -5,18 +5,18 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:layout_marginEnd="12dp"
-              android:layout_marginStart="48dp"
-              android:layout_marginTop="4dp"
+              android:layout_marginLeft="48dp"
+              android:layout_marginRight="16dp"
+              android:layout_marginTop="2dp"
               android:clipChildren="false"
               android:orientation="horizontal">
 
     <LinearLayout
         android:layout_width="150dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="-186dp"
+        android:layout_marginLeft="-200dp"
         android:gravity="center_vertical|end"
-        android:padding="12dp">
+    >
 
         <ImageView
             android:id="@+id/message_action_icon"
@@ -111,14 +111,12 @@
                 />
 
             </LinearLayout>
-
         </LinearLayout>
 
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-        >
+            android:layout_gravity="end">
 
             <TextView
                 android:id="@+id/chat_user_message"
@@ -126,7 +124,8 @@
                 android:layout_height="wrap_content"
                 android:autoLink="web|email"
                 android:background="@drawable/chat_item_me"
-                android:padding="12dp"
+                android:maxWidth="266dp"
+                android:padding="@dimen/chat_message_bubble_padding"
                 android:textColor="@color/pure_white"
                 android:textSize="@dimen/body_font_size"
                 tools:text="test dfsdf sdf fsdf sdf ddf df "/>

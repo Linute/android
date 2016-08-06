@@ -65,7 +65,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mUserId = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
     }
 
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
@@ -146,6 +145,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected View vFrame;
         protected View vLikeBar;
 
+        protected View vMessageBubble;
+
         private int mType;
         private String mUrl;
 
@@ -172,6 +173,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     likePost(checkbox);
                 }
             });
+            vMessageBubble = itemView.findViewById(R.id.message_content);
+
 
             vImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -267,12 +270,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mType = chat.getMessageType();
 
             if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
-                if (isHead) {
+                 if (isHead) {
                     User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
                         vUserName.setVisibility(View.VISIBLE);
                         vProfileImage.setVisibility(View.VISIBLE);
-                        vUserName.setText(u.firstName+" "+u.lastName);
+                        vUserName.setText(u.firstName);
                        // Log.i("TEST", "bindModel: "+u.userImage);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
@@ -286,6 +289,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vUserName.setVisibility(View.GONE);
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
+
+
             }
 
 

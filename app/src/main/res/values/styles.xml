@@ -91,4 +91,9 @@
     <style name="TextAppearence.App.TextInputLayout" parent="@android:style/TextAppearance">
         <item name="android:textColor">@color/red</item>
     </style>
+
+    <style name="fragment_chat_subtext">
+        <item name="android:textColor">@color/chat_subtext</item>
+        <item name="android:textSize">12sp</item>
+    </style>
 </resources>
