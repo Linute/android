@@ -179,7 +179,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
-
             if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
 //                itemView.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, vMessageBubble.getHeight()));
                  if (isHead) {
@@ -199,6 +198,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vUserName.setVisibility(View.GONE);
                     vProfileImage.setVisibility(View.INVISIBLE);
                 }
+
+
             }
             switch (chat.getMessageType()) {
                 case Chat.MESSAGE_IMAGE:

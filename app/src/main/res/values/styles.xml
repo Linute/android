@@ -93,7 +93,7 @@
     </style>
 
     <style name="fragment_chat_subtext">
-        <item name="android:textColor">#ff9b9b9b</item>
+        <item name="android:textColor">@color/chat_subtext</item>
         <item name="android:textSize">12sp</item>
     </style>
 </resources>

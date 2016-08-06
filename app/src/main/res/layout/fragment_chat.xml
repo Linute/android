@@ -34,7 +34,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
-            android:scrollbars="none" />
+            android:scrollbars="none"
+            android:clipToPadding="false"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp"
+            />
     </FrameLayout>
 
     <include
@@ -47,6 +51,7 @@
         android:visibility="gone"
 
         />
+
 
 
 
@@ -94,11 +99,17 @@
 
 
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/chat_subtext"
+        android:layout_above="@+id/message_container"
+        />
 
     <LinearLayout
         android:id="@+id/pre_chat"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         >
