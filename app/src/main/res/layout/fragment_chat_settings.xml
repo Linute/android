@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#FFede7e7">
+    android:background="@color/chat_setting_divider">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -92,10 +92,10 @@
             android:background="@color/pure_white"
             android:orientation="horizontal">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:padding="4dp"
+                android:padding="8dp"
                 android:src="@mipmap/ic_edit_blue"
                 />
             <TextView
@@ -122,10 +122,10 @@
 
             android:orientation="horizontal">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
-                android:padding="4dp"
+                android:padding="8dp"
                 android:src="@mipmap/ic_notification_bell_blue"
                 />
             <TextView
@@ -168,7 +168,10 @@
             android:background="@color/pure_white"
             />
 
-
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -183,7 +186,7 @@
             android:gravity="center_vertical"
             android:paddingStart="16dp"
             android:text="Leave Group"
-            android:textColor="#FFFF0000"
+            android:textColor="@color/red"
             android:textSize="20sp"
 
             />
