@@ -8,7 +8,8 @@
     android:layout_marginTop="2dp"
     android:layout_marginRight="48dp"
     android:clipChildren="false"
-    >k
+
+    >
 
 
     <LinearLayout
@@ -84,6 +85,7 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:scaleType="centerCrop"
+                    android:maxWidth="234dp"
                     app:riv_corner_radius="2dp" />
 
                 <ImageView
@@ -106,7 +108,7 @@
                 android:textColor="@color/eighty_black"
                 android:textSize="@dimen/body_font_size"
                 tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "
-                android:maxWidth="266dp"
+                android:maxWidth="234dp"
                 android:minHeight="@dimen/chat_profile_photo_diameter"
                 android:layout_gravity="top|left" />
 

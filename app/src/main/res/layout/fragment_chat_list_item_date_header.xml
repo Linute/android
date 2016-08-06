@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:padding="4dp"
+    android:padding="8dp"
     android:textAllCaps="false"
     style="@style/fragment_chat_subtext"
     android:text="John Doe has left the group" />
