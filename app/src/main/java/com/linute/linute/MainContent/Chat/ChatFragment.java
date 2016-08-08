@@ -595,9 +595,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             typingJson.put("room", mRoomId);
             typingJson.put("user", mUserId);
 
-            if (mRoomId == null) {
-                Log.e(TAG, "You're a nigger, Harry!");
-            }
             joinLeft.put("room", mRoomId);
             joinLeft.put("user", mUserId);
 
@@ -765,7 +762,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (rootV == null) return;
 
         String title = getChatName();
-        Log.i(TAG, "updateToolbar: "+title);
+//        Log.i(TAG, "updateToolbar: "+title);
         Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
         toolbae.setTitle(title);
         View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
@@ -813,8 +810,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "getroomchat failure");
-
                 setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -1136,18 +1131,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             time = null;
         }
 
-        String owner = data.getJSONObject("owner").getString("id");
+        String ownerId = data.getJSONObject("owner").getString("id");
         String messageId = data.getString("id");
 
 
         final Chat chat = new Chat(
                 mRoomId,
                 time,
-                owner,
+                ownerId,
                 messageId,
                 data.getString("text"),
                 false,
-                owner.equals(mUserId)
+                ownerId.equals(mUserId)
         );
 
         JSONArray imageAndVideo = data.getJSONArray("images");
@@ -1206,7 +1201,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
 
 
-        if (!owner.equals(mUserId)) {//not our message, then mark as read
+        if (!ownerId.equals(mUserId)) {//not our message, then mark as read
             JSONObject read = new JSONObject();
             JSONArray readArray = new JSONArray();
             readArray.put(messageId);
@@ -1739,6 +1734,20 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 owner = message.getJSONObject("owner");
                 ownerId = owner.getString("id");
                 viewerIsOwnerOfMessage = ownerId.equals(mUserId);
+
+
+
+                if(!mUserMap.containsKey(ownerId)){
+                    mUserMap.put(ownerId,
+                            new User(
+                                    ownerId,
+                                    owner.getString("firstName"),
+                                    owner.getString("lastName"),
+                                    owner.getString("profileImage")
+                            ));
+                }
+
+
 
                 messageBeenRead = true;
 

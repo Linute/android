@@ -501,7 +501,7 @@ room: id of room
     private void addUsers(ArrayList<User> users) throws JSONException {
         mParticipants.addAll(users);
 
-        
+
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();

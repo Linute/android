@@ -92,9 +92,6 @@ public class CreateChatFragment extends SelectUsersFragment {
                     try {
                         jsonObject = new JSONObject(response.body().string());
 
-                        for(String s:jsonObject.toString(4).split("\n")){
-                            Log.d("AAA", s);
-                        }
 //                        Log.d(TAG, jsonObject.toString(4));
                         usersJson = jsonObject.getJSONArray("users");
                         JSONObject user;
