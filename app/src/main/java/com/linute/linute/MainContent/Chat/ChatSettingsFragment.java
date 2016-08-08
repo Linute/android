@@ -490,7 +490,7 @@ room: id of room
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();
-        usersJSON.put(user.userId);
+        usersJSON.put(mUserId);
         paramsJSON.put("room", mRoomId);
         paramsJSON.put("users", usersJSON);
 

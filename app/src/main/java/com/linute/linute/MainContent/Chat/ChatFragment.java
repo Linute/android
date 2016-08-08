@@ -92,7 +92,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     //private static final int TYPING_TIMER_LENGTH = 600;
 
     private String mRoomId;
-    private boolean mRoomExists = true;
+    private boolean mRoomExists = false;
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
@@ -545,15 +545,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         if (mRoomId == null) { //occurs when we didn't come from room fragment
+            mRoomExists = false;
             getRoomAndChat();
 
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
 
             getChat();//Chat();
+            mRoomExists = true;
 
 //            joinRoom(activity, false);
         } else {
+            mRoomExists = true;
             getChat();
 //            joinRoom(activity, true);
 
@@ -763,7 +766,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         String title = getChatName();
         Log.i(TAG, "updateToolbar: "+title);
-        ((Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar)).setTitle(title);
+        Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
+        toolbae.setTitle(title);
+        View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
+        chatSettingsbutton.setVisibility(mRoomExists ? View.VISIBLE : View.GONE);
+
 
 
        /*
@@ -851,6 +858,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
                         } else {
+                            mRoomExists = true;
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
                             mChatImage = object.getString("image");
@@ -1337,6 +1345,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
         mRoomExists = true;
+        updateToolbar();
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
