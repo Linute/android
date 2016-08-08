@@ -329,7 +329,7 @@ room: id of room
 
 
         updateNotificationView();
-        mNotificationSettingsView.setOnClickListener(new View.OnClickListener() {
+        getView().findViewById(R.id.setting_notifications).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
 
