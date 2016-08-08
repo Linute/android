@@ -1865,13 +1865,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private void updateTopTimeHeader() {
         //-1 to compensate for footer
-        int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition() - 1;
-
-        if (topItemIndex >= 0 && topItemIndex < mChatList.size()) {
+        int topItemIndex = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition() - 1;
+        if (topItemIndex > 0 && topItemIndex < mChatList.size()) {
             //sets top date header to date of first visible item
             mTopDateHeaderTV.setVisibility(View.VISIBLE);
             Date date = mChatList.get(topItemIndex).getDate();
             mTopDateHeaderTV.setText(new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today");
+        }else{
+            mTopDateHeaderTV.setVisibility(View.INVISIBLE);
         }
     }
 
