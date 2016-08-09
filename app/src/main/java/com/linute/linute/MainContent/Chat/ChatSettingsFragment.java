@@ -304,9 +304,9 @@ room: id of room
             });
 
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-            toolbar.setTitle(mRoomName);
-            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
-            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
+            toolbar.setTitle((mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group") +  " Settings");
+//            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
+//            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
 //            toolbar.findViewById(R.id.space_actions_item_balancer).setVisibility(View.GONE);
                     mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
