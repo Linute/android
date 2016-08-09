@@ -106,6 +106,7 @@
                     android:src="@drawable/ic_edit_blue" />
 
                 <TextView
+                    android:id="@+id/setting_group_name_text"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:gravity="center_vertical"

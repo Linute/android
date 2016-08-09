@@ -446,6 +446,11 @@ room: id of room
     }
 
     private void updateRoomName(View view) {
+        TextView groupNameSettingTextView = (TextView)view.findViewById(R.id.setting_group_name_text);
+        if(!"".equals(mRoomName) && mRoomName != null) {
+            groupNameSettingTextView.setText(mRoomName);
+        }
+
         final View groupNameSettingView = view.findViewById(R.id.setting_group_name);
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
@@ -458,6 +463,8 @@ room: id of room
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
                             .setValue(mRoomName)
