@@ -82,8 +82,9 @@
                 android:layout_height="16dp"
                 android:layout_marginStart="16dp"
                 android:padding="@dimen/activity_horizontal_margin"
-                android:scaleType="centerInside"
                 android:src="@drawable/ic_chat_muted"
+                android:scaleType="centerInside"
+                android:scaleX="-1"
                 android:visibility="visible"/>
 
 
