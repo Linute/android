@@ -23,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -32,8 +31,8 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.SquareCamera.CameraType;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -118,7 +117,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private RecyclerView recList;
     private EditText mInputMessageView;
-    private TextView mTopDateHeaderTV;
+//    private TextView mTopDateHeaderTV;
     private ChatAdapter mChatAdapter;
 
 
@@ -252,7 +251,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
 
 
-        mTopDateHeaderTV = (TextView) view.findViewById(R.id.top_date_header);
+//        mTopDateHeaderTV = (TextView) view.findViewById(R.id.top_date_header);
 
         //when reaches end of list, we want to try to load more
         mChatAdapter.setLoadMoreListener(this);
@@ -288,13 +287,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mLinearLayoutManager.setStackFromEnd(true);
         recList.setLayoutManager(mLinearLayoutManager);
         recList.setAdapter(mChatAdapter);
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+       /* recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 updateTopTimeHeader();
             }
-        });
+        });*/
         final int width = getResources().getDisplayMetrics().widthPixels;
 //        recList.getLayoutParams().width = width;
         recList.setOnTouchListener(new View.OnTouchListener() {
@@ -876,7 +875,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
-                                        updateTopTimeHeader();
+//                                        updateTopTimeHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -1023,7 +1022,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     if (mChatList.isEmpty()) {
                                         vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
-                                        updateTopTimeHeader();
+//                                        updateTopTimeHeader();
                                     }
 
                                     mProgressBar.setVisibility(View.GONE);
@@ -1169,7 +1168,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
-                updateTopTimeHeader();
+//                updateTopTimeHeader();
             }
         });
 
@@ -1641,7 +1640,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         @Override
                                         public void run() {
                                             mChatList.addAll(0, tempChatList);
-                                            updateTopTimeHeader();
+//                                            updateTopTimeHeader();
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
                                             mLoadingMoreMessages = false;
@@ -1862,7 +1861,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         return p;
     }
 
-    private void updateTopTimeHeader() {
+  /*  private void updateTopTimeHeader() {
         //-1 to compensate for footer
         int topItemIndex = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition() - 1;
         if (topItemIndex > 0 && topItemIndex < mChatList.size()) {
@@ -1873,7 +1872,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }else{
             mTopDateHeaderTV.setVisibility(View.INVISIBLE);
         }
-    }
+    }*/
 
     public String getChatName() {
         StringBuilder builder = new StringBuilder();
