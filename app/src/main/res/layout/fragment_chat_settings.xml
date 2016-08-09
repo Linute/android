@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/chat_setting_divider">
+                                            xmlns:app="http://schemas.android.com/apk/res-auto"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:background="@color/chat_setting_divider"
+                                            android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
 
-        >
+    >
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -33,46 +33,47 @@
                 android:layout_height="200dp"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
-                app:riv_corner_radius="@dimen/user_icon_corner_radius"
-                />
+                app:riv_corner_radius="@dimen/user_icon_corner_radius" />
         </FrameLayout>
-        
+
         <RelativeLayout
             android:id="@+id/dm_header"
-            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="72dp"
-            android:orientation="horizontal"
             android:background="@color/pure_white"
+            android:orientation="horizontal"
+            android:paddingBottom="16dp"
             android:paddingTop="16dp"
-            android:paddingBottom="16dp">
+            android:visibility="gone">
 
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/dm_user_icon"
                 android:layout_width="@dimen/profile_image_radius"
                 android:layout_height="@dimen/profile_image_radius"
-                app:riv_corner_radius="@dimen/user_icon_corner_radius"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp" />
+                android:layout_marginRight="16dp"
+                app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+
             <TextView
                 android:id="@+id/dm_user_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
                 android:layout_toEndOf="@id/dm_user_icon"
-                android:text="User Name"
                 android:phoneNumber="true"
-                android:textColor="@color/grey_color" />
+                android:text="User Name"
+                android:textColor="@color/grey_color"
+                android:textSize="16sp" />
+
             <TextView
                 android:id="@+id/dm_user_college"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minLines="1"
-                android:textSize="14sp"
-                android:text="User College"
+                android:layout_below="@+id/dm_user_name"
                 android:layout_toEndOf="@id/dm_user_icon"
-                android:layout_below="@+id/dm_user_name"/>
+                android:minLines="1"
+                android:text="User College"
+                android:textSize="14sp" />
 
 
         </RelativeLayout>
@@ -81,118 +82,131 @@
             android:id="@+id/dm_divider"
             android:layout_width="match_parent"
             android:layout_height="24dp"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/setting_group_name_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:background="@color/pure_white"
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"
-                android:src="@drawable/ic_edit_blue"
-                />
-            <TextView
+            android:background="@color/pure_white">
+
+            <LinearLayout
                 android:id="@+id/setting_group_name"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:gravity="center_vertical"
-                android:text="Group Name"
-                android:paddingStart="16dp"
+                android:orientation="horizontal"
 
-                android:textColor="@color/eighty_black"
-                android:textSize="16sp" />
-        </LinearLayout>
+                android:paddingStart="16dp">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_edit_blue" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:text="Group Name"
+                    android:textColor="@color/eighty_black"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </FrameLayout>
 
 
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="16dp"
-            android:background="@color/pure_white"
+            android:background="@color/pure_white">
 
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:padding="8dp"
-                android:src="@drawable/ic_notification_bell_blue"
-                />
-            <TextView
-                android:id="@+id/setting_notifications_button"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="48dp"
+            <LinearLayout
+                android:id="@+id/setting_notifications"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
                 android:background="?attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
+                android:orientation="horizontal"
 
-                android:text="Notifications"
-                android:textColor="@color/eighty_black"
-                android:textSize="16sp" />
+                android:paddingStart="16dp">
 
-            <TextView
-                android:id="@+id/setting_notifications_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textColor="#0681FE"
-                android:layout_gravity="right"
-                android:gravity="center_vertical"
-                android:paddingRight="16dp"
-                android:textSize="16sp"
-                />
-        </LinearLayout>
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center_vertical"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_notification_bell_blue" />
 
+                <TextView
+                    android:id="@+id/setting_notifications_button"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:text="Notifications"
+                    android:textColor="@color/eighty_black"
+                    android:textSize="16sp" />
 
+                <TextView
+                    android:id="@+id/setting_notifications_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:gravity="center_vertical"
+                    android:paddingRight="16dp"
+                    android:textColor="#0681FE"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+        </FrameLayout>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="24dp"
-            />
+            android:layout_height="24dp" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_participants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@color/pure_white"
-            />
+            android:background="@color/pure_white" />
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="24dp"
-            />
+            android:layout_height="24dp" />
+
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/pure_white"
-            >
-        <TextView
-            android:id="@+id/setting_leave_group"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackground"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:text="Leave Group"
-            android:textColor="@color/red"
-            android:textSize="20sp"
+            android:background="@color/pure_white">
 
-            />
+            <FrameLayout
+                android:id="@+id/setting_leave_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:background="?attr/selectableItemBackground">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:text="Leave Group"
+                    android:textColor="@color/red"
+                    android:textSize="20sp"
+
+                />
+            </FrameLayout>
+
         </FrameLayout>
-
-
     </LinearLayout>
 
 

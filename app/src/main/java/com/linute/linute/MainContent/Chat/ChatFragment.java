@@ -95,7 +95,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     //private static final int TYPING_TIMER_LENGTH = 600;
 
     private String mRoomId;
-    private boolean mRoomExists = true;
+    private boolean mRoomExists = false;
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
@@ -536,15 +536,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         if (mRoomId == null) { //occurs when we didn't come from room fragment
+            mRoomExists = false;
             getRoomAndChat();
 
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
 
             getChat();//Chat();
+            mRoomExists = true;
 
 //            joinRoom(activity, false);
         } else {
+            mRoomExists = true;
             getChat();
 //            joinRoom(activity, true);
 
@@ -583,9 +586,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             typingJson.put("room", mRoomId);
             typingJson.put("user", mUserId);
 
-            if (mRoomId == null) {
-                Log.e(TAG, "You're a nigger, Harry!");
-            }
             joinLeft.put("room", mRoomId);
             joinLeft.put("user", mUserId);
 
@@ -751,7 +751,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void updateToolbar() {
         View rootV = getView();
         if (rootV == null) return;
-        ((Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar)).setTitle(getChatName());
+
+        Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
+        toolbae.setTitle(getChatName());
+        View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
+        chatSettingsbutton.setVisibility(mRoomExists ? View.VISIBLE : View.GONE);
     }
 
 
@@ -774,8 +778,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "getroomchat failure");
-
                 setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
@@ -819,6 +821,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
                         } else {
+                            mRoomExists = true;
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
                             mChatImage = object.getString("image");
@@ -1099,18 +1102,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             time = null;
         }
 
-        String owner = data.getJSONObject("owner").getString("id");
+        String ownerId = data.getJSONObject("owner").getString("id");
         String messageId = data.getString("id");
 
 
         final Chat chat = new Chat(
                 mRoomId,
                 time,
-                owner,
+                ownerId,
                 messageId,
                 data.getString("text"),
                 false,
-                owner.equals(mUserId)
+                ownerId.equals(mUserId)
         );
 
         JSONArray imageAndVideo = data.getJSONArray("images");
@@ -1170,7 +1173,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
 
 
-        if (!owner.equals(mUserId)) {//not our message, then mark as read
+        if (!ownerId.equals(mUserId)) {//not our message, then mark as read
             JSONObject read = new JSONObject();
             JSONArray readArray = new JSONArray();
             readArray.put(messageId);
@@ -1309,6 +1312,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
         mRoomExists = true;
+        updateToolbar();
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
@@ -1703,6 +1707,20 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 ownerId = owner.getString("id");
                 viewerIsOwnerOfMessage = ownerId.equals(mUserId);
 
+
+
+                if(!mUserMap.containsKey(ownerId)){
+                    mUserMap.put(ownerId,
+                            new User(
+                                    ownerId,
+                                    owner.getString("firstName"),
+                                    owner.getString("lastName"),
+                                    owner.getString("profileImage")
+                            ));
+                }
+
+
+
                 messageBeenRead = true;
 
                 if (!viewerIsOwnerOfMessage) { //other person's message. we need to check if we read it
@@ -1845,13 +1863,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private void updateTopTimeHeader() {
         //-1 to compensate for footer
-        int topItemIndex = mLinearLayoutManager.findFirstVisibleItemPosition() - 1;
-
-        if (topItemIndex >= 0 && topItemIndex < mChatList.size()) {
+        int topItemIndex = mLinearLayoutManager.findFirstCompletelyVisibleItemPosition() - 1;
+        if (topItemIndex > 0 && topItemIndex < mChatList.size()) {
             //sets top date header to date of first visible item
             mTopDateHeaderTV.setVisibility(View.VISIBLE);
             Date date = mChatList.get(topItemIndex).getDate();
             mTopDateHeaderTV.setText((sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)));
+        }else{
+            mTopDateHeaderTV.setVisibility(View.INVISIBLE);
         }
     }
 

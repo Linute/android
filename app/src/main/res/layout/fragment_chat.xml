@@ -37,7 +37,6 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             android:paddingBottom="16dp"
-            android:paddingTop="16dp"
             android:scrollbars="none"
         />
     </FrameLayout>
@@ -74,8 +73,9 @@
             android:layout_height="40dp"
             android:layout_gravity="bottom"
             android:layout_margin="4dp"
+            android:padding="8dp"
             android:background="?attr/selectableItemBackground"
-            android:src="@drawable/ic_upload_picture"/>
+            android:src="@drawable/ic_chat_attach"/>
 
         <EditText
             android:id="@+id/message_input"

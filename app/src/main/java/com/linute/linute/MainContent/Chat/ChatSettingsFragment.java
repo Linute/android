@@ -329,7 +329,7 @@ room: id of room
 
 
         updateNotificationView();
-        mNotificationSettingsView.setOnClickListener(new View.OnClickListener() {
+        getView().findViewById(R.id.setting_notifications).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
 
@@ -490,7 +490,7 @@ room: id of room
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();
-        usersJSON.put(user.userId);
+        usersJSON.put(mUserId);
         paramsJSON.put("room", mRoomId);
         paramsJSON.put("users", usersJSON);
 
@@ -499,6 +499,9 @@ room: id of room
     }
 
     private void addUsers(ArrayList<User> users) throws JSONException {
+        mParticipants.addAll(users);
+
+
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();
@@ -507,6 +510,7 @@ room: id of room
         }
         paramsJSON.put("room", mRoomId);
         paramsJSON.put("users", usersJSON);
+
 
         activity.emitSocket(API_Methods.VERSION + ":rooms:add users", paramsJSON);
     }
