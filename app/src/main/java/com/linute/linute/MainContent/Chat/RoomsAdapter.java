@@ -43,7 +43,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void setContextMenuCreator(RoomContextMenuCreator creator){
+    public void setContextMenuCreator(RoomContextMenuCreator creator) {
         mRoomContextMenuCreator = creator;
     }
 
@@ -73,7 +73,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof RoomsViewHolder) {
             ((RoomsViewHolder) holder).bindModel(mRoomsList.get(position));
-            if(mRoomContextMenuCreator != null) {
+            if (mRoomContextMenuCreator != null) {
                 holder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                     @Override
                     public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
@@ -98,14 +98,13 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     @Override
     public int getItemCount() {
         //+1 for the footer
-        return mRoomsList.size() == 0 ? 0 : mRoomsList.size() + 1;
+        return mRoomsList.isEmpty() ? 0 : mRoomsList.size() + 1;
     }
 
     class RoomsViewHolder extends RecyclerView.ViewHolder {
         protected ImageView vUserImage;
         protected TextView vUserName;
         protected TextView vLastMessage;
-//        protected View vHasUnreadIcon;
         protected TextView vTimeStamp;
         protected ChatRoom mRoom;
         protected View vIsMuted;
@@ -116,7 +115,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vUserImage = (ImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
-//            vHasUnreadIcon = itemView.findViewById(R.id.room_unread);
             vTimeStamp = (TextView) itemView.findViewById(R.id.room_time_stamp);
             vIsMuted = itemView.findViewById(R.id.room_is_muted);
 
@@ -145,14 +143,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             mRoom = room;
 
-            //set image
-
-
             Glide.with(aContext)
                     .load(room.getRoomImage())
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
-                    .placeholder(R.color.pure_black)
+                    .placeholder(R.color.seperator_color)
                     .diskCacheStrategy(DiskCacheStrategy.NONE) //only cache the scaled image
                     .into(vUserImage);
 
@@ -165,30 +160,11 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
             vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
             vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
-
-//            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-//            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-//            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
-//            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
-
-
-
-            //show unread icon
-           /* if (room.hasUnread() && vHasUnreadIcon.getVisibility() == View.INVISIBLE)
-                vHasUnreadIcon.setVisibility(View.VISIBLE);
-            else if (!room.hasUnread() && vHasUnreadIcon.getVisibility() == View.VISIBLE)
-                vHasUnreadIcon.setVisibility(View.INVISIBLE);*/
         }
     }
 
 
-
-
-
-
-
-
-    public interface RoomContextMenuCreator{
+    public interface RoomContextMenuCreator {
         void onCreateContextMenu(ContextMenu contextMenu, ChatRoom room, int position, ContextMenu.ContextMenuInfo contextMenuInfo);
     }
 }

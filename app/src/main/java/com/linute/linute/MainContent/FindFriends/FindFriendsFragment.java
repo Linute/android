@@ -125,7 +125,7 @@ public class FindFriendsFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(this),mFriendFoundList);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(getParentFragment()),mFriendFoundList);
 
         recyclerView.setAdapter(mFriendSearchAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));

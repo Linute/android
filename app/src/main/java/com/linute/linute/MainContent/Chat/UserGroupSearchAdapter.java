@@ -138,14 +138,16 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         public void bindModel(User user, ItemStatus status) {
             super.bindModel(user, status);
             tvCollege.setText(user.collegeName);
-            Log.i("test2", "bindModel: "+user.collegeName);
+            //Log.i("test2", "bindModel: "+user.collegeName);
         }
 
         public void bindModel(ChatRoom chat) {
             Glide.with(itemView.getContext())
                     .load(chat.getRoomImage())
                     .signature(new StringSignature(mImageSign))
+                    .placeholder(R.color.seperator_color)
                     .into(vUserImage);
+
             vUserName.setText(chat.getRoomName());
             tvCollege.setText(chat.users.size() + " Members");
             itemView.setBackgroundColor(0);

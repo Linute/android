@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/chat_setting_divider"
-    android:fillViewport="true">
+                                            xmlns:app="http://schemas.android.com/apk/res-auto"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:background="@color/chat_setting_divider"
+                                            android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
 
-        >
+    >
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -105,7 +105,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:padding="8dp"
-                    android:src="@mipmap/ic_edit_blue" />
+                    android:src="@drawable/ic_edit_blue" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -138,7 +138,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:padding="8dp"
-                    android:src="@mipmap/ic_add_blue" />
+                    android:src="@drawable/ic_add_blue" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -181,7 +181,7 @@
                     android:layout_height="40dp"
                     android:layout_gravity="center_vertical"
                     android:padding="8dp"
-                    android:src="@mipmap/ic_notification_bell_blue" />
+                    android:src="@drawable/ic_notification_bell_blue" />
 
                 <TextView
                     android:id="@+id/setting_notifications_button"
@@ -244,7 +244,7 @@
                     android:textColor="@color/red"
                     android:textSize="20sp"
 
-                    />
+                />
             </FrameLayout>
 
         </FrameLayout>

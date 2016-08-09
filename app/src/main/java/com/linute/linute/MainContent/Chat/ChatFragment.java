@@ -51,6 +51,9 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -143,17 +146,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private LinearLayoutManager mLinearLayoutManager;
     private Map<String, User> mUserMap;
 
-    //private SharedPreferences mSharedPreferences;
-
-    //private int mRoomUsersCnt;
-    //private Handler mTypingHandler = new Handler();
-    //private Socket mSocket;
-    //private int mLastRead;
-    //private String mLastReadId;
-    //private List<ChatHead> mChatHeadList;
-    //private List<ChatHead> mChatHeadAddedList;
-    //private Map<String, Integer> mChatHeadPos = new HashMap<String, Integer>();
-
 
     public ChatFragment() {
         // Required empty public constructor
@@ -165,8 +157,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onAttach(context);
         mUserMap = new HashMap<>();
         mChatAdapter = new ChatAdapter(getActivity(), mChatList, mUserMap);
-        //mChatHeadList = new ArrayList<>();
-        //mChatHeadAddedList = new ArrayList<>();
     }
 
     /**
@@ -438,7 +428,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
 
                 //change alpha of send button
-                if (s.length() > 0) vSendButton.setAlpha(1);
+                if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
             }
         });
@@ -460,7 +450,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         vSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                attemptSend(mInputMessageView.getText().toString().trim());
+                String message = mInputMessageView.getText().toString();
+                if (message.trim().isEmpty()) return;
+                attemptSend(message);
                 mInputMessageView.setText("");
             }
         });
@@ -479,16 +471,18 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
         //show keyboard when fragment appears
-        mInputMessageView.requestFocus();
-        mInputMessageView.post(new Runnable() {
-            @Override
-            public void run() {
-                if (getActivity() != null) {
-                    InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    keyboard.showSoftInput(mInputMessageView, 0);
+        if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
+            mInputMessageView.requestFocus();
+            mInputMessageView.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (getActivity() != null) {
+                        InputMethodManager keyboard = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        keyboard.showSoftInput(mInputMessageView, 0);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         vPreChat = view.findViewById(R.id.pre_chat);
         vPreChat.setVisibility(View.GONE); //TODO some condition for prechat
@@ -759,33 +753,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         View rootV = getView();
         if (rootV == null) return;
 
-        String title = getChatName();
-//        Log.i(TAG, "updateToolbar: "+title);
         Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
-        toolbae.setTitle(title);
+        toolbae.setTitle(getChatName());
         View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
         chatSettingsbutton.setVisibility(mRoomExists ? View.VISIBLE : View.GONE);
-
-
-
-       /*
-        ImageView otherPersonIconIV = (ImageView) toolbar.findViewById(R.id.toolbar_chat_user_icon);
-        if (isDM() && mOtherPersonProfileImage == null) {
-            otherPersonIconIV.setVisibility(View.GONE);
-            return;
-        }
-        otherPersonIconIV.setVisibility(View.VISIBLE);
-
-        Context context = rootV.getContext();
-        Glide.with(context)
-                .load(mChatImage)
-                .dontAnimate()
-                .signature(new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000")))
-                .placeholder(R.drawable.image_loading_background)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
-                .listener(mGlideListener)
-                .into(otherPersonIconIV);*/
-
     }
 
 
@@ -826,7 +797,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        Log.i(TAG, "getroomandchat onResponse: " + object.toString(4));
+                       // Log.i(TAG, "getroomandchat onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 
 
@@ -887,6 +858,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
                         }
+
+                        sortLists(tempChatList);
 
                         if (activity != null) {
                             joinRoom(activity, false);
@@ -987,7 +960,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         JSONObject object = new JSONObject(response.body().string());
 
-                        Log.i(TAG, "get chat onResponse: "+object.toString(4));
+                        //Log.i(TAG, "get chat onResponse: "+object.toString(4));
 
                         JSONArray messages = object.getJSONArray("messages");
 
@@ -1019,6 +992,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mChatName = room.getString("name");
                         mChatImage = room.getString("image");
 
+                        sortLists(tempChatList);
 
                         if (activity != null) {
                             joinRoom(activity, false);
@@ -1117,7 +1091,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void addMessage(JSONObject data) throws JSONException {
-        Log.d(TAG, "addMessage: " + data.toString(4));
+        //Log.d(TAG, "addMessage: " + data.toString(4));
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
@@ -1163,13 +1137,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (mChatList.size() > 0) {
                     Chat previousMessage = mChatList.get(mChatList.size() - 1);
                     if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
-                        Date date = chat.getDate();
+                        Date date = getStartOfDay(chat.getDate());
+
                         Chat header = new Chat(
                                 previousMessage.getRoomId(),
-                                previousMessage.getDate(),
+                                date,
                                 "",
                                 "-1",
-                                (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                                (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                                 true,
                                 true
                         );
@@ -1177,13 +1152,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mChatList.add(header);
                     }
                 } else {
-                    Date date = chat.getDate();
+                    Date date = getStartOfDay(chat.getDate());
                     Chat header = new Chat(
                             chat.getRoomId(),
                             chat.getDate(),
                             "",
                             "-1",
-                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                             true,
                             true
                     );
@@ -1428,38 +1403,38 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onLeave = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (args.length != 0) {
-                        try {
-                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
+//            if (getActivity() == null) return;
+//            getActivity().runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (args.length != 0) {
+//                        try {
+//                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            });
         }
     };
 
     private Emitter.Listener onJoin = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (args.length != 0) {
-                        try {
-                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
+//            if (getActivity() == null) return;
+//            getActivity().runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (args.length != 0) {
+//                        try {
+//                            Log.d(TAG, "run: " + ((JSONObject) args[0]).toString(4));
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            });
         }
     };
 
@@ -1526,19 +1501,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onDelivered = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (args.length != 0) {
-                        try {
-                            Log.d(TAG, "runDelivered: " + ((JSONObject) args[0]).toString(4));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            });
+//            if (getActivity() == null) return;
+//            getActivity().runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    if (args.length != 0) {
+//                        try {
+//                            Log.d(TAG, "runDelivered: " + ((JSONObject) args[0]).toString(4));
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            });
         }
     };
 
@@ -1654,6 +1629,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
                         }
 
+                        sortLists(tempChatList);
+
                         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                         if (activity != null) {
                             activity.runOnUiThread(new Runnable() {
@@ -1664,9 +1641,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         @Override
                                         public void run() {
                                             mChatList.addAll(0, tempChatList);
-
                                             updateTopTimeHeader();
-
                                             mSkip -= 20;
                                             mChatAdapter.notifyItemRangeInserted(0, tempChatList.size());
                                             mLoadingMoreMessages = false;
@@ -1786,7 +1761,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         );
                     }
                 } catch (JSONException e) {
-                    Log.d(TAG, "parseMessagesJSON: no value for post");
+                    //Log.d(TAG, "parseMessagesJSON: no value for post");
                 }
 
                 if (post == null) {
@@ -1811,13 +1786,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (intoChatList.size() > 0) {
                     Chat previousMessage = intoChatList.get(intoChatList.size() - 1);
                     if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
-                        Date date = chat.getDate();
+                        Date date = getStartOfDay(chat.getDate());
                         Chat header = new Chat(
                                 previousMessage.getRoomId(),
-                                previousMessage.getDate(),
+                                date,
                                 chat.getOwnerId(),
                                 "-1",
-                                (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                                (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                                 true,
                                 true
                         );
@@ -1825,13 +1800,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         intoChatList.add(header);
                     }
                 } else {
-                    Date date = chat.getDate();
+                    Date date = getStartOfDay(chat.getDate());
                     Chat header = new Chat(
                             chat.getRoomId(),
-                            chat.getDate(),
+                            date,
                             chat.getOwnerId(),
                             "-1",
-                            (new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today"),
+                            (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                             true,
                             true
                     );
@@ -1847,6 +1822,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
     }
 
+    private void sortLists(ArrayList<Chat> chatList){
+        Collections.sort(chatList, new Comparator<Chat>() {
+            @Override
+            public int compare(Chat lhs, Chat rhs) {
+                return lhs.getDate().compareTo(rhs.getDate());
+            }
+        });
+    }
 
     private Post getPost(JSONObject obj) throws JSONException {
 
@@ -1886,7 +1869,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             //sets top date header to date of first visible item
             mTopDateHeaderTV.setVisibility(View.VISIBLE);
             Date date = mChatList.get(topItemIndex).getDate();
-            mTopDateHeaderTV.setText(new Date().getDate() != date.getDate() ? DATE_DIVIDER_DATE_FORMAT.format(date) : "Today");
+            mTopDateHeaderTV.setText((sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)));
         }else{
             mTopDateHeaderTV.setVisibility(View.INVISIBLE);
         }
@@ -1917,6 +1900,21 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         }
         return builder.toString();
+    }
+
+
+    public boolean sameDay(Date date, Date date2){
+        return (date.getDate() == date2.getDate() && date.getMonth() == date2.getMonth() && date.getYear() == date2.getYear());
+    }
+
+    public Date getStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
 }

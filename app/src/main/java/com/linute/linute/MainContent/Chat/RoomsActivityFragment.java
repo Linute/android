@@ -303,11 +303,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 ));
                             }
 
-
-
-
                             messages = room.getJSONArray("messages"); //list of messages in room
-
 
                             //if messages not empty or null
                             if (messages.length() > 0 && !messages.isNull(0)) {
@@ -328,21 +324,29 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                     }
                                 }
 
-                                boolean isOwner = message.getJSONObject("owner").getString("id").equals(mUserId);
+                                JSONObject owner = message.getJSONObject("owner");
+                                boolean isOwner = owner.getString("id").equals(mUserId);
+                                boolean showName = usersList.size() > 1 && message.getInt("type") == 0;
+
                                 //if you sent last message : show  "You: <text>"
 
                                 tempArray = message.getJSONArray("videos");
 
                                 if (tempArray.length() > 0) {
-                                    lastMessage = isOwner ? "You: sent a video" : "sent you a video";
+                                    lastMessage = "sent you a video";
                                 } else {
                                     tempArray = message.getJSONArray("images");
                                     if (tempArray.length() > 0) {
-                                        lastMessage = isOwner ? "You: sent an image" : "sent you an image";
+                                        lastMessage = "sent you an image";
                                     } else {
-                                        lastMessage = isOwner ? "You: " + message.getString("text") :
-                                                message.getString("text");
+                                        lastMessage = message.getString("text");
                                     }
+                                }
+
+                                if (isOwner){
+                                    lastMessage = "You: " + lastMessage;
+                                }else if (showName){
+                                    lastMessage = owner.getString("firstName") + ": " + lastMessage;
                                 }
 
                             } else { //no messages show "..."

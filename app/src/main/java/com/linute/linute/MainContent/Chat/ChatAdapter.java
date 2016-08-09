@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
@@ -280,6 +281,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .asBitmap()
+                                .placeholder(R.color.seperator_color)
                                 .into(vProfileImage);
                     } else {
                         vUserName.setVisibility(View.GONE);
@@ -382,6 +384,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .load(url)
                     .asBitmap()
                     .dontAnimate()
+                    .placeholder(R.color.seperator_color)
                     .into((ImageView) vLikeBar.findViewById(R.id.post_profile));
 
             ((TextView) vLikeBar.findViewById(R.id.post_name)).setText(name);
@@ -394,7 +397,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     .load(image)
                     .asBitmap()
                     .dontAnimate()
-                    .placeholder(R.drawable.chat_backgrounds)
+                    .placeholder(R.color.seperator_color)
                     .into(vImage);
         }
     }
@@ -412,6 +415,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public class ChatActionHolder extends RecyclerView.ViewHolder {
         public ChatActionHolder(View itemView) {
             super(itemView);
+
+            //loads gif
+            Glide.with(itemView.getContext())
+                    .load(R.drawable.typing_three_dots_android)
+                    .into(new GlideDrawableImageViewTarget((ImageView)itemView.findViewById(R.id.gif)));
         }
     }
 }
