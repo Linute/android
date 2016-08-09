@@ -1325,7 +1325,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         recList.post(new Runnable() {
             @Override
             public void run() {
-                recList.scrollToPosition(mChatAdapter.getItemCount() - 1);
+                mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount()-1,Integer.MIN_VALUE);
             }
         });
     }
