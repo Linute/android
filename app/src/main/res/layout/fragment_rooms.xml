@@ -13,7 +13,7 @@
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark"
-        app:titleMarginStart="16dp" />
+        app:titleMarginStart="24dp" />
 
     <TextView
         android:id="@+id/rooms_empty_text"
