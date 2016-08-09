@@ -14,6 +14,7 @@
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
         android:layout_margin="@dimen/activity_horizontal_margin"
+        android:scaleType="centerCrop"
         app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
     <LinearLayout

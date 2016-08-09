@@ -107,13 +107,13 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     .load(Utils.getImageUrlOfUser(user.userImage))
                     .dontAnimate()
                     .signature(new StringSignature(mImageSign))
-                    .placeholder(R.drawable.image_loading_background)
+                    .placeholder(R.color.seperator_color)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(vUserImage);
 
 
             String name = user.firstName+" "+user.lastName;
-            Log.i(TAG, "bindModel: "+name);
+            //Log.i(TAG, "bindModel: "+name);
             vUserName.setText(name);
 
             switch (status){

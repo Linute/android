@@ -118,6 +118,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
             String imageUrlOfUser = Utils.getImageUrlOfUser(user.userImage);
             Glide.with(itemView.getContext())
                     .load(imageUrlOfUser)
+                    .placeholder(R.color.seperator_color)
 //                    .asBitmap()
                     .into(profileImageIV);
             nameTV.setText(user.firstName + " " + user.lastName);
@@ -135,7 +136,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
 
         public void bind(){
-            profileImageIV.setImageResource(R.mipmap.ic_add_blue);
+            profileImageIV.setImageResource(R.drawable.ic_add_blue);
             nameTV.setText("Add People");
         }
 

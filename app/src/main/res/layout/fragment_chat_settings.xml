@@ -96,7 +96,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:padding="8dp"
-                android:src="@mipmap/ic_edit_blue"
+                android:src="@drawable/ic_edit_blue"
                 />
             <TextView
                 android:id="@+id/setting_group_name"
@@ -126,7 +126,7 @@
                 android:layout_height="40dp"
                 android:layout_gravity="center_vertical"
                 android:padding="8dp"
-                android:src="@mipmap/ic_notification_bell_blue"
+                android:src="@drawable/ic_notification_bell_blue"
                 />
             <TextView
                 android:id="@+id/setting_notifications_button"

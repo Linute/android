@@ -67,7 +67,8 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         public void bind(User user){
             Glide.with(itemView.getContext())
                     .load(Utils.getImageUrlOfUser(user.userImage))
-                    .asBitmap()
+                    .dontAnimate()
+                    .placeholder(R.color.seperator_color)
                     .into(userIV);
         }
     }
