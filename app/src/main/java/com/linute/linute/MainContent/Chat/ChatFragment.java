@@ -414,6 +414,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
             @Override
             public void afterTextChanged(Editable s) {
+                if(s.toString().matches("^[\\n\\s]+$")){
+                    mInputMessageView.setText("");
+                }
+
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     if (activity == null || mUserId == null || !activity.socketConnected()) return;
