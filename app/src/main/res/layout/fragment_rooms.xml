@@ -1,37 +1,40 @@
-<RelativeLayout android:id="@+id/fragment_rooms"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:context="com.linute.linute.MainContent.Chat.RoomsActivityFragment">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_rooms"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.linute.linute.MainContent.Chat.RoomsActivityFragment">
 
-    <android.support.v7.widget.Toolbar android:id="@+id/rooms_toolbar"
-                                       android:layout_width="match_parent"
-                                       android:layout_height="wrap_content"
-                                       android:background="@color/colorPrimary"
-                                       android:elevation="4dp"
-                                       android:theme="@style/ThemeOverlay.AppCompat.Dark"
-    />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/rooms_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark" />
 
-    <TextView android:id="@+id/rooms_empty_text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_centerHorizontal="true"
-              android:layout_marginTop="100dp"
-              android:text="No messages"
-              android:textSize="@dimen/header_font_size"
-              android:visibility="gone"
-    />
+    <TextView
+        android:id="@+id/rooms_empty_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="100dp"
+        android:text="No messages"
+        android:textSize="@dimen/header_font_size"
+        android:visibility="gone" />
 
-    <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh_rooms"
-                                                  android:layout_width="match_parent"
-                                                  android:layout_height="wrap_content"
-                                                  android:layout_below="@id/rooms_toolbar">
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_rooms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rooms_toolbar">
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rooms_list"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rooms_toolbar"/>
+            android:layout_below="@id/rooms_toolbar" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -44,6 +47,5 @@
         android:layout_alignParentEnd="true"
         android:layout_margin="@dimen/fab_margin"
         android:scaleType="center"
-        android:src="@drawable/ic_content_add"
-    />
+        android:src="@drawable/ic_content_add" />
 </RelativeLayout>
