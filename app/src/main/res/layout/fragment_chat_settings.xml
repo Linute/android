@@ -45,7 +45,9 @@
             android:orientation="horizontal"
             android:paddingBottom="16dp"
             android:paddingTop="16dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:layout_marginBottom="24dp"
+            >
 
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/dm_user_icon"
@@ -79,11 +81,6 @@
 
         </RelativeLayout>
 
-        <View
-            android:id="@+id/dm_divider"
-            android:layout_width="match_parent"
-            android:layout_height="24dp"
-            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/setting_group_name_container"
@@ -208,25 +205,17 @@
 
         </FrameLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/list_participants"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="24dp"
             android:background="@color/pure_white" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
-
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
             android:background="@color/pure_white">
 
             <FrameLayout

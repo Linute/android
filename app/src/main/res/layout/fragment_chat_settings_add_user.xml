@@ -28,6 +28,7 @@
         android:lines="1"
         android:textSize="16sp"
         android:paddingLeft="16dp"
+        android:textColor="@color/eighty_black"
         tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"
         android:gravity="center_vertical" />
 

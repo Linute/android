@@ -247,19 +247,19 @@ room: id of room
 
 
         View DMHeader = view.findViewById(R.id.dm_header);
-        View DMDivider = view.findViewById(R.id.dm_divider);
+//        View DMDivider = view.findViewById(R.id.dm_divider);
 
 
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             participantsRV.setVisibility(View.GONE);
             leaveGroupView.setVisibility(View.GONE);
             DMHeader.setVisibility(View.VISIBLE);
-            DMDivider.setVisibility(View.VISIBLE);
+//            DMDivider.setVisibility(View.VISIBLE);
         } else {
             participantsRV.setVisibility(View.VISIBLE);
             leaveGroupView.setVisibility(View.VISIBLE);
             DMHeader.setVisibility(View.GONE);
-            DMDivider.setVisibility(View.GONE);
+//            DMDivider.setVisibility(View.GONE);
         }
         if (mParticipants != null) {
             LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
