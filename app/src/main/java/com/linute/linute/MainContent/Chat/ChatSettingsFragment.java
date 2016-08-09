@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -444,7 +446,7 @@ room: id of room
     }
 
     private void updateRoomName(View view) {
-        View groupNameSettingView = view.findViewById(R.id.setting_group_name);
+        final View groupNameSettingView = view.findViewById(R.id.setting_group_name);
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
             view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
@@ -469,6 +471,8 @@ room: id of room
                             })
                             .setNegativeButton("Cancel", null)
                             .create().show();
+                    InputMethodManager inputMethodManager=(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 }
             });
         }
