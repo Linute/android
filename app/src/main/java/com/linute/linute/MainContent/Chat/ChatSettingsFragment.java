@@ -324,6 +324,7 @@ room: id of room
                         }
                     });
                     activity.replaceContainerWithFragment(selectUserFragment);
+
                 }
             });
         }

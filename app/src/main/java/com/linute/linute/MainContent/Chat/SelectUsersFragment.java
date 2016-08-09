@@ -180,6 +180,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
             }
         });
 
+
         search("");
     }
 
@@ -245,6 +246,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                     if (getActivity() != null){
@@ -296,6 +298,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                                         @Override
                                         public void run() {
                                             mSearchAdapter.notifyDataSetChanged();
+                                            View view = getView();
+                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+
                                         }
                                     });
                                 }
