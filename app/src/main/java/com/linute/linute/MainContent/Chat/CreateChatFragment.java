@@ -292,6 +292,9 @@ public class CreateChatFragment extends SelectUsersFragment {
                                         @Override
                                         public void run() {
                                             mSearchAdapter.notifyDataSetChanged();
+                                            View view = getView();
+                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+
                                         }
                                     });
                                 }

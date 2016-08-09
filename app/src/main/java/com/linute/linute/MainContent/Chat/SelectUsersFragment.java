@@ -60,6 +60,13 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     protected final static String KEY_LOCKED_USERS = "locked";
     protected final static String KEY_SELECTED_USERS = "selected";
 
+    /*
+    * A focused user appears as a UserListItem at the top of the Search list
+    * A user gets focused when their icon is touched from inside the SelectedUsersRV
+    * Only one user is focused at a time, if another user is already focused, they're removed
+    * If a user is already focused, they'll refocus to draw attention to the user
+    * */
+    protected User focusedUser = null;
 
     SharedPreferences mSharedPreferences;
 
@@ -136,9 +143,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
         mSearchRV.setHasFixedSize(true);
-        final LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mSearchRV.setLayoutManager(llm);
+        final LinearLayoutManager searchLLM = new LinearLayoutManager(getActivity());
+        searchLLM.setOrientation(LinearLayoutManager.VERTICAL);
+        mSearchRV.setLayoutManager(searchLLM);
         mSearchRV.setAdapter(mSearchAdapter);
         mSearchAdapter.setOnUserSelectedListener(this);
 
@@ -152,12 +159,24 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
             @Override
             public void onUserSelected(User user, int position) {
-                if(!mSearchUserList.get(0).userId.equals(user.userId)) {
-                    mSearchUserList.add(0, user);
-                    mSearchAdapter.notifyDataSetChanged();
-                }
-                llm.scrollToPosition(0);
 
+                int listPosition = User.findUser(mSearchUserList, user);
+                if(listPosition != -1){
+                    mSearchUserList.remove(listPosition);
+                    mSearchAdapter.notifyItemRemoved(listPosition);
+                }
+
+                if(focusedUser != null){
+                    mSearchUserList.remove(0);
+                    mSearchAdapter.notifyItemRemoved(0);
+                }
+
+                mSearchUserList.add(0, user);
+                mSearchAdapter.notifyItemInserted(0);
+                searchLLM.scrollToPosition(0);
+                focusedUser = user;
+
+                mSearchAdapter.notifyDataSetChanged();
             }
         });
 
