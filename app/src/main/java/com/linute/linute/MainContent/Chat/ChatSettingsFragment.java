@@ -240,8 +240,12 @@ room: id of room
 
         RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
         View leaveGroupView = view.findViewById(R.id.setting_leave_group);
+        View createGroupView =view.findViewById(R.id.dm_create_group);
         mNotificationSettingsView = (TextView) view.findViewById(R.id.setting_notifications_button);
         mNotificationSettingsIndicatorView = (TextView) view.findViewById(R.id.setting_notifications_indicator);
+
+
+
         View DMHeader = view.findViewById(R.id.dm_header);
         View DMDivider = view.findViewById(R.id.dm_divider);
 
@@ -408,6 +412,33 @@ room: id of room
             }
         });
 
+        createGroupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                if(activity != null) {
+
+                    CreateChatFragment frag = CreateChatFragment.newInstance(mParticipants);
+                    frag.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
+                        @Override
+                        public void onUsersSelected(ArrayList<User> users) {
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
+                        }
+                    });
+                    frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                        @Override
+                        public void onRoomSelected(ChatRoom room) {
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), null));
+                        }
+                    });
+                    activity.replaceContainerWithFragment(frag);
+
+
+                }
+
+            }
+        });
+
 
     }
 
@@ -415,6 +446,7 @@ room: id of room
         View groupNameSettingView = view.findViewById(R.id.setting_group_name);
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
+            view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
             User u = mParticipants.get(0);
 
             ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.firstName+ " "+u.lastName);

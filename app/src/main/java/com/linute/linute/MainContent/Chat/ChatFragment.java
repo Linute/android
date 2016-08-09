@@ -211,14 +211,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mRoomId = getArguments().getString(ROOM_ID);
-//            mOtherPersonName = getArguments().getString(OTHER_PERSON_NAME);
-//            mOtherPersonId = getArguments().getString(OTHER_PERSON_ID);
-            //mRoomUsersCnt = getArguments().getInt(USER_COUNT);
-            //mChatHeadList = getArguments().getParcelableArrayList(CHAT_HEADS);
 
             mUsers = getArguments().getParcelableArrayList(ARG_USERS);
-            for (User user : mUsers) {
-                mUserMap.put(user.userId, user);
+            if(mUsers != null) {
+                for (User user : mUsers) {
+                    mUserMap.put(user.userId, user);
+                }
             }
         }
     }
@@ -242,7 +240,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         //updateToolbar();
 
-        if (isDM()) {
+       /* if (isDM()) {
             toolbar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -252,7 +250,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
                 }
             });
-        }
+        }*/
 
 
         View settingsButton = toolbar.findViewById(R.id.toolbar_chat_settings);

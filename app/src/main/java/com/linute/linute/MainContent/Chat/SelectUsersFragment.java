@@ -57,7 +57,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     protected RecyclerView mSelectedRV;
     protected RecyclerView mSearchRV;
 
-    private final static String KEY_LOCKED_USERS = "selected";
+    protected final static String KEY_LOCKED_USERS = "locked";
+    protected final static String KEY_SELECTED_USERS = "selected";
+
 
     SharedPreferences mSharedPreferences;
 
@@ -68,13 +70,24 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         selectUserFragment.setArguments(arguments);
         return selectUserFragment;
     }
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers, ArrayList<User> selectedUsers){
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
+        arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
+        SelectUsersFragment selectUserFragment = new SelectUsersFragment();
+        selectUserFragment.setArguments(arguments);
+        return selectUserFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if(arguments != null) {
-            mLockedUsers = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+            ArrayList<User> lockedUsersArg = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+            if(lockedUsersArg != null) mLockedUsers = lockedUsersArg;
+            ArrayList<User> selectedUsersArg = arguments.getParcelableArrayList(KEY_SELECTED_USERS);
+            if(selectedUsersArg != null) mSelectedUsers = selectedUsersArg;
         }
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }

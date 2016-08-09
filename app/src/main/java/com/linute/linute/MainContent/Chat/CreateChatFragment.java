@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import com.linute.linute.API.LSDKChat;
@@ -40,6 +41,14 @@ public class CreateChatFragment extends SelectUsersFragment {
         UserGroupSearchAdapter userGroupSearchAdapter = new UserGroupSearchAdapter(getContext(), mSearchRoomList, mSearchUserList);
         userGroupSearchAdapter.setOnRoomSelectedListener(onRoomSelectedListener);
         return userGroupSearchAdapter;
+    }
+
+    public static CreateChatFragment newInstance(ArrayList<User> selectedUsers){
+        CreateChatFragment createChatFrag = new CreateChatFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
+        createChatFrag.setArguments(arguments);
+        return createChatFrag;
     }
 
     @Override
