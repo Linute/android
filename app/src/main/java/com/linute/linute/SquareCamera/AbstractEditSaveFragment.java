@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
 import com.linute.linute.SquareCamera.overlay.OverlayWipeAdapter;
@@ -37,6 +38,7 @@ import com.linute.linute.SquareCamera.overlay.StickerDrawerAdapter;
 import com.linute.linute.SquareCamera.overlay.WipeViewPager;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+
 import java.io.File;
 
 /**
@@ -63,6 +65,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     protected String mUserToken;
 
     protected View mUploadButton;
+    protected View mStickerHandle;
 
     protected CoordinatorLayout mStickerContainer;
     protected RecyclerView mStickerDrawer;
@@ -131,14 +134,15 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         });
 
-        View stickerDrawerHandle = mToolbar.findViewById(R.id.sticker_drawer_handle);
+        mStickerHandle = mToolbar.findViewById(R.id.sticker_drawer_handle);
         if (mFromGallery) {
-            stickerDrawerHandle.setVisibility(View.GONE);
+            mStickerHandle.setVisibility(View.GONE);
         } else {
-            stickerDrawerHandle.setOnClickListener(new View.OnClickListener() {
+            mStickerHandle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    toggleStickerDrawer();
+                    if (!isStickerDrawerOpen())
+                        toggleStickerDrawer();
                 }
             });
         }
@@ -170,9 +174,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isStickerDrawerOpen()) {
-                    closeStickerDrawer();
-                } else {
+                if (!isStickerDrawerOpen()) {
                     uploadContent();
                 }
             }
@@ -317,6 +319,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 mTextView.setText(mEditText.getText().toString());
                 mTextView.setVisibility(View.VISIBLE);
             }
+            mToolbar.setVisibility(View.VISIBLE);
             hideKeyboard();
         }
     }
@@ -481,6 +484,14 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             }
         });
 
+
+        mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mToolbar.setVisibility(hasFocus ? View.INVISIBLE : View.VISIBLE);
+            }
+        });
+
         //movement
         mTextView.setOnTouchListener(new View.OnTouchListener() {
             float prevY;
@@ -493,7 +504,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
-                        Log.i(TAG, "onTouch: " + mAllContent.getHeight() + " " + mAllContent.getWidth());
+                        //Log.i(TAG, "onTouch: " + mAllContent.getHeight() + " " + mAllContent.getWidth());
                         prevY = event.getY();
                         totalMovement = 0;
                         if (bottomMargin == -1) {
@@ -564,11 +575,13 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         if (mFromGallery) return;
         mStickerDrawer.setVisibility(View.VISIBLE);
         mUploadButton.setAlpha(.3f);
+        if (!mFromGallery) mStickerHandle.setAlpha(.3f);
     }
 
     protected void closeStickerDrawer() {
         mStickerDrawer.setVisibility(View.GONE);
         mUploadButton.setAlpha(1);
+        if (!mFromGallery) mStickerHandle.setAlpha(1);
     }
 
 

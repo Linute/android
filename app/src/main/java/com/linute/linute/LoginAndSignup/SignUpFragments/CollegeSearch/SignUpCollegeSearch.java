@@ -26,14 +26,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.HttpUrl;
 import okhttp3.Response;
 
 /**
@@ -113,34 +110,24 @@ public class SignUpCollegeSearch extends Fragment {
         vMaterialSearch.setSearchActions(new MaterialSearchToolbar.SearchActions() {
             @Override
             public void search(final String query) {
-                if (mType == TYPE_SEARCH) {
-                    mSeachHandler.removeCallbacksAndMessages(null);
-                    mSeachHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (query.isEmpty())
-                                mResponseHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mColleges.clear();
-                                        mColleges.addAll(mUnfilteredColleges);
-                                        mCollegeAdapter.notifyDataSetChanged();
-                                        showList();
-                                    }
-                                });
-                            else
-                                searchCollege(query);
-                        }
-                    }, 300);
-                } else {
-                    mResponseHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            Log.i(TAG, "run: "+query);
-                            filterSearch(query);
-                        }
-                    }, 250);
-                }
+                mSeachHandler.removeCallbacksAndMessages(null);
+                mSeachHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (query.isEmpty())
+                            mResponseHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mColleges.clear();
+                                    mColleges.addAll(mUnfilteredColleges);
+                                    mCollegeAdapter.notifyDataSetChanged();
+                                    showList();
+                                }
+                            });
+                        else
+                            searchCollege(query);
+                    }
+                }, 300);
             }
         });
 
@@ -179,6 +166,11 @@ public class SignUpCollegeSearch extends Fragment {
             getInitialList();
 
 
+        vMaterialSearch.requestFocus();
+
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
         return root;
     }
 
@@ -199,8 +191,8 @@ public class SignUpCollegeSearch extends Fragment {
         showProgress();
         HashMap<String, String> param = new HashMap<>();
 
-        param.put("latitude", mLatitude+"");
-        param.put("longitude", mLongitude+"");
+        param.put("latitude", mLatitude + "");
+        param.put("longitude", mLongitude + "");
 
         new LSDKCollege(getContext()).getColleges(param, new Callback() {
             @Override
@@ -271,8 +263,6 @@ public class SignUpCollegeSearch extends Fragment {
                                                 mColleges.addAll(mUnfilteredColleges);
                                                 mCollegeAdapter.notifyDataSetChanged();
                                                 showList();
-                                            } else {
-                                                filterSearch(vMaterialSearch.getText());
                                             }
                                         }
                                     });
@@ -303,32 +293,6 @@ public class SignUpCollegeSearch extends Fragment {
                 }
             }
         });
-    }
-
-
-    private void filterSearch(String filter) {
-        if (filter.isEmpty()) {
-            mColleges.clear();
-            mColleges.addAll(mUnfilteredColleges);
-            mCollegeAdapter.notifyDataSetChanged();
-        }else {
-            final ArrayList<College> filtered = new ArrayList<>();
-            filter = filter.toLowerCase();
-            for (College college : mUnfilteredColleges) {
-                if (college.getCollegeName().toLowerCase().contains(filter)) {
-                    filtered.add(college);
-                }
-            }
-
-            mColleges.clear();
-            mColleges.addAll(filtered);
-            mCollegeAdapter.notifyDataSetChanged();
-        }
-
-
-        if (mColleges.isEmpty())
-            showEmpty();
-        else showList();
     }
 
 

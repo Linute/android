@@ -15,11 +15,14 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKUser;
@@ -49,6 +52,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
     public static final String TAG = SignUpProfilePicture.class.getSimpleName();
     private ImageView vProfileImage;
     private SignUpInfo mSignUpInfo;
+    private Button vButton;
 
     @Nullable
     @Override
@@ -58,12 +62,17 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         vProfileImage = (ImageView) root.findViewById(R.id.profile_image);
         mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
 
+        vButton = (Button) root.findViewById(R.id.create);
+
         if (mSignUpInfo.getImage() != null) {
             Glide.with(this)
                     .load(mSignUpInfo.getImage())
-                    .asBitmap()
                     .placeholder(R.color.seperator_color)
                     .into(vProfileImage);
+
+            activateButton(true);
+        } else {
+            activateButton(false);
         }
 
         vProfileImage.setOnClickListener(new View.OnClickListener() {
@@ -80,7 +89,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
             }
         });
 
-        root.findViewById(R.id.create).setOnClickListener(new View.OnClickListener() {
+        vButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createAccount();
@@ -93,7 +102,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
 
     private void startCameraChoices() {
         if (getActivity() == null) return;
-        String[] options = {"Camera", "Photo Gallery"};
+        String[] options = {"Camera", "Photo Gallery", "Import from Facebook"};
         new AlertDialog.Builder(getActivity())
                 .setItems(options, this)
                 .show();
@@ -103,21 +112,53 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        int type;
         switch (which) {
             case 0:
-                type = ProfileCameraActivity.TYPE_CAMERA;
+                startCamera(ProfileCameraActivity.TYPE_CAMERA);
                 break;
             case 1:
-                type = ProfileCameraActivity.TYPE_GALLERY;
+                startCamera(ProfileCameraActivity.TYPE_GALLERY);
+                break;
+            case 2:
+                getFacebookProfileImage();
                 break;
             default:
-                return;
+                break;
         }
+    }
 
+
+    private void startCamera(int type) {
         Intent i = new Intent(getActivity(), ProfileCameraActivity.class);
         i.putExtra(ProfileCameraActivity.TYPE_KEY, type);
         startActivityForResult(i, REQUEST_PHOTO);
+    }
+
+    private void getFacebookProfileImage() {
+        PreLoginActivity activity = (PreLoginActivity) getActivity();
+        if (activity != null) {
+            activity.getFBProfileImage(new PreLoginActivity.GetPhotoCallback() {
+                @Override
+                public void success(String id) {
+                    Uri image = Uri.parse(Utils.getFBImage(id));
+                    mSignUpInfo.setImage(image);
+
+                    Glide.with(SignUpProfilePicture.this)
+                            .load(image)
+                            .asBitmap()
+                            .placeholder(R.color.seperator_color)
+                            .into(vProfileImage);
+
+                    activateButton(true);
+                }
+
+                @Override
+                public void error() {
+                    if (getContext() != null)
+                        Toast.makeText(getContext(), "Error retrieving Facebook photo", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 
@@ -125,14 +166,12 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         if (getContext() == null) return;
 
         final ProgressDialog dialog = ProgressDialog.show(getContext(), "", "Creating account...", true, false);
-
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
                 sendInfoToServer(getParams(), dialog);
             }
         });
-
     }
 
 
@@ -160,7 +199,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
 
         try {
             if (mSignUpInfo.getImage() != null) {
-                if (mSignUpInfo instanceof FBSignUpInfo && mSignUpInfo.getImage().toString().contains("facebook.com")) {
+                if (mSignUpInfo.getImage().toString().contains("facebook.com")) {
                     info.put("profileImage", Utils.encodeImageBase64(
                             BitmapFactory.decodeFile(
                                     Glide.with(this).load(mSignUpInfo.getImage()).downloadOnly(720, 720).get().getAbsolutePath()
@@ -282,6 +321,18 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
     }
 
 
+    private void activateButton(boolean act) {
+        if (act) {
+            vButton.setBackgroundResource(R.drawable.active_button);
+            vButton.setTextColor(ContextCompat.getColor(vButton.getContext(), R.color.pure_white));
+            vButton.setText("Finish");
+        } else {
+            vButton.setBackgroundResource(R.drawable.inactive_button);
+            vButton.setTextColor(ContextCompat.getColor(vButton.getContext(), R.color.secondaryColor));
+            vButton.setText("Skip");
+        }
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if ((requestCode == REQUEST_PHOTO) && resultCode == Activity.RESULT_OK) { //photo came back from crop
@@ -291,6 +342,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
             Glide.with(this)
                     .load(image)
                     .into(vProfileImage);
+            activateButton(true);
         }
     }
 }

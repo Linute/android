@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.MinimumWidthImageView;
@@ -72,8 +71,14 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
 
     @Override
     protected void backPressed() {
-        CameraActivity activity = (CameraActivity) getActivity();
-        if (activity != null) activity.clearBackStack();
+        if(isStickerDrawerOpen()){
+            toggleStickerDrawer();
+        }else {
+            CameraActivity activity = (CameraActivity) getActivity();
+            if (activity != null) {
+                activity.clearBackStack();
+            }
+        }
     }
 
 
@@ -150,6 +155,7 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                         @Override
                         public void call(Uri uri) {
                             if (uri != null) {
+
                                 PendingUploadPost pendingUploadPost =
                                         new PendingUploadPost(
                                                 ObjectId.get().toString(),
@@ -163,7 +169,13 @@ public class EditSavePhotoFragment extends AbstractEditSaveFragment {
                                                 mUserId,
                                                 mUserToken
                                         );
-                                ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(pendingUploadPost), SendToFragment.TAG);
+
+                                Intent result = new Intent();
+                                result.putExtra(PendingUploadPost.PENDING_POST_KEY, pendingUploadPost);
+                                Toast.makeText(getActivity(), "Uploading photo in background...", Toast.LENGTH_SHORT).show();
+
+                                getActivity().setResult(Activity.RESULT_OK, result);
+                                getActivity().finish();
                             }else {
                                 if (getActivity() != null) {
                                     Toast.makeText(getActivity(), "An error occured while saving the image", Toast.LENGTH_SHORT).show();

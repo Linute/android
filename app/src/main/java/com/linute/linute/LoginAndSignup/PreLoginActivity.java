@@ -38,6 +38,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -76,9 +77,6 @@ public class PreLoginActivity extends AppCompatActivity {
         if (AccessToken.getCurrentAccessToken() != null) {
             LoginManager.getInstance().logOut();
         }
-
-        setUpFacebookCallback();
-
 
         vChat = findViewById(R.id.chat_button);
 
@@ -145,6 +143,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
 
     public void selectedFacebookLogin() {
+        setUpFacebookLoginCallback();
         LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Arrays.asList("user_friends", "public_profile", "email"));
     }
 
@@ -160,12 +159,10 @@ public class PreLoginActivity extends AppCompatActivity {
         addFragment(new LinuteLoginFragment());
     }
 
-    private void setUpFacebookCallback() {
-
+    public void setUpFacebookLoginCallback() {
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-
                 if (!loginResult.getRecentlyDeniedPermissions().isEmpty()) {
                     showFacebookPermissionsRationale();
                     return;
@@ -173,7 +170,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
                 mFBToken = loginResult.getAccessToken().getToken();
 
-                final ProgressDialog progress = ProgressDialog.show(PreLoginActivity.this, null, "Retrieving information from Facebook", true);
+                ProgressDialog progress = ProgressDialog.show(PreLoginActivity.this, null, "Retrieving information from Facebook", true);
                 loginOrSignUpWithFacebook(mFBToken, progress);
             }
 
@@ -187,7 +184,6 @@ public class PreLoginActivity extends AppCompatActivity {
                 showFacebookErrorToast();
             }
         });
-
     }
 
 
@@ -436,6 +432,52 @@ public class PreLoginActivity extends AppCompatActivity {
         mOnBackPressed = onBackPressed;
     }
 
+
+    private void setUpFacebookProfilePictureCallback(final GetPhotoCallback callback){
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                if (!loginResult.getRecentlyDeniedPermissions().isEmpty()) {
+                    callback.error();
+                    return;
+                }
+
+                callback.success(loginResult.getAccessToken().getUserId());
+            }
+
+            @Override
+            public void onCancel() {
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                error.printStackTrace();
+                showFacebookErrorToast();
+            }
+        });
+    }
+
+    public void clearFBCallback(){
+        LoginManager.getInstance().registerCallback(mCallbackManager, null);
+    }
+
+
+    public void getFBProfileImage(GetPhotoCallback callback){
+        setUpFacebookProfilePictureCallback(callback);
+        LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Collections.singletonList("public_profile"));
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        clearFBCallback();
+    }
+
+    public interface GetPhotoCallback{
+        void success(String id);
+        void error();
+    }
 
     public interface OnBackPressed {
         void onBack();

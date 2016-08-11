@@ -68,8 +68,5 @@
                       android:textColor="@color/twentyfive_black"
                       android:textSize="@dimen/sub_font_size"/>
         </LinearLayout>
-
     </LinearLayout>
-
-
 </LinearLayout>

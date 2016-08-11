@@ -28,6 +28,7 @@ import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
@@ -54,6 +55,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.Database.TaptUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -68,10 +70,14 @@ import java.net.URISyntaxException;
 import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.transports.WebSocket;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class MainActivity extends BaseTaptActivity {
 
@@ -108,10 +114,13 @@ public class MainActivity extends BaseTaptActivity {
     private Socket mSocket;
     private boolean mConnecting;
 
+    private Realm mRealm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mRealm = Realm.getDefaultInstance();
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new BaseFragment[4];
@@ -136,10 +145,10 @@ public class MainActivity extends BaseTaptActivity {
                     mPreviousItem = null;
                     replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
                 } else {
-                    if (getSupportFragmentManager().getBackStackEntryCount() > 1){
+                    if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                         clearBackStack();
                         replaceContainerWithFragment(getFragment(FRAGMENT_INDEXES.PROFILE));
-                    }else {
+                    } else {
                         getFragment(FRAGMENT_INDEXES.PROFILE).resetFragment();
                     }
                 }
@@ -512,12 +521,22 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("filters", filter);
                     mSocket.on("status colors", statusColors);
                     mSocket.on("blocked", blocked);
+                    mSocket.on("sync contacts", syncContacts);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
                     mSocket.connect();
                     mConnecting = false;
 
                     mSocket.emit(API_Methods.VERSION + ":posts:refresh", new JSONObject());
+
+                    try {
+                        JSONObject object = new JSONObject();
+                        object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));
+
+                        mSocket.emit(API_Methods.VERSION + ":users:sync contacts", object);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     //emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
                 } catch (URISyntaxException e) {
                     throw new RuntimeException(e);
@@ -547,6 +566,7 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.off("filters", filter);
             mSocket.off("status colors", statusColors);
             mSocket.off("blocked", blocked);
+            mSocket.off("sync contacts", syncContacts);
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
@@ -666,7 +686,7 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
-                Log.i(TAG, "call: "+activity.toString(4));
+                //Log.i(TAG, "call: " + activity.toString(4));
                 //message
                 if (activity.getString("action").equals("messager")) {
                     final NewMessageEvent chat = new NewMessageEvent(true);
@@ -821,7 +841,7 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject body = new JSONObject(args[0].toString());
-                Log.i(TAG, "call: " + body.toString(4));
+                //Log.i(TAG, "call: " + body.toString(4));
                 final String text = body.getString("text");
 
                 emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
@@ -934,6 +954,8 @@ public class MainActivity extends BaseTaptActivity {
                 memeDir.mkdirs();
 
 
+                if (memes == null) return;
+
                 for (File f : memeDir.listFiles()) {
                     for (int i = 0; i < memes.length(); i++) {
                         String fileName = memes.getString(i);
@@ -984,6 +1006,7 @@ public class MainActivity extends BaseTaptActivity {
                 File filtersDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "filters/");
                 filtersDir.mkdirs();
 
+                if (filters == null) return;
 
                 for (File f : filtersDir.listFiles()) {
                     for (int i = 0; i < filters.length(); i++) {
@@ -1044,31 +1067,96 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private Emitter.Listener statusColors = new Emitter.Listener(){
+    private Emitter.Listener statusColors = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             JSONObject object = (JSONObject) args[0];
             if (object != null) {
                 try {
-                    SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(),Context.MODE_PRIVATE);
+                    SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
                     SharedPreferences.Editor prefs = sharedPrefs.edit();
                     JSONArray colors = object.getJSONArray("colors");
-                    for(int i = 0;i<colors.length();i++){
+
+                    if (colors == null) return;
+
+                    for (int i = 0; i < colors.length(); i++) {
                         JSONObject color = colors.getJSONObject(i);
-                        int tColor = Integer.valueOf(color.getString("text"),16);
+                        int tColor = Integer.valueOf(color.getString("text"), 16);
                         int bColor = Integer.valueOf(color.getString("background"), 16);
-                        prefs.putInt("status_color_"+i+"_text", /*(tColor <= 0x01000000 ? */0xFF000000+ tColor/* + 0xFF000000 : tColor)*/);
-                        prefs.putInt("status_color_"+i+"_bg", /*(bColor <= 0x01000000 ? */0xFF000000+ bColor /*+ 0xFF000000 : bColor)*/);
+                        prefs.putInt("status_color_" + i + "_text", /*(tColor <= 0x01000000 ? */0xFF000000 + tColor/* + 0xFF000000 : tColor)*/);
+                        prefs.putInt("status_color_" + i + "_bg", /*(bColor <= 0x01000000 ? */0xFF000000 + bColor /*+ 0xFF000000 : bColor)*/);
                     }
                     prefs.commit();
 
-                }catch(JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
     };
 
+    private Emitter.Listener syncContacts = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if ((boolean) args[0]) {
+                updateFriendsList();
+            }
+        }
+    };
+
+    private void updateFriendsList() {
+        new LSDKFriends(this).getSendToList(mSharedPreferences.getLong("timestamp", 0), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        final JSONObject object = new JSONObject(response.body().string());
+                       // Log.d(TAG, "onResponse: " + object.toString(4));
+
+                        mRealm.executeTransactionAsync(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                try {
+                                    JSONArray insertAndDelete = object.getJSONArray("insert");
+                                    for (int i = 0; i < insertAndDelete.length() ; i++){
+                                        realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(i), true));
+                                    }
+
+                                    insertAndDelete = object.getJSONArray("delete");
+                                    for (int j = 0; j < insertAndDelete.length(); j++){
+                                        realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(j), false));
+                                    }
+
+                                    mSharedPreferences.edit().putLong("timestamp", object.getLong("timestamp")).apply();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.d(TAG, "onResponse: " + response.body().string());
+                }
+            }
+        });
+    }
+
+    private TaptUser getUser(JSONObject object, boolean insert) throws JSONException {
+        return new TaptUser(
+                object.getString("id"),
+                object.getString("fullName"),
+                object.getString("profileImage"),
+                insert
+        );
+    }
 
     private void showUpdateSnackbar(String text) {
         final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);
@@ -1092,5 +1180,10 @@ public class MainActivity extends BaseTaptActivity {
     public void addActivityFragment() {
         addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY), UpdatesFragment.TAG);
     }
-}
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mRealm.close();
+    }
+}

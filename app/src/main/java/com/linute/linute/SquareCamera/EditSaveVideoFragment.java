@@ -33,7 +33,6 @@ import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
 import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
-import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -135,10 +134,9 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
             @Override
             public void onClick(View v) {
                 if (mVideoState == VS_IDLE)
-                    showConfirmDialog();
+                    backPressed();
             }
         });
-
 
 
         mFfmpeg = FFmpeg.getInstance(getActivity());
@@ -255,7 +253,11 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
     @Override
     protected void backPressed() {
-        showConfirmDialog();
+        if (isStickerDrawerOpen()) {
+            toggleStickerDrawer();
+        } else {
+            showConfirmDialog();
+        }
     }
 
     @Override
@@ -434,7 +436,7 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
 
                     @Override
                     public void onNext(Uri image) {
-                        if (mReturnType == CameraActivity.RETURN_URI_AND_PRIVACY) {
+                        if (mReturnType != CameraActivity.SEND_POST) {
                             Intent i = new Intent()
                                     .putExtra("video", Uri.parse(outputFile))
                                     .putExtra("image", image)
@@ -475,7 +477,12 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         );
 
         showProgress(false);
-        ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
+        Intent result = new Intent();
+        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+        Toast.makeText(getActivity(), "Uploading video in background...", Toast.LENGTH_SHORT).show();
+
+        getActivity().setResult(Activity.RESULT_OK, result);
+        getActivity().finish();
     }
 
 
