@@ -420,13 +420,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mInputMessageView.setText("");
                 }
 
+                final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     if (activity == null || mUserId == null || !activity.socketConnected()) return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     if (activity == null || mUserId == null || !activity.socketConnected()) return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
@@ -435,6 +434,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 //change alpha of send button
                 if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
+
+                if(mAmAlreadyTyping) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                        }
+                    },3000);
+                }
+
             }
         });
 
