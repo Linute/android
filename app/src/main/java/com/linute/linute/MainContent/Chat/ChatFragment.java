@@ -1322,12 +1322,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void scrollToBottom() {
+
+        Activity activity = getActivity();
+        if(activity != null){
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount()-1,Integer.MIN_VALUE);
+                }
+            });
+        }
+
+/*
         recList.post(new Runnable() {
             @Override
             public void run() {
                 mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount()-1,Integer.MIN_VALUE);
             }
         });
+*/
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
