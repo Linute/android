@@ -34,6 +34,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.GalleryFragment;
@@ -250,17 +252,21 @@ room: id of room
 
         View DMHeader = view.findViewById(R.id.dm_header);
 //        View DMDivider = view.findViewById(R.id.dm_divider);
+        View blockView = view.findViewById(R.id.dm_block);
 
 
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             participantsRV.setVisibility(View.GONE);
             leaveGroupView.setVisibility(View.GONE);
             DMHeader.setVisibility(View.VISIBLE);
+            blockView.setVisibility(View.VISIBLE);
+
 //            DMDivider.setVisibility(View.VISIBLE);
         } else {
             participantsRV.setVisibility(View.VISIBLE);
             leaveGroupView.setVisibility(View.VISIBLE);
             DMHeader.setVisibility(View.GONE);
+            blockView.setVisibility(View.GONE);
 //            DMDivider.setVisibility(View.GONE);
         }
         if (mParticipants != null) {
@@ -442,6 +448,13 @@ room: id of room
             }
         });
 
+        blockView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                block();
+            }
+        });
+
 
     }
 
@@ -468,7 +481,7 @@ room: id of room
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
                             .setValue(mRoomName)
-                            .setTitle("Set Group Name")
+                            .setTitle("Set Group ame")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -514,6 +527,39 @@ room: id of room
                     }
                 }
             });
+        }
+    }
+
+    private void block() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity == null) return;
+
+        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
+
+        JSONObject emit = new JSONObject();
+        try {
+            emit.put("block", true);
+            emit.put("user", mParticipants.get(0).userId);
+            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+
+            String message;
+                message = "You will no longer see this user and they won't be able to see you";
+                BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
+
+            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+            getFragmentManager().popBackStack();
+            getFragmentManager().popBackStack();
+
+        } catch (JSONException e) {
+            Utils.showServerErrorToast(activity);
+            e.printStackTrace();
         }
     }
 

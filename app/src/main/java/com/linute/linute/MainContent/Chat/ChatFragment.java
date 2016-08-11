@@ -209,7 +209,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
 
-
         }
     }
 
