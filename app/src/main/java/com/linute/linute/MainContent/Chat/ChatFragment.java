@@ -1250,6 +1250,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     private void attemptSend(String message) {
 
+        message = message.replaceAll("[\\n\\s]+$", "");
+
+
         if (!mRoomExists) {
             createRoom(message);
             return;
