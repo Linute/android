@@ -495,7 +495,7 @@ room: id of room
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
                             .setValue(mRoomName)
-                            .setTitle("Set Group ame")
+                            .setTitle("Set Group Name")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {

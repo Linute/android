@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +88,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
                 return;
             case TYPE_HEADER:
                 if(position == getRoomsHeaderPosition()){
-                    ((HeaderVH)holder).bind("Rooms");
+                    ((HeaderVH)holder).bind("Suggested Group" + (mSearchRoomsList.size() > 1 ? "s" : ""));
                 }else if(position == getPeopleHeaderPosition()){
                     ((HeaderVH)holder).bind("People");
                 }
