@@ -14,8 +14,22 @@
         android:background="@color/colorPrimary"
         app:navigationIcon="@drawable/ic_action_navigation_close"
         app:titleTextColor="@color/pure_white"
-        app:title="Send to"
-    />
+    >
+        <EditText
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="Search"
+            android:textColorHint="@color/fifty_white"
+            android:imeOptions="actionSearch"
+            android:inputType="textPersonName"
+            android:textColor="@color/white"
+            android:textCursorDrawable="@drawable/edit_text_cursor"/>
+
+    </android.support.v7.widget.Toolbar>
 
 
     <Button

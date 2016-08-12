@@ -29,7 +29,7 @@ public class ProfileViewHolderNoImage extends RecyclerView.ViewHolder implements
         mContext = context;
 
         mTextView = (TextView) itemView.findViewById(R.id.profile_grid_item_no_image_text);
-        mTextView.setTypeface(Typeface.createFromAsset(context.getAssets(), "Lato-LightItalic.ttf"));
+        mTextView.setTypeface(Typeface.createFromAsset(context.getAssets(), "Veneer.otf"));
 
         //vAnonIcon = itemView.findViewById(R.id.profile_frag_anon_icon);
         itemView.setOnClickListener(this);

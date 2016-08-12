@@ -62,11 +62,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/sign_up_button"
+        android:background="@drawable/inactive_button"
+        android:foreground="?selectableItemBackground"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
-        android:text="Create account"
-        android:textColor="@drawable/signup_button_text"
+        android:text="Skip"
+        android:textColor="@color/secondaryColor"
     />
 
 

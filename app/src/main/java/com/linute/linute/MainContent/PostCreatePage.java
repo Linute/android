@@ -1,16 +1,20 @@
 package com.linute.linute.MainContent;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -27,10 +31,8 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
@@ -74,7 +76,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.activity_new_post_create, container, false);
 
-        Toolbar toolbar = (Toolbar) root.findViewById(R.id.postContentToolbar);
+        final Toolbar toolbar = (Toolbar) root.findViewById(R.id.postContentToolbar);
         mPostButton = toolbar.findViewById(R.id.create_page_post_button);
         mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
@@ -122,7 +124,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         });
 
         Typeface font = Typeface.createFromAsset(getActivity().getAssets(),
-                "Lato-LightItalic.ttf");
+                "Veneer.otf");
         mPostEditText.setTypeface(font);
         mTextView.setTypeface(font);
 
@@ -145,6 +147,13 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                         showTextView();
                 }
                 return false;
+            }
+        });
+
+        mPostEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                    toolbar.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -184,22 +193,29 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         //wont let me generate signed apk if using same id
         SharedPreferences sharedPrefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
-        setItem(R.id.selector_text0, 0, sharedPrefs);
-        setItem(R.id.selector_text1, 1, sharedPrefs);
-        setItem(R.id.selector_text2, 2, sharedPrefs);
-        setItem(R.id.selector_text3, 3, sharedPrefs);
-        setItem(R.id.selector_text4, 4, sharedPrefs);
-        setItem(R.id.selector_text5, 5, sharedPrefs);
+        setItem(R.id.selector_text0, 0, sharedPrefs, font);
+        setItem(R.id.selector_text1, 1, sharedPrefs, font);
+        setItem(R.id.selector_text2, 2, sharedPrefs, font);
+        setItem(R.id.selector_text3, 3, sharedPrefs, font);
+        setItem(R.id.selector_text4, 4, sharedPrefs, font);
+        setItem(R.id.selector_text5, 5, sharedPrefs, font);
+
+        onClick(mPostColorSelectorViews[0]);
 
         return root;
     }
 
-    private void setItem(int res, int index, SharedPreferences preferences) {
+    private void setItem(int res, int index, SharedPreferences preferences, Typeface typeface) {
         mPostTextColors[index] = preferences.getInt("status_color_" + index + "_text", 0xFF000000);
         mPostBackgroundColors[index] = preferences.getInt("status_color_" + index + "_bg", 0xFF000000);
+
         View postColorSelectorView = mPostColorSelectorViews[index];
-        postColorSelectorView.setBackgroundColor(mPostBackgroundColors[index]);
-        ((TextView) postColorSelectorView.findViewById(res)).setTextColor(mPostTextColors[index]);
+        postColorSelectorView.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
+
+        TextView text = (TextView) postColorSelectorView.findViewById(res);
+        text.setTextColor(mPostTextColors[index]);
+        text.setTypeface(typeface);
+
         postColorSelectorView.setOnClickListener(this);
     }
 
@@ -269,7 +285,14 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                             mSharedPreferences.getString("userToken", "")
                     );
 
-            ((CameraActivity) getActivity()).launchFragment(SendToFragment.newInstance(post), SendToFragment.TAG);
+
+            Intent result = new Intent();
+            result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+            Toast.makeText(getActivity(), "Uploading status in background...", Toast.LENGTH_SHORT).show();
+
+            getActivity().setResult(Activity.RESULT_OK, result);
+
+            getActivity().finish();
             mPostInProgress = false;
         } else {
             Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
@@ -321,6 +344,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
 
         mPostEditText.setTextColor(textColor);
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 70));
         mTextView.setTextColor(textColor);
         mTextFrame.setBackgroundColor(backgroundColor);
     }

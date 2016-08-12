@@ -285,7 +285,7 @@ public class ForgotPasswordFragment extends Fragment {
                         try {
                             JSONObject jsonObject = new JSONObject(response.body().string());
 
-                            Log.i(TAG, "onResponse: "+jsonObject);
+                            //Log.i(TAG, "onResponse: "+jsonObject);
                             mPinCode = jsonObject.getString("pinCode");
 
                             JSONObject user = jsonObject.getJSONObject("user");
@@ -396,7 +396,7 @@ public class ForgotPasswordFragment extends Fragment {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()){
-                        Log.i(TAG, "onResponse: "+response.body().string());
+                        //Log.i(TAG, "onResponse: "+response.body().string());
                         if (getActivity() != null){
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override

@@ -43,17 +43,17 @@
     <FrameLayout android:layout_width="wrap_content"
                  android:layout_height="wrap_content"
                  android:layout_gravity="center_horizontal"
-                 android:layout_marginBottom="32dp"
-    >
+                 android:layout_marginBottom="32dp">
 
         <Button
             android:id="@+id/confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/sign_up_button"
+            android:background="@drawable/active_button"
+            android:foreground="?selectableItemBackground"
             android:text="Confirm"
-            android:textColor="@drawable/signup_button_text"
+            android:textColor="@color/pure_white"
             android:visibility="gone"
         />
 
@@ -62,11 +62,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/sign_up_button"
+            android:background="@drawable/inactive_button"
+            android:foreground="?selectableItemBackground"
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
             android:text="Resend in 0"
-            android:textColor="@drawable/signup_button_text"
+            android:textColor="@color/secondaryColor"
         />
 
     </FrameLayout>

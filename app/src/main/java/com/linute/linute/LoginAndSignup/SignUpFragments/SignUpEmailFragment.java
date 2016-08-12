@@ -1,16 +1,15 @@
 package com.linute.linute.LoginAndSignup.SignUpFragments;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.linute.linute.API.LSDKUser;
@@ -31,14 +30,14 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 7/29/16.
  */
-public class SignUpEmailFragment extends Fragment {
+public class SignUpEmailFragment extends BaseSignUpFragment {
 
     public static final String TAG = SignUpEmailFragment.class.getSimpleName();
     public static final String COLLEGE_KEY = "email_frag_college_key";
 
     private EditText vEmail;
     private EditText vPassword;
-    private View vButton;
+    private Button vButton;
     private View vProgress;
 
     private College mCollege;
@@ -77,11 +76,21 @@ public class SignUpEmailFragment extends Fragment {
         mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
 
         vEmail = (EditText) root.findViewById(R.id.email);
-        vEmail.setText(mSignUpInfo.getEmail());
-
         vPassword = (EditText) root.findViewById(R.id.password);
 
-        if (mSignUpInfo instanceof FBSignUpInfo) vPassword.setVisibility(View.GONE);
+
+        vEmail.addTextChangedListener(this);
+        vEmail.setOnEditorActionListener(this);
+
+        if (mSignUpInfo instanceof FBSignUpInfo) {
+            vPassword.setVisibility(View.GONE);
+            vEmail.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        } else {
+            vPassword.setVisibility(View.VISIBLE);
+            vPassword.setOnEditorActionListener(this);
+            vPassword.addTextChangedListener(this);
+            vEmail.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        }
 
         if (mCollege.getIncludedEmails().isEmpty()) {
             vSuggestionsText.setVisibility(View.GONE);
@@ -96,7 +105,7 @@ public class SignUpEmailFragment extends Fragment {
             vEmail.setHint(mCollege.getIncludedEmails().get(0));
         }
 
-        vButton = root.findViewById(R.id.button);
+        vButton = (Button) root.findViewById(R.id.button);
         vButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -126,7 +135,7 @@ public class SignUpEmailFragment extends Fragment {
                 } else {
                     password = vPassword.getText().toString();
                     if (!isValidPassword(password)) {
-                        vPassword.setError("Passwords must be longer than 6 characters");
+                        vPassword.setError("Passwords must be at least 6 characters");
                         vPassword.requestFocus();
                         return;
                     }
@@ -143,15 +152,35 @@ public class SignUpEmailFragment extends Fragment {
     }
 
 
-    private boolean isValidPassword(String pass) {
-        return !pass.isEmpty() && !pass.contains(" ");
+    @Override
+    public boolean activateButton() {
+        boolean password = vPassword.getVisibility() != View.VISIBLE || isValidPassword(vPassword.getText().toString());
+        return !vEmail.getText().toString().trim().isEmpty() && password;
     }
 
+    @Override
+    public Button getButton() {
+        return vButton;
+    }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        hideKeyboard();
+    public String getButtonText(boolean buttonActive) {
+        return buttonActive ? "Next" : "3 of 4";
+    }
+
+    @Override
+    public void onDonePressed() {
+        vButton.callOnClick();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        vEmail.setText(mSignUpInfo.getEmail());
+    }
+
+    private boolean isValidPassword(String pass) {
+        return pass.length() >= 6 && !pass.contains(" ");
     }
 
 
@@ -195,7 +224,6 @@ public class SignUpEmailFragment extends Fragment {
                     .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            // TODO: 7/31/16 remove
                             checkEmail(email, password);
                             //goToNext(email, password);
                         }
@@ -321,17 +349,6 @@ public class SignUpEmailFragment extends Fragment {
         });
     }
 
-    private void hideKeyboard() {
-        if (getActivity() == null) return;
-
-        View v = getActivity().getCurrentFocus();
-
-        if (v != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-        }
-    }
-
 
     private void showProgress(boolean show) {
         if (show) {
@@ -344,16 +361,16 @@ public class SignUpEmailFragment extends Fragment {
     }
 
 
-    //test code
-
-    private void goToNext(String email, String password) {
-        mSignUpInfo.setEmail(email);
-        mSignUpInfo.setPassword(password);
-
-        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-        if (frag != null) {
-            frag.addFragment(SignUpPinFragment.newInstance("1234"), SignUpPinFragment.TAG);
-        }
-    }
+//    //test code
+//
+//    private void goToNext(String email, String password) {
+//        mSignUpInfo.setEmail(email);
+//        mSignUpInfo.setPassword(password);
+//
+//        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+//        if (frag != null) {
+//            frag.addFragment(SignUpPinFragment.newInstance("1234"), SignUpPinFragment.TAG);
+//        }
+//    }
 
 }

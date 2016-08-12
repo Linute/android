@@ -386,10 +386,6 @@ public class FindFriendsFragment extends BaseFragment {
                                 tempFriend.add(user);
                             }
 
-                        if (tempFriend.isEmpty() && mEmptyText.getVisibility() == View.GONE) { //empty, show empty text
-                            mEmptyText.setVisibility(View.VISIBLE);
-                        }
-
                         mFriendFoundList.clear();
                         mFriendFoundList.addAll(tempFriend);
                     }
@@ -397,7 +393,7 @@ public class FindFriendsFragment extends BaseFragment {
 
                     if (mFriendFoundList.isEmpty()) {
                         mEmptyText.setVisibility(View.VISIBLE);
-                    } else if (mEmptyText.getVisibility() == View.VISIBLE) {
+                    } else{
                         mEmptyText.setVisibility(View.GONE);
                     }
 
@@ -502,8 +498,11 @@ public class FindFriendsFragment extends BaseFragment {
                             public void run() {
                                 //showRetryButton(false);
                                 mProgressBar.setVisibility(View.GONE);
+
                                 if (mFriendFoundList.isEmpty()) {
                                     mEmptyText.setVisibility(View.VISIBLE);
+                                }else {
+                                    mEmptyText.setVisibility(View.GONE);
                                 }
 
                                 mMainHandler.removeCallbacksAndMessages(null);

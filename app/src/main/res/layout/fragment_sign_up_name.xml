@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:hint="@string/first_name_hint"
+        android:hint="First"
         android:inputType="textPersonName|textCapWords"
         android:lines="1"
         android:maxLength="16"
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:hint="@string/last_name_hint"
+        android:hint="Last"
         android:inputType="textPersonName|textCapWords"
         android:lines="1"
         android:maxLength="16"
@@ -59,8 +59,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/sign_up_button"
+        android:background="@drawable/inactive_button"
+        android:foreground="?selectableItemBackground"
         android:text="1 of 4"
-        android:textColor="@drawable/signup_button_text"
+        android:textColor="@color/secondaryColor"
     />
+
 </LinearLayout>

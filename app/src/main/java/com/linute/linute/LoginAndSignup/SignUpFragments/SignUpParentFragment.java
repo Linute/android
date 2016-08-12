@@ -110,7 +110,11 @@ public class SignUpParentFragment extends Fragment {
     public void addFragment(Fragment fragment, String tag) {
         getChildFragmentManager()
                 .beginTransaction()
-                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)
+                .setCustomAnimations(
+                        R.anim.slide_in_right,
+                        R.anim.slide_out_left,
+                        R.anim.slide_in_left,
+                        R.anim.slide_out_right)
                 .replace(R.id.fragment_container, fragment, tag)
                 .addToBackStack(null)
                 .commit();
@@ -132,8 +136,11 @@ public class SignUpParentFragment extends Fragment {
 
 
     public void backPressed(){
-        if (getChildFragmentManager().getBackStackEntryCount() == 0)
+        if (getChildFragmentManager().getBackStackEntryCount() == 0) {
             getFragmentManager().popBackStack();
-        else getChildFragmentManager().popBackStack();
+        }
+        else {
+            getChildFragmentManager().popBackStack();
+        }
     }
 }

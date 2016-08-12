@@ -1,14 +1,11 @@
 package com.linute.linute.LoginAndSignup.SignUpFragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.linute.linute.R;
@@ -16,7 +13,7 @@ import com.linute.linute.R;
 /**
  * Created by QiFeng on 7/28/16.
  */
-public class SignUpNameFragment extends Fragment implements View.OnClickListener{
+public class SignUpNameFragment extends BaseSignUpFragment implements View.OnClickListener {
 
     public static final String TAG = SignUpNameFragment.class.getSimpleName();
 
@@ -24,6 +21,8 @@ public class SignUpNameFragment extends Fragment implements View.OnClickListener
 
     private EditText vFirstName;
     private EditText vLastName;
+
+    private Button vButton;
 
     @Nullable
     @Override
@@ -33,14 +32,25 @@ public class SignUpNameFragment extends Fragment implements View.OnClickListener
         mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
         vFirstName = (EditText) root.findViewById(R.id.fname_text);
         vLastName = (EditText) root.findViewById(R.id.lname_text);
-        root.findViewById(R.id.button).setOnClickListener(this);
 
-        vFirstName.setText(mSignUpInfo.getFirstName());
-        vLastName.setText(mSignUpInfo.getLastName());
+        vButton = (Button) root.findViewById(R.id.button);
+        vButton.setOnClickListener(this);
+
+        vLastName.addTextChangedListener(this);
+        vFirstName.addTextChangedListener(this);
+
+        vLastName.setOnEditorActionListener(this);
 
         return root;
     }
 
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        vFirstName.setText(mSignUpInfo.getFirstName());
+        vLastName.setText(mSignUpInfo.getLastName());
+    }
 
     @Override
     public void onClick(View v) {
@@ -51,12 +61,12 @@ public class SignUpNameFragment extends Fragment implements View.OnClickListener
 
         String first = vFirstName.getText().toString().trim();
         String last = vLastName.getText().toString().trim();
-        if (first.isEmpty()){
+        if (first.isEmpty()) {
             vFirstName.setError("Required field");
             error = true;
         }
 
-        if (last.isEmpty()){
+        if (last.isEmpty()) {
             vLastName.setError("Required field");
             error = true;
         }
@@ -71,14 +81,23 @@ public class SignUpNameFragment extends Fragment implements View.OnClickListener
 
 
     @Override
-    public void onStop() {
-        super.onStop();
-        if (getActivity() == null) return;
-
-        View view = getActivity().getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
+    public boolean activateButton() {
+        return !vFirstName.getText().toString().trim().isEmpty() && !vLastName.getText().toString().isEmpty();
     }
+
+    @Override
+    public Button getButton() {
+        return vButton;
+    }
+
+    @Override
+    public String getButtonText(boolean buttonActive) {
+        return buttonActive ? "Next" : "1 of 4";
+    }
+
+    @Override
+    public void onDonePressed() {
+        onClick(vButton);
+    }
+
 }

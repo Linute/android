@@ -8,12 +8,15 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -46,6 +49,8 @@ public class SignUpPinFragment extends Fragment {
 
     private String mPincode;
 
+    private Button vConfirm;
+
     private SignUpInfo mSignUpInfo;
 
 
@@ -75,7 +80,7 @@ public class SignUpPinFragment extends Fragment {
         mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
         vResend = (Button) root.findViewById(R.id.resend);
 
-        final Button vConfirm = (Button) root.findViewById(R.id.confirm);
+        vConfirm = (Button) root.findViewById(R.id.confirm);
         vPinCode = (EditText) root.findViewById(R.id.pincode);
 
         if (mButtonCountDownTimer != null) mButtonCountDownTimer.cancel();
@@ -100,16 +105,7 @@ public class SignUpPinFragment extends Fragment {
         vConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                vPinCode.setError(null);
-                if (mPincode != null && vPinCode.getText().toString().equals(mPincode)){
-                    SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-                    if (frag != null){
-                        frag.addFragment(new SignUpProfilePicture(), SignUpProfilePicture.TAG);
-                    }
-                }else {
-                    vPinCode.setError("Invalid pin");
-                    vPinCode.requestFocus();
-                }
+                checkPin();
             }
         });
 
@@ -126,7 +122,6 @@ public class SignUpPinFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() == 4){
-                    hideKeyboard();
                     vResend.setVisibility(View.GONE);
                     vConfirm.setVisibility(View.VISIBLE);
                 }else {
@@ -136,7 +131,31 @@ public class SignUpPinFragment extends Fragment {
             }
         });
 
+        vPinCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    checkPin();
+                }
+                return false;
+            }
+        });
+
         return root;
+    }
+
+
+    private void checkPin(){
+        vPinCode.setError(null);
+        if (mPincode != null && vPinCode.getText().toString().equals(mPincode)){
+            SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+            if (frag != null){
+                frag.addFragment(new SignUpProfilePicture(), SignUpProfilePicture.TAG);
+            }
+        }else {
+            vPinCode.setError("Invalid pin");
+            vPinCode.requestFocus();
+        }
     }
 
 

@@ -17,6 +17,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -27,6 +28,8 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 
+import io.realm.Realm;
+import io.realm.RealmResults;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -173,9 +176,12 @@ public class SettingActivity extends AppCompatActivity {
         Preference mNotification;
         Preference mAbout;
 
+        private Realm mRealm;
+
         @Override
         public void onCreate(final Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            mRealm = Realm.getDefaultInstance();
             addPreferencesFromResource(R.xml.pref_profile_frag_main);
 
             bindPreferences();
@@ -195,7 +201,7 @@ public class SettingActivity extends AppCompatActivity {
             mAbout = findPreference("version");
 
             DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
-            mAbout.setSummary("v"+info.getVersionCode()+"api"+API_Methods.VERSION);
+            mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION);
         }
 
         /* TODO: still need to add the following on click listeners:
@@ -220,11 +226,25 @@ public class SettingActivity extends AppCompatActivity {
                     if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                         LoginManager.getInstance().logOut();
 
-                    //start new
-                    Intent i = new Intent(getActivity(), PreLoginActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
-                    startActivity(i);
-                    getActivity().finish();
+                    mRealm.executeTransactionAsync(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            realm.delete(TaptUser.class);
+
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent i = new Intent(getActivity(), PreLoginActivity.class);
+                                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
+                                        startActivity(i);
+                                        getActivity().finish();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
                     return true;
                 }
             });
@@ -312,6 +332,12 @@ public class SettingActivity extends AppCompatActivity {
                     return true;
                 }
             });
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            mRealm.close();
         }
     }
 }

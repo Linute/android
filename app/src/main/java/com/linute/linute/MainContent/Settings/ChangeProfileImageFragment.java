@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -39,7 +40,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -54,7 +54,7 @@ public class ChangeProfileImageFragment extends Fragment {
     private TextView mSaveButton;
     private View mButtonLayer;
 
-    private CircleImageView mImageView;
+    private ImageView mImageView;
     private SharedPreferences mSharedPreferences;
     private ProgressBar mProgressBar;
     private Uri mImageUri;
@@ -79,7 +79,7 @@ public class ChangeProfileImageFragment extends Fragment {
         mEditButton = (TextView) rootView.findViewById(R.id.changeprofileimage_change_button);
         mButtonLayer = rootView.findViewById(R.id.changeprofileimage_buttons);
 
-        mImageView = (CircleImageView) rootView.findViewById(R.id.changeprofileimage_image);
+        mImageView = (ImageView) rootView.findViewById(R.id.changeprofileimage_image);
 
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.changeprofileimage_progressbar);
     }

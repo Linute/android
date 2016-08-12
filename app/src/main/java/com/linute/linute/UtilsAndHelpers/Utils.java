@@ -131,6 +131,7 @@ public class Utils {
         pref.putString("userToken", null);
         pref.putString("points", "0");
         pref.putString("userName", null);
+        pref.putLong("timestamp", 0);
         pref.apply();
     }
 
@@ -270,4 +271,8 @@ public class Utils {
 
     }
 
+
+    public static String getFBImage(String id){
+        return String.format("https://graph.facebook.com/%s/picture?width=720&height=720", id);
+    }
 }

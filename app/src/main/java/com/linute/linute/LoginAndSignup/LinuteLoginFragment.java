@@ -14,14 +14,17 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.IOException;
 
@@ -94,7 +97,7 @@ public class LinuteLoginFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() > 6){
+                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() >= 6){
                     mSigninButton.setBackgroundResource(R.drawable.active_button);
                     mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.pure_white));
                 }else {
@@ -106,6 +109,16 @@ public class LinuteLoginFragment extends Fragment {
 
         mEmailView.addTextChangedListener(textWatcher);
         mPasswordView.addTextChangedListener(textWatcher);
+
+        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE){
+                    mSigninButton.callOnClick();
+                }
+                return false;
+            }
+        });
 
         rootView.findViewById(R.id.facebook_login).setOnClickListener(new OnClickListener() {
             @Override
@@ -159,7 +172,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString().toLowerCase();
+        String email = mEmailView.getText().toString().toLowerCase().trim();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -350,7 +363,7 @@ public class LinuteLoginFragment extends Fragment {
 
         JSONObject response = new JSONObject(responseString);
 
-        Log.i(TAG, "saveCredentials: "+response.toString());
+        //Log.i(TAG, "saveCredentials: "+response.toString());
 
         SharedPreferences.Editor sharedPreferences = getActivity().
                 getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).edit();

@@ -1,7 +1,6 @@
 package com.linute.linute.LoginAndSignup.SignUpFragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -13,14 +12,13 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,13 +31,14 @@ import com.linute.linute.R;
 /**
  * Created by QiFeng on 7/28/16.
  */
-public class SignUpCollegeFragment extends Fragment implements LocationListener, View.OnClickListener {
+public class SignUpCollegeFragment extends BaseSignUpFragment implements LocationListener, View.OnClickListener {
 
     public static final String TAG = SignUpCollegeFragment.class.getSimpleName();
 
     private EditText vEditText;
     private boolean gotResult = false;
     private TextView vNearby;
+    private Button vButton;
 
     private SignUpInfo mSignUpInfo;
 
@@ -53,7 +52,7 @@ public class SignUpCollegeFragment extends Fragment implements LocationListener,
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_sign_up_college, container, false);
 
-        mSignUpInfo = ((SignUpParentFragment)getParentFragment()).getSignUpInfo();
+        mSignUpInfo = ((SignUpParentFragment) getParentFragment()).getSignUpInfo();
         vNearby = (TextView) root.findViewById(R.id.nearby);
         vNearby.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,10 +62,13 @@ public class SignUpCollegeFragment extends Fragment implements LocationListener,
         });
         vEditText = (EditText) root.findViewById(R.id.search);
         vEditText.setOnClickListener(this);
+        vEditText.addTextChangedListener(this);
 
-        root.findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+        vButton = (Button) root.findViewById(R.id.button);
+        vButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                vEditText.setError(null);
                 if (mSignUpInfo.getCollege() != null) {
                     collegeSelected(mSignUpInfo.getCollege());
                 } else {
@@ -75,14 +77,18 @@ public class SignUpCollegeFragment extends Fragment implements LocationListener,
             }
         });
 
+        return root;
+    }
+
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         if (mSignUpInfo.getCollege() != null) {
             vEditText.setText(mSignUpInfo.getCollege().getCollegeName());
         }
-
-        return root;
     }
-
 
     private void setCollege(College college) {
         vEditText.setError(null);
@@ -183,29 +189,10 @@ public class SignUpCollegeFragment extends Fragment implements LocationListener,
     }
 
     private void collegeSelected(final College college) {
-        if (getContext() == null) return;
-
-        new AlertDialog.Builder(getContext())
-                .setTitle("Confirm")
-                .setMessage("Are you sure you want to set " + college.getCollegeName() + " as your school?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SignUpParentFragment fragment = (SignUpParentFragment) getParentFragment();
-
-                        if (fragment != null) {
-                            fragment.addFragment(SignUpEmailFragment.newInstance(college), SignUpEmailFragment.TAG);
-                        }
-
-                    }
-                })
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+        SignUpParentFragment fragment = (SignUpParentFragment) getParentFragment();
+        if (fragment != null) {
+            fragment.addFragment(SignUpEmailFragment.newInstance(college), SignUpEmailFragment.TAG);
+        }
     }
 
     @Override
@@ -266,5 +253,24 @@ public class SignUpCollegeFragment extends Fragment implements LocationListener,
             });
             fragment.addToTop(frag, SignUpCollegeSearch.TAG);
         }
+    }
+
+    @Override
+    public boolean activateButton() {
+        return !vEditText.getText().toString().trim().isEmpty();
+    }
+
+    @Override
+    public Button getButton() {
+        return vButton;
+    }
+
+    @Override
+    public String getButtonText(boolean buttonActive) {
+        return buttonActive ? "Next" : "2 of 4";
+    }
+
+    @Override
+    public void onDonePressed() {
     }
 }

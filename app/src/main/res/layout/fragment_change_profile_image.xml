@@ -8,47 +8,52 @@
     android:orientation="vertical">
 
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/changeprofileimage_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
-        tools:src="@color/pure_white"
         android:layout_marginTop="32dp"
-        app:civ_border_color="@color/seperator_color"
-        app:civ_border_width="1px"/>
+        app:riv_border_color="@color/seperator_color"
+        app:riv_border_width="1dp"
+        app:riv_corner_radius="@dimen/post_create_corner_radius"
+        android:scaleType="centerCrop"
+        tools:src="@color/pure_white"/>
 
-    <LinearLayout android:id="@+id/changeprofileimage_buttons"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
+    <LinearLayout
+        android:id="@+id/changeprofileimage_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
     >
-        <TextView android:id="@+id/changeprofileimage_change_button"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginEnd="64dp"
-                  android:layout_marginStart="64dp"
-                  android:layout_gravity="center_horizontal"
-                  android:background="?android:attr/selectableItemBackground"
-                  android:gravity="center"
-                  android:padding="20dp"
-                  android:textStyle="bold"
-                  android:text="Change"
-                  android:textSize="@dimen/header_font_size"/>
+        <TextView
+            android:id="@+id/changeprofileimage_change_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="64dp"
+            android:layout_marginStart="64dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:padding="20dp"
+            android:text="Change"
+            android:textSize="@dimen/header_font_size"
+            android:textStyle="bold"/>
 
-        <TextView android:id="@+id/changeprofileimage_save_button"
-                  android:layout_marginStart="64dp"
-                  android:textStyle="bold"
-                  android:layout_marginEnd="64dp"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_horizontal"
-                  android:background="?android:attr/selectableItemBackground"
-                  android:gravity="center"
-                  android:padding="20dp"
-                  android:text="Save"
-                  android:textSize="@dimen/header_font_size"/>
+        <TextView
+            android:id="@+id/changeprofileimage_save_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="64dp"
+            android:layout_marginStart="64dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:padding="20dp"
+            android:text="Save"
+            android:textSize="@dimen/header_font_size"
+            android:textStyle="bold"/>
     </LinearLayout>
 
     <ProgressBar
