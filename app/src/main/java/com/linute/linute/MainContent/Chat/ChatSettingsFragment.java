@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +34,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.GalleryFragment;
@@ -240,22 +244,30 @@ room: id of room
 
         RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
         View leaveGroupView = view.findViewById(R.id.setting_leave_group);
+        View createGroupView =view.findViewById(R.id.dm_create_group);
         mNotificationSettingsView = (TextView) view.findViewById(R.id.setting_notifications_button);
         mNotificationSettingsIndicatorView = (TextView) view.findViewById(R.id.setting_notifications_indicator);
+
+
+
         View DMHeader = view.findViewById(R.id.dm_header);
-        View DMDivider = view.findViewById(R.id.dm_divider);
+//        View DMDivider = view.findViewById(R.id.dm_divider);
+        View blockView = view.findViewById(R.id.dm_block);
 
 
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             participantsRV.setVisibility(View.GONE);
             leaveGroupView.setVisibility(View.GONE);
             DMHeader.setVisibility(View.VISIBLE);
-            DMDivider.setVisibility(View.VISIBLE);
+            blockView.setVisibility(View.VISIBLE);
+
+//            DMDivider.setVisibility(View.VISIBLE);
         } else {
             participantsRV.setVisibility(View.VISIBLE);
             leaveGroupView.setVisibility(View.VISIBLE);
             DMHeader.setVisibility(View.GONE);
-            DMDivider.setVisibility(View.GONE);
+            blockView.setVisibility(View.GONE);
+//            DMDivider.setVisibility(View.GONE);
         }
         if (mParticipants != null) {
             LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
@@ -300,9 +312,9 @@ room: id of room
             });
 
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-            toolbar.setTitle(mRoomName);
-            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
-            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
+            toolbar.setTitle((mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group") +  " Settings");
+//            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
+//            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
 //            toolbar.findViewById(R.id.space_actions_item_balancer).setVisibility(View.GONE);
                     mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
@@ -320,6 +332,7 @@ room: id of room
                         }
                     });
                     activity.replaceContainerWithFragment(selectUserFragment);
+
                 }
             });
         }
@@ -408,13 +421,53 @@ room: id of room
             }
         });
 
+        createGroupView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                if(activity != null) {
+
+                    CreateChatFragment frag = CreateChatFragment.newInstance(mParticipants);
+                    frag.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
+                        @Override
+                        public void onUsersSelected(ArrayList<User> users) {
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
+                        }
+                    });
+                    frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                        @Override
+                        public void onRoomSelected(ChatRoom room) {
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), null));
+                        }
+                    });
+                    activity.replaceContainerWithFragment(frag);
+
+
+                }
+
+            }
+        });
+
+        blockView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                block();
+            }
+        });
+
 
     }
 
     private void updateRoomName(View view) {
-        View groupNameSettingView = view.findViewById(R.id.setting_group_name);
+        TextView groupNameSettingTextView = (TextView)view.findViewById(R.id.setting_group_name_text);
+        if(!"".equals(mRoomName) && mRoomName != null) {
+            groupNameSettingTextView.setText(mRoomName);
+        }
+
+        final View groupNameSettingView = view.findViewById(R.id.setting_group_name);
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
+            view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
             User u = mParticipants.get(0);
 
             ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.firstName+ " "+u.lastName);
@@ -423,10 +476,12 @@ room: id of room
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
                             .setValue(mRoomName)
-                            .setTitle("Set Group Name")
+                            .setTitle("Set Group ame")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -436,6 +491,8 @@ room: id of room
                             })
                             .setNegativeButton("Cancel", null)
                             .create().show();
+                    InputMethodManager inputMethodManager=(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 }
             });
         }
@@ -470,6 +527,39 @@ room: id of room
                     }
                 }
             });
+        }
+    }
+
+    private void block() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+        if (activity == null) return;
+
+        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
+
+        JSONObject emit = new JSONObject();
+        try {
+            emit.put("block", true);
+            emit.put("user", mParticipants.get(0).userId);
+            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+
+            String message;
+                message = "You will no longer see this user and they won't be able to see you";
+                BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
+
+            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+            getFragmentManager().popBackStack();
+            getFragmentManager().popBackStack();
+
+        } catch (JSONException e) {
+            Utils.showServerErrorToast(activity);
+            e.printStackTrace();
         }
     }
 

@@ -219,6 +219,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mMentionedList.setAdapter(mMentionedPersonAdapter);
 
         mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
+        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(b){
+                    if(llm != null){
+                        llm.scrollToPosition(llm.getItemCount()-1);
+                    }
+                }
+            }
+        });
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

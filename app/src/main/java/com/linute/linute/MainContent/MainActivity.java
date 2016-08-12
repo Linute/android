@@ -273,7 +273,7 @@ public class MainActivity extends BaseTaptActivity {
             if (mSafeForFragmentTransaction) {
                 MainActivity.this.getSupportFragmentManager()
                         .beginTransaction()
-                        .setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
+                        //.setCustomAnimations(R.anim.frag_fade_in, R.anim.hold)
                         .replace(R.id.mainActivity_fragment_holder, fragment)
                         .addToBackStack(PROFILE_OR_EVENT_NAME)
                         .commit();

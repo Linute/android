@@ -29,6 +29,20 @@
 
     </android.support.v7.widget.Toolbar>
 
+    <FrameLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/pure_white">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_gravity="center" />
+    </FrameLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/selected_users"
         android:layout_width="match_parent"

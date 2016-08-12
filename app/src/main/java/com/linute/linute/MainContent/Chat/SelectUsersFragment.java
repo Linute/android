@@ -57,7 +57,16 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     protected RecyclerView mSelectedRV;
     protected RecyclerView mSearchRV;
 
-    private final static String KEY_LOCKED_USERS = "selected";
+    protected final static String KEY_LOCKED_USERS = "locked";
+    protected final static String KEY_SELECTED_USERS = "selected";
+
+    /*
+    * A focused user appears as a UserListItem at the top of the Search list
+    * A user gets focused when their icon is touched from inside the SelectedUsersRV
+    * Only one user is focused at a time, if another user is already focused, they're removed
+    * If a user is already focused, they'll refocus to draw attention to the user
+    * */
+    protected User focusedUser = null;
 
     SharedPreferences mSharedPreferences;
 
@@ -68,13 +77,24 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         selectUserFragment.setArguments(arguments);
         return selectUserFragment;
     }
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers, ArrayList<User> selectedUsers){
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
+        arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
+        SelectUsersFragment selectUserFragment = new SelectUsersFragment();
+        selectUserFragment.setArguments(arguments);
+        return selectUserFragment;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
         if(arguments != null) {
-            mLockedUsers = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+            ArrayList<User> lockedUsersArg = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
+            if(lockedUsersArg != null) mLockedUsers = lockedUsersArg;
+            ArrayList<User> selectedUsersArg = arguments.getParcelableArrayList(KEY_SELECTED_USERS);
+            if(selectedUsersArg != null) mSelectedUsers = selectedUsersArg;
         }
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
@@ -123,9 +143,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
         mSearchRV.setHasFixedSize(true);
-        final LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        mSearchRV.setLayoutManager(llm);
+        final LinearLayoutManager searchLLM = new LinearLayoutManager(getActivity());
+        searchLLM.setOrientation(LinearLayoutManager.VERTICAL);
+        mSearchRV.setLayoutManager(searchLLM);
         mSearchRV.setAdapter(mSearchAdapter);
         mSearchAdapter.setOnUserSelectedListener(this);
 
@@ -139,12 +159,24 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
             @Override
             public void onUserSelected(User user, int position) {
-                if(!mSearchUserList.get(0).userId.equals(user.userId)) {
-                    mSearchUserList.add(0, user);
-                    mSearchAdapter.notifyDataSetChanged();
-                }
-                llm.scrollToPosition(0);
 
+                int listPosition = User.findUser(mSearchUserList, user);
+                if(listPosition != -1){
+                    mSearchUserList.remove(listPosition);
+                    mSearchAdapter.notifyItemRemoved(listPosition);
+                }
+
+                if(focusedUser != null){
+                    mSearchUserList.remove(0);
+                    mSearchAdapter.notifyItemRemoved(0);
+                }
+
+                mSearchUserList.add(0, user);
+                mSearchAdapter.notifyItemInserted(0);
+                searchLLM.scrollToPosition(0);
+                focusedUser = user;
+
+                mSearchAdapter.notifyDataSetChanged();
             }
         });
 
@@ -166,6 +198,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
             }
         });
+
 
         search("");
     }
@@ -232,6 +265,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
                     if (getActivity() != null){
@@ -283,6 +317,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                                         @Override
                                         public void run() {
                                             mSearchAdapter.notifyDataSetChanged();
+                                            View view = getView();
+                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+
                                         }
                                     });
                                 }

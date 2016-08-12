@@ -1,8 +1,13 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -40,6 +45,22 @@ public class CreateChatFragment extends SelectUsersFragment {
         UserGroupSearchAdapter userGroupSearchAdapter = new UserGroupSearchAdapter(getContext(), mSearchRoomList, mSearchUserList);
         userGroupSearchAdapter.setOnRoomSelectedListener(onRoomSelectedListener);
         return userGroupSearchAdapter;
+    }
+
+    public static CreateChatFragment newInstance(ArrayList<User> selectedUsers){
+        CreateChatFragment createChatFrag = new CreateChatFragment();
+        Bundle arguments = new Bundle();
+        arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
+        createChatFrag.setArguments(arguments);
+        return createChatFrag;
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.findViewById(R.id.search_users_entry).requestFocus();
+        InputMethodManager inputMethodManager= (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.toggleSoftInputFromWindow(view.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
     }
 
     @Override
@@ -271,6 +292,9 @@ public class CreateChatFragment extends SelectUsersFragment {
                                         @Override
                                         public void run() {
                                             mSearchAdapter.notifyDataSetChanged();
+                                            View view = getView();
+                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+
                                         }
                                     });
                                 }
