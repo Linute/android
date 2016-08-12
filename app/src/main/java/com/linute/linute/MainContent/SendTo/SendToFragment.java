@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -207,25 +208,24 @@ public class SendToFragment extends BaseFragment {
                 .equalTo("isFriend", true)
                 .findAllAsync();
 
+        //gets called when we get the results from async call
         mRealmResults.addChangeListener(new RealmChangeListener<RealmResults<TaptUser>>() {
             @Override
             public void onChange(RealmResults<TaptUser> element) {
-                if (mRealmResults.isLoaded()) {
-                    ArrayList<SendToItem> items = new ArrayList<>();
-                    for (TaptUser user1 : mRealmResults) {
-                        items.add(new SendToItem(
-                                SendToItem.TYPE_PERSON,
-                                user1.getFullName(),
-                                user1.getId(),
-                                user1.getProfileImage()
-                        ));
-                    }
-
-                    mUnfilteredList.clear();
-                    mUnfilteredList.addAll(items);
-                    mRealmResults.removeChangeListeners();
-                    filterList();
+                ArrayList<SendToItem> items = new ArrayList<>();
+                for (TaptUser user1 : mRealmResults) {
+                    items.add(new SendToItem(
+                            SendToItem.TYPE_PERSON,
+                            user1.getFullName(),
+                            user1.getId(),
+                            user1.getProfileImage()
+                    ));
                 }
+
+                mUnfilteredList.clear();
+                mUnfilteredList.addAll(items);
+                mRealmResults.removeChangeListeners();
+                filterList();
             }
         });
     }

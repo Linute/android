@@ -66,7 +66,7 @@
             android:inputType="textMultiLine|textCapSentences"
             android:maxLines="8"
             android:textColor="#000000"
-            android:textSize="28sp"
+            android:textSize="32sp"
             tools:text="HELLO THEREHELLO THEREHELLO THEREHELLO THERE "
         />
 

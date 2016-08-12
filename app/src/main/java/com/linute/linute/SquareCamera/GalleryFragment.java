@@ -105,7 +105,7 @@ public class GalleryFragment extends Fragment {
 //                        Log.i(TAG, "onActivityResult: bitrate "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
-                        if (length > 3000 && length < 15500) {
+                        if (length > 2500 && length < 15000) {
                             try {
                                 getFragmentManager()
                                         .beginTransaction()
