@@ -545,36 +545,46 @@ room: id of room
     }
 
     private void block() {
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity == null) return;
+        new AlertDialog.Builder(getContext()).setMessage(R.string.block_confirmation_text)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
-            Utils.showBadConnectionToast(activity);
-            return;
-        }
+                        if (activity == null) return;
 
-        JSONObject emit = new JSONObject();
-        try {
-            emit.put("block", true);
-            emit.put("user", mParticipants.get(0).userId);
-            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+                        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+                            Utils.showBadConnectionToast(activity);
+                            return;
+                        }
 
-            String message;
-                message = "You will no longer see this user and they won't be able to see you";
-                BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
+                        JSONObject emit = new JSONObject();
+                        try {
+                            emit.put("block", true);
+                            emit.put("user", mParticipants.get(0).userId);
+                            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
 
-            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
-                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            String message;
+                            message = "You will no longer see this user and they won't be able to see you";
+                            BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
 
-            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-            getFragmentManager().popBackStack();
-            getFragmentManager().popBackStack();
+                            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+                                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
 
-        } catch (JSONException e) {
-            Utils.showServerErrorToast(activity);
-            e.printStackTrace();
-        }
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                            getFragmentManager().popBackStack();
+                            getFragmentManager().popBackStack();
+
+                        } catch (JSONException e) {
+                            Utils.showServerErrorToast(activity);
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .create().show();
+
     }
 
     protected void startGetImageActivity() {

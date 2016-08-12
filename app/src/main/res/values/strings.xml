@@ -1607,4 +1607,5 @@ limitations under the License.\n\n
     <string name="create_account_agree">By tapping to continue, you are indicating that you have
         read and agreed to the following
     </string>
+    <string name="block_confirmation_text">This person will be blocked, and this conversation will be deleted. They will not be able to message you anymore.</string>
 </resources>
