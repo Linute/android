@@ -1,12 +1,10 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -56,7 +54,7 @@ import rx.schedulers.Schedulers;
  * i.e. chatroom with max, chat room with nabeel.
  * You can click to see your convo with max or convo with nabeel
  */
-public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.RoomContextMenuCreator{
+public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.RoomContextMenuCreator {
     public static final String TAG = RoomsActivityFragment.class.getSimpleName();
 
     private RoomsAdapter mRoomsAdapter;
@@ -120,7 +118,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
-                            BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
 
                         }
@@ -128,7 +126,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     selectUserFragment.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
                         @Override
                         public void onRoomSelected(ChatRoom room) {
-                            BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                            BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), room.users));
                         }
                     });
@@ -283,17 +281,17 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             long mutedUntil = 0;
                             Object unMuteAt = room.get("unMuteAt");
 
-                            if(unMuteAt != null) {
+                            if (unMuteAt != null) {
                                 try {
                                     mutedUntil = Long.getLong(unMuteAt.toString());
+                                } catch (NumberFormatException | NullPointerException e) {
                                 }
-                                catch (NumberFormatException | NullPointerException e){}
                             }
 
 
                             usersJson = room.getJSONArray("users");
                             ArrayList<User> usersList = new ArrayList<User>();
-                            for(int u = 0;u<usersJson.length();u++){
+                            for (int u = 0; u < usersJson.length(); u++) {
                                 JSONObject userJson = usersJson.getJSONObject(u);
                                 usersList.add(new User(
                                         userJson.getString("id"),
@@ -343,9 +341,9 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                     }
                                 }
 
-                                if (isOwner){
+                                if (isOwner) {
                                     lastMessage = "You: " + lastMessage;
-                                }else if (showName){
+                                } else if (showName) {
                                     lastMessage = owner.getString("firstName") + ": " + lastMessage;
                                 }
 
@@ -514,7 +512,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             users = room.getJSONArray("users");
 
                             ArrayList<User> usersList = new ArrayList<User>();
-                            for(int u = 0; u < users.length(); u++){
+                            for (int u = 0; u < users.length(); u++) {
                                 JSONObject user = users.getJSONObject(u);
                                 usersList.add(new User(
                                         user.getString("id"),
@@ -630,7 +628,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         @Override
         public void call(NewMessageEvent event) {
             if (!mSwipeRefreshLayout.isRefreshing() && event.getRoomId() != null && getActivity() != null) {
-                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), 0, "","", null, event.getMessage(), true, new Date().getTime(), false, 0);
+                final ChatRoom tempRoom = new ChatRoom(event.getRoomId(), 0, "", "", null, event.getMessage(), true, new Date().getTime(), false, 0);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -658,7 +656,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     };
 
 
-    private void deleteRoom(final int position, final ChatRoom room){
+    private void deleteRoom(final int position, final ChatRoom room) {
         final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             JSONObject object = new JSONObject();
@@ -689,10 +687,10 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                                     //remove room from list and notify it was removed
                                     mRoomsList.remove(newPos);
-                                    if (mRoomsList.isEmpty()){
+                                    if (mRoomsList.isEmpty()) {
                                         mRoomsAdapter.notifyDataSetChanged();
                                         mEmptyText.setVisibility(View.VISIBLE);
-                                    }else {
+                                    } else {
                                         mRoomsAdapter.notifyItemRemoved(newPos);
                                         mRoomsAdapter.notifyItemRangeChanged(newPos, mRoomsList.size());
                                     }
@@ -725,12 +723,12 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                 return true;
             }
         });
-        MenuItem mute = contextMenu.add(room.isMuted()?"Unmute":"Mute");
+        MenuItem mute = contextMenu.add(room.isMuted() ? "Unmute" : "Mute");
         mute.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
                 if (!room.isMuted()) {
-                    new RadioButtonDialog<>(getContext(), ChatSettingsFragment.MUTE_OPTIONS_TEXT,ChatSettingsFragment.MUTE_OPTIONS_VALUES)
+                    new RadioButtonDialog<>(getContext(), ChatSettingsFragment.MUTE_OPTIONS_TEXT, ChatSettingsFragment.MUTE_OPTIONS_VALUES)
                             .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
                                 @Override
                                 public void onDurationSelected(Integer item) {
@@ -753,35 +751,31 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 }
                             })
                             .create().show();
-                }else{
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Unmute this chat?")
-                            .setPositiveButton("Unmute", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                                    if (activity != null) {
-                                        try {
-                                            JSONObject jsonParams = new JSONObject();
-                                            jsonParams.put("mute", false);
-                                            jsonParams.put("room", room.getRoomId());
-                                            jsonParams.put("time", 0);
-                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
-                                            room.setMute(false, 0);
-                                            mRoomsAdapter.notifyItemChanged(position);
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .create().show();
-                }
-                return true;
+                } else {
+
+                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                    if (activity != null) {
+                        try {
+                            JSONObject jsonParams = new JSONObject();
+                            jsonParams.put("mute", false);
+                            jsonParams.put("room", room.getRoomId());
+                            jsonParams.put("time", 0);
+                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                            room.setMute(false, 0);
+                            mRoomsAdapter.notifyItemChanged(position);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
             }
-        });
+
+            return true;
+        }
     }
+
+    );
+}
 
 
 }

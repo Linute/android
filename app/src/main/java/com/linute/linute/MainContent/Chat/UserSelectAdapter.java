@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,11 +122,11 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                     break;
                 case Selected:
                     itemView.setClickable(true);
-                    itemView.setBackgroundColor(0x4484CFDF);
+                    itemView.setBackgroundColor(0x5584CFDF);
                     break;
                 case Locked:
                     itemView.setClickable(false);
-                    itemView.setBackgroundColor(0x1184CFDF);
+                    itemView.setBackgroundColor(0x3384CFDF);
 
                     break;
             }

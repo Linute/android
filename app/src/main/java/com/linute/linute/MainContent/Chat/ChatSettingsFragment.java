@@ -32,6 +32,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
@@ -244,13 +248,13 @@ room: id of room
 
         RecyclerView participantsRV = (RecyclerView) view.findViewById(R.id.list_participants);
         View leaveGroupView = view.findViewById(R.id.setting_leave_group);
-        View createGroupView =view.findViewById(R.id.dm_create_group);
+        View createGroupView = view.findViewById(R.id.dm_create_group);
         mNotificationSettingsView = (TextView) view.findViewById(R.id.setting_notifications_button);
         mNotificationSettingsIndicatorView = (TextView) view.findViewById(R.id.setting_notifications_indicator);
 
 
-
         View DMHeader = view.findViewById(R.id.dm_header);
+
 //        View DMDivider = view.findViewById(R.id.dm_divider);
         View blockView = view.findViewById(R.id.dm_block);
 
@@ -286,13 +290,13 @@ room: id of room
                 @Override
                 public void OnUserClick(User user) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.firstName+ " "+user.lastName, user.userId);
+                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.firstName + " " + user.lastName, user.userId);
                     activity.addFragmentToContainer(fragment);
                 }
 
                 @Override
                 public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                    contextMenu.setHeaderTitle(user.firstName+ " "+user.lastName);
+                    contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
@@ -312,11 +316,11 @@ room: id of room
             });
 
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-            toolbar.setTitle((mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group") +  " Settings");
+            toolbar.setTitle((mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group") + " Settings");
 //            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
 //            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
 //            toolbar.findViewById(R.id.space_actions_item_balancer).setVisibility(View.GONE);
-                    mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
+            mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
@@ -342,6 +346,19 @@ room: id of room
 
 
         updateNotificationView();
+
+        DMHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
+                    User user = mParticipants.get(0);
+                    TaptUserProfileFragment profile = TaptUserProfileFragment.newInstance(user.getFullName(), user.userId);
+                    activity.addFragmentToContainer(profile);
+                }
+            }
+        });
+
         getView().findViewById(R.id.setting_notifications).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -424,8 +441,8 @@ room: id of room
         createGroupView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final BaseTaptActivity activity = (BaseTaptActivity)getActivity();
-                if(activity != null) {
+                final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                if (activity != null) {
 
                     CreateChatFragment frag = CreateChatFragment.newInstance(mParticipants);
                     frag.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
@@ -459,8 +476,8 @@ room: id of room
     }
 
     private void updateRoomName(View view) {
-        TextView groupNameSettingTextView = (TextView)view.findViewById(R.id.setting_group_name_text);
-        if(!"".equals(mRoomName) && mRoomName != null) {
+        final TextView groupNameSettingTextView = (TextView) view.findViewById(R.id.setting_group_name_text);
+        if (!"".equals(mRoomName) && mRoomName != null) {
             groupNameSettingTextView.setText(mRoomName);
         }
 
@@ -470,7 +487,7 @@ room: id of room
             view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
             User u = mParticipants.get(0);
 
-            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.firstName+ " "+u.lastName);
+            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.getFullName());
             ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
         } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
@@ -478,28 +495,35 @@ room: id of room
                 public void onClick(View view) {
 
 
+                    final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
                             .setValue(mRoomName)
-                            .setTitle("Set Group ame")
+                            .setTitle("Set Group Name")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
 //                                mRoomName = editTextDialog.getValue();
                                     setGroupNameAndPhoto(editTextDialog.getValue(), null);
+                                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
                                 }
                             })
                             .setNegativeButton("Cancel", null)
                             .create().show();
-                    InputMethodManager inputMethodManager=(InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
+                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_IMPLICIT, 0);
                 }
             });
         }
     }
 
     private void updateRoomPhoto(View view) {
-        ImageView groupImageSettingView = (ImageView) view.findViewById(R.id.setting_group_image);
+        final ImageView groupImageSettingView = (ImageView) view.findViewById(R.id.setting_group_image);
+        final View groupImageProgressBar = view.findViewById(R.id.group_image_progress_bar);
+
+        groupImageSettingView.setImageBitmap(null);
+        groupImageProgressBar.setVisibility(View.VISIBLE);
+
+
         if (mType == ChatRoom.ROOM_TYPE_DM) {
             view.findViewById(R.id.setting_group_image_container).setVisibility(View.GONE);
             User u = mParticipants.get(0);
@@ -511,18 +535,42 @@ room: id of room
             Glide.with(getContext())
                     .load(mRoomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
+//                    .signature(new StringSignature(getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE).getString("imageSigniture", "000")))
+                    //random signature to invalidate cache
+                    .listener(new RequestListener<String, GlideDrawable>() {
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            Activity a = getActivity();
+                            if ( a != null) {
+                                a.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        groupImageProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
+                            return false;
+                        }
+                    })
+                    .signature(new StringSignature("" + Math.random()))
                     .into(groupImageSettingView);
+
 
             groupImageSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    if(PermissionChecker.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                    if (PermissionChecker.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-                            ActivityCompat.requestPermissions(getActivity(),
-                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                                    REQUEST_PERMISSION_STORAGE);
-                    }else{
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                REQUEST_PERMISSION_STORAGE);
+                    } else {
                         startGetImageActivity();
                     }
                 }
@@ -531,36 +579,46 @@ room: id of room
     }
 
     private void block() {
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (activity == null) return;
+        new AlertDialog.Builder(getContext()).setMessage(R.string.block_confirmation_text)
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
-            Utils.showBadConnectionToast(activity);
-            return;
-        }
+                        if (activity == null) return;
 
-        JSONObject emit = new JSONObject();
-        try {
-            emit.put("block", true);
-            emit.put("user", mParticipants.get(0).userId);
-            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+                        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+                            Utils.showBadConnectionToast(activity);
+                            return;
+                        }
 
-            String message;
-                message = "You will no longer see this user and they won't be able to see you";
-                BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
+                        JSONObject emit = new JSONObject();
+                        try {
+                            emit.put("block", true);
+                            emit.put("user", mParticipants.get(0).userId);
+                            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
 
-            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
-                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            String message;
+                            message = "You will no longer see this user and they won't be able to see you";
+                            BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
 
-            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
-            getFragmentManager().popBackStack();
-            getFragmentManager().popBackStack();
+                            ((MainActivity) getActivity()).setFragmentOfIndexNeedsUpdating(
+                                    FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
 
-        } catch (JSONException e) {
-            Utils.showServerErrorToast(activity);
-            e.printStackTrace();
-        }
+                            Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+                            getFragmentManager().popBackStack();
+                            getFragmentManager().popBackStack();
+
+                        } catch (JSONException e) {
+                            Utils.showServerErrorToast(activity);
+                            e.printStackTrace();
+                        }
+                    }
+                })
+                .create().show();
+
     }
 
     protected void startGetImageActivity() {
@@ -618,8 +676,8 @@ room: id of room
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == REQUEST_PERMISSION_STORAGE){
-            if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == REQUEST_PERMISSION_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startGetImageActivity();
             }
         }
@@ -754,7 +812,7 @@ room: id of room
 
                     Log.d(TAG, object.toString(4));
 
-                    mRoomImage = object.getString("image");
+                    mRoomImage = object.getJSONObject("profileImage").getString("original");
                     mRoomName = object.getString("name");
                     Activity activity = getActivity();
                     final View view = getView();
