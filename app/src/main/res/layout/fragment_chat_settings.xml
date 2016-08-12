@@ -35,6 +35,15 @@
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/group_image_progress_bar"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
         </FrameLayout>
 
         <RelativeLayout
