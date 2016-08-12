@@ -251,6 +251,7 @@ room: id of room
 
 
         View DMHeader = view.findViewById(R.id.dm_header);
+
 //        View DMDivider = view.findViewById(R.id.dm_divider);
         View blockView = view.findViewById(R.id.dm_block);
 
@@ -342,6 +343,19 @@ room: id of room
 
 
         updateNotificationView();
+
+        DMHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+                if(activity != null) {
+                    User user = mParticipants.get(0);
+                    TaptUserProfileFragment profile = TaptUserProfileFragment.newInstance(user.getFullName(), user.userId);
+                    activity.addFragmentToContainer(profile);
+                }
+            }
+        });
+
         getView().findViewById(R.id.setting_notifications).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -470,7 +484,7 @@ room: id of room
             view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
             User u = mParticipants.get(0);
 
-            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.firstName+ " "+u.lastName);
+            ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.getFullName());
             ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
         } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
