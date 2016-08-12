@@ -25,6 +25,4 @@
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
     </group>
-
-
 </menu>
