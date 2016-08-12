@@ -725,6 +725,20 @@ public class MainActivity extends BaseTaptActivity {
                                     newEventSnackbar(update.getDescription(), update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
+
+                                    if (update.getUpdateType() == Update.UpdateType.FOLLOWER){
+                                        mRealm.executeTransactionAsync(new Realm.Transaction() {
+                                            @Override
+                                            public void execute(Realm realm) {
+                                                realm.copyToRealmOrUpdate(
+                                                        new TaptUser(update.getUserId(),
+                                                                update.getUserFullName(),
+                                                                update.getUserProfileImageName(),
+                                                                true)
+                                                );
+                                            }
+                                        });
+                                    }
                                 }
                             }
                         });
@@ -1116,29 +1130,33 @@ public class MainActivity extends BaseTaptActivity {
                 if (response.isSuccessful()) {
                     try {
                         final JSONObject object = new JSONObject(response.body().string());
-                       // Log.d(TAG, "onResponse: " + object.toString(4));
+                        Log.d(TAG, "onResponse: " + object.toString(4));
 
-                        mRealm.executeTransactionAsync(new Realm.Transaction() {
+                        runOnUiThread(new Runnable() {
                             @Override
-                            public void execute(Realm realm) {
-                                try {
-                                    JSONArray insertAndDelete = object.getJSONArray("insert");
-                                    for (int i = 0; i < insertAndDelete.length() ; i++){
-                                        realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(i), true));
-                                    }
+                            public void run() {
+                                mRealm.executeTransactionAsync(new Realm.Transaction() {
+                                    @Override
+                                    public void execute(Realm realm) {
+                                        try {
+                                            JSONArray insertAndDelete = object.getJSONArray("insert");
+                                            for (int i = 0; i < insertAndDelete.length(); i++) {
+                                                realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(i), true));
+                                            }
 
-                                    insertAndDelete = object.getJSONArray("delete");
-                                    for (int j = 0; j < insertAndDelete.length(); j++){
-                                        realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(j), false));
-                                    }
+                                            insertAndDelete = object.getJSONArray("delete");
+                                            for (int j = 0; j < insertAndDelete.length(); j++) {
+                                                realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(j), false));
+                                            }
 
-                                    mSharedPreferences.edit().putLong("timestamp", object.getLong("timestamp")).apply();
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
+                                            mSharedPreferences.edit().putLong("timestamp", object.getLong("timestamp")).apply();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
                             }
                         });
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

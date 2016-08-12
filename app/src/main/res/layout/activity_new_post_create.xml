@@ -61,13 +61,12 @@
             android:layout_marginTop="16dp"
             android:background="@null"
             android:gravity="center"
-            android:hint="Enter your text here"
+            android:hint="WHAT WOULD YOU SAY TO YOUR ENTIRE CAMPUS?"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
             android:maxLines="8"
             android:textColor="#000000"
             android:textSize="32sp"
-            tools:text="HELLO THEREHELLO THEREHELLO THEREHELLO THERE "
         />
 
         <!--edit text still shows red underline on some phones-->
@@ -106,7 +105,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_0"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
             <TextView
@@ -126,7 +125,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_1"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
@@ -147,7 +146,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_2"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
@@ -170,7 +169,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_3"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
 
@@ -193,7 +192,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_4"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
@@ -216,7 +215,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color_5"
+            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >

@@ -97,7 +97,7 @@ public class LinuteLoginFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() > 6){
+                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() >= 6){
                     mSigninButton.setBackgroundResource(R.drawable.active_button);
                     mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.pure_white));
                 }else {
@@ -172,7 +172,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString().toLowerCase();
+        String email = mEmailView.getText().toString().toLowerCase().trim();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;

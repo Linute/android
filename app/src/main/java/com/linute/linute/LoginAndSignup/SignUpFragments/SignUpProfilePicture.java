@@ -67,6 +67,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
         if (mSignUpInfo.getImage() != null) {
             Glide.with(this)
                     .load(mSignUpInfo.getImage())
+                    .asBitmap()
                     .placeholder(R.color.seperator_color)
                     .into(vProfileImage);
 
@@ -341,6 +342,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
             mSignUpInfo.setImage(image);
             Glide.with(this)
                     .load(image)
+                    .asBitmap()
                     .into(vProfileImage);
             activateButton(true);
         }

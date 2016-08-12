@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.hdodenhof.circleimageview.CircleImageView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -191,7 +190,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     public class UpdateItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private CircleImageView mProfileImage;
+        private ImageView mProfileImage;
         private ImageView mIconImage;
         private ImageView mEventPicture;
         private TextView mNameText;
@@ -204,7 +203,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         public UpdateItemViewHolder(View itemView) {
             super(itemView);
 
-            mProfileImage = (CircleImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
+            mProfileImage = (ImageView) itemView.findViewById(R.id.updatesFragment_profile_picture);
             mEventPicture = (ImageView) itemView.findViewById(R.id.updatesFragment_update_picture);
 
             mIconImage = (ImageView) itemView.findViewById((R.id.updatesFragment_icon_image));
@@ -251,7 +250,6 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             itemView.setBackgroundColor(update.isViewed() ? 0 : 0x2284CFDF);
 
             setUpPictures(update); //profile and event image
-
         }
 
 

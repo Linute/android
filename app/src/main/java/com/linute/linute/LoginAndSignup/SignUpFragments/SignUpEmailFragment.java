@@ -224,11 +224,8 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
                     .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-
-                            // TODO: 8/9/16 CHANGE
-
-                            //checkEmail(email, password);
-                            goToNext(email, password);
+                            checkEmail(email, password);
+                            //goToNext(email, password);
                         }
                     }).show();
         }
@@ -366,14 +363,14 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
 
 //    //test code
 //
-    private void goToNext(String email, String password) {
-        mSignUpInfo.setEmail(email);
-        mSignUpInfo.setPassword(password);
-
-        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
-        if (frag != null) {
-            frag.addFragment(SignUpPinFragment.newInstance("1234"), SignUpPinFragment.TAG);
-        }
-    }
+//    private void goToNext(String email, String password) {
+//        mSignUpInfo.setEmail(email);
+//        mSignUpInfo.setPassword(password);
+//
+//        SignUpParentFragment frag = (SignUpParentFragment) getParentFragment();
+//        if (frag != null) {
+//            frag.addFragment(SignUpPinFragment.newInstance("1234"), SignUpPinFragment.TAG);
+//        }
+//    }
 
 }
