@@ -115,6 +115,13 @@ public class ChatRoom {
         return mRoomImage;
     }
 
+    public void setImage(String image){
+        mRoomImage = image;
+    }
+
+    public void setName(String name){
+        mRoomName = name;
+    }
 
     public String getLastMessage() {
         return mLastMessage;
@@ -153,11 +160,17 @@ public class ChatRoom {
         mTime = time;
     }
 
+    public long getUnmuteTime(){
+        return mMutedUntil;
+    }
+
     public void merge(ChatRoom rooms){
         mLastMessage = rooms.getLastMessage();
         mTime = rooms.getTime();
         mHasUnread = rooms.hasUnread();
     }
+
+
 
     @Override
     public boolean equals(Object o) {
