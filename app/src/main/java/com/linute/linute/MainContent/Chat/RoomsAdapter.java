@@ -128,8 +128,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         mRoom.hasUnread = false;
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
-                                        mRoom.roomId,
-                                        mRoom.users
+                                        mRoom
                                 )
                         );
                     }

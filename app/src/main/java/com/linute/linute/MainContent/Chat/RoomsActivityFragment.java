@@ -127,7 +127,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         @Override
                         public void onRoomSelected(ChatRoom room) {
                             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.roomId, room.users));
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }
                     });
                     activity.addFragmentToContainer(selectUserFragment);
@@ -233,7 +233,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
-                        //Log.d(TAG, jsonObj.toString(4));
+//                        Log.d(TAG, jsonObj.toString(4));
 
 
                         mSkip = jsonObj.getInt("skip");
@@ -273,6 +273,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                             name = room.getString("name");
                             image = room.getJSONObject("profileImage").getString("thumbnail");
+
 
                             type = room.getInt("type");
 

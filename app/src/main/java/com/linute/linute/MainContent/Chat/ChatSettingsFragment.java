@@ -22,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -45,6 +44,7 @@ import com.linute.linute.R;
 import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -102,6 +102,7 @@ public class ChatSettingsFragment extends BaseFragment {
         if (getArguments() != null) {
             mChatRoom = getArguments().getParcelable(ARG_ROOM_ID);
         }
+        mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
         Map<String, String> params = new HashMap<>();
         params.put("room", mChatRoom.roomId);
         display();
@@ -201,7 +202,7 @@ room: id of room
 
                 @Override
                 public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                    contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
+                    /*contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
@@ -216,7 +217,7 @@ room: id of room
                             return true;
 
                         }
-                    });
+                    });*/
                 }
             });
 
@@ -358,14 +359,11 @@ room: id of room
                     frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
                         @Override
                         public void onRoomSelected(ChatRoom room) {
-                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.roomId, null));
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }
                     });
                     activity.replaceContainerWithFragment(frag);
-
-
                 }
-
             }
         });
 

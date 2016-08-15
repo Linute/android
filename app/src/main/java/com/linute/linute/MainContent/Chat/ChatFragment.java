@@ -79,10 +79,11 @@ import static android.app.Activity.RESULT_OK;
 public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
-    private static final String ROOM_ID = "room";
+    private static final String ARG_ROOM_ID = "room";
     //    private static final String OTHER_PERSON_NAME = "username";
 //    private static final String OTHER_PERSON_ID = "userid";
     private static final String ARG_USERS = "users";
+    private static final String ARG_ROOM = "chatroom";
 
     private static final DateFormat DATE_DIVIDER_DATE_FORMAT = new SimpleDateFormat("MMMM d");
 
@@ -178,7 +179,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
 
-        args.putString(ROOM_ID, roomId);
+        args.putString(ARG_ROOM_ID, roomId);
 
         ArrayList<User> users = new ArrayList<>(1);
         users.add(new User(otherPersonId, otherPersonFirstName, otherPersonLastName, ""));
@@ -191,26 +192,45 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public static ChatFragment newInstance(String roomId, ArrayList<User> userList) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
-        args.putString(ROOM_ID, roomId);
+        args.putString(ARG_ROOM_ID, roomId);
         args.putParcelableArrayList(ARG_USERS, userList);
         fragment.setArguments(args);
         return fragment;
     }
 
+    public static ChatFragment newInstance(ChatRoom chatRoom) {
+        ChatFragment fragment = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_ROOM, chatRoom);
+        args.putString(ARG_ROOM_ID, chatRoom.roomId);
+        args.putParcelableArrayList(ARG_USERS, chatRoom.users);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mRoomId = getArguments().getString(ROOM_ID);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
 
-            mUsers = getArguments().getParcelableArrayList(ARG_USERS);
+            mChatRoom = arguments.getParcelable(ARG_ROOM);
 
-            if(mUsers != null) {
-                for (User user : mUsers) {
-                    mUserMap.put(user.userId, user);
+            if (mChatRoom != null) {
+                mRoomId = mChatRoom.roomId;
+                mUsers = mChatRoom.users;
+                mChatName = mChatRoom.getRoomName();
+                mRoomExists = true;
+            }else{
+                mRoomId = arguments.getString(ARG_ROOM_ID);
+                mUsers = arguments.getParcelableArrayList(ARG_USERS);
+                if (mUsers != null) {
+                    for (User user : mUsers) {
+                        mUserMap.put(user.userId, user);
+                    }
                 }
             }
-
         }
     }
 
@@ -424,11 +444,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
                 }
@@ -437,13 +459,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
 
-                if(mAmAlreadyTyping) {
+                if (mAmAlreadyTyping) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                         }
-                    },3000);
+                    }, 3000);
                 }
 
             }
@@ -454,7 +476,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 }
@@ -910,9 +933,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             }
 
                             Date date = null;
-                            try{
+                            try {
                                 Utils.getDateFormat().parse(object.getString("date"));
-                            }catch (ParseException e){
+                            } catch (ParseException e) {
 
                             }
 
@@ -966,7 +989,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
         Map<String, String> chat = new HashMap<>();
-        chat.put(ROOM_ID, mRoomId);
+        chat.put(ARG_ROOM_ID, mRoomId);
 
 
         setFragmentState(FragmentState.LOADING_DATA);
@@ -1087,9 +1110,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             }
                         }
                         Date date = null;
-                        try{
+                        try {
                             Utils.getDateFormat().parse(room.getString("date"));
-                        }catch (ParseException e){
+                        } catch (ParseException e) {
 
                         }
 
@@ -1131,7 +1154,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         });
                     }
                 }
-
 
 
                 setFragmentState(FragmentState.FINISHED_UPDATING);
@@ -1646,7 +1668,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mLoadingMoreMessages = true;
 
         Map<String, String> chat = new HashMap<>();
-        chat.put(ROOM_ID, mRoomId);
+        chat.put(ARG_ROOM_ID, mRoomId);
 
         if (mSkip < 0) {
             chat.put("skip", "0");
