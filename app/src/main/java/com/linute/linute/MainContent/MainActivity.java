@@ -773,7 +773,6 @@ public class MainActivity extends BaseTaptActivity {
                         chatEvent.getRoomId(),
                         null
                 ));
-
                 sn.dismiss();
             }
         });

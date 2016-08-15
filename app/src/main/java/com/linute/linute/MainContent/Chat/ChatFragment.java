@@ -1401,6 +1401,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
         mRoomExists = true;
+        mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
