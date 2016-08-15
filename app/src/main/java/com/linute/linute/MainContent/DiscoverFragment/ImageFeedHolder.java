@@ -1,8 +1,14 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Build;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
@@ -41,8 +47,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
             @Override
             protected void onDoubleTap(float x, float y) {
-                //Log.i(TAG, "onDoubleTap: ");
-                doubleClick();
+                doubleClick(x, y);
             }
 
             @Override
@@ -58,9 +63,54 @@ public class ImageFeedHolder extends BaseFeedHolder {
         });
     }
 
-    private void doubleClick() {
+    private void doubleClick(float x, float y) {
         final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 
+            animateLollipop(layer,
+                    (int) x,
+                    (int) y,
+                    (float) getMax(Math.hypot(x, y),
+                            Math.hypot(x, layer.getHeight() - y),
+                            Math.hypot(layer.getWidth() - x, y),
+                            Math.hypot(layer.getWidth() - x, layer.getHeight() - y)
+                    ));
+        } else {
+            animatePreLollipop(layer);
+        }
+
+        if (!vLikesHeart.isChecked()) {
+            vLikesHeart.toggle();
+        }
+    }
+
+    private double getMax(double a, double b, double c, double d) {
+        return Math.max(Math.max(a, b), Math.max(c, d));
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void animateLollipop(final View v, int x, int y, float radius) {
+        Animator animator = ViewAnimationUtils.createCircularReveal(v, x, y, 0, radius);
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                v.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                super.onAnimationCancel(animation);
+                v.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        v.setVisibility(View.VISIBLE);
+        animator.start();
+    }
+
+    private void animatePreLollipop(final View layer) {
         AlphaAnimation a = new AlphaAnimation(0.0f, 0.75f);
         a.setDuration(400);
 
@@ -70,7 +120,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
         a.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
@@ -85,10 +134,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
         });
 
         layer.startAnimation(a);
-
-        if (!vLikesHeart.isChecked()) {
-            vLikesHeart.toggle();
-        }
     }
 
     private void longPress() {
@@ -113,7 +158,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
         if (!thresholdMet) {
             MainActivity activity = (MainActivity) mContext;
             if (activity != null && activity.getSupportFragmentManager().findFragmentByTag(FULL_VIEW) != null) {
-               activity.getSupportFragmentManager().popBackStack();
+                activity.getSupportFragmentManager().popBackStack();
             }
         }
     }

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="72dp"
-              android:background="?android:attr/selectableItemBackground"
-              android:orientation="horizontal">
-
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="horizontal">
 
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
-        android:layout_margin="@dimen/activity_horizontal_margin"
         android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin"
         app:riv_border_color="@color/seperator_color"
         app:riv_border_width="1px"
-        app:riv_corner_radius="4dp"
+        app:riv_corner_radius="@dimen/profile_image_radius"
         tools:src="@drawable/ic_anon"
     />
 
@@ -33,13 +33,12 @@
         tools:text="Mike Hunt Smells Bad (VERY VERY BAD)"
     />
 
-
     <com.linute.linute.UtilsAndHelpers.ToggleImageView
         android:id="@+id/toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:src="@drawable/send_to_checkbox_off"
-        android:layout_margin="@dimen/activity_horizontal_margin"/>
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:src="@drawable/send_to_checkbox_off"/>
 
 </LinearLayout>

@@ -12,7 +12,6 @@
         tools:src="@color/colorPrimary"
     />
 
-
     <TextView
         android:id="@+id/name"
         android:layout_width="match_parent"
@@ -24,7 +23,6 @@
         android:textSize="@dimen/header_font_size"
         tools:text="Mike Hunt Smells Bad (VERY VERY BAD)"
     />
-
 
     <com.linute.linute.UtilsAndHelpers.ToggleImageView
         android:id="@+id/toggle"
