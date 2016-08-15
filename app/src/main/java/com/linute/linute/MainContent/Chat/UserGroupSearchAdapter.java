@@ -142,7 +142,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
 
         public void bindModel(ChatRoom chat) {
             Glide.with(itemView.getContext())
-                    .load(chat.getRoomImage())
+                    .load(chat.roomImage)
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.color.seperator_color)
                     .into(vUserImage);

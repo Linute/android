@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,14 +70,14 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
                         }
                     }
                 });
-                holder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+               /* holder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
                     @Override
                     public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
                         if(mUserClickListener != null) {
                             mUserClickListener.onCreateContextMenu(contextMenu,user,contextMenuInfo);
                         }
                     }
-                });
+                });*/
                 return;
             case TYPE_ADD:
                 ((AddVH)holder).bind();
