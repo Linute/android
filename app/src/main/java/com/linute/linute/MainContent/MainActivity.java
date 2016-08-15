@@ -1130,7 +1130,7 @@ public class MainActivity extends BaseTaptActivity {
                 if (response.isSuccessful()) {
                     try {
                         final JSONObject object = new JSONObject(response.body().string());
-                        Log.d(TAG, "onResponse: " + object.toString(4));
+                        //Log.d(TAG, "onResponse: " + object.toString(4));
 
                         runOnUiThread(new Runnable() {
                             @Override

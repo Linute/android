@@ -464,8 +464,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         vSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String message = mInputMessageView.getText().toString();
-                if (message.trim().isEmpty()) return;
+                String message = mInputMessageView.getText().toString().trim();
+                if (message.isEmpty()) return;
                 attemptSend(message);
                 mInputMessageView.setText("");
             }
@@ -1251,7 +1251,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void attemptSend(String message) {
 
         message = message.replaceAll("[\\n\\s]+$", "");
-
 
         if (!mRoomExists) {
             createRoom(message);

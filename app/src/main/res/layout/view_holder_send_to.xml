@@ -16,7 +16,7 @@
         android:layout_margin="@dimen/activity_horizontal_margin"
         app:riv_border_color="@color/seperator_color"
         app:riv_border_width="1px"
-        app:riv_corner_radius="@dimen/profile_image_radius"
+        app:riv_corner_radius="@dimen/user_icon_corner_radius"
         tools:src="@drawable/ic_anon"
     />
 
