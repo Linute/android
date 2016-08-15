@@ -15,6 +15,7 @@ public class EditTextDialog extends AlertDialog.Builder{
 
     EditText mEditText;
 
+
     public EditTextDialog(Context context) {
         super(context);
 
@@ -24,6 +25,11 @@ public class EditTextDialog extends AlertDialog.Builder{
         setView(view);
     }
 
+    public EditText getEditText(){
+        return mEditText;
+    }
+
+
     public EditTextDialog setValue(CharSequence value){
         mEditText.setText(value);
         return this;
@@ -32,4 +38,6 @@ public class EditTextDialog extends AlertDialog.Builder{
     public String getValue(){
         return mEditText.getText().toString();
     }
+
+
 }

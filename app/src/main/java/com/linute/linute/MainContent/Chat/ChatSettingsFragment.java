@@ -21,9 +21,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -410,8 +412,22 @@ room: id of room
                                     inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
                                 }
                             })
-                            .setNegativeButton("Cancel", null)
-                            .create().show();
+                            .setNegativeButton("Cancel", null);
+
+                    editTextDialog.getEditText().setImeActionLabel("Ok", EditorInfo.IME_ACTION_DONE);
+
+                    editTextDialog.getEditText().setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                            if(i == EditorInfo.IME_ACTION_DONE){
+                                setGroupNameAndPhoto(editTextDialog.getValue(), null);
+                                inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+                    editTextDialog.create().show();
                     inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 }
             });
