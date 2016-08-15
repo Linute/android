@@ -325,7 +325,7 @@ room: id of room
             public void onClick(View view) {
                 new AlertDialog.Builder(getContext())
                         .setTitle("Leave Group")
-                        .setMessage("If you leave the group, you will lose access to the chat log. You can be added back to the group")
+                        .setMessage(R.string.leave_group_chat_dialog_text)
                         .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
