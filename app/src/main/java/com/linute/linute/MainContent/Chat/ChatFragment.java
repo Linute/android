@@ -79,10 +79,11 @@ import static android.app.Activity.RESULT_OK;
 public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
-    private static final String ROOM_ID = "room";
+    private static final String ARG_ROOM_ID = "room";
     //    private static final String OTHER_PERSON_NAME = "username";
 //    private static final String OTHER_PERSON_ID = "userid";
     private static final String ARG_USERS = "users";
+    private static final String ARG_ROOM = "chatroom";
 
     private static final DateFormat DATE_DIVIDER_DATE_FORMAT = new SimpleDateFormat("MMMM d");
 
@@ -101,6 +102,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public static final int CHAT_TYPE_DM = 0;
     public static final int CHAT_TYPE_GROUP = 1;
+
+    private ChatRoom mChatRoom;
 
     private int mChatType;
     private String mChatName;
@@ -176,7 +179,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
 
-        args.putString(ROOM_ID, roomId);
+        args.putString(ARG_ROOM_ID, roomId);
 
         ArrayList<User> users = new ArrayList<>(1);
         users.add(new User(otherPersonId, otherPersonFirstName, otherPersonLastName, ""));
@@ -189,26 +192,45 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public static ChatFragment newInstance(String roomId, ArrayList<User> userList) {
         ChatFragment fragment = new ChatFragment();
         Bundle args = new Bundle();
-        args.putString(ROOM_ID, roomId);
+        args.putString(ARG_ROOM_ID, roomId);
         args.putParcelableArrayList(ARG_USERS, userList);
         fragment.setArguments(args);
         return fragment;
     }
 
+    public static ChatFragment newInstance(ChatRoom chatRoom) {
+        ChatFragment fragment = new ChatFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_ROOM, chatRoom);
+        args.putString(ARG_ROOM_ID, chatRoom.roomId);
+        args.putParcelableArrayList(ARG_USERS, chatRoom.users);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mRoomId = getArguments().getString(ROOM_ID);
+        Bundle arguments = getArguments();
+        if (arguments != null) {
 
-            mUsers = getArguments().getParcelableArrayList(ARG_USERS);
+            mChatRoom = arguments.getParcelable(ARG_ROOM);
 
-            if(mUsers != null) {
-                for (User user : mUsers) {
-                    mUserMap.put(user.userId, user);
+            if (mChatRoom != null) {
+                mRoomId = mChatRoom.roomId;
+                mUsers = mChatRoom.users;
+                mChatName = mChatRoom.getRoomName();
+                mRoomExists = true;
+            }else{
+                mRoomId = arguments.getString(ARG_ROOM_ID);
+                mUsers = arguments.getParcelableArrayList(ARG_USERS);
+                if (mUsers != null) {
+                    for (User user : mUsers) {
+                        mUserMap.put(user.userId, user);
+                    }
                 }
             }
-
         }
     }
 
@@ -248,7 +270,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId, mUserId));
+                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mChatRoom));
             }
         });
 
@@ -422,11 +444,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
                 }
@@ -435,13 +459,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
 
-                if(mAmAlreadyTyping) {
+                if (mAmAlreadyTyping) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                         }
-                    },3000);
+                    }, 3000);
                 }
 
             }
@@ -452,7 +476,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !activity.socketConnected()) return;
+                    if (activity == null || mUserId == null || !activity.socketConnected())
+                        return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 }
@@ -839,7 +864,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mRoomExists = true;
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
-                            mChatImage = object.getString("image");
+                            mChatImage = object.getJSONObject("profileImage").getString("original");
 
                             if (activity != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -906,6 +931,29 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 obj.put("messages", listOfUnreadMessages);
                                 activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
                             }
+
+                            Date date = null;
+                            try {
+                                Utils.getDateFormat().parse(object.getString("date"));
+                            } catch (ParseException e) {
+
+                            }
+
+                            String unMuteAtString = object.getString("unMuteAt");
+                            mChatRoom = new ChatRoom(
+                                    mRoomId,
+                                    mChatType,
+                                    mChatName,
+                                    mChatImage,
+                                    mUsers,
+                                    "",
+                                    false,
+                                    date == null ? 0 : ~date.getTime(),
+                                    object.getBoolean("isMuted"),
+                                    unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
+                            );
+
+
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -941,7 +989,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
         Map<String, String> chat = new HashMap<>();
-        chat.put(ROOM_ID, mRoomId);
+        chat.put(ARG_ROOM_ID, mRoomId);
 
 
         setFragmentState(FragmentState.LOADING_DATA);
@@ -984,7 +1032,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONArray listOfUnreadMessages = new JSONArray();
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
-                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
+                        JSONObject room = object.getJSONObject("room");
+                        JSONArray users = room.getJSONArray("users");
                         mUsers.clear();
 //                        if (mOtherPersonProfileImage == null && mUserId != null) {
                         for (int i = 0; i < users.length(); i++) {
@@ -997,13 +1046,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mUsers.add(user);
                             mUserMap.put(userJSON.getString("id"), user);
 
-                        }
 
-                        JSONObject room = object.getJSONObject("room");
+                        }
 
                         mChatType = room.getInt("type");
                         mChatName = room.getString("name");
-                        mChatImage = room.getString("image");
+                        mChatImage = room.getJSONObject("profileImage").getString("original");
+
 
                         sortLists(tempChatList);
 
@@ -1060,6 +1109,28 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
                             }
                         }
+                        Date date = null;
+                        try {
+                            Utils.getDateFormat().parse(room.getString("date"));
+                        } catch (ParseException e) {
+
+                        }
+
+                        String unMuteAtString = room.getString("unMuteAt");
+                        mChatRoom = new ChatRoom(
+                                mRoomId,
+                                mChatType,
+                                mChatName,
+                                mChatImage,
+                                mUsers,
+                                "",
+                                false,
+                                date == null ? 0 : ~date.getTime(),
+                                room.getBoolean("isMuted"),
+                                unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
+                        );
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         if (activity != null) {
@@ -1083,6 +1154,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         });
                     }
                 }
+
 
                 setFragmentState(FragmentState.FINISHED_UPDATING);
             }
@@ -1292,7 +1364,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
     private void createRoom(final String message) {
-//        mRoomId = ObjectId.get().toString();
+//        roomId = ObjectId.get().toString();
 
         final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 //        joinRoom(activity, false);
@@ -1596,7 +1668,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mLoadingMoreMessages = true;
 
         Map<String, String> chat = new HashMap<>();
-        chat.put(ROOM_ID, mRoomId);
+        chat.put(ARG_ROOM_ID, mRoomId);
 
         if (mSkip < 0) {
             chat.put("skip", "0");

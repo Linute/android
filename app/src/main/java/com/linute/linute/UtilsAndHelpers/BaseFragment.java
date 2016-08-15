@@ -1,6 +1,7 @@
 package com.linute.linute.UtilsAndHelpers;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 
@@ -50,8 +51,32 @@ public class BaseFragment extends Fragment {
         return mFragmentState;
     }
 
-    public void resetFragment(){
+    public void resetFragment(){}
 
+    boolean isCacheLoaded = false;
+
+    public void loadDataFromCache(){}
+    public void loadDataFromNetwork(){}
+    public void displayDataFromCache(){}
+    public void displayDataFromNetwork(){}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadDataFromCache();
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                loadDataFromNetwork();
+            }
+        }).start();
     }
 
     @Override

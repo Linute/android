@@ -127,7 +127,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         @Override
                         public void onRoomSelected(ChatRoom room) {
                             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), room.users));
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }
                     });
                     activity.addFragmentToContainer(selectUserFragment);
@@ -233,7 +233,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                     try {
 
                         JSONObject jsonObj = new JSONObject(resString);
-                        //Log.d(TAG, jsonObj.toString(4));
+//                        Log.d(TAG, jsonObj.toString(4));
 
 
                         mSkip = jsonObj.getInt("skip");
@@ -273,6 +273,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                             name = room.getString("name");
                             image = room.getJSONObject("profileImage").getString("thumbnail");
+
 
                             type = room.getInt("type");
 
@@ -662,7 +663,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
             JSONObject object = new JSONObject();
             try {
                 if (activity.socketConnected()) {
-                    object.put("room", room.getRoomId());
+                    object.put("room", room.roomId);
                     activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
                     activity.runOnUiThread(new Runnable() {
                         @Override
@@ -723,11 +724,11 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                 return true;
             }
         });
-        MenuItem mute = contextMenu.add(room.isMuted() ? "Unmute" : "Mute");
+        MenuItem mute = contextMenu.add(room.isMuted ? "Unmute" : "Mute");
         mute.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if (!room.isMuted()) {
+                if (!room.isMuted) {
                     new RadioButtonDialog<>(getContext(), ChatSettingsFragment.MUTE_OPTIONS_TEXT, ChatSettingsFragment.MUTE_OPTIONS_VALUES)
                             .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
                                 @Override
@@ -737,7 +738,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                         try {
                                             JSONObject jsonParams = new JSONObject();
                                             jsonParams.put("mute", true);
-                                            jsonParams.put("room", room.getRoomId());
+                                            jsonParams.put("room", room.roomId);
                                             jsonParams.put("time", item);
                                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
 //                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
@@ -758,7 +759,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         try {
                             JSONObject jsonParams = new JSONObject();
                             jsonParams.put("mute", false);
-                            jsonParams.put("room", room.getRoomId());
+                            jsonParams.put("room", room.roomId);
                             jsonParams.put("time", 0);
                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
                             room.setMute(false, 0);

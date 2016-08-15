@@ -1,5 +1,8 @@
 package com.linute.linute.MainContent.Chat;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,46 +12,23 @@ import java.util.ArrayList;
 /**
  * Created by Arman on 1/16/16.
  */
-public class ChatRoom {
+public class ChatRoom implements Parcelable{
 
-    private String mRoomId;
-
-    private String mRoomName;
-    private String mRoomImage;
+    public String roomId;
+    public String roomName;
+    public String roomImage;
+    public String lastMessage; //last message
+    public boolean hasUnread;
+    public long time;
+    public int roomType;
+    public boolean isMuted;
+    public long mutedUntil;
 
     public final ArrayList<User> users;
 
-    private String mLastMessage; //last message
-
-    private boolean mHasUnread;
-    //private int mUsersCount;
-    //private ArrayList<ChatHead> mChatHeadList;
-
-    private long mTime;
-
-    private int mRoomType;
 
     public static final int ROOM_TYPE_DM = 0;
     public static final int ROOM_TYPE_GROUP = 1;
-
-    private boolean mIsMuted;
-    private long mMutedUntil;
-
-
-/*public ChatRoom() {
-        mRoomId = "";
-        mUserId = "";
-        mUserName = "";
-        mLastMessage = "";
-        mUserImage = "";
-        mHasUnread = false;
-        mTime = 0;
-        //mChatHeadList = new ArrayList<>();
-    }*/
-
-
-    //, int usersCount, ArrayList<ChatHead> chatHeadList
-
 
 
     public ChatRoom(String roomId,
@@ -62,32 +42,28 @@ public class ChatRoom {
                     boolean isMuted,
                     long mutedUntil
     ) {
-        mRoomId = roomId;
-        mRoomType = roomType;
-        mRoomName = roomName;
-        mRoomImage = roomImage;
+        this.roomId = roomId;
+        this.roomType = roomType;
+        this.roomName = roomName;
+        this.roomImage = roomImage;
         this.users = users;
-        mLastMessage = lastMessage;
-        mHasUnread = hasUnread;
-        mTime = time;
-        mIsMuted = isMuted;
-        mMutedUntil = mutedUntil;
-        //mUsersCount = usersCount;
-        //mChatHeadList = chatHeadList;
+        this.lastMessage = lastMessage;
+        this.hasUnread = hasUnread;
+        this.time = time;
+        this.isMuted = isMuted;
+        this.mutedUntil = mutedUntil;
     }
 
     public ChatRoom(String mRoomId, ArrayList<User> users, String mLastMessage, boolean mHasUnread, long mTime) {
-        this.mRoomId = mRoomId;
+        this.roomId = mRoomId;
         this.users = users;
-        this.mLastMessage = mLastMessage;
-        this.mHasUnread = mHasUnread;
-        this.mTime = mTime;
+        this.lastMessage = mLastMessage;
+        this.hasUnread = mHasUnread;
+        this.time = mTime;
     }
 
-
-
     public String getRoomName(){
-        if("".equals(mRoomName) || mRoomName == null) {
+        if("".equals(roomName) || roomName == null) {
 
             if (users.size() == 1){
                 return users.get(0).firstName + " " +users.get(0).lastName;
@@ -102,62 +78,28 @@ public class ChatRoom {
             }
             return name;
         }else{
-            return mRoomName;
+            return roomName;
         }
     }
 
-    public String getRoomId() {
-        return mRoomId;
-    }
-
-    public String getRoomImage(){
-        //if no set room image
-        return mRoomImage;
-    }
-
-
-    public String getLastMessage() {
-        return mLastMessage;
-    }
-
-    public void setLastMessage(String message)
-    {
-        mLastMessage = message;
-    }
-
-    public boolean isMuted(){
-        return mIsMuted;
-    }
-
-    public void setMute(boolean isMuted, long mutedUntil){
-        mIsMuted = isMuted;
+    public void setMute(boolean isMute, long muteUntil){
+        this.isMuted = isMute;
+        mutedUntil = muteUntil;
     }
 
     public boolean isDM(){
-        return mRoomType == ROOM_TYPE_DM;
-    }
-
-    public boolean hasUnread() {
-        return mHasUnread;
-    }
-
-    public void setHasUnread(boolean hasUnread) {
-        mHasUnread = hasUnread;
-    }
-
-    public long getTime() {
-        return mTime;
-    }
-
-    public void setTime(long time) {
-        mTime = time;
+        return roomType == ROOM_TYPE_DM;
     }
 
     public void merge(ChatRoom rooms){
-        mLastMessage = rooms.getLastMessage();
-        mTime = rooms.getTime();
-        mHasUnread = rooms.hasUnread();
+        lastMessage = rooms.lastMessage;
+        time = rooms.time;
+        hasUnread = rooms.hasUnread;
     }
+
+
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -165,13 +107,13 @@ public class ChatRoom {
             return false;
         }
 
-        return mRoomId.equals(((ChatRoom) o).mRoomId);
+        return roomId.equals(((ChatRoom) o).roomId);
     }
 
 
     @Override
     public int hashCode() {
-        return mRoomId.hashCode();
+        return roomId.hashCode();
     }
 
     public static ChatRoom fromJSON(JSONObject json) throws JSONException {
@@ -196,4 +138,50 @@ public class ChatRoom {
                 0
         );
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+
+         parcel.writeString(roomId);
+         parcel.writeInt(roomType);
+         parcel.writeString(roomName);
+         parcel.writeString(roomImage);
+         parcel.writeList(users);
+         parcel.writeString(lastMessage);
+         parcel.writeInt(hasUnread ? 1 : 0);
+         parcel.writeLong(time);
+         parcel.writeInt(isMuted ? 1 : 0);
+         parcel.writeLong(mutedUntil);
+
+
+    }
+
+    public static final Parcelable.Creator<ChatRoom> CREATOR = new Parcelable.Creator<ChatRoom>(){
+        @Override
+        public ChatRoom createFromParcel(Parcel parcel) {
+            return new ChatRoom(
+                        parcel.readString()  ,
+                        parcel.readInt()     ,
+                        parcel.readString()  ,
+                        parcel.readString()  ,
+                        parcel.readArrayList(User.class.getClassLoader()),
+                        parcel.readString()  ,
+                        parcel.readInt() == 1,
+                        parcel.readLong()    ,
+                        parcel.readInt() == 1,
+                        parcel.readLong()
+                        );
+        }
+
+        @Override
+        public ChatRoom[] newArray(int i) {
+            return new ChatRoom[i];
+        }
+    };
 }

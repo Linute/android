@@ -22,7 +22,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -45,6 +44,7 @@ import com.linute.linute.R;
 import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -77,16 +77,8 @@ public class ChatSettingsFragment extends BaseFragment {
     public static final int REQUEST_PHOTO = 1;
     public static final int REQUEST_PERMISSION_STORAGE = 5;
 
-    private String mRoomId;
     private String mUserId;
-
-
-    private int mType = ChatRoom.ROOM_TYPE_GROUP;
-    private String mRoomName;
-    private String mRoomImage;
-    private User mUser;
-    private ArrayList<User> mParticipants = new ArrayList<>();
-    private long mMuteRelease = 0;
+    private ChatRoom mChatRoom;
 
 
     private ChatParticipantsAdapter mParticipantsAdapter;
@@ -95,11 +87,10 @@ public class ChatSettingsFragment extends BaseFragment {
     private TextView mNotificationSettingsView;
     private TextView mNotificationSettingsIndicatorView;
 
-    public static ChatSettingsFragment newInstance(String roomId, String userId) {
+    public static ChatSettingsFragment newInstance(ChatRoom chatRoom) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_ROOM_ID, roomId);
-        args.putString(ARG_USER, userId);
+        args.putParcelable(ARG_ROOM_ID, chatRoom);
         fragment.setArguments(args);
 
         return fragment;
@@ -109,95 +100,11 @@ public class ChatSettingsFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mRoomId = getArguments().getString(ARG_ROOM_ID);
-            mUserId = getArguments().getString(ARG_USER);
+            mChatRoom = getArguments().getParcelable(ARG_ROOM_ID);
         }
+        mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
         Map<String, String> params = new HashMap<>();
-        params.put("room", mRoomId);
-        new LSDKChat(getContext()).getChat(params, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    JSONObject chat = new JSONObject(response.body().string());
-
-
-//                    mChatRoom = ChatRoom.fromJSON(chat.getJSONObject("room"));
-
-                    JSONObject room = chat.getJSONObject("room");
-
-                    mRoomName = room.getString("name");
-                    mRoomImage = room.getJSONObject("profileImage").getString("original");
-                    mType = room.getInt("type");
-
-                    /*JSONArray muteList = room.getJSONArray("mute");
-                    JSONObject mute = null;
-
-                    if(muteList != null)
-                    for(int i = 0; i < muteList.length();i++){
-                        if(muteList.getJSONObject(i).getString("user").equals(mUserId)){
-                            mute = muteList.getJSONObject(i);
-                            break;
-                        }
-                    }
-                    if (mute != null) {
-                        mMuteRelease = mute.getLong("time");
-                    }*/
-
-                    Object mute = room.get("unMuteAt");
-                    if (mute != null) {
-                        try {
-                            mMuteRelease = Long.valueOf(mute.toString());
-                        } catch (NumberFormatException e) {
-
-                        }
-                    }
-
-                    JSONArray users = room.getJSONArray("users");
-
-                    mParticipants.clear();
-                    for (int i = 0; i < users.length(); i++) {
-                        JSONObject user = users.getJSONObject(i);
-                        if (user.getString("id").equals(mUserId)) {
-                            mUser = new User(
-                                    user.getString("id"),
-                                    user.getString("firstName"),
-                                    user.getString("lastName"),
-                                    user.getString("profileImage"),
-                                    user.getJSONObject("college").getString("name")
-
-                            );
-                        } else {
-                            mParticipants.add(new User(
-                                    user.getString("id"),
-                                    user.getString("firstName"),
-                                    user.getString("lastName"),
-                                    user.getString("profileImage"),
-                                    user.getJSONObject("college").getString("name")
-
-                            ));
-                        }
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                FragmentActivity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            display();
-                        }
-                    });
-                }
-            }
-        });
+        params.put("room", mChatRoom.roomId);
         display();
     }
 
@@ -259,7 +166,7 @@ room: id of room
         View blockView = view.findViewById(R.id.dm_block);
 
 
-        if (mType == ChatRoom.ROOM_TYPE_DM) {
+        if (mChatRoom.isDM()) {
             participantsRV.setVisibility(View.GONE);
             leaveGroupView.setVisibility(View.GONE);
             DMHeader.setVisibility(View.VISIBLE);
@@ -273,7 +180,6 @@ room: id of room
             blockView.setVisibility(View.GONE);
 //            DMDivider.setVisibility(View.GONE);
         }
-        if (mParticipants != null) {
             LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
                 @Override
                 public boolean canScrollVertically() {
@@ -282,7 +188,7 @@ room: id of room
             };
             llm.setAutoMeasureEnabled(true);
             participantsRV.setLayoutManager(llm);
-            mParticipantsAdapter = new ChatParticipantsAdapter(mParticipants);
+            mParticipantsAdapter = new ChatParticipantsAdapter(mChatRoom.users);
             participantsRV.setAdapter(mParticipantsAdapter);
             mParticipantsAdapter.notifyDataSetChanged();
 
@@ -296,14 +202,14 @@ room: id of room
 
                 @Override
                 public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
-                    contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
+                    /*contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem menuItem) {
                             Toast.makeText(getContext(), "Remove", Toast.LENGTH_SHORT).show();
                             try {
-                                deleteUser(user);
+                                leaveGroup();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 return false;
@@ -311,12 +217,12 @@ room: id of room
                             return true;
 
                         }
-                    });
+                    });*/
                 }
             });
 
             Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-            toolbar.setTitle((mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group") + " Settings");
+            toolbar.setTitle((mChatRoom.isDM() ? "Message" : "Group") + " Settings");
 //            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
 //            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
 //            toolbar.findViewById(R.id.space_actions_item_balancer).setVisibility(View.GONE);
@@ -324,7 +230,7 @@ room: id of room
                 @Override
                 public void onClick(View view) {
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    SelectUsersFragment selectUserFragment = SelectUsersFragment.newInstance(mParticipants);
+                    SelectUsersFragment selectUserFragment = SelectUsersFragment.newInstance(mChatRoom.users);
                     selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
@@ -339,7 +245,6 @@ room: id of room
 
                 }
             });
-        }
 
         updateRoomPhoto(view);
         updateRoomName(view);
@@ -352,7 +257,7 @@ room: id of room
             public void onClick(View view) {
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
-                    User user = mParticipants.get(0);
+                    User user = mChatRoom.users.get(0);
                     TaptUserProfileFragment profile = TaptUserProfileFragment.newInstance(user.getFullName(), user.userId);
                     activity.addFragmentToContainer(profile);
                 }
@@ -363,7 +268,7 @@ room: id of room
             @Override
             public void onClick(final View view) {
 
-                if (mMuteRelease == NO_MUTE) {
+                if (mChatRoom.mutedUntil == NO_MUTE) {
                     new RadioButtonDialog<>(view.getContext(), MUTE_OPTIONS_TEXT, MUTE_OPTIONS_VALUES)
                             .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
                                 @Override
@@ -373,10 +278,10 @@ room: id of room
                                         try {
                                             JSONObject jsonParams = new JSONObject();
                                             jsonParams.put("mute", true);
-                                            jsonParams.put("room", mRoomId);
+                                            jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", item);
                                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
-                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
+                                            mChatRoom.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
                                             updateNotificationView();
 
                                         } catch (JSONException e) {
@@ -397,10 +302,10 @@ room: id of room
                                         try {
                                             JSONObject jsonParams = new JSONObject();
                                             jsonParams.put("mute", false);
-                                            jsonParams.put("room", mRoomId);
+                                            jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", 0);
                                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
-                                            mMuteRelease = 0;
+                                            mChatRoom.setMute(false, 0);
                                             updateNotificationView();
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -425,7 +330,7 @@ room: id of room
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 try {
-                                    deleteUser(mUser);
+                                    leaveGroup();
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -444,7 +349,7 @@ room: id of room
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (activity != null) {
 
-                    CreateChatFragment frag = CreateChatFragment.newInstance(mParticipants);
+                    CreateChatFragment frag = CreateChatFragment.newInstance(mChatRoom.users);
                     frag.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
                         @Override
                         public void onUsersSelected(ArrayList<User> users) {
@@ -454,14 +359,11 @@ room: id of room
                     frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
                         @Override
                         public void onRoomSelected(ChatRoom room) {
-                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), null));
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }
                     });
                     activity.replaceContainerWithFragment(frag);
-
-
                 }
-
             }
         });
 
@@ -477,15 +379,15 @@ room: id of room
 
     private void updateRoomName(View view) {
         final TextView groupNameSettingTextView = (TextView) view.findViewById(R.id.setting_group_name_text);
-        if (!"".equals(mRoomName) && mRoomName != null) {
-            groupNameSettingTextView.setText(mRoomName);
+        if (!"".equals(mChatRoom.getRoomName()) && mChatRoom.getRoomName() != null) {
+            groupNameSettingTextView.setText(mChatRoom.getRoomName());
         }
 
         final View groupNameSettingView = view.findViewById(R.id.setting_group_name);
-        if (mType == ChatRoom.ROOM_TYPE_DM) {
+        if (mChatRoom.isDM()) {
             view.findViewById(R.id.setting_group_name_container).setVisibility(View.GONE);
             view.findViewById(R.id.dm_create_group).setVisibility(View.VISIBLE);
-            User u = mParticipants.get(0);
+            User u = mChatRoom.users.get(0);
 
             ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.getFullName());
             ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
@@ -498,12 +400,12 @@ room: id of room
                     final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
                     editTextDialog
-                            .setValue(mRoomName)
+                            .setValue(mChatRoom.getRoomName())
                             .setTitle("Set Group Name")
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-//                                mRoomName = editTextDialog.getValue();
+//                                roomName = editTextDialog.getValue();
                                     setGroupNameAndPhoto(editTextDialog.getValue(), null);
                                     inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
                                 }
@@ -524,16 +426,16 @@ room: id of room
         groupImageProgressBar.setVisibility(View.VISIBLE);
 
 
-        if (mType == ChatRoom.ROOM_TYPE_DM) {
+        if (mChatRoom.isDM()) {
             view.findViewById(R.id.setting_group_image_container).setVisibility(View.GONE);
-            User u = mParticipants.get(0);
+            User u = mChatRoom.users.get(0);
 
             Glide.with(getContext())
                     .load(Utils.getImageUrlOfUser(u.userImage))
                     .into(((ImageView) view.findViewById(R.id.dm_user_icon)));
         } else {
             Glide.with(getContext())
-                    .load(mRoomImage)
+                    .load(mChatRoom.roomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
 //                    .signature(new StringSignature(getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE).getString("imageSigniture", "000")))
                     //random signature to invalidate cache
@@ -597,12 +499,12 @@ room: id of room
                         JSONObject emit = new JSONObject();
                         try {
                             emit.put("block", true);
-                            emit.put("user", mParticipants.get(0).userId);
+                            emit.put("user", mChatRoom.users.get(0).userId);
                             activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
 
                             String message;
                             message = "You will no longer see this user and they won't be able to see you";
-                            BlockedUsersSingleton.getBlockedListSingletion().add(mParticipants.get(0).userId);
+                            BlockedUsersSingleton.getBlockedListSingletion().add(mChatRoom.users.get(0).userId);
 
                             ((MainActivity) getActivity()).setFragmentOfIndexNeedsUpdating(
                                     FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
@@ -631,15 +533,15 @@ room: id of room
 
     private void updateNotificationView() {
         if (mNotificationSettingsIndicatorView == null) return;
-        mNotificationSettingsIndicatorView.setText(mMuteRelease == NO_MUTE ? "On" : "Off");
+        mNotificationSettingsIndicatorView.setText(mChatRoom.mutedUntil == NO_MUTE ? "On" : "Off");
     }
 
-    private void deleteUser(User user) throws JSONException {
+    private void leaveGroup() throws JSONException {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();
         usersJSON.put(mUserId);
-        paramsJSON.put("room", mRoomId);
+        paramsJSON.put("room", mChatRoom.roomId);
         paramsJSON.put("users", usersJSON);
 
 
@@ -647,7 +549,7 @@ room: id of room
     }
 
     private void addUsers(ArrayList<User> users) throws JSONException {
-        mParticipants.addAll(users);
+        mChatRoom.users.addAll(users);
 
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
@@ -656,7 +558,7 @@ room: id of room
         for (User user : users) {
             usersJSON.put(user.userId);
         }
-        paramsJSON.put("room", mRoomId);
+        paramsJSON.put("room", mChatRoom.roomId);
         paramsJSON.put("users", usersJSON);
 
 
@@ -705,7 +607,7 @@ room: id of room
 //                            final int oldSize = mParticipants.size();
                             for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
-                                mParticipants.add(new User(
+                                mChatRoom.users.add(new User(
                                         user.getString("id"),
                                         user.getString("firstName"),
                                         user.getString("lastName"),
@@ -742,10 +644,10 @@ room: id of room
                             final int[] removedPositions = new int[users.length()];
                             for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(0);
-                                for (int j = 0; j < mParticipants.size(); j++) {
-                                    if (user.getString("id").equals(mParticipants.get(j).userId)) {
+                                for (int j = 0; j < mChatRoom.users.size(); j++) {
+                                    if (user.getString("id").equals(mChatRoom.users.get(j).userId)) {
                                         removedPositions[i] = j;
-                                        mParticipants.remove(j);
+                                        mChatRoom.users.remove(j);
                                         break;
                                     }
                                 }
@@ -797,7 +699,7 @@ room: id of room
     }
 
     private void setGroupNameAndPhoto(String name, String photo) {
-        new LSDKChat(getContext()).setGroupNameAndPhoto(mRoomId, name, photo, new Callback() {
+        new LSDKChat(getContext()).setGroupNameAndPhoto(mChatRoom.roomId, name, photo, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -812,8 +714,8 @@ room: id of room
 
                     Log.d(TAG, object.toString(4));
 
-                    mRoomImage = object.getJSONObject("profileImage").getString("original");
-                    mRoomName = object.getString("name");
+                    mChatRoom.roomImage = object.getJSONObject("profileImage").getString("original");
+                    mChatRoom.roomName = object.getString("name");
                     Activity activity = getActivity();
                     final View view = getView();
                     if (activity != null && view != null) {

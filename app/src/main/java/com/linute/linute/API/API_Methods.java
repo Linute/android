@@ -1,7 +1,5 @@
 package com.linute.linute.API;
 
-import android.util.Log;
-
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -10,6 +8,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Headers;
@@ -32,9 +31,16 @@ public class API_Methods {
     public static final String SCHEME = "https";
 
     //private static String HOST = "api.tapt.io";
-    public static final String HOST = "devapi2.tapt.io";
+    public static String HOST = "devapi2.tapt.io";
 
-    public static final String VERSION = "v1.4.3";
+    public static final String HOST_DEV = "devapi2.tapt.io";
+    public static final String HOST_LIVE = "api.tapt.io";
+
+    public static String VERSION = "v1.4.3";
+
+    public static final String VERSION_DEV = "v1.4.3";
+    public static final String VERSION_LIVE = "v1.4.2";
+
 
     //JSON TYPE
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
