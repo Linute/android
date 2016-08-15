@@ -412,7 +412,7 @@ room: id of room
                             })
                             .setNegativeButton("Cancel", null)
                             .create().show();
-                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_IMPLICIT, 0);
+                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 }
             });
         }
