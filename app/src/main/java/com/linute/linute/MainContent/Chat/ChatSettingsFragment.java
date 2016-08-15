@@ -87,11 +87,10 @@ public class ChatSettingsFragment extends BaseFragment {
     private TextView mNotificationSettingsView;
     private TextView mNotificationSettingsIndicatorView;
 
-    public static ChatSettingsFragment newInstance(String roomId, String userId) {
+    public static ChatSettingsFragment newInstance(ChatRoom chatRoom) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_ROOM_ID, roomId);
-        args.putString(ARG_USER, userId);
+        args.putParcelable(ARG_ROOM_ID, chatRoom);
         fragment.setArguments(args);
 
         return fragment;
@@ -102,10 +101,9 @@ public class ChatSettingsFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mChatRoom = getArguments().getParcelable(ARG_ROOM_ID);
-            mUserId = getArguments().getString(ARG_USER);
         }
         Map<String, String> params = new HashMap<>();
-        params.put("room", mChatRoom.getRoomId());
+        params.put("room", mChatRoom.roomId);
         display();
     }
 
@@ -269,7 +267,7 @@ room: id of room
             @Override
             public void onClick(final View view) {
 
-                if (mChatRoom.getUnmuteTime() == NO_MUTE) {
+                if (mChatRoom.mutedUntil == NO_MUTE) {
                     new RadioButtonDialog<>(view.getContext(), MUTE_OPTIONS_TEXT, MUTE_OPTIONS_VALUES)
                             .setDurationSelectedListener(new RadioButtonDialog.DurationSelectedListener<Integer>() {
                                 @Override
@@ -279,7 +277,7 @@ room: id of room
                                         try {
                                             JSONObject jsonParams = new JSONObject();
                                             jsonParams.put("mute", true);
-                                            jsonParams.put("room", mChatRoom.getRoomId());
+                                            jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", item);
                                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
                                             mChatRoom.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
@@ -303,7 +301,7 @@ room: id of room
                                         try {
                                             JSONObject jsonParams = new JSONObject();
                                             jsonParams.put("mute", false);
-                                            jsonParams.put("room", mChatRoom.getRoomId());
+                                            jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", 0);
                                             activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
                                             mChatRoom.setMute(false, 0);
@@ -360,7 +358,7 @@ room: id of room
                     frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
                         @Override
                         public void onRoomSelected(ChatRoom room) {
-                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.getRoomId(), null));
+                            activity.replaceContainerWithFragment(ChatFragment.newInstance(room.roomId, null));
                         }
                     });
                     activity.replaceContainerWithFragment(frag);
@@ -409,7 +407,7 @@ room: id of room
                             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
-//                                mRoomName = editTextDialog.getValue();
+//                                roomName = editTextDialog.getValue();
                                     setGroupNameAndPhoto(editTextDialog.getValue(), null);
                                     inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
                                 }
@@ -439,7 +437,7 @@ room: id of room
                     .into(((ImageView) view.findViewById(R.id.dm_user_icon)));
         } else {
             Glide.with(getContext())
-                    .load(mChatRoom.getRoomImage())
+                    .load(mChatRoom.roomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
 //                    .signature(new StringSignature(getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE).getString("imageSigniture", "000")))
                     //random signature to invalidate cache
@@ -537,7 +535,7 @@ room: id of room
 
     private void updateNotificationView() {
         if (mNotificationSettingsIndicatorView == null) return;
-        mNotificationSettingsIndicatorView.setText(mChatRoom.getUnmuteTime() == NO_MUTE ? "On" : "Off");
+        mNotificationSettingsIndicatorView.setText(mChatRoom.mutedUntil == NO_MUTE ? "On" : "Off");
     }
 
     private void leaveGroup() throws JSONException {
@@ -545,7 +543,7 @@ room: id of room
         JSONObject paramsJSON = new JSONObject();
         JSONArray usersJSON = new JSONArray();
         usersJSON.put(mUserId);
-        paramsJSON.put("room", mChatRoom.getRoomId());
+        paramsJSON.put("room", mChatRoom.roomId);
         paramsJSON.put("users", usersJSON);
 
 
@@ -562,7 +560,7 @@ room: id of room
         for (User user : users) {
             usersJSON.put(user.userId);
         }
-        paramsJSON.put("room", mChatRoom.getRoomId());
+        paramsJSON.put("room", mChatRoom.roomId);
         paramsJSON.put("users", usersJSON);
 
 
@@ -703,7 +701,7 @@ room: id of room
     }
 
     private void setGroupNameAndPhoto(String name, String photo) {
-        new LSDKChat(getContext()).setGroupNameAndPhoto(mChatRoom.getRoomId(), name, photo, new Callback() {
+        new LSDKChat(getContext()).setGroupNameAndPhoto(mChatRoom.roomId, name, photo, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -718,8 +716,8 @@ room: id of room
 
                     Log.d(TAG, object.toString(4));
 
-                    mChatRoom.setImage(object.getJSONObject("profileImage").getString("original"));
-                    mChatRoom.setName(object.getString("name"));
+                    mChatRoom.roomImage = object.getJSONObject("profileImage").getString("original");
+                    mChatRoom.roomName = object.getString("name");
                     Activity activity = getActivity();
                     final View view = getView();
                     if (activity != null && view != null) {

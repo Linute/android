@@ -125,10 +125,10 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     BaseTaptActivity activity = (BaseTaptActivity) aContext;
                     if (activity != null) {
                         //mark all as read
-                        mRoom.setHasUnread(false);
+                        mRoom.hasUnread = false;
                         activity.addFragmentToContainer(
                                 ChatFragment.newInstance(
-                                        mRoom.getRoomId(),
+                                        mRoom.roomId,
                                         mRoom.users
                                 )
                         );
@@ -144,7 +144,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             mRoom = room;
 
             Glide.with(aContext)
-                    .load(room.getRoomImage())
+                    .load(room.roomImage)
                     .dontAnimate()
                     .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
                     .placeholder(R.color.seperator_color)
@@ -152,14 +152,14 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .into(vUserImage);
 
             vUserName.setText(room.getRoomName());
-            vLastMessage.setText(room.getLastMessage());
-            vTimeStamp.setText(Utils.getRoomDateFormat(room.getTime()));
-            vIsMuted.setVisibility(mRoom.isMuted() ? View.VISIBLE : View.INVISIBLE);
+            vLastMessage.setText(room.lastMessage);
+            vTimeStamp.setText(Utils.getRoomDateFormat(room.time));
+            vIsMuted.setVisibility(mRoom.isMuted ? View.VISIBLE : View.INVISIBLE);
 
-            vUserName.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-            vTimeStamp.setTypeface((mRoom.hasUnread() ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
-            vTimeStamp.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
-            vLastMessage.setTextColor(mRoom.hasUnread() ? COLOR_READ : COLOR_UNREAD);
+            vUserName.setTypeface((mRoom.hasUnread ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTypeface((mRoom.hasUnread ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT));
+            vTimeStamp.setTextColor(mRoom.hasUnread ? COLOR_READ : COLOR_UNREAD);
+            vLastMessage.setTextColor(mRoom.hasUnread ? COLOR_READ : COLOR_UNREAD);
         }
     }
 

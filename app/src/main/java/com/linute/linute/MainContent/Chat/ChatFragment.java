@@ -102,6 +102,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public static final int CHAT_TYPE_DM = 0;
     public static final int CHAT_TYPE_GROUP = 1;
 
+    private ChatRoom mChatRoom;
+
     private int mChatType;
     private String mChatName;
     private String mChatImage;
@@ -248,7 +250,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mRoomId, mUserId));
+                ((MainActivity) getActivity()).addFragmentToContainer(ChatSettingsFragment.newInstance(mChatRoom));
             }
         });
 
@@ -839,7 +841,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mRoomExists = true;
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
-                            mChatImage = object.getString("image");
+                            mChatImage = object.getJSONObject("profileImage").getString("original");
 
                             if (activity != null) {
                                 getActivity().runOnUiThread(new Runnable() {
@@ -906,6 +908,29 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 obj.put("messages", listOfUnreadMessages);
                                 activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
                             }
+
+                            Date date = null;
+                            try{
+                                Utils.getDateFormat().parse(object.getString("date"));
+                            }catch (ParseException e){
+
+                            }
+
+                            String unMuteAtString = object.getString("unMuteAt");
+                            mChatRoom = new ChatRoom(
+                                    mRoomId,
+                                    mChatType,
+                                    mChatName,
+                                    mChatImage,
+                                    mUsers,
+                                    "",
+                                    false,
+                                    date == null ? 0 : ~date.getTime(),
+                                    object.getBoolean("isMuted"),
+                                    unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
+                            );
+
+
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -984,7 +1009,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         JSONArray listOfUnreadMessages = new JSONArray();
                         parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
 
-                        JSONArray users = object.getJSONObject("room").getJSONArray("users");
+                        JSONObject room = object.getJSONObject("room");
+                        JSONArray users = room.getJSONArray("users");
                         mUsers.clear();
 //                        if (mOtherPersonProfileImage == null && mUserId != null) {
                         for (int i = 0; i < users.length(); i++) {
@@ -997,13 +1023,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mUsers.add(user);
                             mUserMap.put(userJSON.getString("id"), user);
 
-                        }
 
-                        JSONObject room = object.getJSONObject("room");
+                        }
 
                         mChatType = room.getInt("type");
                         mChatName = room.getString("name");
-                        mChatImage = room.getString("image");
+                        mChatImage = room.getJSONObject("profileImage").getString("original");
+
 
                         sortLists(tempChatList);
 
@@ -1060,6 +1086,28 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
                             }
                         }
+                        Date date = null;
+                        try{
+                            Utils.getDateFormat().parse(room.getString("date"));
+                        }catch (ParseException e){
+
+                        }
+
+                        String unMuteAtString = room.getString("unMuteAt");
+                        mChatRoom = new ChatRoom(
+                                mRoomId,
+                                mChatType,
+                                mChatName,
+                                mChatImage,
+                                mUsers,
+                                "",
+                                false,
+                                date == null ? 0 : ~date.getTime(),
+                                room.getBoolean("isMuted"),
+                                unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
+                        );
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         if (activity != null) {
@@ -1083,6 +1131,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         });
                     }
                 }
+
+
 
                 setFragmentState(FragmentState.FINISHED_UPDATING);
             }
@@ -1292,7 +1342,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
     private void createRoom(final String message) {
-//        mRoomId = ObjectId.get().toString();
+//        roomId = ObjectId.get().toString();
 
         final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 //        joinRoom(activity, false);
