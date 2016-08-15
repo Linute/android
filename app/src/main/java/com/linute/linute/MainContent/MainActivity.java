@@ -771,10 +771,8 @@ public class MainActivity extends BaseTaptActivity {
             public void onClick(View v) {
                 addFragmentToContainer(ChatFragment.newInstance(
                         chatEvent.getRoomId(),
-                        chatEvent.getOtherUserFirstName(),
-                        chatEvent.getOtherUserLastName(),
-                        chatEvent.getOtherUserId())
-                );
+                        null
+                ));
 
                 sn.dismiss();
             }
