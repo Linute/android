@@ -32,9 +32,12 @@ import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.Chat.ChatRoom;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.DiscoverFragment.DiscoverHolderFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
@@ -58,7 +61,6 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.Database.TaptUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -70,6 +72,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -694,6 +697,14 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
+    private String getStringFromJSON(JSONObject obj, String key){
+        try{
+            return obj.getString(key);
+        }catch(JSONException e){
+            return null;
+        }
+    }
+
     private Emitter.Listener newActivity = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -702,21 +713,60 @@ public class MainActivity extends BaseTaptActivity {
                 //Log.i(TAG, "call: " + activity.toString(4));
                 //message
                 if (activity.getString("action").equals("messager")) {
-                    final NewMessageEvent chat = new NewMessageEvent(true);
-                    chat.setRoomId(activity.getString("room"));
-                    chat.setMessage(activity.getString("text"));
-                    chat.setOtherUserId(activity.getString("ownerID"));
-                    chat.setOtherUserFirstName(activity.getString("ownerFirstName"));
-                    chat.setOtherUserLastName(activity.getString("ownerLastName"));
+                    /*
+                    *
+                    * room: room.id,
+                   roomType: room.type,
+                   roomUsers: room.users,
+                   roomProfileImage: room.profileImage,
+                   roomNameOfGroup: room.name,
+                   messageType: message.type, (edited)
+                    *
+                    * */
+
+                    JSONArray users = activity.getJSONArray("roomUsers");
+                    ArrayList<User> usersList = new ArrayList<>(users.length());
+                    Log.i("AAA", users.toString(4));
+                    for(int u=0;u<users.length();u++){
+                        JSONObject userJson = users.getJSONObject(u);
+                        usersList.add(new User(
+                                userJson.getString("id"),
+                                userJson.getString("firstName"),
+                                "",
+                                ""
+                        ));
+                    }
+
+                    final ChatRoom chat = new ChatRoom(
+                            activity.getString("room"),
+                            activity.getInt("roomType"),
+                            getStringFromJSON(activity, "roomName"),
+                            activity.getJSONObject("roomProfileImage").getString("original"),
+                            usersList,
+                            "",
+                            true,
+                            0,
+                            false,
+                            0
+                    );
+                    final String message = activity.getString("text");
+
+
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            newMessageSnackbar(chat);
+                            newMessageSnackbar(chat, message);
                         }
                     });
 
-                    NewMessageBus.getInstance().setNewMessage(chat);
+                    final NewMessageEvent chatEvent = new NewMessageEvent(true);
+                    /*chatEvent.setRoomId(activity.getString("room"));
+                    chatEvent.setMessage(activity.getString("text"));
+                    chatEvent.setOtherUserId(activity.getString("ownerID"));
+                    chatEvent.setOtherUserFirstName(activity.getString("ownerFirstName"));
+                    chatEvent.setOtherUserLastName(activity.getString("ownerLastName"));*/
+                    NewMessageBus.getInstance().setNewMessage(chatEvent);
                     NotificationsCounterSingleton.getInstance().setHasMessage(true);
                 } else {
                     final Update update = new Update(activity);
@@ -763,15 +813,14 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private void newMessageSnackbar(final NewMessageEvent chatEvent) {
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, chatEvent.getMessage(), CustomSnackbar.LENGTH_SHORT);
+    private void newMessageSnackbar(final ChatRoom chat, String message) {
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, message, CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addFragmentToContainer(ChatFragment.newInstance(
-                        chatEvent.getRoomId(),
-                        null
+                        chat
                 ));
                 sn.dismiss();
             }
@@ -844,19 +893,23 @@ public class MainActivity extends BaseTaptActivity {
                 addFragmentToContainer(TaptUserProfileFragment.newInstance("", id));
             }
         } else if (type == LinuteConstants.MESSAGE) {
-            String room = intent.getStringExtra("room");
+            /*String room = intent.getStringExtra("room");
             String userId = intent.getStringExtra("ownerID");
             String firstName = intent.getStringExtra("ownerFistName");
-            String lastName = intent.getStringExtra("ownerLastName");
+            String lastName = intent.getStringExtra("ownerLastName");*/
             mSafeForFragmentTransaction = true;
 
-            boolean empty = room == null || room.isEmpty();
-            addFragmentToContainer(new RoomsActivityFragment());
-            addFragmentToContainer(ChatFragment.newInstance(
+            ChatRoom room = intent.getParcelableExtra("chatRoom");
+
+            boolean empty = room.roomId == null || room.roomId.isEmpty();
+            if(getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
+                addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
+            addFragmentToContainer(ChatFragment.newInstance(room));
+            /*addFragmentToContainer(ChatFragment.newInstance(
                     empty ? null : room,
                     empty ? firstName : "",
                     empty ? lastName : "",
-                    userId.isEmpty() ? null : userId));
+                    userId.isEmpty() ? null : userId));*/
         }
     }
 

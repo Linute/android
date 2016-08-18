@@ -31,13 +31,20 @@ import android.util.Log;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.gcm.GcmListenerService;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
+import com.linute.linute.MainContent.Chat.ChatRoom;
+import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 
@@ -94,7 +101,8 @@ public class MyGcmListenerService extends GcmListenerService {
     private void sendNotification(Bundle data, String action) {
 
         Intent intent = buildIntent(data, action);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_IMMUTABLE);
 
         Log.d(TAG, data.toString());
 
@@ -104,13 +112,21 @@ public class MyGcmListenerService extends GcmListenerService {
         //int type = gettNotificationType(data.getString("action"));
         //String name = data.getString("ownerFullName");
         boolean isAnon = "1".equals(data.getString("privacy"));
-        Object profileImage = data.get("ownerProfileImage");
+        String profileImage = null;
+        try{
+            JSONObject image = new JSONObject(data.getString("roomProfileImage"));
+            profileImage = image.getString("thumbnail");
+        }catch(JSONException e){
+
+        }
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        ChatRoom chatRoom = (ChatRoom) intent.getParcelableExtra("chatRoom");
+        String title = chatRoom != null ? chatRoom.getRoomName() : "Tapt";
         final NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_stat_untitled_4_01)
                 .setColor(Color.BLACK)
-                .setContentTitle("Tapt")
+                .setContentTitle(title)
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
@@ -124,17 +140,20 @@ public class MyGcmListenerService extends GcmListenerService {
                                 ? Utils.getAnonImageUrl(String.valueOf(profileImage))
                                 : Utils.getImageUrlOfUser(String.valueOf(profileImage))
                         );
-                image = Glide.with(this).load(url).downloadOnly(64, 64).get();
+                Log.i("AAA", profileImage);
+                image = Glide.with(this).load(profileImage).downloadOnly(256, 256).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             if (image != null)
+
+
                 notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
         }
 
         BigInteger notificationId;
 
-        Object ownerId = data.get("ownerID");
+        Object ownerId = data.get("room");
         Object eventId = data.get("event");
         if (eventId != null) {
             notificationId = new BigInteger(String.valueOf(eventId), 16);
@@ -154,7 +173,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent;
 
         //Log.i(TAG, "action : "  + action);
-       // Log.i(TAG, "sendNotification: " + data.toString());
+        Log.i(TAG, "sendNotification: " + data.toString());
 
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
 
@@ -182,10 +201,50 @@ public class MyGcmListenerService extends GcmListenerService {
         intent.putExtra("NOTIFICATION", type);
         if (type == LinuteConstants.MESSAGE) {
             intent.putExtra("NOTIFICATION", type);
-            intent.putExtra("ownerID", data.getString("ownerID"));
-            intent.putExtra("ownerFirstName", data.getString("ownerFullName"));
-            intent.putExtra("ownerLastName", data.getString("ownerLastName"));
-            intent.putExtra("room", data.getString("room"));
+
+            try {
+                JSONObject image = new JSONObject(data.getString("roomProfileImage", "{original:'', thumbnail:''}"));
+                JSONArray users = new JSONArray(data.getString("roomUsers", "[]"));
+
+                String myId = Utils.getMyId(getApplicationContext());
+
+                ArrayList<User> usersList = new ArrayList<>(users.length());
+                for(int u=0;u<users.length();u++){
+                    JSONObject userJson = users.getJSONObject(u);
+                    if(!myId.equals(userJson.getString("id"))) {
+                        usersList.add(new User(
+                                userJson.getString("id"),
+                                userJson.getString("firstName"),
+                                "",
+                                ""
+                        ));
+                    }
+                }
+
+                Log.i("AAA", data.getString("room", ""));
+
+                ChatRoom chatRoom = new ChatRoom(
+                        data.getString("room", ""),
+                        Integer.parseInt(data.getString("roomType", ""+ChatRoom.ROOM_TYPE_GROUP)),
+                        data.getString("roomNameOfGroup", null),
+                        image.getString("thumbnail"),
+                        usersList,
+                        "",
+                        true,
+                        0,
+                        false,
+                        0
+                );
+
+                intent.putExtra("chatRoom", chatRoom);
+
+                /*intent.putExtra("ownerID", data.getString("ownerID"));
+                intent.putExtra("ownerFirstName", data.getString("ownerFullName"));
+                intent.putExtra("ownerLastName", data.getString("ownerLastName"));
+                intent.putExtra("room", data.getString("room"));*/
+            }catch(JSONException e){
+                e.printStackTrace();
+            }
 
         } else if (type == LinuteConstants.FEED_DETAIL) {
             intent.putExtra("event", data.getString("event"));

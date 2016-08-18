@@ -21,9 +21,11 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -180,28 +182,28 @@ room: id of room
             blockView.setVisibility(View.GONE);
 //            DMDivider.setVisibility(View.GONE);
         }
-            LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
-                @Override
-                public boolean canScrollVertically() {
-                    return false;
-                }
-            };
-            llm.setAutoMeasureEnabled(true);
-            participantsRV.setLayoutManager(llm);
-            mParticipantsAdapter = new ChatParticipantsAdapter(mChatRoom.users);
-            participantsRV.setAdapter(mParticipantsAdapter);
-            mParticipantsAdapter.notifyDataSetChanged();
+        LinearLayoutManager llm = new LinearLayoutManager(getContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
+        llm.setAutoMeasureEnabled(true);
+        participantsRV.setLayoutManager(llm);
+        mParticipantsAdapter = new ChatParticipantsAdapter(mChatRoom.users);
+        participantsRV.setAdapter(mParticipantsAdapter);
+        mParticipantsAdapter.notifyDataSetChanged();
 
-            mParticipantsAdapter.setUserClickListener(new ChatParticipantsAdapter.OnUserClickListener() {
-                @Override
-                public void OnUserClick(User user) {
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.firstName + " " + user.lastName, user.userId);
-                    activity.addFragmentToContainer(fragment);
-                }
+        mParticipantsAdapter.setUserClickListener(new ChatParticipantsAdapter.OnUserClickListener() {
+            @Override
+            public void OnUserClick(User user) {
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                TaptUserProfileFragment fragment = TaptUserProfileFragment.newInstance(user.firstName + " " + user.lastName, user.userId);
+                activity.addFragmentToContainer(fragment);
+            }
 
-                @Override
-                public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, final User user, ContextMenu.ContextMenuInfo contextMenuInfo) {
                     /*contextMenu.setHeaderTitle(user.firstName + " " + user.lastName);
                     MenuItem item = contextMenu.add(0, MENU_USER_DELETE, 0, "Delete");
                     item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -218,33 +220,33 @@ room: id of room
 
                         }
                     });*/
-                }
-            });
+            }
+        });
 
-            Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-            toolbar.setTitle((mChatRoom.isDM() ? "Message" : "Group") + " Settings");
+        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+        toolbar.setTitle((mChatRoom.isDM() ? "Message" : "Group") + " Settings");
 //            toolbar.addView(LayoutInflater.from(getContext()).inflate(R.layout.toolbar_chat, toolbar, false));
 //            ((TextView)toolbar.findViewById(R.id.toolbar_chat_name)).setText(mType == ChatRoom.ROOM_TYPE_DM ? "Message" : "Group" +  " Settings");
 //            toolbar.findViewById(R.id.space_actions_item_balancer).setVisibility(View.GONE);
-            mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    SelectUsersFragment selectUserFragment = SelectUsersFragment.newInstance(mChatRoom.users);
-                    selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
-                        @Override
-                        public void onUsersSelected(ArrayList<User> users) {
-                            try {
-                                addUsers(users);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+        mParticipantsAdapter.setAddPeopleListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                SelectUsersFragment selectUserFragment = SelectUsersFragment.newInstance(mChatRoom.users);
+                selectUserFragment.setOnUsersSelectedListener(new SelectUsersFragment.OnUsersSelectedListener() {
+                    @Override
+                    public void onUsersSelected(ArrayList<User> users) {
+                        try {
+                            addUsers(users);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    });
-                    activity.replaceContainerWithFragment(selectUserFragment);
+                    }
+                });
+                activity.replaceContainerWithFragment(selectUserFragment);
 
-                }
-            });
+            }
+        });
 
         updateRoomPhoto(view);
         updateRoomName(view);
@@ -325,7 +327,7 @@ room: id of room
             public void onClick(View view) {
                 new AlertDialog.Builder(getContext())
                         .setTitle("Leave Group")
-                        .setMessage("If you leave the group, you will lose access to the chat log. You can be added back to the group")
+                        .setMessage(R.string.leave_group_chat_dialog_text)
                         .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -377,7 +379,7 @@ room: id of room
 
     }
 
-    private void updateRoomName(View view) {
+    private void updateRoomName(final View view) {
         final TextView groupNameSettingTextView = (TextView) view.findViewById(R.id.setting_group_name_text);
         if (!"".equals(mChatRoom.getRoomName()) && mChatRoom.getRoomName() != null) {
             groupNameSettingTextView.setText(mChatRoom.getRoomName());
@@ -394,11 +396,12 @@ room: id of room
         } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(final View v) {
 
 
                     final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
+                    final TextView editText = editTextDialog.mEditText;
                     editTextDialog
                             .setValue(mChatRoom.getRoomName())
                             .setTitle("Set Group Name")
@@ -407,12 +410,52 @@ room: id of room
                                 public void onClick(DialogInterface dialogInterface, int i) {
 //                                roomName = editTextDialog.getValue();
                                     setGroupNameAndPhoto(editTextDialog.getValue(), null);
-                                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getWindowToken(), 0, InputMethodManager.HIDE_IMPLICIT_ONLY);
+//                                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                                    dialogInterface.dismiss();
                                 }
                             })
-                            .setNegativeButton("Cancel", null)
-                            .create().show();
-                    inputMethodManager.toggleSoftInputFromWindow(groupNameSettingView.getApplicationWindowToken(), InputMethodManager.SHOW_IMPLICIT, 0);
+                            .setNegativeButton("Cancel", null);
+                            /*.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialogInterface) {
+                                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                                }
+                            })*/
+                            /*.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    *//*inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(),0, new ResultReceiver(new Handler()){
+                                        @Override
+                                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                            super.onReceiveResult(resultCode, resultData);
+                                        }
+                                    });*//*
+                                }
+                            })
+                    ;*/
+
+                    editTextDialog.getEditText().setImeActionLabel("Ok", EditorInfo.IME_ACTION_DONE);
+
+                    final AlertDialog dialog = editTextDialog.create();
+
+                    editTextDialog.getEditText().setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                        @Override
+                        public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                            if (i == EditorInfo.IME_ACTION_DONE) {
+                                setGroupNameAndPhoto(editTextDialog.getValue(), null);
+//                                inputMethodManager.hideSoftInputFromWindow(textView.getWindowToken(), 0);
+                                dialog.dismiss();
+
+                                return true;
+                            }
+                            return false;
+                        }
+                    });
+
+
+                    dialog.show();
+                    editText.requestFocus();
+//                    inputMethodManager.toggleSoftInput(0, 0);
                 }
             });
         }
@@ -448,7 +491,7 @@ room: id of room
                         @Override
                         public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                             Activity a = getActivity();
-                            if ( a != null) {
+                            if (a != null) {
                                 a.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {

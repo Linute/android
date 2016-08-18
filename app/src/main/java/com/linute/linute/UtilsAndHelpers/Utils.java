@@ -283,4 +283,9 @@ public class Utils {
     public static String getFBImage(String id){
         return String.format("https://graph.facebook.com/%s/picture?width=720&height=720", id);
     }
+
+
+    public static String getMyId(Context context){
+        return context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
+    }
 }
