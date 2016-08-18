@@ -201,8 +201,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 //when passing last item and scrolling upward
                 if (llm.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
                     //close keyboard
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(recyclerView.getWindowToken(), 0);
+
                 }
             }
 
@@ -269,6 +268,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 mCommentEditText.append(" @");
                 mCommentEditText.insertMention(person);
                 mCommentEditText.requestFocus();
+                showKeyboard(mCommentEditText, true);
             }
         });
 
@@ -352,6 +352,18 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         }
 
         if (mImageUri != null) sendPicture();
+    }
+
+    private void showKeyboard(View editText, boolean show){
+        if (getActivity() != null){
+            if (show) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+            }else {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+            }
+        }
     }
 
 
