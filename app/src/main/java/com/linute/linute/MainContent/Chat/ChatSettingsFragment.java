@@ -396,11 +396,12 @@ room: id of room
         } else {
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(final View view) {
+                public void onClick(final View v) {
 
 
                     final InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     final EditTextDialog editTextDialog = new EditTextDialog(getContext());
+                    final TextView editText = editTextDialog.mEditText;
                     editTextDialog
                             .setValue(mChatRoom.getRoomName())
                             .setTitle("Set Group Name")
@@ -409,11 +410,29 @@ room: id of room
                                 public void onClick(DialogInterface dialogInterface, int i) {
 //                                roomName = editTextDialog.getValue();
                                     setGroupNameAndPhoto(editTextDialog.getValue(), null);
-                                    inputMethodManager.hideSoftInputFromWindow(editTextDialog.getEditText().getWindowToken(), 0);
+//                                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
                                     dialogInterface.dismiss();
                                 }
                             })
                             .setNegativeButton("Cancel", null);
+                            /*.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                @Override
+                                public void onCancel(DialogInterface dialogInterface) {
+                                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                                }
+                            })*/
+                            /*.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialogInterface) {
+                                    *//*inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(),0, new ResultReceiver(new Handler()){
+                                        @Override
+                                        protected void onReceiveResult(int resultCode, Bundle resultData) {
+                                            super.onReceiveResult(resultCode, resultData);
+                                        }
+                                    });*//*
+                                }
+                            })
+                    ;*/
 
                     editTextDialog.getEditText().setImeActionLabel("Ok", EditorInfo.IME_ACTION_DONE);
 
@@ -424,7 +443,7 @@ room: id of room
                         public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
                             if (i == EditorInfo.IME_ACTION_DONE) {
                                 setGroupNameAndPhoto(editTextDialog.getValue(), null);
-                                inputMethodManager.hideSoftInputFromWindow(textView.getWindowToken(), 0);
+//                                inputMethodManager.hideSoftInputFromWindow(textView.getWindowToken(), 0);
                                 dialog.dismiss();
 
                                 return true;
@@ -435,7 +454,8 @@ room: id of room
 
 
                     dialog.show();
-                    inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                    editText.requestFocus();
+//                    inputMethodManager.toggleSoftInput(0, 0);
                 }
             });
         }
