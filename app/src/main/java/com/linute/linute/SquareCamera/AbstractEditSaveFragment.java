@@ -154,6 +154,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         vBottom = (ViewGroup) view.findViewById(R.id.bottom);
         mAnonComments = (CheckBox) vBottom.findViewById(R.id.anon_comments);
         mAnonSwitch = (CheckBox) vBottom.findViewById(R.id.editFragment_switch);
+
         if (mReturnType == CameraActivity.SEND_POST) {
             vBottom.findViewById(R.id.comments).setVisibility(View.VISIBLE);
             vBottom.findViewById(R.id.anon).setVisibility(View.VISIBLE);
@@ -164,12 +165,16 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             vBottom.findViewById(R.id.comments).setVisibility(View.INVISIBLE);
         }
 
+        if (mAnonSwitch.getVisibility() == View.VISIBLE && getActivity() != null){
+            mAnonSwitch.setChecked(getActivity().getIntent().getBooleanExtra(CameraActivity.ANON_KEY, false));
+        }
+
+
         if (mHasSoftKeySingleton.getHasNavigation()) {
             FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) vBottom.getLayoutParams();
             params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
             vBottom.setLayoutParams(params);
         }
-
 
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,7 +184,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                 }
             }
         });
-
 
         //setup memes drawer
         mStickerContainer = (CoordinatorLayout) view.findViewById(R.id.stickers_container);

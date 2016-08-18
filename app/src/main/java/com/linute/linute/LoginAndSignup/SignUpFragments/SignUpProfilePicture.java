@@ -216,7 +216,7 @@ public class SignUpProfilePicture extends Fragment implements DialogInterface.On
                                             false)));
                 }
             }
-        } catch (IOException | InterruptedException | ExecutionException e) {
+        } catch (IOException | InterruptedException | ExecutionException | NullPointerException e) {
             e.printStackTrace();
         }
 

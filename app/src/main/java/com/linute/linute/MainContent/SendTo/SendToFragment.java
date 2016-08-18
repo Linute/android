@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
@@ -24,12 +25,14 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.Database.TaptUser;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -277,8 +280,16 @@ public class SendToFragment extends BaseFragment {
     public void sendItems() {
 
         if (mSendToAdapter == null || mSendToAdapter.checkedItemsIsEmpty()) return;
+
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
+
+
+        if (!activity.socketConnected()){
+            Toast.makeText(activity, "Failed to share post", Toast.LENGTH_SHORT).show();
+            getFragmentManager().popBackStack();
+            return;
+        }
 
         JSONArray people = new JSONArray();
         JSONArray trends = new JSONArray();
@@ -287,10 +298,11 @@ public class SendToFragment extends BaseFragment {
             if (sendToItem.getType() == SendToItem.TYPE_TREND)
                 trends.put(sendToItem.getId());
 
-
-        for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE))
+        String firstPersonName = null;
+        for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE)) {
             people.put(sendToItem.getId());
-
+            if (firstPersonName == null) firstPersonName = sendToItem.getName();
+        }
 
         JSONObject send = new JSONObject();
         try {
@@ -300,6 +312,17 @@ public class SendToFragment extends BaseFragment {
             send.put("post", mPostId);
 
             activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
+
+            String text;
+            if (people.length() > 1){
+                text = String.format(Locale.US, "Sent to %d people", people.length());
+            }else if (!mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE).isEmpty() && firstPersonName != null){
+                text = String.format(Locale.US, "Sent to %s", firstPersonName);
+            }else {
+                text = "Post has been shared";
+            }
+
+            Toast.makeText(activity, text, Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
         } catch (JSONException e) {
             e.printStackTrace();

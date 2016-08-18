@@ -46,7 +46,6 @@ public class ProfileCameraActivity extends AppCompatActivity {
         else mType = TYPE_CAMERA;
 
         if (savedInstanceState == null) {
-
             if (mType == TYPE_GALLERY) {
                 replaceWithoutAddingToBackstack(new ProfilePictureGalleryFragment());
             } else {

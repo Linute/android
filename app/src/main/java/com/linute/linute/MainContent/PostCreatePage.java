@@ -373,6 +373,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
     //cuts a bitmap from our RelativeLayout
     public static Bitmap getBitmapFromView(View view) {
         Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+
         Canvas canvas = new Canvas(returnedBitmap);
         Drawable bgDrawable = view.getBackground();
         if (bgDrawable != null)
@@ -380,7 +381,8 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         else
             canvas.drawColor(Color.WHITE);
         view.draw(canvas);
-        return returnedBitmap;
+
+        return Bitmap.createScaledBitmap(returnedBitmap, 720, 720, false);
     }
 
 }

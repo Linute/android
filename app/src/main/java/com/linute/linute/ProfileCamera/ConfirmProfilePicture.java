@@ -1,19 +1,21 @@
 package com.linute.linute.ProfileCamera;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.R;
-
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
 /**
  * Created by QiFeng on 7/5/16.
  */
@@ -57,7 +59,10 @@ public class ConfirmProfilePicture extends Fragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                if (getActivity() != null) {
+                    getActivity().setResult(RESULT_CANCELED);
+                    getActivity().finish();
+                }
             }
         });
 
@@ -67,14 +72,18 @@ public class ConfirmProfilePicture extends Fragment {
                 if (getActivity() != null && mImageUri != null){
                     Intent i = new Intent();
                     i.setData(mImageUri);
-                    getActivity().setResult(Activity.RESULT_OK, i);
+                    getActivity().setResult(RESULT_OK, i);
                     getActivity().finish();
                 }
             }
         });
 
         if (mImageUri != null){
-            vImageView.setImageURI(mImageUri);
+            Glide.with(this)
+                    .load(mImageUri)
+                    .dontAnimate()
+                    .placeholder(android.R.color.black)
+                    .into(vImageView);
         }
 
         return root;

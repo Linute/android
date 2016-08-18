@@ -34,6 +34,7 @@ public class CameraActivity extends AppCompatActivity {
     public final static String RETURN_TYPE = "send_to_url";
     public final static String CAMERA_TYPE = "camera_type";
     public final static String GALLERY_TYPE = "gallery_filters";
+    public final static String ANON_KEY = "anon_key";
 
     private CameraType mCameraType;
     private int mReturnType;

@@ -55,6 +55,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private LinuteUser mUser;
     private RequestManager mRequestManager;
 
+    private OnClickFollow mOnClickFollow;
+
     private String mUserid;
     private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
 
@@ -64,7 +66,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private TitleTextListener mTitleTextListener;
 
 
-    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user,Context context) {
+    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
         this.context = context;
         mUserid = context
                 .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
@@ -73,7 +75,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mUser = user;
     }
 
-    public void setRequestManager(RequestManager manager){
+    public void setRequestManager(RequestManager manager) {
         mRequestManager = manager;
     }
 
@@ -155,6 +157,11 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void setLoadMorePosts(LoadMoreViewHolder.OnLoadMore loadMorePosts) {
         mLoadMorePosts = loadMorePosts;
+    }
+
+
+    public void setOnClickFollow(OnClickFollow follow) {
+        mOnClickFollow = follow;
     }
 
     public void setTitleTextListener(TitleTextListener t) {
@@ -263,126 +270,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     if (mUser.getUserID() == null || !mUser.isInformationLoaded()) return;
 
                     if (!mUserid.equals(mUser.getUserID())) {
-                        if (mUser.getFriend().equals("")) {
-                            Map<String, Object> postData = new HashMap<>();
-                            postData.put("user", mUser.getUserID());
-                            mFollowingButtonText.setText("loading");
+                        if (mOnClickFollow == null) return;
 
-                            new LSDKPeople(context).postFollow(postData, new Callback() {
-                                @Override
-                                public void onFailure(Call call, IOException e) {
-                                    final BaseTaptActivity activity = (BaseTaptActivity) context;
-                                    if (activity != null) {
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Utils.showBadConnectionToast(activity);
-                                                mFollowingButtonText.setText("follow");
-                                            }
-                                        });
-                                    }
-                                }
-
-                                @Override
-                                public void onResponse(Call call, Response response) throws IOException {
-
-                                    final BaseTaptActivity activity = (BaseTaptActivity) context;
-
-                                    if (activity == null) return;
-
-                                    if (!response.isSuccessful()) {
-                                        Log.d(TAG, response.body().string());
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFollowingButtonText.setText("follow");
-                                            }
-                                        });
-                                        return;
-                                    }
-//                                Log.d(TAG, "onResponse: " + response.body().string());
-
-
-                                    try {
-                                        final JSONObject jsonObject = new JSONObject(response.body().string());
-
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFollowingButtonText.setText("following");
-                                                vMessageButton.show();
-                                                try {
-                                                    mUser.setFriendship(jsonObject.getString("id"));
-                                                    mUser.setFriend("NotEmpty");
-                                                } catch (JSONException e) {
-                                                    e.printStackTrace();
-                                                }
-                                            }
-                                        });
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFollowingButtonText.setText("follow");
-                                                Utils.showServerErrorToast(activity);
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        } else {
-                            Map<String, Object> putData = new HashMap<>();
-                            putData.put("isDeleted", true);
-                            mFollowingButtonText.setText("loading");
-
-                            new LSDKPeople(context).putUnfollow(putData, mUser.getFriendship(), new Callback() {
-                                @Override
-                                public void onFailure(Call call, IOException e) {
-                                    final BaseTaptActivity activity = (BaseTaptActivity) context;
-                                    if (activity != null) {
-                                        activity.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFollowingButtonText.setText("following");
-                                                Utils.showBadConnectionToast(activity);
-                                            }
-                                        });
-                                    }
-                                }
-
-                                @Override
-                                public void onResponse(Call call, Response response) throws IOException {
-                                    final BaseTaptActivity activity1 = (BaseTaptActivity) context;
-
-                                    if (!response.isSuccessful()) {
-                                        Log.d(TAG, response.body().string());
-                                        if (activity1 != null) {
-                                            activity1.runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    Utils.showServerErrorToast(activity1);
-                                                    mFollowingButtonText.setText("following");
-                                                }
-                                            });
-                                        }
-                                    } else {
-                                        response.body().close();
-
-                                        if (activity1 == null) return;
-
-                                        activity1.runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                mFollowingButtonText.setText("follow");
-                                                vMessageButton.hide();
-                                                mUser.setFriend("");
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
+                        mOnClickFollow.followUser(mFollowingButtonText, vMessageButton, mUser, mUser.getFriend().equals(""));
                     } else { //user viewing own profile
                         MainActivity activity = (MainActivity) context;
                         if (activity != null) {
@@ -414,8 +304,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if (mUser.getStatus() != null)
                     vStatusText.setText(mUser.getStatus().equals("") ? "No bio... :|" : mUser.getStatus());
 
-                vPosts.setText(mUser.getPosts()+"");
-                vFollowers.setText(mUser.getFollowers()+"");
+                vPosts.setText(mUser.getPosts() + "");
+                vFollowers.setText(mUser.getFollowers() + "");
                 vCollegeName.setText(mUser.getCollegeName());
 
                 if (mUser.getUserID().equals(mUserid)) { //viewer is viewing own profile
@@ -441,5 +331,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
 
         protected abstract void showTitle(boolean show);
+    }
+
+
+    public interface OnClickFollow {
+        void followUser(TextView followingText, FloatingActionButton floatingActionButton, LinuteUser user, boolean follow);
     }
 }

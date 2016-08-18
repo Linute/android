@@ -7,21 +7,13 @@
     <TextView android:id="@+id/updateFragment_section_title"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginTop="8dp"
-              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:layout_marginBottom="2dp"
               android:layout_marginEnd="@dimen/activity_horizontal_margin"
-              android:textSize="@dimen/body_font_size"
+              android:layout_marginStart="@dimen/activity_horizontal_margin"
+              android:layout_marginTop="4dp"
               android:textColor="@color/fifty_black"
+              android:textSize="@dimen/body_font_size"
               tools:text="RECENT"/>
-
-    <View android:layout_width="match_parent"
-          android:layout_height="2px"
-          android:layout_marginLeft="16dp"
-          android:layout_marginRight="16dp"
-          android:layout_marginTop="4dp"
-          android:background="@color/fifty_black"
-          android:layout_marginBottom="4dp"
-        />
 
 
 </LinearLayout>

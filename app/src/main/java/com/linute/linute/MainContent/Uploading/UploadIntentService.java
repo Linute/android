@@ -115,7 +115,11 @@ public class UploadIntentService extends IntentService {
             params.put("type", p.getType());
             params.put("owner", p.getOwner());
             JSONArray imageArray = new JSONArray();
-            imageArray.put(Utils.encodeImageBase64(image));
+
+            imageArray.put(
+                    p.getType() == 0 ?
+                            Utils.encodeImageBase64HighRes(image) : Utils.encodeImageBase64(image));
+
             params.put("images", imageArray);
 
             if (p.getVideoPath() != null) {

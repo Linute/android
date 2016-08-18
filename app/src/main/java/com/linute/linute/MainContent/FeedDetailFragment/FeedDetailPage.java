@@ -201,7 +201,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 //when passing last item and scrolling upward
                 if (llm.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
                     //close keyboard
-
+                    showKeyboard(recyclerView, false);
                 }
             }
 
@@ -307,6 +307,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_GALLERY));
                     i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
                     i.putExtra(CameraActivity.GALLERY_TYPE, CameraActivity.IMAGE);
+                    i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
                     startActivityForResult(i, CAMERA_REQUEST);
                 }
             }
@@ -456,8 +457,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         super.onStop();
         if (getActivity() == null) return;
 
-        final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mCommentEditText.getWindowToken(), 0);
+        showKeyboard(mCommentEditText, false);
     }
 
 

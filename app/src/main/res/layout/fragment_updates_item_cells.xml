@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:background="?android:selectableItemBackground">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:selectableItemBackground">
 
 
-    <FrameLayout android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:layout_margin="@dimen/activity_horizontal_margin"
-    >
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp">
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/updatesFragment_profile_picture"
             android:layout_width="@dimen/profile_image_radius"
             android:layout_height="@dimen/profile_image_radius"
+            android:layout_margin="4dp"
             android:scaleType="centerCrop"
             app:riv_border_color="@color/seperator_color"
             app:riv_border_width="1dp"
@@ -33,33 +35,37 @@
 
     </FrameLayout>
 
-    <LinearLayout android:layout_width="0px"
-                  android:layout_height="wrap_content"
-                  android:layout_marginBottom="@dimen/activity_horizontal_margin"
-                  android:layout_marginTop="@dimen/activity_horizontal_margin"
-                  android:layout_weight="1"
-                  android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
 
-        <LinearLayout android:layout_width="match_parent"
-                      android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-            <TextView android:id="@+id/updatesFragment_name_text"
-                      android:layout_width="0px"
-                      android:layout_height="wrap_content"
-                      android:layout_marginBottom="5dp"
-                      android:layout_weight="1"
-                      android:singleLine="true"
-                      android:textColor="@color/user_name_blue"
-                      android:textSize="@dimen/header_font_size"
-                      tools:text="FIRST LAST"/>
+            <TextView
+                android:id="@+id/updatesFragment_name_text"
+                android:layout_width="0px"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
+                android:singleLine="true"
+                android:textColor="@color/user_name_blue"
+                android:textSize="@dimen/header_font_size"
+                tools:text="FIRST LAST"/>
 
-            <TextView android:id="@+id/time"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textColor="@color/twentyfive_black"
-                      android:textSize="@dimen/sub_font_size"
-                      tools:text="123h"
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/twentyfive_black"
+                android:textSize="@dimen/sub_font_size"
+                tools:text="123h"
 
             />
         </LinearLayout>
@@ -82,7 +88,7 @@
         android:id="@+id/updatesFragment_update_picture"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
-        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:layout_margin="16dp"
         android:background="@color/seperator_color"
         android:padding="1px"
         android:scaleType="centerCrop"/>

@@ -5,7 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,10 +16,12 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
@@ -43,6 +45,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -51,7 +55,7 @@ import okhttp3.Response;
 /**
  * Created by Arman on 1/9/16.
  */
-public class TaptUserProfileFragment extends BaseFragment {
+public class TaptUserProfileFragment extends BaseFragment implements ProfileAdapter.OnClickFollow {
     public static final String TAG = TaptUserProfileFragment.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
@@ -215,7 +219,7 @@ public class TaptUserProfileFragment extends BaseFragment {
                             activity.startEditProfileActivity(SettingActivity.class);
                         return true;
                     case R.id.menu_updates:
-                        if(activity != null){
+                        if (activity != null) {
                             activity.addFragmentToContainer(new UpdatesFragment());
                         }
                         return true;
@@ -233,6 +237,8 @@ public class TaptUserProfileFragment extends BaseFragment {
             }
         });
         if (mProfileAdapter.titleShown()) mToolbar.setTitle(mUserName);
+
+        mProfileAdapter.setOnClickFollow(this);
 
         recList.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
@@ -629,7 +635,7 @@ public class TaptUserProfileFragment extends BaseFragment {
                 BlockedUsersSingleton.getBlockedListSingletion().add(mLinuteUser.getUserID());
             }
 
-            ((MainActivity)getActivity()).setFragmentOfIndexNeedsUpdating(
+            ((MainActivity) getActivity()).setFragmentOfIndexNeedsUpdating(
                     FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
 
             Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
@@ -737,6 +743,151 @@ public class TaptUserProfileFragment extends BaseFragment {
                     }
                 }
                 mLoadingMore = false;
+            }
+        });
+    }
+
+    @Override
+    public void followUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user, boolean follow) {
+        if (getContext() == null) return;
+
+        if (follow) followUser(followingText, floatingActionButton, user);
+        else {
+            mDialog = new AlertDialog.Builder(getContext()).setTitle("Unfollow")
+                    .setMessage("Unfollow " + user.getFirstName()+ " "+ user.getLastName()+ "?")
+                    .setPositiveButton("Unfollow", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (getContext() == null) return;
+                            unFollowUser(followingText, floatingActionButton, user);
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    }).show();
+
+        }
+    }
+
+    private void followUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user) {
+        Map<String, Object> postData = new HashMap<>();
+        postData.put("user", user.getUserID());
+        followingText.setText("loading");
+        new LSDKPeople(getContext()).postFollow(postData, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                final BaseTaptActivity activity = (BaseTaptActivity) getContext();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(activity);
+                            followingText.setText("follow");
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+
+                final BaseTaptActivity activity = (BaseTaptActivity) getContext();
+
+                if (activity == null) return;
+
+                if (!response.isSuccessful()) {
+                    Log.d(TAG, response.body().string());
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            followingText.setText("follow");
+                        }
+                    });
+                    return;
+                }
+
+                try {
+                    final JSONObject jsonObject = new JSONObject(response.body().string());
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            followingText.setText("following");
+                            floatingActionButton.show();
+                            try {
+                                user.setFriendship(jsonObject.getString("id"));
+                                user.setFriend("NotEmpty");
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            followingText.setText("follow");
+                            Utils.showServerErrorToast(activity);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+
+    private void unFollowUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user) {
+        Map<String, Object> putData = new HashMap<>();
+        putData.put("isDeleted", true);
+        followingText.setText("loading");
+
+        new LSDKPeople(getContext()).putUnfollow(putData, user.getFriendship(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                final BaseTaptActivity activity = (BaseTaptActivity) getContext();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            followingText.setText("following");
+                            Utils.showBadConnectionToast(activity);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final BaseTaptActivity activity1 = (BaseTaptActivity) getContext();
+
+                if (!response.isSuccessful()) {
+                    Log.d(TAG, response.body().string());
+                    if (activity1 != null) {
+                        activity1.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(activity1);
+                                followingText.setText("following");
+                            }
+                        });
+                    }
+                } else {
+                    response.body().close();
+
+                    if (activity1 == null) return;
+
+                    activity1.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            followingText.setText("follow");
+                            floatingActionButton.hide();
+                            user.setFriend("");
+                        }
+                    });
+                }
             }
         });
     }
