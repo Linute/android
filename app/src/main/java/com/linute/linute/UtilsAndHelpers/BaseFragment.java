@@ -12,7 +12,7 @@ import android.support.v4.app.Fragment;
 /**
  * Base fragment that all our fragments will be based off of
  */
-public class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
 
     /*
      * Our fragment has states to help us manage when we need to query server for info
@@ -85,4 +85,5 @@ public class BaseFragment extends Fragment {
 //        RefWatcher refWatcher = TaptApplication.getRefWatcher(getActivity());
 //        refWatcher.watch(this);
     }
+
 }

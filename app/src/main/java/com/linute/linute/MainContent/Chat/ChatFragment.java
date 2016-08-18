@@ -232,6 +232,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         }
+
+        Log.i("AAA","chat fragment room id :" +mRoomId);
     }
 
 
@@ -283,7 +285,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         vEmptyChatView = view.findViewById(R.id.empty_view_messanger);
         mProgressBar = view.findViewById(R.id.chat_load_progress);
 
-        mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
+        mUserId = Utils.getMyId(getContext());
 
         //when press attach photo or video: start intent
         view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
