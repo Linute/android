@@ -158,25 +158,30 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
         mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
             @Override
-            public void onUserSelected(User user, int position) {
+            public void onUserSelected(final User user, final int position) {
 
-                int listPosition = User.findUser(mSearchUserList, user);
-                if(listPosition != -1){
-                    mSearchUserList.remove(listPosition);
-                    mSearchAdapter.notifyItemRemoved(listPosition);
-                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int listPosition = User.findUser(mSearchUserList, user);
+                        if(listPosition != -1){
+                            mSearchUserList.remove(listPosition);
+                            mSearchAdapter.notifyItemRemoved(listPosition);
+                        }
 
-                if(focusedUser != null){
-                    mSearchUserList.remove(0);
-                    mSearchAdapter.notifyItemRemoved(0);
-                }
+                        if(focusedUser != null){
+                            mSearchUserList.remove(0);
+                            mSearchAdapter.notifyItemRemoved(0);
+                        }
 
-                mSearchUserList.add(0, user);
-                mSearchAdapter.notifyItemInserted(0);
-                searchLLM.scrollToPosition(0);
-                focusedUser = user;
+                        mSearchUserList.add(0, user);
+                        mSearchAdapter.notifyItemInserted(0);
+                        searchLLM.scrollToPosition(0);
+                        focusedUser = user;
 
-                mSearchAdapter.notifyDataSetChanged();
+                        mSearchAdapter.notifyDataSetChanged();
+                    }
+                });
             }
         });
 
@@ -208,24 +213,29 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     }
 
     @Override
-    public void onUserSelected(User user, int adapterPosition) {
-        int listPosition = User.findUser(mSelectedUsers, user);
+    public void onUserSelected(final User user, final int adapterPosition) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int listPosition = User.findUser(mSelectedUsers, user);
 
-        if(listPosition == -1) {
-            mSelectedUsers.add(user);
-           // mSearchUserList.remove(user);
-            mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
-            mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size()-1);
-            editText.setText("");
+                if(listPosition == -1) {
+                    mSelectedUsers.add(user);
+                    // mSearchUserList.remove(user);
+                    mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
+                    mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size()-1);
+                    editText.setText("");
 //            mSearchAdapter.notifyDataSetChanged();
-        }else{
-            mSelectedUsers.remove(listPosition);
-            mSelectedRV.getLayoutManager().scrollToPosition(listPosition);
-            mSelectedAdapter.notifyItemRemoved(listPosition);
-            editText.setText("");
+                }else{
+                    mSelectedUsers.remove(listPosition);
+                    mSelectedRV.getLayoutManager().scrollToPosition(listPosition);
+                    mSelectedAdapter.notifyItemRemoved(listPosition);
+                    editText.setText("");
 
-        }
-        mSearchAdapter.notifyItemChanged(adapterPosition);
+                }
+                mSearchAdapter.notifyItemChanged(adapterPosition);
+            }
+        });
     }
 
     @Override
@@ -246,8 +256,6 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         }
 
         newChat.put("users", new JSONArray());
-
-
 
 
         users.getUsersAndRooms(newChat, new Callback() {
@@ -311,16 +319,16 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mSearchUserList.clear();
-                                    mSearchUserList.addAll(tempUsers);
                                     mHandler.removeCallbacksAndMessages(null);
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            mSearchUserList.clear();
+                                            mSearchUserList.addAll(tempUsers);
                                             mSearchAdapter.notifyDataSetChanged();
                                             View view = getView();
-                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
-
+                                            if(view != null)
+                                                view.findViewById(R.id.empty_view).setVisibility(tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
                                     });
                                 }

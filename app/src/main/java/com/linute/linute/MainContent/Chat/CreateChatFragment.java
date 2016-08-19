@@ -106,7 +106,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                     }
                 } else {
 //                    mSearchUserList.clear();
-                    ArrayList<User> tempUsers = new ArrayList<>();
+                    final ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray usersJson;
                     JSONArray roomsJson;
@@ -145,8 +145,6 @@ public class CreateChatFragment extends SelectUsersFragment {
 
                         }
 
-                        mSearchUserList.clear();
-                        mSearchUserList.addAll(tempUsers);
                         /*
                         *     "rooms": [
        {
@@ -266,7 +264,6 @@ public class CreateChatFragment extends SelectUsersFragment {
                             if (!roomJson.isNull("unMuteAt"))
                                 unMuteAt = roomJson.getLong("unMuteAt");
                             tempRoomList.add(new ChatRoom(
-
                                     roomJson.getString("id"),
                                     1,
                                     roomJson.getString("name"),
@@ -288,16 +285,25 @@ public class CreateChatFragment extends SelectUsersFragment {
                                 public void run() {
                                     mHandler.removeCallbacksAndMessages(null);
 
-                                    mSearchRoomList.clear();
-                                    mSearchRoomList.addAll(tempRoomList);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSearchUserList.clear();
+                                            mSearchUserList.addAll(tempUsers);
+                                            mSearchRoomList.clear();
+                                            mSearchRoomList.addAll(tempRoomList);
 
-                                    Log.i("AAA", "test");
-                                    Log.i("AAA", "" + mSearchAdapter.getItemCount());
-                                    mSearchRV.getRecycledViewPool().clear();
-                                    mSearchAdapter.notifyDataSetChanged();
+                                            mSearchAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
+                                    //mSearchRV.getRecycledViewPool().clear();
+
                                     View view = getView();
                                     if (view != null)
-                                        view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+                                        view.findViewById(R.id.empty_view)
+                                                .setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ?
+                                                        View.VISIBLE : View.GONE);
 
 
                                 }
