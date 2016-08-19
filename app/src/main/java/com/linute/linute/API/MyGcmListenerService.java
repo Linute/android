@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -102,7 +103,7 @@ public class MyGcmListenerService extends GcmListenerService {
 
         Intent intent = buildIntent(data, action);
         PendingIntent pendingIntent =
-                PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_IMMUTABLE);
+                PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
 
         //Log.d(TAG, data.toString());
 

@@ -34,7 +34,6 @@ import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
