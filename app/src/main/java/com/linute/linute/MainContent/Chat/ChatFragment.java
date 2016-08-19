@@ -35,7 +35,6 @@ import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -148,6 +147,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private LinearLayoutManager mLinearLayoutManager;
     private Map<String, User> mUserMap;
 
+    private boolean mSocketConnected = false;
+
 
     public ChatFragment() {
         // Required empty public constructor
@@ -221,7 +222,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mRoomId = mChatRoom.roomId;
                 mUsers = mChatRoom.users;
                 mChatName = mChatRoom.getRoomName();
-                mRoomExists = true;
             }else{
                 mRoomId = arguments.getString(ARG_ROOM_ID);
                 mUsers = arguments.getParcelableArrayList(ARG_USERS);
@@ -233,7 +233,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         }
 
-        Log.i("AAA","chat fragment room id :" +mRoomId);
     }
 
 
@@ -606,8 +605,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
 
+        if(mSocketConnected){
+            leaveRooms();
+        }
+
+        mSocketConnected = true;
+
+
+
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
         activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+
         activity.connectSocket("new message", onNewMessage);
         activity.connectSocket("typing", onTyping);
         activity.connectSocket("stop typing", onStopTyping);
@@ -619,6 +627,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         activity.connectSocket("messages refresh", onRefresh);
 
         activity.connectSocket("add users", onAddUsers);
+
 
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
@@ -746,6 +755,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public void onPause() {
         super.onPause();
 
+        leaveRooms();
+    }
+
+    protected void leaveRooms() {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (joinLeft != null && activity != null && mUserId != null && mRoomId != null) {
@@ -775,6 +788,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.disconnectSocket("messages refresh", onRefresh);
             activity.disconnectSocket("add users", onAddUsers);
 
+            mSocketConnected = false;
         }
     }
 
@@ -842,6 +856,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mRoomId = object.getString("id");
 
 
+
+
                         //room doesn't exist
                         if (mRoomId.equals("null")) {
                             mRoomExists = false;
@@ -902,7 +918,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         sortLists(tempChatList);
 
+                        activity = (BaseTaptActivity)getActivity();
+
                         if (activity != null) {
+
                             joinRoom(activity, false);
 
                             activity.runOnUiThread(new Runnable() {
@@ -954,6 +973,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     object.getBoolean("isMuted"),
                                     unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
                             );
+
+                            mChatAdapter.setIsDM(mChatRoom.isDM());
 
 
                         }
@@ -1131,6 +1152,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 room.getBoolean("isMuted"),
                                 unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
                         );
+
+                        mChatAdapter.setIsDM(mChatRoom.isDM());
 
 
                     } catch (JSONException e) {
@@ -1371,10 +1394,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //        joinRoom(activity, false);
 
 
-        if (!activity.socketConnected() || mUserId == null
+      /*  if (!activity.socketConnected() || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
-        }
+        }*/
 
         if (TextUtils.isEmpty(message)) {
             mInputMessageView.requestFocus();
@@ -1404,6 +1427,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mRoomExists = true;
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
+        joinRoom(activity, false);
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
@@ -1448,6 +1472,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         @Override
         public void call(final Object... args) {
             final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+
 
             if (activity == null) return;
 
