@@ -108,6 +108,8 @@ public class MainActivity extends BaseTaptActivity {
 
     private SocketErrorResponse mSocketErrorResponse;
 
+    private boolean mShowSnackbar = true; //show snackbar for new activity
+
     public static class FRAGMENT_INDEXES {
         public static final short PROFILE = 0;
         public static final short FEED = 1;
@@ -752,18 +754,20 @@ public class MainActivity extends BaseTaptActivity {
                     final String message = activity.getString("text");
 
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            newMessageSnackbar(chat, message);
-                        }
-                    });
-
-                    final NewMessageEvent chatEvent = new NewMessageEvent(true);
-                    chatEvent.setRoomId(chat.roomId);
-                    chatEvent.setMessage(message);
-                    NewMessageBus.getInstance().setNewMessage(chatEvent);
-                    NotificationsCounterSingleton.getInstance().setHasMessage(true);
+                    if (mShowSnackbar) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                newMessageSnackbar(chat, message);
+                            }
+                        });
+                    }else {
+                        final NewMessageEvent chatEvent = new NewMessageEvent(true);
+                        chatEvent.setRoomId(chat.roomId);
+                        chatEvent.setMessage(message);
+                        NewMessageBus.getInstance().setNewMessage(chatEvent);
+                        NotificationsCounterSingleton.getInstance().setHasMessage(true);
+                    }
                 } else {
                     final Update update = new Update(activity);
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
@@ -1262,6 +1266,10 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
         sn.show();
+    }
+
+    public void setShowSnackbar(boolean show){
+        mShowSnackbar = show;
     }
 
     public void openDrawer() {

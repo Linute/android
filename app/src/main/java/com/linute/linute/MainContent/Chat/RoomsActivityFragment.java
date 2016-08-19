@@ -19,6 +19,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
+import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -166,6 +167,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     public void onResume() {
         super.onResume();
         //currently reloads screen whenever resumed. Maybe better way to do it in the future
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) activity.setShowSnackbar(false);
 
         mSwipeRefreshLayout.post(new Runnable() {
             @Override
@@ -185,11 +188,17 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     @Override
     public void onPause() {
         super.onPause();
-
         //stop listening
         if (mChatSubscription != null && !mChatSubscription.isUnsubscribed()) {
             mChatSubscription.unsubscribe();
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) activity.setShowSnackbar(true);
     }
 
     @Override
