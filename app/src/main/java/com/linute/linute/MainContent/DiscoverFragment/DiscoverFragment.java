@@ -445,7 +445,9 @@ public class DiscoverFragment extends BaseFragment {
             @Override
             public void run() {
                 mPosts.add(0, post);
-                mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                if (mCheckBoxChoiceCapableAdapters != null) {
+                    mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                }
             }
         });
 
