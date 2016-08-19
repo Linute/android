@@ -748,10 +748,10 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     }
 
     @Override
-    public void followUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user, boolean follow) {
+    public void followUser(final TextView followingText, final LinuteUser user, boolean follow) {
         if (getContext() == null) return;
 
-        if (follow) followUser(followingText, floatingActionButton, user);
+        if (follow) followUser(followingText, user);
         else {
             mDialog = new AlertDialog.Builder(getContext()).setTitle("Unfollow")
                     .setMessage("Unfollow " + user.getFirstName()+ " "+ user.getLastName()+ "?")
@@ -759,7 +759,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (getContext() == null) return;
-                            unFollowUser(followingText, floatingActionButton, user);
+                            unFollowUser(followingText, user);
                         }
                     }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         @Override
@@ -771,7 +771,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         }
     }
 
-    private void followUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user) {
+    private void followUser(final TextView followingText, final LinuteUser user) {
         Map<String, Object> postData = new HashMap<>();
         postData.put("user", user.getUserID());
         followingText.setText("loading");
@@ -815,7 +815,6 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                         @Override
                         public void run() {
                             followingText.setText("following");
-                            floatingActionButton.show();
                             try {
                                 user.setFriendship(jsonObject.getString("id"));
                                 user.setFriend("NotEmpty");
@@ -839,7 +838,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     }
 
 
-    private void unFollowUser(final TextView followingText, final FloatingActionButton floatingActionButton, final LinuteUser user) {
+    private void unFollowUser(final TextView followingText, final LinuteUser user) {
         Map<String, Object> putData = new HashMap<>();
         putData.put("isDeleted", true);
         followingText.setText("loading");
@@ -883,7 +882,6 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                         @Override
                         public void run() {
                             followingText.setText("follow");
-                            floatingActionButton.hide();
                             user.setFriend("");
                         }
                     });

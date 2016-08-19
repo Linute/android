@@ -118,11 +118,11 @@ public class CameraActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
 
-        if (mCameraType.contains(CameraType.CAMERA_VIDEO)) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.RECORD_AUDIO);
-            }
+        if (mCameraType.contains(CameraType.CAMERA_VIDEO) &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.RECORD_AUDIO);
         }
+
 
         //we need permissions
         if (!permissions.isEmpty()) {
@@ -191,7 +191,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null){
+            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null) {
                 getSupportFragmentManager().popBackStack();
                 return;
             }
@@ -199,10 +199,10 @@ public class CameraActivity extends AppCompatActivity {
             AbstractEditSaveFragment fragment = (AbstractEditSaveFragment) getSupportFragmentManager()
                     .findFragmentByTag(AbstractEditSaveFragment.TAG);
 
-            if (fragment != null){
-                if (fragment.isStickerDrawerOpen()){
+            if (fragment != null) {
+                if (fragment.isStickerDrawerOpen()) {
                     fragment.closeStickerDrawer();
-                }else {
+                } else {
                     fragment.backPressed();
                 }
             } else {
@@ -222,7 +222,7 @@ public class CameraActivity extends AppCompatActivity {
         return mReturnType;
     }
 
-    public int getGalleryType(){
+    public int getGalleryType() {
         return mGalleryType;
     }
 }

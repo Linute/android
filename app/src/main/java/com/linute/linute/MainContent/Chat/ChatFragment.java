@@ -222,7 +222,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mRoomId = mChatRoom.roomId;
                 mUsers = mChatRoom.users;
                 mChatName = mChatRoom.getRoomName();
-            }else{
+            } else {
                 mRoomId = arguments.getString(ARG_ROOM_ID);
                 mUsers = arguments.getParcelableArrayList(ARG_USERS);
                 if (mUsers != null) {
@@ -605,12 +605,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
 
-        if(mSocketConnected){
+        if (mSocketConnected) {
             leaveRooms();
         }
 
         mSocketConnected = true;
-
 
 
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
@@ -852,10 +851,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                         Log.d(TAG, "getroomandchat onResponse: " + object.toString(4));
+                        //Log.d(TAG, "getroomandchat onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
-
-
 
 
                         //room doesn't exist
@@ -918,7 +915,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         sortLists(tempChatList);
 
-                        activity = (BaseTaptActivity)getActivity();
+                        activity = (BaseTaptActivity) getActivity();
 
                         if (activity != null) {
 
@@ -1201,7 +1198,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void addMessage(JSONObject data) throws JSONException {
-        //Log.d(TAG, "addMessage: " + data.toString(4));
+        Log.d(TAG, "addMessage: " + data.toString(4));
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
@@ -1472,8 +1469,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         @Override
         public void call(final Object... args) {
             final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-
-
 
             if (activity == null) return;
 
@@ -1831,8 +1826,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 message = messages.getJSONObject(i);
 
-                //Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
-
+                //Log.d(TAG, "parseMessagesJSON: " + message.toString(4));
                 owner = message.getJSONObject("owner");
                 ownerId = owner.getString("id");
                 viewerIsOwnerOfMessage = ownerId.equals(mUserId);
@@ -1888,7 +1882,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         );
                     }
                 } catch (JSONException e) {
-                    //Log.d(TAG, "parseMessagesJSON: no value for post");
+//                    e.printStackTrace();
+//                    //Log.i(TAG, "parseMessagesJSON: none");
+                    Log.d(TAG, "parseMessagesJSON: no value for post");
                 }
 
                 if (post == null) {

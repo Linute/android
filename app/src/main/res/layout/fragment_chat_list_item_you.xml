@@ -13,8 +13,8 @@
     <LinearLayout
         android:layout_width="150dp"
         android:layout_height="match_parent"
-        android:layout_alignTop="@+id/message_content"
-        android:layout_alignBottom="@id/message_content"
+        android:layout_alignBottom="@+id/message_content"
+        android:layout_alignTop="@id/message_content"
         android:layout_marginLeft="-150dp"
         android:layout_toLeftOf="@+id/profile_image"
         android:gravity="center_vertical|end">
@@ -52,6 +52,8 @@
         android:layout_marginRight="16dp"
         android:scaleType="centerInside"
         android:visibility="invisible"
+        app:riv_border_color="@color/seperator_color"
+        app:riv_border_width="1dp"
         app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
 

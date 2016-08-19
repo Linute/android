@@ -826,7 +826,8 @@ public class CameraFragment extends Fragment {
 
     private boolean hasCameraAndWritePermission() {
         return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                && hasPermission(Manifest.permission.CAMERA) && hasPermission(Manifest.permission.RECORD_AUDIO);
+                && hasPermission(Manifest.permission.CAMERA)
+                && (!mCameraType.contains(CameraType.CAMERA_VIDEO) || hasPermission(Manifest.permission.RECORD_AUDIO));
     }
 
 

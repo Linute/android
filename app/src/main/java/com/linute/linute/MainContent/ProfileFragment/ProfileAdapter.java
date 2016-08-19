@@ -245,20 +245,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             vMessageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mUser == null ||
-                            mUser.getUserID() == null ||
-                            mUser.getUserID().equals(mUserid) ||
-                            mUser.getFriend().equals(""))
+                    if (mUser == null || mUser.getUserID() == null || mUser.getUserID().equals(mUserid))
                         return;
 
                     BaseTaptActivity activity = (BaseTaptActivity) context;
                     if (activity != null) {
                         activity.addFragmentToContainer(ChatFragment
                                 .newInstance(
-                                        null
-                                        , mUser.getFirstName()
-                                        , mUser.getLastName()
-                                        , mUser.getUserID()));
+                                        null,
+                                        mUser.getFirstName(),
+                                        mUser.getLastName(),
+                                        mUser.getUserID()));
                     }
                 }
             });
@@ -272,7 +269,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     if (!mUserid.equals(mUser.getUserID())) {
                         if (mOnClickFollow == null) return;
 
-                        mOnClickFollow.followUser(mFollowingButtonText, vMessageButton, mUser, mUser.getFriend().equals(""));
+                        mOnClickFollow.followUser(mFollowingButtonText, mUser, mUser.getFriend().equals(""));
                     } else { //user viewing own profile
                         MainActivity activity = (MainActivity) context;
                         if (activity != null) {
@@ -315,8 +312,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         mFollowingButtonText.setText("follow");
                     } else {
                         mFollowingButtonText.setText("following");
-                        vMessageButton.show(); //show message button
                     }
+
+                    vMessageButton.show();
                 }
             }
         }
@@ -335,6 +333,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
 
     public interface OnClickFollow {
-        void followUser(TextView followingText, FloatingActionButton floatingActionButton, LinuteUser user, boolean follow);
+        void followUser(TextView followingText, LinuteUser user, boolean follow);
     }
 }
