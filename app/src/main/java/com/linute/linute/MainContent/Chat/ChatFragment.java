@@ -49,7 +49,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -223,7 +222,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mRoomId = mChatRoom.roomId;
                 mUsers = mChatRoom.users;
                 mChatName = mChatRoom.getRoomName();
-                mRoomExists = true;
             }else{
                 mRoomId = arguments.getString(ARG_ROOM_ID);
                 mUsers = arguments.getParcelableArrayList(ARG_USERS);
@@ -235,7 +233,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         }
 
-        Log.i("AAA","chat fragment room id :" +mRoomId);
     }
 
 
@@ -859,6 +856,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         mRoomId = object.getString("id");
 
 
+
+
                         //room doesn't exist
                         if (mRoomId.equals("null")) {
                             mRoomExists = false;
@@ -919,7 +918,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         sortLists(tempChatList);
 
+                        activity = (BaseTaptActivity)getActivity();
+
                         if (activity != null) {
+
                             joinRoom(activity, false);
 
                             activity.runOnUiThread(new Runnable() {
@@ -1473,7 +1475,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
 
-            Log.i("AAA", "socket recieved" + Arrays.toString(args));
 
             if (activity == null) return;
 
