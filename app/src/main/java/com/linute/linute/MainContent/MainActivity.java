@@ -764,7 +764,7 @@ public class MainActivity extends BaseTaptActivity {
                     }else {
                         final NewMessageEvent chatEvent = new NewMessageEvent(true);
                         chatEvent.setRoomId(chat.roomId);
-                        chatEvent.setMessage(message);
+                        chatEvent.setMessage(activity.getString("messageText"));
                         NewMessageBus.getInstance().setNewMessage(chatEvent);
                         NotificationsCounterSingleton.getInstance().setHasMessage(true);
                     }
