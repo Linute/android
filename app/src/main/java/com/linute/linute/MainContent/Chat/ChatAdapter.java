@@ -277,9 +277,11 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
+
+
             if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
                  if (isHead) {
-                    User u = mUsers.get(chat.getOwnerId());
+                    final User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
                         if(!isDM) {
                             vUserName.setVisibility(View.VISIBLE);
@@ -294,6 +296,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                                 .asBitmap()
                                 .placeholder(R.color.seperator_color)
                                 .into(vProfileImage);
+
+                        vProfileImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                goToProfile(u.getFullName(), u.userId);
+                            }
+                        });
                     } else {
                         vUserName.setVisibility(View.GONE);
                         vProfileImage.setVisibility(View.INVISIBLE);
