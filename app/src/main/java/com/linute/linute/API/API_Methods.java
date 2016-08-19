@@ -27,11 +27,13 @@ public class API_Methods {
 
     public static String TAG = "API_METHODS";
 
+    public static final boolean DEV = false;   //change this flag for dev
+
     // API ENDPOINT URL
     public static final String SCHEME = "https";
 
-    //private static String HOST = "api.tapt.io";
-    public static String HOST = "devapi2.tapt.io";
+    public static String HOST = "api.tapt.io";
+    //public static String HOST = "devapi2.tapt.io";
 
     public static final String HOST_DEV = "devapi2.tapt.io";
     public static final String HOST_LIVE = "api.tapt.io";

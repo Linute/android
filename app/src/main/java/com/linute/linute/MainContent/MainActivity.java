@@ -186,15 +186,17 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
-        ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
-                API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
-                API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
-            }
-        });
+        if (API_Methods.DEV) {
+            mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
+            ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
+                    API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
+                    API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
+                }
+            });
+        }
 
         clearBackStack();
 
