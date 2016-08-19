@@ -278,7 +278,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                     }
                 } else {
 //                    mSearchUserList.clear();
-                    ArrayList<User> tempUsers = new ArrayList<>();
+                    final ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray friends;
                     try {
@@ -305,13 +305,14 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
                         }
 
-                        mSearchUserList.clear();
-                        mSearchUserList.addAll(tempUsers);
+
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    mSearchUserList.clear();
+                                    mSearchUserList.addAll(tempUsers);
                                     mHandler.removeCallbacksAndMessages(null);
                                     mHandler.post(new Runnable() {
                                         @Override

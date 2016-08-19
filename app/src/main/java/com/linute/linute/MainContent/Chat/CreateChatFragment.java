@@ -241,7 +241,8 @@ public class CreateChatFragment extends SelectUsersFragment {
 
 
                         roomsJson = jsonObject.getJSONArray("rooms");
-                        mSearchRoomList.clear();
+
+                        final ArrayList<ChatRoom> tempRoomList = new ArrayList<ChatRoom>();
 
                         for (int i = 0; i < roomsJson.length(); i++) {
                             JSONObject roomJson = roomsJson.getJSONObject(i);
@@ -264,7 +265,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                             long unMuteAt = 0;
                             if (!roomJson.isNull("unMuteAt"))
                                 unMuteAt = roomJson.getLong("unMuteAt");
-                            mSearchRoomList.add(new ChatRoom(
+                            tempRoomList.add(new ChatRoom(
 
                                     roomJson.getString("id"),
                                     1,
@@ -287,6 +288,12 @@ public class CreateChatFragment extends SelectUsersFragment {
                                 public void run() {
                                     mHandler.removeCallbacksAndMessages(null);
 
+                                    mSearchRoomList.clear();
+                                    mSearchRoomList.addAll(tempRoomList);
+
+                                    Log.i("AAA", "test");
+                                    Log.i("AAA", "" + mSearchAdapter.getItemCount());
+                                    mSearchRV.getRecycledViewPool().clear();
                                     mSearchAdapter.notifyDataSetChanged();
                                     View view = getView();
                                     if (view != null)
