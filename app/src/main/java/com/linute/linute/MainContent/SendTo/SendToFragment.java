@@ -37,6 +37,7 @@ import java.util.Locale;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by QiFeng on 7/15/16.
@@ -208,7 +209,8 @@ public class SendToFragment extends BaseFragment {
     private void getFriends() {
         mRealmResults = mRealm.where(TaptUser.class)
                 .equalTo("isFriend", true)
-                .findAllAsync();
+                .findAllSortedAsync("numTimesSharedWith", Sort.DESCENDING, "fullName", Sort.ASCENDING);
+        //.sort("fullName", Sort.DESCENDING, "numTimesSharedWith", Sort.DESCENDING);
 
         //gets called when we get the results from async call
         mRealmResults.addChangeListener(new RealmChangeListener<RealmResults<TaptUser>>() {
@@ -285,7 +287,7 @@ public class SendToFragment extends BaseFragment {
         if (activity == null) return;
 
 
-        if (!activity.socketConnected()){
+        if (!activity.socketConnected()) {
             Toast.makeText(activity, "Failed to share post", Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
             return;
@@ -301,6 +303,16 @@ public class SendToFragment extends BaseFragment {
         String firstPersonName = null;
         for (SendToItem sendToItem : mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE)) {
             people.put(sendToItem.getId());
+
+            final String id = sendToItem.getId();
+            mRealm.executeTransactionAsync(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    TaptUser user = realm.where(TaptUser.class).equalTo("id", id).findFirst();
+                    user.incrementNumTimeShared();
+                }
+            });
+
             if (firstPersonName == null) firstPersonName = sendToItem.getName();
         }
 
@@ -314,11 +326,11 @@ public class SendToFragment extends BaseFragment {
             activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
 
             String text;
-            if (people.length() > 1){
+            if (people.length() > 1) {
                 text = String.format(Locale.US, "Sent to %d people", people.length());
-            }else if (!mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE).isEmpty() && firstPersonName != null){
+            } else if (!mSendToAdapter.getCheckedItems().get(SendToAdapter.PEOPLE).isEmpty() && firstPersonName != null) {
                 text = String.format(Locale.US, "Sent to %s", firstPersonName);
-            }else {
+            } else {
                 text = "Post has been shared";
             }
 

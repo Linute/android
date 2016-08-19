@@ -22,6 +22,7 @@ public class TaptUser extends RealmObject {
     private String fullName;
     private String profileImage;
     private boolean isFriend;   // friends with this person
+    private int numTimesSharedWith;
 
     public TaptUser(){
 
@@ -32,6 +33,13 @@ public class TaptUser extends RealmObject {
         this.fullName = fullName;
         this.profileImage = profileImage;
         this.isFriend = isFriend;
+        this.numTimesSharedWith = 0;
+    }
+
+    public void update(TaptUser user){
+        fullName = user.fullName;
+        profileImage = user.profileImage;
+        isFriend = user.isFriend;
     }
 
 
@@ -64,4 +72,13 @@ public class TaptUser extends RealmObject {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+
+    public void incrementNumTimeShared(){
+        ++numTimesSharedWith;
+    }
+
+    public int getNumTimesSharedWith(){
+        return numTimesSharedWith;
+    }
+
 }

@@ -228,7 +228,13 @@ public class ChangeProfileImageFragment extends Fragment {
                 && resultCode == Activity.RESULT_OK) { //got response from camera
             mImageUri = data.getData();
             if (mImageUri != null) {
-                mImageView.setImageURI(mImageUri);
+                Glide.with(this)
+                        .load(mImageUri)
+                        .asBitmap()
+                        .placeholder(android.R.color.black)
+                        .dontAnimate()
+                        .into(mImageView);
+
                 mHasChangedImage = true;
             }
         }

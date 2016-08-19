@@ -185,10 +185,10 @@ public class MainActivity extends BaseTaptActivity {
         });
 
         mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
-        ((Switch)mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                ((TextView)mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
+                ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
                 API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
                 API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
             }
@@ -697,10 +697,10 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-    private String getStringFromJSON(JSONObject obj, String key){
-        try{
+    private String getStringFromJSON(JSONObject obj, String key) {
+        try {
             return obj.getString(key);
-        }catch(JSONException e){
+        } catch (JSONException e) {
             return null;
         }
     }
@@ -727,7 +727,7 @@ public class MainActivity extends BaseTaptActivity {
                     JSONArray users = activity.getJSONArray("roomUsers");
                     ArrayList<User> usersList = new ArrayList<>(users.length());
                     Log.d("AAA", users.toString(4));
-                    for(int u=0;u<users.length();u++){
+                    for (int u = 0; u < users.length(); u++) {
                         JSONObject userJson = users.getJSONObject(u);
                         usersList.add(new User(
                                 userJson.getString("id"),
@@ -750,7 +750,6 @@ public class MainActivity extends BaseTaptActivity {
                             0
                     );
                     final String message = activity.getString("text");
-
 
 
                     runOnUiThread(new Runnable() {
@@ -786,16 +785,23 @@ public class MainActivity extends BaseTaptActivity {
                                 } else {
                                     newProfileSnackBar(update);
 
-                                    if (update.getUpdateType() == Update.UpdateType.FOLLOWER){
+                                    if (update.getUpdateType() == Update.UpdateType.FOLLOWER) {
                                         mRealm.executeTransactionAsync(new Realm.Transaction() {
                                             @Override
                                             public void execute(Realm realm) {
-                                                realm.copyToRealmOrUpdate(
-                                                        new TaptUser(update.getUserId(),
-                                                                update.getUserFullName(),
-                                                                update.getUserProfileImageName(),
-                                                                true)
-                                                );
+                                                TaptUser user = realm.where(TaptUser.class).equalTo("id", update.getUserId()).findFirst();
+                                                if (user != null) {
+                                                    user.setFullName(update.getUserFullName());
+                                                    user.setFriend(true);
+                                                    user.setProfileImage(update.getUserProfileImageName());
+                                                } else {
+                                                    realm.copyToRealm(
+                                                            new TaptUser(update.getUserId(),
+                                                                    update.getUserFullName(),
+                                                                    update.getUserProfileImageName(),
+                                                                    true)
+                                                    );
+                                                }
                                             }
                                         });
                                     }
@@ -899,7 +905,7 @@ public class MainActivity extends BaseTaptActivity {
             ChatRoom room = intent.getParcelableExtra("chatRoom");
 
             boolean empty = room.roomId == null || room.roomId.isEmpty();
-            if(getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
+            if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
                 addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));
             /*addFragmentToContainer(ChatFragment.newInstance(
@@ -1200,13 +1206,20 @@ public class MainActivity extends BaseTaptActivity {
                                     public void execute(Realm realm) {
                                         try {
                                             JSONArray insertAndDelete = object.getJSONArray("insert");
+                                            TaptUser user;
+                                            TaptUser temp;
                                             for (int i = 0; i < insertAndDelete.length(); i++) {
-                                                realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(i), true));
+                                                user = getUser(insertAndDelete.getJSONObject(i), true);
+                                                temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
+                                                if (temp != null) temp.update(user);
+                                                else realm.copyToRealm(user);
                                             }
 
                                             insertAndDelete = object.getJSONArray("delete");
                                             for (int j = 0; j < insertAndDelete.length(); j++) {
-                                                realm.copyToRealmOrUpdate(getUser(insertAndDelete.getJSONObject(j), false));
+                                                user = getUser(insertAndDelete.getJSONObject(j), false);
+                                                temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
+                                                if (temp != null) temp.update(user);
                                             }
 
                                             mSharedPreferences.edit().putLong("timestamp", object.getLong("timestamp")).apply();
