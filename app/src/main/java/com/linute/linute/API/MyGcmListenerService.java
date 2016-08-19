@@ -104,7 +104,7 @@ public class MyGcmListenerService extends GcmListenerService {
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(this, (int)System.currentTimeMillis(), intent, PendingIntent.FLAG_IMMUTABLE);
 
-        Log.d(TAG, data.toString());
+        //Log.d(TAG, data.toString());
 
         String message = data.getString("message");
 
@@ -116,7 +116,7 @@ public class MyGcmListenerService extends GcmListenerService {
         try{
             JSONObject image = new JSONObject(data.getString("roomProfileImage"));
             profileImage = image.getString("thumbnail");
-        }catch(JSONException e){
+        }catch(JSONException|NullPointerException e){
 
         }
 
@@ -140,7 +140,7 @@ public class MyGcmListenerService extends GcmListenerService {
                                 ? Utils.getAnonImageUrl(String.valueOf(profileImage))
                                 : Utils.getImageUrlOfUser(String.valueOf(profileImage))
                         );
-                Log.i("AAA", profileImage);
+                Log.d("AAA", profileImage);
                 image = Glide.with(this).load(profileImage).downloadOnly(256, 256).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
@@ -173,7 +173,7 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent intent;
 
         //Log.i(TAG, "action : "  + action);
-        Log.i(TAG, "sendNotification: " + data.toString());
+        Log.d(TAG, "sendNotification: " + data.toString());
 
         boolean isLoggedIn = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getBoolean("isLoggedIn", false);
 
@@ -221,7 +221,7 @@ public class MyGcmListenerService extends GcmListenerService {
                     }
                 }
 
-                Log.i("AAA", data.getString("room", ""));
+                Log.d("AAA", data.getString("room", ""));
 
                 ChatRoom chatRoom = new ChatRoom(
                         data.getString("room", ""),

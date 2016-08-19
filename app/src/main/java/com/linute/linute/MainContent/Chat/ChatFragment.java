@@ -838,7 +838,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                     try {
                         JSONObject object = new JSONObject(response.body().string());
-                        // Log.i(TAG, "getroomandchat onResponse: " + object.toString(4));
+                         Log.d(TAG, "getroomandchat onResponse: " + object.toString(4));
                         mRoomId = object.getString("id");
 
 

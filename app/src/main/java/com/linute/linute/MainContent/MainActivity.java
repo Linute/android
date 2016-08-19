@@ -710,7 +710,7 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
-                //Log.i(TAG, "call: " + activity.toString(4));
+                Log.d(TAG, "call: " + activity.toString(4));
                 //message
                 if (activity.getString("action").equals("messager")) {
                     /*
@@ -726,7 +726,7 @@ public class MainActivity extends BaseTaptActivity {
 
                     JSONArray users = activity.getJSONArray("roomUsers");
                     ArrayList<User> usersList = new ArrayList<>(users.length());
-                    Log.i("AAA", users.toString(4));
+                    Log.d("AAA", users.toString(4));
                     for(int u=0;u<users.length();u++){
                         JSONObject userJson = users.getJSONObject(u);
                         usersList.add(new User(
@@ -761,11 +761,8 @@ public class MainActivity extends BaseTaptActivity {
                     });
 
                     final NewMessageEvent chatEvent = new NewMessageEvent(true);
-                    /*chatEvent.setRoomId(activity.getString("room"));
-                    chatEvent.setMessage(activity.getString("text"));
-                    chatEvent.setOtherUserId(activity.getString("ownerID"));
-                    chatEvent.setOtherUserFirstName(activity.getString("ownerFirstName"));
-                    chatEvent.setOtherUserLastName(activity.getString("ownerLastName"));*/
+                    chatEvent.setRoomId(chat.roomId);
+                    chatEvent.setMessage(message);
                     NewMessageBus.getInstance().setNewMessage(chatEvent);
                     NotificationsCounterSingleton.getInstance().setHasMessage(true);
                 } else {
