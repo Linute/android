@@ -95,6 +95,8 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         }
     }
 
+
+
     private ChatRoom getChat(int position) {
         return mSearchRoomsList.get(position-1);
     }
@@ -154,6 +156,8 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
     }
 
 
+
+
     public static class HeaderVH extends RecyclerView.ViewHolder{
         TextView tvHeader;
         public HeaderVH(View itemView) {
@@ -169,5 +173,6 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
     public interface OnRoomSelectedListener{
         public void onRoomSelected(ChatRoom room);
     }
+
 
 }

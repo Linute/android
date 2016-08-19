@@ -35,7 +35,6 @@ import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -50,6 +49,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -147,6 +147,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Handler mHandler = new Handler();
     private LinearLayoutManager mLinearLayoutManager;
     private Map<String, User> mUserMap;
+
+    private boolean mSocketConnected = false;
 
 
     public ChatFragment() {
@@ -606,8 +608,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     public void joinRoom(BaseTaptActivity activity, boolean emitRefresh) {
 
+        if(mSocketConnected){
+            leaveRooms();
+        }
+
+        mSocketConnected = true;
+
+
+
         activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
         activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+
         activity.connectSocket("new message", onNewMessage);
         activity.connectSocket("typing", onTyping);
         activity.connectSocket("stop typing", onStopTyping);
@@ -619,6 +630,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         activity.connectSocket("messages refresh", onRefresh);
 
         activity.connectSocket("add users", onAddUsers);
+
 
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
@@ -746,6 +758,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public void onPause() {
         super.onPause();
 
+        leaveRooms();
+    }
+
+    protected void leaveRooms() {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (joinLeft != null && activity != null && mUserId != null && mRoomId != null) {
@@ -775,6 +791,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.disconnectSocket("messages refresh", onRefresh);
             activity.disconnectSocket("add users", onAddUsers);
 
+            mSocketConnected = false;
         }
     }
 
@@ -1372,10 +1389,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //        joinRoom(activity, false);
 
 
-        if (!activity.socketConnected() || mUserId == null
+      /*  if (!activity.socketConnected() || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
-        }
+        }*/
 
         if (TextUtils.isEmpty(message)) {
             mInputMessageView.requestFocus();
@@ -1405,6 +1422,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mRoomExists = true;
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
+        joinRoom(activity, false);
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
@@ -1449,6 +1467,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         @Override
         public void call(final Object... args) {
             final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+
+            Log.i("AAA", "socket recieved" + Arrays.toString(args));
 
             if (activity == null) return;
 

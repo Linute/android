@@ -47,7 +47,7 @@ public class CreateChatFragment extends SelectUsersFragment {
         return userGroupSearchAdapter;
     }
 
-    public static CreateChatFragment newInstance(ArrayList<User> selectedUsers){
+    public static CreateChatFragment newInstance(ArrayList<User> selectedUsers) {
         CreateChatFragment createChatFrag = new CreateChatFragment();
         Bundle arguments = new Bundle();
         arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
@@ -59,7 +59,7 @@ public class CreateChatFragment extends SelectUsersFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         view.findViewById(R.id.search_users_entry).requestFocus();
-        InputMethodManager inputMethodManager= (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInputFromWindow(view.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
     }
 
@@ -73,7 +73,7 @@ public class CreateChatFragment extends SelectUsersFragment {
         }
 
         JSONArray usersJson = new JSONArray();
-        for(User user:mSelectedUsers){
+        for (User user : mSelectedUsers) {
             usersJson.put(user.userId);
         }
 
@@ -82,7 +82,7 @@ public class CreateChatFragment extends SelectUsersFragment {
         users.getUsersAndRooms(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -96,7 +96,7 @@ public class CreateChatFragment extends SelectUsersFragment {
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
-                    if (getActivity() != null){
+                    if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -120,10 +120,10 @@ public class CreateChatFragment extends SelectUsersFragment {
                             user = ((JSONObject) usersJson.get(i));
 
                             String collegeName;
-                            if(!user.isNull("college")) {
+                            if (!user.isNull("college")) {
                                 collegeName = user.getJSONObject("college").getString("name");
 
-                            }else{
+                            } else {
                                 collegeName = "";
                             }
 
@@ -243,7 +243,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                         roomsJson = jsonObject.getJSONArray("rooms");
                         mSearchRoomList.clear();
 
-                        for(int i = 0; i < roomsJson.length();i++){
+                        for (int i = 0; i < roomsJson.length(); i++) {
                             JSONObject roomJson = roomsJson.getJSONObject(i);
 
                             JSONObject lastMessage = roomJson.getJSONArray("messages").getJSONObject(0);
@@ -251,7 +251,7 @@ public class CreateChatFragment extends SelectUsersFragment {
 
                             JSONArray roomUsersJson = roomJson.getJSONArray("users");
                             ArrayList<User> usersList = new ArrayList<User>();
-                            for(int u=0;u<roomUsersJson.length();u++){
+                            for (int u = 0; u < roomUsersJson.length(); u++) {
                                 JSONObject userJSON = roomUsersJson.getJSONObject(u);
                                 usersList.add(new User(
                                         userJSON.getString("id"),
@@ -262,8 +262,8 @@ public class CreateChatFragment extends SelectUsersFragment {
                             }
 
                             long unMuteAt = 0;
-                            if(!roomJson.isNull("unMuteAt"))
-                                    unMuteAt = roomJson.getLong("unMuteAt");
+                            if (!roomJson.isNull("unMuteAt"))
+                                unMuteAt = roomJson.getLong("unMuteAt");
                             mSearchRoomList.add(new ChatRoom(
 
                                     roomJson.getString("id"),
@@ -281,29 +281,25 @@ public class CreateChatFragment extends SelectUsersFragment {
                         }
 
 
-
-
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     mHandler.removeCallbacksAndMessages(null);
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mSearchAdapter.notifyDataSetChanged();
-                                            View view = getView();
-                                            if(view != null) view.findViewById(R.id.empty_view).setVisibility(View.GONE);
 
-                                        }
-                                    });
+                                    mSearchAdapter.notifyDataSetChanged();
+                                    View view = getView();
+                                    if (view != null)
+                                        view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+
+
                                 }
                             });
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        if (getActivity() != null){
+                        if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
