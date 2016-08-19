@@ -1198,58 +1198,97 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void addMessage(JSONObject data) throws JSONException {
-        Log.d(TAG, "addMessage: " + data.toString(4));
+        //Log.d(TAG, "addMessage: " + data.toString(4));
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        Date time;
 
+        JSONObject owner = data.getJSONObject("owner");
+        String ownerId = owner.getString("id");
+        boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
+
+
+        if (!mUserMap.containsKey(ownerId)) {
+            mUserMap.put(ownerId,
+                    new User(
+                            ownerId,
+                            owner.getString("firstName"),
+                            owner.getString("lastName"),
+                            owner.getString("profileImage")
+                    ));
+        }
+
+        Date time;
         try {
             time = Utils.getDateFormat().parse(data.getString("date"));
         } catch (ParseException | JSONException e) {
             time = null;
         }
 
-        String ownerId = data.getJSONObject("owner").getString("id");
-        String messageId = data.getString("id");
-
-
         final Chat chat = new Chat(
-                mRoomId,
+                data.getString("room"),
                 time,
                 ownerId,
-                messageId,
+                data.getString("id"),
                 data.getString("text"),
-                false,
-                ownerId.equals(mUserId)
+                viewerIsOwnerOfMessage,
+                viewerIsOwnerOfMessage
         );
 
-        JSONArray imageAndVideo = data.getJSONArray("images");
-        if (imageAndVideo.length() > 0) {
-            chat.setImageId(imageAndVideo.getString(0));
-            imageAndVideo = data.getJSONArray("videos");
+
+        JSONArray unreadArray = new JSONArray();
+        if (!viewerIsOwnerOfMessage) {
+            unreadArray.put(chat.getMessageId());
+        }
+
+
+        JSONObject post = null;
+        try {
+            post = data.getJSONObject("post");
+            if (post != null) {
+                chat.setPost(getPost(post));
+                chat.setMessageType(
+                        chat.getPost().getType() == Post.POST_TYPE_VIDEO ?
+                                Chat.MESSAGE_SHARE_VIDEO :
+                                Chat.MESSAGE_SHARE_IMAGE
+                );
+            }
+        } catch (JSONException e) {
+            //e.printStackTrace();
+//  Log.i(TAG, "parseMessagesJSON: none");
+            Log.d(TAG, "parseMessagesJSON: no value for post");
+        }
+
+
+        if (post == null) {
+            JSONArray imageAndVideo = data.getJSONArray("images");
             if (imageAndVideo.length() > 0) {
-                chat.setVideoId(imageAndVideo.getString(0));
-                chat.setMessageType(Chat.MESSAGE_VIDEO);
-            } else {
-                chat.setMessageType(Chat.MESSAGE_IMAGE);
+                chat.setImageId(imageAndVideo.getString(0));
+                imageAndVideo = data.getJSONArray("videos");
+                if (imageAndVideo.length() > 0) {
+                    chat.setVideoId(imageAndVideo.getString(0));
+                    chat.setMessageType(Chat.MESSAGE_VIDEO);
+                } else {
+                    chat.setMessageType(Chat.MESSAGE_IMAGE);
+                }
             }
         }
 
+        if (data.getInt("type") == 1) {
+            chat.setType(Chat.TYPE_SYSTEM_MESSAGE);
+        }
 
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-
                 if (mChatList.size() > 0) {
                     Chat previousMessage = mChatList.get(mChatList.size() - 1);
                     if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
                         Date date = getStartOfDay(chat.getDate());
-
                         Chat header = new Chat(
                                 previousMessage.getRoomId(),
                                 date,
-                                "",
+                                chat.getOwnerId(),
                                 "-1",
                                 (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                                 true,
@@ -1262,8 +1301,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     Date date = getStartOfDay(chat.getDate());
                     Chat header = new Chat(
                             chat.getRoomId(),
-                            chat.getDate(),
-                            "",
+                            date,
+                            chat.getOwnerId(),
                             "-1",
                             (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
                             true,
@@ -1273,6 +1312,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatList.add(header);
                 }
 
+
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
                 scrollToBottom();
@@ -1281,14 +1321,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
 
 
-        if (!ownerId.equals(mUserId)) {//not our message, then mark as read
+        if (unreadArray.length() > 0) {//not our message, then mark as read
             JSONObject read = new JSONObject();
-            JSONArray readArray = new JSONArray();
-            readArray.put(messageId);
-
-            read.put("messages", readArray);
             read.put("room", mRoomId);
-
+            read.put("messages", unreadArray);
             activity.emitSocket(API_Methods.VERSION + ":messages:read", read);
         }
     }
@@ -1325,22 +1361,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
     }
-
-//    private void removeChatHead(String username) {
-//        for (int i = mChatList.size() - 1; i >= 0; i--) {
-//            Chat message = mChatList.get(i);
-//            // chat type head ; message get list size == 0 get list 0 element username
-//            if (message.getType() == Chat.TYPE_ACTION && message.getUserName().equals(username)) {
-//                mChatList.remove(i);
-//                mChatAdapter.notifyItemRemoved(i);
-//            }
-//            // else if
-//            // chat type head ; message get list size > 0
-//            // for -> if uesrname = username
-//            // list remove username
-//            // update adapter
-//        }
-//    }
 
     private void attemptSend(String message) {
 
@@ -1807,7 +1827,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
      * @param listOfUnreadMessages JSONArray to populate with unread message data
      */
 
-    private void parseMessagesJSON(JSONArray messages, final ArrayList<Chat> intoChatList, JSONArray listOfUnreadMessages) {
+    private void parseMessagesJSON(JSONArray messages, final List<Chat> intoChatList, JSONArray listOfUnreadMessages) {
         // final ArrayList<Chat> intoChatList = new ArrayList<>();
         JSONObject message;
         Chat chat;

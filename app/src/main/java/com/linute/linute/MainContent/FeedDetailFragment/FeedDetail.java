@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

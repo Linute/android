@@ -1,10 +1,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFFFFFFF"
-    android:orientation="vertical"
-    tools:context=".MainContent.Chat.SelectUsersFragment">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="#FFFFFFFF"
+              android:orientation="vertical"
+              tools:context=".MainContent.Chat.SelectUsersFragment">
 
 
     <android.support.v7.widget.Toolbar
@@ -23,8 +23,8 @@
             android:background="@null"
             android:gravity="center_vertical"
             android:hint="Search for friends..."
-            android:textColor="@color/pure_white" />
-
+            android:imeOptions="actionDone"
+            android:textColor="@color/pure_white"/>
 
 
     </android.support.v7.widget.Toolbar>
@@ -36,11 +36,11 @@
         android:background="@color/pure_white">
 
         <ProgressBar
+            android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:layout_gravity="center" />
+            android:layout_gravity="center"/>
     </FrameLayout>
 
     <android.support.v7.widget.RecyclerView

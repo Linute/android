@@ -221,9 +221,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                if(b){
-                    if(llm != null){
-                        llm.scrollToPosition(llm.getItemCount()-1);
+                if (b) {
+                    if (llm != null) {
+                        llm.scrollToPosition(llm.getItemCount() - 1);
                     }
                 }
             }
@@ -243,20 +243,20 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         });
 
-        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEvent.ACTION_UP == event.getAction())
-                    recList.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-                        }
-                    }, 500);
-
-                return false;
-            }
-        });
+//        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (MotionEvent.ACTION_UP == event.getAction())
+//                    recList.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+//                        }
+//                    }, 500);
+//
+//                return false;
+//            }
+//        });
 
         mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
         mCommentEditText.setQueryTokenReceiver(this);
@@ -308,14 +308,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
                     i.putExtra(CameraActivity.GALLERY_TYPE, CameraActivity.IMAGE);
 
-                    if(mAnonCheckBoxContainer.getVisibility() == View.VISIBLE){
-                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
-                        i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
-                    }else {
+                    if (mFeedDetail.getPost().isCommentAnonDisabled()) {
                         i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
                         i.putExtra(CameraActivity.ANON_KEY, false);
+                    } else {
+                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+                        i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
                     }
-
                     startActivityForResult(i, CAMERA_REQUEST);
                 }
             }
@@ -363,12 +362,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (mImageUri != null) sendPicture();
     }
 
-    private void showKeyboard(View editText, boolean show){
-        if (getActivity() != null){
+    private void showKeyboard(View editText, boolean show) {
+        if (getActivity() != null) {
             if (show) {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-            }else {
+            } else {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
             }
@@ -379,15 +378,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private Uri mImageUri;
     private String mOverlayText;
     private boolean mPrivacy;
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAMERA_REQUEST){
-            if (resultCode == RESULT_OK){
+        if (requestCode == CAMERA_REQUEST) {
+            if (resultCode == RESULT_OK) {
                 mImageUri = data.getParcelableExtra("image");
                 mOverlayText = data.getStringExtra("title");
                 if (mOverlayText == null) mOverlayText = "";
                 mPrivacy = data.getBooleanExtra("privacy", false);
-            }else {
+            } else {
                 mImageUri = null;
                 mOverlayText = "";
                 mPrivacy = false;
@@ -395,7 +395,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         }
     }
 
-    private void sendPicture(){
+    private void sendPicture() {
         try {
             JSONObject comment = new JSONObject();
             comment.put("user", mViewId);
@@ -420,7 +420,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity == null) return;
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
-        }catch (JSONException | IOException e){
+        } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
 
@@ -589,6 +589,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                             mFeedDetail.getPost().isCommentAnonDisabled() ?
                                                     View.GONE :
                                                     View.VISIBLE);
+
+                                    recList.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            recList.scrollToPosition(tempComments.size());
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -775,7 +782,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (mFeedDetail.getPostUserId() == null || getActivity() == null) return;
 
         if (mFeedDetail.getPostUserId().equals(mViewId)) { //is the viewers post
-            String[] ops = new String[]{"Delete post", mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous"};
+            String[] ops = new String[]{
+                    "Delete post",
+                    mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous",
+                    mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post"};
 
             mAlertDialog = new AlertDialog.Builder(getActivity())
                     .setItems(ops, new DialogInterface.OnClickListener() {
@@ -783,8 +793,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                         public void onClick(DialogInterface dialog, int which) {
                             if (which == 0) {
                                 showConfirmDeleteDialog();
-                            } else {
+                            } else if ((which == 1)){
                                 showRevealConfirm();
+                            }else {
+                                toggleMute();
                             }
                         }
                     }).show();
