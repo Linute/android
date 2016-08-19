@@ -106,7 +106,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                     }
                 } else {
 //                    mSearchUserList.clear();
-                    ArrayList<User> tempUsers = new ArrayList<>();
+                    final ArrayList<User> tempUsers = new ArrayList<>();
                     JSONObject jsonObject;
                     JSONArray usersJson;
                     JSONArray roomsJson;
@@ -145,8 +145,6 @@ public class CreateChatFragment extends SelectUsersFragment {
 
                         }
 
-                        mSearchUserList.clear();
-                        mSearchUserList.addAll(tempUsers);
                         /*
                         *     "rooms": [
        {
@@ -241,7 +239,8 @@ public class CreateChatFragment extends SelectUsersFragment {
 
 
                         roomsJson = jsonObject.getJSONArray("rooms");
-                        mSearchRoomList.clear();
+
+                        final ArrayList<ChatRoom> tempRoomList = new ArrayList<ChatRoom>();
 
                         for (int i = 0; i < roomsJson.length(); i++) {
                             JSONObject roomJson = roomsJson.getJSONObject(i);
@@ -264,8 +263,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                             long unMuteAt = 0;
                             if (!roomJson.isNull("unMuteAt"))
                                 unMuteAt = roomJson.getLong("unMuteAt");
-                            mSearchRoomList.add(new ChatRoom(
-
+                            tempRoomList.add(new ChatRoom(
                                     roomJson.getString("id"),
                                     1,
                                     roomJson.getString("name"),
@@ -287,10 +285,25 @@ public class CreateChatFragment extends SelectUsersFragment {
                                 public void run() {
                                     mHandler.removeCallbacksAndMessages(null);
 
-                                    mSearchAdapter.notifyDataSetChanged();
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mSearchUserList.clear();
+                                            mSearchUserList.addAll(tempUsers);
+                                            mSearchRoomList.clear();
+                                            mSearchRoomList.addAll(tempRoomList);
+
+                                            mSearchAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+
+                                    //mSearchRV.getRecycledViewPool().clear();
+
                                     View view = getView();
                                     if (view != null)
-                                        view.findViewById(R.id.empty_view).setVisibility(View.GONE);
+                                        view.findViewById(R.id.empty_view)
+                                                .setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ?
+                                                        View.VISIBLE : View.GONE);
 
 
                                 }
