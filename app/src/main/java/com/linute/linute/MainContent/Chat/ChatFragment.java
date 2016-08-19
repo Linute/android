@@ -972,6 +972,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
                             );
 
+                            mChatAdapter.setIsDM(mChatRoom.isDM());
+
 
                         }
                     } catch (JSONException e) {
@@ -1148,6 +1150,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 room.getBoolean("isMuted"),
                                 unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
                         );
+
+                        mChatAdapter.setIsDM(mChatRoom.isDM());
 
 
                     } catch (JSONException e) {

@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.Chat;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +48,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private String mUserId;
 
+
+
+    private boolean isDM = false;
+
     private Map<String, User> mUsers;
 
     static {
@@ -64,6 +67,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.mUsers = users;
 
         mUserId = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+    }
+
+    public void setIsDM( boolean isdm) {
+        this.isDM = isdm;
     }
 
     @Override
@@ -274,9 +281,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                  if (isHead) {
                     User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
-                        vUserName.setVisibility(View.VISIBLE);
+                        if(!isDM) {
+                            vUserName.setVisibility(View.VISIBLE);
+                            vUserName.setText(u.firstName);
+                        }else{
+                            vUserName.setVisibility(View.GONE);
+                        }
                         vProfileImage.setVisibility(View.VISIBLE);
-                        vUserName.setText(u.firstName);
                        // Log.i("TEST", "bindModel: "+u.userImage);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
