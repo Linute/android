@@ -55,6 +55,6 @@
 
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
-    <include layout="@layout/feed_detail_action_bar"/>
+    <!--<include layout="@layout/feed_detail_action_bar"/>-->
 
 </LinearLayout>

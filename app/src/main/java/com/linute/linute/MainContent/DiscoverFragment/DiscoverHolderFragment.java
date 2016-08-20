@@ -7,9 +7,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -21,12 +19,10 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,7 +43,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private Toolbar mToolbar;
     private boolean mInitiallyPresentedFragmentWasCampus = true; //first fragment presented by viewpager was campus fragment
 
-    private DiscoverFragment[] mDiscoverFragments;
+    private FeedFragment[] mFeedFragments;
     private AppBarLayout mAppBarLayout;
 
     private View mUpdateNotification;
@@ -79,7 +75,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+                mFeedFragments[mViewPager.getCurrentItem()].scrollUp();
             }
         });
 
@@ -118,11 +114,11 @@ public class DiscoverHolderFragment extends BaseFragment {
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
-        if (mDiscoverFragments == null || mDiscoverFragments.length != 2) {
-            mDiscoverFragments = new DiscoverFragment[]{DiscoverFragment.newInstance(false), DiscoverFragment.newInstance(true)};
+        if (mFeedFragments == null || mFeedFragments.length != 2) {
+            mFeedFragments = new FeedFragment[]{FeedFragment.newInstance(false), FeedFragment.newInstance(true)};
         }
 
-        FragmentHolderPagerAdapter fragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mDiscoverFragments);
+        FragmentHolderPagerAdapter fragmentHolderPagerAdapter = new FragmentHolderPagerAdapter(getChildFragmentManager(), mFeedFragments);
         mViewPager = (ViewPager) rootView.findViewById(R.id.discover_hostViewPager);
         mViewPager.setAdapter(fragmentHolderPagerAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -151,7 +147,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                 new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
                     @Override
                     public void onTabReselected(TabLayout.Tab tab) {
-                        mDiscoverFragments[mViewPager.getCurrentItem()].scrollUp();
+                        mFeedFragments[mViewPager.getCurrentItem()].scrollUp();
                     }
                 }
         );
@@ -212,7 +208,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private void loadFragmentAtPositionIfNeeded(int position) {
         //only load when fragment comes into view
         if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
-            mDiscoverFragments[position].refreshFeed();
+            mFeedFragments[position].refreshFeed();
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
         }
@@ -255,15 +251,15 @@ public class DiscoverHolderFragment extends BaseFragment {
     //returns if success
     public boolean addPostToFeed(Post post) {
         return getActivity() != null &&
-                mDiscoverFragments[0] != null &&
-                mDiscoverFragments[0].addPostToTop(post);
+                mFeedFragments[0] != null &&
+                mFeedFragments[0].addPostToTop(post);
     }
 
     @Override
     public void resetFragment() {
         mAppBarLayout.setExpanded(true, false);
         mViewPager.setCurrentItem(0, true);
-        mDiscoverFragments[0].scrollUp();
+        mFeedFragments[0].scrollUp();
     }
 
 

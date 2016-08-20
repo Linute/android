@@ -3,26 +3,23 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-
-import com.linute.linute.MainContent.DiscoverFragment.DiscoverFragment;
 
 /**
  * Created by QiFeng on 1/20/16.
  */
 public class FragmentHolderPagerAdapter extends FragmentPagerAdapter {
 
-    public DiscoverFragment[] mDiscoverFragments;
+    public FeedFragment[] mFeedFragments;
 
 
-    public FragmentHolderPagerAdapter(FragmentManager fm, DiscoverFragment[] fragments) {
+    public FragmentHolderPagerAdapter(FragmentManager fm, FeedFragment[] fragments) {
         super(fm);
-        mDiscoverFragments = fragments;
+        mFeedFragments = fragments;
     }
 
     @Override
     public Fragment getItem(int position) {
-        return mDiscoverFragments[position];
+        return mFeedFragments[position];
     }
 
     @Override

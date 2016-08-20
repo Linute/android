@@ -20,10 +20,9 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
-import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -43,8 +42,8 @@ import okhttp3.Response;
  * Created by QiFeng on 11/17/15.
  */
 
-public class DiscoverFragment extends BaseFragment {
-    private static final String TAG = DiscoverFragment.class.getSimpleName();
+public class FeedFragment extends BaseFragment {
+    private static final String TAG = FeedFragment.class.getSimpleName();
     private static final String SECTION_KEY = "section";
     private RecyclerView recList;
 
@@ -53,7 +52,7 @@ public class DiscoverFragment extends BaseFragment {
     private SwipeRefreshLayout refreshLayout;
 
     private ArrayList<Post> mPosts = new ArrayList<>();
-    private CheckBoxQuestionAdapter mCheckBoxChoiceCapableAdapters;
+    private FeedAdapter mFeedAdapter;
     private boolean feedDone;
 
     private boolean mSectionTwo = false;
@@ -62,8 +61,8 @@ public class DiscoverFragment extends BaseFragment {
 
     private Handler mHandler = new Handler();
 
-    public static DiscoverFragment newInstance(boolean friendsOnly) {
-        DiscoverFragment fragment = new DiscoverFragment();
+    public static FeedFragment newInstance(boolean friendsOnly) {
+        FeedFragment fragment = new FeedFragment();
         Bundle args = new Bundle();
         args.putBoolean(SECTION_KEY, friendsOnly);
         fragment.setArguments(args);
@@ -92,15 +91,15 @@ public class DiscoverFragment extends BaseFragment {
                 R.layout.fragment_discover_feed,
                 container, false); //setContent
 
-        if (mCheckBoxChoiceCapableAdapters == null) {
-            mCheckBoxChoiceCapableAdapters = new CheckBoxQuestionAdapter(
+        if (mFeedAdapter == null) {
+            mFeedAdapter = new FeedAdapter(
                     mPosts,
                     getContext(),
                     Glide.with(this),
                     mSectionTwo
             );
         }else {
-            mCheckBoxChoiceCapableAdapters.setRequestManager(Glide.with(this));
+            mFeedAdapter.setRequestManager(Glide.with(this));
         }
 
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
@@ -113,10 +112,10 @@ public class DiscoverFragment extends BaseFragment {
 
         recList.setLayoutManager(llm);
 
-        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                true, true));
+      /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));*/
 
-        mCheckBoxChoiceCapableAdapters.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
+        mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override
             public void loadMore() {
                 if (!feedDone)
@@ -124,7 +123,7 @@ public class DiscoverFragment extends BaseFragment {
             }
         });
 
-        recList.setAdapter(mCheckBoxChoiceCapableAdapters);
+        recList.setAdapter(mFeedAdapter);
 
         refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -233,7 +232,7 @@ public class DiscoverFragment extends BaseFragment {
 
                             if (skip1 == 0) {
                                 feedDone = true; //no more feed to load
-                                mCheckBoxChoiceCapableAdapters.setLoadState(LoadMoreViewHolder.STATE_END);
+                                mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                             }
 
 
@@ -256,8 +255,8 @@ public class DiscoverFragment extends BaseFragment {
                                                         mSkip = skip1;
                                                         int size = mPosts.size();
                                                         mPosts.addAll(tempList);
-                                                        mCheckBoxChoiceCapableAdapters.notifyItemRangeInserted(size, tempList.size());
-                                                        //mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                                        mFeedAdapter.notifyItemRangeInserted(size, tempList.size());
+                                                        //mFeedAdapter.notifyDataSetChanged();
                                                     }
                                                 });
                                             }
@@ -339,10 +338,10 @@ public class DiscoverFragment extends BaseFragment {
 
                             if (mSkip == 0) {
                                 feedDone = true; //no more feed to load
-                                mCheckBoxChoiceCapableAdapters.setLoadState(LoadMoreViewHolder.STATE_END);
+                                mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                             } else {
                                 feedDone = false;
-                                mCheckBoxChoiceCapableAdapters.setLoadState(LoadMoreViewHolder.STATE_LOADING);
+                                mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_LOADING);
                             }
 
                             final ArrayList<Post> refreshedPosts = new ArrayList<>();
@@ -382,7 +381,7 @@ public class DiscoverFragment extends BaseFragment {
                                                 public void run() {
                                                     mPosts.clear();
                                                     mPosts.addAll(refreshedPosts);
-                                                    mCheckBoxChoiceCapableAdapters.notifyDataSetChanged();
+                                                    mFeedAdapter.notifyDataSetChanged();
                                                 }
                                             });
 
@@ -445,8 +444,8 @@ public class DiscoverFragment extends BaseFragment {
             @Override
             public void run() {
                 mPosts.add(0, post);
-                if (mCheckBoxChoiceCapableAdapters != null) {
-                    mCheckBoxChoiceCapableAdapters.notifyItemInserted(0);
+                if (mFeedAdapter != null) {
+                    mFeedAdapter.notifyItemInserted(0);
                 }
             }
         });

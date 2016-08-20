@@ -14,7 +14,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
-import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -40,7 +39,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected RoundedImageView vUserImage;
     protected Context mContext;
-    protected View vShareButton;
+//    protected View vShareButton;
 
     private String mUserId;
     private String mImageSignature;
@@ -65,7 +64,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vUserImage = (RoundedImageView) itemView.findViewById(R.id.feedDetail_profile_image);
-        vShareButton = itemView.findViewById(R.id.share);
+//        vShareButton = itemView.findViewById(R.id.share);
 
         //vLikesHeart.setClickable(false);
         vLikesHeart.setOnCheckedChangeListener(this);
@@ -74,14 +73,14 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        vShareButton.setOnClickListener(new View.OnClickListener() {
+        /*vShareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 BaseTaptActivity activity = (BaseTaptActivity) mContext;
                 if (activity != null && mPost != null)
                     activity.addFragmentOnTop(SendToFragment.newInstance(mPost.getPostId()), "send_to");
             }
-        });
+        });*/
     }
 
     public void bindModel(Post post) {
@@ -97,8 +96,8 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
         vPostTime.setText(post.getPostTime());
         vLikesHeart.setChecked(post.isPostLiked());
-        vLikesText.setText("Like (" + post.getNumLike() + ")");
-        vCommentText.setText("Comment (" + post.getNumOfComments() + ")");
+        vLikesText.setText(String.valueOf(post.getNumLike()));
+        vCommentText.setText(String.valueOf(post.getNumOfComments()));
         ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
                 R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
     }
@@ -113,12 +112,12 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         if (isChecked && !mPost.isPostLiked()) {
             mPost.setPostLiked(true);
             mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) + 1);
-            vLikesText.setText("Like (" + mPost.getNumLike() + ")");
+            vLikesText.setText(String.valueOf(mPost.getNumLike()));
             emit = true;
         } else if (!isChecked && mPost.isPostLiked()) {
             mPost.setPostLiked(false);
             mPost.setNumLike(Integer.parseInt(mPost.getNumLike()) - 1);
-            vLikesText.setText("Like (" + mPost.getNumLike() + ")");
+            vLikesText.setText(String.valueOf(mPost.getNumLike()));
             emit = true;
         }
 
