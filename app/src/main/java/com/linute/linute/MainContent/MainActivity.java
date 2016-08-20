@@ -390,7 +390,10 @@ public class MainActivity extends BaseTaptActivity {
 
         //set name text
         String name = sharedPreferences.getString("firstName", "") + " " + sharedPreferences.getString("lastName", "");
+
+        String college = sharedPreferences.getString("collegeName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
+        ((TextView) header.findViewById(R.id.drawerHeader_college)).setText(college);
 
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
@@ -764,7 +767,7 @@ public class MainActivity extends BaseTaptActivity {
                     }else {
                         final NewMessageEvent chatEvent = new NewMessageEvent(true);
                         chatEvent.setRoomId(chat.roomId);
-                        chatEvent.setMessage(activity.getString("messageText"));
+                        chatEvent.setMessage(activity.getString("messageTextfdr"));
                         NewMessageBus.getInstance().setNewMessage(chatEvent);
                         NotificationsCounterSingleton.getInstance().setHasMessage(true);
                     }

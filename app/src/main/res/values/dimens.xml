@@ -44,7 +44,7 @@
 
     <dimen name="main_app_bar_elevation">4dp</dimen>
 
-    <dimen name="nav_header_profile_side">85dp</dimen>
+    <dimen name="nav_header_profile_side">64dp</dimen>
 
     <dimen name="spacing">8dp</dimen>
 
