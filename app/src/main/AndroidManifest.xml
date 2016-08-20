@@ -25,6 +25,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
@@ -130,6 +131,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"/>
 
+        <activity
+            android:name=".PostStatus.CreateStatusActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.FullScreen"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="90e83e6f6353d1c449a0b3e3e30dff28fe01a3ae"/>
@@ -140,6 +146,7 @@
         <service
             android:name=".MainContent.Uploading.UploadIntentService"
             android:process=":taptupload"/>
+
     </application>
 
 </manifest>

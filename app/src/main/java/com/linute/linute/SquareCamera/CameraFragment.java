@@ -37,7 +37,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.linute.linute.MainContent.PostCreatePage;
+import com.linute.linute.PostStatus.CreateStatusActivity;
 import com.linute.linute.R;
 
 import java.io.IOException;
@@ -152,7 +152,7 @@ public class CameraFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing) {
-                        ((CameraActivity) getActivity()).launchFragment(new PostCreatePage(), PostCreatePage.TAG);
+                       // ((CameraActivity) getActivity()).launchFragment(new CreateStatusActivity(), CreateStatusActivity.TAG);
                     }
                 }
             });

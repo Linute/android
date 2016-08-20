@@ -1,10 +1,12 @@
-package com.linute.linute.MainContent;
+package com.linute.linute.PostStatus;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,17 +16,16 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
@@ -34,18 +35,13 @@ import android.widget.Toast;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.bson.types.ObjectId;
 
-import static android.app.Activity.RESULT_CANCELED;
-import static android.content.Context.INPUT_METHOD_SERVICE;
-import static android.content.Context.MODE_PRIVATE;
-
-public class PostCreatePage extends BaseFragment implements View.OnClickListener {
-    public static final String TAG = PostCreatePage.class.getSimpleName();
+public class CreateStatusActivity extends AppCompatActivity implements View.OnClickListener {
+    public static final String TAG = CreateStatusActivity.class.getSimpleName();
 
     private CustomBackPressedEditText mPostEditText;
     private TextView mTextView;
@@ -61,33 +57,31 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
     private SharedPreferences mSharedPreferences;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mSharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
-    }
-
     private int[] mPostBackgroundColors = new int[6];
     private int[] mPostTextColors = new int[6];
     private View[] mPostColorSelectorViews = new View[6];
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.activity_new_post_create, container, false);
+    private int mCurrentlySelected = 0;
 
-        final Toolbar toolbar = (Toolbar) root.findViewById(R.id.postContentToolbar);
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_create_status);
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.postContentToolbar);
         mPostButton = toolbar.findViewById(R.id.create_page_post_button);
         mProgressbar = toolbar.findViewById(R.id.create_page_progress_bar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getActivity() == null || mProgressbar.getVisibility() == View.VISIBLE) return;
+                if (mProgressbar.getVisibility() == View.VISIBLE) return;
                 hideKeyboard();
                 if (mPostEditText.getText().toString().isEmpty()) {
-                    getActivity().setResult(RESULT_CANCELED);
-                    getActivity().finish();
+                    setResult(RESULT_CANCELED);
+                    finish();
                 } else {
                     showTextView();
                     showConfirmDialog();
@@ -97,8 +91,8 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
         toolbar.setTitle("Status");
 
-        mPostEditText = (CustomBackPressedEditText) root.findViewById(R.id.post_create_text);
-        mTextView = (TextView) root.findViewById(R.id.textView);
+        mPostEditText = (CustomBackPressedEditText) findViewById(R.id.post_create_text);
+        mTextView = (TextView) findViewById(R.id.textView);
         mPostButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,8 +117,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
             }
         });
 
-        Typeface font = Typeface.createFromAsset(getActivity().getAssets(),
-                "Veneer.otf");
+        Typeface font = Typeface.createFromAsset(getAssets(), "Veneer.otf");
         mPostEditText.setTypeface(font);
         mTextView.setTypeface(font);
 
@@ -132,7 +125,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
             @Override
             public void backPressed() {
                 hideKeyboard();
-                if (!mPostEditText.getText().toString().isEmpty()){
+                if (!mPostEditText.getText().toString().isEmpty()) {
                     showTextView();
                 }
             }
@@ -153,7 +146,7 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         mPostEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                    toolbar.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
+                toolbar.setVisibility(hasFocus ? View.GONE : View.VISIBLE);
             }
         });
 
@@ -179,20 +172,20 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
             }
         });
 
-        vAnonComments = (CheckBox) root.findViewById(R.id.anon_comments);
-        vAnonPost = (CheckBox) root.findViewById(R.id.anon_post);
+        vAnonComments = (CheckBox) findViewById(R.id.anon_comments);
+        vAnonPost = (CheckBox) findViewById(R.id.anon_post);
 
-        mTextFrame = root.findViewById(R.id.post_create_frame);
+        mTextFrame = findViewById(R.id.post_create_frame);
 
-        mPostColorSelectorViews[0] = root.findViewById(R.id.post_create_0);
-        mPostColorSelectorViews[1] = root.findViewById(R.id.post_create_1);
-        mPostColorSelectorViews[2] = root.findViewById(R.id.post_create_2);
-        mPostColorSelectorViews[3] = root.findViewById(R.id.post_create_3);
-        mPostColorSelectorViews[4] = root.findViewById(R.id.post_create_4);
-        mPostColorSelectorViews[5] = root.findViewById(R.id.post_create_5);
+        mPostColorSelectorViews[0] = findViewById(R.id.post_create_0);
+        mPostColorSelectorViews[1] = findViewById(R.id.post_create_1);
+        mPostColorSelectorViews[2] = findViewById(R.id.post_create_2);
+        mPostColorSelectorViews[3] = findViewById(R.id.post_create_3);
+        mPostColorSelectorViews[4] = findViewById(R.id.post_create_4);
+        mPostColorSelectorViews[5] = findViewById(R.id.post_create_5);
 
         //wont let me generate signed apk if using same id
-        SharedPreferences sharedPrefs = getContext().getSharedPreferences(getContext().getPackageName(), Context.MODE_PRIVATE);
+        SharedPreferences sharedPrefs = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
         setItem(R.id.selector_text0, 0, sharedPrefs, font);
         setItem(R.id.selector_text1, 1, sharedPrefs, font);
         setItem(R.id.selector_text2, 2, sharedPrefs, font);
@@ -200,36 +193,43 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         setItem(R.id.selector_text4, 4, sharedPrefs, font);
         setItem(R.id.selector_text5, 5, sharedPrefs, font);
 
+
+        //set to first color
         onClick(mPostColorSelectorViews[0]);
 
-        return root;
     }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        checkPermission();
+    }
+
 
     private void setItem(int res, int index, SharedPreferences preferences, Typeface typeface) {
         mPostTextColors[index] = preferences.getInt("status_color_" + index + "_text", 0xFF000000);
         mPostBackgroundColors[index] = preferences.getInt("status_color_" + index + "_bg", 0xFF000000);
 
         View postColorSelectorView = mPostColorSelectorViews[index];
-        postColorSelectorView.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
 
         TextView text = (TextView) postColorSelectorView.findViewById(res);
         text.setTextColor(mPostTextColors[index]);
         text.setTypeface(typeface);
+        text.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
 
         postColorSelectorView.setOnClickListener(this);
     }
 
 
     private void showConfirmDialog() {
-        new AlertDialog.Builder(getActivity())
+        new AlertDialog.Builder(this)
                 .setTitle("you sure?")
                 .setMessage("would you like to throw away what you have currently?")
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (getActivity() == null) return;
-                        getActivity().setResult(RESULT_CANCELED);
-                        getActivity().finish();
+                        setResult(RESULT_CANCELED);
+                        finish();
                     }
                 })
                 .setNegativeButton("no", new DialogInterface.OnClickListener() {
@@ -240,26 +240,9 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                 }).show();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-    }
 
     private void postContent() {
-        if (getActivity() == null ||
-                mPostInProgress ||
+        if (mPostInProgress ||
                 mPostEditText.getText().toString().trim().isEmpty())
             return;
 
@@ -269,7 +252,13 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         mPostButton.setVisibility(View.INVISIBLE);
 
 
-        Uri image = ImageUtility.savePicture(getActivity(), getBitmapFromView(mTextFrame));
+        //save file to external if we have permission to access it
+        //else save to cache
+        Uri image = hasWritePermission() ?
+                ImageUtility.savePicture(this, getBitmapFromView(mTextFrame)) :
+                ImageUtility.savePictureToCache(this, getBitmapFromView(mTextFrame));
+
+
         if (image != null) {
             PendingUploadPost post =
                     new PendingUploadPost(
@@ -288,14 +277,14 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
             Intent result = new Intent();
             result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
-            Toast.makeText(getActivity(), "Uploading status in background...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Uploading status in background...", Toast.LENGTH_SHORT).show();
 
-            getActivity().setResult(Activity.RESULT_OK, result);
+            setResult(Activity.RESULT_OK, result);
 
-            getActivity().finish();
+            finish();
             mPostInProgress = false;
         } else {
-            Toast.makeText(getActivity(), "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "An error occurred while saving your status", Toast.LENGTH_SHORT).show();
             mProgressbar.setVisibility(View.GONE);
             mPostButton.setVisibility(View.VISIBLE);
             mPostInProgress = false;
@@ -304,37 +293,42 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (getActivity() == null) return;
-
         int viewId = v.getId();
 
         int backgroundColor;
         int textColor;
 
+        int selected = 0;
         switch (viewId) {
             case R.id.post_create_0:
                 backgroundColor = mPostBackgroundColors[0];
                 textColor = mPostTextColors[0];
+                selected = 0;
                 break;
             case R.id.post_create_1:
                 backgroundColor = mPostBackgroundColors[1];
                 textColor = mPostTextColors[1];
+                selected = 1;
                 break;
             case R.id.post_create_2:
                 backgroundColor = mPostBackgroundColors[2];
                 textColor = mPostTextColors[2];
+                selected = 2;
                 break;
             case R.id.post_create_3:
                 backgroundColor = mPostBackgroundColors[3];
                 textColor = mPostTextColors[3];
+                selected = 3;
                 break;
             case R.id.post_create_4:
                 backgroundColor = mPostBackgroundColors[4];
                 textColor = mPostTextColors[4];
+                selected = 4;
                 break;
             case R.id.post_create_5:
                 backgroundColor = mPostBackgroundColors[5];
                 textColor = mPostTextColors[5];
+                selected = 5;
                 break;
             default:
                 backgroundColor = 0xFFFFFFFF;
@@ -342,24 +336,34 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
                 break;
         }
 
-
+        //change text view and edit text colors
         mPostEditText.setTextColor(textColor);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 70));
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 70)); //hint will be 70% of text color
         mTextView.setTextColor(textColor);
         mTextFrame.setBackgroundColor(backgroundColor);
+
+        //set selected background
+        mPostColorSelectorViews[mCurrentlySelected].setBackground(null);
+        mPostColorSelectorViews[selected].setBackgroundResource(R.drawable.post_background);
+        mCurrentlySelected = selected;
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPostEditText.clearFocus();
+        if (!mPostEditText.getText().toString().isEmpty())
+            showTextView();
+    }
 
     private void hideKeyboard() {
-        if (getActivity() == null) return;
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mPostEditText.getWindowToken(), 0);
         mPostEditText.clearFocus(); //release focus from EditText and hide keyboard
     }
 
     private void showKeyboard() {
-        if (getActivity() == null) return;
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
         imm.showSoftInput(mPostEditText, InputMethodManager.SHOW_IMPLICIT);
     }
 
@@ -383,6 +387,22 @@ public class PostCreatePage extends BaseFragment implements View.OnClickListener
         view.draw(canvas);
 
         return Bitmap.createScaledBitmap(returnedBitmap, 720, 720, false);
+    }
+
+
+    public void checkPermission() {
+        if (!hasWritePermission()) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    0
+            );
+        }
+    }
+
+    public boolean hasWritePermission(){
+        return  ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
 }

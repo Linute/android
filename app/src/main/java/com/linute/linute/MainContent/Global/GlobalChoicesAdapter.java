@@ -1,6 +1,9 @@
 package com.linute.linute.MainContent.Global;
 
 import android.content.Context;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,36 +58,51 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter <GlobalChoicesAda
 
         private TextView vTitle;
         private ImageView vImage;
+        private TextView vText;
 
         private GlobalChoiceItem mGlobalChoiceItem;
 
         public TrendingChoiceViewHolder(View itemView) {
             super(itemView);
 
+
             vTitle = (TextView) itemView.findViewById(R.id.text);
+            vTitle.setTypeface(Typeface.createFromAsset(mContext.getAssets(), "AbadiMTCondensedExtraBold.ttf"));
             vImage = (ImageView) itemView.findViewById(R.id.background);
+            vText = (TextView) itemView.findViewById(R.id.text1);
             itemView.setOnClickListener(this);
         }
 
 
 
         public void bindView(GlobalChoiceItem item){
-            vTitle.setText(item.getTitle());
+            vTitle.setText(item.title);
 
             mGlobalChoiceItem = item;
 
+            if (item.hasUnread()){
+                vImage.clearColorFilter();
+            }else {
+                ColorMatrix matrix = new ColorMatrix();
+                matrix.setSaturation(0);
+                vImage.setColorFilter(new ColorMatrixColorFilter(matrix));
+            }
+
+            //vImage.setImageResource(R.color.seperator_color);
             Glide.with(mContext)
-                    .load(Utils.getTrendsImageURL(item.getImageUrl()))
+                    .load(Utils.getTrendsImageURL(item.imageUrl))
                     .dontAnimate()
                     .placeholder(R.color.seperator_color)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .into(vImage);
+
+            vText.setText("Temp");
         }
 
         @Override
         public void onClick(View v) {
             if (mGoToTrend != null){
-                mGoToTrend.goToTrend(mGlobalChoiceItem.getKey(), mGlobalChoiceItem.getTitle());
+                mGoToTrend.goToTrend(mGlobalChoiceItem.key, mGlobalChoiceItem.title);
             }
         }
     }

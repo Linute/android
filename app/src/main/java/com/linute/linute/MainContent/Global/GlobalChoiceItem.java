@@ -5,28 +5,26 @@ package com.linute.linute.MainContent.Global;
  */
 public class GlobalChoiceItem {
 
-    private String mTitle;
-    private String mImageUrl;
-    private String mKey;
+    public final String title;
+    public final String imageUrl;
+    public final String key;
+    private boolean hasUnread;
+
 
     public GlobalChoiceItem(String title, String imageUrl, String key){
-        mImageUrl = imageUrl;
-        mTitle = title;
-        mKey = key;
+        this.imageUrl = imageUrl;
+        this.title = title;
+        this.key = key;
+        this.hasUnread = false;
     }
 
 
-    public String getImageUrl() {
-        return mImageUrl;
+    public void setHasUnread(boolean hasUnread){
+        this.hasUnread = hasUnread;
     }
 
-
-    public String getKey(){
-        return mKey;
-    }
-
-    public String getTitle() {
-        return mTitle;
+    public boolean hasUnread(){
+        return hasUnread;
     }
 
 }

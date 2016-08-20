@@ -1,11 +1,12 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
-    tools:context=".MainContent.PostCreatePage">
+    tools:context=".PostStatus.CreateStatusActivity">
 
 
     <android.support.v7.widget.Toolbar
@@ -81,7 +82,7 @@
             android:gravity="center"
             android:maxLines="8"
             android:textColor="#000000"
-            android:textSize="28sp"
+            android:textSize="32sp"
             android:visibility="gone"
         />
 
@@ -96,7 +97,7 @@
         android:layout_marginTop="@dimen/half_margin"
         android:baselineAligned="false"
         android:gravity="center"
-        android:weightSum="7"
+        android:weightSum="6"
     >
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
@@ -105,18 +106,23 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground">
+            android:foreground="?android:attr/selectableItemBackground"
+            tools:background="@drawable/post_background">
+
             <TextView
                 android:id="@+id/selector_text0"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="T"
-                android:textColor="#000000"
+                android:textColor="#FFFFFF"
                 android:textSize="25sp"
             />
+
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
@@ -125,15 +131,17 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
             <TextView
                 android:id="@+id/selector_text1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="A"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
@@ -146,21 +154,21 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-
             <TextView
                 android:id="@+id/selector_text2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="P"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
             />
-
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
@@ -169,15 +177,17 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
 
             <TextView
                 android:id="@+id/selector_text3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="T"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
@@ -192,16 +202,17 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-
             <TextView
                 android:id="@+id/selector_text4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="I"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
@@ -215,21 +226,21 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/post_create_button_space"
             android:layout_weight="1"
-            android:background="@drawable/post_color"
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-
             <TextView
                 android:id="@+id/selector_text5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
+                android:layout_margin="3dp"
+                android:background="@drawable/post_color"
+                android:gravity="center"
                 android:text="N"
                 android:textColor="#FFFFFF"
                 android:textSize="25sp"
             />
-
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
     </LinearLayout>
@@ -303,5 +314,6 @@
 
 
     </LinearLayout>
+
 
 </LinearLayout>

@@ -1,41 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
 
-    <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
-                                                android:layout_height="wrap_content">
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
-                                           android:layout_width="match_parent"
-                                           android:layout_height="?android:attr/actionBarSize"
-                                           android:background="@color/secondaryColor"
-                                           android:theme="@style/ThemeOverlay.AppCompat.Dark">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@color/secondaryColor"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-            <EditText android:id="@+id/search_view"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                      android:background="@null"
-                      android:gravity="center_vertical"
-                      android:hint="Search"
-                      android:imeOptions="actionSearch"
-                      android:inputType="textPersonName"
-                      android:textColor="@color/white"
-                      android:textCursorDrawable="@drawable/edit_text_cursor"/>
+            <EditText
+                android:id="@+id/search_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:hint="Search"
+                android:imeOptions="actionSearch"
+                android:inputType="textPersonName"
+                android:textColor="@color/white"
+                android:textCursorDrawable="@drawable/edit_text_cursor"/>
 
         </android.support.v7.widget.Toolbar>
 
-        <android.support.design.widget.TabLayout android:id="@+id/tabs"
-                                                 android:layout_width="match_parent"
-                                                 android:layout_height="wrap_content"
-                                                 app:tabBackground="@color/colorPrimary"
-                                                 app:tabIndicatorColor="@color/secondaryColor"
-                                                 app:tabSelectedTextColor="@color/secondaryColor"
-                                                 app:tabTextColor="@color/pure_white"
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabBackground="@color/colorPrimary"
+            app:tabIndicatorColor="@color/secondaryColor"
+            app:tabSelectedTextColor="@color/secondaryColor"
+            app:tabTextColor="@color/pure_white"
         />
 
     </android.support.design.widget.AppBarLayout>

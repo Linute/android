@@ -413,7 +413,8 @@ public class MainActivity extends BaseTaptActivity {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
         } else if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
-            if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed)) {
+            if (!mSafeForFragmentTransaction) return;
+            if (mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) {
                 clearBackStack();
                 if (mPreviousItem != null) mPreviousItem.setChecked(false);
                 mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);

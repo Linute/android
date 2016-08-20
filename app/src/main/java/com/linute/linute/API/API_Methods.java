@@ -27,7 +27,7 @@ public class API_Methods {
 
     public static String TAG = "API_METHODS";
 
-    public static final boolean DEV = false;   //change this flag for dev
+    public static final boolean DEV = true;   //change this flag for dev
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";

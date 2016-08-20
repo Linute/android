@@ -7,9 +7,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -21,12 +19,9 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
+import com.linute.linute.PostStatus.CreateStatusActivity;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.CameraActivity;
-import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.SingleVideoPlaybackManager;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -161,9 +156,11 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+//                Intent i = new Intent(getActivity(), CameraActivity.class);
+//                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+//                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+//                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
