@@ -19,7 +19,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostCreatePage;
+import com.linute.linute.MainContent.PostCreateActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -177,8 +177,8 @@ public class DiscoverHolderFragment extends BaseFragment {
         rootView.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((BaseTaptActivity)getActivity()).addFragmentToContainer(new PostCreatePage(), PostCreatePage.TAG);
-
+                Intent i = new Intent(getActivity(), PostCreateActivity.class);
+                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
 
