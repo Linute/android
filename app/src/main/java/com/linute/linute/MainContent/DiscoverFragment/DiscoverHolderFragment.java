@@ -19,10 +19,13 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.PostCreatePage;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
+import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -153,7 +156,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         );
 
 
-        rootView.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
@@ -163,6 +166,22 @@ public class DiscoverHolderFragment extends BaseFragment {
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
+
+        rootView.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((BaseTaptActivity)getActivity()).addFragmentToContainer(GalleryFragment.newInstance(), GalleryFragment.TAG);
+            }
+        });
+
+        rootView.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((BaseTaptActivity)getActivity()).addFragmentToContainer(new PostCreatePage(), PostCreatePage.TAG);
+
+            }
+        });
+
 
         return rootView;
     }
