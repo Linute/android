@@ -58,6 +58,15 @@
             />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/drawerHeading_settings"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_action_action_settings"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        />
 
 
 </RelativeLayout>
