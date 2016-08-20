@@ -15,13 +15,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -186,7 +183,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
+       /* mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
         ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -194,7 +191,7 @@ public class MainActivity extends BaseTaptActivity {
                 API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
                 API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
             }
-        });
+        });*/
 
         clearBackStack();
 
