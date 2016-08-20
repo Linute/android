@@ -50,6 +50,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
+import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.MainContent.UpdateFragment.Update;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
@@ -394,7 +395,12 @@ public class MainActivity extends BaseTaptActivity {
         String college = sharedPreferences.getString("collegeName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
         ((TextView) header.findViewById(R.id.drawerHeader_college)).setText(college);
-
+        header.findViewById(R.id.drawerHeading_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startEditProfileActivity(SettingActivity.class);
+            }
+        });
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .dontAnimate()
