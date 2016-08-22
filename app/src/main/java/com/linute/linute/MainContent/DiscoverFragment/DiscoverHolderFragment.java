@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
@@ -23,9 +24,7 @@ import com.linute.linute.MainContent.PostCreateActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
-import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -170,7 +169,8 @@ public class DiscoverHolderFragment extends BaseFragment {
         rootView.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((BaseTaptActivity)getActivity()).addFragmentToContainer(GalleryFragment.newInstance(), GalleryFragment.TAG);
+                Intent i = new Intent(getActivity(), GalleryActivity.class);
+                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
 
