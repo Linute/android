@@ -153,8 +153,7 @@ public class GalleryActivity extends FragmentActivity {
     }
 
     //didnt get image, so popbackstack
-//    finish();
-
+    finish();
 }
 
     /**
