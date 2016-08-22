@@ -6,7 +6,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
@@ -15,6 +14,9 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -28,12 +30,16 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
     public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
+    protected View vPlaceholder;
+    protected View vProgressBar;
     protected int mType;
 
     public ImageFeedHolder(final View itemView, Context context, RequestManager manager) {
         super(itemView, context, manager);
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
+        vPlaceholder = itemView.findViewById(R.id.image_placeholder);
+        vProgressBar = itemView.findViewById(R.id.post_image_progress_bar);
         setUpOnClicks(itemView.findViewById(R.id.parent));
     }
 
@@ -53,12 +59,12 @@ public class ImageFeedHolder extends BaseFeedHolder {
             @Override
             protected void onLongPress() {
                 //Log.i(TAG, "onLongPress: ");
-                longPress();
+//                longPress();
             }
 
             @Override
             protected void onLongPressCancelled(boolean thresholdMet) {
-                cancelLongPress(thresholdMet);
+//                cancelLongPress(thresholdMet);
             }
         });
     }
@@ -167,6 +173,12 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public void bindModel(Post post) {
         super.bindModel(post);
 
+        if(vPostImage.getDrawable() == null){
+            vPostImage.setMinimumHeight(vPostImage.getWidth());
+        }else{
+            vPostImage.setMinimumHeight(0);
+        }
+
         // Set Post Image
         mType = post.getType();
         getEventImage(post.getImage());
@@ -177,9 +189,28 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void getEventImage(String image) {
+        vPlaceholder.setVisibility(View.VISIBLE);
+        vProgressBar.setVisibility(View.VISIBLE);
+
+
         mRequestManager
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        vPlaceholder.setVisibility(View.GONE);
+                        vProgressBar.setVisibility(View.GONE);
+                        vPostImage.requestLayout();
+                        return false;
+
+                    }
+                })
                 .into(vPostImage);
     }
 }
