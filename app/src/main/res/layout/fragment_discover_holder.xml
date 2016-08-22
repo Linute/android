@@ -56,9 +56,14 @@
             android:layout_height="match_parent" />
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/fab_close_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
-        android:id="@+id/right_labels"
+        android:id="@+id/create_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
@@ -67,7 +72,7 @@
         app:fab_addButtonPlusIconColor="@color/pure_white">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_text"
+            android:id="@+id/create_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:fab_colorNormal="@color/white"
@@ -76,7 +81,7 @@
             />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_upload"
+            android:id="@+id/create_upload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:fab_colorNormal="@color/white"
@@ -86,7 +91,7 @@
             />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_camera"
+            android:id="@+id/create_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:fab_colorNormal="@color/white"

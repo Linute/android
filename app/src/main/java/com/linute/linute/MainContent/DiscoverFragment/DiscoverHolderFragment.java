@@ -8,10 +8,12 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
@@ -154,8 +156,30 @@ public class DiscoverHolderFragment extends BaseFragment {
                 }
         );
 
+        final FloatingActionsMenu fabMenu = (FloatingActionsMenu)rootView.findViewById(R.id.create_menu);
 
-        rootView.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
+        final View fabCloseOverlay = rootView.findViewById(R.id.fab_close_overlay);
+        fabCloseOverlay.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                fabMenu.collapse();
+                return false;
+            }
+    });
+
+        /*fabMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+            @Override
+            public void onMenuExpanded() {
+                fabCloseOverlay.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onMenuCollapsed() {
+                fabCloseOverlay.setVisibility(View.GONE);
+            }
+        });*/
+
+        rootView.findViewById(R.id.create_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
@@ -163,22 +187,25 @@ public class DiscoverHolderFragment extends BaseFragment {
                 i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                fabMenu.collapse();
             }
         });
 
-        rootView.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.create_upload).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), GalleryActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                fabMenu.collapse();
             }
         });
 
-        rootView.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
+        rootView.findViewById(R.id.create_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(getActivity(), PostCreateActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                fabMenu.collapse();
             }
         });
 

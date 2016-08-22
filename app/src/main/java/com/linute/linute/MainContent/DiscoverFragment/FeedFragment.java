@@ -171,6 +171,7 @@ public class FeedFragment extends BaseFragment {
         }
     }
 
+
     private int mSkip = 0;
 
     private boolean mLoadingMore = false;
