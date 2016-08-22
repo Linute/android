@@ -48,10 +48,10 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -202,6 +202,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     showKeyboard(recyclerView, false);
                 }
             }
+
 
         });
 

@@ -37,7 +37,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.linute.linute.PostStatus.CreateStatusActivity;
 import com.linute.linute.R;
 
 import java.io.IOException;

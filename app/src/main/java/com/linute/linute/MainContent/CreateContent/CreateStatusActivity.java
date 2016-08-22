@@ -1,4 +1,4 @@
-package com.linute.linute.PostStatus;
+package com.linute.linute.MainContent.CreateContent;
 
 import android.Manifest;
 import android.app.Activity;

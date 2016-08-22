@@ -17,7 +17,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -102,7 +101,11 @@ public abstract class AbstractEditSaveFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mReturnType = ((CameraActivity) getActivity()).getReturnType();
+        try {
+            mReturnType = ((CameraActivity) getActivity()).getReturnType();
+        }catch (ClassCastException e){
+            mReturnType = CameraActivity.SEND_POST;
+        }
         mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
         return inflater.inflate(R.layout.square_camera_edit_save, container, false);
     }

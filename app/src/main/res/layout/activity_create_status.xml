@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
-    tools:context=".PostStatus.CreateStatusActivity">
+    tools:context=".MainContent.CreateContent.CreateStatusActivity">
 
 
     <android.support.v7.widget.Toolbar

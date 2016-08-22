@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#142029</color>
-    <color name="secondaryColor">#67CDC9</color>
+    <color name="colorPrimary">#173856</color>
+    <color name="secondaryColor">#52b9f4</color>
 
 
     <color name="red">#FB284C</color>
 
-    <color name="toolbar_color">#142029</color>
-    <color name="colorPrimaryDark">#0f181e</color>
+
+
+    <color name="status_bar_color">#173856</color>
+    <color name="colorPrimaryDark">#122c44</color>
+    <color name="colorSubPrimary">#22486a</color>
     <color name="colorAccent">#1d4261</color>
     <color name="light_grey">#d3d3d3</color>
 
@@ -19,7 +22,7 @@
     <color name="fifty_black">#80000000</color>
     <color name="eighty_black">#CC000000</color>
     <color name="twentyfive_black">#40000000</color>
-    <color name="user_name_blue">#17607d</color>
+    <color name="user_name_blue">#4f80b4</color>
 
     <color name="messanger_blue">#009eea</color>
     <color name="messanger_blue_dark">#0592d6</color>

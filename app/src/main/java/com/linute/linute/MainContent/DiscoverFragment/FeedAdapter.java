@@ -31,8 +31,8 @@ import java.util.List;
 /**
  * Created by Arman on 12/27/15.
  */
-public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.ViewHolder> {
-    private static final String TAG = CheckBoxQuestionAdapter.class.getSimpleName();
+public class FeedAdapter extends ChoiceCapableAdapter<RecyclerView.ViewHolder> {
+    private static final String TAG = FeedAdapter.class.getSimpleName();
     private List<Post> mPosts;
     private Context context;
 
@@ -46,7 +46,7 @@ public class CheckBoxQuestionAdapter extends ChoiceCapableAdapter<RecyclerView.V
     private RequestManager mRequestManager;
 
 
-    public CheckBoxQuestionAdapter(List<Post> posts, Context context, RequestManager manager, boolean sectiontwo) {
+    public FeedAdapter(List<Post> posts, Context context, RequestManager manager, boolean sectiontwo) {
         super(new MultiChoiceMode());
         mSectionTwo = sectiontwo;
         mRequestManager = manager;
