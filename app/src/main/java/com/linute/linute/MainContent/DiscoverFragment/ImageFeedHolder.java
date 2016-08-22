@@ -189,7 +189,9 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void getEventImage(String image) {
+        if(vPlaceholder != null)
         vPlaceholder.setVisibility(View.VISIBLE);
+        if(vProgressBar != null)
         vProgressBar.setVisibility(View.VISIBLE);
 
 
@@ -204,8 +206,10 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        vPlaceholder.setVisibility(View.GONE);
-                        vProgressBar.setVisibility(View.GONE);
+                        if(vPlaceholder != null)
+                            vPlaceholder.setVisibility(View.GONE);
+                        if(vProgressBar != null)
+                            vProgressBar.setVisibility(View.GONE);
                         vPostImage.requestLayout();
                         return false;
 
