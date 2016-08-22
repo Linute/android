@@ -125,7 +125,7 @@ public class FindFriendsFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(getParentFragment()),mFriendFoundList);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(getParentFragment()), mFriendFoundList);
 
         recyclerView.setAdapter(mFriendSearchAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -134,7 +134,7 @@ public class FindFriendsFragment extends BaseFragment {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING){
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     FindFriendsChoiceFragment fragment = (FindFriendsChoiceFragment) getParentFragment();
                     if (fragment != null) fragment.hideKeyboard();
                 }
@@ -231,7 +231,7 @@ public class FindFriendsFragment extends BaseFragment {
         } else if (mSearchType == SEARCH_TYPE_FACEBOOK) { //facebook
 
             rationaleText.setText(R.string.facebook_rationale);
-            reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.facebook_blue));
+            reloadButton.setBackgroundResource(R.drawable.fb_button);
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
@@ -261,7 +261,7 @@ public class FindFriendsFragment extends BaseFragment {
 
         } else { //contacts. This process takes forever to get emails. We will use async task
             rationaleText.setText(R.string.need_contant_permission);
-            reloadButton.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.yellow_color));
+            reloadButton.setBackgroundResource(R.drawable.yellow_button);
             reloadButton.setText("Search contacts");
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
@@ -393,7 +393,7 @@ public class FindFriendsFragment extends BaseFragment {
 
                     if (mFriendFoundList.isEmpty()) {
                         mEmptyText.setVisibility(View.VISIBLE);
-                    } else{
+                    } else {
                         mEmptyText.setVisibility(View.GONE);
                     }
 
@@ -501,7 +501,7 @@ public class FindFriendsFragment extends BaseFragment {
 
                                 if (mFriendFoundList.isEmpty()) {
                                     mEmptyText.setVisibility(View.VISIBLE);
-                                }else {
+                                } else {
                                     mEmptyText.setVisibility(View.GONE);
                                 }
 
@@ -780,7 +780,7 @@ public class FindFriendsFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mFriendSearchAdapter != null) mFriendSearchAdapter.clearContext();
+        if (mFriendSearchAdapter != null) mFriendSearchAdapter.clearContext();
     }
 }
 

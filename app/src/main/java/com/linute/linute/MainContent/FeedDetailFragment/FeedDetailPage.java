@@ -177,7 +177,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mSendButton = (ToggleImageView) rootView.findViewById(R.id.feed_detail_send_comment);
         mSendButton.setImageViews(R.drawable.ic_upload_picture, R.drawable.ic_send);
 
-        //comments recyclerview
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
         final LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);

@@ -108,7 +108,7 @@ public class ProfileViewHolder extends RecyclerView.ViewHolder implements View.O
 
     @Override
     public boolean onLongClick(View v) {
-        if (mUserActivityItem.getPost().getType() != Post.POST_TYPE_STATUS) {
+        if (mUserActivityItem.getPost().getImage() != null && !mUserActivityItem.getPost().getImage().isEmpty()) {
             MainActivity activity = (MainActivity) mContext;
             VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
             activity.addFragmentOnTop(

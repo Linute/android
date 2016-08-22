@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
 import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
@@ -22,7 +23,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.MainContent.PostCreateActivity;
+
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -203,7 +204,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         rootView.findViewById(R.id.create_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(getActivity(), PostCreateActivity.class);
+                Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                 fabMenu.collapse();
             }

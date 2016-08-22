@@ -1256,7 +1256,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         } catch (JSONException e) {
             //e.printStackTrace();
 //  Log.i(TAG, "parseMessagesJSON: none");
-            Log.d(TAG, "parseMessagesJSON: no value for post");
+            //Log.d(TAG, "parseMessagesJSON: no value for post");
         }
 
 
@@ -1904,7 +1904,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 } catch (JSONException e) {
 //                    e.printStackTrace();
 //                    //Log.i(TAG, "parseMessagesJSON: none");
-                    Log.d(TAG, "parseMessagesJSON: no value for post");
+                    //Log.d(TAG, "parseMessagesJSON: no value for post");
                 }
 
                 if (post == null) {

@@ -2,13 +2,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
-             android:layout_height="100dp"
-             android:layout_marginBottom="@dimen/half_margin"
-             android:layout_marginEnd="@dimen/activity_horizontal_margin"
-             android:layout_marginStart="@dimen/activity_horizontal_margin"
-             android:layout_marginTop="@dimen/half_margin"
-             android:foreground="?android:attr/selectableItemBackground"
-             android:clickable="true">
+             android:layout_height="136dp"
+             android:clickable="true"
+             android:foreground="?android:attr/selectableItemBackground">
 
     <ImageView android:id="@+id/background"
                android:layout_width="match_parent"
@@ -17,14 +13,39 @@
                android:scaleType="centerCrop"
                tools:src="@color/seperator_color"/>
 
-    <TextView android:id="@+id/text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              android:textColor="@color/pure_white"
-              android:textSize="24sp"
-              android:textStyle="italic"
-              tools:text="temp"
-    />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:orientation="vertical">
+
+        <TextView android:id="@+id/text"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:shadowColor="#59000000"
+                  android:textAllCaps="true"
+                  android:textColor="@color/pure_white"
+                  android:textSize="26sp"
+                  android:textStyle="bold"
+                  android:shadowDy="2"
+                  android:shadowRadius="1"
+                  tools:text="BACK TO SCHOOL"
+        />
+
+        <TextView
+            android:id="@+id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:shadowColor="#59000000"
+            android:textColor="@color/pure_white"
+            android:textSize="14sp"
+            android:shadowDy="2"
+            android:shadowRadius="1"
+            tools:text="Oleg! Where have u been"
+        />
+
+    </LinearLayout>
+
 
 </FrameLayout>

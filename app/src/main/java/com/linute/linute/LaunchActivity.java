@@ -19,6 +19,7 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.API.QuickstartPreferences;
 import com.linute.linute.API.RegistrationIntentService;
@@ -63,7 +64,7 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!BuildConfig.DEBUG) {
+        if (!API_Methods.DEV) {
             Log.i(TAG, "onCreate: Crashlytics initialized");
             Fabric.with(this, new Crashlytics());
         }
@@ -188,7 +189,7 @@ public class LaunchActivity extends Activity {
 
 
     private void updateLocationIfPossible() {
-        if (getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getString("userToken", null) == null){
+        if (getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getString("userToken", null) == null) {
             Log.i(TAG, "updateLocationIfPossible: no user token");
             return;
         }
@@ -216,9 +217,9 @@ public class LaunchActivity extends Activity {
 
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
-                            if (!response.isSuccessful()){
-                                Log.i(TAG, "onResponse: "+response.body().string());
-                            }else {
+                            if (!response.isSuccessful()) {
+                                Log.i(TAG, "onResponse: " + response.body().string());
+                            } else {
                                 response.body().close();
                             }
                         }

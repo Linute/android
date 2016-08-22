@@ -15,10 +15,13 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -184,15 +187,17 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-       /* mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
-        ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
-                API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
-                API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
-            }
-        });*/
+        if (API_Methods.DEV) {
+            mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
+            ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
+                    API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
+                    API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
+                }
+            });
+        }
 
         clearBackStack();
 
@@ -417,7 +422,8 @@ public class MainActivity extends BaseTaptActivity {
         if (mDrawerLayout.isDrawerOpen(mNavigationView)) {
             mDrawerLayout.closeDrawers();
         } else if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
-            if ((mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed)) {
+            if (!mSafeForFragmentTransaction) return;
+            if (mPreviousItem == null || mPreviousItem.getItemId() != R.id.navigation_item_feed) {
                 clearBackStack();
                 if (mPreviousItem != null) mPreviousItem.setChecked(false);
                 mPreviousItem = mNavigationView.getMenu().findItem(R.id.navigation_item_feed);
@@ -914,7 +920,7 @@ public class MainActivity extends BaseTaptActivity {
 
             ChatRoom room = intent.getParcelableExtra("chatRoom");
 
-            boolean empty = room.roomId == null || room.roomId.isEmpty();
+            //boolean empty = room.roomId == null || room.roomId.isEmpty();
             if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
                 addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));

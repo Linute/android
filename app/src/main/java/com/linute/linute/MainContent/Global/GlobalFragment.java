@@ -47,6 +47,7 @@ import rx.schedulers.Schedulers;
 public class GlobalFragment extends BaseFragment {
 
     private static final String TAG = GlobalFragment.class.getSimpleName();
+
     private RecyclerView vRecycler;
     private SwipeRefreshLayout vSwipe;
     private GlobalChoicesAdapter mGlobalChoicesAdapter;
