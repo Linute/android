@@ -21,6 +21,8 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.PostStatus.CreateStatusActivity;
 import com.linute.linute.R;
+import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 
 import rx.Subscription;
@@ -156,11 +158,9 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
-//                Intent i = new Intent(getActivity(), CameraActivity.class);
-//                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-//                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
-//                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                Intent i = new Intent(getActivity(), CreateStatusActivity.class);
+                Intent i = new Intent(getActivity(), CameraActivity.class);
+                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });

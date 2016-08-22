@@ -911,7 +911,7 @@ public class MainActivity extends BaseTaptActivity {
 
             ChatRoom room = intent.getParcelableExtra("chatRoom");
 
-            boolean empty = room.roomId == null || room.roomId.isEmpty();
+            //boolean empty = room.roomId == null || room.roomId.isEmpty();
             if (getSupportFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null)
                 addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
             addFragmentToContainer(ChatFragment.newInstance(room));
