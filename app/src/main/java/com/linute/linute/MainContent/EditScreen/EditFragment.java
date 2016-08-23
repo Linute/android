@@ -183,9 +183,10 @@ public class EditFragment extends BaseFragment {
         }
     }
 
-    private static EditContentTool[] setupTools(ViewGroup overlay) {
+    private EditContentTool[] setupTools(ViewGroup overlay) {
         return new EditContentTool[]{
-            new PrivacySettingTool(overlay)
+            new PrivacySettingTool(mUri, mContentType, overlay),
+                new OverlaysTool(mUri, mContentType, overlay)
         };
     }
 

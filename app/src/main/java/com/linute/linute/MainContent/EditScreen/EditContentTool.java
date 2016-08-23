@@ -14,9 +14,13 @@ public abstract class EditContentTool {
 
     //View where all content should be added
     protected ViewGroup mOverlaysView;
+    protected Uri mUri;
+    protected EditFragment.ContentType mContentType;
 
-    public EditContentTool(ViewGroup overlays){
+    public EditContentTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays){
         mOverlaysView = overlays;
+        mUri = uri;
+        mContentType = type;
     };
 
 

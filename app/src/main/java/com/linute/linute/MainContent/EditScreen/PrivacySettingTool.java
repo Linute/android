@@ -18,8 +18,8 @@ public class PrivacySettingTool extends EditContentTool {
     private boolean allowAnonComments = ProcessingOptions.DEFAULT_ALLOW_ANON_COMMENTS;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
 
-    public PrivacySettingTool(ViewGroup overlays) {
-        super(overlays);
+    public PrivacySettingTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
+        super(uri, type, overlays);
     }
 
     @Override
