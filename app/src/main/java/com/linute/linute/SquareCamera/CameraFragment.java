@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -374,9 +376,11 @@ public class CameraFragment extends Fragment {
     // some phones crash if both autofocus and flash are on. There is no way to tell from autoflash is
     // flash is going to go off.
     private void setupFlashMode() {
-        View view = getView();
-        if (view == null) return;
-        //// TODO: 8/22/16  change icon color
+        if (mFlashContainer == null || getContext() == null) return;
+        ImageView view = ((ImageView)mFlashContainer.findViewById(R.id.flash_icon));
+        if (mFlashOn) view.setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
+        else view.clearColorFilter();
+
     }
 
     @Override

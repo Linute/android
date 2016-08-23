@@ -81,11 +81,11 @@
 
             <ImageView
                 android:id="@+id/flash_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_gravity="center"
                 android:contentDescription="Flash"
-                android:src="@drawable/ic_form1"/>
+                android:src="@drawable/ic_flash"/>
         </FrameLayout>
 
 
@@ -141,11 +141,11 @@
 
             <ImageView
                 android:id="@+id/change_camera"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:layout_gravity="center"
                 android:contentDescription="Reverse"
-                android:src="@drawable/ic_icon_reverse_camera"/>
+                android:src="@drawable/ic_reverse"/>
         </FrameLayout>
 
     </LinearLayout>

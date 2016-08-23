@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.media.AudioManager;
@@ -22,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.linute.linute.R;
@@ -66,8 +69,8 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     private Subscription mStartCameraSubscription;
 
     //private View vFocusCircle;
-    private TextView vFlashText;
-    private View vFlash;
+    private View vFlashContainer;
+    private ImageView vFlashIcon;
     private SquareCameraPreview vPreviewView;
 
     private boolean mSurfaceAlreadyCreated = false;
@@ -109,8 +112,8 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_take_profile_picture, container, false);
 
-        vFlash = root.findViewById(R.id.flash);
-        vFlashText = (TextView) vFlash.findViewById(R.id.flash_text);
+        vFlashContainer = root.findViewById(R.id.flash_container);
+        vFlashIcon = (ImageView) vFlashContainer.findViewById(R.id.flash_icon);
         vPreviewView = (SquareCameraPreview) root.findViewById(R.id.camera_preview_view);
 
         Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
@@ -123,9 +126,9 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
             }
         });
 
-        View reverseCam = root.findViewById(R.id.switch_camera);
+        View reverseCam = root.findViewById(R.id.reverse_container);
         if (Camera.getNumberOfCameras() < 2) {
-            reverseCam.setVisibility(View.GONE);
+            reverseCam.setVisibility(View.INVISIBLE);
         } else {
             reverseCam.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -140,14 +143,14 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
             });
         }
 
-        root.findViewById(R.id.take_picture).setOnClickListener(new View.OnClickListener() {
+        root.findViewById(R.id.capture_image_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 takePicture();
             }
         });
 
-        vFlash.setOnClickListener(new View.OnClickListener() {
+        vFlashContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsSafeToTakePhoto && toggleFlash()){
@@ -258,7 +261,10 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
     // some phones crash if both autofocus and flash are on. There is no way to tell from autoflash is
     // flash is going to go off.
     private void setupFlashMode() {
-        vFlashText.setText(mFlashOn ? "On" : "Off");
+        if (getContext() != null) {
+            if (mFlashOn) vFlashIcon.setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
+            else vFlashIcon.clearColorFilter();
+        }
     }
 
     /**
@@ -429,12 +435,12 @@ public class ProfilePictureCamera extends Fragment implements Camera.PictureCall
 
         List<String> flashModes = parameters.getSupportedFlashModes();
         if (flashModes != null && flashModes.contains(Camera.Parameters.FLASH_MODE_ON)){
-            vFlash.setVisibility(View.VISIBLE);
+            vFlashContainer.setVisibility(View.VISIBLE);
             setupFlashMode();
 
             if (mFlashOn) parameters.setFlashMode(Camera.Parameters.FLASH_MODE_ON);
         }else {
-            vFlash.setVisibility(View.GONE);
+            vFlashContainer.setVisibility(View.INVISIBLE);
             mFlashOn = false;
         }
 
