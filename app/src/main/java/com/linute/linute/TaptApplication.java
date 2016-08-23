@@ -3,6 +3,7 @@ package com.linute.linute;
 import android.app.Application;
 
 import com.linute.linute.API.API_Methods;
+import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 
 import io.realm.DynamicRealm;
 import io.realm.Realm;

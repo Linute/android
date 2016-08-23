@@ -1,19 +1,18 @@
 package com.linute.linute.SquareCamera;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.TextureView;
 
-import java.util.ArrayList;
+import com.linute.linute.ProfileCamera.SquareCameraPreview;
+
 import java.util.List;
 
 /**
  *
  */
-public class CustomCameraPreview extends TextureView {
+public class CustomCameraPreview extends SquareCameraPreview {
 
     public static final String TAG = CustomCameraPreview.class.getSimpleName();
 
@@ -22,16 +21,12 @@ public class CustomCameraPreview extends TextureView {
     private static final int FOCUS_MAX_BOUND = 950;
     private static final int FOCUS_MIN_BOUND = -FOCUS_MAX_BOUND;
 
-    private Camera mCamera;
-
     private float mLastTouchX;
     private float mLastTouchY;
 
     // For focus
     private boolean mIsFocus;
     private boolean mIsFocusReady;
-    private Camera.Area mFocusArea;
-    private ArrayList<Camera.Area> mFocusAreas;
 
     public CustomCameraPreview(Context context) {
         super(context);
@@ -48,24 +43,6 @@ public class CustomCameraPreview extends TextureView {
         init(context);
     }
 
-    private void init(Context context) {
-        mFocusArea = new Camera.Area(new Rect(), 500);
-        mFocusAreas = new ArrayList<>();
-        mFocusAreas.add(mFocusArea);
-    }
-
-    public int getViewWidth() {
-        return getWidth();
-    }
-
-    public int getViewHeight() {
-        return getHeight();
-    }
-
-    public void setCamera(Camera camera) {
-        mCamera = camera;
-    }
-
     private float mMovement = 0;
     private float mYPosition = 0;
     private boolean mMoved = false;
@@ -77,8 +54,8 @@ public class CustomCameraPreview extends TextureView {
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
                 mIsFocus = true;
-                mLastTouchX = event.getX();
-                mLastTouchY = event.getY();
+                mLastTouchX = event.getRawX();
+                mLastTouchY = event.getRawY();
                 mYPosition = mLastTouchY;
                 mMovement = 0;
                 mMoved = false;
@@ -96,8 +73,8 @@ public class CustomCameraPreview extends TextureView {
                 break;
             }
             case MotionEvent.ACTION_MOVE:
-                mMovement += mYPosition - event.getY();
-                mYPosition = event.getY();
+                mMovement += mYPosition - event.getRawY();
+                mYPosition = event.getRawY();
                 if (mMovement > 5 || mMovement < -5) {
                     mMoved = true;
                     zoom(mMovement > 0 ? 2 : -2);
@@ -117,9 +94,6 @@ public class CustomCameraPreview extends TextureView {
         try {
             Camera.Parameters param = mCamera.getParameters();
             int newZoom = param.getZoom() + deltaZoom;
-
-//            Log.i(TAG, "zoom: max " + param.getMaxZoom());
-//            Log.i(TAG, "zoom: new zoom " + newZoom);
 
             if (newZoom > param.getMaxZoom() || newZoom < 0) return;
 

@@ -73,7 +73,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
     protected View mOverlays;
     protected ViewGroup vBottom;
-    protected HasSoftKeySingleton mHasSoftKeySingleton;
+    protected ScreenSizeSingleton mHasSoftKeySingleton;
     protected OverlayWipeAdapter mFilterAdapter;
     private StickerDrawerAdapter mStickerDrawerAdapter;
     private WipeViewPager mFilterPager;
@@ -106,7 +106,7 @@ public abstract class AbstractEditSaveFragment extends Fragment {
         }catch (ClassCastException e){
             mReturnType = CameraActivity.SEND_POST;
         }
-        mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
+
         return inflater.inflate(R.layout.square_camera_edit_save, container, false);
     }
 
@@ -170,13 +170,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
         if (mAnonSwitch.getVisibility() == View.VISIBLE && getActivity() != null){
             mAnonSwitch.setChecked(getActivity().getIntent().getBooleanExtra(CameraActivity.ANON_KEY, false));
-        }
-
-
-        if (mHasSoftKeySingleton.getHasNavigation()) {
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) vBottom.getLayoutParams();
-            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
-            vBottom.setLayoutParams(params);
         }
 
         mUploadButton.setOnClickListener(new View.OnClickListener() {
@@ -504,8 +497,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
             float prevY;
             float totalMovement;
             int mTextMargin;
-            int bottomMargin = -1;
-            int topMargin = -1;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -514,15 +505,6 @@ public abstract class AbstractEditSaveFragment extends Fragment {
                         //Log.i(TAG, "onTouch: " + mAllContent.getHeight() + " " + mAllContent.getWidth());
                         prevY = event.getY();
                         totalMovement = 0;
-                        if (bottomMargin == -1) {
-                            if (mContentContainer.getHeight() >= mHasSoftKeySingleton.getSize().y) {
-                                bottomMargin = mHasSoftKeySingleton.getBottomPixels();
-                                topMargin = mToolbar.getBottom();
-                            } else {
-                                bottomMargin = 0;
-                                topMargin = 0;
-                            }
-                        }
                         break;
 
                     case MotionEvent.ACTION_UP:
@@ -540,10 +522,10 @@ public abstract class AbstractEditSaveFragment extends Fragment {
 
                         mTextMargin = params.topMargin + change; //new margintop
 
-                        if (mTextMargin <= topMargin) { //over the top edge
-                            mTextMargin = topMargin;
-                        } else if (mTextMargin > mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight()) { //under the bottom edge
-                            mTextMargin = mContentContainer.getHeight() + mContentContainer.getTop() - bottomMargin - v.getHeight();
+                        if (mTextMargin <= 0) { //over the top edge
+                            mTextMargin = 0;
+                        } else if (mTextMargin > mContentContainer.getHeight() + mContentContainer.getTop() - v.getHeight()) { //under the bottom edge
+                            mTextMargin = mContentContainer.getHeight() + mContentContainer.getTop() - v.getHeight();
                         }
 
                         params.setMargins(0, mTextMargin, 0, 0); //set new margin

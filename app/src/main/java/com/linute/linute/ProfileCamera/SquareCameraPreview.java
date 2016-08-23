@@ -24,7 +24,7 @@ public class SquareCameraPreview extends TextureView{
     private static final int FOCUS_MIN_BOUND = -FOCUS_MAX_BOUND;
 
     private static final double ASPECT_RATIO = 3.0 / 4.0;
-    private Camera mCamera;
+    protected Camera mCamera;
 
     private float mLastTouchX;
     private float mLastTouchY;
@@ -32,8 +32,8 @@ public class SquareCameraPreview extends TextureView{
     // For focus
     private boolean mIsFocus;
     private boolean mIsFocusReady;
-    private Camera.Area mFocusArea;
-    private ArrayList<Camera.Area> mFocusAreas;
+    protected Camera.Area mFocusArea;
+    protected ArrayList<Camera.Area> mFocusAreas;
 
     public SquareCameraPreview(Context context) {
         super(context);
@@ -50,7 +50,7 @@ public class SquareCameraPreview extends TextureView{
         init(context);
     }
 
-    private void init(Context context) {
+    protected void init(Context context) {
         mFocusArea = new Camera.Area(new Rect(), 1000);
         mFocusAreas = new ArrayList<>();
         mFocusAreas.add(mFocusArea);

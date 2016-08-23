@@ -32,10 +32,8 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.linute.linute.R;
 
@@ -54,6 +52,9 @@ import static rx.android.schedulers.AndroidSchedulers.mainThread;
 public class CameraFragment extends Fragment {
 
     public static final String TAG = CameraFragment.class.getSimpleName();
+
+    public static final int MAX_RESOLUTION = 3200;
+
     public static final String CAMERA_ID_KEY = "camera_id";
     public static final String CAMERA_FLASH_KEY = "flash_on";
 
@@ -68,10 +69,10 @@ public class CameraFragment extends Fragment {
 
     private ImageView mTakePhotoBtn;
     private EditSaveVideoFragment.VideoDimen mVideoDimen;
-    private View mCameraTopButtons;
-    private View mGalleryButton;
-    private View mStatusButton;
-    private View mFlashTop;
+    private View mFlashContainer;
+    private View mReverseContainer;
+    private CustomView mFlashTop;
+
     private View mFocusCircle;
 
     private Uri mVideoUri;
@@ -89,7 +90,6 @@ public class CameraFragment extends Fragment {
     private boolean mIsSafeToTakePhoto = false;
     private boolean mVideoProcessing = false;
 
-    private HasSoftKeySingleton mHasSoftKeySingleton;
 
     public static Fragment newInstance() {
         return new CameraFragment();
@@ -117,7 +117,6 @@ public class CameraFragment extends Fragment {
             mFlashOn = savedInstanceState.getBoolean(CAMERA_FLASH_KEY);
         }
 
-        mHasSoftKeySingleton = HasSoftKeySingleton.getmSoftKeySingleton(getActivity().getWindowManager());
     }
 
     @Override
@@ -126,54 +125,25 @@ public class CameraFragment extends Fragment {
 
         View root = inflater.inflate(R.layout.square_camera_take_photo, container, false);
 
+        mFlashTop = (CustomView) root.findViewById(R.id.flash_top);
+
+        //make square if doesn't meet our requirements
+        if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
+            mFlashTop.setMakeSquare(true);
+            root.requestLayout();
+        }
+
         mCameraType = ((CameraActivity) getActivity()).getCameraType();
 
         mTakePhotoBtn = (ImageView) root.findViewById(R.id.capture_image_button);
-        mFlashTop = root.findViewById(R.id.flash_top);
 
-        mGalleryButton = root.findViewById(R.id.cameraFragment_galleryButton);
-        mStatusButton = root.findViewById(R.id.new_post);
-
-
-        if (mCameraType.contains(CameraType.CAMERA_GALLERY)){
-            mGalleryButton.setVisibility(View.VISIBLE);
-            mGalleryButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
-                        ((CameraActivity) getActivity()).launchFragment(GalleryFragment.newInstance(), GalleryFragment.TAG);
-                }
-            });
-        }else mGalleryButton.setVisibility(View.INVISIBLE);
-
-        if (mCameraType.contains(CameraType.CAMERA_STATUS)){
-            mStatusButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing) {
-                       // ((CameraActivity) getActivity()).launchFragment(new CreateStatusActivity(), CreateStatusActivity.TAG);
-                    }
-                }
-            });
-        } else mStatusButton.setVisibility(View.INVISIBLE);
-
-
-        mCameraTopButtons = root.findViewById(R.id.toolbar);
-        ((Toolbar) mCameraTopButtons).setNavigationOnClickListener(new View.OnClickListener() {
+        ((Toolbar) root.findViewById(R.id.toolbar)).setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
                     getActivity().finish();
             }
         });
-
-
-        if (mHasSoftKeySingleton.getHasNavigation()) {
-            View bottom = root.findViewById(R.id.bottom);
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) bottom.getLayoutParams();
-            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + mHasSoftKeySingleton.getBottomPixels());
-            bottom.setLayoutParams(params);
-        }
 
         mRecordProgress = (ProgressBar) root.findViewById(R.id.record_progress);
         mFocusCircle = root.findViewById(R.id.focus);
@@ -264,9 +234,10 @@ public class CameraFragment extends Fragment {
 
     //buttons will only be set after camera view has appeared
     private void setOnClickListeners(final View view) {
-        final View changeCameraFlashModeBtn = view.findViewById(R.id.flash);
+        mFlashContainer = view.findViewById(R.id.flash_container);
+        mReverseContainer = view.findViewById(R.id.reverse_container);
 
-        view.findViewById(R.id.change_camera).setOnClickListener(new View.OnClickListener() {
+        mReverseContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsSafeToTakePhoto) {
@@ -280,7 +251,7 @@ public class CameraFragment extends Fragment {
             }
         });
 
-        changeCameraFlashModeBtn.setOnClickListener(new View.OnClickListener() {
+        mFlashContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsSafeToTakePhoto) {
@@ -357,16 +328,12 @@ public class CameraFragment extends Fragment {
 
     //hides the gallery, flash, and reverse camera button
     private void hideCameraButtons(boolean hide) {
-        if (hide && mCameraTopButtons.getVisibility() == View.VISIBLE) {
-            mCameraTopButtons.setVisibility(View.INVISIBLE);
-
-            if (mCameraType.contains(CameraType.CAMERA_STATUS)) mStatusButton.setVisibility(View.INVISIBLE);
-            if (mCameraType.contains(CameraType.CAMERA_GALLERY)) mGalleryButton.setVisibility(View.INVISIBLE);
-        } else if (!hide && mCameraTopButtons.getVisibility() == View.INVISIBLE) {
-            mCameraTopButtons.setVisibility(View.VISIBLE);
-
-            if (mCameraType.contains(CameraType.CAMERA_STATUS)) mStatusButton.setVisibility(View.VISIBLE);
-            if (mCameraType.contains(CameraType.CAMERA_GALLERY)) mGalleryButton.setVisibility(View.VISIBLE);
+        if (hide) {
+            mFlashContainer.setVisibility(View.INVISIBLE);
+            mReverseContainer.setVisibility(View.INVISIBLE);
+        } else {
+            mFlashContainer.setVisibility(View.VISIBLE);
+            mReverseContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -409,7 +376,7 @@ public class CameraFragment extends Fragment {
     private void setupFlashMode() {
         View view = getView();
         if (view == null) return;
-        ((TextView) view.findViewById(R.id.auto_flash_icon)).setText(mFlashOn ? "On" : "Off");
+        //// TODO: 8/22/16  change icon color
     }
 
     @Override
@@ -588,26 +555,12 @@ public class CameraFragment extends Fragment {
     private Size determineBestSize(List<Size> sizes) {
 
         Size bestSize = null;
-        int longerReal = mHasSoftKeySingleton.getRealSize().y > mHasSoftKeySingleton.getRealSize().x ?
-                mHasSoftKeySingleton.getRealSize().y : mHasSoftKeySingleton.getRealSize().x;
-        int longerBest = 0;
 
-        for (Size size : sizes) {
-            //same size as screen, return the size
-            if ((mHasSoftKeySingleton.getRealSize().y == size.height && mHasSoftKeySingleton.getRealSize().x == size.width) ||
-                    (mHasSoftKeySingleton.getRealSize().x == size.height && mHasSoftKeySingleton.getRealSize().y == size.width))
-                return size;
-
-            int longerSide = size.height > size.width ? size.height : size.width;
-            //better size
-            if ((bestSize == null) || longerSide < longerReal) {
-                //ratio we need
-                if (longerBest < longerSide &&
-                        ((mHasSoftKeySingleton.getRealSize().x * size.width == mHasSoftKeySingleton.getRealSize().y * size.height) ||
-                                (mHasSoftKeySingleton.getRealSize().y * size.width == mHasSoftKeySingleton.getRealSize().x * size.height))) {
-                    bestSize = size;
-                    longerBest = longerSide;
-                }
+        for (Size size : sizes){
+            if (size.width > MAX_RESOLUTION || size.height > MAX_RESOLUTION)
+                continue;
+            if (betterSize(bestSize, size)){
+                bestSize = size;
             }
         }
 
@@ -617,6 +570,19 @@ public class CameraFragment extends Fragment {
         }
 
         return bestSize;
+    }
+
+
+    private boolean betterSize(Size oldSize, Size newSize){
+        if ((newSize.width * 4 == newSize.height * 3) || newSize.height * 4 == newSize.width * 3){
+            if (oldSize == null) return true;
+            else {
+                if ((newSize.width > oldSize.width && newSize.height > oldSize.height ) ||
+                        (newSize.width > oldSize.height && newSize.height > oldSize.width))
+                    return true;
+            }
+        }
+        return false;
     }
 
     private int getFrontCameraID() {
@@ -748,6 +714,8 @@ public class CameraFragment extends Fragment {
         CameraSettingPreferences.saveCameraFlashMode(getActivity(), mFlashOn);
     }
 
+
+
     private void takeImageOfView() {
 //        subscriber.onNext(ImageUtility.savePicture(getActivity(), mPreviewView.getBitmap()));
         mProcessImageSubscriptions = Observable
@@ -759,9 +727,8 @@ public class CameraFragment extends Fragment {
                             @Override
                             public void call(Void aVoid) {
                                 if (getActivity() == null) return;
-                                Bitmap b = mPreviewView.getBitmap();
                                 mStartCameraSubscription = Observable
-                                        .just(ImageUtility.savePicture(getActivity(), b))
+                                        .just(saveBitmap())
                                         .subscribeOn(io())
                                         .observeOn(mainThread())
                                         .subscribe(
@@ -787,6 +754,16 @@ public class CameraFragment extends Fragment {
                 );
     }
 
+
+    private Uri saveBitmap(){
+        return ImageUtility.savePicture(getContext(),
+                Bitmap.createBitmap(mPreviewView.getBitmap(),
+                        0,
+                        0,
+                        mPreviewView.getBitmap().getWidth(),
+                        (int)(mPreviewView.getBitmap().getWidth() * 6f / 5f)));
+    }
+
     private Void stopCamera() {
         mCamera.stopPreview();
         return null;
@@ -807,7 +784,7 @@ public class CameraFragment extends Fragment {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                mFlashTop.setVisibility(show ? View.VISIBLE : View.GONE);
+                mFlashTop.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
             }
 
             @Override
@@ -979,7 +956,7 @@ public class CameraFragment extends Fragment {
 
                 mTakePhotoBtn.setImageResource(R.drawable.square_camera_record);
             } else {
-                mFlashTop.setVisibility(View.GONE);
+                mFlashTop.setVisibility(View.INVISIBLE);
             }
         }
     }
