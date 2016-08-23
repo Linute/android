@@ -20,6 +20,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -242,20 +243,20 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             }
         });
 
-//        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (MotionEvent.ACTION_UP == event.getAction())
-//                    recList.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-//                        }
-//                    }, 500);
-//
-//                return false;
-//            }
-//        });
+        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEvent.ACTION_UP == event.getAction())
+                    recList.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                        }
+                    }, 500);
+
+                return false;
+            }
+        });
 
         mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
         mCommentEditText.setQueryTokenReceiver(this);

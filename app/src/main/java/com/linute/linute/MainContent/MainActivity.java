@@ -802,6 +802,7 @@ public class MainActivity extends BaseTaptActivity {
                                     newProfileSnackBar(update);
 
                                     if (update.getUpdateType() == Update.UpdateType.FOLLOWER) {
+                                        if (mRealm.isClosed()) return;
                                         mRealm.executeTransactionAsync(new Realm.Transaction() {
                                             @Override
                                             public void execute(Realm realm) {
@@ -1217,6 +1218,7 @@ public class MainActivity extends BaseTaptActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                if (mRealm.isClosed()) return;
                                 mRealm.executeTransactionAsync(new Realm.Transaction() {
                                     @Override
                                     public void execute(Realm realm) {

@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.WindowManager;
 
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
@@ -53,8 +52,8 @@ public class CameraActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.squarecamera__activity_camera);
-        HasSoftKeySingleton.getmSoftKeySingleton(getWindowManager());
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+        ScreenSizeSingleton.init(getWindowManager());
 
         Intent i = getIntent();
         if (i != null) {
