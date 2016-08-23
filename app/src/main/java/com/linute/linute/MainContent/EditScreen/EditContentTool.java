@@ -35,5 +35,8 @@ public abstract class EditContentTool {
     public abstract String getName();
     public abstract int getDrawable();
 
+    public void onOpen(){};
+    public void onClose(){};
+
 
 }

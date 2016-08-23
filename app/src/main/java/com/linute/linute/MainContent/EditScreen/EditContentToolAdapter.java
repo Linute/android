@@ -61,6 +61,9 @@ public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentTool
         if (mOnItemSelectedListener != null)
             mOnItemSelectedListener.onItemSelected(index);
 
+        tools[oldSelection].onClose();
+        tools[mSelectedItem].onOpen();
+
     }
 
     @Override

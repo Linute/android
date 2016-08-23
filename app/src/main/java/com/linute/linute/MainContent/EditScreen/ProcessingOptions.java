@@ -10,8 +10,8 @@ public class ProcessingOptions {
     public static final String DEFAULT_TEXT = "";
 
 
-    public int height = -1;
-    public int width = -1;
+    public int topInset = 0;
+    public int bottomInset = 0;
     public boolean postAsAnon = DEFAULT_POST_AS_ANON;
     public boolean allowAnonComments = DEFAULT_ALLOW_ANON_COMMENTS;
 

@@ -74,7 +74,7 @@ public class OverlaysTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return R.drawable.sticker_icon;
+        return R.drawable.filters_icon;
     }
 
 

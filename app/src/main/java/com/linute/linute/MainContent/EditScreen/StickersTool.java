@@ -60,7 +60,7 @@ public class StickersTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-        
+
     }
 
     @Override

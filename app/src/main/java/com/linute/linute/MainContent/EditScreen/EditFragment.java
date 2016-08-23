@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -186,16 +187,23 @@ public class EditFragment extends BaseFragment {
     private EditContentTool[] setupTools(ViewGroup overlay) {
         return new EditContentTool[]{
                 new PrivacySettingTool(mUri, mContentType, overlay),
-                new OverlaysTool(mUri, mContentType, overlay),
-                new StickersTool(mUri, mContentType, overlay)
+                new CropTool(mUri, mContentType, overlay),
+                new StickersTool(mUri, mContentType, overlay),
+                new OverlaysTool(mUri, mContentType, overlay)
         };
     }
 
     private void onDoneButtonPress() {
         ProcessingOptions options = new ProcessingOptions();
+        for(EditContentTool tool : mTools){
+            tool.onClose();
+        }
+
         for (EditContentTool tool : mTools) {
             tool.processContent(mUri, mContentType, options);
         }
+
+
 
         beginUpload(options);
     }
@@ -235,8 +243,18 @@ public class EditFragment extends BaseFragment {
         if (getActivity() == null) return;
 
 
+        Bitmap bitmapFromView = ImageUtility.getBitmapFromView(mFinalContentView);
+        Bitmap bitmap;
+        if(options.topInset != 0 || options.bottomInset != 0){
+            bitmap = Bitmap.createBitmap(bitmapFromView, 0, options.topInset, bitmapFromView.getWidth(), bitmapFromView.getHeight()-options.topInset-options.bottomInset);
+            bitmapFromView.recycle();
+        }else{
+            bitmap = bitmapFromView;
+        }
+
+
         if (mReturnType != CameraActivity.SEND_POST) {
-            mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), ImageUtility.getBitmapFromView(mFinalContentView)))
+            mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), bitmap))
                     .observeOn(io())
                     .subscribeOn(mainThread())
                     .subscribe(new Action1<Uri>() {
@@ -259,7 +277,7 @@ public class EditFragment extends BaseFragment {
                         }
                     });
         } else {
-            mSubscription = Observable.just(ImageUtility.savePicture(getActivity(), ImageUtility.getBitmapFromView(mFinalContentView)))
+            mSubscription = Observable.just(ImageUtility.savePicture(getActivity(), bitmap))
                     .subscribeOn(io())
                     .observeOn(mainThread())
                     .subscribe(new Action1<Uri>() {
