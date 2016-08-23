@@ -21,12 +21,15 @@ public abstract class EditContentTool {
 
 
     //Binds icon and text of item to menu item
-    public abstract void bindMenuItem(EditContentToolAdapter.ToolHolder holder);
+//    public abstract void bindMenuItem(EditContentToolAdapter.ToolHolder holder, boolean isSelected);
 
     //creates a view to display tool options
     public abstract View createToolOptionsView(LayoutInflater inflater, ViewGroup parent);
 
     public abstract void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options);
+
+    public abstract String getName();
+    public abstract int getDrawable();
 
 
 }

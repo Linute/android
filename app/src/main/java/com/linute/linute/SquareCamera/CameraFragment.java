@@ -35,6 +35,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
 
 import java.io.IOException;
@@ -356,11 +357,13 @@ public class CameraFragment extends Fragment {
     private void goToVideoEditFragment(Uri uri, EditSaveVideoFragment.VideoDimen videoDimen) {
         if (getActivity() != null) {
             try {
+                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+
                 getFragmentManager()
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditSaveVideoFragment.newInstance(uri, videoDimen),
+                                EditFragment.newInstance(uri, EditFragment.ContentType.Video/*, videoDimen*/, returnType),
                                 AbstractEditSaveFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -727,6 +730,9 @@ public class CameraFragment extends Fragment {
                             @Override
                             public void call(Void aVoid) {
                                 if (getActivity() == null) return;
+
+                                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+
                                 mStartCameraSubscription = Observable
                                         .just(saveBitmap())
                                         .subscribeOn(io())
@@ -739,7 +745,7 @@ public class CameraFragment extends Fragment {
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditSavePhotoFragment.newInstance(uri),
+                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo,returnType),
                                                                         AbstractEditSaveFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();

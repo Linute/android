@@ -195,16 +195,12 @@ public class CameraActivity extends AppCompatActivity {
                 return;
             }
 
-            AbstractEditSaveFragment fragment = (AbstractEditSaveFragment) getSupportFragmentManager()
+            Fragment fragment = getSupportFragmentManager()
                     .findFragmentByTag(AbstractEditSaveFragment.TAG);
 
             if (fragment != null) {
-                if (fragment.isStickerDrawerOpen()) {
-                    fragment.closeStickerDrawer();
-                } else {
-                    fragment.backPressed();
-                }
-            } else {
+                getSupportFragmentManager().popBackStack();
+            } else {;
                 clearBackStack();
             }
         } else {

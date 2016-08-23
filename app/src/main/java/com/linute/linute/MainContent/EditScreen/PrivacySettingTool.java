@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
@@ -22,13 +23,8 @@ public class PrivacySettingTool extends EditContentTool {
     }
 
     @Override
-    public void bindMenuItem(EditContentToolAdapter.ToolHolder holder) {
-        holder.vLabel.setText("Privacy");
-    }
-
-    @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
-        View root = inflater.inflate(R.layout.tool_option_privacy_switch, parent, false);
+        View root = inflater.inflate(R.layout.tool_options_privacy, parent, false);
 
 
         View leftSwitch = root.findViewById(R.id.switch_left);
@@ -41,20 +37,46 @@ public class PrivacySettingTool extends EditContentTool {
         postingAsRightText.setText("Anon");
 
 
-        View rightSwitch = root.findViewById(R.id.switch_left);
+        View rightSwitch = root.findViewById(R.id.switch_right);
         TextView anonCommentsHeader = (TextView)rightSwitch.findViewById(R.id.text_heading_top);
         TextView anonCommentsLeftText = (TextView)rightSwitch.findViewById(R.id.text_heading_left);
         TextView anonCommentsRightText = (TextView)rightSwitch.findViewById(R.id.text_heading_right);
         Switch anonCommentsSwitch = (Switch)rightSwitch.findViewById(R.id.switch_main);
-        postingAsHeader.setText("Anon comments");
-        postingAsLeftText.setText("Yes");
-        postingAsRightText.setText("No");
+        anonCommentsHeader.setText("Anon comments");
+        anonCommentsLeftText.setText("Yes");
+        anonCommentsRightText.setText("No");
+
+
+        postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                postAsAnon = b;
+            }
+        });
+
+        anonCommentsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                allowAnonComments = b;
+            }
+        });
 
         return root;
     }
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
+        options.allowAnonComments = allowAnonComments;
+        options.postAsAnon = postAsAnon;
+    }
 
+    @Override
+    public String getName() {
+        return "Privacy";
+    }
+
+    @Override
+    public int getDrawable() {
+        return 0;
     }
 }

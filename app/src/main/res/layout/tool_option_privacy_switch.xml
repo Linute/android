@@ -14,7 +14,9 @@
         android:layout_height="wrap_content"
         tools:text="Posting as"
         android:layout_above="@+id/switch_main"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/pure_white"
+        />
 
     <Switch
         android:id="@id/switch_main"
@@ -31,7 +33,7 @@
         android:layout_toLeftOf="@id/switch_main"
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
-
+        android:textColor="@color/pure_white"
 
         />
 
@@ -44,6 +46,7 @@
         android:layout_toRightOf="@id/switch_main"
         android:layout_centerVertical="true"
         android:layout_marginLeft="8dp"
+        android:textColor="@color/pure_white"
         />
 
 

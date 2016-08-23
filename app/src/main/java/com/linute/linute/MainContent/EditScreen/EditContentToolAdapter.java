@@ -12,11 +12,11 @@ import com.linute.linute.R;
 /**
  * Created by mikhail on 8/22/16.
  */
-public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentToolAdapter.ToolHolder>{
-
+public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentToolAdapter.ToolHolder> {
 
 
     private EditContentTool[] tools;
+    int mSelectedItem = 0;
 
     private OnItemSelectedListener mOnItemSelectedListener;
 
@@ -24,7 +24,7 @@ public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentTool
         this.tools = tools;
     }
 
-    public void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener){
+    public void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener) {
         mOnItemSelectedListener = onItemSelectedListener;
     }
 
@@ -37,14 +37,28 @@ public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentTool
 
     @Override
     public void onBindViewHolder(final ToolHolder holder, int position) {
-        tools[position].bindMenuItem(holder);
+        holder.bind(tools[position], position == mSelectedItem);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mOnItemSelectedListener != null);
-                mOnItemSelectedListener.onItemSelected(holder.getAdapterPosition());
+
+                selectItem(holder.getAdapterPosition());
+
             }
         });
+    }
+
+
+    public void selectItem(int index) {
+        int oldSelection = mSelectedItem;
+        mSelectedItem = index;
+
+        notifyItemChanged(oldSelection);
+        notifyItemChanged(mSelectedItem);
+
+        if (mOnItemSelectedListener != null)
+            mOnItemSelectedListener.onItemSelected(index);
+
     }
 
     @Override
@@ -52,16 +66,27 @@ public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentTool
         return tools.length;
     }
 
-    public static class ToolHolder extends RecyclerView.ViewHolder{
+    public static class ToolHolder extends RecyclerView.ViewHolder {
 
         public ImageView vIcon;
         public TextView vLabel;
 
         public ToolHolder(View itemView) {
             super(itemView);
-            vIcon = (ImageView)itemView.findViewById(R.id.image_icon);
+            vIcon = (ImageView) itemView.findViewById(R.id.image_icon);
             vLabel = (TextView) itemView.findViewById(R.id.text_label);
 
+        }
+
+        public void bind(EditContentTool tool, boolean isSelected) {
+            vLabel.setText(tool.getName());
+            vIcon.setImageResource(tool.getDrawable());
+
+            if (isSelected) {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
+            } else {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
+            }
         }
     }
 
