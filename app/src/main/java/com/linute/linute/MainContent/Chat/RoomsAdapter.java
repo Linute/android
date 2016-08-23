@@ -82,7 +82,7 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 });
             }
         } else {
-            //bind view, tells it which to show: footer or text
+            //bindMenuItem view, tells it which to show: footer or text
             ((LoadMoreViewHolder) holder).bindView(mLoadingMoreState);
             if (mOnLoadMore != null) mOnLoadMore.loadMore();
         }
