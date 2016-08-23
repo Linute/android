@@ -73,7 +73,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        /*vShareButton.setOnItemSelectedListener(new View.OnClickListener() {
+        /*vShareButton.setOnItemTouchListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 BaseTaptActivity activity = (BaseTaptActivity) mContext;

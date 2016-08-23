@@ -109,7 +109,7 @@ public class EditFragment extends BaseFragment {
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
+                switch (item.getItemId()) {
                     case android.R.id.home:
                         getActivity().getSupportFragmentManager().popBackStack();
                         return true;
@@ -123,7 +123,7 @@ public class EditFragment extends BaseFragment {
 
 
         mFinalContentView = root.findViewById(R.id.final_content);
-        mContentView = (ViewGroup)root.findViewById(R.id.base_content);
+        mContentView = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
 
 
@@ -166,8 +166,8 @@ public class EditFragment extends BaseFragment {
     }
 
 
-    private void setupMainContent(Uri uri, ContentType contentType){
-        switch (contentType){
+    private void setupMainContent(Uri uri, ContentType contentType) {
+        switch (contentType) {
             case Photo:
             case UploadedPhoto:
                 ImageView imageView = new ImageView(getContext());
@@ -185,22 +185,23 @@ public class EditFragment extends BaseFragment {
 
     private EditContentTool[] setupTools(ViewGroup overlay) {
         return new EditContentTool[]{
-            new PrivacySettingTool(mUri, mContentType, overlay),
-                new OverlaysTool(mUri, mContentType, overlay)
+                new PrivacySettingTool(mUri, mContentType, overlay),
+                new OverlaysTool(mUri, mContentType, overlay),
+                new StickersTool(mUri, mContentType, overlay)
         };
     }
 
-    private void onDoneButtonPress(){
+    private void onDoneButtonPress() {
         ProcessingOptions options = new ProcessingOptions();
-        for(EditContentTool tool:mTools){
+        for (EditContentTool tool : mTools) {
             tool.processContent(mUri, mContentType, options);
         }
 
         beginUpload(options);
     }
 
-    private void beginUpload(ProcessingOptions options){
-        switch (mContentType){
+    private void beginUpload(ProcessingOptions options) {
+        switch (mContentType) {
             case Video:
             case UploadedVideo:
                 processVideo(options);
@@ -212,9 +213,10 @@ public class EditFragment extends BaseFragment {
         }
     }
 
-    private void showProgress(boolean show){}
+    private void showProgress(boolean show) {
+    }
 
-    private void processPhoto(final ProcessingOptions options){
+    private void processPhoto(final ProcessingOptions options) {
         if (getActivity() == null) return;
 
         /*if (mEditText.getVisibility() == View.VISIBLE) {
@@ -285,7 +287,7 @@ public class EditFragment extends BaseFragment {
 
                                 getActivity().setResult(Activity.RESULT_OK, result);
                                 getActivity().finish();
-                            }else {
+                            } else {
                                 if (getActivity() != null) {
                                     Toast.makeText(getActivity(), "An error occured while saving the image", Toast.LENGTH_SHORT).show();
                                     showProgress(false);
@@ -296,7 +298,7 @@ public class EditFragment extends BaseFragment {
         }
     }
 
-    private void processVideo(ProcessingOptions options){
+    private void processVideo(ProcessingOptions options) {
 
     }
 
