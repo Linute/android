@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -84,8 +86,11 @@ public class EditContentToolAdapter extends RecyclerView.Adapter<EditContentTool
 
             if (isSelected) {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
+                vIcon.setColorFilter(new
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
             } else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
+                vIcon.setColorFilter(null);
             }
         }
     }

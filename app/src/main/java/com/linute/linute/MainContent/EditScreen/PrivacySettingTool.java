@@ -77,6 +77,6 @@ public class PrivacySettingTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return 0;
+        return R.drawable.sticker_icon;
     }
 }

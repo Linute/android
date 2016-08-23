@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.linute.linute.R;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -72,7 +74,7 @@ public class OverlaysTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return 0;
+        return R.drawable.sticker_icon;
     }
 
 

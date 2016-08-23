@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.linute.linute.R;
 import com.linute.linute.SquareCamera.overlay.ManipulableImageView;
 
 import java.io.File;
@@ -51,8 +52,7 @@ public class StickersTool extends EditContentTool {
         mStickersRV.setLayoutManager(new LinearLayoutManager(parent.getContext(), LinearLayoutManager.HORIZONTAL, false));
 
 
-        mStickers.add(null);
-        initFiltersAsync(parent.getContext());
+        initStickersAsync(parent.getContext());
 
 
         return mStickersRV;
@@ -60,7 +60,7 @@ public class StickersTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-
+        
     }
 
     @Override
@@ -70,7 +70,7 @@ public class StickersTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return 0;
+        return R.drawable.sticker_icon;
     }
 
 
@@ -175,7 +175,7 @@ public class StickersTool extends EditContentTool {
         }
     }
 
-    private void initFiltersAsync(final Context context) {
+    private void initStickersAsync(final Context context) {
         final File memeDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
 
         new Thread(new Runnable() {
@@ -183,17 +183,17 @@ public class StickersTool extends EditContentTool {
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 File[] memes = memeDir.listFiles();
-                if (memes != null)
+                if (memes != null) {
                     for (File f : memes) {
                         try {
                             mStickers.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
 
-                            mStickersRV.post(new Runnable() {
+                           /* mStickersRV.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mStickersAdapter.notifyItemInserted(mStickers.size()-1);
+                                    mStickersAdapter.notifyItemInserted(mStickers.size() - 1);
                                 }
-                            });
+                            });*/
 
                         } catch (OutOfMemoryError e) {
                             e.printStackTrace();
@@ -201,6 +201,13 @@ public class StickersTool extends EditContentTool {
                             np.printStackTrace();
                         }
                     }
+                }
+                mStickersRV.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mStickersAdapter.notifyDataSetChanged();
+                    }
+                });
             }
 
         }).start();
