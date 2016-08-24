@@ -10,10 +10,10 @@
     tools:background="@color/pure_black">
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
         android:layout_gravity="center"
-        android:src="@drawable/ic_action_turn20"/>
+        android:src="@drawable/ic_action_update"/>
 
     <include layout="@layout/layout_new_notifications_bubble"/>
 

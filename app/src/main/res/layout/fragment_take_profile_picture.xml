@@ -35,14 +35,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/square_space"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/darkPrimary">
 
         <FrameLayout
             android:id="@+id/flash_container"
             android:layout_width="0px"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:visibility="invisible">
 
             <View android:layout_width="48dp"
                   android:layout_height="48dp"
@@ -112,8 +113,8 @@
 
             <ImageView
                 android:id="@+id/change_camera"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_gravity="center"
                 android:contentDescription="Reverse"
                 android:src="@drawable/ic_reverse"/>

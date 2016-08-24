@@ -760,6 +760,8 @@ public class CameraFragment extends Fragment {
 
 
     private Uri saveBitmap(){
+        //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
+        //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
         return ImageUtility.savePicture(getContext(),
                 Bitmap.createBitmap(mPreviewView.getBitmap(),
                         0,

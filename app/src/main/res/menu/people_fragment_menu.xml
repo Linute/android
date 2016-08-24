@@ -17,6 +17,6 @@
         app:actionLayout="@layout/toolbar_updates_icon"
         android:orderInCategory="101"
         android:title="Updates"
-        android:icon="@drawable/ic_action_turn20"
+        android:icon="@drawable/ic_action_update"
         app:showAsAction="always"/>
 </menu>

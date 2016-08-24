@@ -57,7 +57,7 @@
             <ImageView android:id="@+id/postComments"
                        android:layout_width="20dp"
                        android:layout_height="20dp"
-                       android:src="@drawable/ic_oval19"
+                       android:src="@drawable/ic_comment"
             />
 
             <TextView android:id="@+id/postNumComments"

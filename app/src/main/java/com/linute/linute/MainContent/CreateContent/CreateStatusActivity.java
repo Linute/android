@@ -21,6 +21,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,7 +29,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,8 +52,8 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
     private boolean mPostInProgress = false;
 
-    private CheckBox vAnonPost;
-    private CheckBox vAnonComments;
+    private SwitchCompat vAnonPost;
+    private SwitchCompat vAnonComments;
 
     private SharedPreferences mSharedPreferences;
 
@@ -172,8 +172,8 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
-        vAnonComments = (CheckBox) findViewById(R.id.anon_comments);
-        vAnonPost = (CheckBox) findViewById(R.id.anon_post);
+        vAnonComments = (SwitchCompat) findViewById(R.id.anon_comments);
+        vAnonPost = (SwitchCompat) findViewById(R.id.anon_post);
 
         mTextFrame = findViewById(R.id.post_create_frame);
 
@@ -212,10 +212,8 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
         View postColorSelectorView = mPostColorSelectorViews[index];
 
-        TextView text = (TextView) postColorSelectorView.findViewById(res);
-        text.setTextColor(mPostTextColors[index]);
-        text.setTypeface(typeface);
-        text.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
+        View view = postColorSelectorView.findViewById(res);
+        view.getBackground().setColorFilter(mPostBackgroundColors[index], PorterDuff.Mode.SRC_ATOP);
 
         postColorSelectorView.setOnClickListener(this);
     }
@@ -400,8 +398,8 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    public boolean hasWritePermission(){
-        return  ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public boolean hasWritePermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
 

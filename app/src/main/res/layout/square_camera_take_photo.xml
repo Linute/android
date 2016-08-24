@@ -45,7 +45,7 @@
     <View android:layout_width="match_parent"
           android:layout_height="6dp"
           android:layout_below="@id/flash_top"
-          android:background="@color/colorPrimaryDark"
+          android:background="@color/darkPrimary"
     />
 
     <ProgressBar
@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="6dp"
         android:layout_below="@id/flash_top"
-        android:background="@color/colorPrimary"
+        android:background="@color/darkPrimary"
         android:max="1000"
         android:progressDrawable="@drawable/camera_progress_red"
         android:visibility="invisible"/>
@@ -64,7 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/record_progress"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/darkPrimary">
 
         <FrameLayout
             android:id="@+id/flash_container"
@@ -141,8 +141,8 @@
 
             <ImageView
                 android:id="@+id/change_camera"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_gravity="center"
                 android:contentDescription="Reverse"
                 android:src="@drawable/ic_reverse"/>

@@ -25,7 +25,6 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraSettingPreferences;

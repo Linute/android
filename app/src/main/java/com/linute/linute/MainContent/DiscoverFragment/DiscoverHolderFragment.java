@@ -8,10 +8,14 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
 import com.linute.linute.MainContent.CreateContent.GalleryActivity;
@@ -55,6 +59,8 @@ public class DiscoverHolderFragment extends BaseFragment {
     private boolean mHasMessage;
 
     private View mNotificationIndicator;
+
+    private FloatingActionsMenu mFloatingActionsMenu;
 
     public DiscoverHolderFragment() {
     }
@@ -136,6 +142,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onPageSelected(int position) {
                 VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+                if (mFloatingActionsMenu.isExpanded()) mFloatingActionsMenu.collapse();
             }
 
             @Override
@@ -145,7 +152,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         });
 
         tabLayout.setupWithViewPager(mViewPager);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire);
         tabLayout.setOnTabSelectedListener(
                 new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
                     @Override
@@ -155,10 +162,11 @@ public class DiscoverHolderFragment extends BaseFragment {
                 }
         );
 
-
-        rootView.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
+        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.right_labels);
+        mFloatingActionsMenu.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mFloatingActionsMenu.collapse();
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
                 i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
@@ -167,17 +175,21 @@ public class DiscoverHolderFragment extends BaseFragment {
             }
         });
 
-        rootView.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
+        mFloatingActionsMenu.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (getActivity() == null) return;
+                mFloatingActionsMenu.collapse();
                 Intent i = new Intent(getActivity(), GalleryActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
         });
 
-        rootView.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
+        mFloatingActionsMenu.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (getActivity() == null) return;
+                mFloatingActionsMenu.collapse();
                 Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
@@ -185,6 +197,12 @@ public class DiscoverHolderFragment extends BaseFragment {
 
 
         return rootView;
+    }
+
+
+    public void closeFAM(){
+        if (mFloatingActionsMenu.isExpanded())
+            mFloatingActionsMenu.collapse();
     }
 
 
@@ -306,7 +324,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         public void call(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
                 int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
-                mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE );
+                mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
                 mUpdatesCounter.setText(count < 100 ? count + "" : "+");
             } else if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);

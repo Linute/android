@@ -2,6 +2,8 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.CheckBox;
@@ -98,8 +100,15 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText(String.valueOf(post.getNumLike()));
         vCommentText.setText(String.valueOf(post.getNumOfComments()));
-        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
-                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
+//        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
+//                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
+        if (post.getNumOfComments() > 0) {
+            //979797
+            ((ImageView) vCommentButton.findViewById(R.id.postComments)).clearColorFilter();
+        } else if (mContext != null) {
+            ((ImageView) vCommentButton.findViewById(R.id.postComments))
+                    .setColorFilter(ContextCompat.getColor(mContext, R.color.inactive_grey), PorterDuff.Mode.SRC_ATOP);
+        }
     }
 
 

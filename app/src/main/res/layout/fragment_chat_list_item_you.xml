@@ -135,7 +135,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center_vertical"
                         android:layout_margin="4dp"
-                        android:src="@drawable/ic_fire_on"
+                        android:src="@drawable/ic_fire"
                     />
 
                 </LinearLayout>

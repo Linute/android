@@ -105,15 +105,23 @@ public class FeedFragment extends BaseFragment {
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
-
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-
         recList.setLayoutManager(llm);
 
       /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));*/
+
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING){
+                    DiscoverHolderFragment frag = (DiscoverHolderFragment) getParentFragment();
+                    if (frag != null) frag.closeFAM();
+                }
+            }
+        });
 
         mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override
