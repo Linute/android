@@ -5,10 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
@@ -49,6 +52,8 @@ public class EditFragment extends BaseFragment {
     private ViewGroup mContentView;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
+    private int mSelectedTool;
+    private ToolHolder[] toolHolders;
 
     public enum ContentType {
         Photo, Video, UploadedPhoto, UploadedVideo
@@ -127,38 +132,51 @@ public class EditFragment extends BaseFragment {
         mContentView = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
 
+        mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
         ViewGroup overlaysV = (ViewGroup) root.findViewById(R.id.overlays);
 
         mTools = setupTools(overlaysV);
         mToolViews = new View[mTools.length];
 
-        RecyclerView toolsListRV = (RecyclerView) root.findViewById(R.id.list_tools);
-        mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
-
         //Set up adapter that controls tool selection
-        EditContentToolAdapter toolsAdapter = new EditContentToolAdapter();
-        toolsAdapter.setTools(mTools);
-        toolsAdapter.setOnItemSelectedListener(new EditContentToolAdapter.OnItemSelectedListener() {
+        LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
-            public void onItemSelected(int i) {
-                onToolSelected(i);
+            public void onClick(View view) {
+                onToolSelected((Integer)view.getTag());
             }
-        });
+        };
 
-        toolsAdapter.selectItem(0);
+        toolHolders = new ToolHolder[mTools.length];
 
+        for (int i = 0; i < mTools.length; i++) {
+            EditContentTool tool = mTools[i];
+            View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
+            toolHolders[i] = new ToolHolder(toolView);
+            toolHolders[i].bind(tool);
+            toolView.setTag(i);
+            toolView.setOnClickListener(onClickListener);
+            toolsListRV.addView(toolView);
+        }
 
-        LinearLayoutManager toolsLLM = new LinearLayoutManager(root.getContext());
-        toolsLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
+        onToolSelected(0);
 
-        toolsListRV.setAdapter(toolsAdapter);
-        toolsListRV.setLayoutManager(toolsLLM);
 
         return root;
     }
 
+
+
     protected void onToolSelected(int i) {
+        int oldSelectedTool = mSelectedTool;
+        mSelectedTool = i;
+
+        toolHolders[oldSelectedTool].setSelected(false);
+        toolHolders[mSelectedTool].setSelected(false);
+
+
         mToolOptionsView.removeAllViews();
         if (mToolViews[i] == null) {
             mToolViews[i] = mTools[i].createToolOptionsView(LayoutInflater.from(mToolOptionsView.getContext()), mToolOptionsView);
@@ -324,6 +342,37 @@ public class EditFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         if (mSubscription != null) mSubscription.unsubscribe();
+    }
+
+    public static class ToolHolder extends RecyclerView.ViewHolder {
+
+        public ImageView vIcon;
+        public TextView vLabel;
+
+        public ToolHolder(View itemView) {
+            super(itemView);
+            vIcon = (ImageView) itemView.findViewById(R.id.image_icon);
+            vLabel = (TextView) itemView.findViewById(R.id.text_label);
+
+        }
+
+        public void bind(EditContentTool tool) {
+            vLabel.setText(tool.getName());
+            vIcon.setImageResource(tool.getDrawable());
+        }
+
+        public void setSelected(boolean isSelected) {
+            if (isSelected) {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
+                vIcon.setColorFilter(new
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
+            } else {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
+                vIcon.setColorFilter(null);
+            }
+        }
+
+
     }
 
    /* protected void hideKeyboard() {
