@@ -28,20 +28,22 @@ public class OverlaysTool extends EditContentTool {
     ArrayList<Bitmap> mOverlays;
     private OverlaysAdapter mOverlaysAdapter;
     private RecyclerView mOverlaysRV;
+    private final ImageView overlayView;
 
     public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri, type, overlaysView);
         mOverlays = new ArrayList<>();
+        overlayView = new ImageView(overlaysView.getContext());
+        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        mOverlaysView.addView(overlayView);
     }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
 
-        final ImageView overlayView = new ImageView(parent.getContext());
-        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        mOverlaysView.addView(overlayView);
 
         mOverlaysAdapter = new OverlaysAdapter(mOverlays);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {

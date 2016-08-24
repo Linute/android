@@ -34,16 +34,19 @@ public class StickersTool extends EditContentTool {
     public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri, type, overlaysView);
         mStickers = new ArrayList<>();
+
+
+        mStickersContainer = new FrameLayout(overlaysView.getContext());
+        mStickersContainer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        mOverlaysView.addView(mStickersContainer);
+
     }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mStickersRV = new RecyclerView(parent.getContext());
 
-        mStickersContainer = new FrameLayout(parent.getContext());
-        mStickersContainer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        mOverlaysView.addView(mStickersContainer);
 
         mStickersAdapter = new OverlaysAdapter(mStickers);
         mStickersAdapter.setOnStickerTouchListener(onStickerTouchListener);
@@ -89,7 +92,7 @@ public class StickersTool extends EditContentTool {
 
 
 
-            mOverlaysView.addView(stickerIV);
+            mStickersContainer.addView(stickerIV);
 
             /*stickerIV.setX(view.getX());
             stickerIV.setY(view.getY());*/

@@ -3,9 +3,9 @@ package com.linute.linute.MainContent.EditScreen;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.linute.linute.R;
 
@@ -18,7 +18,7 @@ public class CropTool extends EditContentTool {
     private final EditFragment.Activatable mActivatable;
     /*measurements taken from bottom (0 in bottom and top = full image)*/
     private int mTopY = 0;
-    private int mBotY = -30;
+    private int mBotY = 0;
 
     private View topBar;
     private View botBar;
@@ -28,14 +28,13 @@ public class CropTool extends EditContentTool {
 
     public int MIN_SIZE = 300;
     public int MAX_SIZE = 600;
-    private final View baseContentView;
 
 
     public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, EditFragment.Activatable activatable) {
         super(uri, type, overlays);
         mCropperLayout = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tools_cropper_overlay, mOverlaysView, false);
         mCropperLayout.setAlpha(.3f);
-        mOverlaysView.addView(mCropperLayout);
+        ((ViewGroup)(mOverlaysView.getParent())).addView(mCropperLayout);
 
         topBar = mCropperLayout.findViewById(R.id.top_bar);
         botBar = mCropperLayout.findViewById(R.id.bot_bar);
@@ -47,73 +46,7 @@ public class CropTool extends EditContentTool {
         updateCropperView();
 
         mActivatable = activatable;
-
-        baseContentView = ((View) mOverlaysView.getParent()).findViewById(R.id.base_content);
-       /* baseContentView.setOnTouchListener(new View.OnTouchListener() {
-
-            float startX = 0;
-            float startY = 0;
-            float initX = 0;
-            float initY = 0;
-
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (mGestureDetector.onTouchEvent(motionEvent)) {
-                    return true;
-                }
-
-
-                Log.i("AAA",MotionEvent.actionToString(motionEvent.getActionMasked()));
-//                mGestureDetector.onTouchEvent(motionEvent);
-
-                switch (motionEvent.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        initX = view.getX();
-                        initY = view.getY();
-                        startX = motionEvent.getRawX();
-                        startY = motionEvent.getRawY();
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        view.setX(initX + (motionEvent.getRawX() - startX));
-                        view.setY(initY + (motionEvent.getRawY() - startY));
-                        view.invalidate();
-                        break;
-                    case MotionEvent.ACTION_UP:
-
-
-                        break;
-                }
-
-                return false;
-            }
-        });*/
     }
-
-    ScaleGestureDetector mGestureDetector = new ScaleGestureDetector(mOverlaysView.getContext(), new ScaleGestureDetector.OnScaleGestureListener() {
-        float totalScale = 1;
-
-
-        @Override
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-            totalScale *= scaleGestureDetector.getScaleFactor();
-            baseContentView.setPivotX(scaleGestureDetector.getFocusX());
-            baseContentView.setPivotY(scaleGestureDetector.getFocusY());
-            baseContentView.setScaleX(totalScale);
-            baseContentView.setScaleY(totalScale);
-            return true;
-        }
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
-
-            return true;
-        }
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-
-        }
-    });
 
 
     View.OnTouchListener touchListener = new View.OnTouchListener() {
@@ -176,6 +109,16 @@ public class CropTool extends EditContentTool {
         ViewGroup.LayoutParams botParam = botFade.getLayoutParams();
         botParam.height = mBotY;
         botFade.setLayoutParams(botParam);
+
+
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params.topMargin = mTopY;
+        params.bottomMargin = mBotY;
+        mOverlaysView.setLayoutParams(params);
+        mOverlaysView.setTop(mTopY);
+        mOverlaysView.setBottom(mBotY);
+        mOverlaysView.invalidate();
+
     }
 
     @Override
@@ -210,7 +153,7 @@ public class CropTool extends EditContentTool {
     @Override
     public void onClose() {
         super.onClose();
-        mCropperLayout.setAlpha(.3f);
+        mCropperLayout.setAlpha(.7f);
         topBar.setOnTouchListener(null);
         botBar.setOnTouchListener(null);
         topBar.setVisibility(View.GONE);

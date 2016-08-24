@@ -234,19 +234,30 @@ public class EditFragment extends BaseFragment {
         int displayWidth = metrics.widthPixels;
         int height = mDimens.height * displayWidth / mDimens.width;
 
-        CropTool tool;
 
-        EditContentTool[] tools = new EditContentTool[]{
-                new PrivacySettingTool(mUri, mContentType, overlay),
-                tool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null)) ,
-                new StickersTool(mUri, mContentType, overlay),
-                new OverlaysTool(mUri, mContentType, overlay)
+
+
+
+
+        //tools created in reverse priority order
+        //(Crop appears above Text, which appears above Overlays, etc)
+        PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
+        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay);
+        OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
+        TextTool textTool = new TextTool(mUri, mContentType, overlay);
+        CropTool cropTool;
+        cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null));
+        cropTool.MAX_SIZE = height;
+        cropTool.MIN_SIZE = displayWidth/16 * 9;
+
+        return new EditContentTool[]{
+                privacySettingTool,
+                cropTool,
+                textTool,
+                stickersTool,
+                overlaysTool
         };
 
-        tool.MAX_SIZE = height;
-        tool.MIN_SIZE = displayWidth/16 * 9;
-
-        return tools;
     }
 
     private void onDoneButtonPress() {
