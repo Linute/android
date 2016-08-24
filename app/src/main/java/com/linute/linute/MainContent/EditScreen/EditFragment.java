@@ -7,17 +7,21 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,6 +34,7 @@ import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
 
@@ -211,6 +216,47 @@ public class EditFragment extends BaseFragment {
             case Video:
             case UploadedVideo:
                 SurfaceView surface = new SurfaceView(getContext());
+                mPlaying = new CheckBox(getContext());
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+                mPlaying.setLayoutParams(params);
+                mPlaying.setChecked(true);
+                mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
+                mVideoView = new TextureVideoView(getContext());
+
+                mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) mVideoView.start();
+                        else mVideoView.pause();
+                    }
+                });
+
+                vBottom.addView(mPlaying);
+
+                mVideoLink = getArguments().getParcelable(BITMAP_URI);
+                mVideoView.setBackgroundResource(R.color.pure_black);
+
+                mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                if (mVideoDimen.isFrontFacing) mVideoView.setScaleX(-1);
+
+                mVideoView.setVideoURI(mVideoLink);
+                mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mVideoView.start();
+                    }
+                });
+
+                mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        if (mPlaying.isChecked()) mVideoView.start();
+                    }
+                });
+                container.addView(mVideoView);
                 break;
         }
     }
