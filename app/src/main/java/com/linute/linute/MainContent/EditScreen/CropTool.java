@@ -1,8 +1,10 @@
 package com.linute.linute.MainContent.EditScreen;
 
 import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -26,6 +28,7 @@ public class CropTool extends EditContentTool {
 
     private int MIN_SIZE = 300;
     private int MAX_SIZE = 600;
+    private final View baseContentView;
 
 
     public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
@@ -43,7 +46,73 @@ public class CropTool extends EditContentTool {
         botFade = mCropperLayout.findViewById(R.id.bot_fade);
         updateCropperView();
 
+
+        baseContentView = ((View) mOverlaysView.getParent()).findViewById(R.id.base_content);
+        baseContentView.setOnTouchListener(new View.OnTouchListener() {
+
+            float startX = 0;
+            float startY = 0;
+            float initX = 0;
+            float initY = 0;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (mGestureDetector.onTouchEvent(motionEvent)) {
+                    return true;
+                }
+
+
+                Log.i("AAA",MotionEvent.actionToString(motionEvent.getActionMasked()));
+//                mGestureDetector.onTouchEvent(motionEvent);
+
+                switch (motionEvent.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        initX = view.getX();
+                        initY = view.getY();
+                        startX = motionEvent.getRawX();
+                        startY = motionEvent.getRawY();
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        view.setX(initX + (motionEvent.getRawX() - startX));
+                        view.setY(initY + (motionEvent.getRawY() - startY));
+                        view.invalidate();
+                        break;
+                    case MotionEvent.ACTION_UP:
+
+
+                        break;
+                }
+
+                return false;
+            }
+        });
     }
+
+    ScaleGestureDetector mGestureDetector = new ScaleGestureDetector(mOverlaysView.getContext(), new ScaleGestureDetector.OnScaleGestureListener() {
+        float totalScale = 1;
+
+
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+            totalScale *= scaleGestureDetector.getScaleFactor();
+            baseContentView.setPivotX(scaleGestureDetector.getFocusX());
+            baseContentView.setPivotY(scaleGestureDetector.getFocusY());
+            baseContentView.setScaleX(totalScale);
+            baseContentView.setScaleY(totalScale);
+            return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
+
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
+
+        }
+    });
 
 
     View.OnTouchListener touchListener = new View.OnTouchListener() {
@@ -52,7 +121,6 @@ public class CropTool extends EditContentTool {
 
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-
 
 
             switch (motionEvent.getActionMasked()) {
@@ -68,20 +136,20 @@ public class CropTool extends EditContentTool {
                     if (view == botBar) {
                         mBotY = (int) (initBarY + (startY - motionEvent.getRawY()));
 
-                        if(mBotY + botBar.getHeight() + mTopY +topBar.getHeight() + MIN_SIZE> mCropperLayout.getHeight()){
-                            mBotY = mCropperLayout.getHeight() - (botBar.getHeight() + mTopY +topBar.getHeight()+MIN_SIZE);
+                        if (mBotY + botBar.getHeight() + mTopY + topBar.getHeight() + MIN_SIZE > mCropperLayout.getHeight()) {
+                            mBotY = mCropperLayout.getHeight() - (botBar.getHeight() + mTopY + topBar.getHeight() + MIN_SIZE);
                         }
-                        if(mBotY < 0){
+                        if (mBotY < 0) {
                             mBotY = 0;
                         }
 
                     } else {
                         mTopY = (int) (initBarY + (motionEvent.getRawY() - startY));
 
-                        if(mTopY + botBar.getHeight() + mBotY +topBar.getHeight() +MIN_SIZE > mCropperLayout.getHeight()){
-                            mTopY = mCropperLayout.getHeight() - (botBar.getHeight() + mBotY +topBar.getHeight()+MIN_SIZE);
+                        if (mTopY + botBar.getHeight() + mBotY + topBar.getHeight() + MIN_SIZE > mCropperLayout.getHeight()) {
+                            mTopY = mCropperLayout.getHeight() - (botBar.getHeight() + mBotY + topBar.getHeight() + MIN_SIZE);
                         }
-                        if(mTopY < 0){
+                        if (mTopY < 0) {
                             mTopY = 0;
                         }
                     }
