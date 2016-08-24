@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
@@ -18,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
@@ -45,10 +49,15 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_URI = "content_uri";
     private static final String ARG_CONTENT_TYPE = "content_type";
     private static final String ARG_RETURN_TYPE = "return_type";
+    private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
+
+
     private ViewGroup mContentView;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
+    private int mSelectedTool;
+    private ToolHolder[] toolHolders;
 
     public enum ContentType {
         Photo, Video, UploadedPhoto, UploadedVideo
@@ -56,6 +65,7 @@ public class EditFragment extends BaseFragment {
 
     private Uri mUri;
     private ContentType mContentType;
+    private Dimens mDimens;
 
     private EditContentTool[] mTools;
     private View[] mToolViews;
@@ -70,12 +80,13 @@ public class EditFragment extends BaseFragment {
     private String mUserToken;
 
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType/*, int cameraType*/) {
+    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
         args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
         args.putInt(ARG_RETURN_TYPE, returnType);
+        args.putParcelable(ARG_DIMEN, dimens);
 //        args.putInt(ARG_CAMERA_TYPE, cameraType);
         EditFragment fragment = new EditFragment();
         fragment.setArguments(args);
@@ -90,6 +101,7 @@ public class EditFragment extends BaseFragment {
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
+        mDimens = args.getParcelable(ARG_DIMEN);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
@@ -122,43 +134,62 @@ public class EditFragment extends BaseFragment {
             }
         });
 
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        int displayWidth = metrics.widthPixels;
+        int height = mDimens.height * displayWidth / mDimens.width;
 
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentView = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
 
+        mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+
+        mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
         ViewGroup overlaysV = (ViewGroup) root.findViewById(R.id.overlays);
 
         mTools = setupTools(overlaysV);
         mToolViews = new View[mTools.length];
 
-        RecyclerView toolsListRV = (RecyclerView) root.findViewById(R.id.list_tools);
-        mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
-
         //Set up adapter that controls tool selection
-        EditContentToolAdapter toolsAdapter = new EditContentToolAdapter();
-        toolsAdapter.setTools(mTools);
-        toolsAdapter.setOnItemSelectedListener(new EditContentToolAdapter.OnItemSelectedListener() {
+        LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
-            public void onItemSelected(int i) {
-                onToolSelected(i);
+            public void onClick(View view) {
+                onToolSelected((Integer)view.getTag());
             }
-        });
+        };
 
-        toolsAdapter.selectItem(0);
+        toolHolders = new ToolHolder[mTools.length];
+
+        for (int i = 0; i < mTools.length; i++) {
+            EditContentTool tool = mTools[i];
+            View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
+            toolHolders[i] = new ToolHolder(toolView);
+            toolHolders[i].bind(tool);
+            toolView.setTag(i);
+            toolView.setOnClickListener(onClickListener);
+            toolsListRV.addView(toolView);
+        }
+
+        onToolSelected(0);
 
 
-        LinearLayoutManager toolsLLM = new LinearLayoutManager(root.getContext());
-        toolsLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-        toolsListRV.setAdapter(toolsAdapter);
-        toolsListRV.setLayoutManager(toolsLLM);
 
         return root;
     }
 
+
     protected void onToolSelected(int i) {
+        int oldSelectedTool = mSelectedTool;
+        mSelectedTool = i;
+
+        toolHolders[oldSelectedTool].setSelected(false);
+        toolHolders[mSelectedTool].setSelected(false);
+
+
         mToolOptionsView.removeAllViews();
         if (mToolViews[i] == null) {
             mToolViews[i] = mTools[i].createToolOptionsView(LayoutInflater.from(mToolOptionsView.getContext()), mToolOptionsView);
@@ -324,6 +355,37 @@ public class EditFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         if (mSubscription != null) mSubscription.unsubscribe();
+    }
+
+    public static class ToolHolder extends RecyclerView.ViewHolder {
+
+        public ImageView vIcon;
+        public TextView vLabel;
+
+        public ToolHolder(View itemView) {
+            super(itemView);
+            vIcon = (ImageView) itemView.findViewById(R.id.image_icon);
+            vLabel = (TextView) itemView.findViewById(R.id.text_label);
+
+        }
+
+        public void bind(EditContentTool tool) {
+            vLabel.setText(tool.getName());
+            vIcon.setImageResource(tool.getDrawable());
+        }
+
+        public void setSelected(boolean isSelected) {
+            if (isSelected) {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
+                vIcon.setColorFilter(new
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
+            } else {
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
+                vIcon.setColorFilter(null);
+            }
+        }
+
+
     }
 
    /* protected void hideKeyboard() {
