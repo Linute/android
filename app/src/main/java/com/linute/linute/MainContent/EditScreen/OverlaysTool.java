@@ -44,7 +44,7 @@ public class OverlaysTool extends EditContentTool {
         mOverlaysView.addView(overlayView);
 
         mOverlaysAdapter = new OverlaysAdapter(mOverlays);
-        mOverlaysAdapter.setOnItemSelectedListener(new EditContentToolAdapter.OnItemSelectedListener() {
+        mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
                 overlayView.setImageBitmap(mOverlays.get(i));
@@ -85,7 +85,7 @@ public class OverlaysTool extends EditContentTool {
         int mSelectedItem;
 
 
-        EditContentToolAdapter.OnItemSelectedListener mOnItemSelectedListener;
+        OnItemSelectedListener mOnItemSelectedListener;
 
 
         public OverlaysAdapter(ArrayList<Bitmap> overlays) {
@@ -130,7 +130,7 @@ public class OverlaysTool extends EditContentTool {
             return overlays.size();
         }
 
-        public void setOnItemSelectedListener(EditContentToolAdapter.OnItemSelectedListener onItemSelectedListener) {
+        public void setOnItemSelectedListener(OnItemSelectedListener onItemSelectedListener) {
             this.mOnItemSelectedListener = onItemSelectedListener;
         }
     }
@@ -204,5 +204,9 @@ public class OverlaysTool extends EditContentTool {
         }).start();
 
 
+    }
+
+    interface OnItemSelectedListener{
+        void onItemSelected(int i);
     }
 }

@@ -15,7 +15,6 @@
         android:id="@+id/final_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:layout_gravity="center">
 
         <!-- Photos and videos taken/uploaded by user in this view -->
@@ -38,14 +37,16 @@
         android:orientation="horizontal"
         android:id="@+id/list_tools"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="56dp"
+        android:layout_weight="1"
         android:background="#0b1e30"
         />
 
     <FrameLayout
         android:id="@+id/layout_tools_menu"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="56dp"
         android:background="#2c3256"
         />
 

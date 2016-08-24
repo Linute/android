@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
@@ -48,7 +49,10 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_URI = "content_uri";
     private static final String ARG_CONTENT_TYPE = "content_type";
     private static final String ARG_RETURN_TYPE = "return_type";
+    private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
+
+
     private ViewGroup mContentView;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
@@ -61,6 +65,7 @@ public class EditFragment extends BaseFragment {
 
     private Uri mUri;
     private ContentType mContentType;
+    private Dimens mDimens;
 
     private EditContentTool[] mTools;
     private View[] mToolViews;
@@ -75,12 +80,13 @@ public class EditFragment extends BaseFragment {
     private String mUserToken;
 
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType/*, int cameraType*/) {
+    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
         args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
         args.putInt(ARG_RETURN_TYPE, returnType);
+        args.putParcelable(ARG_DIMEN, dimens);
 //        args.putInt(ARG_CAMERA_TYPE, cameraType);
         EditFragment fragment = new EditFragment();
         fragment.setArguments(args);
@@ -95,6 +101,7 @@ public class EditFragment extends BaseFragment {
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
+        mDimens = args.getParcelable(ARG_DIMEN);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = sharedPreferences.getString("collegeId", "");
@@ -127,10 +134,15 @@ public class EditFragment extends BaseFragment {
             }
         });
 
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        int displayWidth = metrics.widthPixels;
+        int height = mDimens.height * displayWidth / mDimens.width;
 
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentView = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
+
+        mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
@@ -164,9 +176,10 @@ public class EditFragment extends BaseFragment {
         onToolSelected(0);
 
 
+
+
         return root;
     }
-
 
 
     protected void onToolSelected(int i) {
