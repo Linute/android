@@ -2,41 +2,64 @@ package com.linute.linute.MainContent.EditScreen;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.media.MediaMetadataRetriever;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
+import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegCommandAlreadyRunningException;
+import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedException;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Locale;
+
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
 import static rx.schedulers.Schedulers.io;
@@ -46,6 +69,7 @@ import static rx.schedulers.Schedulers.io;
  */
 public class EditFragment extends BaseFragment {
 
+    public static final String TAG = EditFragment.class.getSimpleName();
 
     private static final String ARG_URI = "content_uri";
     private static final String ARG_CONTENT_TYPE = "content_type";
@@ -59,6 +83,8 @@ public class EditFragment extends BaseFragment {
     private ViewGroup mToolOptionsView;
     private int mSelectedTool;
     private ToolHolder[] toolHolders;
+    private ViewGroup mOverlaysContainer;
+    private FFmpeg mFfmpeg;
 
     public enum ContentType {
         Photo, Video, UploadedPhoto, UploadedVideo
@@ -111,7 +137,63 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
+
+        mFfmpeg = FFmpeg.getInstance(getContext());
+        try {
+            mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
+                @Override
+                public void onStart() {
+                    showProgress(true);
+                }
+
+                @Override
+                public void onFailure() {
+                }
+
+                @Override
+                public void onSuccess() {
+                }
+
+                @Override
+                public void onFinish() {
+                    showProgress(false);
+                }
+            });
+        } catch (FFmpegNotSupportedException e) {
+            //handle
+            e.printStackTrace();
+            if (getActivity() == null) return;
+            new AlertDialog.Builder(getActivity())
+                    .setMessage("We're sorry. We can't process video on your device. Please let the dev team know what device you are using and we'll find a way.")
+                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            //take them back to camera screen
+                            CameraActivity activity = (CameraActivity) getActivity();
+                            if (activity != null) {
+                                activity.clearBackStack();
+                            }
+                        }
+                    });
+        }
+
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        View decorView = getActivity().getWindow().getDecorView();
+// Hide both the navigation bar and the status bar.
+// SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
+// a general rule, you should design your app to hide the status bar whenever you
+// hide the navigation bar.
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        decorView.setSystemUiVisibility(uiOptions);
+    }
+
+
 
     @Nullable
     @Override
@@ -150,9 +232,9 @@ public class EditFragment extends BaseFragment {
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
-        ViewGroup overlaysV = (ViewGroup) root.findViewById(R.id.overlays);
+        mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
 
-        mTools = setupTools(overlaysV);
+        mTools = setupTools(mOverlaysContainer);
         mToolViews = new View[mTools.length];
 
         //Set up adapter that controls tool selection
@@ -222,8 +304,48 @@ public class EditFragment extends BaseFragment {
                 break;
             case Video:
             case UploadedVideo:
-                SurfaceView surface = new SurfaceView(getContext());
 
+                final CheckBox mPlaying = new CheckBox(getContext());
+                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
+
+                mPlaying.setLayoutParams(params);
+                mPlaying.setChecked(true);
+                mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
+                final TextureVideoView mVideoView = new TextureVideoView(getContext());
+
+                mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if (isChecked) mVideoView.start();
+                        else mVideoView.pause();
+                    }
+                });
+
+//                vBottom.addView(mPlaying);
+
+                mVideoView.setBackgroundResource(R.color.pure_black);
+
+                mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                if (mDimens.isFrontFacing) mVideoView.setScaleX(-1);
+
+                mVideoView.setVideoURI(mUri);
+                mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mVideoView.start();
+                    }
+                });
+
+                mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        if (mPlaying.isChecked()) mVideoView.start();
+                    }
+                });
+                mContentView = mVideoView;
+                mContentContainer.addView(mContentView);
                 break;
         }
     }
@@ -382,11 +504,7 @@ public class EditFragment extends BaseFragment {
                     });
         }
     }
-
-    private void processVideo(ProcessingOptions options) {
-
-    }
-
+    
     @Override
     public void onStop() {
         super.onStop();
@@ -433,4 +551,242 @@ public class EditFragment extends BaseFragment {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mContentContainer.getWindowToken(), 0);
     }*/
+
+
+    Subscription mVideoProcessSubscription;
+    
+    private void processVideo(final ProcessingOptions options) {
+//        if (getActivity() == null || mVideoLink == null || mVideoState != VS_IDLE) return;
+
+        /*if (mEditText.hasFocus()) {
+            mEditText.clearFocus();
+            hideKeyboard();
+            mEditText.setVisibility(View.GONE);
+            if (!mEditText.getText().toString().trim().isEmpty()) {
+                mTextView.setText(mEditText.getText().toString());
+                mTextView.setVisibility(View.VISIBLE);
+            }
+
+            return;
+        }*/
+
+//        mPlaying.setChecked(false);
+
+
+
+        final String outputFile = ImageUtility.getVideoUri();
+        showProgress(true);
+
+        mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
+            @Override
+            public void call(final Subscriber<? super Uri> subscriber) {
+
+                String cmd = "-i " + new File(mUri.getPath()).getAbsolutePath() + " -r 24 "; //input file
+
+                boolean widthIsGreater = mDimens.height < mDimens.width;
+                String overlay;
+
+                int newWidth;
+                int newHeight;
+                if (widthIsGreater) {
+                    if (mDimens.width > 720) {
+                        newWidth = 720;
+                        newHeight = ((mDimens.height * newWidth / mDimens.width / 2)) * 2;
+                    } else {
+                        newWidth = mDimens.width;
+                        newHeight = mDimens.height;
+                    }
+                } else {
+                    if (mDimens.height > 720) {
+                        newHeight = 720;
+                        newWidth = ((newHeight * mDimens.width / mDimens.height / 2)) * 2;
+                    } else {
+                        newWidth = mDimens.width;
+                        newHeight = mDimens.height;
+                    }
+                }
+
+                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                //Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
+                //Log.i(TAG, "call: rotation " + mDimens.rotation);
+
+                 overlay = saveViewAsImage(mOverlaysContainer);
+
+                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
+                //Log.i(TAG, "call: " + mTextView.getTop());
+
+                if (overlay != null) {
+                    cmd += "-i " + overlay + " -filter_complex ";
+                    //scale vid
+                    cmd += String.format(Locale.US,
+                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
+
+                    if (mDimens.isFrontFacing) {
+                        //rotate vid
+                        cmd += "[rot]hflip[tran];";
+                    }
+
+                    if (isPortrait()) {
+                        cmd += String.format(Locale.US,
+                                "[1:v]scale=-1:%d[over];", newHeight);
+                    } else {
+                        cmd += String.format(Locale.US,
+                                "[1:v]scale=%d:-1[over];", newWidth);
+                    }
+
+                    Point coord = new Point(0, 0);
+                    //overlay
+                    cmd += String.format(Locale.US,
+                            "%s[over]overlay=%d:%d ", mDimens.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
+                } else {
+                    if (mDimens.isFrontFacing) {
+                        cmd += String.format(Locale.US,
+                                "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
+                    } else {
+                        cmd += String.format(Locale.US,
+                                "-filter_complex scale=%d:%d ", newWidth, newHeight);
+                    }
+                }
+                //}
+
+                cmd += "-preset superfast "; //good idea to set threads?
+                cmd += String.format(Locale.US,
+                        "-metadata:s:v rotate=%d ", mDimens.rotation);
+                cmd += "-c:a copy "; //copy instead of re-encoding audio
+                cmd += outputFile; //output file;
+
+                try {
+                    mFfmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
+
+                        long startTime = 0;
+
+                        @Override
+                        public void onSuccess(String message) {
+                            //get first frame in video as bitmap
+                            if (getActivity() == null) return;
+
+                            MediaMetadataRetriever media = new MediaMetadataRetriever();
+                            media.setDataSource(outputFile);
+                            Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
+                            media.release();
+
+                            ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
+                            subscriber.onNext(image);
+                        }
+
+                        @Override
+                        public void onProgress(String message) {
+                            //Log.i(TAG, "onProgress: " + message);
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+//                            Log.i(TAG, "onFailure: excute" + message);
+//                            mVideoState = VS_IDLE;
+                            subscriber.onCompleted();
+                        }
+
+                        @Override
+                        public void onStart() {
+//                            mVideoState = VS_PROCESSING;
+                            startTime = System.currentTimeMillis();
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            Log.i(TAG, "processed video in milliseconds: " + (System.currentTimeMillis() - startTime));
+                        }
+                    });
+                } catch (FFmpegCommandAlreadyRunningException e) {
+                    e.printStackTrace();
+                }
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Uri>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Uri image) {
+                        if (mReturnType != CameraActivity.SEND_POST) {
+                            Intent i = new Intent()
+                                    .putExtra("video", Uri.parse(outputFile))
+                                    .putExtra("image", image)
+                                    .putExtra("privacy", options.postAsAnon)
+                                    .putExtra("type", CameraActivity.VIDEO)
+                                    /*.putExtra("title", mTextView.getText().toString())*/;
+
+//                            mProgressDialog.dismiss();
+                            getActivity().setResult(Activity.RESULT_OK, i);
+                            getActivity().finish();
+                        } else {
+                            uploadVideo(image.toString(), outputFile, options);
+                        }
+                    }
+                });
+    }
+    public String saveViewAsImage(View view) {
+        try {
+            File f = ImageUtility.getTempFile(getContext(), "overlay", ".png");
+            FileOutputStream outputStream = new FileOutputStream(f);
+            view.setDrawingCacheEnabled(true);
+            view.buildDrawingCache();
+
+            //rotate the png so it can overlay correctly
+            Matrix m = new Matrix();
+            m.setRotate(360 - mDimens.rotation);
+
+            Bitmap bm = Bitmap.createBitmap(view.getDrawingCache(), 0, 0, view.getWidth(), view.getHeight(), m, true);
+            view.destroyDrawingCache();
+            bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.close();
+            return f.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private boolean isPortrait() {
+        return mDimens.rotation == 90 || mDimens.rotation == 270;
+    }
+
+
+    private void uploadVideo(String imagepath, String videopath, ProcessingOptions options) {
+
+
+        PendingUploadPost post = new PendingUploadPost(
+                ObjectId.get().toString(),
+                mCollegeId,
+                options.postAsAnon ? 1 : 0,
+                options.allowAnonComments ? 0 : 1,
+//                mTextView.getText().toString(),
+                "",
+                2,
+                imagepath,
+                videopath,
+                mUserId,
+                mUserToken
+        );
+
+        showProgress(false);
+        Intent result = new Intent();
+        result.putExtra(PendingUploadPost.PENDING_POST_KEY, post);
+        Toast.makeText(getActivity(), "Uploading video in background...", Toast.LENGTH_SHORT).show();
+
+        getActivity().setResult(Activity.RESULT_OK, result);
+        getActivity().finish();
+    }
+
+
 }

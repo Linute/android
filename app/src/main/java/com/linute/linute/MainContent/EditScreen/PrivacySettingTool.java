@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.EditScreen;
 
 import android.net.Uri;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,23 +29,40 @@ public class PrivacySettingTool extends EditContentTool {
 
 
         View leftSwitch = root.findViewById(R.id.switch_left);
-        TextView postingAsHeader = (TextView)leftSwitch.findViewById(R.id.text_heading_top);
-        TextView postingAsLeftText = (TextView)leftSwitch.findViewById(R.id.text_heading_left);
-        TextView postingAsRightText = (TextView)leftSwitch.findViewById(R.id.text_heading_right);
-        Switch postingAsSwitch = (Switch)leftSwitch.findViewById(R.id.switch_main);
+        TextView postingAsHeader = (TextView) leftSwitch.findViewById(R.id.text_heading_top);
+        TextView postingAsLeftText = (TextView) leftSwitch.findViewById(R.id.text_heading_left);
+        TextView postingAsRightText = (TextView) leftSwitch.findViewById(R.id.text_heading_right);
+        Switch postingAsSwitch = (Switch) leftSwitch.findViewById(R.id.switch_main);
         postingAsHeader.setText("Posting as");
-        postingAsLeftText.setText("Self");
-        postingAsRightText.setText("Anon");
 
+        postingAsLeftText.setText("");
+        postingAsRightText.setText("");
+        postingAsSwitch.setTextOn("Anon");
+        postingAsSwitch.setTextOff("Self");
 
         View rightSwitch = root.findViewById(R.id.switch_right);
-        TextView anonCommentsHeader = (TextView)rightSwitch.findViewById(R.id.text_heading_top);
-        TextView anonCommentsLeftText = (TextView)rightSwitch.findViewById(R.id.text_heading_left);
-        TextView anonCommentsRightText = (TextView)rightSwitch.findViewById(R.id.text_heading_right);
-        Switch anonCommentsSwitch = (Switch)rightSwitch.findViewById(R.id.switch_main);
+        TextView anonCommentsHeader = (TextView) rightSwitch.findViewById(R.id.text_heading_top);
+        TextView anonCommentsLeftText = (TextView) rightSwitch.findViewById(R.id.text_heading_left);
+        TextView anonCommentsRightText = (TextView) rightSwitch.findViewById(R.id.text_heading_right);
+        Switch anonCommentsSwitch = (Switch) rightSwitch.findViewById(R.id.switch_main);
         anonCommentsHeader.setText("Anon comments");
-        anonCommentsLeftText.setText("Yes");
-        anonCommentsRightText.setText("No");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            postingAsSwitch.setShowText(false);
+            postingAsLeftText.setText("Anon");
+            postingAsRightText.setText("Self");
+
+            anonCommentsSwitch.setShowText(false);
+            anonCommentsLeftText.setText("Yes");
+            anonCommentsRightText.setText("No");
+
+        } else {
+            postingAsSwitch.setTextOff("Self");
+            postingAsSwitch.setTextOn("Anon");
+
+            anonCommentsSwitch.setTextOff("No");
+            anonCommentsSwitch.setTextOn("Yes");
+        }
 
 
         postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
