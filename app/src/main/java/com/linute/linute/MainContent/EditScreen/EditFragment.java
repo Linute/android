@@ -141,6 +141,7 @@ public class EditFragment extends BaseFragment {
         int displayWidth = metrics.widthPixels;
         int height = mDimens.height * displayWidth / mDimens.width;
 
+
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
@@ -229,12 +230,23 @@ public class EditFragment extends BaseFragment {
 
     private EditContentTool[] setupTools(ViewGroup overlay) {
 
-        return new EditContentTool[]{
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        int displayWidth = metrics.widthPixels;
+        int height = mDimens.height * displayWidth / mDimens.width;
+
+        CropTool tool;
+
+        EditContentTool[] tools = new EditContentTool[]{
                 new PrivacySettingTool(mUri, mContentType, overlay),
-                new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null)) ,
+                tool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null)) ,
                 new StickersTool(mUri, mContentType, overlay),
                 new OverlaysTool(mUri, mContentType, overlay)
         };
+
+        tool.MAX_SIZE = height;
+        tool.MIN_SIZE = displayWidth/16 * 9;
+
+        return tools;
     }
 
     private void onDoneButtonPress() {

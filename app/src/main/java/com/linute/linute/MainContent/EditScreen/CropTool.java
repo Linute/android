@@ -26,8 +26,8 @@ public class CropTool extends EditContentTool {
     private View botFade;
     private final View mCropperLayout;
 
-    private int MIN_SIZE = 300;
-    private int MAX_SIZE = 600;
+    public int MIN_SIZE = 300;
+    public int MAX_SIZE = 600;
     private final View baseContentView;
 
 
