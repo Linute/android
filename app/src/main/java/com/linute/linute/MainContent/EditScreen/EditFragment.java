@@ -5,23 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,7 +31,6 @@ import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.bson.types.ObjectId;
 
@@ -58,7 +54,7 @@ public class EditFragment extends BaseFragment {
     private static final String ARG_CAMERA_TYPE = "camera_type";
 
 
-    private ViewGroup mContentView;
+    private ViewGroup mContentContainer;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
     private int mSelectedTool;
@@ -83,6 +79,8 @@ public class EditFragment extends BaseFragment {
     private String mCollegeId;
     private String mUserId;
     private String mUserToken;
+
+    View mContentView;
 
 
     public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
@@ -144,7 +142,7 @@ public class EditFragment extends BaseFragment {
         int height = mDimens.height * displayWidth / mDimens.width;
 
         mFinalContentView = root.findViewById(R.id.final_content);
-        mContentView = (ViewGroup) root.findViewById(R.id.base_content);
+        mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
         setupMainContent(mUri, mContentType);
 
         mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
@@ -181,8 +179,6 @@ public class EditFragment extends BaseFragment {
         onToolSelected(0);
 
 
-
-
         return root;
     }
 
@@ -192,8 +188,10 @@ public class EditFragment extends BaseFragment {
         mSelectedTool = i;
 
         toolHolders[oldSelectedTool].setSelected(false);
-        toolHolders[mSelectedTool].setSelected(false);
+        toolHolders[mSelectedTool].setSelected(true);
 
+        mTools[oldSelectedTool].onClose();
+        mTools[mSelectedTool].onOpen();
 
         mToolOptionsView.removeAllViews();
         if (mToolViews[i] == null) {
@@ -207,64 +205,33 @@ public class EditFragment extends BaseFragment {
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
-                ImageView imageView = new ImageView(getContext());
+                MoveZoomImageView imageView = new MoveZoomImageView(getContext());
+                imageView.leftBound = 0;
+                imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
+                imageView.topBound = 0;
+                imageView.botBound = -2;
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                mContentView.addView(imageView);
-                imageView.setImageURI(uri);
+                mContentContainer.addView(imageView);
+
+                imageView.setImageBitmap(BitmapFactory.decodeFile(uri.getPath()));
+                imageView.setActive(false);
+
+                mContentView = imageView;
+//                imageView.setImageURI(uri);
                 break;
             case Video:
             case UploadedVideo:
                 SurfaceView surface = new SurfaceView(getContext());
-                mPlaying = new CheckBox(getContext());
-                FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 
-                mPlaying.setLayoutParams(params);
-                mPlaying.setChecked(true);
-                mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
-                mVideoView = new TextureVideoView(getContext());
-
-                mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if (isChecked) mVideoView.start();
-                        else mVideoView.pause();
-                    }
-                });
-
-                vBottom.addView(mPlaying);
-
-                mVideoLink = getArguments().getParcelable(BITMAP_URI);
-                mVideoView.setBackgroundResource(R.color.pure_black);
-
-                mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-                if (mVideoDimen.isFrontFacing) mVideoView.setScaleX(-1);
-
-                mVideoView.setVideoURI(mVideoLink);
-                mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                    @Override
-                    public void onPrepared(MediaPlayer mp) {
-                        mVideoView.start();
-                    }
-                });
-
-                mVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        if (mPlaying.isChecked()) mVideoView.start();
-                    }
-                });
-                container.addView(mVideoView);
                 break;
         }
     }
 
     private EditContentTool[] setupTools(ViewGroup overlay) {
+
         return new EditContentTool[]{
                 new PrivacySettingTool(mUri, mContentType, overlay),
-                new CropTool(mUri, mContentType, overlay),
+                new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null)) ,
                 new StickersTool(mUri, mContentType, overlay),
                 new OverlaysTool(mUri, mContentType, overlay)
         };
@@ -432,6 +399,10 @@ public class EditFragment extends BaseFragment {
         }
 
 
+    }
+
+    interface Activatable{
+        void setActive(boolean active);
     }
 
    /* protected void hideKeyboard() {
