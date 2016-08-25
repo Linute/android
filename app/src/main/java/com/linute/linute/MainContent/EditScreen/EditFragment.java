@@ -369,18 +369,28 @@ public class EditFragment extends BaseFragment {
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay);
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
-        CropTool cropTool;
-        cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null), mDimens);
-        cropTool.MAX_SIZE = height;
-        cropTool.MIN_SIZE = displayWidth/16 * 9;
 
-        return new EditContentTool[]{
-                privacySettingTool,
-                cropTool,
-                textTool,
-                stickersTool,
-                overlaysTool
-        };
+        if(mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
+            CropTool cropTool;
+            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens);
+            cropTool.MAX_SIZE = height;
+            cropTool.MIN_SIZE = displayWidth / 16 * 9;
+
+            return new EditContentTool[]{
+                    privacySettingTool,
+                    cropTool,
+                    textTool,
+                    stickersTool,
+                    overlaysTool
+            };
+        }else{
+            return new EditContentTool[]{
+                    privacySettingTool,
+                    textTool,
+                    stickersTool,
+                    overlaysTool
+            };
+        }
 
     }
 
