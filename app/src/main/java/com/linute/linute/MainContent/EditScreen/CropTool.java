@@ -44,8 +44,7 @@ public class CropTool extends EditContentTool {
 
     public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, EditFragment.Activatable activatable, Dimens dimens) {
         super(uri, type, overlays);
-        mCropperLayout = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tools_cropper_overlay, mOverlaysView, false);
-        mCropperLayout.setAlpha(.3f);
+        mCropperLayout = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tools_overlay_crop, mOverlaysView, false);
         ((ViewGroup)(mOverlaysView.getParent())).addView(mCropperLayout);
 
         topBar = mCropperLayout.findViewById(R.id.top_bar);
@@ -250,7 +249,9 @@ public class CropTool extends EditContentTool {
     @Override
     public void onOpen() {
         super.onOpen();
-        mCropperLayout.setAlpha(1);
+        int color = 0xCC000000 + mOverlaysView.getContext().getResources().getColor(R.color.colorPrimary);
+        topFade.setBackgroundColor(color);
+        botFade.setBackgroundColor(color);
         topBar.setOnTouchListener(touchListener);
         botBar.setOnTouchListener(touchListener);
         topBar.setVisibility(View.VISIBLE);
@@ -262,7 +263,9 @@ public class CropTool extends EditContentTool {
     @Override
     public void onClose() {
         super.onClose();
-        mCropperLayout.setAlpha(.7f);
+        int color = 0xFF000000 + mOverlaysView.getContext().getResources().getColor(R.color.colorPrimary);
+        topFade.setBackgroundColor(color);
+        botFade.setBackgroundColor(color);
         topBar.setOnTouchListener(null);
         botBar.setOnTouchListener(null);
         topBar.setVisibility(View.GONE);

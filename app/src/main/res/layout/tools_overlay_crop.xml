@@ -7,7 +7,7 @@
         android:id="@+id/top_fade"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="#CC000000"
+        android:background="@color/colorPrimary"
         android:layout_alignParentTop="true"
         />
 
@@ -33,7 +33,7 @@
         android:id="@id/bot_fade"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="#CC000000"
+        android:background="@color/colorPrimary"
         android:layout_alignParentBottom="true"
         />
 
