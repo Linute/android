@@ -137,45 +137,46 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
+        if(mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
+            mFfmpeg = FFmpeg.getInstance(getContext());
+            try {
+                mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
+                    @Override
+                    public void onStart() {
+                        showProgress(true);
+                    }
 
-        mFfmpeg = FFmpeg.getInstance(getContext());
-        try {
-            mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
-                @Override
-                public void onStart() {
-                    showProgress(true);
-                }
+                    @Override
+                    public void onFailure() {
+                    }
 
-                @Override
-                public void onFailure() {
-                }
+                    @Override
+                    public void onSuccess() {
+                    }
 
-                @Override
-                public void onSuccess() {
-                }
-
-                @Override
-                public void onFinish() {
-                    showProgress(false);
-                }
-            });
-        } catch (FFmpegNotSupportedException e) {
-            //handle
-            e.printStackTrace();
-            if (getActivity() == null) return;
-            new AlertDialog.Builder(getActivity())
-                    .setMessage("We're sorry. We can't process video on your device. Please let the dev team know what device you are using and we'll find a way.")
-                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            //take them back to camera screen
-                            CameraActivity activity = (CameraActivity) getActivity();
-                            if (activity != null) {
-                                activity.clearBackStack();
+                    @Override
+                    public void onFinish() {
+                        showProgress(false);
+                    }
+                });
+            } catch (FFmpegNotSupportedException e) {
+                //handle
+                e.printStackTrace();
+                if (getActivity() == null) return;
+                new AlertDialog.Builder(getActivity())
+                        .setMessage("We're sorry. We can't process video on your device. Please let the dev team know what device you are using and we'll find a way.")
+                        .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                //take them back to camera screen
+                                CameraActivity activity = (CameraActivity) getActivity();
+                                if (activity != null) {
+                                    activity.clearBackStack();
+                                }
                             }
-                        }
-                    }).create().show();
+                        }).create().show();
+            }
         }
 
     }
@@ -243,6 +244,7 @@ public class EditFragment extends BaseFragment {
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.i("AAA", "onclick "+view.getTag());
                 onToolSelected((Integer)view.getTag());
             }
         };
