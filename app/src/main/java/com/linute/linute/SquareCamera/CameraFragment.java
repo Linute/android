@@ -361,7 +361,7 @@ public class CameraFragment extends Fragment {
     private void goToVideoEditFragment(Uri uri, Dimens videoDimen) {
         if (getActivity() != null) {
             try {
-                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+                final int returnType = ((CameraActivity) getActivity()).getReturnType();
 
                 getFragmentManager()
                         .beginTransaction()
@@ -382,7 +382,7 @@ public class CameraFragment extends Fragment {
     // flash is going to go off.
     private void setupFlashMode() {
         if (mFlashContainer == null || getContext() == null) return;
-        ImageView view = ((ImageView)mFlashContainer.findViewById(R.id.flash_icon));
+        ImageView view = ((ImageView) mFlashContainer.findViewById(R.id.flash_icon));
         if (mFlashOn) view.setColorFilter(Color.YELLOW, PorterDuff.Mode.MULTIPLY);
         else view.clearColorFilter();
 
@@ -561,14 +561,15 @@ public class CameraFragment extends Fragment {
         mCamera.setParameters(parameters);
     }
 
-    private Size determineBestSize(List<Size> sizes) {
+    private Camera.Size determineBestSize(List<Camera.Size> sizes) {
 
-        Size bestSize = null;
+        Camera.Size bestSize = null;
 
-        for (Size size : sizes){
-            if (size.width > MAX_RESOLUTION || size.height > MAX_RESOLUTION)
-                continue;
-            if (betterSize(bestSize, size)){
+        for (Camera.Size size : sizes) {
+            boolean isDesireRatio = (size.width / 4) == (size.height / 3) || (size.height / 4) == (size.width / 3);
+            boolean isBetterSize = (bestSize == null) || size.width > bestSize.width;
+
+            if (isDesireRatio && isBetterSize && size.height < MAX_RESOLUTION && size.width < MAX_RESOLUTION) {
                 bestSize = size;
             }
         }
@@ -579,19 +580,6 @@ public class CameraFragment extends Fragment {
         }
 
         return bestSize;
-    }
-
-
-    private boolean betterSize(Size oldSize, Size newSize){
-        if ((newSize.width * 4 == newSize.height * 3) || newSize.height * 4 == newSize.width * 3){
-            if (oldSize == null) return true;
-            else {
-                if ((newSize.width > oldSize.width && newSize.height > oldSize.height ) ||
-                        (newSize.width > oldSize.height && newSize.height > oldSize.width))
-                    return true;
-            }
-        }
-        return false;
     }
 
     private int getFrontCameraID() {
@@ -724,7 +712,6 @@ public class CameraFragment extends Fragment {
     }
 
 
-
     private void takeImageOfView() {
 //        subscriber.onNext(ImageUtility.savePicture(getActivity(), mPreviewView.getBitmap()));
         mProcessImageSubscriptions = Observable
@@ -737,7 +724,7 @@ public class CameraFragment extends Fragment {
                             public void call(Void aVoid) {
                                 if (getActivity() == null) return;
 
-                                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+                                final int returnType = ((CameraActivity) getActivity()).getReturnType();
 
                                 mStartCameraSubscription = Observable
                                         .just(saveBitmap())
@@ -759,7 +746,7 @@ public class CameraFragment extends Fragment {
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo,returnType, photoDimens),
+                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo, returnType, photoDimens),
                                                                         AbstractEditSaveFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();
@@ -775,7 +762,7 @@ public class CameraFragment extends Fragment {
     }
 
 
-    private Uri saveBitmap(){
+    private Uri saveBitmap() {
         //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
         //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
         return ImageUtility.savePicture(getContext(),
@@ -783,7 +770,11 @@ public class CameraFragment extends Fragment {
                         0,
                         0,
                         mPreviewView.getBitmap().getWidth(),
-                        (int)(mPreviewView.getBitmap().getWidth() * 6f / 5f)));
+                        ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
+                                (int) (mPreviewView.getBitmap().getWidth() * 6f / 5f) :
+                                mPreviewView.getBitmap().getWidth()
+                )
+        );
     }
 
     private Void stopCamera() {
@@ -841,7 +832,6 @@ public class CameraFragment extends Fragment {
         Camera.Parameters p = mCamera.getParameters();
         Size vidSize = p.getSupportedVideoSizes() != null ? determineBestSize(p.getSupportedVideoSizes()) : p.getPreviewSize();
 
-
         mVideoDimen = new Dimens(
                 vidSize.width,
                 vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
@@ -861,7 +851,7 @@ public class CameraFragment extends Fragment {
         final Uri imageUri;
 
         try {
-            imageUri = Uri.parse(ImageUtility.getTempFilePath(getActivity(), "uncropped_video", ".mp4"));
+            imageUri = Uri.parse(ImageUtility.getVideoUri()); //Uri.parse(ImageUtility.getTempFilePath(getActivity(), "uncropped_video", ".mp4"));
             mMediaRecorder.setOutputFile(imageUri.getPath());
 
             //called when reached file size limit or max duration of video

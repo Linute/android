@@ -20,7 +20,7 @@
     <com.linute.linute.SquareCamera.CustomCameraPreview
         android:id="@+id/camera_preview_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@id/toolbar"
         android:background="@android:color/black"/>
 

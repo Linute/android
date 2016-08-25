@@ -162,7 +162,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                 }
         );
 
-        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.right_labels);
+        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.create_menu);
         final View fabCloseOverlay = rootView.findViewById(R.id.fab_close_overlay);
         fabCloseOverlay.setOnTouchListener(
                 new View.OnTouchListener() {
@@ -170,7 +170,6 @@ public class DiscoverHolderFragment extends BaseFragment {
                     public boolean onTouch(View view, MotionEvent motionEvent) {
                         if (mFloatingActionsMenu.isExpanded())
                             mFloatingActionsMenu.collapse();
-
                         return false;
                     }
                 });
@@ -189,10 +188,9 @@ public class DiscoverHolderFragment extends BaseFragment {
                         }
                 );
 
-        mFloatingActionsMenu.findViewById(R.id.fab_upload).setOnClickListener(
+        mFloatingActionsMenu.findViewById(R.id.create_upload).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
-
                     public void onClick(View v) {
                         if (getActivity() == null) return;
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
@@ -201,8 +199,8 @@ public class DiscoverHolderFragment extends BaseFragment {
                 }
         );
 
-        mFloatingActionsMenu.findViewById(R.id.fab_text).
-                setOnClickListener(new View.OnClickListener() {
+        mFloatingActionsMenu.findViewById(R.id.create_text).setOnClickListener(
+                new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (getActivity() == null) return;
@@ -214,13 +212,6 @@ public class DiscoverHolderFragment extends BaseFragment {
 
         return rootView;
     }
-
-
-    public void closeFAM() {
-        if (mFloatingActionsMenu.isExpanded())
-            mFloatingActionsMenu.collapse();
-    }
-
 
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
