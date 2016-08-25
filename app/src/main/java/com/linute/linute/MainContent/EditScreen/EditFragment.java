@@ -368,7 +368,7 @@ public class EditFragment extends BaseFragment {
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay);
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
-        TextTool textTool = new TextTool(mUri, mContentType, overlay);
+        TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
         CropTool cropTool;
         cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null));
         cropTool.MAX_SIZE = height;

@@ -43,6 +43,9 @@ public class TextTool extends EditContentTool {
             for (TextView tv : mextViews) {
                 tv.setVisibility(View.VISIBLE);
             }
+            if(mextViews.length>0)
+            showKeyboard(mextViews[0]);
+
         }
 
         ;
@@ -63,7 +66,7 @@ public class TextTool extends EditContentTool {
 
     TextMode[] textModes;
 
-    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
+    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim) {
         super(uri, type, overlays);
 
         View rootView = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
@@ -82,6 +85,7 @@ public class TextTool extends EditContentTool {
         midTV.setVisibility(View.GONE);
         midET.setVisibility(View.GONE);
 
+        midTV.setY(dim.height/2);
 
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -121,8 +125,7 @@ public class TextTool extends EditContentTool {
                     case MotionEvent.ACTION_UP:
                         if(System.currentTimeMillis() - timeDown < 400
                                 && Math.abs(motionEvent.getRawY()-downY) < 20){
-                            midET.setVisibility(View.VISIBLE);
-                            view.setVisibility(View.GONE);
+                            swapSnapchatET();
                         }
                         return true;
                 }
@@ -140,7 +143,13 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.sticker_icon, midTV),//Snapchat
+                new TextMode(R.drawable.sticker_icon, midTV){
+                    @Override
+                    public void onSelected() {
+                        super.onSelected();
+                        swapSnapchatET();
+                    }
+                },//Snapchat
                 new TextMode(R.drawable.sticker_icon, topTV, botTV),//Full Meme
                 new TextMode(R.drawable.sticker_icon, topTV),//Top
                 new TextMode(R.drawable.sticker_icon, botTV),//Bottom
@@ -149,6 +158,12 @@ public class TextTool extends EditContentTool {
 
         mOverlaysView.addView(rootView);
 
+    }
+
+    public void swapSnapchatET() {
+        midET.setVisibility(View.VISIBLE);
+        midTV.setVisibility(View.GONE);
+        showKeyboard(midET);
     }
 
     private int mSelected;
@@ -184,7 +199,7 @@ public class TextTool extends EditContentTool {
         return rootView;
     }
 
-    private void showKeyboard(View view){
+    private static void showKeyboard(View view){
         view.requestFocus();
         InputMethodManager lManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(view, 0);
