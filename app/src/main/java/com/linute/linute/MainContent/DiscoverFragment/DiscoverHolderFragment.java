@@ -166,7 +166,6 @@ public class DiscoverHolderFragment extends BaseFragment {
         mFloatingActionsMenu.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mFloatingActionsMenu.collapse();
                 if (getActivity() == null) return;
                 Intent i = new Intent(getActivity(), CameraActivity.class);
                 i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
@@ -179,7 +178,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 if (getActivity() == null) return;
-                mFloatingActionsMenu.collapse();
                 Intent i = new Intent(getActivity(), GalleryActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
@@ -189,7 +187,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 if (getActivity() == null) return;
-                mFloatingActionsMenu.collapse();
                 Intent i = new Intent(getActivity(), CreateStatusActivity.class);
                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
             }
@@ -283,6 +280,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         }
 
         mAppBarLayout.setExpanded(true, false);
+        mFloatingActionsMenu.collapse();
     }
 
 

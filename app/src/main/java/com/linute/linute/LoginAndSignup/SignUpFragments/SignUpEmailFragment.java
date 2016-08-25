@@ -251,6 +251,7 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    //Log.d(TAG, "onResponse: "+response.body().string());
                     if (response.code() == 200) { //email was good
                         response.body().close();
                         mSignUpInfo.setEmail(email);
