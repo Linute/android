@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -32,6 +34,7 @@ public class GalleryActivity extends FragmentActivity {
 
 
     public static final String TAG = GalleryFragment.class.getSimpleName();
+    public static final int REQ_READ_EXT_STORAGE = 52;
 
     private int SELECT_IMAGE_OR_VID = 9;
 
@@ -51,8 +54,10 @@ public class GalleryActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_gallery);
         mGalleryType = getIntent().getIntExtra(ARG_GALLERY_TYPE, CameraActivity.ALL);
-        if (hasCameraAndWritePermission()) {
+        if (hasReadPermission()) {
             getImageOrVideo();
+        }else{
+            getReadPermission();
         }
     }
 
@@ -68,7 +73,8 @@ public class GalleryActivity extends FragmentActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (!hasCameraAndWritePermission()) { //pop if we don't have permissions
+
+        if (!hasReadPermission()) { //pop if we don't have permissions
 //            getFragmentManager().popBackStack();
             finish();
             return;
@@ -153,9 +159,25 @@ public class GalleryActivity extends FragmentActivity {
     }
 
     //didnt get image, so popbackstack
-//    finish();
-
+    finish();
 }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQ_READ_EXT_STORAGE:
+            if(hasReadPermission()){
+                getImageOrVideo();
+            }else{
+                finish();
+            }
+                break;
+        }
+
+
+    }
 
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
@@ -312,8 +334,11 @@ public class GalleryActivity extends FragmentActivity {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean hasCameraAndWritePermission() {
-        return hasPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                && hasPermission(Manifest.permission.CAMERA) && hasPermission(Manifest.permission.RECORD_AUDIO);
+    private boolean hasReadPermission() {
+        return hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+    }
+
+    private void getReadPermission(){
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQ_READ_EXT_STORAGE);
     }
 }

@@ -255,7 +255,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         //updateToolbar();
 
        /* if (isDM()) {
-            toolbar.setOnClickListener(new View.OnClickListener() {
+            toolbar.setOnItemTouchListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     MainActivity activity = (MainActivity) getActivity();

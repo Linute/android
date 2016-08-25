@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    tools:showIn="@layout/tool_options_privacy">
+
+    <TextView
+        android:id="@+id/text_heading_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Posting as"
+        android:layout_above="@+id/switch_main"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/pure_white"
+        />
+
+    <Switch
+        android:id="@id/switch_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/text_heading_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Self"
+        android:layout_toLeftOf="@id/switch_main"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="8dp"
+        android:textColor="@color/pure_white"
+
+        />
+
+    <TextView
+        android:id="@+id/text_heading_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/text_heading_left"
+        tools:text="Anon"
+        android:layout_toRightOf="@id/switch_main"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="8dp"
+        android:textColor="@color/pure_white"
+        />
+
+
+
+</RelativeLayout>

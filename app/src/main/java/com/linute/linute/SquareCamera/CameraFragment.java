@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
@@ -37,6 +38,8 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
+import com.linute.linute.MainContent.EditScreen.Dimens;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
 
 import java.io.IOException;
@@ -70,7 +73,7 @@ public class CameraFragment extends Fragment {
     private MediaRecorder mMediaRecorder;
 
     private ImageView mTakePhotoBtn;
-    private EditSaveVideoFragment.VideoDimen mVideoDimen;
+    private Dimens mVideoDimen;
     private View mFlashContainer;
     private View mReverseContainer;
     private CustomView mFlashTop;
@@ -355,14 +358,16 @@ public class CameraFragment extends Fragment {
                 .show();
     }
 
-    private void goToVideoEditFragment(Uri uri, EditSaveVideoFragment.VideoDimen videoDimen) {
+    private void goToVideoEditFragment(Uri uri, Dimens videoDimen) {
         if (getActivity() != null) {
             try {
+                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+
                 getFragmentManager()
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditSaveVideoFragment.newInstance(uri, videoDimen),
+                                EditFragment.newInstance(uri, EditFragment.ContentType.Video, returnType, videoDimen),
                                 AbstractEditSaveFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -731,6 +736,9 @@ public class CameraFragment extends Fragment {
                             @Override
                             public void call(Void aVoid) {
                                 if (getActivity() == null) return;
+
+                                final int returnType = ((CameraActivity)getActivity()).getReturnType();
+
                                 mStartCameraSubscription = Observable
                                         .just(saveBitmap())
                                         .subscribeOn(io())
@@ -739,11 +747,19 @@ public class CameraFragment extends Fragment {
                                                 new Action1<Uri>() {
                                                     @Override
                                                     public void call(Uri uri) {
+
+                                                        BitmapFactory.Options options = new BitmapFactory.Options();
+                                                        options.inJustDecodeBounds = true;
+                                                        BitmapFactory.decodeFile(uri.getPath(), options);
+
+                                                        Dimens photoDimens = new Dimens(options.outWidth, options.outHeight, mCameraID == getFrontCameraID());
+
+
                                                         getFragmentManager()
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditSavePhotoFragment.newInstance(uri),
+                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo,returnType, photoDimens),
                                                                         AbstractEditSaveFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();
@@ -826,7 +842,7 @@ public class CameraFragment extends Fragment {
         Size vidSize = p.getSupportedVideoSizes() != null ? determineBestSize(p.getSupportedVideoSizes()) : p.getPreviewSize();
 
 
-        mVideoDimen = new EditSaveVideoFragment.VideoDimen(
+        mVideoDimen = new Dimens(
                 vidSize.width,
                 vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
         );

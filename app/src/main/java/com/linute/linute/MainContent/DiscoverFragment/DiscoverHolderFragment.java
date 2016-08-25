@@ -163,41 +163,60 @@ public class DiscoverHolderFragment extends BaseFragment {
         );
 
         mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.right_labels);
-        mFloatingActionsMenu.findViewById(R.id.fab_camera).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
+        final View fabCloseOverlay = rootView.findViewById(R.id.fab_close_overlay);
+        fabCloseOverlay.setOnTouchListener(
+                new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if (mFloatingActionsMenu.isExpanded())
+                            mFloatingActionsMenu.collapse();
 
-        mFloatingActionsMenu.findViewById(R.id.fab_upload).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), GalleryActivity.class);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
+                        return false;
+                    }
+                });
 
-        mFloatingActionsMenu.findViewById(R.id.fab_text).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CreateStatusActivity.class);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-            }
-        });
+        mFloatingActionsMenu.findViewById(R.id.create_camera).
+                setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (getActivity() == null) return;
+                                Intent i = new Intent(getActivity(), CameraActivity.class);
+                                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+                                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                            }
+                        }
+                );
+
+        mFloatingActionsMenu.findViewById(R.id.fab_upload).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+
+                    public void onClick(View v) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), GalleryActivity.class);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                }
+        );
+
+        mFloatingActionsMenu.findViewById(R.id.fab_text).
+                setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), CreateStatusActivity.class);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                });
 
 
         return rootView;
     }
 
 
-    public void closeFAM(){
+    public void closeFAM() {
         if (mFloatingActionsMenu.isExpanded())
             mFloatingActionsMenu.collapse();
     }

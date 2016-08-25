@@ -112,17 +112,6 @@ public class FeedFragment extends BaseFragment {
       /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
                 true, true));*/
 
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_DRAGGING){
-                    DiscoverHolderFragment frag = (DiscoverHolderFragment) getParentFragment();
-                    if (frag != null) frag.closeFAM();
-                }
-            }
-        });
-
         mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override
             public void loadMore() {
@@ -178,6 +167,7 @@ public class FeedFragment extends BaseFragment {
             }
         }
     }
+
 
     private int mSkip = 0;
 
