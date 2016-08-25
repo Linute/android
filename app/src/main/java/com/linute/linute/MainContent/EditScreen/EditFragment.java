@@ -175,7 +175,7 @@ public class EditFragment extends BaseFragment {
                                 activity.clearBackStack();
                             }
                         }
-                    });
+                    }).create().show();
         }
 
     }
@@ -542,6 +542,14 @@ public class EditFragment extends BaseFragment {
 
     }
 
+    @Override
+    public void onDestroy() {
+        if (mDimens.deleteVideoWhenFinished)
+            ImageUtility.deleteCachedVideo(mUri);
+
+        super.onDestroy();
+    }
+
     interface Activatable{
         void setActive(boolean active);
     }
@@ -573,6 +581,9 @@ public class EditFragment extends BaseFragment {
 //        mPlaying.setChecked(false);
 
 
+        ((TextureVideoView)mContentView).stopPlayback();
+
+
 
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
@@ -581,7 +592,9 @@ public class EditFragment extends BaseFragment {
             @Override
             public void call(final Subscriber<? super Uri> subscriber) {
 
-                String cmd = "-i " + new File(mUri.getPath()).getAbsolutePath() + " -r 24 "; //input file
+
+
+                String cmd = " -i " + new File(mUri.getPath()).getAbsolutePath() + " -r 24 "; //input file
 
                 boolean widthIsGreater = mDimens.height < mDimens.width;
                 String overlay;
@@ -655,6 +668,9 @@ public class EditFragment extends BaseFragment {
                 cmd += "-c:a copy "; //copy instead of re-encoding audio
                 cmd += outputFile; //output file;
 
+                Log.i(TAG, "ffmped call");
+
+
                 try {
                     mFfmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
 
@@ -676,18 +692,20 @@ public class EditFragment extends BaseFragment {
 
                         @Override
                         public void onProgress(String message) {
-                            //Log.i(TAG, "onProgress: " + message);
+                            Log.i(TAG, "onProgress: " + message);
                         }
 
                         @Override
                         public void onFailure(String message) {
-//                            Log.i(TAG, "onFailure: excute" + message);
+                            Log.i(TAG, "onFailure: excute" + message);
 //                            mVideoState = VS_IDLE;
                             subscriber.onCompleted();
                         }
 
                         @Override
                         public void onStart() {
+                            Log.i(TAG, "start vp");
+
 //                            mVideoState = VS_PROCESSING;
                             startTime = System.currentTimeMillis();
                         }
