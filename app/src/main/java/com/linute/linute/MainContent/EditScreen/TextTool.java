@@ -246,6 +246,6 @@ public class TextTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return R.drawable.meme_icon;
+        return R.drawable.meme_icon_selected;
     }
 }

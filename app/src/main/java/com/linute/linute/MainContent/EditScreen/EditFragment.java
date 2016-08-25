@@ -547,7 +547,7 @@ public class EditFragment extends BaseFragment {
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
             } else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
-                vIcon.setColorFilter(null);
+                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
             }
         }
 

@@ -73,7 +73,7 @@ public class StickersTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return R.drawable.sticker_icon;
+        return R.drawable.sticker_icon_selected;
     }
 
 
