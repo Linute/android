@@ -1,5 +1,7 @@
 package com.linute.linute.API;
 
+import android.os.Build;
+
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -49,6 +51,8 @@ public class API_Methods {
 
     //PlainText Type
     public static final MediaType EMPTY = MediaType.parse("text/plain; charset=utf-8");
+
+    public static String USER_ID;
 
 
     public static String getURL(){
@@ -173,6 +177,8 @@ public class API_Methods {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
+        OkHttpClient client = new OkHttpClient();
+        header.put("User-Agent", "("+Build.BRAND + " " + Build.DEVICE + " "+Build.MODEL+"; Android "+Build.VERSION.RELEASE+")/ Ver ["+VERSION+"] UserID ["+USER_ID+"]");
         return header;
     }
 

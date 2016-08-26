@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,11 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.ImageUtility;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -49,7 +45,7 @@ public class OverlaysTool extends EditContentTool {
 
 
 
-        mOverlaysAdapter = new OverlaysAdapter(mOverlays);
+        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mUri);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
@@ -80,12 +76,13 @@ public class OverlaysTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return R.drawable.filters_icon;
+        return R.drawable.filters_icon_selected;
     }
 
 
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
+        private final Uri mUri;
         ArrayList<Bitmap> overlays;
 
         int mSelectedItem;
@@ -94,17 +91,19 @@ public class OverlaysTool extends EditContentTool {
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Bitmap> overlays) {
+        public OverlaysAdapter(ArrayList<Bitmap> overlays, Uri uri) {
             this.overlays = overlays;
+            mUri = uri;
         }
 
         @Override
         public OverlayItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
-            ImageView view = new ImageView(parent.getContext());
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_overlay, parent, false);
             int height = parent.getHeight();
             int width = height / 6 * 5;
-            view.setLayoutParams(new RecyclerView.LayoutParams(width, height));
-            return new OverlayItemVH(view);
+            ((ImageView)v.findViewById(R.id.image_back)).setImageURI(mUri);
+            v.setLayoutParams(new RecyclerView.LayoutParams(width, height));
+            return new OverlayItemVH(v);
         }
 
         @Override
@@ -144,15 +143,16 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {
 
-        ImageView vPreview;
+        ImageView vBack;
+        ImageView vOverlay;
 
         public OverlayItemVH(View itemView) {
             super(itemView);
-            vPreview = (ImageView) itemView;
+            vOverlay = (ImageView) itemView.findViewById(R.id.image_overlay);
         }
 
         public void bind(Bitmap overlay, boolean isSelected) {
-            vPreview.setImageBitmap(overlay);
+            vOverlay.setImageBitmap(overlay);
         }
     }
 

@@ -68,9 +68,10 @@ public class TextTool extends EditContentTool {
 
     public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim) {
         super(uri, type, overlays);
-
         View rootView = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
+
+
 
         topTV = (TextView) rootView.findViewById(R.id.text_top);
         botTV = (TextView) rootView.findViewById(R.id.text_bot);
@@ -90,9 +91,7 @@ public class TextTool extends EditContentTool {
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
-                midET.clearFocus(); //release focus from EditText and hide keyboard
-                InputMethodManager imm = (InputMethodManager) midET.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(midET.getWindowToken(), 0);
+                hideKeyboard(midET);
 
                 String text = midET.getText().toString().trim();
                 midET.setText(text);
@@ -156,8 +155,21 @@ public class TextTool extends EditContentTool {
         };
         textModeViews = new View[textModes.length];
 
+        rootView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hideKeyboard(view);
+            }
+        });
+
         mOverlaysView.addView(rootView);
 
+    }
+
+    public void hideKeyboard(View view) {
+        view.clearFocus(); //release focus from EditText and hide keyboard
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     public void swapSnapchatET() {
@@ -246,6 +258,6 @@ public class TextTool extends EditContentTool {
 
     @Override
     public int getDrawable() {
-        return R.drawable.meme_icon;
+        return R.drawable.meme_icon_selected;
     }
 }

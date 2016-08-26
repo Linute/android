@@ -1706,7 +1706,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
     @Override
     public void loadMore() {
-        if (!mCanLoadMore || mLoadingMoreMessages) return;
+        if (!mCanLoadMore || mLoadingMoreMessages || mRoomId == null) return;
+
 
         mLoadingMoreMessages = true;
 

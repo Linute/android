@@ -26,7 +26,6 @@ import com.linute.linute.API.RegistrationIntentService;
 import com.linute.linute.LoginAndSignup.CollegePickerActivity;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.MainContent.MainActivity;
-import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -34,15 +33,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.fabric.sdk.android.Fabric;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+import io.fabric.sdk.android.Fabric;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 
 /*
@@ -170,12 +169,16 @@ public class LaunchActivity extends Activity {
         //if user is logged in
         if (sharedPreferences.getBoolean("isLoggedIn", false) && sharedPreferences.getString("userToken", null) != null) {
             //college set, go to college
-            if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
+            if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
+
+                API_Methods.USER_ID = sharedPreferences.getString("userID", null);
+
                 nextActivity = MainActivity.class;
 
                 //college was not set. go to college picker
-            else
+            }else {
                 nextActivity = CollegePickerActivity.class;
+            }
         }
 
         //user not logged in

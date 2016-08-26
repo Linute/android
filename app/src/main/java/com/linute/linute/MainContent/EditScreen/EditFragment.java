@@ -205,14 +205,17 @@ public class EditFragment extends BaseFragment {
         final Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_cancel);
         toolbar.inflateMenu(R.menu.menu_fragment_edit);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case android.R.id.home:
-                        getActivity().getSupportFragmentManager().popBackStack();
-                        return true;
-                    case R.id.menu_item_done:
+                      case R.id.menu_item_done:
                         onDoneButtonPress();
                         return true;
                 }
@@ -365,18 +368,28 @@ public class EditFragment extends BaseFragment {
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay);
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
-        CropTool cropTool;
-        cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable)mContentView: null));
-        cropTool.MAX_SIZE = height;
-        cropTool.MIN_SIZE = displayWidth/16 * 9;
 
-        return new EditContentTool[]{
-                privacySettingTool,
-                cropTool,
-                textTool,
-                stickersTool,
-                overlaysTool
-        };
+        if(mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
+            CropTool cropTool;
+            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens);
+            cropTool.MAX_SIZE = height;
+            cropTool.MIN_SIZE = displayWidth / 16 * 9;
+
+            return new EditContentTool[]{
+                    privacySettingTool,
+                    cropTool,
+                    textTool,
+                    stickersTool,
+                    overlaysTool
+            };
+        }else{
+            return new EditContentTool[]{
+                    privacySettingTool,
+                    textTool,
+                    stickersTool,
+                    overlaysTool
+            };
+        }
 
     }
 
@@ -533,7 +546,7 @@ public class EditFragment extends BaseFragment {
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
             } else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
-                vIcon.setColorFilter(null);
+                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
             }
         }
 
