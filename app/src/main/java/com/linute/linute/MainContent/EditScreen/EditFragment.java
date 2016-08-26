@@ -181,7 +181,7 @@ public class EditFragment extends BaseFragment {
 
     }
 
-    @Override
+    /*@Override
     public void onAttach(Context context) {
         super.onAttach(context);
         View decorView = getActivity().getWindow().getDecorView();
@@ -192,7 +192,7 @@ public class EditFragment extends BaseFragment {
         int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN;
         decorView.setSystemUiVisibility(uiOptions);
-    }
+    }*/
 
 
 
@@ -247,7 +247,6 @@ public class EditFragment extends BaseFragment {
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("AAA", "onclick "+view.getTag());
                 onToolSelected((Integer)view.getTag());
             }
         };
@@ -264,6 +263,7 @@ public class EditFragment extends BaseFragment {
             toolsListRV.addView(toolView);
         }
 
+        if(mTools.length > 0)
         onToolSelected(0);
 
 
