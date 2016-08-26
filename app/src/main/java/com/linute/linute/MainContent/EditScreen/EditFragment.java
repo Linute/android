@@ -359,10 +359,6 @@ public class EditFragment extends BaseFragment {
         int height = mDimens.height * displayWidth / mDimens.width;
 
 
-
-
-
-
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
@@ -546,7 +542,7 @@ public class EditFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        if (mDimens.deleteVideoWhenFinished)
+        if (mContentType == ContentType.Video && mDimens.deleteVideoWhenFinished)
             ImageUtility.deleteCachedVideo(mUri);
 
         super.onDestroy();
@@ -593,9 +589,6 @@ public class EditFragment extends BaseFragment {
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
             @Override
             public void call(final Subscriber<? super Uri> subscriber) {
-
-
-
                 String cmd = " -i " + new File(mUri.getPath()).getAbsolutePath() + " -r 24 "; //input file
 
                 boolean widthIsGreater = mDimens.height < mDimens.width;
