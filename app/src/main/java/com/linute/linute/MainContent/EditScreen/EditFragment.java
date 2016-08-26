@@ -205,14 +205,17 @@ public class EditFragment extends BaseFragment {
         final Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_cancel);
         toolbar.inflateMenu(R.menu.menu_fragment_edit);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                    case android.R.id.home:
-                        getActivity().getSupportFragmentManager().popBackStack();
-                        return true;
-                    case R.id.menu_item_done:
+                      case R.id.menu_item_done:
                         onDoneButtonPress();
                         return true;
                 }
