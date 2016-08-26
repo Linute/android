@@ -27,6 +27,7 @@ public class TextTool extends EditContentTool {
     private final View[] textModeViews;
     int midTvPost = 0;
     private final CustomBackPressedEditText midET;
+    private final View mTextContainer;
 
     private static class TextMode {
 
@@ -68,15 +69,15 @@ public class TextTool extends EditContentTool {
 
     public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim) {
         super(uri, type, overlays);
-        View rootView = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
+        mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
 
 
-        topTV = (TextView) rootView.findViewById(R.id.text_top);
-        botTV = (TextView) rootView.findViewById(R.id.text_bot);
-        midTV = (TextView) rootView.findViewById(R.id.text_mid);
-        midET = (CustomBackPressedEditText) rootView.findViewById(R.id.edit_text_mid);
+        topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
+        botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
+        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
+        midET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.edit_text_mid);
 
         topTV.setTypeface(font);
         botTV.setTypeface(font);
@@ -155,14 +156,15 @@ public class TextTool extends EditContentTool {
         };
         textModeViews = new View[textModes.length];
 
-        rootView.setOnClickListener(new View.OnClickListener() {
+        mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 hideKeyboard(view);
             }
         });
 
-        mOverlaysView.addView(rootView);
+
+        mOverlaysView.addView(mTextContainer);
 
     }
 
@@ -237,6 +239,7 @@ public class TextTool extends EditContentTool {
         super.onOpen();
         botTV.setInputType(InputType.TYPE_CLASS_TEXT);
         topTV.setInputType(InputType.TYPE_CLASS_TEXT);
+       mTextContainer.setClickable(true);
     }
 
     @Override
@@ -244,6 +247,7 @@ public class TextTool extends EditContentTool {
         super.onClose();
         botTV.setInputType(InputType.TYPE_NULL);
         topTV.setInputType(InputType.TYPE_NULL);
+        mTextContainer.setClickable(false);
     }
 
     @Override
