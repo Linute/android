@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -150,18 +151,35 @@ public class TextTool extends EditContentTool {
                         swapSnapchatET();
                     }
                 },//Snapchat
-                new TextMode(R.drawable.sticker_icon, topTV, botTV),//Full Meme
+                new TextMode(R.drawable.sticker_icon, topTV, botTV){
+                    @Override
+                    public void onSelected() {
+                        super.onSelected();
+                        topTV.setNextFocusDownId(R.id.text_bot);
+                        botTV.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    }
+
+                    @Override
+                    public void onUnSelected() {
+                        super.onUnSelected();
+                        topTV.setNextFocusDownId(0);
+                    }
+                },//Full Meme
                 new TextMode(R.drawable.sticker_icon, topTV),//Top
                 new TextMode(R.drawable.sticker_icon, botTV),//Bottom
         };
         textModeViews = new View[textModes.length];
 
+
+        //OnClick to hide the keyboard when image is tapped
+        //Turned on and off in OnOpen and OnClose to allow other touch listeners to function
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 hideKeyboard(view);
             }
         });
+        mTextContainer.setClickable(false);
 
 
         mOverlaysView.addView(mTextContainer);
