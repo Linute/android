@@ -45,7 +45,7 @@ public class OverlaysTool extends EditContentTool {
 
 
 
-        mOverlaysAdapter = new OverlaysAdapter(mOverlays);
+        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mUri);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
@@ -82,6 +82,7 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
+        private final Uri mUri;
         ArrayList<Bitmap> overlays;
 
         int mSelectedItem;
@@ -90,17 +91,19 @@ public class OverlaysTool extends EditContentTool {
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Bitmap> overlays) {
+        public OverlaysAdapter(ArrayList<Bitmap> overlays, Uri uri) {
             this.overlays = overlays;
+            mUri = uri;
         }
 
         @Override
         public OverlayItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
-            ImageView view = new ImageView(parent.getContext());
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_overlay, parent, false);
             int height = parent.getHeight();
             int width = height / 6 * 5;
-            view.setLayoutParams(new RecyclerView.LayoutParams(width, height));
-            return new OverlayItemVH(view);
+            ((ImageView)v.findViewById(R.id.image_back)).setImageURI(mUri);
+            v.setLayoutParams(new RecyclerView.LayoutParams(width, height));
+            return new OverlayItemVH(v);
         }
 
         @Override
@@ -140,15 +143,16 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {
 
-        ImageView vPreview;
+        ImageView vBack;
+        ImageView vOverlay;
 
         public OverlayItemVH(View itemView) {
             super(itemView);
-            vPreview = (ImageView) itemView;
+            vOverlay = (ImageView) itemView.findViewById(R.id.image_overlay);
         }
 
         public void bind(Bitmap overlay, boolean isSelected) {
-            vPreview.setImageBitmap(overlay);
+            vOverlay.setImageBitmap(overlay);
         }
     }
 
