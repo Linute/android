@@ -17,8 +17,9 @@
 
     <ImageView
         android:id="@+id/image_profile"
-        android:layout_width="@dimen/user_icon_corner_radius"
-        android:layout_height="@dimen/user_icon_corner_radius"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:scaleType="centerCrop"
         android:layout_gravity="center"
         />
 

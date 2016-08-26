@@ -1,15 +1,20 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
  * Created by mikhail on 8/22/16.
@@ -64,11 +69,19 @@ public class PrivacySettingTool extends EditContentTool {
             anonCommentsSwitch.setTextOn("Yes");
         }
 
+        final ImageView profileImageView = (ImageView)root.findViewById(R.id.image_profile);
+
 
         postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 postAsAnon = b;
+                if(b){
+                    profileImageView.setImageResource(R.drawable.ic_anon);
+                }else{
+                    String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
+                    Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
+                }
             }
         });
 
@@ -79,8 +92,14 @@ public class PrivacySettingTool extends EditContentTool {
             }
         });
 
+        String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
+        Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
+
+
         return root;
     }
+
+
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
