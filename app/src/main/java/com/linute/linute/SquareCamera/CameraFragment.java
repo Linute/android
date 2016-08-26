@@ -833,18 +833,13 @@ public class CameraFragment extends Fragment {
         Camera.Parameters p = mCamera.getParameters();
         Size vidSize = p.getSupportedVideoSizes() != null ? determineBestSize(p.getSupportedVideoSizes()) : p.getPreviewSize();
 
-        if (vidSize.height < vidSize.width) {
-            mVideoDimen = new Dimens(
-                    vidSize.width,
-                    vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
-            );
-        }else{
-            mVideoDimen = new Dimens(
-                    vidSize.height,
-                    vidSize.width,
-                    mCameraID == CameraInfo.CAMERA_FACING_FRONT
-            );
-        }
+        Log.i(TAG, "prepareMediaRecorder: "+vidSize.width);
+        Log.i(TAG, "prepareMediaRecorder: "+vidSize.height);
+
+        mVideoDimen = new Dimens(
+                vidSize.width,
+                vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
+        );
 
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();

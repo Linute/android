@@ -8,8 +8,10 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -40,7 +42,10 @@ import com.github.hiteshsondhi88.libffmpeg.exceptions.FFmpegNotSupportedExceptio
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.SquareCamera.CustomFrameLayout;
+import com.linute.linute.SquareCamera.CustomView;
 import com.linute.linute.SquareCamera.ImageUtility;
+import com.linute.linute.SquareCamera.ScreenSizeSingleton;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
@@ -50,10 +55,15 @@ import org.bson.types.ObjectId;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Locale;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import static rx.android.schedulers.AndroidSchedulers.mainThread;
 import static rx.schedulers.Schedulers.io;
@@ -64,19 +74,17 @@ import static rx.schedulers.Schedulers.io;
 
 
 /**
- *
  * So what we need to account for because this is what iOS did:
  * VIDEO :
- *      - CameraFragment returns video of ratio 4:3. We can use a view to cover the bottom section of the
- *              video to make it look like it's 6:5 (or 1:1 on smaller phones)
- *      - GalleryFragment can return videos of all sizes.
- *              - video is landscape, we don't crop to 6:5.
- *              - video is portrait:
- *                      - ratio bigger than 6:5, we crop
- *                      - ratio less than 6:5, we don't crop
- *
+ * - CameraFragment returns video of ratio 4:3. We can use a view to cover the bottom section of the
+ * video to make it look like it's 6:5 (or 1:1 on smaller phones)
+ * - GalleryFragment can return videos of all sizes.
+ * - video is landscape, we don't crop to 6:5.
+ * - video is portrait:
+ * - ratio bigger than 6:5, we crop
+ * - ratio less than 6:5, we don't crop
+ * <p/>
  * So yea, it's going to be a pain in the ass
- *
  */
 public class EditFragment extends BaseFragment {
 
@@ -136,6 +144,8 @@ public class EditFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ScreenSizeSingleton.init(getActivity().getWindowManager());
+
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
@@ -148,7 +158,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if(mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
+        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -203,8 +213,6 @@ public class EditFragment extends BaseFragment {
     }
 
 
-
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -213,7 +221,7 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         final Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_action_cancel);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
         toolbar.inflateMenu(R.menu.menu_fragment_edit);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -221,11 +229,12 @@ public class EditFragment extends BaseFragment {
                 getActivity().getSupportFragmentManager().popBackStack();
             }
         });
+
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
-                      case R.id.menu_item_done:
+                    case R.id.menu_item_done:
                         onDoneButtonPress();
                         return true;
                 }
@@ -248,6 +257,19 @@ public class EditFragment extends BaseFragment {
         //horrible hack
         if (!mDimens.needsCropping) {
             mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+        } else if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
+            //screen was too small for 6:5 ratio, the video or image is a square, relayout accordingly
+            CustomView view = (CustomView) root.findViewById(R.id.spacer);
+            if (view != null) {
+                view.setMakeSquare(true);
+            }
+
+            CustomFrameLayout frame = (CustomFrameLayout) mOverlaysContainer;
+            if (frame != null) {
+                frame.setMakeSquare(true);
+            }
+
+            root.requestLayout();
         }
 
         mTools = setupTools(mOverlaysContainer);
@@ -259,8 +281,7 @@ public class EditFragment extends BaseFragment {
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("AAA", "onclick "+view.getTag());
-                onToolSelected((Integer)view.getTag());
+                onToolSelected((Integer) view.getTag());
             }
         };
 
@@ -276,7 +297,8 @@ public class EditFragment extends BaseFragment {
             toolsListRV.addView(toolView);
         }
 
-        onToolSelected(0);
+        if (mTools.length > 0)
+            onToolSelected(0);
 
 
         return root;
@@ -380,7 +402,7 @@ public class EditFragment extends BaseFragment {
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
 
-        if(mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
+        if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
             CropTool cropTool;
             cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens);
             cropTool.MAX_SIZE = height;
@@ -393,7 +415,7 @@ public class EditFragment extends BaseFragment {
                     stickersTool,
                     overlaysTool
             };
-        }else{
+        } else {
             return new EditContentTool[]{
                     privacySettingTool,
                     textTool,
@@ -406,14 +428,13 @@ public class EditFragment extends BaseFragment {
 
     private void onDoneButtonPress() {
         ProcessingOptions options = new ProcessingOptions();
-        for(EditContentTool tool : mTools){
+        for (EditContentTool tool : mTools) {
             tool.onClose();
         }
 
         for (EditContentTool tool : mTools) {
             tool.processContent(mUri, mContentType, options);
         }
-
 
 
         beginUpload(options);
@@ -456,10 +477,10 @@ public class EditFragment extends BaseFragment {
 
         Bitmap bitmapFromView = ImageUtility.getBitmapFromView(mFinalContentView);
         Bitmap bitmap;
-        if(options.topInset != 0 || options.bottomInset != 0){
-            bitmap = Bitmap.createBitmap(bitmapFromView, 0, options.topInset, bitmapFromView.getWidth(), bitmapFromView.getHeight()-options.topInset-options.bottomInset);
+        if (options.topInset != 0 || options.bottomInset != 0) {
+            bitmap = Bitmap.createBitmap(bitmapFromView, 0, options.topInset, bitmapFromView.getWidth(), bitmapFromView.getHeight() - options.topInset - options.bottomInset);
             bitmapFromView.recycle();
-        }else{
+        } else {
             bitmap = bitmapFromView;
         }
 
@@ -526,7 +547,7 @@ public class EditFragment extends BaseFragment {
                     });
         }
     }
-    
+
     @Override
     public void onStop() {
         super.onStop();
@@ -572,7 +593,7 @@ public class EditFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    interface Activatable{
+    interface Activatable {
         void setActive(boolean active);
     }
 
@@ -584,7 +605,7 @@ public class EditFragment extends BaseFragment {
 
 
     Subscription mVideoProcessSubscription;
-    
+
     private void processVideo(final ProcessingOptions options) {
 //        if (getActivity() == null || mVideoLink == null || mVideoState != VS_IDLE) return;
 
@@ -603,174 +624,213 @@ public class EditFragment extends BaseFragment {
 //        mPlaying.setChecked(false);
 
 
-//        ((TextureVideoView)mContentView).stopPlayback();
-//
-//
-//
-//        final String outputFile = ImageUtility.getVideoUri();
-//        showProgress(true);
-//
-//        mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
-//            @Override
-//            public void call(final Subscriber<? super Uri> subscriber) {
-//                String cmd = " -i " + new File(mUri.getPath()).getAbsolutePath() + " -r 24 "; //input file
-//
-//                boolean widthIsGreater = mDimens.height < mDimens.width;
-//                String overlay;
-//
-//                int newWidth;
-//                int newHeight;
-//                if (widthIsGreater) {
-//                    if (mDimens.width > 720) {
-//                        newWidth = 720;
-//                        newHeight = ((mDimens.height * newWidth / mDimens.width / 2)) * 2;
-//                    } else {
-//                        newWidth = mDimens.width;
-//                        newHeight = mDimens.height;
-//                    }
-//                } else {
-//                    if (mDimens.height > 720) {
-//                        newHeight = 720;
-//                        newWidth = ((newHeight * mDimens.width / mDimens.height / 2)) * 2;
-//                    } else {
-//                        newWidth = mDimens.width;
-//                        newHeight = mDimens.height;
-//                    }
-//                }
-//
-//                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-//                //Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
-//                //Log.i(TAG, "call: rotation " + mDimens.rotation);
-//
-//                 overlay = saveViewAsImage(mOverlaysContainer);
-//
-//                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
-//                //Log.i(TAG, "call: " + mTextView.getTop());
-//
-//                if (overlay != null) {
-//                    cmd += "-i " + overlay + " -filter_complex ";
-//                    //scale vid
-//                    cmd += String.format(Locale.US,
-//                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
-//
-//                    if (mDimens.isFrontFacing) {
-//                        //rotate vid
-//                        cmd += "[rot]hflip[tran];";
-//                    }
-//
-//                    if (isPortrait()) {
-//                        cmd += String.format(Locale.US,
-//                                "[1:v]scale=-1:%d[over];", newHeight);
-//                    } else {
-//                        cmd += String.format(Locale.US,
-//                                "[1:v]scale=%d:-1[over];", newWidth);
-//                    }
-//
-//                    Point coord = new Point(0, 0);
+        ((TextureVideoView) mContentView).stopPlayback();
+
+
+        final String outputFile = ImageUtility.getVideoUri();
+        showProgress(true);
+
+        /**
+         * TODO:
+         *      - if video coming from camera is square
+         *      - from gallery, don't crop
+         *      - look at overlays
+         *      - preset too fast ?
+         */
+
+        mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
+            @Override
+            public void call(final Subscriber<? super Uri> subscriber) {
+                ArrayList<String> cmd = new ArrayList<String>();
+                cmd.add("-i");
+                cmd.add(new File(mUri.getPath()).getAbsolutePath());
+                cmd.add("-r");
+                cmd.add("24");
+
+                boolean widthIsGreater = mDimens.height < mDimens.width;
+                String overlay;
+
+                //scale video, we don't want to process huge videos
+                int newWidth;
+                int newHeight;
+                if (widthIsGreater) {
+                    if (mDimens.width > 720) {
+                        newWidth = 720;
+                        newHeight = ((mDimens.height * newWidth / mDimens.width / 2)) * 2;
+                    } else {
+                        newWidth = mDimens.width;
+                        newHeight = mDimens.height;
+                    }
+                } else {
+                    if (mDimens.height > 720) {
+                        newHeight = 720;
+                        newWidth = ((newHeight * mDimens.width / mDimens.height / 2)) * 2;
+                    } else {
+                        newWidth = mDimens.width;
+                        newHeight = mDimens.height;
+                    }
+                }
+
+                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
+                //Log.i(TAG, "call: rotation " + mDimens.rotation);
+
+                overlay = saveViewAsImage(mOverlaysContainer);
+
+                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
+                //Log.i(TAG, "call: " + mTextView.getTop());
+
+                if (overlay != null) {
+                    cmd.add("-i");
+                    cmd.add(overlay);
+                    cmd.add("-filter_complex");
+
+                    String temp = "";
+
+                    if (isPortrait()) {
+                        //scale vid
+                        temp += String.format(Locale.US,
+                                "[0:v]scale=%d:%d[rot];", newHeight, newWidth);
+                    }else {
+                        temp += String.format(Locale.US,
+                                "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
+                    }
+
+                    if (mDimens.isFrontFacing) {
+                        //rotate vid
+                        temp += "[rot]hflip[tran];";
+                    }
+
+                    if (isPortrait()) {
+                        temp += String.format(Locale.US,
+                                "[1:v]scale=-1:%d[over];", newHeight);
+                    } else {
+                        temp += String.format(Locale.US,
+                                "[1:v]scale=%d:-1[over];", newWidth);
+                    }
+
+
+                    int shorter = isPortrait() ? newHeight : newWidth;
+
+                    temp += String.format(Locale.US, "%scrop=%d:%d[crop1];", mDimens.isFrontFacing ? "[tran]" : "[rot]", shorter,(int) (shorter * 1.2));
+
+                    Point coord = new Point(0, 0);
 //                    //overlay
-//                    cmd += String.format(Locale.US,
-//                            "%s[over]overlay=%d:%d ", mDimens.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
-//                } else {
-//                    if (mDimens.isFrontFacing) {
-//                        cmd += String.format(Locale.US,
-//                                "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
-//                    } else {
-//                        cmd += String.format(Locale.US,
-//                                "-filter_complex scale=%d:%d ", newWidth, newHeight);
-//                    }
-//                }
-//                //}
-//
-//                cmd += "-preset superfast "; //good idea to set threads?
-//                cmd += String.format(Locale.US,
-//                        "-metadata:s:v rotate=%d ", mDimens.rotation);
+                    temp += String.format(Locale.US,
+                            "[crop1][over]overlay=%d:%d", coord.x, coord.y);
+
+                    cmd.add(temp);
+                } else {
+                    if (mDimens.isFrontFacing) {
+                        cmd.add("-filter_complex");
+                        cmd.add(String.format(Locale.US,
+                                "[0]scale=%d:%d[scaled];[scaled]hflip", widthIsGreater ? mDimens.height : mDimens.width, widthIsGreater ? mDimens.height : (int) (mDimens.width * 1.2)));//newWidth, newHeight));
+                    } else {
+                        cmd.add("-filter_complex");
+                        cmd.add(String.format(Locale.US,
+                                "scale=%d:%d", widthIsGreater ? (int) (mDimens.height * 1.2) : mDimens.width, widthIsGreater ? mDimens.height : (int) (mDimens.width * 1.2))); //newWidth, newHeight));
+                    }
+                }
+                //}
+
+                cmd.add("-preset");
+                cmd.add("ultrafast");
+//                cmd.add("-metadata:s:v");
+//                cmd.add(String.format(Locale.US,
+//                        "rotate=%d", mDimens.rotation));
+                cmd.add("-c:a");
+                cmd.add("copy");
+                cmd.add(outputFile);
+
+                //cmd += "-preset superfast "; //good idea to set threads?
+
 //                cmd += "-c:a copy "; //copy instead of re-encoding audio
 //                cmd += outputFile; //output file;
-//
+
 //                Log.i(TAG, "ffmped call");
-//
-//
-//                try {
-//                    mFfmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
-//
-//                        long startTime = 0;
-//
-//                        @Override
-//                        public void onSuccess(String message) {
-//                            //get first frame in video as bitmap
-//                            if (getActivity() == null) return;
-//
-//                            MediaMetadataRetriever media = new MediaMetadataRetriever();
-//                            media.setDataSource(outputFile);
-//                            Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
-//                            media.release();
-//
-//                            ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
-//                            subscriber.onNext(image);
-//                        }
-//
-//                        @Override
-//                        public void onProgress(String message) {
-//                            Log.i(TAG, "onProgress: " + message);
-//                        }
-//
-//                        @Override
-//                        public void onFailure(String message) {
-//                            Log.i(TAG, "onFailure: excute" + message);
-////                            mVideoState = VS_IDLE;
-//                            subscriber.onCompleted();
-//                        }
-//
-//                        @Override
-//                        public void onStart() {
-//                            Log.i(TAG, "start vp");
-//
-////                            mVideoState = VS_PROCESSING;
-//                            startTime = System.currentTimeMillis();
-//                        }
-//
-//                        @Override
-//                        public void onFinish() {
-//                            Log.i(TAG, "processed video in milliseconds: " + (System.currentTimeMillis() - startTime));
-//                        }
-//                    });
-//                } catch (FFmpegCommandAlreadyRunningException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        })
-//                .subscribeOn(Schedulers.newThread())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<Uri>() {
-//                    @Override
-//                    public void onCompleted() {
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    @Override
-//                    public void onNext(Uri image) {
-//                        if (mReturnType != CameraActivity.SEND_POST) {
-//                            Intent i = new Intent()
-//                                    .putExtra("video", Uri.parse(outputFile))
-//                                    .putExtra("image", image)
-//                                    .putExtra("privacy", options.postAsAnon)
-//                                    .putExtra("type", CameraActivity.VIDEO)
-//                                    /*.putExtra("title", mTextView.getText().toString())*/;
-//
-////                            mProgressDialog.dismiss();
-//                            getActivity().setResult(Activity.RESULT_OK, i);
-//                            getActivity().finish();
-//                        } else {
-//                            uploadVideo(image.toString(), outputFile, options);
-//                        }
-//                    }
-//                });
+
+                try {
+                    mFfmpeg.execute(cmd.toArray(new String[cmd.size()]), new FFmpegExecuteResponseHandler() {
+
+                        long startTime = 0;
+
+                        @Override
+                        public void onSuccess(String message) {
+                            //get first frame in video as bitmap
+                            if (getActivity() == null) return;
+
+                            MediaMetadataRetriever media = new MediaMetadataRetriever();
+                            media.setDataSource(outputFile);
+                            Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
+                            media.release();
+
+                            ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
+                            subscriber.onNext(image);
+                        }
+
+                        @Override
+                        public void onProgress(String message) {
+                            Log.i(TAG, "onProgress: " + message);
+                        }
+
+                        @Override
+                        public void onFailure(String message) {
+                            Log.i(TAG, "onFailure: excute" + message);
+//                            mVideoState = VS_IDLE;
+                            subscriber.onCompleted();
+                        }
+
+                        @Override
+                        public void onStart() {
+                            Log.i(TAG, "start vp");
+
+//                            mVideoState = VS_PROCESSING;
+                            startTime = System.currentTimeMillis();
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            Log.i(TAG, "processed video in milliseconds: " + (System.currentTimeMillis() - startTime));
+                        }
+                    });
+                } catch (FFmpegCommandAlreadyRunningException e) {
+                    e.printStackTrace();
+                }
+            }
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Uri>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(Uri image) {
+                        if (mReturnType != CameraActivity.SEND_POST) {
+                            Intent i = new Intent()
+                                    .putExtra("video", Uri.parse(outputFile))
+                                    .putExtra("image", image)
+                                    .putExtra("privacy", options.postAsAnon)
+                                    .putExtra("type", CameraActivity.VIDEO)
+                                    /*.putExtra("title", mTextView.getText().toString())*/;
+
+//                            mProgressDialog.dismiss();
+                            getActivity().setResult(Activity.RESULT_OK, i);
+                            getActivity().finish();
+                        } else {
+                            uploadVideo(image.toString(), outputFile, options);
+                        }
+                    }
+                });
     }
+
     public String saveViewAsImage(View view) {
         try {
             File f = ImageUtility.getTempFile(getContext(), "overlay", ".png");

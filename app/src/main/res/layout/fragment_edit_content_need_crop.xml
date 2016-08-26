@@ -33,11 +33,12 @@
             android:layout_height="match_parent"/>
 
         <!-- Playground for tools -->
+        <!--can be changed to square by calling setMakeSquare() and requestLayout-->
         <com.linute.linute.SquareCamera.CustomFrameLayout
             android:id="@+id/overlays"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"/>
+        />
 
     </FrameLayout>
 

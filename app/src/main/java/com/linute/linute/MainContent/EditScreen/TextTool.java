@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,6 +28,7 @@ public class TextTool extends EditContentTool {
     private final View[] textModeViews;
     int midTvPost = 0;
     private final CustomBackPressedEditText midET;
+    private final View mTextContainer;
 
     private static class TextMode {
 
@@ -68,13 +70,13 @@ public class TextTool extends EditContentTool {
 
     public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim) {
         super(uri, type, overlays);
-        View rootView = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
+        mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
-        topTV = (TextView) rootView.findViewById(R.id.text_top);
-        botTV = (TextView) rootView.findViewById(R.id.text_bot);
-        midTV = (TextView) rootView.findViewById(R.id.text_mid);
-        midET = (CustomBackPressedEditText) rootView.findViewById(R.id.edit_text_mid);
+        topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
+        botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
+        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
+        midET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.edit_text_mid);
 
         topTV.setTypeface(font);
         botTV.setTypeface(font);
@@ -147,20 +149,37 @@ public class TextTool extends EditContentTool {
                         swapSnapchatET();
                     }
                 },//Snapchat
-                new TextMode(R.drawable.sticker_icon, topTV, botTV),//Full Meme
+                new TextMode(R.drawable.sticker_icon, topTV, botTV) {
+                    @Override
+                    public void onSelected() {
+                        super.onSelected();
+                        topTV.setNextFocusDownId(R.id.text_bot);
+                        botTV.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                    }
+
+                    @Override
+                    public void onUnSelected() {
+                        super.onUnSelected();
+                        topTV.setNextFocusDownId(0);
+                    }
+                },//Full Meme
                 new TextMode(R.drawable.sticker_icon, topTV),//Top
                 new TextMode(R.drawable.sticker_icon, botTV),//Bottom
         };
         textModeViews = new View[textModes.length];
 
-        rootView.setOnClickListener(new View.OnClickListener() {
+
+        //OnClick to hide the keyboard when image is tapped
+        //Turned on and off in OnOpen and OnClose to allow other touch listeners to function
+        mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 hideKeyboard(view);
             }
         });
+        mTextContainer.setClickable(false);
 
-        mOverlaysView.addView(rootView);
+        mOverlaysView.addView(mTextContainer);
     }
 
     public void hideKeyboard(View view) {
@@ -234,6 +253,7 @@ public class TextTool extends EditContentTool {
         super.onOpen();
         botTV.setInputType(InputType.TYPE_CLASS_TEXT);
         topTV.setInputType(InputType.TYPE_CLASS_TEXT);
+        mTextContainer.setClickable(true);
     }
 
     @Override
@@ -241,6 +261,7 @@ public class TextTool extends EditContentTool {
         super.onClose();
         botTV.setInputType(InputType.TYPE_NULL);
         topTV.setInputType(InputType.TYPE_NULL);
+        mTextContainer.setClickable(false);
     }
 
     @Override
