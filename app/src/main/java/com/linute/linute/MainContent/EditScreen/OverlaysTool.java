@@ -24,7 +24,6 @@ import java.util.ArrayList;
  */
 public class OverlaysTool extends EditContentTool {
 
-
     ArrayList<Bitmap> mOverlays;
     private OverlaysAdapter mOverlaysAdapter;
     private RecyclerView mOverlaysRV;
@@ -43,8 +42,6 @@ public class OverlaysTool extends EditContentTool {
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
 
-
-
         mOverlaysAdapter = new OverlaysAdapter(mOverlays, mUri);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
@@ -56,10 +53,8 @@ public class OverlaysTool extends EditContentTool {
         mOverlaysRV.setAdapter(mOverlaysAdapter);
         mOverlaysRV.setLayoutManager(new LinearLayoutManager(parent.getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-
         mOverlays.add(null);
         initFiltersAsync(parent.getContext());
-
 
         return mOverlaysRV;
     }

@@ -43,8 +43,8 @@ public class TextTool extends EditContentTool {
             for (TextView tv : mextViews) {
                 tv.setVisibility(View.VISIBLE);
             }
-            if(mextViews.length>0)
-            showKeyboard(mextViews[0]);
+            if (mextViews.length > 0)
+                showKeyboard(mextViews[0]);
 
         }
 
@@ -71,8 +71,6 @@ public class TextTool extends EditContentTool {
         View rootView = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
-
-
         topTV = (TextView) rootView.findViewById(R.id.text_top);
         botTV = (TextView) rootView.findViewById(R.id.text_bot);
         midTV = (TextView) rootView.findViewById(R.id.text_mid);
@@ -86,7 +84,7 @@ public class TextTool extends EditContentTool {
         midTV.setVisibility(View.GONE);
         midET.setVisibility(View.GONE);
 
-        midTV.setY(dim.height/2);
+        midTV.setY(dim.height / 2);
 
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -122,8 +120,8 @@ public class TextTool extends EditContentTool {
 
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if(System.currentTimeMillis() - timeDown < 400
-                                && Math.abs(motionEvent.getRawY()-downY) < 20){
+                        if (System.currentTimeMillis() - timeDown < 400
+                                && Math.abs(motionEvent.getRawY() - downY) < 20) {
                             swapSnapchatET();
                         }
                         return true;
@@ -142,7 +140,7 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.sticker_icon, midTV){
+                new TextMode(R.drawable.sticker_icon, midTV) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -163,7 +161,6 @@ public class TextTool extends EditContentTool {
         });
 
         mOverlaysView.addView(rootView);
-
     }
 
     public void hideKeyboard(View view) {
@@ -211,7 +208,7 @@ public class TextTool extends EditContentTool {
         return rootView;
     }
 
-    private static void showKeyboard(View view){
+    private static void showKeyboard(View view) {
         view.requestFocus();
         InputMethodManager lManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(view, 0);

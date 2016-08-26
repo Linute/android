@@ -13,6 +13,7 @@ public class Dimens implements Parcelable {
     boolean isFrontFacing;              //image was taken with front facing camera
     int rotation;                       //video rotation
     boolean deleteVideoWhenFinished;    //delete cached video
+    boolean needsCropping;
 
 
     //typically used when image taken with our camera
@@ -22,6 +23,7 @@ public class Dimens implements Parcelable {
         this.isFrontFacing = isFrontFacing;
         this.rotation = 90;
         this.deleteVideoWhenFinished = true;
+        this.needsCropping = true;
     }
 
     //when uploading from gallery
@@ -33,6 +35,13 @@ public class Dimens implements Parcelable {
 
         //should not delete gallery's video
         this.deleteVideoWhenFinished = false;
+
+        //width will be height
+        needsCropping = (rotation == 90 || rotation == 270) && ((float) width / height) > 1.2;
+    }
+
+    public void setNeedsCropping(boolean needsCropping) {
+        this.needsCropping = needsCropping;
     }
 
     protected Dimens(Parcel in) {
@@ -41,6 +50,7 @@ public class Dimens implements Parcelable {
         isFrontFacing = in.readByte() == 1;
         rotation = in.readInt();
         deleteVideoWhenFinished = in.readByte() == 1;
+        needsCropping = in.readByte() == 1;
     }
 
     @Override
@@ -50,6 +60,7 @@ public class Dimens implements Parcelable {
         dest.writeByte((byte) (isFrontFacing ? 1 : 0));
         dest.writeInt(rotation);
         dest.writeByte((byte) (deleteVideoWhenFinished ? 1 : 0));
+        dest.writeByte((byte) (needsCropping ? 1 : 0));
     }
 
     @Override

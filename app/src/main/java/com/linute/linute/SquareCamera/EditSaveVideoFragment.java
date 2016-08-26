@@ -297,161 +297,161 @@ public class EditSaveVideoFragment extends AbstractEditSaveFragment {
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
 
-        mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
-            @Override
-            public void call(final Subscriber<? super Uri> subscriber) {
-
-                String cmd = "-i " + new File(mVideoLink.getPath()).getAbsolutePath() + " -r 24 "; //input file
-
-                boolean widthIsGreater = mVideoDimen.height < mVideoDimen.width;
-
-                int newWidth;
-                int newHeight;
-                if (widthIsGreater) {
-                    if (mVideoDimen.width > 720) {
-                        newWidth = 720;
-                        newHeight = ((mVideoDimen.height * newWidth / mVideoDimen.width / 2)) * 2;
-                    } else {
-                        newWidth = mVideoDimen.width;
-                        newHeight = mVideoDimen.height;
-                    }
-                } else {
-                    if (mVideoDimen.height > 720) {
-                        newHeight = 720;
-                        newWidth = ((newHeight * mVideoDimen.width / mVideoDimen.height / 2)) * 2;
-                    } else {
-                        newWidth = mVideoDimen.width;
-                        newHeight = mVideoDimen.height;
-                    }
-                }
-
-                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                //Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
-                //Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
-
-                String overlay = saveViewAsImage(mOverlays);
-
-                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
-                //Log.i(TAG, "call: " + mTextView.getTop());
-
-                if (overlay != null) {
-                    cmd += "-i " + overlay + " -filter_complex ";
-                    //scale vid
-                    cmd += String.format(Locale.US,
-                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
-
-                    if (mVideoDimen.isFrontFacing) {
-                        //rotate vid
-                        cmd += "[rot]hflip[tran];";
-                    }
-
-                    if (isPortrait()) {
-                        cmd += String.format(Locale.US,
-                                "[1:v]scale=-1:%d[over];", newHeight);
-                    } else {
-                        cmd += String.format(Locale.US,
-                                "[1:v]scale=%d:-1[over];", newWidth);
-                    }
-
-                    Point coord = new Point(0, 0);
-                    //overlay
-                    cmd += String.format(Locale.US,
-                            "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
-                } else {
-                    if (mVideoDimen.isFrontFacing) {
-                        cmd += String.format(Locale.US,
-                                "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
-                    } else {
-                        cmd += String.format(Locale.US,
-                                "-filter_complex scale=%d:%d ", newWidth, newHeight);
-                    }
-                }
-                //}
-
-                cmd += "-preset superfast "; //good idea to set threads?
-                cmd += String.format(Locale.US,
-                        "-metadata:s:v rotate=%d ", mVideoDimen.rotation);
-                cmd += "-c:a copy "; //copy instead of re-encoding audio
-                cmd += outputFile; //output file;
-
-                try {
-                    mFfmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
-
-                        long startTime = 0;
-
-                        @Override
-                        public void onSuccess(String message) {
-                            //get first frame in video as bitmap
-                            if (getActivity() == null) return;
-
-                            MediaMetadataRetriever media = new MediaMetadataRetriever();
-                            media.setDataSource(outputFile);
-                            Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
-                            media.release();
-
-                            ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
-                            subscriber.onNext(image);
-                        }
-
-                        @Override
-                        public void onProgress(String message) {
-                            //Log.i(TAG, "onProgress: " + message);
-                        }
-
-                        @Override
-                        public void onFailure(String message) {
-                            Log.i(TAG, "onFailure: excute" + message);
-                            mVideoState = VS_IDLE;
-                            subscriber.onCompleted();
-                        }
-
-                        @Override
-                        public void onStart() {
-                            mVideoState = VS_PROCESSING;
-                            startTime = System.currentTimeMillis();
-                        }
-
-                        @Override
-                        public void onFinish() {
-                            Log.i(TAG, "processed video in milliseconds: " + (System.currentTimeMillis() - startTime));
-                        }
-                    });
-                } catch (FFmpegCommandAlreadyRunningException e) {
-                    e.printStackTrace();
-                }
-            }
-        })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<Uri>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-
-                    @Override
-                    public void onNext(Uri image) {
-                        if (mReturnType != CameraActivity.SEND_POST) {
-                            Intent i = new Intent()
-                                    .putExtra("video", Uri.parse(outputFile))
-                                    .putExtra("image", image)
-                                    .putExtra("privacy", mAnonSwitch.isChecked())
-                                    .putExtra("type", CameraActivity.VIDEO)
-                                    .putExtra("title", mTextView.getText().toString());
-
-                            mProgressDialog.dismiss();
-                            getActivity().setResult(Activity.RESULT_OK, i);
-                            getActivity().finish();
-                        } else {
-                            uploadVideo(image.toString(), outputFile);
-                        }
-                    }
-                });
+//        mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
+//            @Override
+//            public void call(final Subscriber<? super Uri> subscriber) {
+//
+//                String cmd = "-i " + new File(mVideoLink.getPath()).getAbsolutePath() + " -r 24 "; //input file
+//
+//                boolean widthIsGreater = mVideoDimen.height < mVideoDimen.width;
+//
+//                int newWidth;
+//                int newHeight;
+//                if (widthIsGreater) {
+//                    if (mVideoDimen.width > 720) {
+//                        newWidth = 720;
+//                        newHeight = ((mVideoDimen.height * newWidth / mVideoDimen.width / 2)) * 2;
+//                    } else {
+//                        newWidth = mVideoDimen.width;
+//                        newHeight = mVideoDimen.height;
+//                    }
+//                } else {
+//                    if (mVideoDimen.height > 720) {
+//                        newHeight = 720;
+//                        newWidth = ((newHeight * mVideoDimen.width / mVideoDimen.height / 2)) * 2;
+//                    } else {
+//                        newWidth = mVideoDimen.width;
+//                        newHeight = mVideoDimen.height;
+//                    }
+//                }
+//
+//                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+//                //Log.i(TAG, "call: old " + mVideoDimen.width + " " + mVideoDimen.height);
+//                //Log.i(TAG, "call: rotation " + mVideoDimen.rotation);
+//
+//                String overlay = saveViewAsImage(mOverlays);
+//
+//                //Log.i(TAG, "call:frame  " + mContentContainer.getHeight());
+//                //Log.i(TAG, "call: " + mTextView.getTop());
+//
+//                if (overlay != null) {
+//                    cmd += "-i " + overlay + " -filter_complex ";
+//                    //scale vid
+//                    cmd += String.format(Locale.US,
+//                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
+//
+//                    if (mVideoDimen.isFrontFacing) {
+//                        //rotate vid
+//                        cmd += "[rot]hflip[tran];";
+//                    }
+//
+//                    if (isPortrait()) {
+//                        cmd += String.format(Locale.US,
+//                                "[1:v]scale=-1:%d[over];", newHeight);
+//                    } else {
+//                        cmd += String.format(Locale.US,
+//                                "[1:v]scale=%d:-1[over];", newWidth);
+//                    }
+//
+//                    Point coord = new Point(0, 0);
+//                    //overlay
+//                    cmd += String.format(Locale.US,
+//                            "%s[over]overlay=%d:%d ", mVideoDimen.isFrontFacing ? "[tran]" : "[rot]", coord.x, coord.y);
+//                } else {
+//                    if (mVideoDimen.isFrontFacing) {
+//                        cmd += String.format(Locale.US,
+//                                "-filter_complex [0]scale=%d:%d[scaled];[scaled]hflip ", newWidth, newHeight);
+//                    } else {
+//                        cmd += String.format(Locale.US,
+//                                "-filter_complex scale=%d:%d ", newWidth, newHeight);
+//                    }
+//                }
+//                //}
+//
+//                cmd += "-preset superfast "; //good idea to set threads?
+//                cmd += String.format(Locale.US,
+//                        "-metadata:s:v rotate=%d ", mVideoDimen.rotation);
+//                cmd += "-c:a copy "; //copy instead of re-encoding audio
+//                cmd += outputFile; //output file;
+//
+//                try {
+//                    mFfmpeg.execute(cmd, new FFmpegExecuteResponseHandler() {
+//
+//                        long startTime = 0;
+//
+//                        @Override
+//                        public void onSuccess(String message) {
+//                            //get first frame in video as bitmap
+//                            if (getActivity() == null) return;
+//
+//                            MediaMetadataRetriever media = new MediaMetadataRetriever();
+//                            media.setDataSource(outputFile);
+//                            Uri image = ImageUtility.savePictureToCache(getActivity(), media.getFrameAtTime(0));
+//                            media.release();
+//
+//                            ImageUtility.broadcastVideo(getActivity(), outputFile); //so gallery app can see video
+//                            subscriber.onNext(image);
+//                        }
+//
+//                        @Override
+//                        public void onProgress(String message) {
+//                            //Log.i(TAG, "onProgress: " + message);
+//                        }
+//
+//                        @Override
+//                        public void onFailure(String message) {
+//                            Log.i(TAG, "onFailure: excute" + message);
+//                            mVideoState = VS_IDLE;
+//                            subscriber.onCompleted();
+//                        }
+//
+//                        @Override
+//                        public void onStart() {
+//                            mVideoState = VS_PROCESSING;
+//                            startTime = System.currentTimeMillis();
+//                        }
+//
+//                        @Override
+//                        public void onFinish() {
+//                            Log.i(TAG, "processed video in milliseconds: " + (System.currentTimeMillis() - startTime));
+//                        }
+//                    });
+//                } catch (FFmpegCommandAlreadyRunningException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        })
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Subscriber<Uri>() {
+//                    @Override
+//                    public void onCompleted() {
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    @Override
+//                    public void onNext(Uri image) {
+//                        if (mReturnType != CameraActivity.SEND_POST) {
+//                            Intent i = new Intent()
+//                                    .putExtra("video", Uri.parse(outputFile))
+//                                    .putExtra("image", image)
+//                                    .putExtra("privacy", mAnonSwitch.isChecked())
+//                                    .putExtra("type", CameraActivity.VIDEO)
+//                                    .putExtra("title", mTextView.getText().toString());
+//
+//                            mProgressDialog.dismiss();
+//                            getActivity().setResult(Activity.RESULT_OK, i);
+//                            getActivity().finish();
+//                        } else {
+//                            uploadVideo(image.toString(), outputFile);
+//                        }
+//                    }
+//                });
     }
 
 

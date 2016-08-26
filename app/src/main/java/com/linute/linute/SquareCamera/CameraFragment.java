@@ -741,6 +741,7 @@ public class CameraFragment extends Fragment {
 
                                                         Dimens photoDimens = new Dimens(options.outWidth, options.outHeight, mCameraID == getFrontCameraID());
 
+                                                        photoDimens.setNeedsCropping(false);
 
                                                         getFragmentManager()
                                                                 .beginTransaction()

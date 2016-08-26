@@ -38,7 +38,6 @@ public class CustomView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         //if doesn't have required size, we force to square
         setMeasuredDimension(getMeasuredWidth(),
                 makeSquare ? getMeasuredWidth() : (int) (getMeasuredWidth() * (1.2))
