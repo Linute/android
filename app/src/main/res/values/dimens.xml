@@ -91,5 +91,6 @@
     <dimen name="message_bubble_corner_radius">8dp</dimen>
     <dimen name="chat_message_bubble_padding">8dp</dimen>
     <dimen name="chat_profile_photo_diameter">32dp</dimen>
+    <dimen name="radius_crop_mode">4dp</dimen>
 
 </resources>

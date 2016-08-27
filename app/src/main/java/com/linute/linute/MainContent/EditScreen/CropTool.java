@@ -36,7 +36,7 @@ public class CropTool extends EditContentTool {
     public boolean MOVE_OTHER_BAR = false;
 
     CropMode[] mCropModes;
-    ImageView[] mCropModeViews;
+    FrameLayout[] mCropModeViews;
     private int mSelected;
 
     Dimens mDimens;
@@ -204,19 +204,40 @@ public class CropTool extends EditContentTool {
                 new CropMode(R.drawable.sticker_icon, true, displayWidth/16 * 9, displayWidth/16 * 9),
         };
 
-        mCropModeViews = new ImageView[mCropModes.length];
+        mCropModeViews = new FrameLayout[mCropModes.length];
 
+
+        int maxHeight = parent.getHeight();
+        int maxWidth = mCropperLayout.getWidth() * maxHeight /mCropperLayout.getHeight();
 
 
         for (int i = 0; i < mCropModes.length; i++) {
             CropMode mode = mCropModes[i];
-            ImageView iv = new ImageView(rootView.getContext());
-            iv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
-            iv.setImageResource(mode.icon);
+            FrameLayout cropSettingLayout = (FrameLayout)inflater.inflate(R.layout.list_item_crop_mode, parent, false);
+
+            cropSettingLayout.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+
+            FrameLayout ivLayout = (FrameLayout)cropSettingLayout.findViewById(R.id.layout_image_wrapper);
+            ivLayout.setBackgroundResource(R.drawable.bg_crop_item);
+
+
+            ImageView iv = (ImageView)ivLayout.findViewById(R.id.image_crop_mode);
+
+            float r = (float)mode.maxHeight/mCropperLayout.getWidth();
+            int h = (int)(maxWidth*r);
+            int w = maxWidth;
+
+            iv.setLayoutParams(new FrameLayout.LayoutParams(w,h));
+            View borderView = cropSettingLayout.findViewById(R.id.layout_image_border);
+            borderView.setLayoutParams(new FrameLayout.LayoutParams(w,h));
+
+            iv.setImageURI(mUri);
             iv.setTag(i);
             iv.setOnClickListener(listener);
-            rootView.addView(iv);
-            mCropModeViews[i] = iv;
+
+            rootView.addView(cropSettingLayout);
+
+            mCropModeViews[i] = cropSettingLayout;
         }
 
         selectCropMode(0);
@@ -230,11 +251,16 @@ public class CropTool extends EditContentTool {
         mCropModes[oldSelected].onUnSelected();
         mCropModes[mSelected].onSelected();
 
-        ((ImageView) mCropModeViews[oldSelected]).setColorFilter(null);
-        mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
+        mCropModeViews[oldSelected].findViewById(R.id.layout_image_wrapper).getBackground().setColorFilter(null);
+        mCropModeViews[index].findViewById(R.id.layout_image_wrapper).getBackground().setColorFilter(new PorterDuffColorFilter(
+                mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
+                PorterDuff.Mode.MULTIPLY
+        ));
+
+       /* mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.colorAccent),
                 PorterDuff.Mode.ADD
-        ));
+        ));*/
 
     }
 
