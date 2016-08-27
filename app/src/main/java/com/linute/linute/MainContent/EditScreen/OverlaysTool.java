@@ -207,7 +207,17 @@ public class OverlaysTool extends EditContentTool {
 
     }
 
+    @Override
+    public void onDisable() {
+        super.onDisable();
+        overlayView.setVisibility(View.GONE);
+    }
 
+    @Override
+    public void onEnable() {
+        super.onEnable();
+        overlayView.setVisibility(View.VISIBLE);
+    }
 
     interface OnItemSelectedListener{
         void onItemSelected(int i);

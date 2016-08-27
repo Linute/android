@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +32,7 @@ public class StickersTool extends EditContentTool {
     private OverlaysAdapter mStickersAdapter;
     private RecyclerView mStickersRV;
     private FrameLayout mStickersContainer;
+    private final ImageView mTrashIv;
 
     public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri, type, overlaysView);
@@ -39,8 +42,45 @@ public class StickersTool extends EditContentTool {
         mStickersContainer = new FrameLayout(overlaysView.getContext());
         mStickersContainer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
+        mTrashIv = new ImageView(overlaysView.getContext());
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        mTrashIv.setLayoutParams(params);
+
+
         mOverlaysView.addView(mStickersContainer);
     }
+
+    ManipulableImageView.ViewManipulationListener viewManipulationListener = new ManipulableImageView.ViewManipulationListener() {
+        @Override
+        public void onViewPickedUp(View me) {
+            mTrashIv.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onViewDropped(View me) {
+            mTrashIv.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onViewCollisionBegin(View me) {
+            mTrashIv.setColorFilter(new PorterDuffColorFilter(me.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
+        }
+
+        @Override
+        public void onViewCollisionEnd(View me) {
+            mTrashIv.setColorFilter(null);
+        }
+
+        @Override
+        public void onViewDropCollision(View me) {
+            ((ViewGroup)me.getParent()).removeView(me);
+        }
+
+        @Override
+        public View getCollisionSensor() {
+            return mTrashIv;
+        }
+    };
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
@@ -89,6 +129,7 @@ public class StickersTool extends EditContentTool {
             params.gravity = Gravity.CENTER;
             stickerIV.setLayoutParams(params);
 
+            stickerIV.setManipulationListener(viewManipulationListener);
 
 
             mStickersContainer.addView(stickerIV);

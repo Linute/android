@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -30,6 +31,7 @@ public class TextTool extends EditContentTool {
     private final CustomBackPressedEditText midET;
     private final View mTextContainer;
 
+
     private static class TextMode {
 
         private final TextView[] mextViews;
@@ -50,7 +52,6 @@ public class TextTool extends EditContentTool {
 
         }
 
-        ;
 
         public void onUnSelected() {
             for (TextView tv : mextViews) {
@@ -104,6 +105,8 @@ public class TextTool extends EditContentTool {
             }
         });
 
+
+
         midTV.setOnTouchListener(new View.OnTouchListener() {
 
             float downY, initY;
@@ -133,7 +136,7 @@ public class TextTool extends EditContentTool {
         });
 
         textModes = new TextMode[]{
-                new TextMode(R.drawable.sticker_icon) {
+                new TextMode(R.drawable.no_text_icon) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -142,14 +145,14 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.sticker_icon, midTV) {
+                new TextMode(R.drawable.middle_text_icon, midTV) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
                         swapSnapchatET();
                     }
                 },//Snapchat
-                new TextMode(R.drawable.sticker_icon, topTV, botTV) {
+                new TextMode(R.drawable.text_meme_icon, topTV, botTV) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -163,8 +166,8 @@ public class TextTool extends EditContentTool {
                         topTV.setNextFocusDownId(0);
                     }
                 },//Full Meme
-                new TextMode(R.drawable.sticker_icon, topTV),//Top
-                new TextMode(R.drawable.sticker_icon, botTV),//Bottom
+                new TextMode(R.drawable.top_text_icon, topTV),//Top
+                new TextMode(R.drawable.text_bottom_icon, botTV),//Bottom
         };
         textModeViews = new View[textModes.length];
 

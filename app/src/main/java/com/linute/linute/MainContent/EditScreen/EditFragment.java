@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.EditScreen;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,6 +22,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +31,7 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,7 +74,6 @@ import static rx.schedulers.Schedulers.io;
  * Created by mikhail on 8/22/16.
  */
 
-
 /**
  * So what we need to account for because this is what iOS did:
  * VIDEO :
@@ -103,6 +105,8 @@ public class EditFragment extends BaseFragment {
     private ToolHolder[] toolHolders;
     private ViewGroup mOverlaysContainer;
     private FFmpeg mFfmpeg;
+    private ProgressDialog mProcessingDialog;
+    private Menu mMenu;
 
     public enum ContentType {
         Photo, Video, UploadedPhoto, UploadedVideo
@@ -114,6 +118,8 @@ public class EditFragment extends BaseFragment {
 
     private EditContentTool[] mTools;
     private View[] mToolViews;
+    boolean[] mIsDisabled;
+
 
     private int mReturnType;
 //    private int mCameraType;
@@ -125,6 +131,7 @@ public class EditFragment extends BaseFragment {
     private String mUserToken;
 
     View mContentView;
+
 
 
     public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
@@ -144,6 +151,10 @@ public class EditFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ScreenSizeSingleton.init(getActivity().getWindowManager());
+
+        mProcessingDialog = new ProgressDialog(getContext());
+        mProcessingDialog.setIndeterminate(true);
+        mProcessingDialog.setTitle("Processing Video");
 
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
@@ -222,6 +233,8 @@ public class EditFragment extends BaseFragment {
         final Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
         toolbar.inflateMenu(R.menu.menu_fragment_edit);
+        mMenu = toolbar.getMenu();
+
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -279,7 +292,9 @@ public class EditFragment extends BaseFragment {
         }
 
         mTools = setupTools(mOverlaysContainer);
+        mIsDisabled =new boolean[mTools.length];
         mToolViews = new View[mTools.length];
+
 
         //Set up adapter that controls tool selection
         LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
@@ -306,17 +321,20 @@ public class EditFragment extends BaseFragment {
         if (mTools.length > 0)
             onToolSelected(0);
 
-
+        showProgress(false);
         return root;
     }
 
 
+
     protected void onToolSelected(int i) {
+        if(mIsDisabled[i]) return;
+
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
 
-        toolHolders[oldSelectedTool].setSelected(false);
-        toolHolders[mSelectedTool].setSelected(true);
+        toolHolders[oldSelectedTool].setSelected(false, false);
+        toolHolders[mSelectedTool].setSelected(true, false);
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
@@ -413,6 +431,26 @@ public class EditFragment extends BaseFragment {
         }
     }
 
+    RequestDisableToolListener requestDisableToolListener = new RequestDisableToolListener() {
+        @Override
+        public void requestDisable(Class<? extends EditContentTool> tool, boolean disable) {
+            for (int i = 0; i < mTools.length; i++) {
+                EditContentTool t = mTools[i];
+                if(t.getClass() == tool){
+                    mIsDisabled[i] = disable;
+                    if(disable){
+                        t.onDisable();
+                    }else {
+                        t.onEnable();
+                    }
+                }
+
+                toolHolders[i].setSelected(mSelectedTool == i, mIsDisabled[i]);
+
+            }
+        }
+    };
+
     private EditContentTool[] setupTools(ViewGroup overlay) {
 
         DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
@@ -428,7 +466,7 @@ public class EditFragment extends BaseFragment {
 
         if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
             CropTool cropTool;
-            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens);
+            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens, requestDisableToolListener);
             cropTool.MAX_SIZE = height;
             cropTool.MIN_SIZE = displayWidth / 16 * 9;
 
@@ -449,6 +487,8 @@ public class EditFragment extends BaseFragment {
         }
 
     }
+
+
 
     private void onDoneButtonPress() {
         ProcessingOptions options = new ProcessingOptions();
@@ -478,7 +518,21 @@ public class EditFragment extends BaseFragment {
     }
 
     private void showProgress(boolean show) {
+        /*if(show) {
+            mProcessingDialog.show();
+        }else {
+            mProcessingDialog.hide();
+        }*/
+        if(show) {
+            ProgressBar loaderView = new ProgressBar(getContext());
+            mMenu.findItem(R.id.menu_item_done).setActionView(loaderView);
+
+        }else{
+            mMenu.findItem(R.id.menu_item_done).setActionView(null);
+
+        }
     }
+
 
     private void processPhoto(final ProcessingOptions options) {
         if (getActivity() == null) return;
@@ -595,12 +649,17 @@ public class EditFragment extends BaseFragment {
             vIcon.setImageResource(tool.getDrawable());
         }
 
-        public void setSelected(boolean isSelected) {
+        public void setSelected(boolean isSelected, boolean isDisabled) {
             if (isSelected) {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
                 vIcon.setColorFilter(new
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
-            } else {
+            } else if(isDisabled){
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.grey_color));
+                vIcon.setColorFilter(new
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.grey_color), PorterDuff.Mode.MULTIPLY));
+
+            }else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
                 vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
             }
@@ -907,6 +966,10 @@ public class EditFragment extends BaseFragment {
 
         getActivity().setResult(Activity.RESULT_OK, result);
         getActivity().finish();
+    }
+
+    static interface RequestDisableToolListener{
+        void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
 
 

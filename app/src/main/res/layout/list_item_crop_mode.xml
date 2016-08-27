@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:padding="4dp"
+    >
+
+    <FrameLayout
+        android:id="@+id/layout_image_wrapper"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="@dimen/crop_icon_border_thickness">
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/image_crop_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            app:riv_corner_radius="@dimen/radius_crop_mode"
+            />
+
+        <View
+            android:id="@+id/layout_image_border"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+             />
+
+    </FrameLayout>
+
+</FrameLayout>
