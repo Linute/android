@@ -6,6 +6,6 @@
         android:radius="@dimen/radius_crop_mode"
         />
     <stroke
-        android:width="4dp"
+        android:width="@dimen/crop_icon_border_thickness"
         android:color="@color/pure_white"/>
 </shape>

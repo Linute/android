@@ -4,14 +4,16 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="4dp"
+    >
 
     <FrameLayout
         android:id="@+id/layout_image_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:padding="4dp">
+        android:padding="@dimen/crop_icon_border_thickness">
 
         <com.makeramen.roundedimageview.RoundedImageView
             android:id="@+id/image_crop_mode"
