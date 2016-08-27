@@ -42,6 +42,7 @@ public class SingleVideoPlaybackManager {
     public void stopPlayback(){
         if (mTextureVideoView != null){
             mTextureVideoView.stop();
+            mTextureVideoView.reset();
             mTextureVideoView.runHideVideo();
             mTextureVideoView = null;
         }

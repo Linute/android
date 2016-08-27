@@ -42,8 +42,8 @@ public class API_Methods {
 
     public static String VERSION = "v1.4.3";
 
-    public static final String VERSION_DEV = "v1.4.3";
-    public static final String VERSION_LIVE = "v1.4.2";
+    public static final String VERSION_DEV = "v1.4.4";
+    public static final String VERSION_LIVE = "v1.4.3";
 
 
     //JSON TYPE

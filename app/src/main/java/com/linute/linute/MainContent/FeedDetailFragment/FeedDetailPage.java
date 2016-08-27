@@ -43,6 +43,7 @@ import com.linkedin.android.spyglass.ui.MentionsEditText;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
@@ -85,7 +86,7 @@ import static android.app.Activity.RESULT_OK;
 public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
 
-    private static final int CAMERA_REQUEST = 65;
+    private static final int CAMERA_GALLERY_REQUEST = 65;
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
@@ -303,25 +304,42 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 if (mSendButton.isActive()) {
                     sendComment();
                 } else {
-                    Intent i = new Intent(getActivity(), CameraActivity.class);
-                    i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_GALLERY));
-
-                    i.putExtra(CameraActivity.GALLERY_TYPE, CameraActivity.IMAGE);
-
-                    if (mFeedDetail.getPost().isCommentAnonDisabled()) {
-                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
-                        i.putExtra(CameraActivity.ANON_KEY, false);
-                    } else {
-                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
-                        i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
-                    }
-                    startActivityForResult(i, CAMERA_REQUEST);
+                    showCameraGalleryOption();
                 }
             }
         });
 
         return rootView;
     }
+
+    private void showCameraGalleryOption() {
+        if (getContext() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getContext()).setItems(
+                new String[]{"Camera", "Gallery"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent i;
+                        if (which == 0) {
+                            i = new Intent(getContext(), CameraActivity.class);
+                            i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
+                        } else {
+                            i = new Intent(getContext(), GalleryActivity.class);
+                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.IMAGE);
+                        }
+
+                        if (mFeedDetail.getPost().isCommentAnonDisabled()) {
+                            i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+                            i.putExtra(CameraActivity.ANON_KEY, false);
+                        } else {
+                            i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
+                            i.putExtra(CameraActivity.ANON_KEY, mCheckBox.isChecked());
+                        }
+
+                        startActivityForResult(i, CAMERA_GALLERY_REQUEST);
+                    }
+                }).show();
+    }
+
 
     @Override
     public void onResume() {
@@ -381,7 +399,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAMERA_REQUEST) {
+        if (requestCode == CAMERA_GALLERY_REQUEST) {
             if (resultCode == RESULT_OK) {
                 mImageUri = data.getParcelableExtra("image");
                 mOverlayText = data.getStringExtra("title");
@@ -793,9 +811,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                         public void onClick(DialogInterface dialog, int which) {
                             if (which == 0) {
                                 showConfirmDeleteDialog();
-                            } else if ((which == 1)){
+                            } else if ((which == 1)) {
                                 showRevealConfirm();
-                            }else {
+                            } else {
                                 toggleMute();
                             }
                         }

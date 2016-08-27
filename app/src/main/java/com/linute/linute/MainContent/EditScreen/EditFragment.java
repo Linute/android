@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
@@ -76,7 +77,7 @@ import static rx.schedulers.Schedulers.io;
  * VIDEO :
  * - CameraFragment returns video of ratio 4:3. We can use a view to cover the bottom section of the
  * video to make it look like it's 6:5 (or 1:1 on smaller phones)
- * - GalleryFragment can return videos of all sizes.
+ * - GalleryActivity can return videos of all sizes.
  * - video is landscape, we don't crop to 6:5.
  * - video is portrait:
  * - ratio bigger than 6:5, we crop
@@ -224,7 +225,8 @@ public class EditFragment extends BaseFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getSupportFragmentManager().popBackStack();
+                if (getActivity() != null)
+                    getActivity().onBackPressed();
             }
         });
 
@@ -242,11 +244,17 @@ public class EditFragment extends BaseFragment {
 
         DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
-        int height = mDimens.height * displayWidth / mDimens.width;
+        int height;
+
+        if (isPortrait()) {
+            height = mDimens.width * displayWidth / mDimens.height;
+        } else {
+            height = mDimens.height * displayWidth / mDimens.width;
+        }
 
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
-        setupMainContent(mUri, mContentType);
+        setupMainContent(mUri, mContentType, metrics);
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
@@ -321,7 +329,7 @@ public class EditFragment extends BaseFragment {
     }
 
 
-    private void setupMainContent(Uri uri, ContentType contentType) {
+    private void setupMainContent(Uri uri, ContentType contentType, DisplayMetrics metrics) {
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
@@ -350,6 +358,27 @@ public class EditFragment extends BaseFragment {
                 mPlaying.setButtonDrawable(R.drawable.play_pause_checkbox);
                 final TextureVideoView mVideoView = new TextureVideoView(getContext());
 
+                //set videovew size, otherwise video will look squeezed
+                if (mDimens.needsCropping) {
+                    int width = mDimens.width;
+                    int height = mDimens.height;
+
+                    if (isPortrait()) {
+                        width = mDimens.height;
+                        height = mDimens.width;
+                    }
+
+                    if (height > width)
+                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width)));
+                    else
+                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                } else
+                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
                 mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -361,9 +390,6 @@ public class EditFragment extends BaseFragment {
 //                vBottom.addView(mPlaying);
 
                 mVideoView.setBackgroundResource(R.color.pure_black);
-
-                mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
                 if (mDimens.isFrontFacing) mVideoView.setScaleX(-1);
 
@@ -579,12 +605,14 @@ public class EditFragment extends BaseFragment {
                 vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
             }
         }
-
-
     }
 
     @Override
     public void onDestroy() {
+        if (mContentView != null && mContentView instanceof TextureVideoView){
+            ((TextureVideoView) mContentView).stopPlayback();
+        }
+
         if (mContentType == ContentType.Video && mDimens.deleteVideoWhenFinished)
             ImageUtility.deleteCachedVideo(mUri);
 
@@ -640,21 +668,22 @@ public class EditFragment extends BaseFragment {
                 boolean widthIsGreater = mDimens.height < mDimens.width;
                 String overlay;
 
+                //TODO: smallest side will be 640
                 //scale video, we don't want to process huge videos
                 int newWidth;
                 int newHeight;
                 if (widthIsGreater) {
-                    if (mDimens.width > 720) {
-                        newWidth = 720;
-                        newHeight = ((mDimens.height * newWidth / mDimens.width / 2)) * 2;
+                    if (mDimens.height > 640) {
+                        newHeight = 640;
+                        newWidth = ((int)((float)mDimens.width * newHeight / mDimens.height / 2)) * 2;
                     } else {
                         newWidth = mDimens.width;
                         newHeight = mDimens.height;
                     }
                 } else {
-                    if (mDimens.height > 720) {
-                        newHeight = 720;
-                        newWidth = ((newHeight * mDimens.width / mDimens.height / 2)) * 2;
+                    if (mDimens.width > 640) {
+                        newWidth = 640;
+                        newHeight = ((int)((float)newWidth * mDimens.height / mDimens.width / 2)) * 2;
                     } else {
                         newWidth = mDimens.width;
                         newHeight = mDimens.height;
@@ -670,8 +699,8 @@ public class EditFragment extends BaseFragment {
                     newHeight = temp;
                 }
 
-                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                //Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
+                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
                 //Log.i(TAG, "call: rotation " + mDimens.rotation);
 
                 overlay = saveViewAsImage(mOverlaysContainer);
@@ -698,16 +727,18 @@ public class EditFragment extends BaseFragment {
                             "[1:v]scale=%d:-1[over];", newWidth);
 
                     if (mDimens.needsCropping) {
-                        if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement){
+                        if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
                             //if was square, set dimen to square
                             if (newWidth > newHeight)
                                 newWidth = newHeight;
                             else
                                 newHeight = newWidth;
-                        }else {
+                        } else {
                             //set to 6:5 ratio
                             newHeight = (int) (newWidth * 1.2);
                         }
+
+                        Log.i(TAG, "call: cropp" + newWidth + " " + newHeight);
 
                         temp += String.format(Locale.US,
                                 "%scrop=%d:%d:0:0[crop1];",
@@ -715,7 +746,7 @@ public class EditFragment extends BaseFragment {
                                 newWidth, newHeight);
 
                         temp += "[crop1][over]overlay=0:0";
-                    }else {
+                    } else {
 //                    //overlay
                         temp += String.format(Locale.US,
                                 "%s[over]overlay=0:0", mDimens.isFrontFacing ? "[tran]" : "[rot]");

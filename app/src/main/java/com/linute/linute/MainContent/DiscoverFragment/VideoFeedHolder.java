@@ -56,8 +56,6 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
             videoProcessing = true;
             vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
             vSquareVideoView.setVisibility(View.VISIBLE);
-
-
         } else {
             if (vSquareVideoView.isPlaying()) {
                 vSquareVideoView.pause();
