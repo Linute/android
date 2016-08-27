@@ -291,14 +291,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mUserId = Utils.getMyId(getContext());
 
-        //when press attach photo or video: start intent
-        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCameraGalleryOption();
-            }
-        });
-
         return view;
     }
 
@@ -522,18 +514,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
-        //listen for attach photo or video
-        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_VIDEO).add(CameraType.CAMERA_GALLERY));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
-                startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
-            }
-        });
-
 
         //show keyboard when fragment appears
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
@@ -563,6 +543,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onClick(View view) {
 
+            }
+        });
+
+        //when press attach photo or video: start intent
+        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCameraGalleryOption();
             }
         });
 
@@ -1906,12 +1894,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     time = null;
                 }
 
+                String text;
+                try {
+                    text = message.getString("text");
+                }catch (JSONException e){
+                    e.printStackTrace();
+                    text = "";
+                }
                 chat = new Chat(
                         message.getString("room"),
                         time,
                         ownerId,
                         message.getString("id"),
-                        message.getString("text"),
+                        text,
                         messageBeenRead,
                         viewerIsOwnerOfMessage
                 );
