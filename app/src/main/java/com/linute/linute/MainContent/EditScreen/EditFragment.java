@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.media.MediaMetadataRetriever;
@@ -630,14 +628,6 @@ public class EditFragment extends BaseFragment {
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
 
-        /**
-         * TODO:
-         *      - if video coming from camera is square
-         *      - from gallery, don't crop
-         *      - look at overlays
-         *      - preset too fast ?
-         */
-
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
             @Override
             public void call(final Subscriber<? super Uri> subscriber) {
@@ -671,8 +661,17 @@ public class EditFragment extends BaseFragment {
                     }
                 }
 
-                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
+
+                // ffmpeg takes rotation into account now, so if the video has 90 degrees rotation
+                // the videos width will be used as it's height and video height is it's width
+                if (isPortrait()) {
+                    int temp = newWidth;
+                    newWidth = newHeight;
+                    newHeight = temp;
+                }
+
+                //Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                //Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
                 //Log.i(TAG, "call: rotation " + mDimens.rotation);
 
                 overlay = saveViewAsImage(mOverlaysContainer);
@@ -687,67 +686,61 @@ public class EditFragment extends BaseFragment {
 
                     String temp = "";
 
-                    if (isPortrait()) {
-                        //scale vid
-                        temp += String.format(Locale.US,
-                                "[0:v]scale=%d:%d[rot];", newHeight, newWidth);
-                    }else {
-                        temp += String.format(Locale.US,
-                                "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
-                    }
+                    temp += String.format(Locale.US,
+                            "[0:v]scale=%d:%d[rot];", newWidth, newHeight);
 
                     if (mDimens.isFrontFacing) {
                         //rotate vid
                         temp += "[rot]hflip[tran];";
                     }
 
-                    if (isPortrait()) {
-                        temp += String.format(Locale.US,
-                                "[1:v]scale=-1:%d[over];", newHeight);
-                    } else {
-                        temp += String.format(Locale.US,
-                                "[1:v]scale=%d:-1[over];", newWidth);
-                    }
-
-
-                    int shorter = isPortrait() ? newHeight : newWidth;
-
-                    temp += String.format(Locale.US, "%scrop=%d:%d[crop1];", mDimens.isFrontFacing ? "[tran]" : "[rot]", shorter,(int) (shorter * 1.2));
-
-                    Point coord = new Point(0, 0);
-//                    //overlay
                     temp += String.format(Locale.US,
-                            "[crop1][over]overlay=%d:%d", coord.x, coord.y);
+                            "[1:v]scale=%d:-1[over];", newWidth);
+
+                    if (mDimens.needsCropping) {
+                        if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement){
+                            //if was square, set dimen to square
+                            if (newWidth > newHeight)
+                                newWidth = newHeight;
+                            else
+                                newHeight = newWidth;
+                        }else {
+                            //set to 6:5 ratio
+                            newHeight = (int) (newWidth * 1.2);
+                        }
+
+                        temp += String.format(Locale.US,
+                                "%scrop=%d:%d:0:0[crop1];",
+                                mDimens.isFrontFacing ? "[tran]" : "[rot]",
+                                newWidth, newHeight);
+
+                        temp += "[crop1][over]overlay=0:0";
+                    }else {
+//                    //overlay
+                        temp += String.format(Locale.US,
+                                "%s[over]overlay=0:0", mDimens.isFrontFacing ? "[tran]" : "[rot]");
+                    }
 
                     cmd.add(temp);
                 } else {
+
                     if (mDimens.isFrontFacing) {
                         cmd.add("-filter_complex");
                         cmd.add(String.format(Locale.US,
-                                "[0]scale=%d:%d[scaled];[scaled]hflip", widthIsGreater ? mDimens.height : mDimens.width, widthIsGreater ? mDimens.height : (int) (mDimens.width * 1.2)));//newWidth, newHeight));
+                                "[0]scale=%d:%d[scaled];[scaled]hflip", newWidth, newHeight));//newWidth, newHeight));
                     } else {
                         cmd.add("-filter_complex");
                         cmd.add(String.format(Locale.US,
-                                "scale=%d:%d", widthIsGreater ? (int) (mDimens.height * 1.2) : mDimens.width, widthIsGreater ? mDimens.height : (int) (mDimens.width * 1.2))); //newWidth, newHeight));
+                                "scale=%d:%d", newWidth, newHeight)); //newWidth, newHeight));
                     }
                 }
                 //}
 
                 cmd.add("-preset");
-                cmd.add("ultrafast");
-//                cmd.add("-metadata:s:v");
-//                cmd.add(String.format(Locale.US,
-//                        "rotate=%d", mDimens.rotation));
+                cmd.add("superfast"); //ultrafast
                 cmd.add("-c:a");
                 cmd.add("copy");
                 cmd.add(outputFile);
-
-                //cmd += "-preset superfast "; //good idea to set threads?
-
-//                cmd += "-c:a copy "; //copy instead of re-encoding audio
-//                cmd += outputFile; //output file;
-
-//                Log.i(TAG, "ffmped call");
 
                 try {
                     mFfmpeg.execute(cmd.toArray(new String[cmd.size()]), new FFmpegExecuteResponseHandler() {
@@ -838,11 +831,11 @@ public class EditFragment extends BaseFragment {
             view.setDrawingCacheEnabled(true);
             view.buildDrawingCache();
 
-            //rotate the png so it can overlay correctly
-            Matrix m = new Matrix();
-            m.setRotate(360 - mDimens.rotation);
+//            //rotate the png so it can overlay correctly
+//            Matrix m = new Matrix();
+//            m.setRotate(360 - mDimens.rotation);
 
-            Bitmap bm = Bitmap.createBitmap(view.getDrawingCache(), 0, 0, view.getWidth(), view.getHeight(), m, true);
+            Bitmap bm = Bitmap.createBitmap(view.getDrawingCache(), 0, 0, view.getWidth(), view.getHeight());
             view.destroyDrawingCache();
             bm.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
             outputStream.close();
