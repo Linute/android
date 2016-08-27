@@ -174,7 +174,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vLikeBar = vFrame.findViewById(R.id.action_bar);
 
             final ToggleImageView checkbox = (ToggleImageView) vLikeBar.findViewById(R.id.checkbox);
-            checkbox.setImageViews(R.drawable.ic_fire_off, R.drawable.ic_fire_on);
+            checkbox.setImageViews(R.drawable.ic_fire_off, R.drawable.ic_fire);
             checkbox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

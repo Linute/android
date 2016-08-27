@@ -6,10 +6,9 @@
 
     <color name="red">#FB284C</color>
 
-
-
     <color name="status_bar_color">#173856</color>
-    <color name="colorPrimaryDark">#0B1E30</color>
+    <color name="colorPrimaryDark">#14324D</color>
+    <color name="darkPrimary">#0B1E30</color>
     <color name="colorSubPrimary">#22486a</color>
     <color name="colorAccent">#1d4261</color>
     <color name="light_grey">#d3d3d3</color>
@@ -63,6 +62,8 @@
     <color name="chat_setting_divider">#EDE7E7</color>
 
     <color name="light_blue">#48BEF7</color>
+
+    <color name="inactive_grey">#979797</color>
 
 </resources>
 

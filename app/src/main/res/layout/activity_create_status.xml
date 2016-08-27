@@ -1,13 +1,11 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/darkPrimary"
     android:orientation="vertical"
     tools:context=".MainContent.CreateContent.CreateStatusActivity">
-
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/postContentToolbar"
@@ -110,7 +108,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             tools:background="@drawable/post_background">
 
-            <TextView
+            <View
                 android:id="@+id/selector_text0"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -118,9 +116,6 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="T"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -134,7 +129,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-            <TextView
+            <View
                 android:id="@+id/selector_text1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -142,9 +137,6 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="A"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -157,7 +149,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-            <TextView
+            <View
                 android:id="@+id/selector_text2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -165,9 +157,6 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="P"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -180,7 +169,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground">
 
-            <TextView
+            <View
                 android:id="@+id/selector_text3"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -188,13 +177,9 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="T"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
-
 
         <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
             android:id="@+id/post_create_4"
@@ -205,7 +190,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-            <TextView
+            <View
                 android:id="@+id/selector_text4"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -213,9 +198,6 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="I"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
 
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
@@ -229,7 +211,7 @@
             android:clickable="true"
             android:foreground="?android:attr/selectableItemBackground"
         >
-            <TextView
+            <View
                 android:id="@+id/selector_text5"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -237,9 +219,6 @@
                 android:layout_margin="3dp"
                 android:background="@drawable/post_color"
                 android:gravity="center"
-                android:text="N"
-                android:textColor="#FFFFFF"
-                android:textSize="25sp"
             />
         </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
@@ -251,69 +230,104 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="12dp"
-        android:gravity="center"
         android:orientation="horizontal"
         android:weightSum="2"
     >
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="0px"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-        >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:text="anon\ncomments"
-                android:textColor="@color/pure_white"
-                android:textSize="12sp"
-            />
-
-
-            <CheckBox
-                android:id="@+id/anon_comments"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:button="@drawable/turn_anon_comments_off"
-                android:checked="true"
-            />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:text="post\nas"
-                android:textColor="@color/pure_white"
-                android:textSize="12sp"
-            />
-
-            <CheckBox
+            <android.support.v7.widget.SwitchCompat
                 android:id="@+id/anon_post"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:button="@drawable/post_as_anon_checkbox"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
             />
-        </LinearLayout>
 
+            <TextView
+                android:id="@+id/post_as"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/anon_post"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:text="post as"
+                android:textColor="@color/fifty_white"
+                android:textSize="12sp"
+            />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toLeftOf="@id/anon_post"
+                android:text="Me"
+                android:textColor="@color/pure_white"
+            />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:layout_toRightOf="@id/anon_post"
+                android:text="Anon"
+                android:textColor="@color/pure_white"
+            />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+        >
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/anon_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:checked="true"
+            />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/anon_comments"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="4dp"
+                android:gravity="center"
+                android:text="anon comments"
+                android:textColor="@color/fifty_white"
+                android:textSize="12sp"
+            />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toLeftOf="@id/anon_comments"
+                android:text="No"
+                android:textColor="@color/pure_white"
+            />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:layout_toRightOf="@id/anon_comments"
+                android:text="Yes"
+                android:textColor="@color/pure_white"
+            />
+
+        </RelativeLayout>
     </LinearLayout>
-
-
 </LinearLayout>

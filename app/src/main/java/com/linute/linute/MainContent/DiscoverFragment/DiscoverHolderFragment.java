@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -57,6 +59,8 @@ public class DiscoverHolderFragment extends BaseFragment {
     private boolean mHasMessage;
 
     private View mNotificationIndicator;
+
+    private FloatingActionsMenu mFloatingActionsMenu;
 
     public DiscoverHolderFragment() {
     }
@@ -138,6 +142,7 @@ public class DiscoverHolderFragment extends BaseFragment {
             @Override
             public void onPageSelected(int position) {
                 VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+                if (mFloatingActionsMenu.isExpanded()) mFloatingActionsMenu.collapse();
             }
 
             @Override
@@ -147,7 +152,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         });
 
         tabLayout.setupWithViewPager(mViewPager);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire_on);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire);
         tabLayout.setOnTabSelectedListener(
                 new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
                     @Override
@@ -157,63 +162,56 @@ public class DiscoverHolderFragment extends BaseFragment {
                 }
         );
 
-        final FloatingActionsMenu fabMenu = (FloatingActionsMenu)rootView.findViewById(R.id.create_menu);
-
+        mFloatingActionsMenu = (FloatingActionsMenu) rootView.findViewById(R.id.create_menu);
         final View fabCloseOverlay = rootView.findViewById(R.id.fab_close_overlay);
-        fabCloseOverlay.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                fabMenu.collapse();
-                return false;
-            }
-    });
+        fabCloseOverlay.setOnTouchListener(
+                new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        if (mFloatingActionsMenu.isExpanded())
+                            mFloatingActionsMenu.collapse();
+                        return false;
+                    }
+                });
 
-        /*fabMenu.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
-            @Override
-            public void onMenuExpanded() {
-                fabCloseOverlay.setVisibility(View.VISIBLE);
-            }
+        mFloatingActionsMenu.findViewById(R.id.create_camera).
+                setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (getActivity() == null) return;
+                                Intent i = new Intent(getActivity(), CameraActivity.class);
+                                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
+                                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                            }
+                        }
+                );
 
-            @Override
-            public void onMenuCollapsed() {
-                fabCloseOverlay.setVisibility(View.GONE);
-            }
-        });*/
+        mFloatingActionsMenu.findViewById(R.id.create_upload).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), GalleryActivity.class);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                }
+        );
 
-        rootView.findViewById(R.id.create_camera).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                fabMenu.collapse();
-            }
-        });
-
-        rootView.findViewById(R.id.create_upload).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getActivity(), GalleryActivity.class);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                fabMenu.collapse();
-            }
-        });
-
-        rootView.findViewById(R.id.create_text).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getActivity(), CreateStatusActivity.class);
-                getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
-                fabMenu.collapse();
-            }
-        });
+        mFloatingActionsMenu.findViewById(R.id.create_text).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (getActivity() == null) return;
+                        Intent i = new Intent(getActivity(), CreateStatusActivity.class);
+                        getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
+                    }
+                });
 
 
         return rootView;
     }
-
 
     private boolean mCampusFeedNeedsUpdating = true;
     private boolean mFriendsFeedNeedsUpdating = true;
@@ -292,6 +290,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         }
 
         mAppBarLayout.setExpanded(true, false);
+        mFloatingActionsMenu.collapse();
     }
 
 
@@ -333,7 +332,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         public void call(NotificationEvent notificationEvent) {
             if (notificationEvent.getType() == NotificationEvent.ACTIVITY) {
                 int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
-                mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE );
+                mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
                 mUpdatesCounter.setText(count < 100 ? count + "" : "+");
             } else if (notificationEvent.getType() == NotificationEvent.DISCOVER) {
                 mToolbar.setNavigationIcon(notificationEvent.hasNotification() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);

@@ -2,7 +2,7 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:drawable="@drawable/ic_fire_off" android:state_checked="false"/>
-    <item android:drawable="@drawable/ic_fire_on" android:state_checked="true"/>
+    <item android:drawable="@drawable/ic_fire" android:state_checked="true"/>
     <item android:drawable="@drawable/ic_fire_off"/>
 
     <!-- default state -->

@@ -105,11 +105,8 @@ public class FeedFragment extends BaseFragment {
         mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
 
         recList = (RecyclerView) rootView.findViewById(R.id.eventList);
-
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-
         llm.setOrientation(LinearLayoutManager.VERTICAL);
-
         recList.setLayoutManager(llm);
 
       /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
