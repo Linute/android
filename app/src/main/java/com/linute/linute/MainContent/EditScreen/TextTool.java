@@ -135,7 +135,7 @@ public class TextTool extends EditContentTool {
         });
 
         textModes = new TextMode[]{
-                new TextMode(R.drawable.sticker_icon) {
+                new TextMode(R.drawable.no_text_icon) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -144,14 +144,14 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.sticker_icon, midTV){
+                new TextMode(R.drawable.middle_text_icon, midTV){
                     @Override
                     public void onSelected() {
                         super.onSelected();
                         swapSnapchatET();
                     }
                 },//Snapchat
-                new TextMode(R.drawable.sticker_icon, topTV, botTV){
+                new TextMode(R.drawable.text_meme_icon, topTV, botTV){
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -165,8 +165,8 @@ public class TextTool extends EditContentTool {
                         topTV.setNextFocusDownId(0);
                     }
                 },//Full Meme
-                new TextMode(R.drawable.sticker_icon, topTV),//Top
-                new TextMode(R.drawable.sticker_icon, botTV),//Bottom
+                new TextMode(R.drawable.top_text_icon, topTV),//Top
+                new TextMode(R.drawable.text_bottom_icon, botTV),//Bottom
         };
         textModeViews = new View[textModes.length];
 
