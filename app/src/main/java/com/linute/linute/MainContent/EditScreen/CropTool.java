@@ -21,6 +21,7 @@ public class CropTool extends EditContentTool {
 
 
     private final EditFragment.Activatable mActivatable;
+    private final EditFragment.RequestDisableToolListener reqDisableToolListener;
     /*measurements taken from bottom (0 in bottom and top = full image)*/
     private int mTopY = 0;
     private int mBotY = 0;
@@ -42,8 +43,12 @@ public class CropTool extends EditContentTool {
     Dimens mDimens;
 
 
-    public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, EditFragment.Activatable activatable, Dimens dimens) {
+    public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, EditFragment.Activatable activatable, Dimens dimens, EditFragment.RequestDisableToolListener listener) {
         super(uri, type, overlays);
+        mActivatable = activatable;
+        mDimens = dimens;
+
+
         mCropperLayout = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tools_overlay_crop, mOverlaysView, false);
         ((ViewGroup)(mOverlaysView.getParent())).addView(mCropperLayout);
 
@@ -56,8 +61,8 @@ public class CropTool extends EditContentTool {
         botFade = mCropperLayout.findViewById(R.id.bot_fade);
         updateCropperView();
 
-        mActivatable = activatable;
-        mDimens = dimens;
+        reqDisableToolListener = listener;
+
     }
 
 
@@ -177,6 +182,9 @@ public class CropTool extends EditContentTool {
         mOverlaysView.setTop(mTopY);
         mOverlaysView.setBottom(mBotY);
         mOverlaysView.invalidate();
+
+        if(reqDisableToolListener != null)
+        reqDisableToolListener.requestDisable(OverlaysTool.class, mTopY != 0 || mBotY != 0);
 
     }
 

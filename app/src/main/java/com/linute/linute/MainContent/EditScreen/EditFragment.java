@@ -67,7 +67,7 @@ import static rx.schedulers.Schedulers.io;
 /**
  * Created by mikhail on 8/22/16.
  */
-public class EditFragment extends BaseFragment {
+public class EditFragment extends BaseFragment{
 
     public static final String TAG = EditFragment.class.getSimpleName();
 
@@ -96,6 +96,8 @@ public class EditFragment extends BaseFragment {
 
     private EditContentTool[] mTools;
     private View[] mToolViews;
+    boolean[] mIsDisabled;
+
 
     private int mReturnType;
 //    private int mCameraType;
@@ -107,6 +109,7 @@ public class EditFragment extends BaseFragment {
     private String mUserToken;
 
     View mContentView;
+
 
 
     public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
@@ -238,7 +241,9 @@ public class EditFragment extends BaseFragment {
         mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
 
         mTools = setupTools(mOverlaysContainer);
+        mIsDisabled =new boolean[mTools.length];
         mToolViews = new View[mTools.length];
+
 
         //Set up adapter that controls tool selection
         LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
@@ -270,12 +275,15 @@ public class EditFragment extends BaseFragment {
     }
 
 
+
     protected void onToolSelected(int i) {
+        if(mIsDisabled[i]) return;
+
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
 
-        toolHolders[oldSelectedTool].setSelected(false);
-        toolHolders[mSelectedTool].setSelected(true);
+        toolHolders[oldSelectedTool].setSelected(false, false);
+        toolHolders[mSelectedTool].setSelected(true, false);
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
@@ -354,6 +362,26 @@ public class EditFragment extends BaseFragment {
         }
     }
 
+    RequestDisableToolListener requestDisableToolListener = new RequestDisableToolListener() {
+        @Override
+        public void requestDisable(Class<? extends EditContentTool> tool, boolean disable) {
+            for (int i = 0; i < mTools.length; i++) {
+                EditContentTool t = mTools[i];
+                if(t.getClass() == tool){
+                    mIsDisabled[i] = disable;
+                    if(disable){
+                        t.onDisable();
+                    }else {
+                        t.onEnable();
+                    }
+                }
+
+                toolHolders[i].setSelected(mSelectedTool == i, mIsDisabled[i]);
+
+            }
+        }
+    };
+
     private EditContentTool[] setupTools(ViewGroup overlay) {
 
         DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
@@ -374,7 +402,7 @@ public class EditFragment extends BaseFragment {
 
         if(mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
             CropTool cropTool;
-            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens);
+            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens, requestDisableToolListener);
             cropTool.MAX_SIZE = height;
             cropTool.MIN_SIZE = displayWidth / 16 * 9;
 
@@ -395,6 +423,8 @@ public class EditFragment extends BaseFragment {
         }
 
     }
+
+
 
     private void onDoneButtonPress() {
         ProcessingOptions options = new ProcessingOptions();
@@ -542,12 +572,17 @@ public class EditFragment extends BaseFragment {
             vIcon.setImageResource(tool.getDrawable());
         }
 
-        public void setSelected(boolean isSelected) {
+        public void setSelected(boolean isSelected, boolean isDisabled) {
             if (isSelected) {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
                 vIcon.setColorFilter(new
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
-            } else {
+            } else if(isDisabled){
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.grey_color));
+                vIcon.setColorFilter(new
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.grey_color), PorterDuff.Mode.MULTIPLY));
+
+            }else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
                 vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
             }
@@ -818,6 +853,10 @@ public class EditFragment extends BaseFragment {
 
         getActivity().setResult(Activity.RESULT_OK, result);
         getActivity().finish();
+    }
+
+    static interface RequestDisableToolListener{
+        void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
 
 
