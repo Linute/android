@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -30,6 +31,7 @@ public class TextTool extends EditContentTool {
     private final CustomBackPressedEditText midET;
     private final View mTextContainer;
 
+
     private static class TextMode {
 
         private final TextView[] mextViews;
@@ -45,12 +47,11 @@ public class TextTool extends EditContentTool {
             for (TextView tv : mextViews) {
                 tv.setVisibility(View.VISIBLE);
             }
-            if(mextViews.length>0)
-            showKeyboard(mextViews[0]);
+            if (mextViews.length > 0)
+                showKeyboard(mextViews[0]);
 
         }
 
-        ;
 
         public void onUnSelected() {
             for (TextView tv : mextViews) {
@@ -73,8 +74,6 @@ public class TextTool extends EditContentTool {
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
-
-
         topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
         botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
         midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
@@ -88,7 +87,7 @@ public class TextTool extends EditContentTool {
         midTV.setVisibility(View.GONE);
         midET.setVisibility(View.GONE);
 
-        midTV.setY(dim.height/2);
+        midTV.setY(dim.height / 2);
 
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -105,6 +104,8 @@ public class TextTool extends EditContentTool {
                 //TODO animate?
             }
         });
+
+
 
         midTV.setOnTouchListener(new View.OnTouchListener() {
 
@@ -124,8 +125,8 @@ public class TextTool extends EditContentTool {
 
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if(System.currentTimeMillis() - timeDown < 400
-                                && Math.abs(motionEvent.getRawY()-downY) < 20){
+                        if (System.currentTimeMillis() - timeDown < 400
+                                && Math.abs(motionEvent.getRawY() - downY) < 20) {
                             swapSnapchatET();
                         }
                         return true;
@@ -144,14 +145,14 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.middle_text_icon, midTV){
+                new TextMode(R.drawable.middle_text_icon, midTV) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
                         swapSnapchatET();
                     }
                 },//Snapchat
-                new TextMode(R.drawable.text_meme_icon, topTV, botTV){
+                new TextMode(R.drawable.text_meme_icon, topTV, botTV) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -181,9 +182,7 @@ public class TextTool extends EditContentTool {
         });
         mTextContainer.setClickable(false);
 
-
         mOverlaysView.addView(mTextContainer);
-
     }
 
     public void hideKeyboard(View view) {
@@ -231,7 +230,7 @@ public class TextTool extends EditContentTool {
         return rootView;
     }
 
-    private static void showKeyboard(View view){
+    private static void showKeyboard(View view) {
         view.requestFocus();
         InputMethodManager lManager = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         lManager.showSoftInput(view, 0);
@@ -257,7 +256,7 @@ public class TextTool extends EditContentTool {
         super.onOpen();
         botTV.setInputType(InputType.TYPE_CLASS_TEXT);
         topTV.setInputType(InputType.TYPE_CLASS_TEXT);
-       mTextContainer.setClickable(true);
+        mTextContainer.setClickable(true);
     }
 
     @Override

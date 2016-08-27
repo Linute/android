@@ -48,7 +48,6 @@ public class StickersTool extends EditContentTool {
 
 
         mOverlaysView.addView(mStickersContainer);
-
     }
 
     ManipulableImageView.ViewManipulationListener viewManipulationListener = new ManipulableImageView.ViewManipulationListener() {

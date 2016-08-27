@@ -1,0 +1,72 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/actionBarSize"
+        android:background="@color/colorPrimary"/>
+
+    <!--placeholder view that has 6:5 ratio-->
+    <!--can be changed to square by calling setMakeSquare() and requestLayout-->
+    <com.linute.linute.SquareCamera.CustomView
+        android:id="@+id/spacer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"/>
+
+    <FrameLayout
+        android:id="@+id/final_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:layout_gravity="center">
+
+        <!-- Photos and videos taken/uploaded by user in this view -->
+        <FrameLayout
+            android:id="@+id/base_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- Playground for tools -->
+        <!--can be changed to square by calling setMakeSquare() and requestLayout-->
+        <com.linute.linute.SquareCamera.CustomFrameLayout
+            android:id="@+id/overlays"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+        />
+
+    </FrameLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/spacer"
+        android:orientation="vertical"
+    >
+        <LinearLayout
+            android:id="@+id/list_tools"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:background="#0b1e30"
+            android:orientation="horizontal"
+        />
+        <FrameLayout
+            android:id="@+id/layout_tools_menu"
+            android:layout_width="match_parent"
+            android:layout_height="0px"
+            android:layout_weight="1"
+            android:background="#2c3256"
+        />
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>

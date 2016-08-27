@@ -741,6 +741,7 @@ public class CameraFragment extends Fragment {
 
                                                         Dimens photoDimens = new Dimens(options.outWidth, options.outHeight, mCameraID == getFrontCameraID());
 
+                                                        photoDimens.setNeedsCropping(false);
 
                                                         getFragmentManager()
                                                                 .beginTransaction()
@@ -831,6 +832,9 @@ public class CameraFragment extends Fragment {
 
         Camera.Parameters p = mCamera.getParameters();
         Size vidSize = p.getSupportedVideoSizes() != null ? determineBestSize(p.getSupportedVideoSizes()) : p.getPreviewSize();
+
+        Log.i(TAG, "prepareMediaRecorder: "+vidSize.width);
+        Log.i(TAG, "prepareMediaRecorder: "+vidSize.height);
 
         mVideoDimen = new Dimens(
                 vidSize.width,
