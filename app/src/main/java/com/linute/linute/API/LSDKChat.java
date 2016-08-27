@@ -25,6 +25,12 @@ public class LSDKChat {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
+    public Call getRoom(String id, Map<String, String> param, Callback callback) {
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        String[] path = {"rooms", id};
+        return API_Methods.get(path, header, param, callback);
+    }
+
     public Call getRooms(Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         String[] path = {"rooms"};

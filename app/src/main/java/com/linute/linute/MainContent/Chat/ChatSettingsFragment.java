@@ -106,8 +106,14 @@ public class ChatSettingsFragment extends BaseFragment {
         }
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
         Map<String, String> params = new HashMap<>();
-        params.put("room", mChatRoom.roomId);
+
+        if(mChatRoom.roomImage == null)
+        new LSDKChat(getContext()).getRoom(mChatRoom.roomId, params, getRoomCallback);
+
+
         display();
+
+
     }
 
     @Nullable
@@ -777,12 +783,35 @@ room: id of room
         });
     }
 
+    Callback getRoomCallback = new Callback() {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            e.printStackTrace();
+        }
 
-    //:room:add users
-    //:room:delete users
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
 
-    //room:
-    //users: [;    ]
+            try {
+                JSONObject obj = new JSONObject(response.body().string());
+                Log.i("AAA", obj.toString(4));
 
+                mChatRoom.roomImage = obj.getJSONObject("profileImage").getString("original");
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(getView() != null)
+                            updateRoomPhoto(getView());
+                    }
+                });
+
+
+            }catch(JSONException e){
+
+            }
+
+        }
+    };
 
 }
