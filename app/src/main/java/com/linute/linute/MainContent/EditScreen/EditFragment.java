@@ -305,6 +305,8 @@ public class EditFragment extends BaseFragment {
             View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
             toolHolders[i] = new ToolHolder(toolView);
             toolHolders[i].bind(tool);
+            toolHolders[i].setSelected(false,false);
+
             toolView.setTag(i);
             toolView.setOnClickListener(onClickListener);
             toolsListRV.addView(toolView);
@@ -634,8 +636,8 @@ public class EditFragment extends BaseFragment {
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.grey_color), PorterDuff.Mode.MULTIPLY));
 
             }else {
-                vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
-                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.edit_unselected));
+                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.edit_unselected));
             }
         }
 

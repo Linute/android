@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.EditScreen;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -274,7 +273,7 @@ public class TextTool extends EditContentTool {
 
     @Override
     public String getName() {
-        return "Text";
+        return "Meme";
     }
 
     @Override
