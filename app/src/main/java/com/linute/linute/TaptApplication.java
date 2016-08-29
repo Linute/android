@@ -2,9 +2,6 @@ package com.linute.linute;
 
 import android.app.Application;
 
-import com.linute.linute.API.API_Methods;
-import com.linute.linute.SquareCamera.ScreenSizeSingleton;
-
 import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -23,10 +20,6 @@ public class TaptApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (API_Methods.DEV){
-            API_Methods.HOST = API_Methods.HOST_DEV;
-            API_Methods.VERSION = API_Methods.VERSION_DEV;
-        }
 
         RealmConfiguration configuration = new RealmConfiguration.Builder(this).name(FILE_NAME)
                 .schemaVersion(SCHEMA_VERSION)

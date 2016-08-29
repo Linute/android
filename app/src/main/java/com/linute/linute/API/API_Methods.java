@@ -1,6 +1,7 @@
 package com.linute.linute.API;
 
 import android.os.Build;
+import android.util.Log;
 
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -34,16 +35,16 @@ public class API_Methods {
     // API ENDPOINT URL
     public static final String SCHEME = "https";
 
-    public static String HOST = "api.tapt.io";
-    //public static String HOST = "devapi2.tapt.io";
+//    public static String HOST = "api.tapt.io";
+    public static String HOST = "devapi2.tapt.io";
 
-    public static final String HOST_DEV = "devapi2.tapt.io";
-    public static final String HOST_LIVE = "api.tapt.io";
+//    public static final String HOST_DEV = "devapi2.tapt.io";
+//    public static final String HOST_LIVE = "api.tapt.io";
 
-    public static String VERSION = "v1.4.3";
+//    public static final String VERSION_DEV = "v1.4.4";
+//    public static final String VERSION_LIVE = "v1.4.3";
 
-    public static final String VERSION_DEV = "v1.4.3";
-    public static final String VERSION_LIVE = "v1.4.2";
+    public static String VERSION = "v1.4.4";
 
 
     //JSON TYPE
@@ -177,7 +178,7 @@ public class API_Methods {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
-        OkHttpClient client = new OkHttpClient();
+        Log.i("AAA", VERSION);
         header.put("User-Agent", "("+Build.BRAND + " " + Build.DEVICE + " "+Build.MODEL+"; Android "+Build.VERSION.RELEASE+")/ Ver ["+VERSION+"] UserID ["+USER_ID+"]");
         return header;
     }
