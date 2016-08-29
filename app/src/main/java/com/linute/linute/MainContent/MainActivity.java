@@ -15,13 +15,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -164,6 +161,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
+
         //setNavigationView action
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -187,7 +185,16 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        if (API_Methods.DEV) {
+        mNavigationView.findViewById(R.id.item_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(i);
+
+            }
+        });
+
+        /*if (API_Methods.DEV) {
             mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
             ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -197,7 +204,7 @@ public class MainActivity extends BaseTaptActivity {
                     API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
                 }
             });
-        }
+        }*/
 
         clearBackStack();
 
@@ -773,7 +780,7 @@ public class MainActivity extends BaseTaptActivity {
                                 newMessageSnackbar(chat, message);
                             }
                         });
-                    }else {
+                    } else {
                         final NewMessageEvent chatEvent = new NewMessageEvent(true);
                         chatEvent.setRoomId(chat.roomId);
                         chatEvent.setMessage(activity.getString("messageTextfdr"));
@@ -1282,7 +1289,7 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-    public void setShowSnackbar(boolean show){
+    public void setShowSnackbar(boolean show) {
         mShowSnackbar = show;
     }
 

@@ -24,5 +24,14 @@
             android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
+       <!-- <item
+            android:id="@+id/settings_button"
+            android:icon="@drawable/ic_action_action_settings"
+            android:title="Settings"
+            android:checkable="false"
+            android:enabled="false"
+            android:orderInCategory="200"
+            android:layout_gravity="bottom"
+            />-->
     </group>
 </menu>
