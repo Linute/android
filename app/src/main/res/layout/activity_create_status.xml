@@ -256,10 +256,10 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:text="post as"
+                android:text="Posting as"
                 android:textColor="@color/fifty_white"
                 android:textSize="12sp"
-            />
+                android:autoText="false" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -267,7 +267,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="8dp"
                 android:layout_toLeftOf="@id/anon_post"
-                android:text="Me"
+                android:text="Self"
                 android:textColor="@color/pure_white"
             />
 
@@ -303,7 +303,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="4dp"
                 android:gravity="center"
-                android:text="anon comments"
+                android:text="Anon comments"
                 android:textColor="@color/fifty_white"
                 android:textSize="12sp"
             />

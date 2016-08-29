@@ -54,8 +54,8 @@ public class PrivacySettingTool extends EditContentTool {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postingAsSwitch.setShowText(false);
-            postingAsLeftText.setText("Anon");
-            postingAsRightText.setText("Self");
+            postingAsLeftText.setText("Self");
+            postingAsRightText.setText("Anon");
 
             anonCommentsSwitch.setShowText(false);
             anonCommentsLeftText.setText("Yes");
