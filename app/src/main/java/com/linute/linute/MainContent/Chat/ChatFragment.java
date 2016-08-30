@@ -4,12 +4,14 @@ package com.linute.linute.MainContent.Chat;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -27,6 +29,7 @@ import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -148,6 +151,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Map<String, User> mUserMap;
 
     private boolean mSocketConnected = false;
+
+    private AlertDialog mAlertDialog;
 
 
     public ChatFragment() {
@@ -286,18 +291,30 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mUserId = Utils.getMyId(getContext());
 
-        //when press attach photo or video: start intent
-        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
-                startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
-            }
-        });
-
         return view;
+    }
+
+
+    private void showCameraGalleryOption() {
+        if (getContext() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getContext()).setItems(
+                new String[]{"Camera", "Gallery"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent i;
+                        if (which == 0) {
+                            i = new Intent(getContext(), CameraActivity.class);
+                            i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
+                        } else {
+                            i = new Intent(getContext(), GalleryActivity.class);
+                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.ALL);
+                        }
+
+                        i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
+
+                        startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
+                    }
+                }).show();
     }
 
 
@@ -497,18 +514,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 
-        //listen for attach photo or video
-        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() == null) return;
-                Intent i = new Intent(getActivity(), CameraActivity.class);
-                i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_VIDEO).add(CameraType.CAMERA_GALLERY));
-                i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.RETURN_URI);
-                startActivityForResult(i, ATTACH_PHOTO_OR_IMAGE);
-            }
-        });
-
 
         //show keyboard when fragment appears
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
@@ -538,6 +543,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onClick(View view) {
 
+            }
+        });
+
+        //when press attach photo or video: start intent
+        view.findViewById(R.id.attach).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCameraGalleryOption();
             }
         });
 
@@ -753,6 +766,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     @Override
     public void onPause() {
         super.onPause();
+
+        if (mAlertDialog != null && mAlertDialog.isShowing()) {
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
 
         leaveRooms();
     }
@@ -1598,8 +1616,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onRead = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-
             for (int i = mChatList.size() - 1; i >= 0; i--) {
                 if (!mChatList.get(i).isRead()) {
                     mChatList.get(i).setIsRead(true);
@@ -1608,6 +1624,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
 
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -1876,12 +1893,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     time = null;
                 }
 
+                String text;
+                try {
+                    text = message.getString("text");
+                }catch (JSONException e){
+                    e.printStackTrace();
+                    text = "";
+                }
                 chat = new Chat(
                         message.getString("room"),
                         time,
                         ownerId,
                         message.getString("id"),
-                        message.getString("text"),
+                        text,
                         messageBeenRead,
                         viewerIsOwnerOfMessage
                 );

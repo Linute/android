@@ -32,12 +32,12 @@ public class CameraActivity extends AppCompatActivity {
     //    else, we'll send back a uri
     public final static String RETURN_TYPE = "send_to_url";
     public final static String CAMERA_TYPE = "camera_type";
-    public final static String GALLERY_TYPE = "gallery_filters";
+    //public final static String GALLERY_TYPE = "gallery_filters";
     public final static String ANON_KEY = "anon_key";
 
     private CameraType mCameraType;
     private int mReturnType;
-    private int mGalleryType;
+    //private int mGalleryType;
 
     public static final String TAG = CameraActivity.class.getSimpleName();
 
@@ -62,11 +62,11 @@ public class CameraActivity extends AppCompatActivity {
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
-            mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
+            //mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
             mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
             mReturnType = RETURN_URI;
-            mGalleryType = ALL;
+            //mGalleryType = ALL;
         }
 
         requestPermissions();
@@ -217,7 +217,7 @@ public class CameraActivity extends AppCompatActivity {
         return mReturnType;
     }
 
-    public int getGalleryType() {
-        return mGalleryType;
-    }
+//    public int getGalleryType() {
+//        return mGalleryType;
+//    }
 }

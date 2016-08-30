@@ -39,13 +39,14 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
+import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
-import com.linute.linute.SquareCamera.GalleryFragment;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.FileUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -729,7 +730,7 @@ room: id of room
                 @Override
                 public void run() {
                     Uri uri = data.getData();
-                    Uri path = Uri.parse(GalleryFragment.getPath(getActivity(), uri));
+                    Uri path = Uri.parse(FileUtils.getPath(getActivity(), uri));
                     try {
                         Bitmap bmp = BitmapFactory.decodeFile(path.getPath());
                         FileOutputStream fos = new FileOutputStream(path.getPath());
