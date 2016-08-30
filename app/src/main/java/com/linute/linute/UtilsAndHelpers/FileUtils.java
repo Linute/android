@@ -8,6 +8,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 /**
  * Created by QiFeng on 8/27/16.
@@ -45,6 +47,7 @@ public class FileUtils {
                 final Uri contentUri = ContentUris.withAppendedId(
                         Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
 
+                Log.i("test", "getPath: ");
                 return getDataColumn(context, contentUri, null, null);
             }
             // MediaProvider
@@ -139,5 +142,11 @@ public class FileUtils {
      */
     public static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+
+    public static String getMimeType(Context context, Uri uri){
+        if (context == null) return  null;
+        return context.getContentResolver().getType(uri);
     }
 }

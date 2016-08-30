@@ -28,7 +28,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProgressBarAnimation;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,7 +49,7 @@ public class ViewFullScreenFragment extends BaseFragment {
 
     private ImageView vImage;
     private View vVideoParent;
-    private ScalableVideoView vTextureVideoView;
+    private TextureVideoView vTextureVideoView;
     private View vVideoLoadingIndicator;
     private View vLoadingText;
 
@@ -123,10 +123,10 @@ public class ViewFullScreenFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_view_full_screen, container, false);
-        getActivity().onTouchEvent(MotionEvent.obtain(0,0,MotionEvent.ACTION_CANCEL,0,0,0));
+        getActivity().onTouchEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_CANCEL, 0, 0, 0));
         vImage = (ImageView) root.findViewById(R.id.imageView);
         vVideoParent = root.findViewById(R.id.video_parent);
-        vTextureVideoView = (ScalableVideoView) vVideoParent.findViewById(R.id.video);
+        vTextureVideoView = (TextureVideoView) vVideoParent.findViewById(R.id.video);
 
         vProgressBar = (ProgressBar) root.findViewById(R.id.progress_bar);
         vProgressBar.setIndeterminate(false);
@@ -157,7 +157,7 @@ public class ViewFullScreenFragment extends BaseFragment {
             }
 
             setFragmentState(FragmentState.FINISHED_UPDATING);
-        }else {
+        } else {
             vProgressBar.setVisibility(View.GONE);
         }
 
@@ -184,7 +184,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                                         if (vTextureVideoView.isPlaying()) {
                                             vVideoLoadingIndicator.setVisibility(View.VISIBLE);
                                             vTextureVideoView.pause();
-                                        } else if (!vTextureVideoView.isVideoStopped()){
+                                        } else {
                                             vVideoLoadingIndicator.setVisibility(View.GONE);
                                             vTextureVideoView.start();
                                         }
@@ -239,26 +239,24 @@ public class ViewFullScreenFragment extends BaseFragment {
                     .into(vImage);
         } else if (mPostType == Post.POST_TYPE_VIDEO) {
 
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(getContext(), vTextureVideoView, mLink);
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vTextureVideoView, mLink);
             vVideoParent.setVisibility(View.VISIBLE);
             vImage.setVisibility(View.GONE);
             vLoadingText.setVisibility(View.VISIBLE);
             //vTextureVideoView.stop();
-            vTextureVideoView.prepareAsync(new MediaPlayer.OnPreparedListener() {
+            vTextureVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     setFragmentState(FragmentState.FINISHED_UPDATING);
                     vLoadingText.setVisibility(View.GONE);
-                    if (!vTextureVideoView.isVideoStopped()) {
-                        mp.start();
-                    }
+                    mp.start();
                 }
             });
 
             vTextureVideoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (vVideoLoadingIndicator.getVisibility() == View.GONE && !vTextureVideoView.isVideoStopped()) {
+                    if (vVideoLoadingIndicator.getVisibility() == View.GONE) {
                         mp.start();
                         if (mPostId != null)
                             sendImpressionsAsync(mPostId);
@@ -283,7 +281,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                 vVideoLoadingIndicator.setVisibility(View.VISIBLE);
                 vLoadingText.setVisibility(View.GONE);
             } else {
-                vTextureVideoView.stop();
+                vTextureVideoView.stopPlayback();
             }
         }
 

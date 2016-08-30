@@ -22,6 +22,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
@@ -37,12 +38,6 @@ import java.io.File;
  * Created by mikhail on 8/20/16.
  */
 public class GalleryActivity extends AppCompatActivity {
-
-    /**
-     * TODO: MIME TYPE
-     */
-
-
     public static final String TAG = GalleryActivity.class.getSimpleName();
     public static final int REQ_READ_EXT_STORAGE = 52;
 
@@ -76,92 +71,96 @@ public class GalleryActivity extends AppCompatActivity {
             finish();
             return;
         }
-
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_IMAGE_OR_VID) { //got an image
             Uri uri = data.getData();
-            //Log.i(TAG, "onActivityResult: "+uri.toString());
-            if (uri.toString().contains("image")) { //selected image
-                try {
+            Log.i(TAG, "onActivityResult: "+uri.getPath());
+            Log.i(TAG, "onActivityResult: "+uri);
+            String type = FileUtils.getMimeType(this, uri);
 
-                    String path = FileUtils.getPath(this, uri);
-                    if (path != null) {
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(path, options);
-                        Dimens dimens = new Dimens(options.outWidth, options.outHeight, 0);
+            if (type != null) {
+                //Log.i(TAG, "onActivityResult: "+uri.toString());
+                if (type.startsWith("image")) { //selected image
+                    try {
+                        String path = FileUtils.getPath(this, uri);
+                        Log.i(TAG, "onActivityResult: "+path);
+                        if (path != null) {
+                            BitmapFactory.Options options = new BitmapFactory.Options();
+                            options.inJustDecodeBounds = true;
+                            BitmapFactory.decodeFile(path, options);
+                            Dimens dimens = new Dimens(options.outWidth, options.outHeight, 0);
 
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(
-                                        R.id.fragment_container,
-                                        EditFragment.newInstance(Uri.parse(path), EditFragment.ContentType.UploadedPhoto, mReturnType, dimens),
-                                        EditFragment.TAG)
-                                .addToBackStack(null)
-                                .commit();
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(
+                                            R.id.fragment_container,
+                                            EditFragment.newInstance(Uri.parse(path), EditFragment.ContentType.UploadedPhoto, mReturnType, dimens),
+                                            EditFragment.TAG)
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
+
+                    } catch (IllegalStateException e) {
+                        e.printStackTrace();
                     }
+                    return;
+                } else if (type.startsWith("video")) { //selected video
+                    try {
+                        Uri path = Uri.parse(FileUtils.getPath(this, uri));
 
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
-                }
-                return;
-
-
-            } else if (data.getData().toString().contains("video")) { //selected video
-                try {
-                    Uri path = Uri.parse(FileUtils.getPath(this, uri));
-
-                    if (path != null) {
-                        MediaMetadataRetriever info = new MediaMetadataRetriever();
-                        info.setDataSource(this, uri);
-                        long length = Long.parseLong(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+                        if (path != null) {
+                            MediaMetadataRetriever info = new MediaMetadataRetriever();
+                            info.setDataSource(this, uri);
+                            long length = Long.parseLong(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
 //                        Log.i(TAG, "onActivityResult: rotation "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
 //                        Log.i(TAG, "onActivityResult: bitrate "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
-                        if (length > 2500 && length < 15000) {
-                            try {
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(
-                                                R.id.fragment_container,
-                                                EditFragment.newInstance(
-                                                        path,
-                                                        EditFragment.ContentType.UploadedVideo,
-                                                        mReturnType,
-                                                        new Dimens(
-                                                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
-                                                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)),
-                                                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION))
-                                                        )
-                                                ),
-                                                EditFragment.TAG)
-                                        .addToBackStack(null)
-                                        .commit();
-                            } catch (IllegalStateException e) {
-                                e.printStackTrace();
+                            if (length > 2500 && length < 15000) {
+                                try {
+                                    getSupportFragmentManager()
+                                            .beginTransaction()
+                                            .replace(
+                                                    R.id.fragment_container,
+                                                    EditFragment.newInstance(
+                                                            path,
+                                                            EditFragment.ContentType.UploadedVideo,
+                                                            mReturnType,
+                                                            new Dimens(
+                                                                    Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
+                                                                    Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)),
+                                                                    Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION))
+                                                            )
+                                                    ),
+                                                    EditFragment.TAG)
+                                            .addToBackStack(null)
+                                            .commit();
+                                } catch (IllegalStateException e) {
+                                    e.printStackTrace();
+                                }
+                                return;
+                            } else {
+                                new AlertDialog.Builder(this)
+                                        .setTitle("Video too short or long")
+                                        .setMessage("Sorry, videos must be longer than 3 seconds and shorter than 15 seconds")
+                                        .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .show();
                             }
-                            return;
-                        } else {
-                            new AlertDialog.Builder(this)
-                                    .setTitle("Video too short or long")
-                                    .setMessage("Sorry, videos must be longer than 3 seconds and shorter than 15 seconds")
-                                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                        }
-                                    })
-                                    .show();
-                        }
 
-                        info.release();
+                            info.release();
+                        }
+                    } catch (IllegalArgumentException e) {
+                        //trying to get video info of video that doesn't exist throws this exception
+                        e.printStackTrace();
                     }
-                } catch (IllegalArgumentException e) {
-                    //trying to get video info of video that doesn't exist throws this exception
-                    e.printStackTrace();
                 }
             }
         }
+
 
         //didnt get image, so popbackstack
         finish();

@@ -181,10 +181,21 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
         // Set Post Image
         mType = post.getType();
+        resizeViews(0, getNewViewHeight(0)); //// TODO: 8/29/16 fill in
         getEventImage(post.getImage());
     }
 
     protected void singleClick() {
+    }
+
+    //// TODO: 8/29/16
+    protected void resizeViews(int width, int height){
+        //resize image view
+    }
+
+    //// TODO: 8/29/16
+    private int getNewViewHeight(int width){
+        return 0;
     }
 
 
