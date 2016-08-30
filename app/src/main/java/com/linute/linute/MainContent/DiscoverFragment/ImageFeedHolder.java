@@ -6,10 +6,13 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.bumptech.glide.RequestManager;
@@ -30,17 +33,21 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
     public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
-    protected View vPlaceholder;
     protected View vProgressBar;
     protected int mType;
+    protected int mScreenWidth;
 
     public ImageFeedHolder(final View itemView, Context context, RequestManager manager) {
         super(itemView, context, manager);
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        vPlaceholder = itemView.findViewById(R.id.image_placeholder);
         vProgressBar = itemView.findViewById(R.id.post_image_progress_bar);
         setUpOnClicks(itemView.findViewById(R.id.parent));
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        ((AppCompatActivity) context).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+
+        mScreenWidth = metrics.widthPixels;
     }
 
     protected final void setUpOnClicks(View v) {
@@ -172,38 +179,27 @@ public class ImageFeedHolder extends BaseFeedHolder {
     @Override
     public void bindModel(Post post) {
         super.bindModel(post);
-
-        if(vPostImage.getDrawable() == null){
-            vPostImage.setMinimumHeight(vPostImage.getWidth());
-        }else{
-            vPostImage.setMinimumHeight(0);
-        }
-
         // Set Post Image
         mType = post.getType();
-        resizeViews(0, getNewViewHeight(0)); //// TODO: 8/29/16 fill in
+        resizeViews(getNewViewHeight(post.getImageSize()));
         getEventImage(post.getImage());
     }
 
     protected void singleClick() {
     }
 
-    //// TODO: 8/29/16
-    protected void resizeViews(int width, int height){
-        //resize image view
+    protected void resizeViews(int height) {
+        vPostImage.setLayoutParams(new FrameLayout.LayoutParams(mScreenWidth, height));
     }
 
-    //// TODO: 8/29/16
-    private int getNewViewHeight(int width){
-        return 0;
+    private int getNewViewHeight(PostSize s) {
+        return (int) ((float) mScreenWidth * s.height / s.width);
     }
 
 
     private void getEventImage(String image) {
-        if(vPlaceholder != null)
-        vPlaceholder.setVisibility(View.VISIBLE);
-        if(vProgressBar != null)
-        vProgressBar.setVisibility(View.VISIBLE);
+        if (vProgressBar != null)
+            vProgressBar.setVisibility(View.VISIBLE);
 
 
         mRequestManager
@@ -217,11 +213,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        if(vPlaceholder != null)
-                            vPlaceholder.setVisibility(View.GONE);
-                        if(vProgressBar != null)
+                        if (vProgressBar != null)
                             vProgressBar.setVisibility(View.GONE);
-                        vPostImage.requestLayout();
                         return false;
 
                     }

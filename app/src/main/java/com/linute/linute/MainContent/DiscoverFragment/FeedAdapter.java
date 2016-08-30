@@ -56,7 +56,6 @@ public class FeedAdapter extends ChoiceCapableAdapter<RecyclerView.ViewHolder> {
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
-
     }
 
 

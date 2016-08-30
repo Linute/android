@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
@@ -90,9 +91,9 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     }
 
     @Override
-    protected void resizeViews(int width, int height){
-        super.resizeViews(width, height);
-        //// TODO: 8/29/16 resize video
+    protected void resizeViews(int height){
+        super.resizeViews(height);
+        vVideoView.setLayoutParams(new FrameLayout.LayoutParams(mScreenWidth, height));
     }
 
 

@@ -20,12 +20,6 @@
         android:layout_height="match_parent"
         android:background="@color/seperator_color">
 
-        <View
-            android:id="@+id/image_placeholder"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-        />
-
         <ProgressBar
             android:id="@+id/post_image_progress_bar"
             style="?android:attr/progressBarStyleLarge"

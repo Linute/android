@@ -1616,8 +1616,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onRead = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            if (getActivity() == null) return;
-
             for (int i = mChatList.size() - 1; i >= 0; i--) {
                 if (!mChatList.get(i).isRead()) {
                     mChatList.get(i).setIsRead(true);
@@ -1626,6 +1624,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
 
+            if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

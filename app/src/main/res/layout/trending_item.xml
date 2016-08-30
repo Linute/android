@@ -51,8 +51,6 @@
             android:background="#EA294C"
             android:visibility="invisible"
         />
-
-
     </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
 
 
