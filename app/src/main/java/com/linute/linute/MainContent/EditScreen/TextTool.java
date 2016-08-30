@@ -33,11 +33,14 @@ public class TextTool extends EditContentTool {
     public static final int MID_TEXT_INDEX = 1;
 
 
+
+
     private static class TextMode {
 
         private final TextView[] mextViews;
         public int icon;
 
+        static String[] savedText = new String[3];
 
         public TextMode(int icon, TextView... textViews) {
             this.icon = icon;
@@ -45,7 +48,9 @@ public class TextTool extends EditContentTool {
         }
 
         public void onSelected() {
-            for (TextView tv : mextViews) {
+            for (int i = 0; i < mextViews.length; i++) {
+                TextView tv = mextViews[i];
+                tv.setText(savedText[i]);
                 tv.setVisibility(View.VISIBLE);
             }
             if (mextViews.length > 0)
@@ -55,8 +60,10 @@ public class TextTool extends EditContentTool {
 
 
         public void onUnSelected() {
-            for (TextView tv : mextViews) {
+            for (int i = 0; i < mextViews.length; i++) {
+                TextView tv = mextViews[i];
                 tv.setVisibility(View.GONE);
+                savedText[i] = tv.getText().toString();
             }
         }
 
