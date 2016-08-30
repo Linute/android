@@ -35,7 +35,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
@@ -361,7 +360,17 @@ public class EditFragment extends BaseFragment {
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
-                imageView.setImageBitmap(BitmapFactory.decodeFile(uri.getPath()));
+                Bitmap image = BitmapFactory.decodeFile(uri.getPath());
+
+                int scalewidth = image.getWidth();
+                if(scalewidth<metrics.widthPixels){
+                    scalewidth = metrics.widthPixels;
+                }
+
+                int scaleheight = (int)((float)image.getHeight()*scalewidth/image.getWidth());
+
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(image,scalewidth, scaleheight, false));
+
                 imageView.setActive(false);
 
                 mContentView = imageView;
