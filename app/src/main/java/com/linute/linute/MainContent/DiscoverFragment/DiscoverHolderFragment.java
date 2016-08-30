@@ -11,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
@@ -194,6 +192,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                     public void onClick(View v) {
                         if (getActivity() == null) return;
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
+                        i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                     }
                 }

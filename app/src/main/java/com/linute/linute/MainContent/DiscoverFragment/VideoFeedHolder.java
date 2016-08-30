@@ -13,7 +13,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.VideoClasses.ScalableVideoView;
+import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,10 +23,10 @@ import org.json.JSONObject;
  * Created by QiFeng on 3/8/16.
  */
 public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnCompletionListener, ScalableVideoView.HideVideo {
+        MediaPlayer.OnCompletionListener, TextureVideoView.HideVideo {
 
 
-    private ScalableVideoView vSquareVideoView;
+    private TextureVideoView vVideoView;
     private String mCollegeId;
     private boolean videoProcessing = false;
 
@@ -35,8 +35,8 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     public VideoFeedHolder(final View itemView, Context context, RequestManager manager) {
         super(itemView, context, manager);
         //weird thing with this library where we have to seat a source before we do anything else
-        vSquareVideoView = (ScalableVideoView) itemView.findViewById(R.id.video);
-        vSquareVideoView.setHideVideo(this);
+        vVideoView = (TextureVideoView) itemView.findViewById(R.id.video);
+        vVideoView.setHideVideo(this);
 
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
@@ -47,23 +47,21 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
     @Override
     protected void singleClick() {
         if (mVideoUrl == null || videoProcessing) return;
-        if (vSquareVideoView.getVisibility() == View.GONE) { //image is there, so video hasnt been started yet
-            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(mContext, vSquareVideoView, mVideoUrl);
+        if (vVideoView.getVisibility() == View.INVISIBLE) { //image is there, so video hasnt been started yet
+            VideoPlayerSingleton.getSingleVideoPlaybackManager().playNewVideo(vVideoView, mVideoUrl);
 
-            vSquareVideoView.prepareAsync(this);
-            vSquareVideoView.setOnCompletionListener(this);
+            vVideoView.setOnPreparedListener(this);
+            vVideoView.setOnCompletionListener(this);
 
             videoProcessing = true;
             vCinemaIcon.startAnimation(AnimationUtils.loadAnimation(mContext, R.anim.fade_in_fade_out));
-            vSquareVideoView.setVisibility(View.VISIBLE);
-
-
+            vVideoView.setVisibility(View.VISIBLE);
         } else {
-            if (vSquareVideoView.isPlaying()) {
-                vSquareVideoView.pause();
+            if (vVideoView.isPlaying()) {
+                vVideoView.pause();
                 vCinemaIcon.setAlpha(1);
             } else {
-                vSquareVideoView.start();
+                vVideoView.start();
                 vCinemaIcon.setAlpha(0);
             }
         }
@@ -79,8 +77,8 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
 
         videoProcessing = false;
 
-        if (vSquareVideoView.getVisibility() == View.VISIBLE) {
-            vSquareVideoView.setVisibility(View.GONE);
+        if (vVideoView.getVisibility() == View.VISIBLE) {
+            vVideoView.setVisibility(View.INVISIBLE);
             //vPostImage.setVisibility(View.VISIBLE);
             vCinemaIcon.clearAnimation();
             vCinemaIcon.setAlpha(1f);
@@ -89,6 +87,12 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         mPostId = post.getPostId();
         mVideoUrl = Uri.parse(post.getVideoUrl());
 
+    }
+
+    @Override
+    protected void resizeViews(int width, int height){
+        super.resizeViews(width, height);
+        //// TODO: 8/29/16 resize video
     }
 
 
@@ -125,27 +129,25 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         //if video is paused AND finishes at the same time, video won't pause
         //if icon is showing, then user has paused video
         if (vCinemaIcon.getAlpha() != 1) {
-            vSquareVideoView.start();
+            vVideoView.start();
             sendImpressionsAsync(mPostId);
         }
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        if (!vSquareVideoView.isVideoStopped()) {
-            videoProcessing = false;
-            vCinemaIcon.clearAnimation();
-            vCinemaIcon.setAlpha(0);
-            sendImpressionsAsync(mPostId);
-            mp.start();
-        }
+        videoProcessing = false;
+        vCinemaIcon.clearAnimation();
+        vCinemaIcon.setAlpha(0);
+        sendImpressionsAsync(mPostId);
+        mp.start();
     }
 
     @Override
     public void hideVideo() {
         videoProcessing = false;
         vPostImage.setVisibility(View.VISIBLE);
-        vSquareVideoView.setVisibility(View.GONE);
+        vVideoView.setVisibility(View.INVISIBLE);
         vCinemaIcon.clearAnimation();
         vCinemaIcon.setAlpha(1);
     }
