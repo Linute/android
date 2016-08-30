@@ -656,6 +656,7 @@ room: id of room
 //                            final int oldSize = mParticipants.size();
                             for (int i = 0; i < users.length(); i++) {
                                 JSONObject user = users.getJSONObject(i);
+
                                 mChatRoom.users.add(new User(
                                         user.getString("id"),
                                         user.getString("firstName"),

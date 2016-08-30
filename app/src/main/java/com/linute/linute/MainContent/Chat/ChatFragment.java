@@ -1062,7 +1062,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     userJSON.getString("id"),
                                     userJSON.getString("firstName"),
                                     userJSON.getString("lastName"),
-                                    userJSON.getString("profileImage"));
+                                    userJSON.getString("profileImage"),
+                                    userJSON.getJSONObject("college").getString("name")
+
+                            );
                             mUsers.add(user);
                             mUserMap.put(userJSON.getString("id"), user);
 
@@ -1860,6 +1863,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     owner.getString("firstName"),
                                     owner.getString("lastName"),
                                     owner.getString("profileImage")
+
                             ));
                 }
 

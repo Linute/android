@@ -106,11 +106,13 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     public static class ParticipantVH extends RecyclerView.ViewHolder{
         public final ImageView profileImageIV;
         public final TextView nameTV;
+        public final TextView collegeTV;
 
         public ParticipantVH(View itemView) {
             super(itemView);
             profileImageIV = (ImageView)itemView.findViewById(R.id.search_users_list_image);
             nameTV = (TextView) itemView.findViewById(R.id.search_users_list_name);
+            collegeTV = (TextView) itemView.findViewById(R.id.search_users_list_college);
         }
 
         public void bind(User user){
@@ -120,7 +122,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
                     .placeholder(R.color.seperator_color)
 //                    .asBitmap()
                     .into(profileImageIV);
-            nameTV.setText(user.firstName + " " + user.lastName);
+            nameTV.setText(user.getFullName());
+            collegeTV.setText(user.collegeName);
         }
     }
 
