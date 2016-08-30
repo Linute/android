@@ -161,6 +161,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
+
         //setNavigationView action
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -181,6 +182,16 @@ public class MainActivity extends BaseTaptActivity {
                 }
                 mDrawerLayout.closeDrawers();
                 return true;
+            }
+        });
+
+
+        mNavigationView.findViewById(R.id.item_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(i);
+
             }
         });
 
@@ -770,7 +781,7 @@ public class MainActivity extends BaseTaptActivity {
                                 newMessageSnackbar(chat, message);
                             }
                         });
-                    }else {
+                    } else {
                         final NewMessageEvent chatEvent = new NewMessageEvent(true);
                         chatEvent.setRoomId(chat.roomId);
                         chatEvent.setMessage(activity.getString("messageTextfdr"));
@@ -1279,7 +1290,7 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-    public void setShowSnackbar(boolean show){
+    public void setShowSnackbar(boolean show) {
         mShowSnackbar = show;
     }
 

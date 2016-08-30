@@ -35,7 +35,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
@@ -255,7 +254,7 @@ public class EditFragment extends BaseFragment {
             }
         });
 
-        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         int height;
 
@@ -266,7 +265,27 @@ public class EditFragment extends BaseFragment {
         }
 
         mFinalContentView = root.findViewById(R.id.final_content);
+        mFinalContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                layoutParams.height = view.getWidth()*6/5;
+                view.setLayoutParams(layoutParams);
+            }
+        });
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
+        mContentContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for(int i=0;i<mTools.length;i++){
+                    if(mTools[i] instanceof TextTool){
+                        onToolSelected(i);
+                        ((TextTool)mTools[i]).selectTextMode(TextTool.MID_TEXT_INDEX);
+                        break;
+                    }
+                }
+            }
+        });
         setupMainContent(mUri, mContentType, metrics);
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
@@ -313,6 +332,8 @@ public class EditFragment extends BaseFragment {
             View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
             toolHolders[i] = new ToolHolder(toolView);
             toolHolders[i].bind(tool);
+            toolHolders[i].setSelected(false,false);
+
             toolView.setTag(i);
             toolView.setOnClickListener(onClickListener);
             toolsListRV.addView(toolView);
@@ -359,7 +380,17 @@ public class EditFragment extends BaseFragment {
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
-                imageView.setImageBitmap(BitmapFactory.decodeFile(uri.getPath()));
+                Bitmap image = BitmapFactory.decodeFile(uri.getPath());
+
+                int scalewidth = image.getWidth();
+                if(scalewidth<metrics.widthPixels){
+                    scalewidth = metrics.widthPixels;
+                }
+
+                int scaleheight = (int)((float)image.getHeight()*scalewidth/image.getWidth());
+
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(image,scalewidth, scaleheight, false));
+
                 imageView.setActive(false);
 
                 mContentView = imageView;
@@ -659,8 +690,8 @@ public class EditFragment extends BaseFragment {
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.grey_color), PorterDuff.Mode.MULTIPLY));
 
             }else {
-                vLabel.setTextColor(vLabel.getResources().getColor(R.color.pure_white));
-                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.pure_white));
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.edit_unselected));
+                vIcon.setColorFilter(vIcon.getResources().getColor(R.color.edit_unselected));
             }
         }
     }

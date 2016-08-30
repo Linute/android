@@ -102,8 +102,8 @@
 
             <ImageView
                 android:id="@+id/capture_image_button"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:layout_gravity="center"
                 android:contentDescription="Camera"
                 android:src="@drawable/square_camera_unselected"/>

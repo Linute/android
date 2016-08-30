@@ -42,6 +42,8 @@ public class ManipulableImageView extends FrameLayout {
     private void init(Context context) {
         mImageView = new ImageView(context);
 
+        setClipChildren(false);
+
         addView(mImageView);
         mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         mImageView.setX(100);
