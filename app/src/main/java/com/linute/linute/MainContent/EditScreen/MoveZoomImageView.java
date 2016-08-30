@@ -321,6 +321,7 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 
     public void setImageBitmap(Bitmap bitmap) {
         mImageView.setImageBitmap(bitmap);
+        mImageView.setLayoutParams(new FrameLayout.LayoutParams(bitmap.getWidth(), bitmap.getHeight()));
 
         this.image = bitmap;
         Matrix m = new Matrix();

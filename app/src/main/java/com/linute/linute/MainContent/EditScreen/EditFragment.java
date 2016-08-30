@@ -265,6 +265,14 @@ public class EditFragment extends BaseFragment {
         }
 
         mFinalContentView = root.findViewById(R.id.final_content);
+        mFinalContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+                layoutParams.height = view.getWidth()*6/5;
+                view.setLayoutParams(layoutParams);
+            }
+        });
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
         mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
