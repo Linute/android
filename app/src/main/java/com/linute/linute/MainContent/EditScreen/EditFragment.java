@@ -266,6 +266,18 @@ public class EditFragment extends BaseFragment {
 
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
+        mContentContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for(int i=0;i<mTools.length;i++){
+                    if(mTools[i] instanceof TextTool){
+                        onToolSelected(i);
+                        ((TextTool)mTools[i]).selectTextMode(TextTool.MID_TEXT_INDEX);
+                        break;
+                    }
+                }
+            }
+        });
         setupMainContent(mUri, mContentType, metrics);
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);

@@ -30,6 +30,8 @@ public class TextTool extends EditContentTool {
     private final CustomBackPressedEditText midET;
     private final View mTextContainer;
 
+    public static final int MID_TEXT_INDEX = 1;
+
 
     private static class TextMode {
 
@@ -235,7 +237,7 @@ public class TextTool extends EditContentTool {
         lManager.showSoftInput(view, 0);
     }
 
-    private void selectTextMode(int index) {
+    public void selectTextMode(int index) {
         int oldSelected = mSelected;
         mSelected = index;
 
