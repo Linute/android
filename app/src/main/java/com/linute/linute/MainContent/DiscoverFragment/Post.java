@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -28,9 +27,14 @@ public class Post implements Parcelable {
     private String mAnonImage;      // anon image of user
 
     private String mPostId;         // id of post
+
     private String mVideoURL = "";  // video url
+
     private String mTitle;          // text on image or status
+
     private String mImage = "";     // image url
+    private PostSize mImageSize;
+
     private int mPrivacy;           // 1 for anon, 0 for public
     private int mNumLikes;          // num likes on post
     private long mPostTime;         // post time. millisec since 1970
@@ -76,6 +80,8 @@ public class Post implements Parcelable {
      * @param jsonObject  - post json object
      */
     public Post(JSONObject jsonObject) throws JSONException {
+
+        //Log.i("test", "Post: "+jsonObject.toString(4));
         mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
@@ -131,6 +137,14 @@ public class Post implements Parcelable {
             mNumLikes = 0;
             mNumOfComments = 0;
             mPostLiked = false;
+        }
+
+        try {
+            JSONObject size = jsonObject.getJSONObject("imageSizes");
+            mImageSize = new PostSize(size.getInt("width"), size.getInt("height"));
+        }catch (JSONException e){
+            e.printStackTrace();
+            mImageSize = null;
         }
 
         try {
@@ -174,10 +188,12 @@ public class Post implements Parcelable {
             mUserName = owner.getString("fullName");
             mUserImage = Utils.getImageUrlOfUser(owner.getString("profileImage"));
 
-            try {
-                mCollegeName = owner.getJSONObject("college").getString("name");
-            }catch (JSONException e){
-                mCollegeName = "";
+            if (mCollegeName == null || mCollegeName.isEmpty()) {
+                try {
+                    mCollegeName = owner.getJSONObject("college").getString("name");
+                } catch (JSONException e) {
+                    mCollegeName = "";
+                }
             }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
@@ -215,6 +231,22 @@ public class Post implements Parcelable {
         } catch (JSONException e) {
             mPostMuted = false;
         }
+
+        try {
+            JSONObject size = jsonObject.getJSONObject("imageSizes");
+            mImageSize = new PostSize(size.getInt("width"), size.getInt("height"));
+        }catch (JSONException e){
+            e.printStackTrace();
+            mImageSize = null;
+        }
+    }
+
+    public PostSize getImageSize() {
+        return mImageSize;
+    }
+
+    public void setImageSize(PostSize imageSize) {
+        mImageSize = imageSize;
     }
 
     public String getCollegeName() {
@@ -383,6 +415,8 @@ public class Post implements Parcelable {
         dest.writeByte((byte) (mPostLiked ? 1 : 0)); //boolean
         dest.writeString(mVideoURL);
         dest.writeString(mCollegeName);
+
+        dest.writeParcelable(mImageSize, 0);
     }
 
     private Post(Parcel in) {
@@ -400,6 +434,8 @@ public class Post implements Parcelable {
         mPostLiked = in.readByte() != 0; //true if byte != 0
         mVideoURL = in.readString();
         mCollegeName = in.readString();
+
+        mImageSize = in.readParcelable(PostSize.class.getClassLoader());
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {

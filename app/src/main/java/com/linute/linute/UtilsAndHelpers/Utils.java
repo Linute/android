@@ -87,10 +87,12 @@ public class Utils {
 
     //problem occured communicating with server
     public static void showServerErrorToast(Context context) {
+        if (context == null) return;
         Toast.makeText(context, R.string.error_communicating_server, Toast.LENGTH_SHORT).show();
     }
 
     public static void showSavedToast(Context context) {
+        if (context == null) return;
         Toast.makeText(context, R.string.data_saved, Toast.LENGTH_SHORT).show();
     }
 

@@ -573,7 +573,6 @@ public class EditFragment extends BaseFragment {
             bitmap = bitmapFromView;
         }
 
-
         if (mReturnType != CameraActivity.SEND_POST) {
             mSubscription = Observable.just(ImageUtility.savePictureToCache(getActivity(), bitmap))
                     .observeOn(io())

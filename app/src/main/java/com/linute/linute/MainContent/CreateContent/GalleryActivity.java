@@ -176,8 +176,7 @@ public class GalleryActivity extends AppCompatActivity {
     }
 
     private void getImageOrVideo() {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         if (mGalleryType == CameraActivity.IMAGE) {
             intent.setType("image/*");
             if (Build.VERSION.SDK_INT >= 19) {
