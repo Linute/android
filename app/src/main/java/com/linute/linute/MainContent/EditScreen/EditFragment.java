@@ -253,12 +253,22 @@ public class EditFragment extends BaseFragment {
             }
         });
 
-        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         int height = mDimens.height * displayWidth / mDimens.width;
 
         mFinalContentView = root.findViewById(R.id.final_content);
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
+        mContentContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                int maxHeight = metrics.widthPixels * 6 / 5;
+                if(view.getHeight() > maxHeight){
+                    view.getLayoutParams().height = maxHeight;
+                    view.requestLayout();
+                }
+            }
+        });
         setupMainContent(mUri, mContentType);
 
         mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
@@ -342,6 +352,9 @@ public class EditFragment extends BaseFragment {
 
 
     private void setupMainContent(Uri uri, ContentType contentType) {
+        DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
+        mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(metrics.widthPixels, metrics.widthPixels*6/5));
+
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
