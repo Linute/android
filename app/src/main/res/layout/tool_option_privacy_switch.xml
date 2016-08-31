@@ -31,8 +31,8 @@
         android:layout_height="wrap_content"
         tools:text="Self"
         android:layout_toLeftOf="@id/switch_main"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="12dp"
+        android:layout_alignBaseline="@id/switch_main"
         android:textColor="@color/pure_white"
 
         />
@@ -44,8 +44,8 @@
         android:layout_alignTop="@+id/text_heading_left"
         tools:text="Anon"
         android:layout_toRightOf="@id/switch_main"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="12dp"
+        android:layout_alignBaseline="@id/switch_main"
         android:textColor="@color/pure_white"
         />
 

@@ -223,12 +223,12 @@ public class TextTool extends EditContentTool {
 
         for (int i = 0; i < textModes.length; i++) {
             TextMode mode = textModes[i];
-            ImageView iv = new ImageView(rootView.getContext());
-            iv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+            View v = inflater.inflate(R.layout.tool_option_text_mode, rootView, false);
+            ImageView iv = (ImageView)v.findViewById(R.id.image_icon);
             iv.setImageResource(mode.icon);
-            iv.setTag(i);
-            iv.setOnClickListener(listener);
-            rootView.addView(iv);
+            v.setTag(i);
+            v.setOnClickListener(listener);
+            rootView.addView(v);
 
             textModeViews[i] = iv;
         }
