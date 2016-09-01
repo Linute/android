@@ -47,7 +47,7 @@
         android:ellipsize="end"
         android:lines="1"
         android:textColor="@color/fifty_black"
-        android:textSize="16sp"
+        android:textSize="12sp"
         tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs" />
 
 
