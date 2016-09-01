@@ -33,8 +33,6 @@ public class TextTool extends EditContentTool {
     public static final int MID_TEXT_INDEX = 1;
 
 
-
-
     private static class TextMode {
 
         private final TextView[] mextViews;
@@ -112,7 +110,6 @@ public class TextTool extends EditContentTool {
                 //TODO animate?
             }
         });
-
 
 
         midTV.setOnTouchListener(new View.OnTouchListener() {
@@ -224,7 +221,7 @@ public class TextTool extends EditContentTool {
         for (int i = 0; i < textModes.length; i++) {
             TextMode mode = textModes[i];
             View v = inflater.inflate(R.layout.tool_option_text_mode, rootView, false);
-            ImageView iv = (ImageView)v.findViewById(R.id.image_icon);
+            ImageView iv = (ImageView) v.findViewById(R.id.image_icon);
             iv.setImageResource(mode.icon);
             v.setTag(i);
             v.setOnClickListener(listener);
@@ -259,6 +256,11 @@ public class TextTool extends EditContentTool {
 
     }
 
+    public boolean hasText() {
+        return
+                botTV.getVisibility() == View.VISIBLE || midTV.getVisibility() == View.VISIBLE || topTV.getVisibility() == View.VISIBLE;
+    }
+
     @Override
     public void onOpen() {
         super.onOpen();
@@ -273,6 +275,17 @@ public class TextTool extends EditContentTool {
         botTV.setInputType(InputType.TYPE_NULL);
         topTV.setInputType(InputType.TYPE_NULL);
         mTextContainer.setClickable(false);
+
+        if (midTV.getText().toString().trim().length() == 0) {
+            midTV.setVisibility(View.GONE);
+        }
+        if (botTV.getText().toString().trim().length() == 0) {
+            botTV.setVisibility(View.GONE);
+        }
+        if (topTV.getText().toString().trim().length() == 0) {
+            topTV.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
