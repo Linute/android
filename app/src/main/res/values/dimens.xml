@@ -44,7 +44,9 @@
 
     <dimen name="main_app_bar_elevation">4dp</dimen>
 
-    <dimen name="nav_header_profile_side">64dp</dimen>
+    <!-- overides navigation view to remove empty space -->
+    <dimen name="design_navigation_separator_vertical_padding">0dp</dimen>
+    <dimen name="nav_header_profile_side">96dp</dimen>
 
     <dimen name="spacing">8dp</dimen>
 

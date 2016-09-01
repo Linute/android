@@ -22,6 +22,7 @@
         app:itemIconTint="@color/white"
         app:itemTextAppearance="@style/NavDrawerTextStyle"
         app:menu="@menu/main_activity_drawer"
+        style="@style/SelectableItemBackground"
         >
 
         <FrameLayout

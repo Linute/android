@@ -405,12 +405,6 @@ public class MainActivity extends BaseTaptActivity {
         String college = sharedPreferences.getString("collegeName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
         ((TextView) header.findViewById(R.id.drawerHeader_college)).setText(college);
-        header.findViewById(R.id.drawerHeading_settings).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startEditProfileActivity(SettingActivity.class);
-            }
-        });
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .dontAnimate()
