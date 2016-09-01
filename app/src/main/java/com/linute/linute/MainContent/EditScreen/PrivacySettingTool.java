@@ -3,12 +3,12 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -37,7 +37,7 @@ public class PrivacySettingTool extends EditContentTool {
         TextView postingAsHeader = (TextView) leftSwitch.findViewById(R.id.text_heading_top);
         TextView postingAsLeftText = (TextView) leftSwitch.findViewById(R.id.text_heading_left);
         TextView postingAsRightText = (TextView) leftSwitch.findViewById(R.id.text_heading_right);
-        Switch postingAsSwitch = (Switch) leftSwitch.findViewById(R.id.switch_main);
+        SwitchCompat postingAsSwitch = (SwitchCompat) leftSwitch.findViewById(R.id.switch_main);
         postingAsHeader.setText("Posting as");
 
         postingAsLeftText.setText("");
@@ -49,7 +49,7 @@ public class PrivacySettingTool extends EditContentTool {
         TextView anonCommentsHeader = (TextView) rightSwitch.findViewById(R.id.text_heading_top);
         TextView anonCommentsLeftText = (TextView) rightSwitch.findViewById(R.id.text_heading_left);
         TextView anonCommentsRightText = (TextView) rightSwitch.findViewById(R.id.text_heading_right);
-        Switch anonCommentsSwitch = (Switch) rightSwitch.findViewById(R.id.switch_main);
+        SwitchCompat anonCommentsSwitch = (SwitchCompat) rightSwitch.findViewById(R.id.switch_main);
         anonCommentsHeader.setText("Anon comments");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

@@ -6,7 +6,9 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    tools:showIn="@layout/tool_options_privacy">
+    tools:showIn="@layout/tool_options_privacy"
+    android:gravity="center"
+    >
 
     <TextView
         android:id="@+id/text_heading_top"
@@ -17,7 +19,7 @@
         android:textColor="@color/pure_white"
         />
 
-    <Switch
+    <android.support.v7.widget.SwitchCompat
         android:id="@+id/switch_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

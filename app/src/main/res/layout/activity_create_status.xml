@@ -234,100 +234,21 @@
         android:weightSum="2"
     >
 
-        <RelativeLayout
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
+        <include
+            android:id="@+id/anon_post"
+            layout="@layout/tool_option_privacy_switch"/>
 
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/anon_post"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerInParent="true"
+        <com.linute.linute.UtilsAndHelpers.ProfileImageView
+            android:id="@+id/image_profile"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            android:scaleType="centerCrop"
+            android:layout_gravity="center"
             />
 
-            <TextView
-                android:id="@+id/post_as"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@id/anon_post"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="4dp"
-                android:gravity="center"
-                android:text="Posting as"
-                android:textColor="@color/fifty_white"
-                android:textSize="12sp"
-                android:autoText="false" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:layout_toLeftOf="@id/anon_post"
-                android:text="Self"
-                android:textColor="@color/pure_white"
-            />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:layout_toRightOf="@id/anon_post"
-                android:text="Anon"
-                android:textColor="@color/pure_white"
-            />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="0px"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-        >
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/anon_comments"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:checked="true"
-            />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_above="@id/anon_comments"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="4dp"
-                android:gravity="center"
-                android:text="Anon comments"
-                android:textColor="@color/fifty_white"
-                android:textSize="12sp"
-            />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:layout_toLeftOf="@id/anon_comments"
-                android:text="No"
-                android:textColor="@color/pure_white"
-            />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="8dp"
-                android:layout_toRightOf="@id/anon_comments"
-                android:text="Yes"
-                android:textColor="@color/pure_white"
-            />
-
-        </RelativeLayout>
+        <include
+            android:id="@+id/anon_comments"
+            layout="@layout/tool_option_privacy_switch"/>
     </LinearLayout>
 </LinearLayout>
