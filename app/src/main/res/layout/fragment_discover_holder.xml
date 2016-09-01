@@ -61,6 +61,8 @@
             android:layout_height="wrap_content"
             app:fab_colorNormal="@color/white"
             app:fab_colorPressed="@color/white_pressed"
+            android:src="@drawable/status_icon"
+            android:gravity="center"
             app:fab_size="mini"
         />
 

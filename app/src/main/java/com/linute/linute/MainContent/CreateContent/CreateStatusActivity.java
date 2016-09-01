@@ -219,7 +219,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){
-                    profileImageView.setImageResource(R.drawable.ic_anon);
+                    profileImageView.setImageResource(R.drawable.anon_switch_on);
                 }else {
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
                     Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);

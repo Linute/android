@@ -11,21 +11,21 @@
         android:layout_alignParentTop="true"
         />
 
-    <View
+    <ImageView
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="@color/pure_white"
+        android:src="@drawable/top_crop_line"
         android:layout_below="@id/top_fade"
         />
 
 
 
-    <View
+    <ImageView
         android:id="@+id/bot_bar"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="@color/pure_white"
+        android:src="@drawable/bottom_crop_line"
         android:layout_above="@+id/bot_fade"
         />
 
