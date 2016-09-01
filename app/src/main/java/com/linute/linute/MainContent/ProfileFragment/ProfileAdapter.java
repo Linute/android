@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.ProfileFragment;
 import android.content.Context;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.TextView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
-import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.MainContent.Chat.ChatFragment;
 import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
@@ -25,17 +23,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by Arman on 12/30/15.
@@ -240,6 +228,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mFollowingButtonText = (TextView) itemView.findViewById(R.id.follow_button_text);
 
             vUserName = (TextView) itemView.findViewById(R.id.username);
+
             vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
 
             vMessageButton.setOnClickListener(new View.OnClickListener() {
@@ -303,6 +292,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 vPosts.setText(mUser.getPosts() + "");
                 vFollowers.setText(mUser.getFollowers() + "");
+
+                vCollegeName.setVisibility(mUser.getIsCompany() ? View.GONE : View.VISIBLE);
                 vCollegeName.setText(mUser.getCollegeName());
 
                 if (mUser.getUserID().equals(mUserid)) { //viewer is viewing own profile

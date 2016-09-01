@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,7 +23,6 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
-import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.EmptyUserActivityItem;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
@@ -32,10 +30,10 @@ import com.linute.linute.MainContent.ProfileFragment.UserActivityItem;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -329,8 +327,9 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                     JSONObject jsonObject;
                     try {
                         jsonObject = new JSONObject(body);
-                        //Log.i(TAG, "onResponse: " + jsonObject.toString(4));
+                        Log.i(TAG, "onResponse: " + jsonObject.toString(4));
                         mLinuteUser.updateUserInformation(jsonObject); //container for new information
+
                         mProfileInfoHasLoaded = true;
                     } catch (JSONException e) {
                         e.printStackTrace();

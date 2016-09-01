@@ -40,6 +40,8 @@ public class LinuteUser {
     private String mUserToken;
     private boolean mInformationLoaded;
 
+    private boolean mIsCompany;
+
     public LinuteUser() {
         mFriend = "";
         mFriendship = "";
@@ -140,6 +142,8 @@ public class LinuteUser {
             mCollegeId = getStringFromJson("id", college);
         }
         mCampus = getStringFromJson("campus", userInfo);
+
+        mIsCompany = getBooleon("isCompany", userInfo);
     }
 
     public LinuteUser(JSONObject userInfo) {
@@ -190,6 +194,9 @@ public class LinuteUser {
         }
 
         mCampus = getStringFromJson("campus", userInfo);
+
+        mIsCompany = getBooleon("isCompany", userInfo);
+
     }
 
     private static boolean getBooleon(String key, JSONObject object){
@@ -454,6 +461,8 @@ public class LinuteUser {
         mInformationLoaded = informationLoaded;
     }
 
+
+    public boolean getIsCompany(){ return mIsCompany;}
 
 
     public static class CollegeNameAndID {
