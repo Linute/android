@@ -114,6 +114,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private int mSkip = 0;
 
     private AlertDialog mAlertDialog;
+    private LinearLayoutManager mFeedDetailLLM;
 
     public FeedDetailPage() {
     }
@@ -180,9 +181,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mSendButton.setImageViews(R.drawable.ic_upload_picture, R.drawable.ic_send);
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
-        final LinearLayoutManager llm = new CustomLinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recList.setLayoutManager(llm);
+        mFeedDetailLLM = new CustomLinearLayoutManager(getActivity());
+        mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
+        recList.setLayoutManager(mFeedDetailLLM);
 
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), Glide.with(this));
         mFeedDetailAdapter.setCommentActions(this);
@@ -199,7 +200,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 //when passing last item and scrolling upward
-                if (llm.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
+                if (mFeedDetailLLM.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
                     //close keyboard
                     showKeyboard(recyclerView, false);
                 }
@@ -223,8 +224,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             @Override
             public void onFocusChange(View view, boolean b) {
                 if (b) {
-                    if (llm != null) {
-                        llm.scrollToPosition(llm.getItemCount() - 1);
+                    if (mFeedDetailLLM != null) {
+                        mFeedDetailLLM.scrollToPosition(mFeedDetailLLM.getItemCount() - 1);
                     }
                 }
             }
@@ -655,6 +656,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
         mFeedDetailAdapter.setDenySwipe(true);
         mFeedDetailAdapter.closeAllItems();
+        final int lastPos = mFeedDetailLLM.findFirstVisibleItemPosition();
 
         int skip = mSkip - 20;
         int limit = 20;
@@ -774,7 +776,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                             mFeedDetail.getComments().remove(0);
                                             mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyDataSetChanged();
+                                            mFeedDetailAdapter.notifyItemRangeInserted(0,tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(lastPos+tempComments.size());
                                         }
                                     });
                                 }
