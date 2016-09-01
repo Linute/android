@@ -13,16 +13,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="Posting as"
-        android:layout_above="@+id/switch_main"
         android:layout_centerHorizontal="true"
         android:textColor="@color/pure_white"
         />
 
     <Switch
-        android:id="@id/switch_main"
+        android:id="@+id/switch_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/text_heading_top"
         android:layout_centerHorizontal="true" />
 
     <TextView
