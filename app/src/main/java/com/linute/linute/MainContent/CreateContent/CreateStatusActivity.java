@@ -249,7 +249,9 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
 
         //set to first color
-        onClick(mPostColorSelectorViews[0]);
+//        onClick(mPostColorSelectorViews[0]);
+
+        selectStyle((int)(Math.random()*mPostColorSelectorViews.length));
 
     }
 
@@ -347,52 +349,41 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         int viewId = v.getId();
 
-        int backgroundColor;
-        int textColor;
-
         int selected = 0;
         switch (viewId) {
             case R.id.post_create_0:
-                backgroundColor = mPostBackgroundColors[0];
-                textColor = mPostTextColors[0];
                 selected = 0;
                 break;
             case R.id.post_create_1:
-                backgroundColor = mPostBackgroundColors[1];
-                textColor = mPostTextColors[1];
                 selected = 1;
                 break;
             case R.id.post_create_2:
-                backgroundColor = mPostBackgroundColors[2];
-                textColor = mPostTextColors[2];
                 selected = 2;
                 break;
             case R.id.post_create_3:
-                backgroundColor = mPostBackgroundColors[3];
-                textColor = mPostTextColors[3];
                 selected = 3;
                 break;
             case R.id.post_create_4:
-                backgroundColor = mPostBackgroundColors[4];
-                textColor = mPostTextColors[4];
                 selected = 4;
                 break;
             case R.id.post_create_5:
-                backgroundColor = mPostBackgroundColors[5];
-                textColor = mPostTextColors[5];
                 selected = 5;
                 break;
             default:
-                backgroundColor = 0xFFFFFFFF;
-                textColor = 0xFF000000;
+                selected = mCurrentlySelected;
                 break;
         }
+        selectStyle(selected);
 
+
+    }
+
+    public void selectStyle(int selected) {
         //change text view and edit text colors
-        mPostEditText.setTextColor(textColor);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 70)); //hint will be 70% of text color
-        mTextView.setTextColor(textColor);
-        mTextFrame.setBackgroundColor(backgroundColor);
+        mPostEditText.setTextColor(mPostTextColors[selected]);
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 70)); //hint will be 70% of text color
+        mTextView.setTextColor(mPostTextColors[selected]);
+        mTextFrame.setBackgroundColor(mPostBackgroundColors[selected]);
 
         //set selected background
         mPostColorSelectorViews[mCurrentlySelected].setBackground(null);
