@@ -6,7 +6,7 @@
     android:padding="4dp"
     >
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/image_user"
         android:padding="6dp"
         android:layout_width="match_parent"

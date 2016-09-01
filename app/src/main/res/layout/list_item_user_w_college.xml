@@ -9,7 +9,7 @@
               android:clickable="true"
               android:orientation="horizontal">
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/search_users_list_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"

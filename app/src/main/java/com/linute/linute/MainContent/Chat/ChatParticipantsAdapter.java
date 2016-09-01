@@ -119,8 +119,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
             String imageUrlOfUser = Utils.getImageUrlOfUser(user.userImage);
             Glide.with(itemView.getContext())
                     .load(imageUrlOfUser)
+                    .asBitmap()
                     .placeholder(R.color.seperator_color)
-//                    .asBitmap()
                     .into(profileImageIV);
             nameTV.setText(user.getFullName());
             collegeTV.setText(user.collegeName);

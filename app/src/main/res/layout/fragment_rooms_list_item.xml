@@ -9,7 +9,7 @@
     android:background="?android:selectableItemBackground"
     android:orientation="horizontal">
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/rooms_user_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"

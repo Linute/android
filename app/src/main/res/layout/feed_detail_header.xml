@@ -9,7 +9,7 @@
                 android:paddingStart="@dimen/activity_horizontal_margin"
                 android:paddingTop="8dp">
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/feedDetail_profile_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
