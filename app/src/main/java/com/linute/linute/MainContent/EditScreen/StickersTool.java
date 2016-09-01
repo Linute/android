@@ -32,55 +32,64 @@ public class StickersTool extends EditContentTool {
     private OverlaysAdapter mStickersAdapter;
     private RecyclerView mStickersRV;
     private FrameLayout mStickersContainer;
-    private final ImageView mTrashIv;
+    private ManipulableImageView.ViewManipulationListener mManipulationListener;
+    private final ImageView mTrashCanIV;
 
     public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri, type, overlaysView);
+
+        View container = LayoutInflater.from(overlaysView.getContext()).inflate(R.layout.tool_overlay_stickers, overlaysView, false);
+
+
         mStickers = new ArrayList<>();
 
+        mStickersContainer = (FrameLayout)container.findViewById(R.id.layout_stickers);
 
-        mStickersContainer = new FrameLayout(overlaysView.getContext());
-        mStickersContainer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-        mTrashIv = new ImageView(overlaysView.getContext());
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
-        mTrashIv.setLayoutParams(params);
+        mTrashCanIV = (ImageView)(container.findViewById(R.id.image_sticker_trash));
+        mTrashCanIV.setVisibility(View.GONE);
 
 
-        mOverlaysView.addView(mStickersContainer);
+        mManipulationListener = new ManipulableImageView.ViewManipulationListener() {
+            @Override
+            public void onViewPickedUp(View me) {
+                mTrashCanIV.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onViewDropped(View me) {
+                mTrashCanIV.setVisibility(View.GONE);
+                mTrashCanIV.setColorFilter(null);
+
+            }
+
+            @Override
+            public void onViewCollisionBegin(View me) {
+                mTrashCanIV.setColorFilter(new PorterDuffColorFilter(me.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
+                mTrashCanIV.setImageResource(R.drawable.trash_can_open);
+            }
+
+            @Override
+            public void onViewCollisionEnd(View me) {
+                mTrashCanIV.setImageResource(R.drawable.trash_can_closed);
+                mTrashCanIV.setColorFilter(null);
+            }
+
+            @Override
+            public void onViewDropCollision(View me) {
+                mStickersContainer.removeView(me);
+                mTrashCanIV.setImageResource(R.drawable.trash_can_closed);
+            }
+
+            @Override
+            public View getCollisionSensor() {
+                return mTrashCanIV;
+            }
+        };
+
+        mOverlaysView.addView(container);
     }
 
-    ManipulableImageView.ViewManipulationListener viewManipulationListener = new ManipulableImageView.ViewManipulationListener() {
-        @Override
-        public void onViewPickedUp(View me) {
-            mTrashIv.setVisibility(View.VISIBLE);
-        }
 
-        @Override
-        public void onViewDropped(View me) {
-            mTrashIv.setVisibility(View.GONE);
-        }
-
-        @Override
-        public void onViewCollisionBegin(View me) {
-            mTrashIv.setColorFilter(new PorterDuffColorFilter(me.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
-        }
-
-        @Override
-        public void onViewCollisionEnd(View me) {
-            mTrashIv.setColorFilter(null);
-        }
-
-        @Override
-        public void onViewDropCollision(View me) {
-            ((ViewGroup)me.getParent()).removeView(me);
-        }
-
-        @Override
-        public View getCollisionSensor() {
-            return mTrashIv;
-        }
-    };
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
@@ -102,7 +111,7 @@ public class StickersTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-
+        mTrashCanIV.setVisibility(View.GONE);
     }
 
     @Override
@@ -124,12 +133,12 @@ public class StickersTool extends EditContentTool {
             ManipulableImageView stickerIV = new ManipulableImageView(mOverlaysView.getContext());
             stickerIV.setImageBitmap(bitmap);
 
+            stickerIV.setManipulationListener(mManipulationListener);
 
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             params.gravity = Gravity.CENTER;
             stickerIV.setLayoutParams(params);
 
-            stickerIV.setManipulationListener(viewManipulationListener);
 
 
             mStickersContainer.addView(stickerIV);
