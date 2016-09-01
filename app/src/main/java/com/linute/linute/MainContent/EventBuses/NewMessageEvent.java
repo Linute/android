@@ -5,6 +5,8 @@ package com.linute.linute.MainContent.EventBuses;
  */
 public class NewMessageEvent {
     private boolean mHasNewMessage;
+    private int mNewMessageCount;
+
 
     private String mRoomId;
     private String mMessage;
@@ -12,8 +14,9 @@ public class NewMessageEvent {
     private String mOtherUserFirstName;
     private String mOtherUserLastName;
 
-    public NewMessageEvent(boolean hasNewMessageMessage){
+    public NewMessageEvent(boolean hasNewMessageMessage, int newMessageCount){
         mHasNewMessage = hasNewMessageMessage;
+        mNewMessageCount = newMessageCount;
     }
 
 
@@ -65,4 +68,5 @@ public class NewMessageEvent {
     public boolean hasNewMessage(){
         return mHasNewMessage;
     }
+    public int getmNewMessageCount() {return mNewMessageCount;}
 }

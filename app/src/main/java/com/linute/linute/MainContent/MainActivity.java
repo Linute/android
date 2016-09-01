@@ -728,6 +728,7 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 Log.d(TAG, "call: " + activity.toString(4));
                 //message
+                final NotificationsCounterSingleton notifCounter = NotificationsCounterSingleton.getInstance();
                 if (activity.getString("action").equals("messager")) {
                     /*
                     *
@@ -776,11 +777,11 @@ public class MainActivity extends BaseTaptActivity {
                             }
                         });
                     } else {
-                        final NewMessageEvent chatEvent = new NewMessageEvent(true);
+                        notifCounter.setNumMessages(notifCounter.getNumMessages()+1);
+                        final NewMessageEvent chatEvent = new NewMessageEvent(true, notifCounter.getNumMessages());
                         chatEvent.setRoomId(chat.roomId);
                         chatEvent.setMessage(activity.getString("messageTextfdr"));
                         NewMessageBus.getInstance().setNewMessage(chatEvent);
-                        NotificationsCounterSingleton.getInstance().setHasMessage(true);
                     }
                 } else {
                     final Update update = new Update(activity);
@@ -789,7 +790,7 @@ public class MainActivity extends BaseTaptActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                NotificationsCounterSingleton.getInstance().incrementActivities();
+                                notifCounter.incrementActivities();
 
                                 if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null)
                                     ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
@@ -972,8 +973,9 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject badge = new JSONObject(args[0].toString());
-                NotificationsCounterSingleton.getInstance().setHasMessage(badge.getInt("messages") > 0);
-                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+                int messagesCount = badge.getInt("messages");
+                NotificationsCounterSingleton.getInstance().setNumMessages(messagesCount);
+                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage(), NotificationsCounterSingleton.getInstance().getNumMessages()));
 
                 int activities = badge.getInt("activities");
                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
@@ -1019,8 +1021,9 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            NotificationsCounterSingleton.getInstance().setHasMessage((boolean) args[0]);
-            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+            NotificationsCounterSingleton notCounter = NotificationsCounterSingleton.getInstance();
+            notCounter.setNumMessages((boolean) args[0] ? 1 : 0);
+            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(notCounter.hasMessage(), notCounter.getNumMessages()));
         }
     };
 

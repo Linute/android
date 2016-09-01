@@ -7,7 +7,7 @@ public class NotificationsCounterSingleton {
 
     private int mNumOfNewPosts;
     private int mNumOfNewActivities;
-    private boolean mHasMessage;
+    private int mMessageCount;
 
     private boolean mDiscoverNeedsRefreshing;
     private boolean mUpdatesNeedsRefreshing;
@@ -18,7 +18,7 @@ public class NotificationsCounterSingleton {
     private NotificationsCounterSingleton(){
         mNumOfNewActivities = 0;
         mNumOfNewPosts = 0;
-        mHasMessage = false;
+        mMessageCount = 0;
     }
 
     public static NotificationsCounterSingleton getInstance(){
@@ -41,11 +41,13 @@ public class NotificationsCounterSingleton {
     }
 
     public boolean hasMessage() {
-        return mHasMessage;
+        return mMessageCount > 0;
     }
 
-    public void setHasMessage(boolean hasMessage) {
-        mHasMessage = hasMessage;
+    public int getNumMessages() { return mMessageCount;}
+
+    public void setNumMessages(int count) {
+        mMessageCount = count;
     }
 
     public int incrementActivities(){
