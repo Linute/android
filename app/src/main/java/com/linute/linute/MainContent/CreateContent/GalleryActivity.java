@@ -15,14 +15,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-
 import com.linute.linute.MainContent.EditScreen.Dimens;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.UtilsAndHelpers.FileUtils;
-
 /**
  * Created by mikhail on 8/20/16.
  */
@@ -62,8 +59,8 @@ public class GalleryActivity extends AppCompatActivity {
         }
         if (resultCode == Activity.RESULT_OK && requestCode == SELECT_IMAGE_OR_VID) { //got an image
             Uri uri = data.getData();
-            Log.i(TAG, "onActivityResult: "+uri.getPath());
-            Log.i(TAG, "onActivityResult: "+uri);
+            //Log.i(TAG, "onActivityResult: "+uri.getPath());
+            //Log.i(TAG, "onActivityResult: "+uri);
             String type = FileUtils.getMimeType(this, uri);
 
             if (type != null) {
@@ -71,7 +68,7 @@ public class GalleryActivity extends AppCompatActivity {
                 if (type.startsWith("image")) { //selected image
                     try {
                         String path = FileUtils.getPath(this, uri);
-                        Log.i(TAG, "onActivityResult: "+path);
+                        //Log.i(TAG, "onActivityResult: "+path);
                         if (path != null) {
                             BitmapFactory.Options options = new BitmapFactory.Options();
                             options.inJustDecodeBounds = true;

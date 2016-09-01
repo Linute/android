@@ -68,5 +68,8 @@
 
     <color name="inactive_grey">#979797</color>
 
+    <color name="global_hot_red">#D0021B</color>
+    <color name="global_friend_orange">#F5A623</color>
+
 </resources>
 

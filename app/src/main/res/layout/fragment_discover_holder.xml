@@ -28,8 +28,8 @@
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:tabBackground="@color/colorPrimary"
-            app:tabIndicatorColor="@color/secondaryColor"
-            app:tabSelectedTextColor="@color/secondaryColor"
+            app:tabIndicatorColor="@color/white"
+            app:tabSelectedTextColor="@color/white"
             app:tabTextColor="@color/white"/>
 
     </android.support.design.widget.AppBarLayout>

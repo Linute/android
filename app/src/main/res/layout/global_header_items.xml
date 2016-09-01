@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:id="@+id/parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="64dp"
+    android:layout_margin="4dp"
+    android:background="@drawable/global_item_background"
+    android:clickable="true"
+    android:elevation="4dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:shadowColor="#59000000"
+        android:shadowDy="2"
+        android:shadowRadius="1"
+        android:text="HOTTEST"
+        android:textAllCaps="true"
+        android:textColor="@color/pure_white"
+        android:textSize="26sp"
+        android:textStyle="bold"
+    />
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="end|center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_friends"
+    />
+
+</FrameLayout>
