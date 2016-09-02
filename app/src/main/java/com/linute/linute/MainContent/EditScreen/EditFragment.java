@@ -375,7 +375,7 @@ public class EditFragment extends BaseFragment {
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
-                MoveZoomImageView imageView = new MoveZoomImageView(getContext());
+                final MoveZoomImageView imageView = new MoveZoomImageView(getContext());
                 imageView.leftBound = 0;
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
                 imageView.topBound = 0;
@@ -396,6 +396,13 @@ public class EditFragment extends BaseFragment {
 
                 imageView.setActive(false);
 
+               /* mContentContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                        imageView.centerImage();
+                        view.removeOnLayoutChangeListener(this);
+                    }
+                });*/
                 mContentView = imageView;
 //                imageView.setImageURI(uri);
                 break;
@@ -503,6 +510,7 @@ public class EditFragment extends BaseFragment {
             cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens, requestDisableToolListener);
             cropTool.MAX_SIZE = height;
             cropTool.MIN_SIZE = displayWidth / 16 * 9;
+
 
             return new EditContentTool[]{
                     privacySettingTool,
@@ -688,9 +696,9 @@ public class EditFragment extends BaseFragment {
                 vIcon.setColorFilter(new
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
             } else if(isDisabled){
-                vLabel.setTextColor(vLabel.getResources().getColor(R.color.grey_color));
+                vLabel.setTextColor(vLabel.getResources().getColor(R.color.fifty_black));
                 vIcon.setColorFilter(new
-                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.grey_color), PorterDuff.Mode.MULTIPLY));
+                        PorterDuffColorFilter(vIcon.getResources().getColor(R.color.fifty_black), PorterDuff.Mode.MULTIPLY));
 
             }else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.edit_unselected));

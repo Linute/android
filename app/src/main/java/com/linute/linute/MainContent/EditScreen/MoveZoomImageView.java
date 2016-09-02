@@ -7,7 +7,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -58,7 +57,6 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         mImageView.setX(0);
         mImageView.setY(0);
-
        /* bPaint = new Paint();
         bPaint.setColor(0xFF0000FF);
         bPaint.setStrokeWidth(10);
@@ -292,8 +290,6 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         float topCorrection = mImageView.getY() - rect.top;
         float botCorrection = mImageView.getY()+mImageView.getHeight() - rect.bottom;
 
-        Log.i("AAA", rect.toString() + " "+posX+" "+posY);
-
         if (leftBound != -1 && posX - leftCorrection > leftBound) {
             posX = leftBound + leftCorrection;
         }
@@ -318,6 +314,18 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 
         mImageView.setX(posX);
         mImageView.setY(posY);
+    }
+
+    public void centerImage(){
+
+        getImageBounds(rect);
+       /* float leftCorrection = mImageView.getX() - rect.left;
+        float rightCorrection = mImageView.getX()+mImageView.getWidth() - rect.right;
+        float topCorrection = mImageView.getY() - rect.top;
+        float botCorrection = mImageView.getY()+mImageView.getHeight() - rect.bottom;
+        */
+        mImageView.setX((getWidth()-rect.width())/2);
+        mImageView.setY((getHeight()-rect.height())/2);
     }
 
 

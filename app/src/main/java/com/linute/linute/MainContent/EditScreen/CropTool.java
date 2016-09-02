@@ -41,6 +41,10 @@ public class CropTool extends EditContentTool {
 
     public int MIN_SIZE = 300;
     public int MAX_SIZE = 600;
+    public int BOT_BOUND = 0;
+    public int TOP_BOUND = 0;
+
+
     public boolean MOVE_OTHER_BAR = false;
 
     CropMode[] mCropModes;
@@ -79,6 +83,48 @@ public class CropTool extends EditContentTool {
         mFadeBaseColor = 0;//mOverlaysView.getContext().getResources().getColor(R.color.colorPrimary);
 
 
+        DisplayMetrics metrics = mOverlaysView.getContext().getResources().getDisplayMetrics();
+        int displayWidth = metrics.widthPixels;
+        int height = mDimens.height * displayWidth/mDimens.width;
+
+        //cropper bound setup
+        TOP_BOUND = BOT_BOUND = (int)((1.2*displayWidth - height)/2);
+        if(TOP_BOUND < 0) TOP_BOUND = 0;
+        if(BOT_BOUND < 0) BOT_BOUND = 0;
+
+        float dimenRatio = (float) mDimens.height / mDimens.width;
+        mCropModes = new CropMode[]{
+                (dimenRatio == 6.0/5) ?
+                new CropMode(R.drawable.crop_icon_5x6, true, displayWidth*6/5,displayWidth*6/5){  //6*5
+                    @Override
+                    public void onSelected() {
+                        super.onSelected();
+                        topHandle.setVisibility(View.GONE);
+                        botHandle.setVisibility(View.GONE);
+//                        topFade.setVisibility(View.GONE);
+//                        botFade.setVisibility(View.GONE);
+                        topBar.setVisibility(View.GONE);
+                        botBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onUnSelected() {
+                        super.onUnSelected();
+                        topHandle.setVisibility(View.VISIBLE);
+                        botHandle.setVisibility(View.VISIBLE);
+//                        topFade.setVisibility(View.VISIBLE);
+//                        botFade.setVisibility(View.VISIBLE);
+                        topBar.setVisibility(View.VISIBLE);
+                        botBar.setVisibility(View.VISIBLE);
+                    }
+                }
+                        :
+                        new CropMode(R.drawable.crop_icon_5x6, true, (int)(displayWidth*dimenRatio), (int)(displayWidth*dimenRatio))
+                ,        //no crop
+                new CropMode(R.drawable.crop_icon_1x1, true, displayWidth, displayWidth),   //square
+                new CropMode(R.drawable.custom_crop_icon, false, displayWidth/16 * 9, height) //freeform
+        };
+
     }
 
 
@@ -103,15 +149,15 @@ public class CropTool extends EditContentTool {
                     int cropperLayoutHeight = mCropperLayout.getHeight();
                     if (view == botHandle) {
                         mBotY = (int) (initBarY + (startY - motionEvent.getRawY()));
-                        if(mBotY < 0) mBotY = 0;
+                        if(mBotY < BOT_BOUND) mBotY = BOT_BOUND;
 
                         int imageHeight = cropperLayoutHeight - mBotY - mTopY;
 
                         if(imageHeight > MAX_SIZE){
                             if(MOVE_OTHER_BAR){
                                 mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
-                                if(mTopY < 0){
-                                    mTopY = 0;
+                                if(mTopY < TOP_BOUND){
+                                    mTopY = TOP_BOUND;
                                     mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
                                 }
                             }else{
@@ -122,8 +168,8 @@ public class CropTool extends EditContentTool {
                         if (imageHeight < MIN_SIZE) {
                            if(MOVE_OTHER_BAR){
                                mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
-                               if(mTopY < 0){
-                                   mTopY = 0;
+                               if(mTopY < TOP_BOUND){
+                                   mTopY = TOP_BOUND;
                                    mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
                                }
                            }else{
@@ -135,14 +181,14 @@ public class CropTool extends EditContentTool {
 
                     } else {
                         mTopY = (int) (initBarY + (motionEvent.getRawY() - startY));
-                        if(mTopY < 0) mTopY = 0;
+                        if(mTopY < TOP_BOUND) mTopY = TOP_BOUND;
                         int imageHeight = cropperLayoutHeight - mBotY - mTopY;
 
                         if(imageHeight > MAX_SIZE){
                             if(MOVE_OTHER_BAR){
                                 mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
-                                if(mBotY < 0){
-                                    mBotY = 0;
+                                if(mBotY < BOT_BOUND){
+                                    mBotY = BOT_BOUND;
                                     mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
                                 }
                             }else{
@@ -153,8 +199,8 @@ public class CropTool extends EditContentTool {
                         if (imageHeight < MIN_SIZE) {
                             if(MOVE_OTHER_BAR){
                                 mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
-                                if(mBotY < 0){
-                                    mBotY = 0;
+                                if(mBotY < BOT_BOUND){
+                                    mBotY = BOT_BOUND;
                                     mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
                                 }
                             }else{
@@ -219,37 +265,7 @@ public class CropTool extends EditContentTool {
             }
         };
 
-        DisplayMetrics metrics = parent.getContext().getResources().getDisplayMetrics();
-        int displayWidth = metrics.widthPixels;
-        int height = mDimens.height * displayWidth/mDimens.width;
 
-        mCropModes = new CropMode[]{
-                new CropMode(R.drawable.crop_icon_5x6, true, displayWidth*6/5,displayWidth*6/5){  //6*5
-                    @Override
-                    public void onSelected() {
-                        super.onSelected();
-                        topHandle.setVisibility(View.GONE);
-                        botHandle.setVisibility(View.GONE);
-//                        topFade.setVisibility(View.GONE);
-//                        botFade.setVisibility(View.GONE);
-                        topBar.setVisibility(View.GONE);
-                        botBar.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onUnSelected() {
-                        super.onUnSelected();
-                        topHandle.setVisibility(View.VISIBLE);
-                        botHandle.setVisibility(View.VISIBLE);
-//                        topFade.setVisibility(View.VISIBLE);
-//                        botFade.setVisibility(View.VISIBLE);
-                        topBar.setVisibility(View.VISIBLE);
-                        botBar.setVisibility(View.VISIBLE);
-                    }
-                } ,        //no crop
-                new CropMode(R.drawable.crop_icon_1x1, true, displayWidth, displayWidth),   //square
-                new CropMode(R.drawable.custom_crop_icon, false, displayWidth/16 * 9, height) //freeform
-        };
 
         mCropModeViews = new FrameLayout[mCropModes.length];
 
