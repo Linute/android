@@ -383,7 +383,14 @@ public class EditFragment extends BaseFragment {
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
-                Bitmap image = BitmapFactory.decodeFile(uri.getPath());
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(uri.getPath(), opts);
+                if(opts.outWidth > metrics.widthPixels){
+                    opts.inSampleSize = opts.outWidth/metrics.widthPixels;
+                }
+                opts.inJustDecodeBounds = false;
+                Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
 
                 int scalewidth = image.getWidth();
                 if(scalewidth<metrics.widthPixels){
