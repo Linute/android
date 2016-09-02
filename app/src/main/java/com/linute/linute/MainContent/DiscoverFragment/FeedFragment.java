@@ -3,24 +3,21 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFeedFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -42,24 +39,15 @@ import okhttp3.Response;
  * Created by QiFeng on 11/17/15.
  */
 
-public class FeedFragment extends BaseFragment {
+public class FeedFragment extends BaseFeedFragment {
     private static final String TAG = FeedFragment.class.getSimpleName();
     private static final String SECTION_KEY = "section";
-    private RecyclerView recList;
-
-    private View mEmptyView;
-
-    private SwipeRefreshLayout refreshLayout;
 
     private ArrayList<Post> mPosts = new ArrayList<>();
-    private FeedAdapter mFeedAdapter;
-    private boolean feedDone;
-
+    protected SwipeRefreshLayout vSwipeRefreshLayout;
     private boolean mSectionTwo = false;
 
     private String mCollegeId;
-
-    private Handler mHandler = new Handler();
 
     public static FeedFragment newInstance(boolean friendsOnly) {
         FeedFragment fragment = new FeedFragment();
@@ -78,61 +66,23 @@ public class FeedFragment extends BaseFragment {
         if (getArguments() != null) {
             mSectionTwo = getArguments().getBoolean(SECTION_KEY);
         }
-
     }
 
-    //called when fragment drawn the first time
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //mFriendOnly determines which layout we're using
-        //they are identical, but we need to differentiate them for things like setting background
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View root =  super.onCreateView(inflater, container, savedInstanceState);
 
-        final View rootView = inflater.inflate(
-                R.layout.fragment_discover_feed,
-                container, false); //setContent
-
-        if (mFeedAdapter == null) {
-            mFeedAdapter = new FeedAdapter(
-                    mPosts,
-                    getContext(),
-                    Glide.with(this),
-                    mSectionTwo
-            );
-        }else {
-            mFeedAdapter.setRequestManager(Glide.with(this));
-        }
-
-        mEmptyView = rootView.findViewById(R.id.discover_no_posts_frame);
-
-        recList = (RecyclerView) rootView.findViewById(R.id.eventList);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        recList.setLayoutManager(llm);
-
-      /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                true, true));*/
-
-        mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
-            @Override
-            public void loadMore() {
-                if (!feedDone)
-                    loadMoreFeedFromServer();
-            }
-        });
-
-        recList.setAdapter(mFeedAdapter);
-
-        refreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_layout);
-        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        vSwipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_layout);
+        vSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 refreshFeed();
             }
         });
 
-        return rootView;
+        return root;
     }
-
 
     @Override
     public void onResume() {
@@ -156,25 +106,20 @@ public class FeedFragment extends BaseFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mSectionTwo && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
-                mEmptyView.requestLayout();
-                mEmptyView.setVisibility(View.VISIBLE);
+                ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
+                vEmptyView.requestLayout();
+                vEmptyView.setVisibility(View.VISIBLE);
 
             } else if (mSectionTwo && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
-                ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
-                mEmptyView.requestLayout();
-                mEmptyView.setVisibility(View.VISIBLE);
+                ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
+                vEmptyView.requestLayout();
+                vEmptyView.setVisibility(View.VISIBLE);
             }
         }
     }
 
-
-    private int mSkip = 0;
-
-    private boolean mLoadingMore = false;
-
     public void loadMoreFeedFromServer() {
-        if (getActivity() == null || mLoadingMore || refreshLayout.isRefreshing()) return;
+        if (getActivity() == null || mLoadingMore || vSwipeRefreshLayout.isRefreshing()) return;
 
         mLoadingMore = true;
 
@@ -194,8 +139,8 @@ public class FeedFragment extends BaseFragment {
         events.put("college", mCollegeId);
         events.put("skip", skip + "");
         events.put("limit", limit + "");
-        LSDKEvents events1 = new LSDKEvents(getActivity());
-        events1.getEvents(mSectionTwo, events, new Callback() {
+
+        new LSDKEvents(getActivity()).getEvents(mSectionTwo, events, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         noInternet();
@@ -229,10 +174,9 @@ public class FeedFragment extends BaseFragment {
                             jsonArray = jsonObject.getJSONArray("events");
 
                             if (skip1 == 0) {
-                                feedDone = true; //no more feed to load
+                                mFeedDone = true; //no more feed to load
                                 mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                             }
-
 
                             for (int i = jsonArray.length() - 1; i >= 0; i--) {
                                 try {
@@ -280,15 +224,27 @@ public class FeedFragment extends BaseFragment {
         );
     }
 
+    @Override
+    protected void initAdapter() {
+        if (mFeedAdapter == null){
+            mFeedAdapter = new FeedAdapter(mPosts, getContext(), mSectionTwo);
+        }
+    }
+
+    @Override
+    protected int getLayout() {
+        return R.layout.fragment_discover_feed;
+    }
+
 
     public void refreshFeed() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
-        if (!refreshLayout.isRefreshing()) {
-            refreshLayout.post(new Runnable() {
+        if (!vSwipeRefreshLayout.isRefreshing()) {
+            vSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
-                    refreshLayout.setRefreshing(true);
+                    vSwipeRefreshLayout.setRefreshing(true);
                 }
             });
         }
@@ -316,7 +272,7 @@ public class FeedFragment extends BaseFragment {
                                 getActivity().runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        refreshLayout.setRefreshing(false);
+                                        vSwipeRefreshLayout.setRefreshing(false);
                                         Utils.showServerErrorToast(getActivity());
                                     }
                                 });
@@ -335,10 +291,10 @@ public class FeedFragment extends BaseFragment {
                             jsonArray = jsonObject.getJSONArray("events");
 
                             if (mSkip == 0) {
-                                feedDone = true; //no more feed to load
+                                mFeedDone = true; //no more feed to load
                                 mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                             } else {
-                                feedDone = false;
+                                mFeedDone = false;
                                 mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_LOADING);
                             }
 
@@ -365,13 +321,13 @@ public class FeedFragment extends BaseFragment {
                                         public void run() {
 
                                             if (refreshedPosts.isEmpty()) {
-                                                if (mEmptyView.getVisibility() == View.GONE) {
-                                                    ((TextView) mEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
+                                                if (vEmptyView.getVisibility() == View.GONE) {
+                                                    ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
                                                             R.string.discover_no_posts_hot : R.string.discover_no_posts_campus);
-                                                    mEmptyView.setVisibility(View.VISIBLE);
+                                                    vEmptyView.setVisibility(View.VISIBLE);
                                                 }
-                                            } else if (mEmptyView.getVisibility() == View.VISIBLE) {
-                                                mEmptyView.setVisibility(View.GONE);
+                                            } else if (vEmptyView.getVisibility() == View.VISIBLE) {
+                                                vEmptyView.setVisibility(View.GONE);
                                             }
 
                                             mHandler.post(new Runnable() {
@@ -391,7 +347,7 @@ public class FeedFragment extends BaseFragment {
                                                 activity.setFeedNotification(0);
                                                 NotificationEventBus.getInstance().setNotification(new NotificationEvent(NotificationEvent.DISCOVER, false));
                                             }
-                                            refreshLayout.setRefreshing(false);
+                                            vSwipeRefreshLayout.setRefreshing(false);
                                         }
                                     }
                             );
@@ -405,7 +361,7 @@ public class FeedFragment extends BaseFragment {
                                     @Override
                                     public void run() {
                                         Utils.showServerErrorToast(getActivity());
-                                        refreshLayout.setRefreshing(false);
+                                        vSwipeRefreshLayout.setRefreshing(false);
                                     }
                                 });
                             }
@@ -421,15 +377,15 @@ public class FeedFragment extends BaseFragment {
             @Override
             public void run() {
                 ((MainActivity) getActivity()).noInternet();
-                refreshLayout.setRefreshing(false);
+                vSwipeRefreshLayout.setRefreshing(false);
             }
         });
     }
 
 
     public void scrollUp() {
-        recList.scrollToPosition(0);
-        if (!mSectionTwo && NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing() && !refreshLayout.isRefreshing()) {
+        vRecyclerView.scrollToPosition(0);
+        if (!mSectionTwo && NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing() && !vSwipeRefreshLayout.isRefreshing()) {
             refreshFeed();
         }
     }
@@ -448,8 +404,8 @@ public class FeedFragment extends BaseFragment {
             }
         });
 
-        if (mEmptyView != null && mEmptyView.getVisibility() == View.VISIBLE)
-            mEmptyView.setVisibility(View.GONE);
+        if (vEmptyView != null && vEmptyView.getVisibility() == View.VISIBLE)
+            vEmptyView.setVisibility(View.GONE);
 
         return true;
     }

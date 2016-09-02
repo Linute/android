@@ -147,8 +147,6 @@ public class Profile extends BaseFragment{
             });
         }
 
-        mProfileAdapter.setRequestManager(Glide.with(this));
-
         vRecList.setAdapter(mProfileAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.profilefrag2_swipe_refresh);
@@ -169,6 +167,8 @@ public class Profile extends BaseFragment{
                 }
             }
         });
+
+        mProfileAdapter.setRequestManager(Glide.with(this));
 
         mToolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -287,6 +287,15 @@ public class Profile extends BaseFragment{
         if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mProfileAdapter.getRequestManager() != null)
+            mProfileAdapter.getRequestManager().onDestroy();
+
+        mProfileAdapter.setRequestManager(null);
     }
 
     //get user information from server

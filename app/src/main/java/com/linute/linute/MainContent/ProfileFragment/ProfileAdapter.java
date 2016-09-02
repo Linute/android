@@ -79,6 +79,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mRequestManager = manager;
     }
 
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_ITEM_WITH_IMAGE) {

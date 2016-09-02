@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
@@ -59,8 +60,6 @@ public class UpdatesFragment extends BaseFragment {
     private boolean mHasMessage;
     private AppBarLayout mAppBarLayout;
 
-    private Toolbar mToolbar;
-
     private View mNotificationIndicator;
 
     private JSONArray mUnreadArray = new JSONArray();
@@ -91,8 +90,8 @@ public class UpdatesFragment extends BaseFragment {
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.updatesFragment_swipe_refresh);
         mAppBarLayout = (AppBarLayout) rootView.findViewById(R.id.appbar_layout);
 
-        mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        mToolbar.setOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
+        toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mUpdatesRecyclerView.scrollToPosition(0);
@@ -103,7 +102,7 @@ public class UpdatesFragment extends BaseFragment {
             }
         });
 
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getFragmentManager().popBackStack();
@@ -111,10 +110,10 @@ public class UpdatesFragment extends BaseFragment {
         });
 
         mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-        mToolbar.inflateMenu(R.menu.menu_fragment_updates);
-        View chatActionView = mToolbar.getMenu().findItem(R.id.menu_chat).getActionView();
+        toolbar.inflateMenu(R.menu.menu_fragment_updates);
+        View chatActionView = toolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         mNotificationIndicator = chatActionView.findViewById(R.id.notification);
         mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
@@ -138,11 +137,14 @@ public class UpdatesFragment extends BaseFragment {
         mUpdatesAdapter.setOnLoadMore(new LoadMoreViewHolder.OnLoadMore() {
             @Override
             public void loadMore() {
-                if(mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore){
+                if (mCanLoadMore && !mSwipeRefreshLayout.isRefreshing() && !mLoadingMore) {
                     loadMoreUpdates();
                 }
             }
         });
+
+        mUpdatesAdapter.setRequestManager(Glide.with(this));
+
 
         mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
 
@@ -217,6 +219,13 @@ public class UpdatesFragment extends BaseFragment {
         mAppBarLayout.setExpanded(true, false);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mUpdatesAdapter.getRequestManager() != null)
+            mUpdatesAdapter.getRequestManager().onDestroy();
+        mUpdatesAdapter.setRequestManager(null);
+    }
 
     private void getUpdatesInformation() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
@@ -276,7 +285,7 @@ public class UpdatesFragment extends BaseFragment {
                             if (mSkip <= 0) {
                                 mCanLoadMore = false;
                                 mUpdatesAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
-                            }else {
+                            } else {
                                 mCanLoadMore = true;
                                 mUpdatesAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
                             }
@@ -331,7 +340,7 @@ public class UpdatesFragment extends BaseFragment {
 
     private boolean mLoadingMore = false;
 
-    private void loadMoreUpdates(){
+    private void loadMoreUpdates() {
         if (getActivity() == null) return;
 
         mLoadingMore = true;
@@ -349,7 +358,7 @@ public class UpdatesFragment extends BaseFragment {
         new LSDKActivity(getActivity()).getActivities(skip1, limit, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -361,7 +370,7 @@ public class UpdatesFragment extends BaseFragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()){
+                if (response.isSuccessful()) {
                     try {
                         JSONObject obj = new JSONObject(response.body().string());
 
@@ -425,7 +434,7 @@ public class UpdatesFragment extends BaseFragment {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        if (getActivity() != null){
+                        if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -434,9 +443,9 @@ public class UpdatesFragment extends BaseFragment {
                             });
                         }
                     }
-                }else {
-                    Log.i(TAG, "onResponseError: "+response.body().string());
-                    if (getActivity() != null){
+                } else {
+                    Log.i(TAG, "onResponseError: " + response.body().string());
+                    if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -515,7 +524,7 @@ public class UpdatesFragment extends BaseFragment {
     }
 
     @Override
-    public void resetFragment(){
+    public void resetFragment() {
         mUpdatesRecyclerView.scrollToPosition(0);
     }
 

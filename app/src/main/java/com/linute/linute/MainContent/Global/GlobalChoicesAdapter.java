@@ -178,6 +178,10 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
     interface GoToTrend {
         void goToTrend(GlobalChoiceItem item);
     }

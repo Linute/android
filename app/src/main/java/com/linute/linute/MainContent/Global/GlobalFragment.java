@@ -34,6 +34,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -64,20 +66,14 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
     private View vEmpty;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (mGlobalChoicesAdapter == null) {
-            mGlobalChoicesAdapter = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
-            mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_global_choices, container, false);
 
+        if (mGlobalChoicesAdapter == null) {
+            mGlobalChoicesAdapter = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
+        }
         mGlobalChoicesAdapter.setGoToTrend(this);
 
         vEmpty = root.findViewById(R.id.empty_view);
@@ -85,7 +81,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vRecycler = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swipe_refresh);
 
-        //mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
+        mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
 
         vRecycler.setAdapter(mGlobalChoicesAdapter);
 
@@ -165,6 +161,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     @Override
     public void onResume() {
         super.onResume();
+
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             mHandler.post(new Runnable() {
                 @Override
@@ -241,8 +238,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
 
-                        Log.d(TAG, "onResponse: " + trends.toString(4));
-                        ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
+                       // Log.d(TAG, "onResponse: " + trends.toString(4));
+                        final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
                         JSONObject trend;
 
                         addHotAndFriends(tempList);
@@ -266,8 +263,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             }
                         }
 
-                        mGlobalChoiceItems.clear();
-                        mGlobalChoiceItems.addAll(tempList);
+                        GlobalChoiceItem.sort(tempList);
+
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
@@ -278,6 +275,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            mGlobalChoiceItems.clear();
+                                            mGlobalChoiceItems.addAll(tempList);
                                             mGlobalChoicesAdapter.notifyDataSetChanged();
                                             vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
@@ -351,7 +350,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             item.setUnread(0);
             MainActivity activity = (MainActivity) getActivity();
             if (activity != null) {
-                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item.key, item.title), "TREND");
+                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
             }
         } else {
             Toast.makeText(getContext(), "NEED TO DO", Toast.LENGTH_SHORT).show();
@@ -364,8 +363,11 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        //mGlobalChoicesAdapter.setRequestManager(null);
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mGlobalChoicesAdapter.getRequestManager() != null)
+            mGlobalChoicesAdapter.getRequestManager().onDestroy();
+
+        mGlobalChoicesAdapter.setRequestManager(null);
     }
 }

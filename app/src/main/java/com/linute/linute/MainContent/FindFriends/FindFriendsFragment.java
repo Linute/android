@@ -125,7 +125,8 @@ public class FindFriendsFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(getParentFragment()), mFriendFoundList);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList);
+        mFriendSearchAdapter.setRequestManager(Glide.with(this));
 
         recyclerView.setAdapter(mFriendSearchAdapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
@@ -775,6 +776,18 @@ public class FindFriendsFragment extends BaseFragment {
             if (mUnfilteredList.isEmpty()) return;
             filterList(query);
         }
+    }
+
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (mFriendSearchAdapter.getRequestManager() != null)
+            mFriendSearchAdapter.getRequestManager().onDestroy();
+
+        mFriendSearchAdapter.setRequestManager(null);
     }
 
     @Override

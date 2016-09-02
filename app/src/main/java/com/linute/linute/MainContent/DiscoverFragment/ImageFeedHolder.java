@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
@@ -121,6 +122,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
         v.setVisibility(View.VISIBLE);
         animator.start();
+        Log.i(TAG, "animateLollipop: ");
     }
 
     private void animatePreLollipop(final View layer) {

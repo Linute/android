@@ -647,6 +647,14 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mProfileAdapter.getRequestManager() != null)
+            mProfileAdapter.getRequestManager().onDestroy();
+
+        mProfileAdapter.setRequestManager(null);
+    }
 
     public void getMoreActivities() {
         if (getActivity() == null) return;
@@ -754,7 +762,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (follow) followUser(followingText, user);
         else {
             mDialog = new AlertDialog.Builder(getContext()).setTitle("Unfollow")
-                    .setMessage("Unfollow " + user.getFirstName()+ " "+ user.getLastName()+ "?")
+                    .setMessage("Unfollow " + user.getFirstName() + " " + user.getLastName() + "?")
                     .setPositiveButton("Unfollow", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

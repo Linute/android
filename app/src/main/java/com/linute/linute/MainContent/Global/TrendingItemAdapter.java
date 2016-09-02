@@ -15,6 +15,7 @@ import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TrendingItemAdapter extends BaseFeedAdapter {
 
     public static final int UNDEFINED = 666;
 
@@ -40,18 +41,11 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     String mCollege;
     String mTrendId;
 
-    short mFooterState = 0;
-    private RequestManager mRequestManager;
 
-
-    LoadMoreViewHolder.OnLoadMore mOnLoadMore;
-
-
-    TrendingItemAdapter(List<Post> posts, Context context, LoadMoreViewHolder.OnLoadMore o, RequestManager manager,String trendId) {
+    TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager,String trendId) {
         mContext = context;
         mRequestManager = manager;
         mPosts = posts;
-        mOnLoadMore = o;
         mTrendId = trendId;
 
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -88,10 +82,11 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((VideoFeedHolder)holder).bindModel(mPosts.get(position));
         }
         else if (holder instanceof LoadMoreViewHolder) {
-            ((LoadMoreViewHolder) holder).bindView(mFooterState);
+            ((LoadMoreViewHolder) holder).bindView(mLoadState);
         }
 
-        if (position == mPosts.size() - 1 && mOnLoadMore != null) mOnLoadMore.loadMore();
+        if (position == mPosts.size() - 1)
+            loadMoreFeed();
     }
 
 
@@ -106,19 +101,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else {
             return UNDEFINED;
         }
-    }
-
-
-    public boolean setFooterState(short footerState) {
-        if (mFooterState != footerState) {
-            mFooterState = footerState;
-            return true;
-        }
-        return false;
-    }
-
-    public short getFooterState() {
-        return mFooterState;
     }
 
     @Override
@@ -177,7 +159,10 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     JSONArray mEventIds = new JSONArray();
                     mEventIds.put(id);
                     body.put("events", mEventIds);
-                    body.put("trend", mTrendId);
+
+                    if (mTrendId != null) {
+                        body.put("trend", mTrendId);
+                    }
 
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;
 

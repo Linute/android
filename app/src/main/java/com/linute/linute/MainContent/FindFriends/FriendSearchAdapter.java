@@ -43,12 +43,21 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
     private SharedPreferences mSharedPreferences;
 
 
-    public FriendSearchAdapter(Context context, RequestManager manager, List<FriendSearchUser> mSearchList) {
+    public FriendSearchAdapter(Context context, List<FriendSearchUser> mSearchList) {
         mFriendSearchList = mSearchList;
         mContext = context;
-        mRequestManager = manager;
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
+
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
+    }
+
 
     public void clearContext() {
         mContext = null;
