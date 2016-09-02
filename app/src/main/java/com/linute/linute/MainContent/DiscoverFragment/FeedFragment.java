@@ -23,6 +23,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -109,8 +110,8 @@ public class FeedFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(llm);
 
-      /*  recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
-                true, true));*/
+        recList.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
 
         mFeedAdapter.setGetMoreFeed(new LoadMoreViewHolder.OnLoadMore() {
             @Override

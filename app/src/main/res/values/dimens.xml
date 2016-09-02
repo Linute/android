@@ -97,4 +97,8 @@
     <dimen name="crop_icon_border_thickness">2dp</dimen>
     <dimen name="feed_detail_action_size">18dp</dimen>
 
+    <dimen name="feed_item_bar_height">48dp</dimen>
+
+
+
 </resources>
