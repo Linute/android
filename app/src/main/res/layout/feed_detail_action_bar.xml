@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="44dp"
-              android:orientation="vertical"
->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="44dp"
+    android:orientation="vertical"
+    tools:showIn="@layout/feed_detail_image"
+    >
 
-    <View android:layout_width="match_parent"
-          android:layout_height="1dp"
-          android:background="@drawable/divider_horizontal"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@drawable/divider_horizontal"
+        android:layout_alignParentTop="true"
+        />
 
-    <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:baselineAligned="false"
-                  android:divider="@drawable/divider_vertical"
-                  android:orientation="horizontal"
-                  android:showDividers="middle"
-                  android:weightSum="2">
 
-        <LinearLayout android:id="@+id/feed_control_bar_like_button"
+        <!--<LinearLayout android:id="@+id/feed_control_bar_like_button"
                       android:layout_width="0px"
                       android:layout_height="match_parent"
                       android:layout_gravity="center"
@@ -67,6 +65,76 @@
                       android:text="Comment (0)"
                       android:textColor="@color/twentyfive_black"
                       android:textSize="@dimen/sub_font_size"/>
+        </LinearLayout>-->
+
+        <LinearLayout
+            android:id="@+id/feed_control_bar_like_button"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="22dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <CheckBox
+                android:id="@+id/postHeart"
+                android:layout_width="@dimen/feed_detail_action_size"
+                android:layout_height="@dimen/feed_detail_action_size"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="4dp"
+                android:background="@drawable/post_likes_selector"
+                android:button="@null"
+                android:checked="false"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/postNumHearts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|right"
+                android:textColor="@color/twentyfive_black"
+                android:textSize="12sp"
+                tools:text="237" />
         </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/feed_control_bar_comments_button"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="76dp"
+            android:layout_alignParentLeft="true"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            >
+
+            <ImageView
+                android:id="@+id/postComments"
+                android:layout_width="@dimen/feed_detail_action_size"
+                android:layout_height="@dimen/feed_detail_action_size"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="4dp"
+                android:src="@drawable/ic_comment" />
+
+            <TextView
+                android:id="@+id/postNumComments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|right"
+                android:textColor="@color/twentyfive_black"
+                android:textSize="12sp"
+                tools:text="237" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/share"
+            android:layout_width="@dimen/feed_detail_action_size"
+            android:layout_height="@dimen/feed_detail_action_size"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="20dp"
+            android:src="@drawable/ic_share_arrow"
+        />
+</RelativeLayout>
