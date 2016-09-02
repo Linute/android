@@ -61,10 +61,8 @@
             android:layout_height="wrap_content"
             app:fab_colorNormal="@color/white"
             app:fab_colorPressed="@color/white_pressed"
-            android:src="@drawable/status_icon"
-            android:gravity="center"
-            app:fab_size="mini"
-        />
+            app:fab_icon="@drawable/status_icon"
+            app:fab_size="mini" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/create_upload"
