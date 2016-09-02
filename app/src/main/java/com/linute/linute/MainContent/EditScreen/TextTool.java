@@ -104,9 +104,9 @@ public class TextTool extends EditContentTool {
                 midET.setText(text);
                 midTV.setText(text);
 
-
                 midET.setVisibility(View.GONE);
                 midTV.setVisibility(View.VISIBLE);
+                midTV.setY(midET.getY());
                 //TODO animate?
             }
         });
@@ -290,7 +290,9 @@ public class TextTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-
+        hideKeyboard(midTV);
+        hideKeyboard(botTV);
+        hideKeyboard(topTV);
     }
 
     @Override
