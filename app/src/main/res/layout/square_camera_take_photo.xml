@@ -109,8 +109,8 @@
                 android:src="@drawable/square_camera_unselected"/>
 
             <View
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
                 android:layout_gravity="center"
                 android:background="@drawable/camera_middle_stroke"
             />
@@ -120,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="T"
-                android:textSize="32dp"
+                android:textSize="24dp"
                 android:textColor="@color/pure_white"
                 android:textStyle="bold"/>
 

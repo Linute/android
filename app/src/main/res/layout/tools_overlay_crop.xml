@@ -1,41 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:background="#006"
+    >
 
     <View
         android:id="@+id/top_fade"
         android:layout_width="match_parent"
         android:layout_height="16dp"
-        android:background="@color/colorPrimary"
         android:layout_alignParentTop="true"
         />
-
     <ImageView
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:src="@drawable/top_crop_line"
+        android:layout_height="12dp"
+        android:layout_marginTop="-6dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/crop_line"
         android:layout_below="@id/top_fade"
+        />
+    <ImageView
+        android:id="@+id/top_handle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:src="@drawable/crop_handle"
+        android:layout_marginLeft="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/top_fade"
+        android:layout_marginTop="-24dp"
         />
 
 
 
+
+    <View
+        android:id="@+id/bot_fade"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:layout_alignParentBottom="true"
+        />
     <ImageView
         android:id="@+id/bot_bar"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:src="@drawable/bottom_crop_line"
-        android:layout_above="@+id/bot_fade"
+        android:layout_height="12dp"
+        android:layout_marginBottom="-6dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/crop_line"
+        android:layout_above="@id/bot_fade"
+        />
+    <ImageView
+        android:id="@+id/bot_handle"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:src="@drawable/crop_handle"
+        android:layout_marginRight="48dp"
+        android:layout_alignParentRight="true"
+        android:layout_above="@id/bot_fade"
+        android:layout_marginBottom="-24dp"
         />
 
-    <View
-        android:id="@id/bot_fade"
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:background="@color/colorPrimary"
-        android:layout_alignParentBottom="true"
-        />
 
 
 </RelativeLayout>
