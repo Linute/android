@@ -50,9 +50,4 @@
 
     <include layout="@layout/feed_detail_action_bar"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:background="@color/seperator_color"/>
-
 </LinearLayout>

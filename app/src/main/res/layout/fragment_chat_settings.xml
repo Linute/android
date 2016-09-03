@@ -33,8 +33,7 @@
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_gravity="center"
-                android:scaleType="centerCrop"
-                app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+                android:scaleType="centerCrop"/>
 
             <ProgressBar
                 style="?android:attr/progressBarStyleLarge"
@@ -64,8 +63,7 @@
                 android:layout_height="@dimen/profile_image_radius"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                app:riv_corner_radius="@dimen/user_icon_corner_radius" />
+                android:layout_marginRight="16dp" />
 
             <TextView
                 android:id="@+id/dm_user_name"

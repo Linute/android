@@ -20,7 +20,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark"
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:navigationIcon="@drawable/ic_action_navigation_close"
-            app:title="Campus"/>
+            app:title="My Campus"/>
 
         <android.support.design.widget.TabLayout
             android:id="@+id/discover_sliding_tabs"

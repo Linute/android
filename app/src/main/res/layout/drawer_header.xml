@@ -1,51 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mainActivity_nav_drawer_header"
-    android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:background="#225f83"
-    android:orientation="vertical"
-    android:gravity="center"
-    >
+<LinearLayout android:id="@+id/mainActivity_nav_drawer_header"
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="200dp"
+              android:background="#225f83"
+              android:gravity="center"
+              android:orientation="vertical"
+>
 
 
-    <com.linute.linute.UtilsAndHelpers.ProfileImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/navigation_header_profile_image"
         android:layout_width="@dimen/nav_header_profile_side"
         android:layout_height="@dimen/nav_header_profile_side"
-        android:src="@drawable/group_icon_inbox"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp"
-        app:civ_border_color="@color/colorPrimary"
-        app:civ_border_width="1dp" />
+        android:layout_marginTop="16dp"
+        android:src="@drawable/group_icon_inbox"
+        app:civ_border_color="#225f83"/>
 
     <TextView
         android:id="@+id/drawerHeader_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:gravity="center"
         android:ellipsize="end"
+        android:gravity="center"
         android:lines="1"
         android:textColor="@color/pure_white"
         android:textSize="32sp"
         android:textStyle="bold"
-        tools:text="FirstName LastName" />
+        tools:text="FirstName LastName"/>
 
     <TextView
         android:id="@+id/drawerHeader_college"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:gravity="center"
         android:ellipsize="end"
+        android:gravity="center"
         android:lines="2"
         android:text="College"
         android:textColor="@color/pure_white"
-        android:textSize="16sp" />
+        android:textSize="16sp"/>
 
 
 </LinearLayout>

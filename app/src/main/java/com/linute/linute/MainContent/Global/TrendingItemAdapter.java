@@ -39,14 +39,14 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     String mUserId;
     String mImageSignature;
     String mCollege;
-    String mTrendId;
+    GlobalChoiceItem mGlobalItem;
 
 
-    TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager,String trendId) {
+    TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
         mContext = context;
         mRequestManager = manager;
         mPosts = posts;
-        mTrendId = trendId;
+        mGlobalItem = item;
 
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
@@ -76,6 +76,9 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (position == mPosts.size() - 1)
+            loadMoreFeed();
+
         if (holder instanceof BaseTrendViewHolder) {
             ((BaseTrendViewHolder) holder).bindModel(mPosts.get(position));
         }else if (holder instanceof VideoTrendViewHolder){
@@ -83,10 +86,13 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
         }
         else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
+            return; //don't want loader to be counted as a post
         }
 
-        if (position == mPosts.size() - 1)
-            loadMoreFeed();
+        // once we see all the new posts, mark as read
+        if (position == mGlobalItem.getUnread() - 1){
+            mGlobalItem.setUnread(0);
+        }
     }
 
 
@@ -160,8 +166,8 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
                     mEventIds.put(id);
                     body.put("events", mEventIds);
 
-                    if (mTrendId != null) {
-                        body.put("trend", mTrendId);
+                    if (mGlobalItem.key != null) {
+                        body.put("trend", mGlobalItem.key);
                     }
 
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;

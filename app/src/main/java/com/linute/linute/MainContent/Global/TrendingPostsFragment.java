@@ -374,7 +374,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                     mPostList,
                     getContext(),
                     Glide.with(this),
-                    mGlobalItem.key
+                    mGlobalItem
             );
         }
     }

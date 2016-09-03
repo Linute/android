@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
@@ -57,10 +58,10 @@ public class UpdatesFragment extends BaseFragment {
 
     private View mEmptyView;
 
-    private boolean mHasMessage;
     private AppBarLayout mAppBarLayout;
 
     private View mNotificationIndicator;
+    private TextView vNotificationCounter;
 
     private JSONArray mUnreadArray = new JSONArray();
 
@@ -109,14 +110,13 @@ public class UpdatesFragment extends BaseFragment {
             }
         });
 
-        mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
         toolbar.inflateMenu(R.menu.menu_fragment_updates);
         View chatActionView = toolbar.getMenu().findItem(R.id.menu_chat).getActionView();
 
         toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
 
         mNotificationIndicator = chatActionView.findViewById(R.id.notification);
-        mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+        vNotificationCounter = (TextView) chatActionView.findViewById(R.id.notification_count);
 
         chatActionView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,7 +127,6 @@ public class UpdatesFragment extends BaseFragment {
                 }
             }
         });
-
 
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -163,6 +162,11 @@ public class UpdatesFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        NotificationsCounterSingleton singleton = NotificationsCounterSingleton.getInstance();
+        mNotificationIndicator.setVisibility(singleton.hasMessage() ? View.VISIBLE : View.GONE);
+        int count = singleton.getNumMessages();
+        vNotificationCounter.setText(count < 100 ? count + "" : "+");
 
         mChatSubscription = NewMessageBus
                 .getInstance()
@@ -532,10 +536,10 @@ public class UpdatesFragment extends BaseFragment {
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
         public void call(NewMessageEvent event) {
-            if (event.hasNewMessage() != mHasMessage) {
-                mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
-                mHasMessage = event.hasNewMessage();
-            }
+            int count = NotificationsCounterSingleton.getInstance().getNumMessages();
+            mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+            vNotificationCounter.setText(count < 100 ? count + "" : "+");
+
         }
     };
 

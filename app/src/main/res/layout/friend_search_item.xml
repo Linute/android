@@ -1,44 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:foreground="?android:selectableItemBackground">
 
-    <ImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/friendSearchItem_profile_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"/>
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+    />
 
 
-    <LinearLayout android:layout_width="0px"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_vertical"
-                  android:layout_weight="1"
-                  android:layout_marginStart="16dp"
-                  android:orientation="vertical">
-
-        <TextView android:id="@+id/friendSearchItem_full_name"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:lines="1"
-                  android:ellipsize="end"
-                  android:textColor="@android:color/darker_gray"
-                  android:textSize="16sp"
-                  tools:text="Fullname lastname"
-        />
-    </LinearLayout>
+    <TextView android:id="@+id/friendSearchItem_full_name"
+              android:layout_width="0px"
+              android:layout_height="wrap_content"
+              android:layout_gravity="center_vertical"
+              android:layout_weight="1"
+              android:ellipsize="end"
+              android:lines="1"
+              android:textColor="@android:color/darker_gray"
+              android:textSize="16sp"
+              tools:text="Fullname lastname"
+    />
 
 
-    <de.hdodenhof.circleimageview.CircleImageView
+    <ImageView
         android:id="@+id/friendSearchItem_add_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        app:civ_border_width="0px"
+        android:padding="16dp"
         tools:src="@drawable/add_friend"/>
 
 </LinearLayout>

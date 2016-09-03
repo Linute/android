@@ -10,7 +10,6 @@
         android:id="@+id/image_user"
         android:padding="6dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
+        android:layout_height="match_parent"/>
 
 </FrameLayout>

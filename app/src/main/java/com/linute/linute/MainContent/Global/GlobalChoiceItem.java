@@ -75,6 +75,10 @@ public class GlobalChoiceItem implements Parcelable {
         return unread > 0;
     }
 
+    public int getUnread(){
+        return unread;
+    }
+
     @Override
     public int describeContents() {
         return 0;

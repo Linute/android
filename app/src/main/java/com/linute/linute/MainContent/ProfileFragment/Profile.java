@@ -5,9 +5,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,15 +17,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.linute.linute.API.LSDKPeople;
+import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -40,7 +40,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,7 +49,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class Profile extends BaseFragment{
+public class Profile extends BaseFragment {
     public static final String TAG = Profile.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
@@ -61,7 +60,7 @@ public class Profile extends BaseFragment{
     private View vUpdateNotification;
     private TextView vUpdatesCounter;
 
-    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
+    private ArrayList<Post> mPosts = new ArrayList<>();
     private SharedPreferences mSharedPreferences;
 
     //we have 2 seperate queries, one for header and one for activities
@@ -87,8 +86,8 @@ public class Profile extends BaseFragment{
             mSwipeRefreshLayout.setRefreshing(false);
         }
     };
-    private LinuteUser user;
 
+    private LinuteUser user;
 
     private int mSkip = 0;
     private boolean mCanLoadMore = false;
@@ -114,23 +113,8 @@ public class Profile extends BaseFragment{
 
         vRecList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         vRecList.setHasFixedSize(true);
-        final GridLayoutManager llm = new GridLayoutManager(getActivity(), 3);
 
-        llm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                //header is size 3
-                //0 for image and 1 for profile info
-                if (position == 0 || position == 1)
-                    return 3;
-                else if (position == 2 && mUserActivityItems.get(0) instanceof EmptyUserActivityItem)
-                    return 3; //empty view size 3
-                else if (position == mUserActivityItems.size() + 2)  // view that shows loading indicator
-                    return 3;
-                else return 1;
-            }
-        });
-
+        final LinearLayoutManager llm = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         vRecList.setLayoutManager(llm);
 
         mToolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
@@ -138,7 +122,7 @@ public class Profile extends BaseFragment{
         if (user == null || mProfileAdapter == null) {
             //get data from sharedpref
             user = LinuteUser.getDefaultUser(getContext());
-            mProfileAdapter = new ProfileAdapter(mUserActivityItems, user, getContext());
+            mProfileAdapter = new ProfileAdapter(mPosts, user, getContext());
             mProfileAdapter.setTitleTextListener(new ProfileAdapter.TitleTextListener() {
                 @Override
                 protected void showTitle(boolean show) {
@@ -230,8 +214,6 @@ public class Profile extends BaseFragment{
                         if (llm.findFirstVisibleItemPosition() == 0) {
                             View view = recyclerView.getChildAt(0);
                             if (view != null) {
-
-                                //// TODO: 5/29/16  shit that's a lot of casting. I'm sure there's a way to minimize
                                 int alpha = (int) (((1 - (((float) (view.getBottom() - mToolbar.getHeight())) / (view.getHeight() - mToolbar.getHeight())))) * 255);
                                 //255 is max
                                 //unpredictable actions if it's over 255
@@ -287,6 +269,8 @@ public class Profile extends BaseFragment{
         if (mNotificationSubscription != null) {
             mNotificationSubscription.unsubscribe();
         }
+
+        VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
     }
 
     @Override
@@ -372,9 +356,16 @@ public class Profile extends BaseFragment{
 
 
     public void setActivities() {
+        if (getContext() == null) return;
 
-        //skip  = -1 so we don't add skip to query
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), -1, 24, new Callback() {
+        String owner = mSharedPreferences.getString("userID", null);
+        if (owner == null) return;
+
+        HashMap<String, String> params = new HashMap<>();
+        params.put("owner", owner);
+        params.put("limit", "20");
+
+        new LSDKEvents(getContext()).getEvents("profile", params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() == null) return;
@@ -389,44 +380,25 @@ public class Profile extends BaseFragment{
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+
                 if (response.isSuccessful()) { //got response
                     try { //try to grab needed information from response
-
                         JSONObject bodyJson = new JSONObject(response.body().string());
 
                         mSkip = bodyJson.getInt("skip");
+                        ArrayList<Post> tempPosts = getPosts(bodyJson.getJSONArray("events"));
 
-                        final JSONArray activities = bodyJson.getJSONArray("activities"); //try to get activities from response
-
-                        if (activities == null) return;
-
-                        ArrayList<UserActivityItem> userActItems = new ArrayList<>();
-
-                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
-                            try {
-                                userActItems.add(
-                                        new UserActivityItem(
-                                                activities.getJSONObject(i)
-                                        )); //create activity objects and add to array
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        //if skip was 0, we have reached end of db
                         mCanLoadMore = mSkip > 0;
-
                         mProfileAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
 
-                        mUserActivityItems.clear();
-                        mUserActivityItems.addAll(userActItems);
+                        if (tempPosts.isEmpty())
+                            tempPosts.add(null); //for empty view
 
-                        if (mUserActivityItems.isEmpty()) {
-                            mUserActivityItems.add(new EmptyUserActivityItem());
-                        }
-
-                        mSkip -= 24;
                         if (getActivity() == null) return;
+                        mSkip -= 24;
+
+                        mPosts.clear();
+                        mPosts.addAll(tempPosts);
 
                         if (!mOtherComponentHasUpdated) {
                             mOtherComponentHasUpdated = true;
@@ -449,14 +421,16 @@ public class Profile extends BaseFragment{
                                 }
                             });
                         }
-                    } catch (JSONException e) { //unable to grab needed info
+
+
+                    }catch (JSONException e){
                         e.printStackTrace();
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(rServerErrorAction);
                         }
                     }
-                } else { //unable to connect with DB
-                    Log.v(TAG, response.body().string());
+
+                }else {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -478,10 +452,11 @@ public class Profile extends BaseFragment{
 
         if (getActivity() == null) return;
 
+        String owner = mSharedPreferences.getString("userID", null);
+        if (owner == null) return;
+
         mLoadingMore = true;
-
-        int limit = 24;
-
+        int limit = 20;
         int skip = mSkip;
 
         if (skip < 0) {
@@ -491,7 +466,12 @@ public class Profile extends BaseFragment{
 
         final int skip1 = skip;
 
-        new LSDKUser(getContext()).getUserActivities(mSharedPreferences.getString("userID", null), skip1, limit, new Callback() {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("owner", owner);
+        params.put("skip", skip1 + "");
+        params.put("limit", limit + "");
+
+        new LSDKEvents(getContext()).getEvents("profile", params, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 mLoadingMore = false;
@@ -506,28 +486,9 @@ public class Profile extends BaseFragment{
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) { //got response
-                    try { //try to grab needed information from response
-                        String body = response.body().string();
-                        final JSONArray activities = new JSONObject(body).getJSONArray("activities"); //try to get activities from response
-
-                        if (activities == null) return;
-
-                        final ArrayList<UserActivityItem> userActItems = new ArrayList<>();
-
-                        for (int i = activities.length() - 1; i >= 0; i--) { //add each activity into our array
-                            try {
-                                userActItems.add(
-                                        new UserActivityItem(
-                                                activities.getJSONObject(i)
-                                        )); //create activity objects and add to array
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-
-                        //if skip isn't 0, we can still load more
+                if (response.isSuccessful()) {
+                    try {
+                        final ArrayList<Post> tempPosts = getPosts(new JSONObject(response.body().string()).getJSONArray("events"));
                         mCanLoadMore = skip1 > 0;
 
                         if (!mCanLoadMore) {
@@ -542,16 +503,15 @@ public class Profile extends BaseFragment{
                                         @Override
                                         public void run() {
                                             mSkip -= 24; //skip 24 posts
-                                            int size = mUserActivityItems.size() + 2;
-                                            mUserActivityItems.addAll(userActItems);
-                                            mProfileAdapter.notifyItemRangeInserted(size, userActItems.size());
+                                            int size = mPosts.size() + 2;
+                                            mPosts.addAll(tempPosts);
+                                            mProfileAdapter.notifyItemRangeInserted(size, tempPosts.size());
                                         }
                                     });
                                 }
                             });
                         }
-
-                    } catch (JSONException e) { //unable to grab needed info
+                    } catch (JSONException e) {
                         e.printStackTrace();
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
@@ -562,8 +522,8 @@ public class Profile extends BaseFragment{
                             });
                         }
                     }
-                } else { //unable to connect with DB
-                    Log.v(TAG, response.body().string());
+                } else {
+                    Log.d(TAG, "onResponse: " + response.body().string());
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -577,6 +537,20 @@ public class Profile extends BaseFragment{
                 mLoadingMore = false;
             }
         });
+    }
+
+    private ArrayList<Post> getPosts(JSONArray posts){
+        ArrayList<Post> tempPosts = new ArrayList<>();
+
+        for (int i = posts.length() - 1; i >= 0; i--) {
+            try {
+                tempPosts.add(new Post(posts.getJSONObject(i)));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return tempPosts;
     }
 
     @Override

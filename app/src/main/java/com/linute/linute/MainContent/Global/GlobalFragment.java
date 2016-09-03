@@ -12,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKGlobal;
@@ -56,7 +55,9 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     private Toolbar vToolbar;
     private Handler mHandler = new Handler();
     private AppBarLayout vAppBarLayout;
+
     private View vNotificationIndicator;
+    private TextView vNotificationCounter;
 
     private TextView vUpdateCounter;
     private View vUpdateNotification;
@@ -90,6 +91,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                 return mGlobalChoiceItems.get(position).type == GlobalChoiceItem.TYPE_TREND ? 2 : 1;
             }
         });
+
         vRecycler.setLayoutManager(manager);
         vRecycler.setHasFixedSize(true);
 
@@ -109,8 +111,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             }
         });
 
-        mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-
         View update = vToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
         update.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,10 +123,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
         vUpdateNotification = update.findViewById(R.id.notification);
         vUpdateCounter = (TextView) vUpdateNotification.findViewById(R.id.notification_count);
-
-        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
-        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
-        vUpdateCounter.setText(count < 100 ? count + "" : "+");
 
         vToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ?
                 R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
@@ -141,7 +137,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             }
         });
         vNotificationIndicator = chat.findViewById(R.id.notification);
-        vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+        vNotificationCounter = (TextView) chat.findViewById(R.id.notification_count);
 
         vSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -177,6 +173,18 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         } else if (mGlobalChoiceItems.isEmpty()) {
             vEmpty.setVisibility(View.VISIBLE);
         }
+
+
+        NotificationsCounterSingleton singleton = NotificationsCounterSingleton.getInstance();
+
+        int count = singleton.getNumOfNewActivities();
+        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        vUpdateCounter.setText(count < 100 ? count + "" : "+");
+
+        count = singleton.getNumMessages();
+
+        vNotificationIndicator.setVisibility(singleton.hasMessage() ? View.VISIBLE : View.GONE);
+        vNotificationCounter.setText(count < 100 ? count + "" : "+");
 
         mChatSubscription = NewMessageBus
                 .getInstance()
@@ -235,7 +243,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
 
-                       // Log.d(TAG, "onResponse: " + trends.toString(4));
+                        // Log.d(TAG, "onResponse: " + trends.toString(4));
                         final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
                         JSONObject trend;
 
@@ -313,16 +321,14 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vRecycler.scrollToPosition(0);
     }
 
-    private boolean mHasMessage;
 
     private Subscription mChatSubscription;
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
         public void call(NewMessageEvent event) {
-            if (event.hasNewMessage() != mHasMessage) {
-                vNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
-                mHasMessage = event.hasNewMessage();
-            }
+            int count = NotificationsCounterSingleton.getInstance().getNumMessages();
+            vNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+            vNotificationCounter.setText(count < 100 ? count + "" : "+");
         }
     };
 
