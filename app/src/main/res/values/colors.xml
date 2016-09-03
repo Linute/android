@@ -70,6 +70,7 @@
 
     <color name="global_hot_red">#D0021B</color>
     <color name="global_friend_orange">#F5A623</color>
+    <color name="edit_fragment_meme_text_bg">#CC173856</color>
 
 </resources>
 
