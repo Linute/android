@@ -75,7 +75,7 @@ public class TextTool extends EditContentTool {
 
     TextMode[] textModes;
 
-    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim) {
+    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim,final EditFragment frag) {
         super(uri, type, overlays);
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
@@ -92,6 +92,17 @@ public class TextTool extends EditContentTool {
         botTV.setVisibility(View.GONE);
         midTV.setVisibility(View.GONE);
         midET.setVisibility(View.GONE);
+
+        View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                frag.onToolSelected(2);
+            }
+        };
+
+        topTV.setOnFocusChangeListener(focusChangeListener);
+        botTV.setOnFocusChangeListener(focusChangeListener);
+        midET.setOnFocusChangeListener(focusChangeListener);
 
         midTV.setY(dim.height / 2);
 

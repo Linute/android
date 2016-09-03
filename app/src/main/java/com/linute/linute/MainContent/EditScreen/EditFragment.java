@@ -527,7 +527,7 @@ public class EditFragment extends BaseFragment {
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView)mToolbar.findViewById(R.id.image_sticker_trash));
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
-        TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
+        TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
 
         if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
             CropTool cropTool;
