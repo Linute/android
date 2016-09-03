@@ -637,6 +637,7 @@ public class EditFragment extends BaseFragment {
                                         .putExtra("image", uri)
                                         .putExtra("type", CameraActivity.IMAGE)
                                         .putExtra("privacy", options.postAsAnon)
+                                        .putExtra("isAnonymousCommentsDisabled", options.isAnonCommentsDisabled)
                                         .putExtra("title", options.text);
                                 getActivity().setResult(Activity.RESULT_OK, i);
                                 getActivity().finish();
@@ -662,7 +663,7 @@ public class EditFragment extends BaseFragment {
                                                 ObjectId.get().toString(),
                                                 mCollegeId,
                                                 (options.postAsAnon ? 1 : 0),
-                                                options.allowAnonComments ? 0 : 1,
+                                                options.isAnonCommentsDisabled ? 0 : 1,
                                                 options.text,
                                                 1,
                                                 uri.toString(),
@@ -1011,7 +1012,7 @@ public class EditFragment extends BaseFragment {
                 ObjectId.get().toString(),
                 mCollegeId,
                 options.postAsAnon ? 1 : 0,
-                options.allowAnonComments ? 0 : 1,
+                options.isAnonCommentsDisabled ? 0 : 1,
 //                mTextView.getText().toString(),
                 "",
                 2,
