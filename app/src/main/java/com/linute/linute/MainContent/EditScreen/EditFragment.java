@@ -100,7 +100,7 @@ public class EditFragment extends BaseFragment {
     private ViewGroup mContentContainer;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
-    private int mSelectedTool;
+    private int mSelectedTool = 1;
     private ToolHolder[] toolHolders;
     private ViewGroup mOverlaysContainer;
     private FFmpeg mFfmpeg;
