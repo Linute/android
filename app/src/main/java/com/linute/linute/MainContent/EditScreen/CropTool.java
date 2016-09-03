@@ -56,6 +56,7 @@ public class CropTool extends EditContentTool {
     Dimens mDimens;
 
     private int mFadeBaseColor;
+    private Rect imageBounds;
 
 
     public CropTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, MoveZoomImageView activatable, Dimens dimens, EditFragment.RequestDisableToolListener listener, View contentView) {
@@ -127,23 +128,23 @@ public class CropTool extends EditContentTool {
         mActivatable.setManipulationListener(new MoveZoomImageView.ViewManipulationListener() {
             @Override
             public void onViewMoved(View me) {
-                Rect rect = new Rect();
-                ((MoveZoomImageView) me).getImageBounds(rect);
+                imageBounds = new Rect();
+                ((MoveZoomImageView) me).getImageBounds(imageBounds);
 //                TOP_BOUND = BOT_BOUND = (mCropperLayout.getHeight()-rect.height())/2;
 
-                TOP_BOUND = Math.max(rect.top, 0);
+                TOP_BOUND = Math.max(imageBounds.top, 0);
                 int cropperLayoutHeight = mCropperLayout.getHeight();
-                BOT_BOUND = Math.max(cropperLayoutHeight-rect.bottom, 0);
+                BOT_BOUND = Math.max(cropperLayoutHeight - imageBounds.bottom, 0);
 
 
-                int imgHeight = Math.min(rect.bottom,mContentView.getHeight()) - Math.max(rect.top,0);
+                int imgHeight = Math.min(imageBounds.bottom, mContentView.getHeight()) - Math.max(imageBounds.top, 0);
                 mCropModes[0].minHeight = imgHeight;
                 mCropModes[0].maxHeight = imgHeight;
 
                 mCropModes[2].maxHeight = imgHeight;
                 mCropModes[mSelected].apply();
 
-                if(mBotY < BOT_BOUND){
+                if (mBotY < BOT_BOUND) {
                     mBotY = BOT_BOUND;
 
                     int imageHeight = cropperLayoutHeight - mBotY - mTopY;
@@ -165,32 +166,30 @@ public class CropTool extends EditContentTool {
                     }
 
 
-                }else
-
-                if(mTopY < TOP_BOUND){
+                } else if (mTopY < TOP_BOUND) {
                     mTopY = TOP_BOUND;
                     int imageHeight = cropperLayoutHeight - mBotY - mTopY;
 
                     if (imageHeight > MAX_SIZE) {
-                            mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
-                            if (mBotY < BOT_BOUND) {
-                                mBotY = BOT_BOUND;
-                                mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
-                            }
+                        mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
+                        if (mBotY < BOT_BOUND) {
+                            mBotY = BOT_BOUND;
+                            mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
+                        }
                     }
 
                     if (imageHeight < MIN_SIZE) {
-                            mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
-                            if (mBotY < BOT_BOUND) {
-                                mBotY = BOT_BOUND;
-                                mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
-                            }
+                        mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
+                        if (mBotY < BOT_BOUND) {
+                            mBotY = BOT_BOUND;
+                            mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
+                        }
                     }
                 }
 
 
-
                 updateCropperView();
+                updateCropperModes(imageBounds);
 
             }
 
@@ -347,6 +346,13 @@ public class CropTool extends EditContentTool {
 
     }
 
+    private void updateCropperModes(Rect rect) {
+        if (mCropModeViews != null) {
+            int imgHeight = Math.min(rect.bottom, mContentView.getHeight()) - Math.max(rect.top, 0);
+            mCropModeViews[2].setVisibility(imgHeight >= mContentView.getWidth() ? View.VISIBLE : View.GONE);
+        }
+    }
+
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
 
@@ -402,6 +408,7 @@ public class CropTool extends EditContentTool {
         }
 
         selectCropMode(2);
+        updateCropperModes(imageBounds);
         return rootView;
     }
 
