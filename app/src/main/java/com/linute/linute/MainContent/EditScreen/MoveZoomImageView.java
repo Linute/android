@@ -83,11 +83,13 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 
     public void setManipulationListener(ViewManipulationListener collisionListener) {
         mCollisionListener = collisionListener;
-        mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
-        collisionRect.left -= 10;
-        collisionRect.right += 10;
-        collisionRect.top -= 10;
-        collisionRect.bottom += 10;
+        if (mCollisionListener.getCollisionSensor() != null) {
+            mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
+            collisionRect.left -= 10;
+            collisionRect.right += 10;
+            collisionRect.top -= 10;
+            collisionRect.bottom += 10;
+        }
     }
 
 
@@ -107,8 +109,10 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 //            focusY = scaleGestureDetector.getFocusY();
 
 
-            if (mTotalScale < 1) {
-                mTotalScale = 1;
+            if(mImageView.getWidth()*mTotalScale < getWidth()){
+                mTotalScale = (float)getWidth()/mImageView.getWidth();
+            }else if(mImageView.getHeight()*mTotalScale < (9*getWidth()/16)){
+                mTotalScale = (9*getWidth()/16)/mImageView.getHeight();
             }
 
             mImageView.setScaleX(mTotalScale * mScaleXFlip);
@@ -128,6 +132,16 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
 
         }
     });
+
+    public int getImageHeight() {
+        getImageBounds(rect);
+        return rect.height();
+    }
+
+    public int getImageWidth() {
+        getImageBounds(rect);
+        return rect.width();
+    }
 
     float[] initialX = new float[10];
     float[] initialY = new float[10];
@@ -213,13 +227,13 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
                     try {
                         mainX = (int) event.getX(0);
                         mainY = (int) event.getY(0);
-
-                        mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
-                        collisionRect.left -= 10;
-                        collisionRect.right += 10;
-                        collisionRect.top -= 10;
-                        collisionRect.bottom += 10;
-
+                        if (mCollisionListener.getCollisionSensor() != null) {
+                            mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
+                            collisionRect.left -= 10;
+                            collisionRect.right += 10;
+                            collisionRect.top -= 10;
+                            collisionRect.bottom += 10;
+                        }
                         boolean intersects = collisionRect.contains(mainX, mainY);
 
                         if (intersects && !isInCollision) {
@@ -286,9 +300,9 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         //x and y values
 
         float leftCorrection = mImageView.getX() - rect.left;
-        float rightCorrection = mImageView.getX()+mImageView.getWidth() - rect.right;
+        float rightCorrection = mImageView.getX() + mImageView.getWidth() - rect.right;
         float topCorrection = mImageView.getY() - rect.top;
-        float botCorrection = mImageView.getY()+mImageView.getHeight() - rect.bottom;
+        float botCorrection = mImageView.getY() + mImageView.getHeight() - rect.bottom;
 
         if (leftBound != -1 && posX - leftCorrection > leftBound) {
             posX = leftBound + leftCorrection;
@@ -298,9 +312,16 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
             posX = rightBound - mImageView.getWidth() + rightCorrection;
         }
 
+        if(topBound == -3){
+            topBound = getHeight()-(9*getWidth()/16);
+        }
 
         if (topBound != -1 && posY - topCorrection > topBound) {
             posY = topBound + topCorrection;
+        }
+
+        if(botBound == -3){
+            botBound = (9*getWidth()/16);
         }
 
         if (botBound == -2) {
@@ -311,12 +332,23 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
             posY = botBound - mImageView.getHeight() + botCorrection;
         }
 
-
         mImageView.setX(posX);
         mImageView.setY(posY);
+
+        if (mCollisionListener != null) {
+            mCollisionListener.onViewMoved(this);
+        }
     }
 
-    public void centerImage(){
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        if(mCollisionListener != null){
+            mCollisionListener.onViewMoved(this);
+        }
+    }
+
+    public void centerImage() {
 
         getImageBounds(rect);
        /* float leftCorrection = mImageView.getX() - rect.left;
@@ -324,8 +356,10 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         float topCorrection = mImageView.getY() - rect.top;
         float botCorrection = mImageView.getY()+mImageView.getHeight() - rect.bottom;
         */
-        mImageView.setX((getWidth()-rect.width())/2);
-        mImageView.setY((getHeight()-rect.height())/2);
+        int width = getWidth();
+        int height = getHeight();
+        mImageView.setX((width - rect.width()) / 2);
+        mImageView.setY((height - rect.height()) / 2);
     }
 
 
@@ -335,7 +369,7 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         canvas.drawRect(rect, rPaint);
     }
 
-    private Rect getImageBounds(Rect rect) {
+    public Rect getImageBounds(Rect rect) {
         mImageView.getHitRect(rect);
         return rect;
     }
@@ -355,6 +389,8 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         void onViewPickedUp(View me);
 
         void onViewDropped(View me);
+
+        void onViewMoved(View me);
 
         void onViewCollisionBegin(View me);
 

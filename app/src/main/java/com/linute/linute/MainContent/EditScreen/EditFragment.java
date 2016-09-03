@@ -132,7 +132,6 @@ public class EditFragment extends BaseFragment {
     View mContentView;
 
 
-
     public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
 
         Bundle args = new Bundle();
@@ -269,7 +268,7 @@ public class EditFragment extends BaseFragment {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                 ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                layoutParams.height = view.getWidth()*6/5;
+                layoutParams.height = view.getWidth() * 6 / 5;
                 view.setLayoutParams(layoutParams);
             }
         });
@@ -277,10 +276,10 @@ public class EditFragment extends BaseFragment {
         mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                for(int i=0;i<mTools.length;i++){
-                    if(mTools[i] instanceof TextTool){
+                for (int i = 0; i < mTools.length; i++) {
+                    if (mTools[i] instanceof TextTool) {
                         TextTool mTool = (TextTool) mTools[i];
-                        if(!mTool.hasText()) {
+                        if (!mTool.hasText()) {
                             onToolSelected(i);
                             mTool.selectTextMode(TextTool.MID_TEXT_INDEX);
                             break;
@@ -314,7 +313,7 @@ public class EditFragment extends BaseFragment {
         }
 
         mTools = setupTools(mOverlaysContainer);
-        mIsDisabled =new boolean[mTools.length];
+        mIsDisabled = new boolean[mTools.length];
         mToolViews = new View[mTools.length];
 
 
@@ -335,7 +334,7 @@ public class EditFragment extends BaseFragment {
             View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
             toolHolders[i] = new ToolHolder(toolView);
             toolHolders[i].bind(tool);
-            toolHolders[i].setSelected(false,false);
+            toolHolders[i].setSelected(false, false);
 
             toolView.setTag(i);
             toolView.setOnClickListener(onClickListener);
@@ -350,9 +349,8 @@ public class EditFragment extends BaseFragment {
     }
 
 
-
     protected void onToolSelected(int i) {
-        if(mIsDisabled[i]) return;
+        if (mIsDisabled[i]) return;
 
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
@@ -378,28 +376,33 @@ public class EditFragment extends BaseFragment {
                 final MoveZoomImageView imageView = new MoveZoomImageView(getContext());
                 imageView.leftBound = 0;
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
-                imageView.topBound = 0;
-                imageView.botBound = -2;
+                imageView.topBound = -3;
+                imageView.botBound = -3;
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
                 BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(uri.getPath(), opts);
-                if(opts.outWidth > metrics.widthPixels){
-                    opts.inSampleSize = opts.outWidth/metrics.widthPixels;
+                if (opts.outWidth > metrics.widthPixels) {
+                    opts.inSampleSize = opts.outWidth / metrics.widthPixels + 2;
                 }
                 opts.inJustDecodeBounds = false;
-                Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
+                final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
+
 
                 int scalewidth = image.getWidth();
-                if(scalewidth<metrics.widthPixels){
+                if (scalewidth < metrics.widthPixels) {
                     scalewidth = metrics.widthPixels;
                 }
 
-                int scaleheight = (int)((float)image.getHeight()*scalewidth/image.getWidth());
+                int scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
 
-                imageView.setImageBitmap(Bitmap.createScaledBitmap(image,scalewidth, scaleheight, false));
+                imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
+                mDimens.height = scaleheight;
+                mDimens.width = scalewidth;
+
+//                mFinalContentView.setLayoutParams(new FrameLayout.LayoutParams(scalewidth, scaleheight));
 
                 imageView.setActive(false);
 
@@ -411,6 +414,19 @@ public class EditFragment extends BaseFragment {
                     }
                 });*/
                 mContentView = imageView;
+                mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
+                    int layouts = 0;
+                    @Override
+                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                        imageView.invalidate();
+                        imageView.centerImage();
+                        layouts++;
+                        if (layouts >= 2) {
+                            mContentView.removeOnLayoutChangeListener(this);
+                        }
+                    }
+                });
 //                imageView.setImageURI(uri);
                 break;
             case Video:
@@ -484,11 +500,11 @@ public class EditFragment extends BaseFragment {
         public void requestDisable(Class<? extends EditContentTool> tool, boolean disable) {
             for (int i = 0; i < mTools.length; i++) {
                 EditContentTool t = mTools[i];
-                if(t.getClass() == tool){
+                if (t.getClass() == tool) {
                     mIsDisabled[i] = disable;
-                    if(disable){
+                    if (disable) {
                         t.onDisable();
-                    }else {
+                    } else {
                         t.onEnable();
                     }
                 }
@@ -514,9 +530,7 @@ public class EditFragment extends BaseFragment {
 
         if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
             CropTool cropTool;
-            cropTool = new CropTool(mUri, mContentType, overlay, (mContentView instanceof Activatable ? (Activatable) mContentView : null), mDimens, requestDisableToolListener);
-            cropTool.MAX_SIZE = height;
-            cropTool.MIN_SIZE = displayWidth / 16 * 9;
+            cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
 
 
             return new EditContentTool[]{
@@ -536,7 +550,6 @@ public class EditFragment extends BaseFragment {
         }
 
     }
-
 
 
     private void onDoneButtonPress() {
@@ -572,11 +585,11 @@ public class EditFragment extends BaseFragment {
         }else {
             mProcessingDialog.hide();
         }*/
-        if(show) {
+        if (show) {
             ProgressBar loaderView = new ProgressBar(getContext());
             mMenu.findItem(R.id.menu_item_done).setActionView(loaderView);
 
-        }else{
+        } else {
             mMenu.findItem(R.id.menu_item_done).setActionView(null);
 
         }
@@ -702,12 +715,12 @@ public class EditFragment extends BaseFragment {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.secondaryColor));
                 vIcon.setColorFilter(new
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
-            } else if(isDisabled){
+            } else if (isDisabled) {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.fifty_black));
                 vIcon.setColorFilter(new
                         PorterDuffColorFilter(vIcon.getResources().getColor(R.color.fifty_black), PorterDuff.Mode.MULTIPLY));
 
-            }else {
+            } else {
                 vLabel.setTextColor(vLabel.getResources().getColor(R.color.edit_unselected));
                 vIcon.setColorFilter(vIcon.getResources().getColor(R.color.edit_unselected));
             }
@@ -716,7 +729,7 @@ public class EditFragment extends BaseFragment {
 
     @Override
     public void onDestroy() {
-        if (mContentView != null && mContentView instanceof TextureVideoView){
+        if (mContentView != null && mContentView instanceof TextureVideoView) {
             ((TextureVideoView) mContentView).stopPlayback();
         }
 
@@ -782,7 +795,7 @@ public class EditFragment extends BaseFragment {
                 if (widthIsGreater) {
                     if (mDimens.height > 640) {
                         newHeight = 640;
-                        newWidth = ((int)((float)mDimens.width * newHeight / mDimens.height / 2)) * 2;
+                        newWidth = ((int) ((float) mDimens.width * newHeight / mDimens.height / 2)) * 2;
                     } else {
                         newWidth = mDimens.width;
                         newHeight = mDimens.height;
@@ -790,7 +803,7 @@ public class EditFragment extends BaseFragment {
                 } else {
                     if (mDimens.width > 640) {
                         newWidth = 640;
-                        newHeight = ((int)((float)newWidth * mDimens.height / mDimens.width / 2)) * 2;
+                        newHeight = ((int) ((float) newWidth * mDimens.height / mDimens.width / 2)) * 2;
                     } else {
                         newWidth = mDimens.width;
                         newHeight = mDimens.height;
@@ -1016,7 +1029,7 @@ public class EditFragment extends BaseFragment {
         getActivity().finish();
     }
 
-    static interface RequestDisableToolListener{
+    static interface RequestDisableToolListener {
         void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
 
