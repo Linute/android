@@ -35,7 +35,7 @@ public class StickersTool extends EditContentTool {
     private ManipulableImageView.ViewManipulationListener mManipulationListener;
     private final ImageView mTrashCanIV;
 
-    public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+    public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, ImageView trashCan) {
         super(uri, type, overlaysView);
 
         View container = LayoutInflater.from(overlaysView.getContext()).inflate(R.layout.tool_overlay_stickers, overlaysView, false);
@@ -45,7 +45,7 @@ public class StickersTool extends EditContentTool {
 
         mStickersContainer = (FrameLayout)container.findViewById(R.id.layout_stickers);
 
-        mTrashCanIV = (ImageView)(container.findViewById(R.id.image_sticker_trash));
+        mTrashCanIV = trashCan;
         mTrashCanIV.setVisibility(View.GONE);
 
 
@@ -169,8 +169,9 @@ public class StickersTool extends EditContentTool {
         public OverlayItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
             ImageView view = new ImageView(parent.getContext());
             int height = parent.getHeight();
-            int width = height / 6 * 5;
-            view.setLayoutParams(new RecyclerView.LayoutParams(width, height));
+            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            view.setLayoutParams(new RecyclerView.LayoutParams(height, height));
+            view.setScaleType(ImageView.ScaleType.FIT_CENTER);
             return new OverlayItemVH(view);
         }
 

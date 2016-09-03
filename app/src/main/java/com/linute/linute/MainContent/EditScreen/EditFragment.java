@@ -106,6 +106,7 @@ public class EditFragment extends BaseFragment {
     private FFmpeg mFfmpeg;
     private ProgressDialog mProcessingDialog;
     private Menu mMenu;
+    private Toolbar mToolbar;
 
     public enum ContentType {
         Photo, Video, UploadedPhoto, UploadedVideo
@@ -228,12 +229,12 @@ public class EditFragment extends BaseFragment {
         View root = inflater.inflate(mDimens.needsCropping ? R.layout.fragment_edit_content_need_crop : R.layout.fragment_edit_content,
                 container, false);
 
-        final Toolbar toolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
-        toolbar.inflateMenu(R.menu.menu_fragment_edit);
-        mMenu = toolbar.getMenu();
+        mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
+        mToolbar.inflateMenu(R.menu.menu_fragment_edit);
+        mMenu = mToolbar.getMenu();
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getActivity() != null)
@@ -241,7 +242,7 @@ public class EditFragment extends BaseFragment {
             }
         });
 
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+        mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
@@ -524,7 +525,7 @@ public class EditFragment extends BaseFragment {
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
-        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay);
+        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView)mToolbar.findViewById(R.id.image_sticker_trash));
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens);
 

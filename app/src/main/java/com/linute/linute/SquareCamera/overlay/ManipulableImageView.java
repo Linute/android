@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by mikhail on 6/28/16.
  */
@@ -20,6 +23,8 @@ public class ManipulableImageView extends FrameLayout {
     private ImageView mImageView;
     private Bitmap image;
     private Bitmap flipped;
+
+    private static Map<Bitmap, Bitmap> flips = new HashMap<>();
 
     public ManipulableImageView(Context context) {
         super(context);
@@ -37,16 +42,21 @@ public class ManipulableImageView extends FrameLayout {
     }
 
 
-
     private void init(Context context) {
         mImageView = new ImageView(context);
 
         setClipChildren(false);
 
+        int x = (int)(Math.random()*(context.getResources().getDisplayMetrics().widthPixels));
+        int y = (int)(Math.random()*320)+200;
+
+
         addView(mImageView);
         mImageView.setScaleType(ImageView.ScaleType.MATRIX);
-        mImageView.setX(100);
-        mImageView.setY(100);
+        mImageView.setX(x);
+        mImageView.setY(y);
+        mImageView.setLayoutParams(new FrameLayout.LayoutParams(200, 200));
+
 
     /*    bPaint = new Paint();
         bPaint.setColor(0xFF0000FF);
@@ -218,8 +228,8 @@ public class ManipulableImageView extends FrameLayout {
 
 
                     try {
-                        mainX = (int) event.getX(0);
-                        mainY = (int) event.getY(0);
+                        mainX = (int) event.getRawX();
+                        mainY = (int) event.getRawY();
 
                         mCollisionListener.getCollisionSensor().getHitRect(collisionRect);
                         collisionRect.left -= 10;
@@ -304,10 +314,24 @@ public class ManipulableImageView extends FrameLayout {
             bigD = bitmap.getHeight();
         }
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(bigD, bigD));
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        mTotalScale = (float) screenWidth /5/bigD;
+        mImageView.setScaleX(mTotalScale);
+        mImageView.setScaleY(mTotalScale);
         this.image = bitmap;
         Matrix m = new Matrix();
         m.setScale(-1, 1);
-        this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
+            if (flips.containsKey(bitmap)) {
+                this.flipped = flips.get(bitmap);
+            }else{
+                try {
+                    this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
+                    flips.put(bitmap, flipped);
+                }catch(OutOfMemoryError e){
+                    e.printStackTrace();
+                }
+            }
+
     }
 
     public interface ViewManipulationListener {
