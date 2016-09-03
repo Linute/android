@@ -24,6 +24,9 @@ public class CropTool extends EditContentTool {
 
     public static final int FADE_OPEN_OPACITY = 0x33000000;
     public static final int FADE_CLOSE_OPACITY = 0xFF000000;
+    public static final int INDEX_CUSTOM_CROP = 2;
+    public static final int INDEX_SQUARE_CROP = 1;
+    public static final int INDEX_OG_CROP = 0;
     private final MoveZoomImageView mActivatable;
     private final EditFragment.RequestDisableToolListener reqDisableToolListener;
     private final View mContentView;
@@ -132,62 +135,8 @@ public class CropTool extends EditContentTool {
                 ((MoveZoomImageView) me).getImageBounds(imageBounds);
 //                TOP_BOUND = BOT_BOUND = (mCropperLayout.getHeight()-rect.height())/2;
 
-                TOP_BOUND = Math.max(imageBounds.top, 0);
-                int cropperLayoutHeight = mCropperLayout.getHeight();
-                BOT_BOUND = Math.max(cropperLayoutHeight - imageBounds.bottom, 0);
-
-
-                int imgHeight = Math.min(imageBounds.bottom, mContentView.getHeight()) - Math.max(imageBounds.top, 0);
-                mCropModes[0].minHeight = imgHeight;
-                mCropModes[0].maxHeight = imgHeight;
-
-                mCropModes[2].maxHeight = imgHeight;
-                mCropModes[mSelected].apply();
-
-                if (mBotY < BOT_BOUND) {
-                    mBotY = BOT_BOUND;
-
-                    int imageHeight = cropperLayoutHeight - mBotY - mTopY;
-
-                    if (imageHeight > MAX_SIZE) {
-                        mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
-                        if (mTopY < TOP_BOUND) {
-                            mTopY = TOP_BOUND;
-                            mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
-                        }
-                    }
-
-                    if (imageHeight < MIN_SIZE) {
-                        mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
-                        if (mTopY < TOP_BOUND) {
-                            mTopY = TOP_BOUND;
-                            mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
-                        }
-                    }
-
-
-                } else if (mTopY < TOP_BOUND) {
-                    mTopY = TOP_BOUND;
-                    int imageHeight = cropperLayoutHeight - mBotY - mTopY;
-
-                    if (imageHeight > MAX_SIZE) {
-                        mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
-                        if (mBotY < BOT_BOUND) {
-                            mBotY = BOT_BOUND;
-                            mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
-                        }
-                    }
-
-                    if (imageHeight < MIN_SIZE) {
-                        mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
-                        if (mBotY < BOT_BOUND) {
-                            mBotY = BOT_BOUND;
-                            mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
-                        }
-                    }
-                }
-
-
+                updateCropperBounds();
+                boundCropper();
                 updateCropperView();
                 updateCropperModes(imageBounds);
 
@@ -224,6 +173,78 @@ public class CropTool extends EditContentTool {
             }
         });
 
+    }
+
+    public void updateCropperBounds() {
+        TOP_BOUND = Math.max(imageBounds.top, 0);
+        int cropperLayoutHeight = mCropperLayout.getHeight();
+        BOT_BOUND = Math.max(cropperLayoutHeight - imageBounds.bottom, 0);
+
+
+        int imgHeight = Math.min(imageBounds.bottom, mContentView.getHeight()) - Math.max(imageBounds.top, 0);
+        mCropModes[INDEX_OG_CROP].minHeight = imgHeight;
+        mCropModes[INDEX_OG_CROP].maxHeight = imgHeight;
+
+        mCropModes[INDEX_CUSTOM_CROP].maxHeight = imgHeight;
+        mCropModes[mSelected].apply();
+
+    }
+
+    private void boundCropper() {
+        int cropperLayoutHeight = mCropperLayout.getHeight();
+
+
+        int imageHeight = cropperLayoutHeight - mBotY - mTopY;
+
+        if (imageHeight > MAX_SIZE) {
+            mTopY = mBotY = (cropperLayoutHeight - MAX_SIZE) / 2;
+
+        }else if(imageHeight<MIN_SIZE){
+            mTopY = mBotY = (cropperLayoutHeight - MIN_SIZE) / 2;
+        }
+
+
+
+        if (mBotY < BOT_BOUND) {
+            mBotY = BOT_BOUND;
+
+
+            if (imageHeight > MAX_SIZE) {
+                mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
+                if (mTopY < TOP_BOUND) {
+                    mTopY = TOP_BOUND;
+                    mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
+                }
+            }
+
+            if (imageHeight < MIN_SIZE) {
+                mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
+                if (mTopY < TOP_BOUND) {
+                    mTopY = TOP_BOUND;
+                    mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
+                }
+            }
+
+
+        } else if (mTopY < TOP_BOUND) {
+            mTopY = TOP_BOUND;
+
+            if (imageHeight > MAX_SIZE) {
+                mBotY = cropperLayoutHeight - mTopY - MAX_SIZE;
+                if (mBotY < BOT_BOUND) {
+                    mBotY = BOT_BOUND;
+                    mTopY = cropperLayoutHeight - mBotY - MAX_SIZE;
+                }
+            }
+
+            if (imageHeight < MIN_SIZE) {
+                mBotY = cropperLayoutHeight - mTopY - MIN_SIZE;
+                if (mBotY < BOT_BOUND) {
+                    mBotY = BOT_BOUND;
+                    mTopY = cropperLayoutHeight - mBotY - MIN_SIZE;
+                }
+            }
+        }
     }
 
 
@@ -349,7 +370,12 @@ public class CropTool extends EditContentTool {
     private void updateCropperModes(Rect rect) {
         if (mCropModeViews != null) {
             int imgHeight = Math.min(rect.bottom, mContentView.getHeight()) - Math.max(rect.top, 0);
-            mCropModeViews[2].setVisibility(imgHeight >= mContentView.getWidth() ? View.VISIBLE : View.GONE);
+            if(imgHeight >= mContentView.getWidth()){
+                mCropModeViews[INDEX_SQUARE_CROP].setVisibility(View.VISIBLE);
+                selectCropMode(INDEX_CUSTOM_CROP);
+            }else{
+                mCropModeViews[INDEX_SQUARE_CROP].setVisibility(View.GONE);
+            }
         }
     }
 
@@ -504,7 +530,9 @@ public class CropTool extends EditContentTool {
         public void onSelected() {
             apply();
             int height = ((View) mOverlaysView.getParent()).getHeight();
-            mTopY = mBotY = (height - MAX_SIZE) / 2;
+//            mTopY = mBotY = (height - MAX_SIZE) / 2;
+            boundCropper();
+
             updateCropperView();
         }
 
