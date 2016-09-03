@@ -319,7 +319,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
                             ObjectId.get().toString(),
                             mSharedPreferences.getString("collegeId", ""),
                             (vAnonPost.isChecked() ? 1 : 0),
-                            vAnonComments.isChecked() ? 0 : 1,
+                            vAnonComments.isChecked() ? 1 : 0,
                             mPostEditText.getText().toString(),
                             0,
                             image.toString(),

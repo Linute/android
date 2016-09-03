@@ -7,13 +7,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-
-    <ImageView
-        android:id="@+id/image_sticker_trash"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center_horizontal|top"
-        android:src="@drawable/trash_can_closed"
-        />
+]
 
 </FrameLayout>

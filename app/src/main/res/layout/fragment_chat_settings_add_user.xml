@@ -10,14 +10,13 @@
     android:paddingRight="16dp"
     android:paddingLeft="16dp">
 
-    <com.linute.linute.UtilsAndHelpers.ProfileImageView
+    <ImageView
         android:id="@+id/search_users_list_image"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
         android:padding="8dp"
-        android:layout_margin="0dp"
-        android:layout_marginRight="24dp" />
+        android:src="@drawable/ic_add_blue" />
 
     <TextView
         android:id="@+id/search_users_list_name"

@@ -9,10 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:background="#CC173856"
+        android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:inputType="none"
-        android:nextFocusDown="@+id/text_bot"
         android:padding="8dp"
         android:textColor="@color/pure_white"
         android:textSize="32dp"
@@ -20,11 +19,11 @@
     />
 
     <EditText
-        android:id="@id/text_bot"
+        android:id="@+id/text_bot"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="#CC173856"
+        android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:inputType="none"
         android:padding="8dp"
@@ -33,27 +32,29 @@
         tools:text="Bottom Text"
     />
 
-    <TextView
+   <!-- <TextView
         android:id="@+id/text_mid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#CC000000"
+        android:layout_gravity="center_vertical"
+        android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:padding="4dp"
         android:textColor="@color/pure_white"
         android:textSize="14sp"
-    />
+    />-->
 
     <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
         android:id="@+id/edit_text_mid"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:background="#CC000000"
+        android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:padding="4dp"
         android:textColor="@color/pure_white"
         android:textSize="14sp"
+        android:inputType="textCapSentences"
     />
 
 

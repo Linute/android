@@ -21,7 +21,7 @@ import com.linute.linute.UtilsAndHelpers.Utils;
  */
 public class PrivacySettingTool extends EditContentTool {
 
-    private boolean allowAnonComments = ProcessingOptions.DEFAULT_ALLOW_ANON_COMMENTS;
+    private boolean isAnonCommentsDisabled = ProcessingOptions.DEFAULT_ANON_COMMENTS_DISABLED;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
 
     public PrivacySettingTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
@@ -88,13 +88,16 @@ public class PrivacySettingTool extends EditContentTool {
         anonCommentsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                allowAnonComments = b;
+                isAnonCommentsDisabled = !b;
             }
         });
 
         String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
         Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
+
+        postingAsSwitch.setChecked(postAsAnon);
+        anonCommentsSwitch.setChecked(!isAnonCommentsDisabled);
 
         return root;
     }
@@ -103,7 +106,7 @@ public class PrivacySettingTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-        options.allowAnonComments = allowAnonComments;
+        options.isAnonCommentsDisabled = isAnonCommentsDisabled;
         options.postAsAnon = postAsAnon;
     }
 

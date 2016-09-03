@@ -28,8 +28,10 @@ public class CustomBackPressedEditText extends EditText {
 
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        super.onKeyPreIme(keyCode,event);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // user pressed back
+            setCursorVisible(false);
             mBackAction.backPressed();
         }
         return true;
