@@ -8,7 +8,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,8 +33,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -348,17 +345,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     public void goToTrend(GlobalChoiceItem item) {
         if (item.type == GlobalChoiceItem.TYPE_TREND) {
             item.setUnread(0);
-            MainActivity activity = (MainActivity) getActivity();
-            if (activity != null) {
-                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
-            }
-        } else {
-            Toast.makeText(getContext(), "NEED TO DO", Toast.LENGTH_SHORT).show();
+        }
+
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }
 
     private void addHotAndFriends(ArrayList<GlobalChoiceItem> items) {
-        items.add(new GlobalChoiceItem("hot", null, GlobalChoiceItem.TYPE_HEADER_HOT));
+        items.add(new GlobalChoiceItem("hottest", null, GlobalChoiceItem.TYPE_HEADER_HOT));
         items.add(new GlobalChoiceItem("friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
     }
 

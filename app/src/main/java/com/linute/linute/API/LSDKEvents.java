@@ -25,11 +25,12 @@ public class LSDKEvents {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
-    public Call getEvents(boolean hot, Map<String, String> param, Callback callback) {
+    public Call getEvents(String ending, Map<String, String> param, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-        String[] path = {"events", hot ? "hot" : "discover"};
+        String[] path = {"events", ending /*"hot" : "discover"*/};
         return API_Methods.get(path, header, param, callback);
     }
+
 
     public Call getEventWithId(String id, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);

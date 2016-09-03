@@ -1,8 +1,9 @@
-package com.linute.linute.UtilsAndHelpers;
+package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 
 import android.support.v7.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 
 /**
  * Created by QiFeng on 9/2/16.

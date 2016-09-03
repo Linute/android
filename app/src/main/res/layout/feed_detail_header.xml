@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:paddingEnd="@dimen/activity_horizontal_margin"
-                android:paddingStart="@dimen/activity_horizontal_margin"
-                android:paddingTop="8dp">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:paddingBottom="8dp"
+              android:paddingEnd="@dimen/activity_horizontal_margin"
+              android:paddingStart="@dimen/activity_horizontal_margin"
+              android:paddingTop="8dp"
+              tools:showIn="@layout/feed_detail_image">
 
-    <com.makeramen.roundedimageview.RoundedImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/feedDetail_profile_image"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
+        android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-
         android:scaleType="centerCrop"
         android:src="@drawable/image_loading_background"
         app:riv_border_color="@color/seperator_color"
@@ -22,95 +23,32 @@
         app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
 
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/feedDetail_user_name"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:singleLine="true"
+        android:textColor="@color/user_name_blue"
+        android:textSize="@dimen/header_font_size"
+        tools:text="John Snow"/>
+
+    <TextView
+        android:id="@+id/feedDetail_time_stamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="16dp"
-        android:layout_toRightOf="@id/feedDetail_profile_image"
-        android:orientation="vertical">
-
-
-        <TextView
-            android:id="@+id/feedDetail_user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textColor="@color/user_name_blue"
-            android:textSize="@dimen/header_font_size"
-            tools:text="John Snow"/>
-
-        <TextView
-            android:id="@+id/feedDetail_time_stamp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:singleLine="true"
-            android:textColor="@color/twentyfive_black"
-            android:textSize="@dimen/sub_font_size"
-            tools:text="1m"/>
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/feed_control_bar_like_button"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/postHeart"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="4dp"
-            android:background="@drawable/post_likes_selector"
-            android:button="@null"
-            android:checked="false"
-            android:gravity="center"
-        />
-
-        <TextView
-            android:id="@+id/postNumHearts"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:textColor="@color/twentyfive_black"
-            android:textSize="12sp"
-            tools:text="237"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/feed_control_bar_comments_button"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"
-        android:layout_toLeftOf="@id/feed_control_bar_like_button"
-        android:orientation="horizontal">
-
-        <ImageView android:id="@+id/postComments"
-                   android:layout_width="16dp"
-                   android:layout_height="16dp"
-                   android:layout_gravity="center_vertical"
-                   android:layout_margin="4dp"
-                   android:src="@drawable/ic_comment"
-        />
-
-        <TextView
-            android:id="@+id/postNumComments"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|right"
-            android:textColor="@color/twentyfive_black"
-            android:textSize="12sp"
-            tools:text="237"/>
-    </LinearLayout>
-
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="16dp"
+        android:gravity="center_vertical"
+        android:singleLine="true"
+        android:textColor="@color/twentyfive_black"
+        android:textSize="@dimen/sub_font_size"
+        tools:text="1m"/>
 
     <!--    <ImageView
             android:id="@+id/share"
@@ -121,4 +59,4 @@
             android:src="@drawable/ic_share_arrow"
         />-->
 
-</RelativeLayout>
+</LinearLayout>

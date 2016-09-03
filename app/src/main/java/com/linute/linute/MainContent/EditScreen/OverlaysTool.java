@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class OverlaysTool extends EditContentTool {
 
         mOverlaysRV.setAdapter(mOverlaysAdapter);
         mOverlaysRV.setLayoutManager(new LinearLayoutManager(parent.getContext(), LinearLayoutManager.HORIZONTAL, false));
+        mOverlaysRV.addItemDecoration(new SpaceItemDecoration(24));
 
         mOverlays.add(null);
         initFiltersAsync(parent.getContext());

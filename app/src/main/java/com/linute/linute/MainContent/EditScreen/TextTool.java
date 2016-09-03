@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.EditScreen;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -31,12 +30,15 @@ public class TextTool extends EditContentTool {
     private final CustomBackPressedEditText midET;
     private final View mTextContainer;
 
+    public static final int MID_TEXT_INDEX = 1;
+
 
     private static class TextMode {
 
         private final TextView[] mextViews;
         public int icon;
 
+        static String[] savedText = new String[3];
 
         public TextMode(int icon, TextView... textViews) {
             this.icon = icon;
@@ -44,7 +46,9 @@ public class TextTool extends EditContentTool {
         }
 
         public void onSelected() {
-            for (TextView tv : mextViews) {
+            for (int i = 0; i < mextViews.length; i++) {
+                TextView tv = mextViews[i];
+                tv.setText(savedText[i]);
                 tv.setVisibility(View.VISIBLE);
             }
             if (mextViews.length > 0)
@@ -54,8 +58,10 @@ public class TextTool extends EditContentTool {
 
 
         public void onUnSelected() {
-            for (TextView tv : mextViews) {
+            for (int i = 0; i < mextViews.length; i++) {
+                TextView tv = mextViews[i];
                 tv.setVisibility(View.GONE);
+                savedText[i] = tv.getText().toString();
             }
         }
 
@@ -98,13 +104,12 @@ public class TextTool extends EditContentTool {
                 midET.setText(text);
                 midTV.setText(text);
 
-
                 midET.setVisibility(View.GONE);
                 midTV.setVisibility(View.VISIBLE);
+                midTV.setY(midET.getY());
                 //TODO animate?
             }
         });
-
 
 
         midTV.setOnTouchListener(new View.OnTouchListener() {
@@ -215,12 +220,12 @@ public class TextTool extends EditContentTool {
 
         for (int i = 0; i < textModes.length; i++) {
             TextMode mode = textModes[i];
-            ImageView iv = new ImageView(rootView.getContext());
-            iv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1));
+            View v = inflater.inflate(R.layout.tool_option_text_mode, rootView, false);
+            ImageView iv = (ImageView) v.findViewById(R.id.image_icon);
             iv.setImageResource(mode.icon);
-            iv.setTag(i);
-            iv.setOnClickListener(listener);
-            rootView.addView(iv);
+            v.setTag(i);
+            v.setOnClickListener(listener);
+            rootView.addView(v);
 
             textModeViews[i] = iv;
         }
@@ -236,7 +241,7 @@ public class TextTool extends EditContentTool {
         lManager.showSoftInput(view, 0);
     }
 
-    private void selectTextMode(int index) {
+    public void selectTextMode(int index) {
         int oldSelected = mSelected;
         mSelected = index;
 
@@ -249,6 +254,11 @@ public class TextTool extends EditContentTool {
                 PorterDuff.Mode.ADD
         ));
 
+    }
+
+    public boolean hasText() {
+        return
+                botTV.getVisibility() == View.VISIBLE || midTV.getVisibility() == View.VISIBLE || topTV.getVisibility() == View.VISIBLE;
     }
 
     @Override
@@ -265,16 +275,29 @@ public class TextTool extends EditContentTool {
         botTV.setInputType(InputType.TYPE_NULL);
         topTV.setInputType(InputType.TYPE_NULL);
         mTextContainer.setClickable(false);
+
+        if (midTV.getText().toString().trim().length() == 0) {
+            midTV.setVisibility(View.GONE);
+        }
+        if (botTV.getText().toString().trim().length() == 0) {
+            botTV.setVisibility(View.GONE);
+        }
+        if (topTV.getText().toString().trim().length() == 0) {
+            topTV.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-
+        hideKeyboard(midTV);
+        hideKeyboard(botTV);
+        hideKeyboard(topTV);
     }
 
     @Override
     public String getName() {
-        return "Text";
+        return "Meme";
     }
 
     @Override

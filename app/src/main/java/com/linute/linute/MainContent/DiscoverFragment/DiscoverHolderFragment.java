@@ -59,6 +59,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private View mNotificationIndicator;
 
     private FloatingActionsMenu mFloatingActionsMenu;
+    private TextView mNotificationCount;
 
     public DiscoverHolderFragment() {
     }
@@ -102,6 +103,9 @@ public class DiscoverHolderFragment extends BaseFragment {
         });
         mNotificationIndicator = chat.findViewById(R.id.notification);
         mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+
+        mNotificationCount = (TextView)chat.findViewById(R.id.notification_count);
+        mNotificationCount.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
         View update = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
         update.setOnClickListener(new View.OnClickListener() {
@@ -252,7 +256,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private void loadFragmentAtPositionIfNeeded(int position) {
         //only load when fragment comes into view
         if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
-            mFeedFragments[position].refreshFeed();
+            mFeedFragments[position].getPosts();
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
         }
@@ -318,7 +322,11 @@ public class DiscoverHolderFragment extends BaseFragment {
         @Override
         public void call(NewMessageEvent event) {
             if (event.hasNewMessage() != mHasMessage) {
+
                 mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+                mNotificationCount.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+                mNotificationCount.setText(String.valueOf(event.getmNewMessageCount()));
+
                 mHasMessage = event.hasNewMessage();
             }
         }

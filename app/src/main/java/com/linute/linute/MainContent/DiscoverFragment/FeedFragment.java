@@ -17,7 +17,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseFeedFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -71,13 +71,13 @@ public class FeedFragment extends BaseFeedFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root =  super.onCreateView(inflater, container, savedInstanceState);
+        View root = super.onCreateView(inflater, container, savedInstanceState);
 
         vSwipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.swipe_layout);
         vSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshFeed();
+                getPosts();
             }
         });
 
@@ -97,12 +97,12 @@ public class FeedFragment extends BaseFeedFragment {
         if (fragment.getInitiallyPresentedFragmentWasCampus()
                 && !mSectionTwo
                 && fragment.getCampusFeedNeedsUpdating()) {
-            refreshFeed();
+            getPosts();
             fragment.setCampusFeedNeedsUpdating(false);
         } else if (!fragment.getInitiallyPresentedFragmentWasCampus()
                 && mSectionTwo
                 && fragment.getFriendsFeedNeedsUpdating()) {
-            refreshFeed();
+            getPosts();
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mSectionTwo && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
@@ -118,7 +118,8 @@ public class FeedFragment extends BaseFeedFragment {
         }
     }
 
-    public void loadMoreFeedFromServer() {
+    @Override
+    protected void getMorePosts() {
         if (getActivity() == null || mLoadingMore || vSwipeRefreshLayout.isRefreshing()) return;
 
         mLoadingMore = true;
@@ -140,7 +141,7 @@ public class FeedFragment extends BaseFeedFragment {
         events.put("skip", skip + "");
         events.put("limit", limit + "");
 
-        new LSDKEvents(getActivity()).getEvents(mSectionTwo, events, new Callback() {
+        new LSDKEvents(getActivity()).getEvents(mSectionTwo ? "hot" : "discover", events, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         noInternet();
@@ -226,7 +227,7 @@ public class FeedFragment extends BaseFeedFragment {
 
     @Override
     protected void initAdapter() {
-        if (mFeedAdapter == null){
+        if (mFeedAdapter == null) {
             mFeedAdapter = new FeedAdapter(mPosts, getContext(), mSectionTwo);
         }
     }
@@ -236,8 +237,8 @@ public class FeedFragment extends BaseFeedFragment {
         return R.layout.fragment_discover_feed;
     }
 
-
-    public void refreshFeed() {
+    @Override
+    protected void getPosts() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
         if (!vSwipeRefreshLayout.isRefreshing()) {
@@ -256,7 +257,7 @@ public class FeedFragment extends BaseFeedFragment {
         events.put("limit", "25");
         LSDKEvents events1 = new LSDKEvents(getActivity());
 
-        events1.getEvents(mSectionTwo, events, new Callback() {
+        events1.getEvents(mSectionTwo ? "hot" : "discover", events, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         setFragmentState(FragmentState.FINISHED_UPDATING);
@@ -386,7 +387,7 @@ public class FeedFragment extends BaseFeedFragment {
     public void scrollUp() {
         vRecyclerView.scrollToPosition(0);
         if (!mSectionTwo && NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing() && !vSwipeRefreshLayout.isRefreshing()) {
-            refreshFeed();
+            getPosts();
         }
     }
 

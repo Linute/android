@@ -12,10 +12,11 @@
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:layout_weight="1"
+        android:layout_gravity="center_vertical"
         />
 
 
-    <ImageView
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
         android:id="@+id/image_profile"
         android:layout_width="@dimen/profile_image_radius"
         android:layout_height="@dimen/profile_image_radius"
@@ -30,6 +31,7 @@
         android:layout_height="match_parent"
         android:layout_width="0dp"
         android:layout_weight="1"
+        android:layout_gravity="center_vertical"
         />
 
 

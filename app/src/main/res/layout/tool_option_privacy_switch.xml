@@ -6,23 +6,24 @@
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"
-    tools:showIn="@layout/tool_options_privacy">
+    tools:showIn="@layout/tool_options_privacy"
+    android:gravity="center"
+    >
 
     <TextView
         android:id="@+id/text_heading_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:text="Posting as"
-        android:layout_above="@+id/switch_main"
         android:layout_centerHorizontal="true"
         android:textColor="@color/pure_white"
         />
 
-    <Switch
-        android:id="@id/switch_main"
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/switch_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_below="@id/text_heading_top"
         android:layout_centerHorizontal="true" />
 
     <TextView
@@ -31,8 +32,8 @@
         android:layout_height="wrap_content"
         tools:text="Self"
         android:layout_toLeftOf="@id/switch_main"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="8dp"
+        android:layout_marginRight="12dp"
+        android:layout_alignBaseline="@id/switch_main"
         android:textColor="@color/pure_white"
 
         />
@@ -44,8 +45,8 @@
         android:layout_alignTop="@+id/text_heading_left"
         tools:text="Anon"
         android:layout_toRightOf="@id/switch_main"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="8dp"
+        android:layout_marginLeft="12dp"
+        android:layout_alignBaseline="@id/switch_main"
         android:textColor="@color/pure_white"
         />
 

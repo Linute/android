@@ -1,17 +1,19 @@
-package com.linute.linute.UtilsAndHelpers;
+package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 
 /**
  * Created by QiFeng on 9/2/16.
@@ -48,6 +50,10 @@ public abstract class BaseFeedFragment extends BaseFragment {
         vEmptyView = rootView.findViewById(R.id.empty_view);
 
         vRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+
+        vRecyclerView.addItemDecoration(new SpaceItemDecoration(getActivity(), R.dimen.list_space,
+                true, true));
+
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         vRecyclerView.setLayoutManager(llm);
@@ -61,7 +67,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
                 if (getFragmentState() == FragmentState.LOADING_DATA || mFeedDone)
                     return;
                 if (mFeedAdapter.getLoadState() == LoadMoreViewHolder.STATE_LOADING) {
-                    loadMoreFeedFromServer();
+                    getMorePosts();
                 }
             }
         });
@@ -70,15 +76,13 @@ public abstract class BaseFeedFragment extends BaseFragment {
         return rootView;
     }
 
-
-
-    protected abstract void refreshFeed();
-
-    protected abstract void loadMoreFeedFromServer();
-
     protected abstract void initAdapter();
 
     protected abstract int getLayout();
+
+    protected abstract void getPosts();
+    protected abstract void getMorePosts();
+
 
     @Override
     public void onDestroyView() {

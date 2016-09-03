@@ -36,32 +36,36 @@ public class ManipulableImageView extends FrameLayout {
         init(context);
     }
 
-  /*  Paint bPaint;
-    Paint rPaint;
-*/
+
+
     private void init(Context context) {
         mImageView = new ImageView(context);
+
+        setClipChildren(false);
 
         addView(mImageView);
         mImageView.setScaleType(ImageView.ScaleType.MATRIX);
         mImageView.setX(100);
         mImageView.setY(100);
 
-      /*  bPaint = new Paint();
+    /*    bPaint = new Paint();
         bPaint.setColor(0xFF0000FF);
         bPaint.setStrokeWidth(10);
         rPaint = new Paint();
-        rPaint.setColor(0xFFFF0000);*/
+        rPaint.setColor(0xFFFF0000);
     }
-/*
+
+    Paint bPaint;
+    Paint rPaint;
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         canvas.drawRect(collisionRect, rPaint);
         canvas.drawPoint(mainX, mainY, bPaint);
+
+        */
     }
-*/
 
     private ViewManipulationListener mCollisionListener;
 

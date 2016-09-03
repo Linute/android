@@ -20,7 +20,7 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.makeramen.roundedimageview.RoundedImageView;
+import com.linute.linute.UtilsAndHelpers.ProfileImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,7 +39,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
 
-    protected RoundedImageView vUserImage;
+    protected ProfileImageView vUserImage;
     protected Context mContext;
 //    protected View vShareButton;
 
@@ -65,7 +65,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentText = (TextView) itemView.findViewById(R.id.postNumComments);
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
-        vUserImage = (RoundedImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vUserImage = (ProfileImageView) itemView.findViewById(R.id.feedDetail_profile_image);
 //        vShareButton = itemView.findViewById(R.id.share);
 
         //vLikesHeart.setClickable(false);

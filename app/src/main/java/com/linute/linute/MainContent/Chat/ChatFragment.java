@@ -329,6 +329,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mLinearLayoutManager.setStackFromEnd(true);
         recList.setLayoutManager(mLinearLayoutManager);
         recList.setAdapter(mChatAdapter);
+        recList.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                if(view.getHeight() >= ((View)view.getParent()).getHeight()){
+                    view.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
+                }else{
+                    view.setOverScrollMode(View.OVER_SCROLL_NEVER);
+                }
+            }
+        });
        /* recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -1080,7 +1090,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     userJSON.getString("id"),
                                     userJSON.getString("firstName"),
                                     userJSON.getString("lastName"),
-                                    userJSON.getString("profileImage"));
+                                    userJSON.getString("profileImage"),
+                                    userJSON.getJSONObject("college").getString("name")
+
+                            );
                             mUsers.add(user);
                             mUserMap.put(userJSON.getString("id"), user);
 
@@ -1877,6 +1890,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     owner.getString("firstName"),
                                     owner.getString("lastName"),
                                     owner.getString("profileImage")
+
                             ));
                 }
 

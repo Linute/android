@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.appsflyer.AppsFlyerLib;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -68,6 +69,8 @@ public class LaunchActivity extends Activity {
             Log.i(TAG, "onCreate: Crashlytics initialized");
             Fabric.with(this, new Crashlytics());
         }
+
+        AppsFlyerLib.getInstance().startTracking(this.getApplication(),"[Dev_Key]");
 
         generateNewSigniture();
         updateLocationIfPossible();

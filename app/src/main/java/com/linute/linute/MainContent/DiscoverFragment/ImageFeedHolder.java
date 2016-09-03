@@ -35,6 +35,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
     protected View vProgressBar;
+    protected View vTopLayer;
     protected int mType;
     protected int mScreenWidth;
 
@@ -43,6 +44,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
         vProgressBar = itemView.findViewById(R.id.post_image_progress_bar);
+        vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
         setUpOnClicks(itemView.findViewById(R.id.parent));
 
         DisplayMetrics metrics = new DisplayMetrics();
@@ -78,19 +80,17 @@ public class ImageFeedHolder extends BaseFeedHolder {
     }
 
     private void doubleClick(float x, float y) {
-        final View layer = itemView.findViewById(R.id.feed_detail_hidden_animation);
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            animateLollipop(layer,
+            animateLollipop(vTopLayer,
                     (int) x,
                     (int) y,
                     (float) getMax(Math.hypot(x, y),
-                            Math.hypot(x, layer.getHeight() - y),
-                            Math.hypot(layer.getWidth() - x, y),
-                            Math.hypot(layer.getWidth() - x, layer.getHeight() - y)
+                            Math.hypot(x, vTopLayer.getHeight() - y),
+                            Math.hypot(vTopLayer.getWidth() - x, y),
+                            Math.hypot(vTopLayer.getWidth() - x, vTopLayer.getHeight() - y)
                     ));
         } else {
-            animatePreLollipop(layer);
+            animatePreLollipop(vTopLayer);
         }
 
         if (!vLikesHeart.isChecked()) {
@@ -122,7 +122,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
         v.setVisibility(View.VISIBLE);
         animator.start();
-        Log.i(TAG, "animateLollipop: ");
     }
 
     private void animatePreLollipop(final View layer) {
@@ -191,7 +190,9 @@ public class ImageFeedHolder extends BaseFeedHolder {
     }
 
     protected void resizeViews(int height) {
-        vPostImage.setLayoutParams(new FrameLayout.LayoutParams(mScreenWidth, height));
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(mScreenWidth, height);
+        vPostImage.setLayoutParams(params);
+        vTopLayer.setLayoutParams(params);
     }
 
     private int getNewViewHeight(PostSize s) {

@@ -57,6 +57,7 @@ public abstract class BaseFragment extends Fragment {
 
     public void loadDataFromCache(){}
     public void loadDataFromNetwork(){}
+    public void loadMoreDataFromNetwork(){};
     public void displayDataFromCache(){}
     public void displayDataFromNetwork(){}
 

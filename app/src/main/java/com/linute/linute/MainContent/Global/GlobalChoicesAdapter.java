@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.Global;
 
 import android.content.Context;
-import android.graphics.ColorMatrix;
-import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -30,13 +29,12 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
     RequestManager mRequestManager;
 
 
-
     public GlobalChoicesAdapter(Context context, List<GlobalChoiceItem> list) {
         mGlobalChoiceItems = list;
         mContext = context;
     }
 
-    public void setRequestManager(RequestManager manager){
+    public void setRequestManager(RequestManager manager) {
         mRequestManager = manager;
     }
 
@@ -98,24 +96,13 @@ public class GlobalChoicesAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         public void bindView(GlobalChoiceItem item) {
             vTitle.setText(item.title);
-
             mGlobalChoiceItem = item;
-
-            if (item.hasUnread()) {
-                vImage.clearColorFilter();
-                vIndicator.setVisibility(View.VISIBLE);
-            } else {
-                ColorMatrix matrix = new ColorMatrix();
-                matrix.setSaturation(0);
-                vImage.setColorFilter(new ColorMatrixColorFilter(matrix));
-                vIndicator.setVisibility(View.GONE);
-            }
-
-            //vImage.setImageResource(R.color.seperator_color);
+            vIndicator.setVisibility(item.hasUnread() ? View.VISIBLE : View.GONE);
             mRequestManager
                     .load(Utils.getTrendsImageURL(item.imageUrl))
                     .dontAnimate()
                     .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
                     .placeholder(R.color.seperator_color)
                     .into(vImage);
 

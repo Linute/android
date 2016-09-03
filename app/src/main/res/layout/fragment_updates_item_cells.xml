@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="12dp">
 
-        <com.makeramen.roundedimageview.RoundedImageView
+        <com.linute.linute.UtilsAndHelpers.ProfileImageView
             android:id="@+id/updatesFragment_profile_picture"
             android:layout_width="@dimen/profile_image_radius"
             android:layout_height="@dimen/profile_image_radius"

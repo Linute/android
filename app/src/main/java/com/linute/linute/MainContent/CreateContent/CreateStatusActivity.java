@@ -14,6 +14,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -29,14 +30,18 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.bson.types.ObjectId;
 
@@ -78,7 +83,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onClick(View v) {
                 if (mProgressbar.getVisibility() == View.VISIBLE) return;
-                hideKeyboard();
+                    hideKeyboard();
                 if (mPostEditText.getText().toString().isEmpty()) {
                     setResult(RESULT_CANCELED);
                     finish();
@@ -172,8 +177,57 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
-        vAnonComments = (SwitchCompat) findViewById(R.id.anon_comments);
-        vAnonPost = (SwitchCompat) findViewById(R.id.anon_post);
+
+        View leftSwitch = findViewById(R.id.anon_post);
+        TextView postingAsHeader = (TextView) leftSwitch.findViewById(R.id.text_heading_top);
+        TextView postingAsLeftText = (TextView) leftSwitch.findViewById(R.id.text_heading_left);
+        TextView postingAsRightText = (TextView) leftSwitch.findViewById(R.id.text_heading_right);
+        vAnonPost = (SwitchCompat) leftSwitch.findViewById(R.id.switch_main);
+        postingAsHeader.setText("Posting as");
+
+        View rightSwitch = findViewById(R.id.anon_comments);
+        TextView anonCommentsHeader = (TextView) rightSwitch.findViewById(R.id.text_heading_top);
+        TextView anonCommentsLeftText = (TextView) rightSwitch.findViewById(R.id.text_heading_left);
+        TextView anonCommentsRightText = (TextView) rightSwitch.findViewById(R.id.text_heading_right);
+        vAnonComments = (SwitchCompat) rightSwitch.findViewById(R.id.switch_main);
+        anonCommentsHeader.setText("Anon comments");
+
+
+//        profileImageView = (ImageView) findViewById(R.id.image_anon);
+        vAnonComments = (SwitchCompat) findViewById(R.id.anon_comments).findViewById(R.id.switch_main);
+        vAnonPost = (SwitchCompat) findViewById(R.id.anon_post).findViewById(R.id.switch_main);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            vAnonPost.setShowText(false);
+            postingAsLeftText.setText("Self");
+            postingAsRightText.setText("Anon");
+
+            vAnonComments.setShowText(false);
+            anonCommentsLeftText.setText("Yes");
+            anonCommentsRightText.setText("No");
+
+        } else {
+            vAnonPost.setTextOff("Self");
+            vAnonPost.setTextOn("Anon");
+
+            vAnonComments.setTextOff("No");
+            vAnonComments.setTextOn("Yes");
+        }
+
+        final ImageView profileImageView = (ImageView)findViewById(R.id.image_profile);
+        vAnonPost.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(b){
+                    profileImageView.setImageResource(R.drawable.anon_switch_on);
+                }else {
+                    String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
+                    Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
+                }
+            }
+        });
+        String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
+        Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
         mTextFrame = findViewById(R.id.post_create_frame);
 
@@ -195,7 +249,9 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
 
         //set to first color
-        onClick(mPostColorSelectorViews[0]);
+//        onClick(mPostColorSelectorViews[0]);
+
+        selectStyle((int)(Math.random()*mPostColorSelectorViews.length));
 
     }
 
@@ -293,52 +349,41 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         int viewId = v.getId();
 
-        int backgroundColor;
-        int textColor;
-
         int selected = 0;
         switch (viewId) {
             case R.id.post_create_0:
-                backgroundColor = mPostBackgroundColors[0];
-                textColor = mPostTextColors[0];
                 selected = 0;
                 break;
             case R.id.post_create_1:
-                backgroundColor = mPostBackgroundColors[1];
-                textColor = mPostTextColors[1];
                 selected = 1;
                 break;
             case R.id.post_create_2:
-                backgroundColor = mPostBackgroundColors[2];
-                textColor = mPostTextColors[2];
                 selected = 2;
                 break;
             case R.id.post_create_3:
-                backgroundColor = mPostBackgroundColors[3];
-                textColor = mPostTextColors[3];
                 selected = 3;
                 break;
             case R.id.post_create_4:
-                backgroundColor = mPostBackgroundColors[4];
-                textColor = mPostTextColors[4];
                 selected = 4;
                 break;
             case R.id.post_create_5:
-                backgroundColor = mPostBackgroundColors[5];
-                textColor = mPostTextColors[5];
                 selected = 5;
                 break;
             default:
-                backgroundColor = 0xFFFFFFFF;
-                textColor = 0xFF000000;
+                selected = mCurrentlySelected;
                 break;
         }
+        selectStyle(selected);
 
+
+    }
+
+    public void selectStyle(int selected) {
         //change text view and edit text colors
-        mPostEditText.setTextColor(textColor);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(textColor, 70)); //hint will be 70% of text color
-        mTextView.setTextColor(textColor);
-        mTextFrame.setBackgroundColor(backgroundColor);
+        mPostEditText.setTextColor(mPostTextColors[selected]);
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 70)); //hint will be 70% of text color
+        mTextView.setTextColor(mPostTextColors[selected]);
+        mTextFrame.setBackgroundColor(mPostBackgroundColors[selected]);
 
         //set selected background
         mPostColorSelectorViews[mCurrentlySelected].setBackground(null);

@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="vertical"
-    tools:background="@android:color/holo_red_light">
-
+>
 
     <include layout="@layout/feed_detail_header"/>
 
@@ -21,7 +20,8 @@
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/seperator_color">
+        android:background="@color/seperator_color"
+        tools:layout_height="320dp">
 
         <ImageView
             android:id="@+id/feedDetail_event_image"
@@ -50,6 +50,6 @@
     </FrameLayout>
 
 
-    <!--<include layout="@layout/feed_detail_action_bar"/>-->
+    <include layout="@layout/feed_detail_action_bar"/>
 
 </LinearLayout>

@@ -20,10 +20,9 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.ProfileImageView;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
-import com.makeramen.roundedimageview.Corner;
-import com.makeramen.roundedimageview.RoundedImageView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,7 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected ImageView vProfileImage;
         protected TextView vUserName;
 
-        protected RoundedImageView vImage;
+        protected ProfileImageView vImage;
         protected View vFrame;
         protected View vLikeBar;
 
@@ -167,7 +166,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
             vReadReceipt = (ImageView) itemView.findViewById(R.id.read_receipt);
             vFrame = itemView.findViewById(R.id.frame);
-            vImage = (RoundedImageView) itemView.findViewById(R.id.image);
+            vImage = (ProfileImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
 
             vUserName = (TextView) itemView.findViewById(R.id.user_name);
@@ -380,14 +379,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void hideShareStuff() {
             vLikeBar.setVisibility(View.GONE);
-            vImage.setCornerRadius(vImage.getCornerRadius(Corner.TOP_RIGHT));
+//            vImage.setCornerRadius(vImage.getCornerRadius(Corner.TOP_RIGHT));
         }
 
         private void showShareStuff(Post post) {
             vLikeBar.setVisibility(View.VISIBLE);
 
-            vImage.setCornerRadius(Corner.BOTTOM_RIGHT, 0);
-            vImage.setCornerRadius(Corner.BOTTOM_LEFT, 0);
+//            vImage.setCornerRadius(Corner.BOTTOM_RIGHT, 0);
+//            vImage.setCornerRadius(Corner.BOTTOM_LEFT, 0);
 
             String url;
             String name;

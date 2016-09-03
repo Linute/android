@@ -15,13 +15,10 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -164,6 +161,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
+
         //setNavigationView action
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -187,7 +185,17 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        if (API_Methods.DEV) {
+
+        mNavigationView.findViewById(R.id.item_settings).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, SettingActivity.class);
+                startActivity(i);
+
+            }
+        });
+
+        /*if (API_Methods.DEV) {
             mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
             ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -197,7 +205,7 @@ public class MainActivity extends BaseTaptActivity {
                     API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
                 }
             });
-        }
+        }*/
 
         clearBackStack();
 
@@ -397,12 +405,6 @@ public class MainActivity extends BaseTaptActivity {
         String college = sharedPreferences.getString("collegeName", "");
         ((TextView) header.findViewById(R.id.drawerHeader_name)).setText(name);
         ((TextView) header.findViewById(R.id.drawerHeader_college)).setText(college);
-        header.findViewById(R.id.drawerHeading_settings).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startEditProfileActivity(SettingActivity.class);
-            }
-        });
         Glide.with(this)
                 .load(Utils.getImageUrlOfUser(sharedPreferences.getString("profileImage", "")))
                 .dontAnimate()
@@ -726,6 +728,7 @@ public class MainActivity extends BaseTaptActivity {
                 JSONObject activity = new JSONObject(args[0].toString());
                 Log.d(TAG, "call: " + activity.toString(4));
                 //message
+                final NotificationsCounterSingleton notifCounter = NotificationsCounterSingleton.getInstance();
                 if (activity.getString("action").equals("messager")) {
                     /*
                     *
@@ -773,12 +776,12 @@ public class MainActivity extends BaseTaptActivity {
                                 newMessageSnackbar(chat, message);
                             }
                         });
-                    }else {
-                        final NewMessageEvent chatEvent = new NewMessageEvent(true);
+                    } else {
+                        notifCounter.setNumMessages(notifCounter.getNumMessages()+1);
+                        final NewMessageEvent chatEvent = new NewMessageEvent(true, notifCounter.getNumMessages());
                         chatEvent.setRoomId(chat.roomId);
                         chatEvent.setMessage(activity.getString("messageTextfdr"));
                         NewMessageBus.getInstance().setNewMessage(chatEvent);
-                        NotificationsCounterSingleton.getInstance().setHasMessage(true);
                     }
                 } else {
                     final Update update = new Update(activity);
@@ -787,7 +790,7 @@ public class MainActivity extends BaseTaptActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                NotificationsCounterSingleton.getInstance().incrementActivities();
+                                notifCounter.incrementActivities();
 
                                 if (mFragments[FRAGMENT_INDEXES.ACTIVITY] != null)
                                     ((UpdatesFragment) mFragments[FRAGMENT_INDEXES.ACTIVITY]).addItemToRecents(update);
@@ -970,8 +973,9 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject badge = new JSONObject(args[0].toString());
-                NotificationsCounterSingleton.getInstance().setHasMessage(badge.getInt("messages") > 0);
-                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+                int messagesCount = badge.getInt("messages");
+                NotificationsCounterSingleton.getInstance().setNumMessages(messagesCount);
+                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage(), NotificationsCounterSingleton.getInstance().getNumMessages()));
 
                 int activities = badge.getInt("activities");
                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
@@ -1017,8 +1021,9 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            NotificationsCounterSingleton.getInstance().setHasMessage((boolean) args[0]);
-            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
+            NotificationsCounterSingleton notCounter = NotificationsCounterSingleton.getInstance();
+            notCounter.setNumMessages((boolean) args[0] ? 1 : 0);
+            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(notCounter.hasMessage(), notCounter.getNumMessages()));
         }
     };
 
@@ -1282,7 +1287,7 @@ public class MainActivity extends BaseTaptActivity {
         sn.show();
     }
 
-    public void setShowSnackbar(boolean show){
+    public void setShowSnackbar(boolean show) {
         mShowSnackbar = show;
     }
 

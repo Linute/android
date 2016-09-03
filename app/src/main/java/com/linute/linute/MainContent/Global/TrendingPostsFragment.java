@@ -10,12 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
-import com.linute.linute.API.LSDKGlobal;
+import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.BaseFeedFragment;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -100,11 +100,6 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         return root;
     }
 
-    @Override
-    protected void refreshFeed() {
-
-    }
-
 
     @Override
     public void onResume() {
@@ -126,18 +121,134 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         vAppBarLayout.setExpanded(true, false);
     }
 
-    public void getPosts() {
+    @Override
+    protected void getPosts() {
         if (getActivity() == null) return;
 
         setFragmentState(FragmentState.LOADING_DATA);
-
         mProgressBar.setVisibility(View.VISIBLE);
+        new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(-1, 20), getPostsCallback());
+    }
 
+    private String getUrlPathEnding(){
+        switch (mGlobalItem.type){
+            case GlobalChoiceItem.TYPE_HEADER_FRIEND:
+                return  "friends";
+            case GlobalChoiceItem.TYPE_HEADER_HOT:
+                return  "hot";
+            case GlobalChoiceItem.TYPE_TREND:
+                return  "trend";
+            default:
+                return "hot";
+        }
+    }
+
+    private Map<String,String> getParams(int skip, int limit){
         Map<String, String> params = new HashMap<>();
-        params.put("trend", mGlobalItem.key);
-        params.put("limit", "20");
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_TREND){
+            params.put("trend", mGlobalItem.key);
+        }
 
-        new LSDKGlobal(getActivity()).getPosts(params, new Callback() {
+        params.put("limit", limit+"");
+
+        if (skip > -1){
+            params.put("skip", skip+"");
+        }
+
+        return params;
+    }
+
+    private Callback getMorePostsCallback(final int skip1) {
+        return new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                setFragmentState(FragmentState.FINISHED_UPDATING);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Log.d("HEY", response.body().string());
+                    setFragmentState(FragmentState.FINISHED_UPDATING);
+                    if (getActivity() != null) { //shows server error toast
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                String json = response.body().string();
+                //Log.i(TAG, "onResponse: " + json);
+                JSONObject jsonObject;
+                JSONArray jsonArray;
+                final ArrayList<Post> temp = new ArrayList<>();
+                try {
+                    jsonObject = new JSONObject(json);
+                    jsonArray = jsonObject.getJSONArray(mGlobalItem.type == GlobalChoiceItem.TYPE_TREND ? "posts" : "events");
+
+                    if (skip1 == 0) {
+                        mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
+                        mFeedDone = true; //no more feed to load
+                    }
+
+                    for (int i = jsonArray.length() - 1; i >= 0; i--) {
+                        try {
+                            temp.add(new Post(jsonArray.getJSONObject(i)));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    mSkip = skip1;
+
+                    if (getActivity() == null) return;
+
+                    getActivity().runOnUiThread(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mPostList.addAll(temp);
+                                            mFeedAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
+                            }
+
+                    );
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+
+                setFragmentState(FragmentState.FINISHED_UPDATING);
+            }
+        };
+    }
+
+    private Callback getPostsCallback() {
+        return new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 setFragmentState(FragmentState.FINISHED_UPDATING);
@@ -176,11 +287,11 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                 try {
 
                     jsonObject = new JSONObject(response.body().string());
-                    //Log.i(TAG, "onResponse: "+jsonObject.toString(4));
+                    //Log.d(TAG, "onResponse: "+jsonObject.toString(4));
 
                     mSkip = jsonObject.getInt("skip");
 
-                    jsonArray = jsonObject.getJSONArray("posts");
+                    jsonArray = jsonObject.getJSONArray(mGlobalItem.type == GlobalChoiceItem.TYPE_TREND ? "posts" : "events");
 
                     if (mSkip == 0) {
                         mFeedDone = true; //no more feed to load
@@ -235,11 +346,12 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                 }
                 setFragmentState(FragmentState.FINISHED_UPDATING);
             }
-        });
+        };
     }
 
 
-    public void loadMoreFeedFromServer() {
+    @Override
+    protected void getMorePosts() {
         if (getFragmentState() == FragmentState.LOADING_DATA || getActivity() == null) return;
         setFragmentState(FragmentState.LOADING_DATA);
 
@@ -252,100 +364,7 @@ public class TrendingPostsFragment extends BaseFeedFragment {
             skip = 0;
         }
 
-        final int skip1 = skip;
-
-        Map<String, String> params = new HashMap<>();
-        params.put("trend", mGlobalItem.key);
-        params.put("skip", skip + "");
-        params.put("limit", limit + "");
-
-        new LSDKGlobal(getContext()).getPosts(params, new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        setFragmentState(FragmentState.FINISHED_UPDATING);
-                        if (getActivity() != null) {
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showBadConnectionToast(getActivity());
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            Log.d("HEY", response.body().string());
-                            setFragmentState(FragmentState.FINISHED_UPDATING);
-                            if (getActivity() != null) { //shows server error toast
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Utils.showServerErrorToast(getActivity());
-                                    }
-                                });
-                            }
-                            return;
-                        }
-
-                        String json = response.body().string();
-                        //Log.i(TAG, "onResponse: " + json);
-                        JSONObject jsonObject;
-                        JSONArray jsonArray;
-                        final ArrayList<Post> temp = new ArrayList<>();
-                        try {
-                            jsonObject = new JSONObject(json);
-                            jsonArray = jsonObject.getJSONArray("posts");
-
-                            if (skip1 == 0) {
-                                mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
-                                mFeedDone = true; //no more feed to load
-                            }
-
-                            for (int i = jsonArray.length() - 1; i >= 0; i--) {
-                                try {
-                                    temp.add(new Post(jsonArray.getJSONObject(i)));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            mSkip = skip1;
-
-                            if (getActivity() == null) return;
-
-                            getActivity().runOnUiThread(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mHandler.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    mPostList.addAll(temp);
-                                                    mFeedAdapter.notifyDataSetChanged();
-                                                }
-                                            });
-                                        }
-                                    }
-
-                            );
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            if (getActivity() != null) {
-                                getActivity().runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Utils.showServerErrorToast(getActivity());
-                                    }
-                                });
-                            }
-                        }
-
-                        setFragmentState(FragmentState.FINISHED_UPDATING);
-                    }
-                }
-        );
+        new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(skip, limit), getMorePostsCallback(skip));
     }
 
     @Override
