@@ -70,7 +70,7 @@ public class TextTool extends EditContentTool {
 
     private TextView topTV;
     private TextView botTV;
-    private TextView midTV;
+//    private TextView midTV;
 
 
     TextMode[] textModes;
@@ -82,7 +82,7 @@ public class TextTool extends EditContentTool {
 
         topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
         botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
-        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
+//        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
         midET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.edit_text_mid);
 
         topTV.setTypeface(font);
@@ -90,7 +90,7 @@ public class TextTool extends EditContentTool {
 
         topTV.setVisibility(View.GONE);
         botTV.setVisibility(View.GONE);
-        midTV.setVisibility(View.GONE);
+//        midTV.setVisibility(View.GONE);
         midET.setVisibility(View.GONE);
 
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
@@ -104,8 +104,6 @@ public class TextTool extends EditContentTool {
         botTV.setOnFocusChangeListener(focusChangeListener);
         midET.setOnFocusChangeListener(focusChangeListener);
 
-        midTV.setY(dim.height / 2);
-
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
@@ -113,25 +111,27 @@ public class TextTool extends EditContentTool {
 
                 String text = midET.getText().toString().trim();
                 midET.setText(text);
-                midTV.setText(text);
-
-                midET.setVisibility(View.GONE);
-                midTV.setVisibility(View.VISIBLE);
-                midTV.setY(midET.getY());
+//                midTV.setText(text);
+//
+//                midET.setVisibility(View.GONE);
+//                midTV.setVisibility(View.VISIBLE);
+//                midTV.setY(midET.getY());
                 //TODO animate?
             }
         });
 
 
-        midTV.setOnTouchListener(new View.OnTouchListener() {
+        midET.setOnTouchListener(new View.OnTouchListener() {
 
             float downY, initY;
             long timeDown;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                view.onTouchEvent(motionEvent);
                 switch (motionEvent.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
+                        midET.setCursorVisible(true);
                         downY = motionEvent.getRawY();
                         initY = view.getY();
                         timeDown = System.currentTimeMillis();
@@ -161,7 +161,7 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.GONE);
                     }
                 },//None
-                new TextMode(R.drawable.middle_text_icon, midTV) {
+                new TextMode(R.drawable.middle_text_icon, midET) {
                     @Override
                     public void onSelected() {
                         super.onSelected();
@@ -209,7 +209,7 @@ public class TextTool extends EditContentTool {
 
     public void swapSnapchatET() {
         midET.setVisibility(View.VISIBLE);
-        midTV.setVisibility(View.GONE);
+//        midTV.setVisibility(View.GONE);
         showKeyboard(midET);
     }
 
@@ -269,12 +269,13 @@ public class TextTool extends EditContentTool {
 
     public boolean hasText() {
         return
-                botTV.getVisibility() == View.VISIBLE || midTV.getVisibility() == View.VISIBLE || topTV.getVisibility() == View.VISIBLE;
+                botTV.getVisibility() == View.VISIBLE || midET.getVisibility() == View.VISIBLE || topTV.getVisibility() == View.VISIBLE;
     }
 
     @Override
     public void onOpen() {
         super.onOpen();
+        midET.setCursorVisible(true);
         botTV.setInputType(InputType.TYPE_CLASS_TEXT);
         topTV.setInputType(InputType.TYPE_CLASS_TEXT);
         mTextContainer.setClickable(true);
@@ -287,8 +288,8 @@ public class TextTool extends EditContentTool {
         topTV.setInputType(InputType.TYPE_NULL);
         mTextContainer.setClickable(false);
 
-        if (midTV.getText().toString().trim().length() == 0) {
-            midTV.setVisibility(View.GONE);
+        if (midET.getText().toString().trim().length() == 0) {
+            midET.setVisibility(View.GONE);
         }
         if (botTV.getText().toString().trim().length() == 0) {
             botTV.setVisibility(View.GONE);
@@ -297,13 +298,16 @@ public class TextTool extends EditContentTool {
             topTV.setVisibility(View.GONE);
         }
 
+        midET.setCursorVisible(false);
+
     }
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-        hideKeyboard(midTV);
+        hideKeyboard(midET);
         hideKeyboard(botTV);
         hideKeyboard(topTV);
+        midET.setCursorVisible(false);
     }
 
     @Override
