@@ -173,11 +173,15 @@ public class CropTool extends EditContentTool {
             }
         });
 
+        mCropModes[0].apply();
+
     }
 
     public void updateCropperBounds() {
-        TOP_BOUND = Math.max(imageBounds.top, 0);
         int cropperLayoutHeight = mCropperLayout.getHeight();
+        if(cropperLayoutHeight == 0) return;
+
+        TOP_BOUND = Math.max(imageBounds.top, 0);
         BOT_BOUND = Math.max(cropperLayoutHeight - imageBounds.bottom, 0);
 
 
@@ -193,6 +197,7 @@ public class CropTool extends EditContentTool {
     private void boundCropper() {
         int cropperLayoutHeight = mCropperLayout.getHeight();
 
+        if(cropperLayoutHeight == 0) return;
 
         int imageHeight = cropperLayoutHeight - mBotY - mTopY;
 
@@ -480,8 +485,11 @@ public class CropTool extends EditContentTool {
         botBar.setVisibility(View.VISIBLE);
         topHandle.setVisibility(View.VISIBLE);
         botHandle.setVisibility(View.VISIBLE);
-        if (mActivatable != null)
+        if (mActivatable != null) {
             mActivatable.setActive(true);
+            mActivatable.invalidate();
+        }
+
     }
 
     @Override

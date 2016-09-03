@@ -575,7 +575,7 @@ public class EditFragment extends BaseFragment {
                 return;
             case Photo:
             case UploadedPhoto:
-                processPhoto(options);
+                 processPhoto(options);
                 return;
         }
     }
