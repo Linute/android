@@ -33,7 +33,6 @@ public class GalleryActivity extends AppCompatActivity {
 
     private int SELECT_IMAGE_OR_VID = 9;
 
-
     private int mGalleryType;
     private int mReturnType;
     public static final String ARG_GALLERY_TYPE = "gallery_type";

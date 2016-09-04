@@ -76,21 +76,18 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position == mPosts.size() - 1)
-            loadMoreFeed();
 
         if (holder instanceof BaseTrendViewHolder) {
             ((BaseTrendViewHolder) holder).bindModel(mPosts.get(position));
-        }else if (holder instanceof VideoTrendViewHolder){
-            ((VideoFeedHolder)holder).bindModel(mPosts.get(position));
-        }
-        else if (holder instanceof LoadMoreViewHolder) {
+        } else if (holder instanceof VideoTrendViewHolder) {
+            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
+        } else if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
-            return; //don't want loader to be counted as a post
         }
 
-        // once we see all the new posts, mark as read
-        if (position == mGlobalItem.getUnread() - 1){
+        if (position == mPosts.size() - 1) {
+            loadMoreFeed();
+        } else if (position == mPosts.size() && mLoadState == LoadMoreViewHolder.STATE_END) {
             mGlobalItem.setUnread(0);
         }
     }
@@ -133,7 +130,7 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     }
 
 
-    public class VideoTrendViewHolder extends VideoFeedHolder{
+    public class VideoTrendViewHolder extends VideoFeedHolder {
 
         protected TextView vCollegeName;
 

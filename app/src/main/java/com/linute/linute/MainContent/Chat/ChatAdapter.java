@@ -148,7 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected ImageView vProfileImage;
         protected TextView vUserName;
 
-        protected ProfileImageView vImage;
+        protected ImageView vImage;
         protected View vFrame;
         protected View vLikeBar;
 
@@ -166,7 +166,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vActionImage = (ImageView) itemView.findViewById(R.id.message_action_icon);
             vReadReceipt = (ImageView) itemView.findViewById(R.id.read_receipt);
             vFrame = itemView.findViewById(R.id.frame);
-            vImage = (ProfileImageView) itemView.findViewById(R.id.image);
+            vImage = (ImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
 
             vUserName = (TextView) itemView.findViewById(R.id.user_name);

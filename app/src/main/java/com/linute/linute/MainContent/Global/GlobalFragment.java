@@ -349,10 +349,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
     @Override
     public void goToTrend(GlobalChoiceItem item) {
-        if (item.type == GlobalChoiceItem.TYPE_TREND) {
-            item.setUnread(0);
-        }
-
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
             activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
