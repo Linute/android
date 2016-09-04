@@ -1,9 +1,16 @@
 package com.linute.linute.MainContent.Global;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class GlobalChoiceItem {
+public class GlobalChoiceItem implements Parcelable {
 
     public final String title;
     public final String imageUrl;
@@ -29,7 +36,7 @@ public class GlobalChoiceItem {
         this.description = description;
     }
 
-    public GlobalChoiceItem(String title, String key, int type){
+    public GlobalChoiceItem(String title, String key, int type) {
         this.imageUrl = null;
         this.title = title;
         this.key = key;
@@ -39,6 +46,27 @@ public class GlobalChoiceItem {
     }
 
 
+    protected GlobalChoiceItem(Parcel in) {
+        title = in.readString();
+        imageUrl = in.readString();
+        key = in.readString();
+        unread = in.readInt();
+        description = in.readString();
+        type = in.readInt();
+    }
+
+    public static final Creator<GlobalChoiceItem> CREATOR = new Creator<GlobalChoiceItem>() {
+        @Override
+        public GlobalChoiceItem createFromParcel(Parcel in) {
+            return new GlobalChoiceItem(in);
+        }
+
+        @Override
+        public GlobalChoiceItem[] newArray(int size) {
+            return new GlobalChoiceItem[size];
+        }
+    };
+
     public void setUnread(int unread) {
         this.unread = unread;
     }
@@ -46,5 +74,41 @@ public class GlobalChoiceItem {
     public boolean hasUnread() {
         return unread > 0;
     }
+
+    public int getUnread(){
+        return unread;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeString(imageUrl);
+        dest.writeString(key);
+        dest.writeInt(unread);
+        dest.writeString(description);
+        dest.writeInt(type);
+    }
+
+
+    public static void sort(List<GlobalChoiceItem> itemList) {
+        Collections.sort(itemList, new Comparator<GlobalChoiceItem>() {
+            @Override
+            public int compare(GlobalChoiceItem lhs, GlobalChoiceItem rhs) {
+                if (lhs.unread < rhs.unread)
+                    return 1;
+                else if (lhs.unread > rhs.unread)
+                    return -1;
+                else
+                    return 0;
+
+            }
+        });
+    }
+
 
 }

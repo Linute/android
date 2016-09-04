@@ -2,7 +2,6 @@
 <LinearLayout
     android:id="@+id/rooms_list_linear"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -16,10 +15,7 @@
         android:layout_margin="@dimen/activity_horizontal_margin"
         android:cropToPadding="false"
         android:scaleType="centerCrop"
-        android:src="@drawable/icon_user"
-        app:riv_border_color="@color/seperator_color"
-        app:riv_border_width="1dp"
-        app:riv_corner_radius="@dimen/user_icon_corner_radius"/>
+        android:src="@drawable/icon_user"/>
 
     <LinearLayout
         android:layout_width="match_parent"

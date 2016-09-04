@@ -60,14 +60,21 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private RequestManager mRequestManager;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, Context context, RequestManager manager) {
+    public FeedDetailAdapter(FeedDetail feedDetail, RequestManager manager,Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
         mRequestManager = manager;
-
         SharedPreferences mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mViewerUserId = mSharedPreferences.getString("userID", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
+    }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     public void setCommentActions(CommentActions actions) {

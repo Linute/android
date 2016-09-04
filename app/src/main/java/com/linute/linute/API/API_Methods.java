@@ -177,7 +177,6 @@ public class API_Methods {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
-        Log.i("AAA", VERSION);
         header.put("User-Agent", "("+Build.BRAND + " " + Build.DEVICE + " "+Build.MODEL+"; Android "+Build.VERSION.RELEASE+")/ Ver ["+VERSION+"] UserID ["+USER_ID+"]");
         return header;
     }

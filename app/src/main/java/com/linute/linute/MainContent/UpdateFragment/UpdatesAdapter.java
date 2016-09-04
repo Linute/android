@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.API.API_Methods;
@@ -52,6 +52,8 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
 
     private Context mContext;
 
+    private RequestManager mRequestManager;
+
     //load more
     private short mFooterState = LoadMoreViewHolder.STATE_LOADING;
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
@@ -60,6 +62,14 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
         mRecentItems = recentItems;
         mOlderItems = olderItems;
         mContext = context;
+    }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     //private onLoadMoreListener mLoadMore;
@@ -257,7 +267,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             SharedPreferences sharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
             //set profile image
-            Glide.with(mContext)
+            mRequestManager
                     .load(update.isAnon() ? ((update.getAnonImage() == null || update.getAnonImage().equals(""))
                             ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(update.getAnonImage()))
                             : Utils.getImageUrlOfUser(update.getUserProfileImageName()))
@@ -276,14 +286,14 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             if (update.hasEventInformation()) {
 
                 if (update.getEventImageName() == null || update.getEventImageName().equals("")) { //not a picture post; status post
-                    Glide.with(mContext)
+                    mRequestManager
                             .load(R.drawable.quotation2)
                             .dontAnimate()
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(mEventPicture);
                 } else { //picture post
                     //set event image
-                    Glide.with(mContext)
+                    mRequestManager
                             .load(update.getEventImageName())
                             .dontAnimate()
                             .placeholder(R.drawable.image_loading_background)

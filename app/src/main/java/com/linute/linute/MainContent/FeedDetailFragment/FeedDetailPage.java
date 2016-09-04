@@ -185,7 +185,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(mFeedDetailLLM);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, getActivity(), Glide.with(this));
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext());
         mFeedDetailAdapter.setCommentActions(this);
         recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -345,6 +345,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     @Override
     public void onResume() {
         super.onResume();
+
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             //user -- user Id
@@ -482,11 +483,19 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     @Override
     public void onStop() {
         super.onStop();
-        if (getActivity() == null) return;
 
+        if (getActivity() == null) return;
         showKeyboard(mCommentEditText, false);
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mFeedDetailAdapter.getRequestManager() != null)
+            mFeedDetailAdapter.getRequestManager().onDestroy();
+
+        mFeedDetailAdapter.setRequestManager(null);
+    }
 
     private void displayCommentsAndPost() {
         if (getActivity() == null) return;
