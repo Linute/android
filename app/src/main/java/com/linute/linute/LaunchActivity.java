@@ -81,6 +81,9 @@ public class LaunchActivity extends Activity {
             boolean isLive = sharedPreferences.getBoolean("is_live", true);
             API_Methods.HOST = isLive ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV;
             API_Methods.VERSION = isLive ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV;
+        }else{
+            API_Methods.HOST = API_Methods.HOST_LIVE;
+            API_Methods.VERSION = API_Methods.VERSION_LIVE;
         }
 
         //set broadcast receiver
