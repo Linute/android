@@ -65,7 +65,7 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (!API_Methods.DEV) {
+        if (!API_Methods.IS_DEV_BUILD) {
             Log.i(TAG, "onCreate: Crashlytics initialized");
             Fabric.with(this, new Crashlytics());
         }
@@ -75,12 +75,19 @@ public class LaunchActivity extends Activity {
         generateNewSigniture();
         updateLocationIfPossible();
 
+       final SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+        if(API_Methods.IS_DEV_BUILD){
+            boolean isLive = sharedPreferences.getBoolean("is_live", true);
+            API_Methods.HOST = isLive ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV;
+            API_Methods.VERSION = isLive ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV;
+        }
+
         //set broadcast receiver
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
                 String token = sharedPreferences.getString(QuickstartPreferences.OUR_TOKEN, null);
 ////                    requestServices();
