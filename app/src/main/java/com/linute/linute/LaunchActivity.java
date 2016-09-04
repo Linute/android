@@ -70,7 +70,7 @@ public class LaunchActivity extends Activity {
             Fabric.with(this, new Crashlytics());
         }
 
-        AppsFlyerLib.getInstance().startTracking(this.getApplication(),"[Dev_Key]");
+        AppsFlyerLib.getInstance().startTracking(this.getApplication(),"VPnL9y82TinTofd5XRZ6TJ");
 
         generateNewSigniture();
         updateLocationIfPossible();
