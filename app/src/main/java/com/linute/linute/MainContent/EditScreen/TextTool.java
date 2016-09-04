@@ -80,6 +80,8 @@ public class TextTool extends EditContentTool {
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
+        TextMode.savedText = new String[3];
+
         topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
         botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
 //        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
