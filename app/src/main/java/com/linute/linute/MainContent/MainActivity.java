@@ -726,7 +726,7 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject activity = new JSONObject(args[0].toString());
-                Log.d(TAG, "call: " + activity.toString(4));
+                //Log.d(TAG, "call: " + activity.toString(4));
                 //message
                 final NotificationsCounterSingleton notifCounter = NotificationsCounterSingleton.getInstance();
                 if (activity.getString("action").equals("messager")) {
@@ -743,7 +743,7 @@ public class MainActivity extends BaseTaptActivity {
 
                     JSONArray users = activity.getJSONArray("roomUsers");
                     ArrayList<User> usersList = new ArrayList<>(users.length());
-                    Log.d("AAA", users.toString(4));
+                    //Log.d("AAA", users.toString(4));
                     for (int u = 0; u < users.length(); u++) {
                         JSONObject userJson = users.getJSONObject(u);
                         usersList.add(new User(
@@ -766,8 +766,8 @@ public class MainActivity extends BaseTaptActivity {
                             false,
                             0
                     );
-                    final String message = activity.getString("text");
 
+                    final String message = activity.getString("text");
 
                     if (mShowSnackbar) {
                         runOnUiThread(new Runnable() {
@@ -776,13 +776,14 @@ public class MainActivity extends BaseTaptActivity {
                                 newMessageSnackbar(chat, message);
                             }
                         });
-                    } else {
-                        notifCounter.setNumMessages(notifCounter.getNumMessages()+1);
-                        final NewMessageEvent chatEvent = new NewMessageEvent(true, notifCounter.getNumMessages());
-                        chatEvent.setRoomId(chat.roomId);
-                        chatEvent.setMessage(activity.getString("messageTextfdr"));
-                        NewMessageBus.getInstance().setNewMessage(chatEvent);
                     }
+
+                    notifCounter.setNumMessages(notifCounter.getNumMessages() + 1);
+                    final NewMessageEvent chatEvent = new NewMessageEvent(true);
+                    chatEvent.setRoomId(chat.roomId);
+                    chatEvent.setMessage(activity.getString("messageText"));
+                    NewMessageBus.getInstance().setNewMessage(chatEvent);
+
                 } else {
                     final Update update = new Update(activity);
                     if (update.getUpdateType() != Update.UpdateType.UNDEFINED) {
@@ -804,6 +805,7 @@ public class MainActivity extends BaseTaptActivity {
                                 } else {
                                     newProfileSnackBar(update);
 
+                                    //add follower to list of users we can share to
                                     if (update.getUpdateType() == Update.UpdateType.FOLLOWER) {
                                         if (mRealm.isClosed()) return;
                                         mRealm.executeTransactionAsync(new Realm.Transaction() {
@@ -973,9 +975,10 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             try {
                 JSONObject badge = new JSONObject(args[0].toString());
+                //Log.i(TAG, "call: "+badge.toString(4));
                 int messagesCount = badge.getInt("messages");
                 NotificationsCounterSingleton.getInstance().setNumMessages(messagesCount);
-                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage(), NotificationsCounterSingleton.getInstance().getNumMessages()));
+                NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(NotificationsCounterSingleton.getInstance().hasMessage()));
 
                 int activities = badge.getInt("activities");
                 NotificationsCounterSingleton.getInstance().setNumOfNewActivities(activities);
@@ -1018,12 +1021,13 @@ public class MainActivity extends BaseTaptActivity {
     };
 
 
+    //// TODO: 9/3/16 sends boolean. give us int instead?
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
             NotificationsCounterSingleton notCounter = NotificationsCounterSingleton.getInstance();
             notCounter.setNumMessages((boolean) args[0] ? 1 : 0);
-            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(notCounter.hasMessage(), notCounter.getNumMessages()));
+            NewMessageBus.getInstance().setNewMessage(new NewMessageEvent(notCounter.hasMessage()));
         }
     };
 

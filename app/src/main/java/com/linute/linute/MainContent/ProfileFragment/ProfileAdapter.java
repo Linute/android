@@ -13,6 +13,10 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.MainContent.Chat.ChatFragment;
+import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.DiscoverFragment.StatusFeedHolder;
+import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.EditProfileInfoActivity;
@@ -34,12 +38,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private static final int TYPE_HEADER_IMAGE = 0;
     private static final int TYPE_HEADER_ACTIONS = 4;
-    private static final int TYPE_ITEM_WITH_IMAGE = 1;
+    private static final int TYPE_ITEM_VIDEO = 1;
+    private static final int TYPE_ITEM_IMAGE = 5;
     private static final int TYPE_EMPTY = 2;
-    private static final int TYPE_ITEM_WITHOUT_IMAGE = 3;
+    private static final int TYPE_ITEM_STATUS = 3;
 
     private Context context;
-    private ArrayList<UserActivityItem> mUserActivityItems = new ArrayList<>();
+    private ArrayList<Post> mPosts = new ArrayList<>();
     private LinuteUser mUser;
     private RequestManager mRequestManager;
 
@@ -54,12 +59,12 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private TitleTextListener mTitleTextListener;
 
 
-    public ProfileAdapter(ArrayList<UserActivityItem> userActivityItems, LinuteUser user, Context context) {
+    public ProfileAdapter(ArrayList<Post> posts, LinuteUser user, Context context) {
         this.context = context;
         mUserid = context
                 .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
                 .getString("userID", "");
-        mUserActivityItems = userActivityItems;
+        mPosts = posts;
         mUser = user;
     }
 
@@ -67,62 +72,79 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         mRequestManager = manager;
     }
 
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_ITEM_WITH_IMAGE) {
-            //inflate your layout and pass it to view holder
-            return new ProfileViewHolder(LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.profile_grid_item_2, parent, false), context, mRequestManager);
-        } else if (viewType == TYPE_ITEM_WITHOUT_IMAGE) {
-            return new ProfileViewHolderNoImage(LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.profile_grid_item_no_image, parent, false), context);
-        } else if (viewType == TYPE_HEADER_IMAGE) {
-            //inflate your layout and pass it to view holder
-            return new ProfileHeaderViewHolder(LayoutInflater
-                    .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header3, parent, false));
-        } else if (viewType == TYPE_HEADER_ACTIONS) {
-            return new ProfileHeaderActions(LayoutInflater
-                    .from(parent.getContext())
-                    .inflate(R.layout.fragment_profile_header_part_2, parent, false));
-        } else if (viewType == TYPE_EMPTY) {
-            return new EmptyProfileHolder(LayoutInflater
-                    .from(parent.getContext())
-                    .inflate(R.layout.empty_cell_holders, parent, false)
-            );
-        } else if (viewType == LoadMoreViewHolder.FOOTER) {
-            return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");
+        switch (viewType) {
+            case TYPE_ITEM_IMAGE:
+                return new ImageFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_image, parent, false),
+                        context,
+                        mRequestManager
+                );
+            case TYPE_ITEM_VIDEO:
+                return new VideoFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_video, parent, false),
+                        context,
+                        mRequestManager
+                );
+            case TYPE_ITEM_STATUS:
+                return new StatusFeedHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_status, parent, false),
+                        context,
+                        mRequestManager
+                );
+            case TYPE_HEADER_IMAGE:
+                return new ProfileHeaderViewHolder(LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(R.layout.fragment_profile_header3, parent, false));
+            case TYPE_HEADER_ACTIONS:
+                return new ProfileHeaderActions(LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(R.layout.fragment_profile_header_part_2, parent, false));
+            case TYPE_EMPTY:
+                return new EmptyProfileHolder(LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(R.layout.empty_cell_holders, parent, false)
+                );
+            case LoadMoreViewHolder.FOOTER:
+                return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");
+            default:
+                return null;
         }
-        return null;
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 
-        if (position == mUserActivityItems.size() + 2) { //on last elem, need to load more
+        if (position == mPosts.size() + 2) { //on last elem, need to load more
             if (mLoadMorePosts != null)
                 mLoadMorePosts.loadMore();
         }
+
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
-        } else if (holder instanceof ProfileViewHolder) {
-            ((ProfileViewHolder) holder).bindModel(mUserActivityItems.get(position - 2));
+        } else if (holder instanceof VideoFeedHolder) {
+            ((VideoFeedHolder) holder).bindModel(mPosts.get(position - 2));
+        } else if (holder instanceof ImageFeedHolder) {
+            ((ImageFeedHolder) holder).bindModel(mPosts.get(position - 2));
         } else if (holder instanceof ProfileHeaderViewHolder) {
             ((ProfileHeaderViewHolder) holder).bindModel(mUser);
         } else if (holder instanceof ProfileHeaderActions) {
             ((ProfileHeaderActions) holder).bindView();
-        } else if (holder instanceof ProfileViewHolderNoImage) {
-            ((ProfileViewHolderNoImage) holder).bindModel(mUserActivityItems.get(position - 2));
+        } else if (holder instanceof StatusFeedHolder) {
+            ((StatusFeedHolder) holder).bindModel(mPosts.get(position - 2));
         }
     }
 
     @Override
     public int getItemCount() {
         //2 for headers and 1 for footer
-        int size = mUserActivityItems.size() + 2;
+        int size = mPosts.size() + 2;
         return size == 2 ? 2 : size + 1;
     }
 
@@ -132,16 +154,16 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return TYPE_HEADER_IMAGE;
         else if (position == 1)
             return TYPE_HEADER_ACTIONS;
-        else if (position == mUserActivityItems.size() + 2)
+        else if (position == mPosts.size() + 2)
             return LoadMoreViewHolder.FOOTER;
-        else if (mUserActivityItems.get(position - 2) instanceof EmptyUserActivityItem)
+        else if (mPosts.get(position - 2) == null)
             return TYPE_EMPTY;
-        else {
-            if (mUserActivityItems.get(position - 2).getEventImagePath() != null && !mUserActivityItems.get(position - 2).getEventImagePath().equals(""))
-                return TYPE_ITEM_WITH_IMAGE;
-            else return TYPE_ITEM_WITHOUT_IMAGE;
-        }
+        else if (mPosts.get(position - 2).isImagePost())
+            return mPosts.get(position - 2).isVideoPost() ? TYPE_ITEM_VIDEO : TYPE_ITEM_IMAGE;
+
+        return TYPE_ITEM_STATUS;
     }
+
 
     public void setLoadMorePosts(LoadMoreViewHolder.OnLoadMore loadMorePosts) {
         mLoadMorePosts = loadMorePosts;
@@ -181,8 +203,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    //horrible hack
-    //public FloatingActionButton vMessageButton;
+//horrible hack
+//public FloatingActionButton vMessageButton;
 
     public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         protected ImageView vProfilePicture;

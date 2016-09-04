@@ -9,7 +9,7 @@ import org.json.JSONObject;
 /**
  * Created by QiFeng on 1/16/16.
  */
-public class FriendSearchUser implements Parcelable{
+public class FriendSearchUser implements Parcelable {
 
     private String mProfileImage;
     private String mUserId;
@@ -18,66 +18,78 @@ public class FriendSearchUser implements Parcelable{
     private String mFullName;
     private boolean mIsFollowing = false;
 
+    public FriendSearchUser(JSONObject user)throws JSONException{
+        mProfileImage = getStringFromJson("profileImage", user);
+        mUserId = user.getString("id");
 
-    public FriendSearchUser(JSONObject json){
-        mProfileImage = getStringFromJson("profileImage", json);
-        mUserId = getStringFromJson("id", json);
-
-        mFirstName = getStringFromJson("firstName", json);
-        mLastName = getStringFromJson("lastName", json);
+        mFirstName = getStringFromJson("firstName", user);
+        mLastName = getStringFromJson("lastName", user);
 
         if (mFirstName == null) mFirstName = "";
         if (mLastName == null) mLastName = "";
 
-        mFullName = mFirstName + " "+ mLastName;
+        mFullName = mFirstName + " " + mLastName;
 
-        JSONObject friend = getJsonObjectFromJson("friend", json);
+        try {
+            JSONObject friend = user.getJSONObject("friend");
+            setFollowing(friend);
+        }catch (JSONException e){
+            mIsFollowing = false;
+        }
+    }
+
+
+    public FriendSearchUser(JSONObject owner, JSONObject friend) throws JSONException {
+        mProfileImage = getStringFromJson("profileImage", owner);
+        mUserId = owner.getString("id");
+
+        mFirstName = getStringFromJson("firstName", owner);
+        mLastName = getStringFromJson("lastName", owner);
+
+        if (mFirstName == null) mFirstName = "";
+        if (mLastName == null) mLastName = "";
+
+        mFullName = mFirstName + " " + mLastName;
 
         if (friend != null) {
-            String friendUserId = getStringFromJson("user", friend);
-            if (friendUserId == null) return;
-
-
-            if (friendUserId.equals(mUserId)) //means you already followed him
-                mIsFollowing = true; //your following him
-
-            else  //he followed you first, check if your following him back
-                mIsFollowing = getBooleanFromJson("followedBack", friend);
-
-        }
-
-    }
-
-    public static JSONObject getJsonObjectFromJson(String key, JSONObject jsonObject){
-        try {
-            return jsonObject.getJSONObject(key);
-        }catch (JSONException e) {
-            return null;
+            try {
+                setFollowing(friend);
+            } catch (JSONException e) {
+                mIsFollowing = false;
+            }
+        }else {
+            mIsFollowing = false;
         }
     }
 
-    public static String getStringFromJson(String key, JSONObject object){
+    public void setFollowing(JSONObject friendship) throws JSONException {
+        String friendUserId = friendship.getString("user");
+        mIsFollowing = friendUserId.equals(mUserId) || getBooleanFromJson("followedBack", friendship);
+    }
+
+
+    public static String getStringFromJson(String key, JSONObject object) {
         try {
             return object.getString(key);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             return null;
         }
     }
 
-    public static boolean getBooleanFromJson(String key, JSONObject object){
+    public static boolean getBooleanFromJson(String key, JSONObject object) {
         try {
             return object.getBoolean(key);
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public boolean isFollowing(){
+    public boolean isFollowing() {
         return mIsFollowing;
     }
 
-    public void setFollowing(boolean following){
+    public void setFollowing(boolean following) {
         mIsFollowing = following;
     }
 
@@ -102,7 +114,7 @@ public class FriendSearchUser implements Parcelable{
         return mLastName;
     }
 
-    public boolean nameContains(String pre){
+    public boolean nameContains(String pre) {
         return mFullName.toLowerCase().contains(pre.toLowerCase());
     }
 
@@ -120,7 +132,7 @@ public class FriendSearchUser implements Parcelable{
         dest.writeByte((byte) (mIsFollowing ? 1 : 0));
     }
 
-    private FriendSearchUser(Parcel in){
+    private FriendSearchUser(Parcel in) {
         mProfileImage = in.readString();
         mUserId = in.readString();
         mFirstName = in.readString();

@@ -8,12 +8,10 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKGlobal;
@@ -57,27 +55,23 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     private Toolbar vToolbar;
     private Handler mHandler = new Handler();
     private AppBarLayout vAppBarLayout;
+
     private View vNotificationIndicator;
+    private TextView vNotificationCounter;
 
     private TextView vUpdateCounter;
     private View vUpdateNotification;
 
     private View vEmpty;
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (mGlobalChoicesAdapter == null) {
-            mGlobalChoicesAdapter = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
-            mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_global_choices, container, false);
 
+        if (mGlobalChoicesAdapter == null) {
+            mGlobalChoicesAdapter = new GlobalChoicesAdapter(getContext(), mGlobalChoiceItems);
+        }
         mGlobalChoicesAdapter.setGoToTrend(this);
 
         vEmpty = root.findViewById(R.id.empty_view);
@@ -85,7 +79,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vRecycler = (RecyclerView) root.findViewById(R.id.recycler_view);
         vSwipe = (SwipeRefreshLayout) root.findViewById(R.id.swipe_refresh);
 
-        //mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
+        mGlobalChoicesAdapter.setRequestManager(Glide.with(this));
 
         vRecycler.setAdapter(mGlobalChoicesAdapter);
 
@@ -97,6 +91,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                 return mGlobalChoiceItems.get(position).type == GlobalChoiceItem.TYPE_TREND ? 2 : 1;
             }
         });
+
         vRecycler.setLayoutManager(manager);
         vRecycler.setHasFixedSize(true);
 
@@ -116,8 +111,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             }
         });
 
-        mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
-
         View update = vToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
         update.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,10 +123,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
         vUpdateNotification = update.findViewById(R.id.notification);
         vUpdateCounter = (TextView) vUpdateNotification.findViewById(R.id.notification_count);
-
-        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
-        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
-        vUpdateCounter.setText(count < 100 ? count + "" : "+");
 
         vToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ?
                 R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
@@ -148,7 +137,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             }
         });
         vNotificationIndicator = chat.findViewById(R.id.notification);
-        vNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+        vNotificationCounter = (TextView) chat.findViewById(R.id.notification_count);
 
         vSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -165,6 +154,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     @Override
     public void onResume() {
         super.onResume();
+
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             mHandler.post(new Runnable() {
                 @Override
@@ -183,6 +173,18 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         } else if (mGlobalChoiceItems.isEmpty()) {
             vEmpty.setVisibility(View.VISIBLE);
         }
+
+
+        NotificationsCounterSingleton singleton = NotificationsCounterSingleton.getInstance();
+
+        int count = singleton.getNumOfNewActivities();
+        vUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        vUpdateCounter.setText(count < 100 ? count + "" : "+");
+
+        count = singleton.getNumMessages();
+
+        vNotificationIndicator.setVisibility(singleton.hasMessage() ? View.VISIBLE : View.GONE);
+        vNotificationCounter.setText(count < 100 ? count + "" : "+");
 
         mChatSubscription = NewMessageBus
                 .getInstance()
@@ -241,8 +243,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                     try {
                         JSONArray trends = new JSONObject(response.body().string()).getJSONArray("trends");
 
-                        Log.d(TAG, "onResponse: " + trends.toString(4));
-                        ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
+                        // Log.d(TAG, "onResponse: " + trends.toString(4));
+                        final ArrayList<GlobalChoiceItem> tempList = new ArrayList<>();
                         JSONObject trend;
 
                         addHotAndFriends(tempList);
@@ -266,8 +268,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             }
                         }
 
-                        mGlobalChoiceItems.clear();
-                        mGlobalChoiceItems.addAll(tempList);
+                        GlobalChoiceItem.sort(tempList);
+
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
@@ -278,6 +280,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                     mHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
+                                            mGlobalChoiceItems.clear();
+                                            mGlobalChoiceItems.addAll(tempList);
                                             mGlobalChoicesAdapter.notifyDataSetChanged();
                                             vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
@@ -317,16 +321,14 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
         vRecycler.scrollToPosition(0);
     }
 
-    private boolean mHasMessage;
 
     private Subscription mChatSubscription;
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
         public void call(NewMessageEvent event) {
-            if (event.hasNewMessage() != mHasMessage) {
-                vNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
-                mHasMessage = event.hasNewMessage();
-            }
+            int count = NotificationsCounterSingleton.getInstance().getNumMessages();
+            vNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+            vNotificationCounter.setText(count < 100 ? count + "" : "+");
         }
     };
 
@@ -347,25 +349,23 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
 
     @Override
     public void goToTrend(GlobalChoiceItem item) {
-        if (item.type == GlobalChoiceItem.TYPE_TREND) {
-            item.setUnread(0);
-            MainActivity activity = (MainActivity) getActivity();
-            if (activity != null) {
-                activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item.key, item.title), "TREND");
-            }
-        } else {
-            Toast.makeText(getContext(), "NEED TO DO", Toast.LENGTH_SHORT).show();
+        MainActivity activity = (MainActivity) getActivity();
+        if (activity != null) {
+            activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }
 
     private void addHotAndFriends(ArrayList<GlobalChoiceItem> items) {
-        items.add(new GlobalChoiceItem("hot", null, GlobalChoiceItem.TYPE_HEADER_HOT));
+        items.add(new GlobalChoiceItem("hottest", null, GlobalChoiceItem.TYPE_HEADER_HOT));
         items.add(new GlobalChoiceItem("friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        //mGlobalChoicesAdapter.setRequestManager(null);
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mGlobalChoicesAdapter.getRequestManager() != null)
+            mGlobalChoicesAdapter.getRequestManager().onDestroy();
+
+        mGlobalChoicesAdapter.setRequestManager(null);
     }
 }

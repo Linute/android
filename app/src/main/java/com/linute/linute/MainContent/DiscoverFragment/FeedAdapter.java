@@ -8,19 +8,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
-import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.ChoiceCapableAdapter;
-import com.linute.linute.UtilsAndHelpers.RecyclerViewChoiceAdapters.MultiChoiceMode;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,45 +28,28 @@ import java.util.List;
 /**
  * Created by Arman on 12/27/15.
  */
-public class FeedAdapter extends ChoiceCapableAdapter<RecyclerView.ViewHolder> {
+public class FeedAdapter extends BaseFeedAdapter {
     private static final String TAG = FeedAdapter.class.getSimpleName();
     private List<Post> mPosts;
     private Context context;
-
-    private LoadMoreViewHolder.OnLoadMore mGetMoreFeed; //interface that gets more feed
-    private short mLoadState;
 
     private String mCollege;
     private String mUserId;
 
     private boolean mSectionTwo;
-    private RequestManager mRequestManager;
 
 
-    public FeedAdapter(List<Post> posts, Context context, RequestManager manager, boolean sectiontwo) {
-        super(new MultiChoiceMode());
+    public FeedAdapter(List<Post> posts, Context context, boolean sectiontwo) {
         mSectionTwo = sectiontwo;
-        mRequestManager = manager;
         mPosts = posts;
         this.context = context;
-
         SharedPreferences sharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollege = sharedPreferences.getString("collegeId", "");
         mUserId = sharedPreferences.getString("userID", "");
     }
 
-
-    public void setRequestManager(RequestManager manager){
-        mRequestManager = manager;
-    }
-
-    public void setGetMoreFeed(LoadMoreViewHolder.OnLoadMore moreFeed) {
-        mGetMoreFeed = moreFeed;
-    }
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         switch (viewType) {
             case LoadMoreViewHolder.FOOTER:
                 return new LoadMoreViewHolder(
@@ -114,8 +94,7 @@ public class FeedAdapter extends ChoiceCapableAdapter<RecyclerView.ViewHolder> {
         }
 
         if (position + 1 == mPosts.size()) {
-            if (mGetMoreFeed != null)
-                mGetMoreFeed.loadMore();
+            loadMoreFeed();
         } else if (!mSectionTwo && position == 0 && !NotificationsCounterSingleton.getInstance().discoverNeedsRefreshing()) {
             MainActivity activity = (MainActivity) context;
             if (activity != null) {

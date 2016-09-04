@@ -57,6 +57,7 @@ public abstract class BaseFragment extends Fragment {
 
     public void loadDataFromCache(){}
     public void loadDataFromNetwork(){}
+    public void loadMoreDataFromNetwork(){};
     public void displayDataFromCache(){}
     public void displayDataFromNetwork(){}
 
@@ -82,8 +83,6 @@ public abstract class BaseFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        RefWatcher refWatcher = TaptApplication.getRefWatcher(getActivity());
-//        refWatcher.watch(this);
     }
 
 }

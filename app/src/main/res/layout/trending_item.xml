@@ -17,17 +17,18 @@
         android:background="@color/seperator_color"
     />
 
-    <com.linute.linute.UtilsAndHelpers.SquareFrameLayout
+    <FrameLayout
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/seperator_color">
 
-        <View
-            android:id="@+id/image_placeholder"
+        <ImageView
+            android:id="@+id/feedDetail_event_image"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
-            />
+            android:layout_height="match_parent"
+        />
+
         <ProgressBar
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
@@ -35,13 +36,6 @@
             android:id="@+id/post_image_progress_bar"
             android:layout_gravity="center"
             android:indeterminate="true" />
-
-        <ImageView
-            android:id="@+id/feedDetail_event_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
-            />
 
         <View
             android:id="@+id/feed_detail_hidden_animation"
@@ -51,14 +45,9 @@
             android:background="#EA294C"
             android:visibility="invisible"
         />
-    </com.linute.linute.UtilsAndHelpers.SquareFrameLayout>
+    </FrameLayout>
 
 
     <include layout="@layout/feed_detail_action_bar"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:background="@color/seperator_color"/>
 
 </LinearLayout>

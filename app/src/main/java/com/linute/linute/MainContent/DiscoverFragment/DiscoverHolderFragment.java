@@ -7,6 +7,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -54,8 +55,6 @@ public class DiscoverHolderFragment extends BaseFragment {
     private View mUpdateNotification;
     private TextView mUpdatesCounter;
 
-    private boolean mHasMessage;
-
     private View mNotificationIndicator;
 
     private FloatingActionsMenu mFloatingActionsMenu;
@@ -87,7 +86,6 @@ public class DiscoverHolderFragment extends BaseFragment {
             }
         });
 
-        mHasMessage = NotificationsCounterSingleton.getInstance().hasMessage();
         mToolbar.inflateMenu(R.menu.people_fragment_menu);
 
         mToolbar.setNavigationIcon(NotificationsCounterSingleton.getInstance().hasNewPosts() ? R.drawable.nav_icon : R.drawable.ic_action_navigation_menu);
@@ -101,11 +99,9 @@ public class DiscoverHolderFragment extends BaseFragment {
                     activity.addFragmentToContainer(new RoomsActivityFragment(), RoomsActivityFragment.TAG);
             }
         });
-        mNotificationIndicator = chat.findViewById(R.id.notification);
-        mNotificationIndicator.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
 
-        mNotificationCount = (TextView)chat.findViewById(R.id.notification_count);
-        mNotificationCount.setVisibility(mHasMessage ? View.VISIBLE : View.GONE);
+        mNotificationIndicator = chat.findViewById(R.id.notification);
+        mNotificationCount = (TextView) chat.findViewById(R.id.notification_count);
 
         View update = mToolbar.getMenu().findItem(R.id.menu_updates).getActionView();
         update.setOnClickListener(new View.OnClickListener() {
@@ -116,12 +112,9 @@ public class DiscoverHolderFragment extends BaseFragment {
                     activity.addActivityFragment();
             }
         });
-        mUpdateNotification = update.findViewById(R.id.notification);
 
+        mUpdateNotification = update.findViewById(R.id.notification);
         mUpdatesCounter = (TextView) mUpdateNotification.findViewById(R.id.notification_count);
-        int count = NotificationsCounterSingleton.getInstance().getNumOfNewActivities();
-        mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
-        mUpdatesCounter.setText(count < 100 ? count + "" : "+");
 
         TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.discover_sliding_tabs);
 
@@ -256,7 +249,7 @@ public class DiscoverHolderFragment extends BaseFragment {
     private void loadFragmentAtPositionIfNeeded(int position) {
         //only load when fragment comes into view
         if (position == 0 ? mCampusFeedNeedsUpdating : mFriendsFeedNeedsUpdating) {
-            mFeedFragments[position].refreshFeed();
+            mFeedFragments[position].getPosts();
             if (position == 0) mCampusFeedNeedsUpdating = false;
             else mFriendsFeedNeedsUpdating = false;
         }
@@ -265,6 +258,17 @@ public class DiscoverHolderFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        NotificationsCounterSingleton singleton = NotificationsCounterSingleton.getInstance();
+        mNotificationIndicator.setVisibility(singleton.hasMessage() ? View.VISIBLE : View.GONE);
+        int count = singleton.getNumMessages();
+
+        mNotificationCount.setText(count < 100 ? count + "" : "+");
+
+        count = singleton.getNumOfNewActivities();
+        mUpdateNotification.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        mUpdatesCounter.setText(count < 100 ? count + "" : "+");
+
         mChatSubscription = NewMessageBus.getInstance().getObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -274,7 +278,6 @@ public class DiscoverHolderFragment extends BaseFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(mNotificationEventAction1);
-
     }
 
 
@@ -311,24 +314,14 @@ public class DiscoverHolderFragment extends BaseFragment {
         mFeedFragments[0].scrollUp();
     }
 
-
-    /*public SingleVideoPlaybackManager getSinglePlaybackManager() {
-        return mSingleVideoPlaybackManager;
-    }
-*/
     private Subscription mChatSubscription;
 
     private Action1<NewMessageEvent> mNewMessageSubscriber = new Action1<NewMessageEvent>() {
         @Override
         public void call(NewMessageEvent event) {
-            if (event.hasNewMessage() != mHasMessage) {
-
-                mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
-                mNotificationCount.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
-                mNotificationCount.setText(String.valueOf(event.getmNewMessageCount()));
-
-                mHasMessage = event.hasNewMessage();
-            }
+            mNotificationIndicator.setVisibility(event.hasNewMessage() ? View.VISIBLE : View.GONE);
+            int count = NotificationsCounterSingleton.getInstance().getNumMessages();
+            mNotificationCount.setText(count < 100 ? count + "" : "+");
         }
     };
 

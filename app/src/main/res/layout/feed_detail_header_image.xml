@@ -7,7 +7,7 @@
     <include layout="@layout/feed_detail_image"/>
 
     <View android:layout_width="match_parent"
-          android:layout_height="6dp"
+          android:layout_height="@dimen/list_space"
           android:background="@color/seperator_color"/>
 
 </LinearLayout>

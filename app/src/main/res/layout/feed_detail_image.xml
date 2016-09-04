@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="vertical"
-    >
-
+>
 
     <include layout="@layout/feed_detail_header"/>
 
@@ -21,14 +20,14 @@
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:layout_height="320dp"
-        android:background="@color/seperator_color">
+        android:background="@color/seperator_color"
+        tools:layout_height="320dp">
 
         <ImageView
             android:id="@+id/feedDetail_event_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+        />
 
         <View
             android:id="@+id/feed_detail_hidden_animation"

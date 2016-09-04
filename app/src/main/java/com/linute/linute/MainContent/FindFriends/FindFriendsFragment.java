@@ -125,10 +125,11 @@ public class FindFriendsFragment extends BaseFragment {
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(llm);
 
-        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), Glide.with(getParentFragment()), mFriendFoundList);
+        mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList);
+        mFriendSearchAdapter.setRequestManager(Glide.with(this));
 
         recyclerView.setAdapter(mFriendSearchAdapter);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
+        //recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -154,11 +155,19 @@ public class FindFriendsFragment extends BaseFragment {
 //                    Log.i(TAG, response.body().string());
                         try {
                             JSONObject json = new JSONObject(response.body().string());
+                            //Log.i(TAG, "onResponse: "+json.toString(4));
                             JSONArray events = json.getJSONArray("people");
                             ArrayList<FriendSearchUser> tempFriends = new ArrayList<>();
+                            JSONObject friend;
                             if (events != null) {
                                 for (int i = 0; i < events.length(); i++) {
-                                    tempFriends.add(new FriendSearchUser(events.getJSONObject(i).getJSONObject("owner")));
+                                    try{
+                                       friend = events.getJSONObject(i).getJSONObject("friend");
+                                    }catch (JSONException e){
+                                        friend = null;
+                                    }
+
+                                    tempFriends.add(new FriendSearchUser(events.getJSONObject(i).getJSONObject("owner"), friend));
                                 }
                             }
 
@@ -479,6 +488,7 @@ public class FindFriendsFragment extends BaseFragment {
                     try {
                         JSONObject json = new JSONObject(response.body().string());
 
+                        //Log.i(TAG, "onResponse: "+json.toString(4));
                         JSONArray friends = json.getJSONArray("friends");
 
                         if (friends != null) {
@@ -499,11 +509,6 @@ public class FindFriendsFragment extends BaseFragment {
                                 //showRetryButton(false);
                                 mProgressBar.setVisibility(View.GONE);
 
-                                if (mFriendFoundList.isEmpty()) {
-                                    mEmptyText.setVisibility(View.VISIBLE);
-                                } else {
-                                    mEmptyText.setVisibility(View.GONE);
-                                }
 
                                 mMainHandler.removeCallbacksAndMessages(null);
                                 mMainHandler.post(new Runnable() {
@@ -512,6 +517,12 @@ public class FindFriendsFragment extends BaseFragment {
                                         mFriendFoundList.clear();
                                         mFriendFoundList.addAll(mUnfilteredList);
                                         mFriendSearchAdapter.notifyDataSetChanged();
+
+                                        if (mFriendFoundList.isEmpty()) {
+                                            mEmptyText.setVisibility(View.VISIBLE);
+                                        } else {
+                                            mEmptyText.setVisibility(View.GONE);
+                                        }
                                     }
                                 });
 
@@ -775,6 +786,18 @@ public class FindFriendsFragment extends BaseFragment {
             if (mUnfilteredList.isEmpty()) return;
             filterList(query);
         }
+    }
+
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (mFriendSearchAdapter.getRequestManager() != null)
+            mFriendSearchAdapter.getRequestManager().onDestroy();
+
+        mFriendSearchAdapter.setRequestManager(null);
     }
 
     @Override

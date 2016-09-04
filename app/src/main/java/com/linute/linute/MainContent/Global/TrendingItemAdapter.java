@@ -15,6 +15,7 @@ import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * Created by QiFeng on 5/14/16.
  */
-public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class TrendingItemAdapter extends BaseFeedAdapter {
 
     public static final int UNDEFINED = 666;
 
@@ -38,21 +39,14 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     String mUserId;
     String mImageSignature;
     String mCollege;
-    String mTrendId;
-
-    short mFooterState = 0;
-    private RequestManager mRequestManager;
+    GlobalChoiceItem mGlobalItem;
 
 
-    LoadMoreViewHolder.OnLoadMore mOnLoadMore;
-
-
-    TrendingItemAdapter(List<Post> posts, Context context, LoadMoreViewHolder.OnLoadMore o, RequestManager manager,String trendId) {
+    TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
         mContext = context;
         mRequestManager = manager;
         mPosts = posts;
-        mOnLoadMore = o;
-        mTrendId = trendId;
+        mGlobalItem = item;
 
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
@@ -82,16 +76,20 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+
         if (holder instanceof BaseTrendViewHolder) {
             ((BaseTrendViewHolder) holder).bindModel(mPosts.get(position));
-        }else if (holder instanceof VideoTrendViewHolder){
-            ((VideoFeedHolder)holder).bindModel(mPosts.get(position));
-        }
-        else if (holder instanceof LoadMoreViewHolder) {
-            ((LoadMoreViewHolder) holder).bindView(mFooterState);
+        } else if (holder instanceof VideoTrendViewHolder) {
+            ((VideoFeedHolder) holder).bindModel(mPosts.get(position));
+        } else if (holder instanceof LoadMoreViewHolder) {
+            ((LoadMoreViewHolder) holder).bindView(mLoadState);
         }
 
-        if (position == mPosts.size() - 1 && mOnLoadMore != null) mOnLoadMore.loadMore();
+        if (position == mPosts.size() - 1) {
+            loadMoreFeed();
+        } else if (position == mPosts.size() && mLoadState == LoadMoreViewHolder.STATE_END) {
+            mGlobalItem.setUnread(0);
+        }
     }
 
 
@@ -106,19 +104,6 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         } else {
             return UNDEFINED;
         }
-    }
-
-
-    public boolean setFooterState(short footerState) {
-        if (mFooterState != footerState) {
-            mFooterState = footerState;
-            return true;
-        }
-        return false;
-    }
-
-    public short getFooterState() {
-        return mFooterState;
     }
 
     @Override
@@ -145,7 +130,7 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
 
-    public class VideoTrendViewHolder extends VideoFeedHolder{
+    public class VideoTrendViewHolder extends VideoFeedHolder {
 
         protected TextView vCollegeName;
 
@@ -177,7 +162,10 @@ public class TrendingItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     JSONArray mEventIds = new JSONArray();
                     mEventIds.put(id);
                     body.put("events", mEventIds);
-                    body.put("trend", mTrendId);
+
+                    if (mGlobalItem.key != null) {
+                        body.put("trend", mGlobalItem.key);
+                    }
 
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
