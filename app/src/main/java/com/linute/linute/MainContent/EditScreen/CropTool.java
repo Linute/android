@@ -403,8 +403,8 @@ public class CropTool extends EditContentTool {
         mCropModeViews = new FrameLayout[mCropModes.length];
 
 
-        int maxHeight = parent.getHeight();
-        int maxWidth = mCropperLayout.getWidth() * maxHeight / mCropperLayout.getHeight();
+//        int maxHeight = parent.getHeight();
+//        int maxWidth = mCropperLayout.getWidth() * maxHeight / mCropperLayout.getHeight();
 
 
         for (int i = 0; i < mCropModes.length; i++) {

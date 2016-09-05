@@ -367,7 +367,7 @@ public class CameraFragment extends Fragment {
                         .beginTransaction()
                         .replace(
                                 R.id.fragment_container,
-                                EditFragment.newInstance(uri, EditFragment.ContentType.Video, returnType, videoDimen),
+                                EditFragment.newInstance(uri, ((CameraActivity)getActivity()).isChat ? EditFragment.ContentType.ChatVideo : EditFragment.ContentType.Video, returnType, videoDimen),
                                 AbstractEditSaveFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
@@ -747,7 +747,7 @@ public class CameraFragment extends Fragment {
                                                                 .beginTransaction()
                                                                 .replace(
                                                                         R.id.fragment_container,
-                                                                        EditFragment.newInstance(uri, EditFragment.ContentType.Photo, returnType, photoDimens),
+                                                                        EditFragment.newInstance(uri, ((CameraActivity)getActivity()).isChat ? EditFragment.ContentType.ChatPhoto : EditFragment.ContentType.Photo, returnType, photoDimens),
                                                                         AbstractEditSaveFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();

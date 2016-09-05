@@ -34,6 +34,9 @@ public class CameraActivity extends AppCompatActivity {
     public final static String CAMERA_TYPE = "camera_type";
     //public final static String GALLERY_TYPE = "gallery_filters";
     public final static String ANON_KEY = "anon_key";
+    public final static String IS_CHAT = "is_chat";
+
+    public boolean isChat = false;
 
     private CameraType mCameraType;
     private int mReturnType;
@@ -62,6 +65,7 @@ public class CameraActivity extends AppCompatActivity {
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
+            isChat = i.getBooleanExtra(IS_CHAT, false);
             //mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
             mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
