@@ -267,11 +267,26 @@ public class EditFragment extends BaseFragment {
                 return false;
             }
         });
+        String menuTitle = null;
+        switch (mContentSubType) {
+            case Comment:
+                menuTitle = null;
+                break;
+            case Post:
+                menuTitle = "POST";
+                break;
+            case Chat:
+                menuTitle = null;
+                break;
+            case UploadPost:
+                menuTitle = null;
+        }
 
-    /*    mMenu.findItem(R.id.menu_item_done).setTitle(
-
-
-        )*/
+        if(menuTitle == null) {
+            mMenu.findItem(R.id.menu_item_done).setIcon(R.drawable.ic_action_action_done);
+        }else{
+            mMenu.findItem(R.id.menu_item_done).setTitle(menuTitle);
+        }
 
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
