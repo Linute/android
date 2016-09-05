@@ -293,7 +293,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     mCheckBox.setChecked(false);
                 } else {
                     text.setText("ON");
-                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
+                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.secondaryColor));
                     mCheckBox.setChecked(true);
                 }
             }
