@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.FriendsList;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.linute.linute.API.LSDKFriends;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -122,6 +122,7 @@ public class FriendsListFragment extends BaseFragment {
                                     BaseTaptActivity acc = (BaseTaptActivity) getActivity();
                                     Intent i = new Intent(getActivity(), CameraActivity.class);
                                     i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                    i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
                                     i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                                     acc.startActivityForResult(i, MainActivity.PHOTO_STATUS_POSTED);
                                 }

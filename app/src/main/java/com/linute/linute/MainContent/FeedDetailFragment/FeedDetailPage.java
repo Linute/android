@@ -46,6 +46,7 @@ import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -323,6 +324,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE));
+                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Comment);
                         } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.IMAGE);

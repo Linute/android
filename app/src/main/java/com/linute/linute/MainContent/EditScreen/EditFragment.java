@@ -92,6 +92,7 @@ public class EditFragment extends BaseFragment {
 
     private static final String ARG_URI = "content_uri";
     private static final String ARG_CONTENT_TYPE = "content_type";
+    private static final String ARG_CONTENT_SUB_TYPE = "content_sub_type";
     private static final String ARG_RETURN_TYPE = "return_type";
     private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
@@ -109,11 +110,16 @@ public class EditFragment extends BaseFragment {
     private Toolbar mToolbar;
 
     public enum ContentType {
-        Photo, Video, UploadedPhoto, UploadedVideo, ChatPhoto, ChatVideo
+        None, Photo, Video
+    }
+
+    public enum ContentSubType {
+        None, Post, Chat, Comment, UploadPost
     }
 
     private Uri mUri;
     private ContentType mContentType;
+    private ContentSubType mContentSubType = ContentSubType.None;
     private Dimens mDimens;
 
     private EditContentTool[] mTools;
@@ -133,11 +139,12 @@ public class EditFragment extends BaseFragment {
     View mContentView;
 
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
+    public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens/*, int cameraType*/) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
         args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
+        args.putSerializable(ARG_CONTENT_SUB_TYPE, contentSubType);
         args.putInt(ARG_RETURN_TYPE, returnType);
         args.putParcelable(ARG_DIMEN, dimens);
 //        args.putInt(ARG_CAMERA_TYPE, cameraType);
@@ -158,6 +165,13 @@ public class EditFragment extends BaseFragment {
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
+        mContentSubType = (ContentSubType)args.getSerializable(ARG_CONTENT_SUB_TYPE);
+        if(mContentType == ContentType.None){
+            mContentType = ContentType.Photo;
+        }
+        if(mContentSubType == ContentSubType.None){
+            mContentSubType = ContentSubType.Post;
+        }
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
         mDimens = args.getParcelable(ARG_DIMEN);
@@ -167,7 +181,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo || mContentType == ContentType.ChatVideo) {
+        if (mContentType == ContentType.Video) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -373,8 +387,6 @@ public class EditFragment extends BaseFragment {
     private void setupMainContent(Uri uri, ContentType contentType, DisplayMetrics metrics) {
         switch (contentType) {
             case Photo:
-            case UploadedPhoto:
-            case ChatPhoto:
                 final MoveZoomImageView imageView = new MoveZoomImageView(getContext());
                 imageView.leftBound = 0;
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
@@ -432,8 +444,6 @@ public class EditFragment extends BaseFragment {
 //                imageView.setImageURI(uri);
                 break;
             case Video:
-            case UploadedVideo:
-            case ChatVideo:
 
                 final CheckBox mPlaying = new CheckBox(getContext());
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
@@ -534,35 +544,43 @@ public class EditFragment extends BaseFragment {
 
         switch (mContentType){
             case Photo:
-            case UploadedPhoto:
-                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
-                return new EditContentTool[]{
-                        privacySettingTool,
-                        cropTool,
-                        textTool,
-                        stickersTool,
-                        overlaysTool
-                };
-            case ChatPhoto:
-                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
-                return new EditContentTool[]{
-                        cropTool,
-                        textTool,
-                        stickersTool
-                };
+                switch (mContentSubType){
+                    case Post:
+                    case UploadPost:
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                privacySettingTool,
+                                cropTool,
+                                textTool,
+                                stickersTool,
+                                overlaysTool
+                        };
+                    case Chat:
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
+                }
+
             case Video:
-            case UploadedVideo:
-                return new EditContentTool[]{
-                        privacySettingTool,
-                        textTool,
-                        stickersTool,
-                        overlaysTool
-                };
-            case ChatVideo:
-                return new EditContentTool[]{
-                        textTool,
-                        stickersTool,
-                };
+                switch (mContentSubType){
+                    case Post:
+                    case UploadPost:
+                        return new EditContentTool[]{
+                                privacySettingTool,
+                                textTool,
+                                stickersTool,
+                                overlaysTool
+                        };
+                    case Chat:
+                        return new EditContentTool[]{
+                                textTool,
+                                stickersTool,
+                        };
+                }
+
 
 
         }
@@ -587,13 +605,9 @@ public class EditFragment extends BaseFragment {
     private void beginUpload(ProcessingOptions options) {
         switch (mContentType) {
             case Video:
-            case UploadedVideo:
-            case ChatVideo:
                 processVideo(options);
                 return;
             case Photo:
-            case UploadedPhoto:
-            case ChatPhoto:
                 processPhoto(options);
                 return;
         }

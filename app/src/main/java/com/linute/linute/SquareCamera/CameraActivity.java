@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
 
@@ -34,9 +35,9 @@ public class CameraActivity extends AppCompatActivity {
     public final static String CAMERA_TYPE = "camera_type";
     //public final static String GALLERY_TYPE = "gallery_filters";
     public final static String ANON_KEY = "anon_key";
-    public final static String IS_CHAT = "is_chat";
+    public final static String CONTENT_SUB_TYPE = "content_sub_type";
 
-    public boolean isChat = false;
+    public EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
 
     private CameraType mCameraType;
     private int mReturnType;
@@ -65,7 +66,10 @@ public class CameraActivity extends AppCompatActivity {
                 mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
 
             mReturnType = i.getIntExtra(RETURN_TYPE, RETURN_URI);
-            isChat = i.getBooleanExtra(IS_CHAT, false);
+            contentType = (EditFragment.ContentSubType)i.getSerializableExtra(CONTENT_SUB_TYPE);
+            if(contentType == null){
+                contentType = EditFragment.ContentSubType.None;
+            }
             //mGalleryType = i.getIntExtra(GALLERY_TYPE, ALL);
         } else {
             mCameraType = new CameraType(CameraType.CAMERA_PICTURE);
@@ -78,7 +82,7 @@ public class CameraActivity extends AppCompatActivity {
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                    .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
                     .commit();
         }
     }
@@ -165,7 +169,7 @@ public class CameraActivity extends AppCompatActivity {
     protected void launchCameraFragment() {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, CameraFragment.newInstance(), CameraFragment.TAG)
+                .replace(R.id.fragment_container, CameraFragment.newInstance(contentType), CameraFragment.TAG)
                 .commit();
     }
 
@@ -204,7 +208,7 @@ public class CameraActivity extends AppCompatActivity {
 
             if (fragment != null) {
                 getSupportFragmentManager().popBackStack();
-            } else {;
+            } else {
                 clearBackStack();
             }
         } else {

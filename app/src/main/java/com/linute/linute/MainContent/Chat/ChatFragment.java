@@ -31,6 +31,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.CreateContent.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
@@ -305,7 +306,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
-                            i.putExtra(CameraActivity.IS_CHAT, true);
+                            i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
                         }
                         else {
                             i = new Intent(getContext(), GalleryActivity.class);
