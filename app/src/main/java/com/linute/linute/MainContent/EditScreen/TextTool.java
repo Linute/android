@@ -195,7 +195,13 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(view);
+                hideKeyboard(midET);
+            }
+        });
+        mTextContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hideKeyboard(midET);
             }
         });
         mTextContainer.setClickable(false);
@@ -207,6 +213,12 @@ public class TextTool extends EditContentTool {
         view.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        if(view == midET){
+            if(midET.getText().toString().trim().equals("")){
+                selectTextMode(0);
+            }
+        }
     }
 
     public void swapSnapchatET() {
@@ -309,6 +321,9 @@ public class TextTool extends EditContentTool {
         hideKeyboard(midET);
         hideKeyboard(botTV);
         hideKeyboard(topTV);
+        midET.setFocusable(false);
+        botTV.setFocusable(false);
+        topTV.setFocusable(false);
         midET.setCursorVisible(false);
     }
 
