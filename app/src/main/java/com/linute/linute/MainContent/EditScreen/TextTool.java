@@ -80,6 +80,8 @@ public class TextTool extends EditContentTool {
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
+        TextMode.savedText = new String[3];
+
         topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
         botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
 //        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
@@ -193,7 +195,13 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(view);
+                hideKeyboard(midET);
+            }
+        });
+        mTextContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hideKeyboard(midET);
             }
         });
         mTextContainer.setClickable(false);
@@ -205,6 +213,12 @@ public class TextTool extends EditContentTool {
         view.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        if(view == midET){
+            if(midET.getText().toString().trim().equals("")){
+                selectTextMode(0);
+            }
+        }
     }
 
     public void swapSnapchatET() {
@@ -259,12 +273,14 @@ public class TextTool extends EditContentTool {
         textModes[oldSelected].onUnSelected();
         textModes[mSelected].onSelected();
 
-        ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
-        ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
-                textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
-                PorterDuff.Mode.ADD
-        ));
+        if(textModeViews[0] != null) {
+            ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
+            ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
+                    textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
+                    PorterDuff.Mode.ADD
+            ));
 
+        }
     }
 
     public boolean hasText() {
@@ -307,6 +323,9 @@ public class TextTool extends EditContentTool {
         hideKeyboard(midET);
         hideKeyboard(botTV);
         hideKeyboard(topTV);
+        midET.setFocusable(false);
+        botTV.setFocusable(false);
+        topTV.setFocusable(false);
         midET.setCursorVisible(false);
     }
 

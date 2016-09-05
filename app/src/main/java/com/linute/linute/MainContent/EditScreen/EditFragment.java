@@ -109,7 +109,7 @@ public class EditFragment extends BaseFragment {
     private Toolbar mToolbar;
 
     public enum ContentType {
-        Photo, Video, UploadedPhoto, UploadedVideo
+        Photo, Video, UploadedPhoto, UploadedVideo, ChatPhoto, ChatVideo
     }
 
     private Uri mUri;
@@ -167,7 +167,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
+        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo || mContentType == ContentType.ChatVideo) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -374,6 +374,7 @@ public class EditFragment extends BaseFragment {
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
+            case ChatPhoto:
                 final MoveZoomImageView imageView = new MoveZoomImageView(getContext());
                 imageView.leftBound = 0;
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
@@ -432,6 +433,7 @@ public class EditFragment extends BaseFragment {
                 break;
             case Video:
             case UploadedVideo:
+            case ChatVideo:
 
                 final CheckBox mPlaying = new CheckBox(getContext());
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
@@ -528,28 +530,43 @@ public class EditFragment extends BaseFragment {
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView)mToolbar.findViewById(R.id.image_sticker_trash));
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+        CropTool cropTool;
 
-        if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
-            CropTool cropTool;
-            cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+        switch (mContentType){
+            case Photo:
+            case UploadedPhoto:
+                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                return new EditContentTool[]{
+                        privacySettingTool,
+                        cropTool,
+                        textTool,
+                        stickersTool,
+                        overlaysTool
+                };
+            case ChatPhoto:
+                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                return new EditContentTool[]{
+                        cropTool,
+                        textTool,
+                        stickersTool
+                };
+            case Video:
+            case UploadedVideo:
+                return new EditContentTool[]{
+                        privacySettingTool,
+                        textTool,
+                        stickersTool,
+                        overlaysTool
+                };
+            case ChatVideo:
+                return new EditContentTool[]{
+                        textTool,
+                        stickersTool,
+                };
 
 
-            return new EditContentTool[]{
-                    privacySettingTool,
-                    cropTool,
-                    textTool,
-                    stickersTool,
-                    overlaysTool
-            };
-        } else {
-            return new EditContentTool[]{
-                    privacySettingTool,
-                    textTool,
-                    stickersTool,
-                    overlaysTool
-            };
         }
-
+        return new EditContentTool[0];
     }
 
 
@@ -571,11 +588,13 @@ public class EditFragment extends BaseFragment {
         switch (mContentType) {
             case Video:
             case UploadedVideo:
+            case ChatVideo:
                 processVideo(options);
                 return;
             case Photo:
             case UploadedPhoto:
-                 processPhoto(options);
+            case ChatPhoto:
+                processPhoto(options);
                 return;
         }
     }

@@ -305,7 +305,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (which == 0) {
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
-                        } else {
+                            i.putExtra(CameraActivity.IS_CHAT, true);
+                        }
+                        else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.ALL);
                         }
