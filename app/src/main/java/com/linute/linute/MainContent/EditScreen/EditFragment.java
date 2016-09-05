@@ -268,6 +268,11 @@ public class EditFragment extends BaseFragment {
             }
         });
 
+    /*    mMenu.findItem(R.id.menu_item_done).setTitle(
+
+
+        )*/
+
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
         int height;
@@ -558,6 +563,15 @@ public class EditFragment extends BaseFragment {
                     case Chat:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
+                    case Comment:
+                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay);
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                commentPrivacyTool,
                                 cropTool,
                                 textTool,
                                 stickersTool
