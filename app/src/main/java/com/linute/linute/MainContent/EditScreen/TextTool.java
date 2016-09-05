@@ -273,12 +273,14 @@ public class TextTool extends EditContentTool {
         textModes[oldSelected].onUnSelected();
         textModes[mSelected].onSelected();
 
-        ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
-        ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
-                textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
-                PorterDuff.Mode.ADD
-        ));
+        if(textModeViews[0] != null) {
+            ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
+            ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
+                    textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
+                    PorterDuff.Mode.ADD
+            ));
 
+        }
     }
 
     public boolean hasText() {
