@@ -350,13 +350,16 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     public void goToTrend(GlobalChoiceItem item) {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
+            if (item.type == GlobalChoiceItem.TYPE_TREND)
+                setFragmentState(FragmentState.NEEDS_UPDATING);
+
             activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }
 
     private void addHotAndFriends(ArrayList<GlobalChoiceItem> items) {
-        items.add(new GlobalChoiceItem("hottest", null, GlobalChoiceItem.TYPE_HEADER_HOT));
-        items.add(new GlobalChoiceItem("friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
+        items.add(new GlobalChoiceItem("Hottest", null, GlobalChoiceItem.TYPE_HEADER_HOT));
+        items.add(new GlobalChoiceItem("Friends", null, GlobalChoiceItem.TYPE_HEADER_FRIEND));
     }
 
     @Override

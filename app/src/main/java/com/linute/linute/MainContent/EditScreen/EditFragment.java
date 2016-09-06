@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
@@ -495,25 +496,27 @@ public class EditFragment extends BaseFragment {
                 final TextureVideoView mVideoView = new TextureVideoView(getContext());
 
                 //set videovew size, otherwise video will look squeezed
-                if (mDimens.needsCropping) {
-                    int width = mDimens.width;
-                    int height = mDimens.height;
+                //if (mDimens.needsCropping) {
+                int width = mDimens.width;
+                int height = mDimens.height;
 
-                    if (isPortrait()) {
-                        width = mDimens.height;
-                        height = mDimens.width;
-                    }
+                if (isPortrait()) {
+                    width = mDimens.height;
+                    height = mDimens.width;
+                }
 
-                    if (height > width)
-                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width)));
-                    else
-                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-
-                } else
+                if (height > width)
                     mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width), Gravity.CENTER));
+                else
+                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+
+//                } else {
+//
+//                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+//                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//                }
 
                 mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -782,6 +785,18 @@ public class EditFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         if (mSubscription != null) mSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (getActivity() != null){
+            View focused = getActivity().getCurrentFocus();
+            if (focused != null) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
+            }
+        }
     }
 
     public static class ToolHolder extends RecyclerView.ViewHolder {

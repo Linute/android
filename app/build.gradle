@@ -70,6 +70,8 @@ dependencies {
 
     compile 'com.appsflyer:af-android-sdk:4+@aar'
 
+    compile 'com.android.support:multidex:1.0.1'
+
     //new
     compile group: 'org.mongodb', name: 'mongo-java-driver', version: '3.2.2'
 

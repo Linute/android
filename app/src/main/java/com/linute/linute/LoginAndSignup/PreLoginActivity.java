@@ -225,7 +225,7 @@ public class PreLoginActivity extends AppCompatActivity {
                             info.setFirstName(user.getFirstName());
                             info.setLastName(user.getLastName());
 
-                            if (user.getEmail().endsWith(".edu"))
+                            if (user.getEmail() != null && user.getEmail().endsWith(".edu"))
                                 info.setEmail(user.getEmail());
 
                             if (user.getProfileImage() != null && !user.getProfileImage().isEmpty())

@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.CreateContent.Gallery;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
@@ -126,7 +128,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
         mBucketList.add(new BucketItem("", "Gallery"));
         vSpinner = (AppCompatSpinner) toolbar.findViewById(R.id.spinner);
+        vSpinner.getBackground().setColorFilter(ContextCompat.getColor(getContext(), R.color.pure_white), PorterDuff.Mode.SRC_ATOP);
         vSpinner.setOnItemSelectedListener(this);
+
         mSpinnerAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_text, mBucketList);
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
 
@@ -201,7 +205,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         int idIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns._ID);
         int mediaIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE);
         int bucketName = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
-        final int bucketId = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_ID);
+        int bucketId = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_ID);
 
 
         final HashSet<BucketItem> bucketItems = new HashSet<>();
@@ -226,10 +230,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         mBucketList.clear();
-        mBucketList.add(new BucketItem("", "Gallery"));
+        mBucketList.add(new BucketItem("", "Gallery")); //option for all images
         mBucketList.addAll(bucketItems);
         mSpinnerAdapter.notifyDataSetChanged();
-        //vSpinner.setSelection(0);
     }
 
     @Override
@@ -280,7 +283,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 //                        Log.i(TAG, "onActivityResult: bitrate "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
-            if (length > 2500 && length < 15000) {
+            if (length > 1750 && length < 15000) {
                 mContentSubType = EditFragment.ContentSubType.None;
                 goToFragment(EditFragment.newInstance(
                         path,
@@ -296,7 +299,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
             } else {
                 mAlertDialog = new AlertDialog.Builder(getContext())
                         .setTitle("Video too short or long")
-                        .setMessage("Sorry, videos must be longer than 3 seconds and shorter than 15 seconds")
+                        .setMessage("Sorry, videos must be longer than 2 seconds and shorter than 15 seconds")
                         .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -321,12 +324,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
                 EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens),
                 EditFragment.TAG
         );
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        vSpinner.setSelection(vSpinner.getSelectedItemPosition());
     }
 
     private void goToFragment(Fragment fragment, String tag) {

@@ -300,6 +300,7 @@ public class CameraFragment extends Fragment {
 
                 float mMovement;
                 float mYPosition;
+                int mMovementThreshold = 30;
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -319,6 +320,7 @@ public class CameraFragment extends Fragment {
                         case MotionEvent.ACTION_DOWN:
                             mYPosition = event.getY();
                             mMovement = 0;
+                            mMovementThreshold = 30;
                             if (!mIsRecording && !mVideoProcessing) {
                                 mTakePhotoBtn.setImageResource(R.drawable.square_camera_selected);
                                 mRecordHandler.removeCallbacks(mRunnable);
@@ -330,9 +332,10 @@ public class CameraFragment extends Fragment {
                             if (mIsRecording) {
                                 mMovement += mYPosition - event.getY();
                                 mYPosition = event.getY();
-                                if (mMovement > 5 || mMovement < -5) {
+                                if (Math.abs(mMovement) > mMovementThreshold) {
                                     mPreviewView.zoom(mMovement > 0 ? 2 : -2);
                                     mMovement = 0;
+                                    mMovementThreshold = 5;
                                 }
                             }
                             break;
@@ -569,6 +572,8 @@ public class CameraFragment extends Fragment {
         if (focusmodes != null && focusmodes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
             parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
+
+        parameters.setZoom(0);
 
         // Lock in the changes
         mCamera.setParameters(parameters);
@@ -971,7 +976,7 @@ public class CameraFragment extends Fragment {
                 mProgressAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                     @Override
                     public void onAnimationUpdate(ValueAnimator animation) {
-                        if (animation.getCurrentPlayTime() >= 3000) {
+                        if (animation.getCurrentPlayTime() >= 2000) {
                             mProgressAnimator.removeAllUpdateListeners();
                             mRecordProgress.setProgressDrawable(
                                     ContextCompat.getDrawable(getContext(), R.drawable.camera_progress));
@@ -1039,14 +1044,16 @@ public class CameraFragment extends Fragment {
 
             mTakePhotoBtn.setImageResource(R.drawable.square_camera_capture);
             hideCameraButtons(false);
-            if (duration < 3000) { //recorded video was less than 2.5 secs. slight lag time between button press and start recording
-                showVideoTooShortDialog();
-            } else if (mVideoUri != null) {  //go to edit video screen
-                goToVideoEditFragment(mVideoUri, mVideoDimen);
-            }
 
             mIsRecording = false;
             mVideoProcessing = false;
+
+            if (duration < 2000) {
+                //showVideoTooShortDialog();
+                takePicture();
+            } else if (mVideoUri != null) {  //go to edit video screen
+                goToVideoEditFragment(mVideoUri, mVideoDimen);
+            }
         }
     }
 }
