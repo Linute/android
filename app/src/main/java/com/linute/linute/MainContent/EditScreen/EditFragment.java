@@ -655,9 +655,11 @@ public class EditFragment extends BaseFragment {
     private void beginUpload(ProcessingOptions options) {
         switch (mContentType) {
             case Video:
+            case UploadedVideo:
                 processVideo(options);
                 return;
             case Photo:
+            case UploadedPhoto:
                 processPhoto(options);
                 return;
         }
