@@ -98,7 +98,7 @@ public class TextTool extends EditContentTool {
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                frag.onToolSelected(2);
+                frag.selectTool(TextTool.this);
             }
         };
 

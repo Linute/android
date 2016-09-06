@@ -391,6 +391,14 @@ public class EditFragment extends BaseFragment {
         return root;
     }
 
+    public void selectTool(EditContentTool tool){
+        for (int i=0;i<mTools.length;i++){
+            if(mTools[i] == tool){
+                onToolSelected(i);
+                break;
+            }
+        }
+    }
 
     protected void onToolSelected(int i) {
         if (mIsDisabled[i] || mSelectedTool == i) return;
