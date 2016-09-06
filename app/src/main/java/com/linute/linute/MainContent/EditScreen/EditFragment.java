@@ -571,12 +571,15 @@ public class EditFragment extends BaseFragment {
         //(Crop appears above Text, which appears above Overlays, etc)
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-        OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
         CropTool cropTool;
+        OverlaysTool overlaysTool;
 
+        MediaMetadataRetriever retriever;
         switch (mContentType){
             case UploadedPhoto:
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
+
                 cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                 return new EditContentTool[]{
                         privacySettingTool,
@@ -586,6 +589,7 @@ public class EditFragment extends BaseFragment {
                         overlaysTool
                 };
             case Photo:
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
                 switch (mContentSubType){
                     case Post:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
@@ -614,6 +618,10 @@ public class EditFragment extends BaseFragment {
                         };
                 }
             case UploadedVideo:
+                retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(mUri.getPath());
+                retriever.getFrameAtTime(0);
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay,retriever.getFrameAtTime(0));
                 return new EditContentTool[]{
                         privacySettingTool,
                         textTool,
@@ -621,6 +629,9 @@ public class EditFragment extends BaseFragment {
                         overlaysTool
                 };
             case Video:
+                retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(mUri.getPath());
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay,retriever.getFrameAtTime(0));
                 switch (mContentSubType){
                     case Post:
                         return new EditContentTool[]{
