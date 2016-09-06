@@ -127,7 +127,10 @@ public class TextTool extends EditContentTool {
         midET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
             @Override
             public void enterPressed() {
-                selectTextMode(0);
+                if(midET.getText().toString().trim().equals("")) {
+                    selectTextMode(0);
+                    hideKeyboard(midET);
+                }
             }
         });
 
@@ -204,15 +207,14 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(midET);
+                if(mSelected != 0) {
+                    hideKeyboard(midET);
+                }else{
+                    selectTextMode(MID_TEXT_INDEX);
+                }
             }
         });
-        mTextContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hideKeyboard(midET);
-            }
-        });
+
         mTextContainer.setClickable(false);
 
         mOverlaysView.addView(mTextContainer);
