@@ -244,7 +244,7 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_close);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
         mToolbar.inflateMenu(R.menu.menu_fragment_edit);
         mMenu = mToolbar.getMenu();
 
@@ -323,63 +323,71 @@ public class EditFragment extends BaseFragment {
                 }
             }
         });
-        setupMainContent(mUri, mContentType, metrics);
 
-        mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
 
-        mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
+        try {
+            setupMainContent(mUri, mContentType, metrics);
 
-        //horrible hack
-        if (!mDimens.needsCropping) {
-            mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-        } else if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
-            //screen was too small for 6:5 ratio, the video or image is a square, relayout accordingly
-            CustomView view = (CustomView) root.findViewById(R.id.spacer);
-            if (view != null) {
-                view.setMakeSquare(true);
+
+            mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
+
+            mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
+
+            //horrible hack
+            if (!mDimens.needsCropping) {
+                mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
+            } else if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
+                //screen was too small for 6:5 ratio, the video or image is a square, relayout accordingly
+                CustomView view = (CustomView) root.findViewById(R.id.spacer);
+                if (view != null) {
+                    view.setMakeSquare(true);
+                }
+
+                CustomFrameLayout frame = (CustomFrameLayout) mOverlaysContainer;
+                if (frame != null) {
+                    frame.setMakeSquare(true);
+                }
+
+                root.requestLayout();
             }
 
-            CustomFrameLayout frame = (CustomFrameLayout) mOverlaysContainer;
-            if (frame != null) {
-                frame.setMakeSquare(true);
+            mTools = setupTools(mOverlaysContainer);
+            mIsDisabled = new boolean[mTools.length];
+            mToolViews = new View[mTools.length];
+
+
+            //Set up adapter that controls tool selection
+            LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
+
+            View.OnClickListener onClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onToolSelected((Integer) view.getTag());
+                }
+            };
+
+            toolHolders = new ToolHolder[mTools.length];
+
+            for (int i = 0; i < mTools.length; i++) {
+                EditContentTool tool = mTools[i];
+                View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
+                toolHolders[i] = new ToolHolder(toolView);
+                toolHolders[i].bind(tool);
+                toolHolders[i].setSelected(false, false);
+
+                toolView.setTag(i);
+                toolView.setOnClickListener(onClickListener);
+                toolsListRV.addView(toolView);
             }
 
-            root.requestLayout();
+            if (mTools.length > 0)
+                onToolSelected(0);
+
+            showProgress(false);
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
-
-        mTools = setupTools(mOverlaysContainer);
-        mIsDisabled = new boolean[mTools.length];
-        mToolViews = new View[mTools.length];
-
-
-        //Set up adapter that controls tool selection
-        LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
-
-        View.OnClickListener onClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onToolSelected((Integer) view.getTag());
-            }
-        };
-
-        toolHolders = new ToolHolder[mTools.length];
-
-        for (int i = 0; i < mTools.length; i++) {
-            EditContentTool tool = mTools[i];
-            View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
-            toolHolders[i] = new ToolHolder(toolView);
-            toolHolders[i].bind(tool);
-            toolHolders[i].setSelected(false, false);
-
-            toolView.setTag(i);
-            toolView.setOnClickListener(onClickListener);
-            toolsListRV.addView(toolView);
-        }
-
-        if (mTools.length > 0)
-            onToolSelected(0);
-
-        showProgress(false);
         return root;
     }
 
@@ -424,7 +432,6 @@ public class EditFragment extends BaseFragment {
                 opts.inJustDecodeBounds = false;
                 final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
 
-
                 int scalewidth = image.getWidth();
                 if (scalewidth < metrics.widthPixels) {
                     scalewidth = metrics.widthPixels;
@@ -451,6 +458,7 @@ public class EditFragment extends BaseFragment {
                 mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
                     int layouts = 0;
+
                     @Override
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                         imageView.invalidate();
@@ -557,7 +565,7 @@ public class EditFragment extends BaseFragment {
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
-        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView)mToolbar.findViewById(R.id.image_sticker_trash));
+        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
         OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
         CropTool cropTool;

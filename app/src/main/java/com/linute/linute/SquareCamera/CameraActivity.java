@@ -77,6 +77,8 @@ public class CameraActivity extends AppCompatActivity {
             //mGalleryType = ALL;
         }
 
+        clearBackStack();
+
         requestPermissions();
 
         if (savedInstanceState == null && mHasWriteAndCameraPermission) {

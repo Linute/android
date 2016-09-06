@@ -43,7 +43,7 @@ import com.linkedin.android.spyglass.ui.MentionsEditText;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKFriends;
-import com.linute.linute.MainContent.CreateContent.GalleryActivity;
+import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
