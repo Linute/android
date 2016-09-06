@@ -277,7 +277,7 @@ public class TextTool extends EditContentTool {
             ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
             ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
                     textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
-                    PorterDuff.Mode.ADD
+                    PorterDuff.Mode.MULTIPLY
             ));
 
         }
