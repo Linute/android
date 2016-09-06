@@ -87,8 +87,6 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
         if (position == mPosts.size() - 1) {
             loadMoreFeed();
-        } else if (position == mPosts.size() && mLoadState == LoadMoreViewHolder.STATE_END) {
-            mGlobalItem.setUnread(0);
         }
     }
 

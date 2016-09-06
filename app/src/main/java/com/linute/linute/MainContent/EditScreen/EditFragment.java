@@ -230,7 +230,7 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back);
+        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
         mToolbar.inflateMenu(R.menu.menu_fragment_edit);
         mMenu = mToolbar.getMenu();
 

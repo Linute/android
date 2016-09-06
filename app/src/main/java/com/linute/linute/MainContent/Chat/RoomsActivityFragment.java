@@ -206,7 +206,6 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         super.onDestroy();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            Log.i(TAG, "onDestroy: emit");
             activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
         }
     }
@@ -588,6 +587,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         mRoomsAdapter.setLoadingMoreState(!mCanLoadMore ?
                                 LoadMoreViewHolder.STATE_END : LoadMoreViewHolder.STATE_LOADING);
 
+                        //Log.i(TAG, "onResponse: "+mRoomsAdapter.getLoadingMoreState());
 
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
@@ -597,9 +597,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                         @Override
                                         public void run() {
                                             mSkip -= 20;
-                                            int pos = mRoomsList.size();
                                             mRoomsList.addAll(tempRooms);
-                                            mRoomsAdapter.notifyItemRangeInserted(pos, tempRooms.size());
+                                            mRoomsAdapter.notifyDataSetChanged();
                                         }
                                     });
                                 }

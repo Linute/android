@@ -47,6 +47,8 @@ public class CustomCameraPreview extends SquareCameraPreview {
     private float mYPosition = 0;
     private boolean mMoved = false;
 
+    private int mMovementThreshold = 5;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
@@ -75,7 +77,7 @@ public class CustomCameraPreview extends SquareCameraPreview {
             case MotionEvent.ACTION_MOVE:
                 mMovement += mYPosition - event.getRawY();
                 mYPosition = event.getRawY();
-                if (mMovement > 5 || mMovement < -5) {
+                if (Math.abs(mMovement) > mMovementThreshold) {
                     mMoved = true;
                     zoom(mMovement > 0 ? 2 : -2);
                     mMovement = 0;

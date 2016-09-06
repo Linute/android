@@ -939,6 +939,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+                        }else {
+                            mCanLoadMore = true;
+                            mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
                         }
 
                         sortLists(tempChatList);
@@ -1121,6 +1124,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+                        }else {
+                            mCanLoadMore = true;
+                            mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
                         }
 
                         if (activity != null) {
@@ -1890,7 +1896,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     owner.getString("firstName"),
                                     owner.getString("lastName"),
                                     owner.getString("profileImage")
-
                             ));
                 }
 

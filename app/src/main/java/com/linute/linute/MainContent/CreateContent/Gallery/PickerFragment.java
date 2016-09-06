@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.CreateContent.Gallery;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
@@ -120,7 +122,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
         mBucketList.add(new BucketItem("", "Gallery"));
         vSpinner = (AppCompatSpinner) toolbar.findViewById(R.id.spinner);
+        vSpinner.getBackground().setColorFilter(ContextCompat.getColor(getContext(), R.color.pure_white), PorterDuff.Mode.SRC_ATOP);
         vSpinner.setOnItemSelectedListener(this);
+
         mSpinnerAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_text, mBucketList);
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
 
@@ -274,7 +278,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 //                        Log.i(TAG, "onActivityResult: bitrate "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
-            if (length > 2500 && length < 15000) {
+            if (length > 1750 && length < 15000) {
                 goToFragment(EditFragment.newInstance(
                         path,
                         EditFragment.ContentType.UploadedVideo,
@@ -288,7 +292,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
             } else {
                 mAlertDialog = new AlertDialog.Builder(getContext())
                         .setTitle("Video too short or long")
-                        .setMessage("Sorry, videos must be longer than 3 seconds and shorter than 15 seconds")
+                        .setMessage("Sorry, videos must be longer than 2 seconds and shorter than 15 seconds")
                         .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -331,7 +335,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Log.i(TAG, "onItemSelected: " + position);
+        //Log.i(TAG, "onItemSelected: " + position);
         showProgress(true);
         String filter = mBucketList.get(position).id;
         final ArrayList<GalleryItem> temp;
