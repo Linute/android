@@ -1,7 +1,6 @@
 package com.linute.linute.API;
 
 import android.os.Build;
-import android.util.Log;
 
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -30,7 +29,13 @@ public class API_Methods {
 
     public static String TAG = "API_METHODS";
 
+
+    //CHANGE ONLY THIS TO SWITCH TO PROD
     public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
+    //CHANGE ONLY THIS TO SWITCH TO PROD
+
+
+
     // API ENDPOINT URL
     public static final String SCHEME = "https";
 
