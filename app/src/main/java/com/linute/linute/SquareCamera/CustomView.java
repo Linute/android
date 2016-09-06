@@ -9,6 +9,11 @@ import android.view.View;
 /**
  * Created by QiFeng on 8/22/16.
  */
+
+/**
+ * View that is 6:5 ratio
+ * can also be made square by setting makeSquare
+ */
 public class CustomView extends View {
 
 

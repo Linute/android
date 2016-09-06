@@ -450,25 +450,33 @@ public class EditFragment extends BaseFragment {
                 final TextureVideoView mVideoView = new TextureVideoView(getContext());
 
                 //set videovew size, otherwise video will look squeezed
-                if (mDimens.needsCropping) {
-                    int width = mDimens.width;
-                    int height = mDimens.height;
+                //if (mDimens.needsCropping) {
+                int width = mDimens.width;
+                int height = mDimens.height;
 
-                    if (isPortrait()) {
-                        width = mDimens.height;
-                        height = mDimens.width;
-                    }
+                if (isPortrait()) {
+                    width = mDimens.height;
+                    height = mDimens.width;
+                }
 
-                    if (height > width)
-                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width)));
-                    else
-                        mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                Log.i(TAG, "setupMainContent: " + width);
+                Log.i(TAG, "setupMainContent: " + height);
 
-                } else
+                Log.i(TAG, "setupMainContent: " + (int) ((float) metrics.widthPixels * height / width));
+
+
+                if (height > width)
+                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width)));
+                else
                     mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+//                } else {
+//
+//                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+//                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//                }
 
                 mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override

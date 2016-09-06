@@ -199,7 +199,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         int idIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns._ID);
         int mediaIndex = cursor.getColumnIndex(MediaStore.Files.FileColumns.MEDIA_TYPE);
         int bucketName = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME);
-        final int bucketId = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_ID);
+        int bucketId = cursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_ID);
 
 
         final HashSet<BucketItem> bucketItems = new HashSet<>();
@@ -224,10 +224,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         }
 
         mBucketList.clear();
-        mBucketList.add(new BucketItem("", "Gallery"));
+        mBucketList.add(new BucketItem("", "Gallery")); //option for all images
         mBucketList.addAll(bucketItems);
         mSpinnerAdapter.notifyDataSetChanged();
-        //vSpinner.setSelection(0);
     }
 
     @Override
@@ -319,12 +318,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         );
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        vSpinner.setSelection(vSpinner.getSelectedItemPosition());
-    }
-
     private void goToFragment(Fragment fragment, String tag) {
         getFragmentManager()
                 .beginTransaction()
@@ -335,7 +328,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        //Log.i(TAG, "onItemSelected: " + position);
+        Log.i(TAG, "onItemSelected: " + position);
         showProgress(true);
         String filter = mBucketList.get(position).id;
         final ArrayList<GalleryItem> temp;

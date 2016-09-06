@@ -1,6 +1,8 @@
 package com.linute.linute;
 
-import android.app.Application;
+import android.content.Context;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 
 import io.realm.DynamicRealm;
 import io.realm.Realm;
@@ -10,11 +12,16 @@ import io.realm.RealmMigration;
 /**
  * Created by QiFeng on 8/11/16.
  */
-public class TaptApplication extends Application {
+public class TaptApplication extends MultiDexApplication {
 
     private static final String FILE_NAME = "tapt_data.realm";
     private static final long SCHEMA_VERSION = 1;
 
+    @Override
+    protected void attachBaseContext(Context base) {
+        MultiDex.install(base);
+        super.attachBaseContext(base);
+    }
 
     @Override
     public void onCreate() {

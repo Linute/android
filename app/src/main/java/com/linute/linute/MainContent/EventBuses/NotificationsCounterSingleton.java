@@ -14,7 +14,6 @@ public class NotificationsCounterSingleton {
 
     private static NotificationsCounterSingleton mNotificationsCounterSingleton;
 
-
     private NotificationsCounterSingleton(){
         mNumOfNewActivities = 0;
         mNumOfNewPosts = 0;
