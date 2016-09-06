@@ -29,7 +29,7 @@ public class StickersTool extends EditContentTool {
 
 
     ArrayList<Bitmap> mStickers;
-    private OverlaysAdapter mStickersAdapter;
+    private StickersAdapter mStickersAdapter;
     private RecyclerView mStickersRV;
     private FrameLayout mStickersContainer;
     private ManipulableImageView.ViewManipulationListener mManipulationListener;
@@ -95,8 +95,9 @@ public class StickersTool extends EditContentTool {
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mStickersRV = new RecyclerView(parent.getContext());
 
+        StickerVH.containerHeight = parent.getHeight();
 
-        mStickersAdapter = new OverlaysAdapter(mStickers);
+        mStickersAdapter = new StickersAdapter(mStickers);
         mStickersAdapter.setOnStickerTouchListener(onStickerTouchListener);
 
         mStickersRV.setAdapter(mStickersAdapter);
@@ -125,7 +126,7 @@ public class StickersTool extends EditContentTool {
     }
 
 
-    private OverlaysAdapter.OnStickerTouchListener onStickerTouchListener = new OverlaysAdapter.OnStickerTouchListener() {
+    private StickersAdapter.OnStickerTouchListener onStickerTouchListener = new StickersAdapter.OnStickerTouchListener() {
         @Override
         public boolean onStickerTouch(View view, int index, Bitmap bitmap) {
 
@@ -150,33 +151,33 @@ public class StickersTool extends EditContentTool {
         }
     };
 
-    protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
+    protected static class StickersAdapter extends RecyclerView.Adapter<StickerVH> {
 
         ArrayList<Bitmap> stickers;
 
         int mSelectedItem;
 
 
-
         OnStickerTouchListener mOnTouchListener;
 
 
-        public OverlaysAdapter(ArrayList<Bitmap> stickers) {
+        public StickersAdapter(ArrayList<Bitmap> stickers) {
             this.stickers = stickers;
         }
 
         @Override
-        public OverlayItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
+        public StickerVH onCreateViewHolder(ViewGroup parent, int viewType) {
             ImageView view = new ImageView(parent.getContext());
-            int height = parent.getHeight();
-            int width = ViewGroup.LayoutParams.WRAP_CONTENT;
-            view.setLayoutParams(new RecyclerView.LayoutParams(height, height));
-            view.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            return new OverlayItemVH(view);
+//            int height = parent.getHeight();
+//            int width = parent.getContext().getResources().getDisplayMetrics().widthPixels/5;
+            view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            view.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            view.setPadding(16,16,16,16);
+            return new StickerVH(view);
         }
 
         @Override
-        public void onBindViewHolder(final OverlayItemVH holder, int position) {
+        public void onBindViewHolder(final StickerVH holder, int position) {
             holder.bind(stickers.get(position), mSelectedItem == position);
            /* holder.itemView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -214,17 +215,20 @@ public class StickersTool extends EditContentTool {
 
 
 
-    protected static class OverlayItemVH extends RecyclerView.ViewHolder {
+    protected static class StickerVH extends RecyclerView.ViewHolder {
 
         ImageView vPreview;
+        public static int containerHeight = 0;
 
-        public OverlayItemVH(View itemView) {
+        public StickerVH(View itemView) {
             super(itemView);
             vPreview = (ImageView) itemView;
         }
 
         public void bind(Bitmap overlay, boolean isSelected) {
             vPreview.setImageBitmap(overlay);
+            vPreview.setLayoutParams(new RecyclerView.LayoutParams(overlay.getWidth()*containerHeight/overlay.getHeight(), containerHeight));
+            vPreview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
     }
 

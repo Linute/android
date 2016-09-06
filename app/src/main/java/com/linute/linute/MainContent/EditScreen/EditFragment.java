@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
@@ -92,6 +93,7 @@ public class EditFragment extends BaseFragment {
 
     private static final String ARG_URI = "content_uri";
     private static final String ARG_CONTENT_TYPE = "content_type";
+    private static final String ARG_CONTENT_SUB_TYPE = "content_sub_type";
     private static final String ARG_RETURN_TYPE = "return_type";
     private static final String ARG_DIMEN = "dimen";
     private static final String ARG_CAMERA_TYPE = "camera_type";
@@ -109,11 +111,16 @@ public class EditFragment extends BaseFragment {
     private Toolbar mToolbar;
 
     public enum ContentType {
-        Photo, Video, UploadedPhoto, UploadedVideo
+        None, Photo, Video, UploadedPhoto, UploadedVideo
+    }
+
+    public enum ContentSubType {
+        None, Post, Chat, Comment
     }
 
     private Uri mUri;
     private ContentType mContentType;
+    private ContentSubType mContentSubType = ContentSubType.None;
     private Dimens mDimens;
 
     private EditContentTool[] mTools;
@@ -133,11 +140,12 @@ public class EditFragment extends BaseFragment {
     View mContentView;
 
 
-    public static EditFragment newInstance(Uri uri, ContentType contentType, int returnType, Dimens dimens/*, int cameraType*/) {
+    public static EditFragment newInstance(Uri uri, ContentType contentType, ContentSubType contentSubType, int returnType, Dimens dimens/*, int cameraType*/) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARG_URI, uri);
         args.putInt(ARG_CONTENT_TYPE, contentType.ordinal());
+        args.putSerializable(ARG_CONTENT_SUB_TYPE, contentSubType);
         args.putInt(ARG_RETURN_TYPE, returnType);
         args.putParcelable(ARG_DIMEN, dimens);
 //        args.putInt(ARG_CAMERA_TYPE, cameraType);
@@ -158,6 +166,13 @@ public class EditFragment extends BaseFragment {
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
+        mContentSubType = (ContentSubType)args.getSerializable(ARG_CONTENT_SUB_TYPE);
+        if(mContentType == ContentType.None){
+            mContentType = ContentType.Photo;
+        }
+        if(mContentSubType == ContentSubType.None){
+            mContentSubType = ContentSubType.Post;
+        }
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
         mReturnType = args.getInt(ARG_RETURN_TYPE);
         mDimens = args.getParcelable(ARG_DIMEN);
@@ -167,7 +182,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
+        if (mContentType == ContentType.Video) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -230,7 +245,8 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.pure_white));
+        mToolbar.setNavigationIcon(R.drawable.ic_action_cancel);
         mToolbar.inflateMenu(R.menu.menu_fragment_edit);
         mMenu = mToolbar.getMenu();
 
@@ -253,6 +269,24 @@ public class EditFragment extends BaseFragment {
                 return false;
             }
         });
+        String menuTitle = null;
+        switch (mContentSubType) {
+            case Comment:
+                menuTitle = null;
+                break;
+            case Post:
+                menuTitle = "POST";
+                break;
+            case Chat:
+                menuTitle = null;
+                break;
+        }
+
+        if(menuTitle == null) {
+            mMenu.findItem(R.id.menu_item_done).setIcon(R.drawable.ic_action_action_done);
+        }else{
+            mMenu.findItem(R.id.menu_item_done).setTitle(menuTitle);
+        }
 
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         int displayWidth = metrics.widthPixels;
@@ -277,6 +311,7 @@ public class EditFragment extends BaseFragment {
         mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(mTools != null)
                 for (int i = 0; i < mTools.length; i++) {
                     if (mTools[i] instanceof TextTool) {
                         TextTool mTool = (TextTool) mTools[i];
@@ -357,6 +392,14 @@ public class EditFragment extends BaseFragment {
         return root;
     }
 
+    public void selectTool(EditContentTool tool){
+        for (int i=0;i<mTools.length;i++){
+            if(mTools[i] == tool){
+                onToolSelected(i);
+                break;
+            }
+        }
+    }
 
     protected void onToolSelected(int i) {
         if (mIsDisabled[i] || mSelectedTool == i) return;
@@ -369,6 +412,10 @@ public class EditFragment extends BaseFragment {
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
+
+        if(mToolbar != null){
+            mToolbar.setTitle(mTools[mSelectedTool].getName());
+        }
 
         mToolOptionsView.removeAllViews();
         if (mToolViews[i] == null) {
@@ -440,7 +487,6 @@ public class EditFragment extends BaseFragment {
                 break;
             case Video:
             case UploadedVideo:
-
                 final CheckBox mPlaying = new CheckBox(getContext());
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 
@@ -459,18 +505,12 @@ public class EditFragment extends BaseFragment {
                     height = mDimens.width;
                 }
 
-                Log.i(TAG, "setupMainContent: " + width);
-                Log.i(TAG, "setupMainContent: " + height);
-
-                Log.i(TAG, "setupMainContent: " + (int) ((float) metrics.widthPixels * height / width));
-
-
                 if (height > width)
                     mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width)));
+                            ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width), Gravity.CENTER));
                 else
                     mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 
 //                } else {
 //
@@ -542,30 +582,66 @@ public class EditFragment extends BaseFragment {
         //(Crop appears above Text, which appears above Overlays, etc)
         PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-        OverlaysTool overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
+        CropTool cropTool;
+        OverlaysTool overlaysTool;
 
-        if (mContentType == ContentType.Photo || mContentType == ContentType.UploadedPhoto) {
-            CropTool cropTool;
-            cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+        MediaMetadataRetriever retriever;
+        switch (mContentType){
+            case UploadedPhoto:
+            case Photo:
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
+                switch (mContentSubType){
+                    case Post:
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                privacySettingTool,
+                                cropTool,
+                                textTool,
+                                stickersTool,
+                                overlaysTool
+                        };
+                    case Chat:
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
+                    case Comment:
+                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay);
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                commentPrivacyTool,
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
+                }
+            case UploadedVideo:
+            case Video:
+                retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(mUri.getPath());
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay,retriever.getFrameAtTime(0));
+                switch (mContentSubType){
+                    case Post:
+                        return new EditContentTool[]{
+                                privacySettingTool,
+                                textTool,
+                                stickersTool,
+                                overlaysTool
+                        };
+                    case Chat:
+                        return new EditContentTool[]{
+                                textTool,
+                                stickersTool,
+                        };
+                }
 
 
-            return new EditContentTool[]{
-                    privacySettingTool,
-                    cropTool,
-                    textTool,
-                    stickersTool,
-                    overlaysTool
-            };
-        } else {
-            return new EditContentTool[]{
-                    privacySettingTool,
-                    textTool,
-                    stickersTool,
-                    overlaysTool
-            };
+
         }
-
+        return new EditContentTool[0];
     }
 
 
@@ -709,6 +785,18 @@ public class EditFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         if (mSubscription != null) mSubscription.unsubscribe();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (getActivity() != null){
+            View focused = getActivity().getCurrentFocus();
+            if (focused != null) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
+            }
+        }
     }
 
     public static class ToolHolder extends RecyclerView.ViewHolder {

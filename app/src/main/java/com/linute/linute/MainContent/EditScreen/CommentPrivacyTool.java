@@ -19,12 +19,12 @@ import com.linute.linute.UtilsAndHelpers.Utils;
 /**
  * Created by mikhail on 8/22/16.
  */
-public class PrivacySettingTool extends EditContentTool {
+public class CommentPrivacyTool extends EditContentTool {
 
     private boolean isAnonCommentsDisabled = ProcessingOptions.DEFAULT_ANON_COMMENTS_DISABLED;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
 
-    public PrivacySettingTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
+    public CommentPrivacyTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
         super(uri, type, overlays);
     }
 
@@ -38,7 +38,7 @@ public class PrivacySettingTool extends EditContentTool {
         TextView postingAsLeftText = (TextView) leftSwitch.findViewById(R.id.text_heading_left);
         TextView postingAsRightText = (TextView) leftSwitch.findViewById(R.id.text_heading_right);
         SwitchCompat postingAsSwitch = (SwitchCompat) leftSwitch.findViewById(R.id.switch_main);
-        postingAsHeader.setText("Posting as");
+        postingAsHeader.setText("Commenting as");
 
         postingAsLeftText.setText("");
         postingAsRightText.setText("");
@@ -46,38 +46,28 @@ public class PrivacySettingTool extends EditContentTool {
         postingAsSwitch.setTextOff("Self");
 
         View rightSwitch = root.findViewById(R.id.switch_right);
-        TextView anonCommentsHeader = (TextView) rightSwitch.findViewById(R.id.text_heading_top);
-        TextView anonCommentsLeftText = (TextView) rightSwitch.findViewById(R.id.text_heading_left);
-        TextView anonCommentsRightText = (TextView) rightSwitch.findViewById(R.id.text_heading_right);
-        SwitchCompat anonCommentsSwitch = (SwitchCompat) rightSwitch.findViewById(R.id.switch_main);
-        anonCommentsHeader.setText("Anon comments");
+        rightSwitch.setVisibility(View.GONE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postingAsSwitch.setShowText(false);
             postingAsLeftText.setText("Self");
             postingAsRightText.setText("Anon");
 
-            anonCommentsSwitch.setShowText(false);
-            anonCommentsLeftText.setText("Yes");
-            anonCommentsRightText.setText("No");
-
         } else {
             postingAsSwitch.setTextOff("Self");
             postingAsSwitch.setTextOn("Anon");
 
-            anonCommentsSwitch.setTextOff("No");
-            anonCommentsSwitch.setTextOn("Yes");
         }
 
         final ImageView profileImageView = (ImageView)root.findViewById(R.id.image_profile);
-
+        profileImageView.setVisibility(View.GONE);
 
         postingAsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 postAsAnon = b;
                 if(b){
-                    profileImageView.setImageResource(R.drawable.anon_switch_on);
+                    profileImageView.setImageResource(R.drawable.ic_anon);
                 }else{
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
                     Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
@@ -85,19 +75,12 @@ public class PrivacySettingTool extends EditContentTool {
             }
         });
 
-        anonCommentsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                isAnonCommentsDisabled = !b;
-            }
-        });
 
         String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
         Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
 
 
         postingAsSwitch.setChecked(postAsAnon);
-        anonCommentsSwitch.setChecked(!isAnonCommentsDisabled);
 
         return root;
     }

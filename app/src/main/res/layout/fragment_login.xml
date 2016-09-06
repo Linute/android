@@ -16,6 +16,15 @@
         android:src="@drawable/ic_action_navigation_arrow_back_inverted"
     />
 
+    <android.support.v7.widget.SwitchCompat
+        android:id="@+id/dev_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:foreground="?selectableItemBackgroundBorderless"
+        android:padding="@dimen/activity_horizontal_margin"
+        android:visibility="gone"
+        />
 
     <LinearLayout
         android:id="@+id/signin_email_login_form"

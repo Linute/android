@@ -35,7 +35,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.GridSpacingItemDecoration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -50,6 +49,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     public static final String TAG = PickerFragment.class.getSimpleName();
     public static final String PICKER_TYPE_KEY = "picker_type_key";
     public static final String RETURN_TYPE_KEY = "return_type";
+    public static final String KEY_CONTENT_SUBTYPE = "return_type";
     public static final int PICK_IMAGE = 0;
     public static final int PICK_VIDEO = 1;
     public static final int PICK_ALL = 2;
@@ -81,16 +81,18 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     private AlertDialog mAlertDialog;
     private ArrayAdapter mSpinnerAdapter;
     private AppCompatSpinner vSpinner;
+    private EditFragment.ContentSubType mContentSubType;
 
     public PickerFragment() {
 
     }
 
-    public static PickerFragment newInstance(int type, int returntype) {
+    public static PickerFragment newInstance(int type, int returntype, EditFragment.ContentSubType contentSubType) {
         Bundle args = new Bundle();
         PickerFragment fragment = new PickerFragment();
         args.putInt(PICKER_TYPE_KEY, type);
         args.putInt(RETURN_TYPE_KEY, returntype);
+        args.putSerializable(KEY_CONTENT_SUBTYPE, contentSubType);
         fragment.setArguments(args);
         return fragment;
     }
@@ -102,6 +104,10 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         if (getArguments() != null) {
             mPickerType = getArguments().getInt(PICKER_TYPE_KEY, PICK_ALL);
             mReturnType = getArguments().getInt(RETURN_TYPE_KEY, RETURN_URI);
+            mContentSubType = (EditFragment.ContentSubType)getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
+            if(mContentSubType == null){
+                mContentSubType = EditFragment.ContentSubType.None;
+            }
         }
     }
 
@@ -278,9 +284,11 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
             if (length > 1750 && length < 15000) {
+                mContentSubType = EditFragment.ContentSubType.None;
                 goToFragment(EditFragment.newInstance(
                         path,
                         EditFragment.ContentType.UploadedVideo,
+                        mContentSubType,
                         mReturnType,
                         new Dimens(
                                 Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
@@ -313,7 +321,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
 
         goToFragment(
-                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mReturnType, dimens),
+                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens),
                 EditFragment.TAG
         );
     }

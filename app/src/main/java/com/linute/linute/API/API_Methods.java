@@ -1,7 +1,6 @@
 package com.linute.linute.API;
 
 import android.os.Build;
-import android.util.Log;
 
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -30,7 +29,12 @@ public class API_Methods {
 
     public static String TAG = "API_METHODS";
 
-    public static final boolean DEV = true;   //change this flag for dev
+
+    //CHANGE ONLY THIS TO SWITCH TO PROD
+    public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
+    //CHANGE ONLY THIS TO SWITCH TO PROD
+
+
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
@@ -38,11 +42,11 @@ public class API_Methods {
 //    public static String HOST = "api.tapt.io";
     public static String HOST = "devapi2.tapt.io";
 
-//    public static final String HOST_DEV = "devapi2.tapt.io";
-//    public static final String HOST_LIVE = "api.tapt.io";
+    public static final String HOST_DEV = "devapi2.tapt.io";
+    public static final String HOST_LIVE = "api.tapt.io";
 
-//    public static final String VERSION_DEV = "v1.4.4";
-//    public static final String VERSION_LIVE = "v1.4.3";
+    public static final String VERSION_DEV = "v1.4.4";
+    public static final String VERSION_LIVE = "v1.4.3";
 
     public static String VERSION = "v1.4.4";
 

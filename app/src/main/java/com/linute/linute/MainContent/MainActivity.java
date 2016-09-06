@@ -195,7 +195,7 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        /*if (API_Methods.DEV) {
+        /*if (API_Methods.IS_DEV_BUILD) {
             mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
             ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override

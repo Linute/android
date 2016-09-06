@@ -5,11 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-
-import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.SwitchCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -22,20 +22,22 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.IOException;
-
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
-import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -148,6 +150,22 @@ public class LinuteLoginFragment extends Fragment {
                 }
             }
         });
+
+
+        SwitchCompat devSwitch = (SwitchCompat)rootView.findViewById(R.id.dev_switch);
+        if(API_Methods.IS_DEV_BUILD){
+            devSwitch.setVisibility(View.VISIBLE);
+            devSwitch.setChecked(false);
+            devSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    API_Methods.HOST = b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV;
+                    API_Methods.VERSION = b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV;
+                    SharedPreferences sharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE);
+                    sharedPreferences.edit().putBoolean("is_live", b).apply();
+                }
+            });
+        }
 
         return rootView;
     }

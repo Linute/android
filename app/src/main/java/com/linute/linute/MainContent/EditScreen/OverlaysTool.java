@@ -29,21 +29,31 @@ public class OverlaysTool extends EditContentTool {
     private OverlaysAdapter mOverlaysAdapter;
     private RecyclerView mOverlaysRV;
     private final ImageView overlayView;
+    private Bitmap mBackingBitmap;
 
     public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+        this(uri, type, overlaysView, BitmapFactory.decodeFile(uri.getPath()));
+    }
+
+    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, Bitmap back) {
         super(uri, type, overlaysView);
+        mBackingBitmap = back;
         mOverlays = new ArrayList<>();
+        mOverlays.add(null);
         overlayView = new ImageView(overlaysView.getContext());
         overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
+
+
         mOverlaysView.addView(overlayView);
+        initFiltersAsync(overlaysView.getContext());
     }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
 
-        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mUri);
+        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mBackingBitmap);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
@@ -55,8 +65,6 @@ public class OverlaysTool extends EditContentTool {
         mOverlaysRV.setLayoutManager(new LinearLayoutManager(parent.getContext(), LinearLayoutManager.HORIZONTAL, false));
         mOverlaysRV.addItemDecoration(new SpaceItemDecoration(24));
 
-        mOverlays.add(null);
-        initFiltersAsync(parent.getContext());
 
         return mOverlaysRV;
     }
@@ -79,7 +87,7 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
-        private final Uri mUri;
+        private final Bitmap mBackingBitmap;
         ArrayList<Bitmap> overlays;
 
         int mSelectedItem;
@@ -88,9 +96,9 @@ public class OverlaysTool extends EditContentTool {
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Bitmap> overlays, Uri uri) {
+        public OverlaysAdapter(ArrayList<Bitmap> overlays, Bitmap back) {
             this.overlays = overlays;
-            mUri = uri;
+            mBackingBitmap = back;
         }
 
         @Override
@@ -98,7 +106,7 @@ public class OverlaysTool extends EditContentTool {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_overlay, parent, false);
             int height = parent.getHeight();
             int width = height / 6 * 5;
-            ((ImageView)v.findViewById(R.id.image_back)).setImageURI(mUri);
+            ((ImageView) v.findViewById(R.id.image_back)).setImageBitmap(mBackingBitmap);
             v.setLayoutParams(new RecyclerView.LayoutParams(width, height));
             return new OverlayItemVH(v);
         }
@@ -191,12 +199,14 @@ public class OverlaysTool extends EditContentTool {
 
                         }
 
-                        mOverlaysRV.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mOverlaysAdapter.notifyItemInserted(mOverlays.size()-1);
-                            }
-                        });
+                        if (mOverlaysAdapter != null) {
+                            mOverlaysRV.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mOverlaysAdapter.notifyItemInserted(mOverlays.size() - 1);
+                                }
+                            });
+                        }
 
 
                     }
@@ -221,7 +231,7 @@ public class OverlaysTool extends EditContentTool {
         overlayView.setVisibility(View.VISIBLE);
     }
 
-    interface OnItemSelectedListener{
+    interface OnItemSelectedListener {
         void onItemSelected(int i);
     }
 }

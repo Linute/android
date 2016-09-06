@@ -80,6 +80,8 @@ public class TextTool extends EditContentTool {
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
 
+        TextMode.savedText = new String[3];
+
         topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
         botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
 //        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
@@ -96,7 +98,7 @@ public class TextTool extends EditContentTool {
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                frag.onToolSelected(2);
+                frag.selectTool(TextTool.this);
             }
         };
 
@@ -109,6 +111,8 @@ public class TextTool extends EditContentTool {
             public void backPressed() {
                 hideKeyboard(midET);
 
+                midET.setCursorVisible(false);
+
                 String text = midET.getText().toString().trim();
                 midET.setText(text);
 //                midTV.setText(text);
@@ -117,6 +121,16 @@ public class TextTool extends EditContentTool {
 //                midTV.setVisibility(View.VISIBLE);
 //                midTV.setY(midET.getY());
                 //TODO animate?
+            }
+        });
+
+        midET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
+            @Override
+            public void enterPressed() {
+                if(midET.getText().toString().trim().equals("")) {
+                    selectTextMode(0);
+                    hideKeyboard(midET);
+                }
             }
         });
 
@@ -193,9 +207,14 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideKeyboard(view);
+                if(mSelected != 0) {
+                    hideKeyboard(midET);
+                }else{
+                    selectTextMode(MID_TEXT_INDEX);
+                }
             }
         });
+
         mTextContainer.setClickable(false);
 
         mOverlaysView.addView(mTextContainer);
@@ -205,6 +224,12 @@ public class TextTool extends EditContentTool {
         view.clearFocus(); //release focus from EditText and hide keyboard
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+        if(view == midET){
+            if(midET.getText().toString().trim().equals("")){
+                selectTextMode(0);
+            }
+        }
     }
 
     public void swapSnapchatET() {
@@ -259,12 +284,14 @@ public class TextTool extends EditContentTool {
         textModes[oldSelected].onUnSelected();
         textModes[mSelected].onSelected();
 
-        ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
-        ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
-                textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
-                PorterDuff.Mode.ADD
-        ));
+        if(textModeViews[index] != null) {
+            ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
+            ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
+                    textModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
+                    PorterDuff.Mode.MULTIPLY
+            ));
 
+        }
     }
 
     public boolean hasText() {
@@ -307,6 +334,9 @@ public class TextTool extends EditContentTool {
         hideKeyboard(midET);
         hideKeyboard(botTV);
         hideKeyboard(topTV);
+        midET.setFocusable(false);
+        botTV.setFocusable(false);
+        topTV.setFocusable(false);
         midET.setCursorVisible(false);
     }
 

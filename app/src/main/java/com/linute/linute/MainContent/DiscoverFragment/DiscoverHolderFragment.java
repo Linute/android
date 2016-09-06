@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
 import com.linute.linute.MainContent.CreateContent.CreateStatusActivity;
+import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
@@ -23,7 +24,6 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
-
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
@@ -176,6 +176,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                                 if (getActivity() == null) return;
                                 Intent i = new Intent(getActivity(), CameraActivity.class);
                                 i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_EVERYTHING));
+                                i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
                                 i.putExtra(CameraActivity.RETURN_TYPE, CameraActivity.SEND_POST);
                                 getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                             }
@@ -189,6 +190,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                         if (getActivity() == null) return;
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
                         i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
+                        i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                     }
                 }

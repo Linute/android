@@ -1,28 +1,23 @@
 {
   "project_info": {
-    "project_number": "223177344520",
-    "project_id": "tapt-1cbee"
+    "project_number": "538337996189",
+    "project_id": "linute.com:api-project-538337996189"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:223177344520:android:645f399992cfa5a1",
+        "mobilesdk_app_id": "1:538337996189:android:645f399992cfa5a1",
         "android_client_info": {
           "package_name": "com.linute.linute"
         }
       },
       "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCukEjSB5KCykg6oLJUe6tVzjMH3nE6GuI"
-        }
-      ],
+      "api_key": [{
+        "current_key": "AIzaSyCCixomm8QKfyY-OwcER5FfRPtlW1OjJVI"
+      }],
       "services": {
         "analytics_service": {
-          "status": 2,
-          "analytics_property": {
-            "tracking_id": "UA-62702114-4"
-          }
+          "status": 1
         },
         "appinvite_service": {
           "status": 1,

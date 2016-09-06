@@ -11,7 +11,6 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -22,6 +21,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
@@ -30,6 +32,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import static android.text.util.Linkify.EMAIL_ADDRESSES;
 import static android.text.util.Linkify.WEB_URLS;
@@ -468,13 +471,13 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     public class FeedDetailViewHolderImage extends BaseFeedDetailViewHolder {
 
-        protected ImageView vImageView;
+        protected RoundedImageView vImageView;
         private String mImageUrl;
 
 
         public FeedDetailViewHolderImage(View itemView) {
             super(itemView);
-            vImageView = new ImageView(context);
+            vImageView = new RoundedImageView(context);
             int size = (int) context.getResources().getDimension(R.dimen.comment_image_size);
             vImageView.setLayoutParams(new ViewGroup.LayoutParams(size, size));
             vImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -504,7 +507,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mImageUrl = Utils.getCommentImageUrl(comment.getImageUrl());
             mRequestManager.load(mImageUrl)
                     .placeholder(R.color.seperator_color)
-                    .into(vImageView);
+                    .into(new SimpleTarget<GlideDrawable>() {
+                        @Override
+                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                            vImageView.setImageDrawable(resource);
+                            int dimensionPixelSize = itemView.getResources().getDimensionPixelSize(R.dimen.message_bubble_corner_radius);
+                            vImageView.setCornerRadius(dimensionPixelSize);
+                        }
+                    });
         }
     }
 

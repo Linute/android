@@ -13,6 +13,7 @@ import android.widget.EditText;
 public class CustomBackPressedEditText extends EditText {
 
     BackButtonAction mBackAction;
+    EnterButtonAction mEnterAction;
 
     public CustomBackPressedEditText(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -31,15 +32,28 @@ public class CustomBackPressedEditText extends EditText {
         super.onKeyPreIme(keyCode,event);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             // user pressed back
-            setCursorVisible(false);
             mBackAction.backPressed();
         }
+        if(keyCode == KeyEvent.KEYCODE_ENTER){
+            if(mEnterAction != null){
+                mEnterAction.enterPressed();
+            }
+        }
         return true;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_ENTER){
+            mEnterAction.enterPressed();
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     public void setBackAction(BackButtonAction action) {
         mBackAction = action;
     }
+    public void setEnterAction(EnterButtonAction action){mEnterAction = action;}
 
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs)
@@ -56,5 +70,8 @@ public class CustomBackPressedEditText extends EditText {
 
     public interface BackButtonAction {
         void backPressed();
+    }
+    public interface EnterButtonAction{
+        void enterPressed();
     }
 }
