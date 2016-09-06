@@ -33,7 +33,6 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.GridSpacingItemDecoration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -278,6 +277,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
                 goToFragment(EditFragment.newInstance(
                         path,
                         EditFragment.ContentType.UploadedVideo,
+                        EditFragment.ContentSubType.None,
                         mReturnType,
                         new Dimens(
                                 Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
@@ -310,7 +310,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
 
         goToFragment(
-                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mReturnType, dimens),
+                EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, EditFragment.ContentSubType.None, mReturnType, dimens),
                 EditFragment.TAG
         );
     }

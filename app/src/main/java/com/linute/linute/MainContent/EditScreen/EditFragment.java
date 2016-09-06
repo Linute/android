@@ -110,11 +110,11 @@ public class EditFragment extends BaseFragment {
     private Toolbar mToolbar;
 
     public enum ContentType {
-        None, Photo, Video
+        None, Photo, Video, UploadedPhoto, UploadedVideo
     }
 
     public enum ContentSubType {
-        None, Post, Chat, Comment, UploadPost
+        None, Post, Chat, Comment
     }
 
     private Uri mUri;
@@ -278,8 +278,6 @@ public class EditFragment extends BaseFragment {
             case Chat:
                 menuTitle = null;
                 break;
-            case UploadPost:
-                menuTitle = null;
         }
 
         if(menuTitle == null) {
@@ -311,6 +309,7 @@ public class EditFragment extends BaseFragment {
         mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(mTools != null)
                 for (int i = 0; i < mTools.length; i++) {
                     if (mTools[i] instanceof TextTool) {
                         TextTool mTool = (TextTool) mTools[i];
@@ -415,6 +414,7 @@ public class EditFragment extends BaseFragment {
     private void setupMainContent(Uri uri, ContentType contentType, DisplayMetrics metrics) {
         switch (contentType) {
             case Photo:
+            case UploadedPhoto:
                 final MoveZoomImageView imageView = new MoveZoomImageView(getContext());
                 imageView.leftBound = 0;
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
@@ -472,7 +472,7 @@ public class EditFragment extends BaseFragment {
 //                imageView.setImageURI(uri);
                 break;
             case Video:
-
+            case UploadedVideo:
                 final CheckBox mPlaying = new CheckBox(getContext());
                 FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER);
 
@@ -571,10 +571,18 @@ public class EditFragment extends BaseFragment {
         CropTool cropTool;
 
         switch (mContentType){
+            case UploadedPhoto:
+                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                return new EditContentTool[]{
+                        privacySettingTool,
+                        cropTool,
+                        textTool,
+                        stickersTool,
+                        overlaysTool
+                };
             case Photo:
                 switch (mContentSubType){
                     case Post:
-                    case UploadPost:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 privacySettingTool,
@@ -600,11 +608,16 @@ public class EditFragment extends BaseFragment {
                                 stickersTool
                         };
                 }
-
+            case UploadedVideo:
+                return new EditContentTool[]{
+                        privacySettingTool,
+                        textTool,
+                        stickersTool,
+                        overlaysTool
+                };
             case Video:
                 switch (mContentSubType){
                     case Post:
-                    case UploadPost:
                         return new EditContentTool[]{
                                 privacySettingTool,
                                 textTool,
