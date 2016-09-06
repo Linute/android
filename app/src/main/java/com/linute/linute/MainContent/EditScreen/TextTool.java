@@ -111,6 +111,8 @@ public class TextTool extends EditContentTool {
             public void backPressed() {
                 hideKeyboard(midET);
 
+                midET.setCursorVisible(false);
+
                 String text = midET.getText().toString().trim();
                 midET.setText(text);
 //                midTV.setText(text);
@@ -119,6 +121,13 @@ public class TextTool extends EditContentTool {
 //                midTV.setVisibility(View.VISIBLE);
 //                midTV.setY(midET.getY());
                 //TODO animate?
+            }
+        });
+
+        midET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
+            @Override
+            public void enterPressed() {
+                selectTextMode(0);
             }
         });
 
@@ -273,10 +282,10 @@ public class TextTool extends EditContentTool {
         textModes[oldSelected].onUnSelected();
         textModes[mSelected].onSelected();
 
-        if(textModeViews[0] != null) {
+        if(textModeViews[index] != null) {
             ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
             ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
-                    textModeViews[mSelected].getResources().getColor(R.color.colorAccent),
+                    textModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                     PorterDuff.Mode.MULTIPLY
             ));
 
