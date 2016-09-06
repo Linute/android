@@ -182,7 +182,7 @@ public class EditFragment extends BaseFragment {
         mUserId = sharedPreferences.getString("userID", "");
         mUserToken = sharedPreferences.getString("userToken", "");
 
-        if (mContentType == ContentType.Video) {
+        if (mContentType == ContentType.Video || mContentType == ContentType.UploadedVideo) {
             mFfmpeg = FFmpeg.getInstance(getContext());
             try {
                 mFfmpeg.loadBinary(new LoadBinaryResponseHandler() {
@@ -245,8 +245,6 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
-        mToolbar.setTitleTextColor(getResources().getColor(R.color.pure_white));
-        mToolbar.setNavigationIcon(R.drawable.ic_action_cancel);
         mToolbar.inflateMenu(R.menu.menu_fragment_edit);
         mMenu = mToolbar.getMenu();
 

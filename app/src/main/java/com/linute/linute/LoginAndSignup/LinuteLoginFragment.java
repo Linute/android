@@ -155,7 +155,7 @@ public class LinuteLoginFragment extends Fragment {
         SwitchCompat devSwitch = (SwitchCompat)rootView.findViewById(R.id.dev_switch);
         if(API_Methods.IS_DEV_BUILD){
             devSwitch.setVisibility(View.VISIBLE);
-            devSwitch.setChecked(false);
+            devSwitch.setChecked(API_Methods.HOST.equals(API_Methods.HOST_LIVE));
             devSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -225,11 +225,8 @@ public class LinuteLoginFragment extends Fragment {
         //NOTE: some old users still have non-edu emails
         //// TODO: 6/4/16 use regex
         // @.edu                        //hey@.edu          //hey.edu
-        if (email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
-                !email.contains(".") || email.contains(" "))
-            //hello@edededu             //whitespace
-            return false;
-        return true;
+        return !(email.startsWith("@") || email.contains("@.") || !email.contains("@") ||
+                !email.contains(".") || email.contains(" "));
     }
 
     private boolean isPasswordValid(String password) {
