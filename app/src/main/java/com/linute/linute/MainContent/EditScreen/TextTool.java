@@ -75,7 +75,7 @@ public class TextTool extends EditContentTool {
 
     TextMode[] textModes;
 
-    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim,final EditFragment frag) {
+    public TextTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, Dimens dim, final EditFragment frag) {
         super(uri, type, overlays);
         mTextContainer = LayoutInflater.from(overlays.getContext()).inflate(R.layout.tool_overlay_text, overlays, false);
         Typeface font = Typeface.createFromAsset(overlays.getContext().getAssets(), "Veneer.otf");
@@ -99,6 +99,9 @@ public class TextTool extends EditContentTool {
             @Override
             public void onFocusChange(View view, boolean b) {
                 frag.selectTool(TextTool.this);
+                topTV.setCursorVisible(b);
+                botTV.setCursorVisible(b);
+                midET.setCursorVisible(b);
             }
         };
 
@@ -127,7 +130,7 @@ public class TextTool extends EditContentTool {
         midET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
             @Override
             public void enterPressed() {
-                if(midET.getText().toString().trim().equals("")) {
+                if (midET.getText().toString().trim().equals("")) {
                     selectTextMode(0);
                     hideKeyboard(midET);
                 }
@@ -207,9 +210,12 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mSelected != 0) {
+                if(mSelected == MID_TEXT_INDEX){
                     hideKeyboard(midET);
-                }else{
+                }else
+                if (mSelected != 0) {
+                    hideKeyboard(view);
+                } else {
                     selectTextMode(MID_TEXT_INDEX);
                 }
             }
@@ -225,8 +231,8 @@ public class TextTool extends EditContentTool {
         InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-        if(view == midET){
-            if(midET.getText().toString().trim().equals("")){
+        if (view == midET) {
+            if (midET.getText().toString().trim().equals("")) {
                 selectTextMode(0);
             }
         }
@@ -284,7 +290,7 @@ public class TextTool extends EditContentTool {
         textModes[oldSelected].onUnSelected();
         textModes[mSelected].onSelected();
 
-        if(textModeViews[index] != null) {
+        if (textModeViews[index] != null) {
             ((ImageView) textModeViews[oldSelected]).setColorFilter(null);
             ((ImageView) textModeViews[mSelected]).setColorFilter(new PorterDuffColorFilter(
                     textModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
