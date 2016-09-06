@@ -438,13 +438,13 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
             int drawable;
             switch (updateType) {
                 case LIKED_PHOTO:
-                    drawable = R.drawable.icon_like;
+                    drawable = R.drawable.fire_icon_updates;
                     break;
                 case LIKED_STATUS:
-                    drawable = R.drawable.icon_like;
+                    drawable = R.drawable.fire_icon_updates;
                     break;
                 case LIKED_VIDEO:
-                    drawable = R.drawable.icon_like;
+                    drawable = R.drawable.fire_icon_updates;
                     break;
                 case COMMENTED_PHOTO:
                     drawable = R.drawable.icon_comment;
@@ -483,7 +483,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                     drawable = R.drawable.icon_comment;
                     break;
                 case LIKED_COMMENT:
-                    drawable = R.drawable.icon_like;
+                    drawable = R.drawable.fire_icon_updates;
                     break;
                 default:
                     drawable = R.drawable.icon_user;
