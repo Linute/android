@@ -37,6 +37,8 @@ public class OverlaysTool extends EditContentTool {
         overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         mOverlaysView.addView(overlayView);
+        initFiltersAsync(overlaysView.getContext());
+
     }
 
     @Override
@@ -51,12 +53,11 @@ public class OverlaysTool extends EditContentTool {
             }
         });
 
+        mOverlays.add(null);
         mOverlaysRV.setAdapter(mOverlaysAdapter);
         mOverlaysRV.setLayoutManager(new LinearLayoutManager(parent.getContext(), LinearLayoutManager.HORIZONTAL, false));
         mOverlaysRV.addItemDecoration(new SpaceItemDecoration(24));
 
-        mOverlays.add(null);
-        initFiltersAsync(parent.getContext());
 
         return mOverlaysRV;
     }
@@ -191,12 +192,14 @@ public class OverlaysTool extends EditContentTool {
 
                         }
 
-                        mOverlaysRV.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mOverlaysAdapter.notifyItemInserted(mOverlays.size()-1);
-                            }
-                        });
+                        if(mOverlaysAdapter != null) {
+                            mOverlaysRV.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mOverlaysAdapter.notifyItemInserted(mOverlays.size() - 1);
+                                }
+                            });
+                        }
 
 
                     }
