@@ -778,7 +778,7 @@ public class MainActivity extends BaseTaptActivity {
                         });
                     }
 
-                    notifCounter.setNumMessages(notifCounter.getNumMessages() + 1);
+                    mSocket.emit(API_Methods.VERSION+":badge",null);
                     final NewMessageEvent chatEvent = new NewMessageEvent(true);
                     chatEvent.setRoomId(chat.roomId);
                     chatEvent.setMessage(activity.getString("messageText"));
