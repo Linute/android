@@ -190,6 +190,7 @@ public class DiscoverHolderFragment extends BaseFragment {
                         if (getActivity() == null) return;
                         Intent i = new Intent(getActivity(), GalleryActivity.class);
                         i.putExtra(GalleryActivity.ARG_RETURN_TYPE, CameraActivity.SEND_POST);
+                        i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Post);
                         getActivity().startActivityForResult(i, PHOTO_STATUS_POSTED);
                     }
                 }

@@ -578,16 +578,6 @@ public class EditFragment extends BaseFragment {
         MediaMetadataRetriever retriever;
         switch (mContentType){
             case UploadedPhoto:
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
-
-                cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
-                return new EditContentTool[]{
-                        privacySettingTool,
-                        cropTool,
-                        textTool,
-                        stickersTool,
-                        overlaysTool
-                };
             case Photo:
                 overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
                 switch (mContentSubType){
@@ -618,16 +608,6 @@ public class EditFragment extends BaseFragment {
                         };
                 }
             case UploadedVideo:
-                retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(mUri.getPath());
-                retriever.getFrameAtTime(0);
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay,retriever.getFrameAtTime(0));
-                return new EditContentTool[]{
-                        privacySettingTool,
-                        textTool,
-                        stickersTool,
-                        overlaysTool
-                };
             case Video:
                 retriever = new MediaMetadataRetriever();
                 retriever.setDataSource(mUri.getPath());
