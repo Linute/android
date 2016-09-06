@@ -244,6 +244,7 @@ public class EditFragment extends BaseFragment {
                 container, false);
 
         mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        mToolbar.setTitleTextColor(getResources().getColor(R.color.pure_white));
         mToolbar.setNavigationIcon(R.drawable.ic_action_cancel);
         mToolbar.inflateMenu(R.menu.menu_fragment_edit);
         mMenu = mToolbar.getMenu();
@@ -402,6 +403,10 @@ public class EditFragment extends BaseFragment {
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
+
+        if(mToolbar != null){
+            mToolbar.setTitle(mTools[mSelectedTool].getName());
+        }
 
         mToolOptionsView.removeAllViews();
         if (mToolViews[i] == null) {
