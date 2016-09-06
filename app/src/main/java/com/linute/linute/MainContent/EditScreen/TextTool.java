@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,7 +26,6 @@ public class TextTool extends EditContentTool {
 
     private final View[] textModeViews;
     int midTvPost = 0;
-    private final CustomBackPressedEditText midET;
     private final View mTextContainer;
 
     public static final int MID_TEXT_INDEX = 1;
@@ -68,8 +66,10 @@ public class TextTool extends EditContentTool {
         ;
     }
 
-    private TextView topTV;
-    private TextView botTV;
+    private CustomBackPressedEditText topTV;
+    private CustomBackPressedEditText botTV;
+    private final CustomBackPressedEditText midET;
+
 //    private TextView midTV;
 
 
@@ -82,8 +82,8 @@ public class TextTool extends EditContentTool {
 
         TextMode.savedText = new String[3];
 
-        topTV = (TextView) mTextContainer.findViewById(R.id.text_top);
-        botTV = (TextView) mTextContainer.findViewById(R.id.text_bot);
+        topTV = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.text_top);
+        botTV = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.text_bot);
 //        midTV = (TextView) mTextContainer.findViewById(R.id.text_mid);
         midET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.edit_text_mid);
 
@@ -137,6 +137,19 @@ public class TextTool extends EditContentTool {
             }
         });
 
+        botTV.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
+            @Override
+            public void enterPressed() {
+                botTV.setCursorVisible(false);
+            }
+        });
+
+        topTV.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
+            @Override
+            public void enterPressed() {
+                topTV.setCursorVisible(false);
+            }
+        });
 
         midET.setOnTouchListener(new View.OnTouchListener() {
 
@@ -190,7 +203,7 @@ public class TextTool extends EditContentTool {
                     public void onSelected() {
                         super.onSelected();
                         topTV.setNextFocusDownId(R.id.text_bot);
-                        botTV.setImeOptions(EditorInfo.IME_ACTION_DONE);
+//                        botTV.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     }
 
                     @Override

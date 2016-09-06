@@ -30,25 +30,27 @@ public class CustomBackPressedEditText extends EditText {
     @Override
     public boolean onKeyPreIme(int keyCode, KeyEvent event) {
         super.onKeyPreIme(keyCode,event);
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            // user pressed back
-            mBackAction.backPressed();
-        }
-        if(keyCode == KeyEvent.KEYCODE_ENTER){
-            if(mEnterAction != null){
-                mEnterAction.enterPressed();
+        if(mBackAction != null) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                // user pressed back
+                mBackAction.backPressed();
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_ENTER){
-            mEnterAction.enterPressed();
+        if(mEnterAction != null) {
+            if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                mEnterAction.enterPressed();
+            }
         }
         return super.onKeyDown(keyCode, event);
     }
+
+
 
     public void setBackAction(BackButtonAction action) {
         mBackAction = action;
