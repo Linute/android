@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.CreateContent;
+package com.linute.linute.MainContent.CreateContent.Gallery;
 
 import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
@@ -26,10 +26,6 @@ public class PickerAdapter extends RecyclerView.Adapter<PickerAdapter.GalleryVie
         mGalleryItems = items;
     }
 
-    public GalleryItemSelected getGalleryItemSelected() {
-        return mGalleryItemSelected;
-    }
-
     public void setGalleryItemSelected(GalleryItemSelected galleryItemSelected) {
         mGalleryItemSelected = galleryItemSelected;
     }
@@ -49,7 +45,7 @@ public class PickerAdapter extends RecyclerView.Adapter<PickerAdapter.GalleryVie
 
     @Override
     public void onBindViewHolder(GalleryViewHolder holder, int position) {
-
+        holder.bindView(mGalleryItems.get(position));
     }
 
     @Override
@@ -82,8 +78,6 @@ public class PickerAdapter extends RecyclerView.Adapter<PickerAdapter.GalleryVie
             );
 
             mRequestManager.load(item.path)
-                    .asBitmap()
-                    .thumbnail(0.1f)
                     .into(vImageView);
 
         }

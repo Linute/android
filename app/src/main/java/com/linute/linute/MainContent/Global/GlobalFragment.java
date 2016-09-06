@@ -146,7 +146,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
             }
         });
 
-
         return root;
     }
 
