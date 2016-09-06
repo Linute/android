@@ -49,7 +49,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     public static final String TAG = PickerFragment.class.getSimpleName();
     public static final String PICKER_TYPE_KEY = "picker_type_key";
     public static final String RETURN_TYPE_KEY = "return_type";
-    public static final String KEY_CONTENT_SUBTYPE = "return_type";
+    public static final String KEY_CONTENT_SUBTYPE = "content_type";
     public static final int PICK_IMAGE = 0;
     public static final int PICK_VIDEO = 1;
     public static final int PICK_ALL = 2;
@@ -128,8 +128,14 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
         mBucketList.add(new BucketItem("", "Gallery"));
         vSpinner = (AppCompatSpinner) toolbar.findViewById(R.id.spinner);
-        vSpinner.getBackground().setColorFilter(ContextCompat.getColor(getContext(), R.color.pure_white), PorterDuff.Mode.SRC_ATOP);
+        //vSpinner.getBackground().setColorFilter(ContextCompat.getColor(getContext(), R.color.pure_white), PorterDuff.Mode.SRC_ATOP);
         vSpinner.setOnItemSelectedListener(this);
+        toolbar.findViewById(R.id.spinner_arrow).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vSpinner.performClick();
+            }
+        });
 
         mSpinnerAdapter = new ArrayAdapter<>(getContext(), R.layout.spinner_text, mBucketList);
         mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown);
@@ -233,6 +239,9 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         mBucketList.add(new BucketItem("", "Gallery")); //option for all images
         mBucketList.addAll(bucketItems);
         mSpinnerAdapter.notifyDataSetChanged();
+        if (vSpinner.getSelectedItemPosition() == 0) {
+            onItemSelected(null,null,0,0);
+        }
     }
 
     @Override
@@ -336,7 +345,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Log.i(TAG, "onItemSelected: " + position);
+        //Log.i(TAG, "onItemSelected: " + position);
         showProgress(true);
         String filter = mBucketList.get(position).id;
         final ArrayList<GalleryItem> temp;

@@ -1,20 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    android:orientation="vertical">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/colorPrimary"
+              android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
+        app:titleTextColor="@color/pure_white"
+        app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
         android:background="@color/colorPrimary">
+
         <ImageView
             android:id="@+id/image_sticker_trash"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/trash_can_closed"
-            android:layout_gravity="center"/>
+            android:layout_gravity="center"
+            android:src="@drawable/trash_can_closed"/>
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout
@@ -26,21 +30,24 @@
 
         <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+        >
             <!-- Photos and videos taken/uploaded by user in this view -->
             <FrameLayout
                 android:id="@+id/base_content"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:gravity="center" />
+                android:gravity="center"/>
 
             <!-- Playground for tools -->
             <FrameLayout
                 android:id="@+id/overlays"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="center" />
+                android:layout_gravity="center"/>
 
         </FrameLayout>
 
@@ -53,14 +60,14 @@
         android:layout_height="56dp"
         android:layout_weight="1"
         android:background="#0b1e30"
-        android:orientation="horizontal" />
+        android:orientation="horizontal"/>
 
     <FrameLayout
         android:id="@+id/layout_tools_menu"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_weight="1"
-        android:background="#2c3256" />
+        android:background="#2c3256"/>
 
 
 </LinearLayout>
