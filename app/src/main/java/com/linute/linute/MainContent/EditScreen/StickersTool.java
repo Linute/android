@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +49,9 @@ public class StickersTool extends EditContentTool {
 
         mTrashCanIV = trashCan;
         mTrashCanIV.setVisibility(View.GONE);
+        mTrashCanIV.setLayoutParams(new Toolbar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        int pad = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,4,mTrashCanIV.getResources().getDisplayMetrics());
+        mTrashCanIV.setPadding(pad,pad,pad,pad);
 
 
         mManipulationListener = new ManipulableImageView.ViewManipulationListener() {
@@ -65,19 +70,19 @@ public class StickersTool extends EditContentTool {
             @Override
             public void onViewCollisionBegin(View me) {
                 mTrashCanIV.setColorFilter(new PorterDuffColorFilter(me.getResources().getColor(R.color.secondaryColor), PorterDuff.Mode.MULTIPLY));
-                mTrashCanIV.setImageResource(R.drawable.trash_can_open);
+                mTrashCanIV.setImageResource(R.drawable.trash_icon);
             }
 
             @Override
             public void onViewCollisionEnd(View me) {
-                mTrashCanIV.setImageResource(R.drawable.trash_can_closed);
+                mTrashCanIV.setImageResource(R.drawable.trash_icon_closed);
                 mTrashCanIV.setColorFilter(null);
             }
 
             @Override
             public void onViewDropCollision(View me) {
                 mStickersContainer.removeView(me);
-                mTrashCanIV.setImageResource(R.drawable.trash_can_closed);
+                mTrashCanIV.setImageResource(R.drawable.trash_icon_closed);
             }
 
             @Override
