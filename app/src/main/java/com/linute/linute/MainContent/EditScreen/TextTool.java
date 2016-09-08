@@ -377,8 +377,7 @@ public class TextTool extends EditContentTool {
 //        midTV.setY(midET.getY());
 
 
-
-
+        options.text = topET.getText().toString() + " " + midET.getText().toString() + " "+botET.getText().toString();
 
         midET.setCursorVisible(false);
     }
