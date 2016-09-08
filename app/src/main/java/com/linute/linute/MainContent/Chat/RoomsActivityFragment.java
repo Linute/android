@@ -499,6 +499,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                         JSONArray rooms = jsonObj.getJSONArray("rooms");
 
+
                         //ArrayList<ChatHead> chatHeads = new ArrayList<>();
                         String lastMessage = "";
                         boolean hasUnreadMessage;
@@ -509,6 +510,13 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                         JSONObject message;
                         JSONArray readArray;
+                        String image;
+                        String name;
+
+
+                        int type;
+
+                        boolean isMuted;
 
                         Date date;
 
@@ -519,6 +527,26 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             hasUnreadMessage = true;
 
                             room = rooms.getJSONObject(i);
+
+                            name = room.getString("name");
+                            image = room.getJSONObject("profileImage").getString("thumbnail");
+
+
+                            type = room.getInt("type");
+
+
+                            isMuted = room.getBoolean("isMuted");
+
+                            long mutedUntil = 0;
+                            Object unMuteAt = room.get("unMuteAt");
+
+                            if (unMuteAt != null) {
+                                try {
+                                    mutedUntil = Long.getLong(unMuteAt.toString());
+                                } catch (NumberFormatException | NullPointerException e) {
+                                }
+                            }
+
                             users = room.getJSONArray("users");
 
                             ArrayList<User> usersList = new ArrayList<User>();
@@ -531,6 +559,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                         user.getString("profileImage")
                                 ));
                             }
+
 
                             messages = room.getJSONArray("messages"); //list of messages in room
 
@@ -573,10 +602,15 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             //Throws error but still runs correctly... weird
                             tempRooms.add(new ChatRoom(
                                     room.getString("id"),
+                                    type,
+                                    name,
+                                    image,
                                     usersList,
                                     lastMessage,
                                     hasUnreadMessage,
-                                    date == null ? 0 : date.getTime()
+                                    date == null ? 0 : date.getTime(),
+                                    isMuted,
+                                    mutedUntil
                             ));
                             // ,
 //                                    users.length() + 1,  // add yourself
