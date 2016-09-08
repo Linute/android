@@ -67,7 +67,7 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
             return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
                     "",
-                    "Come back later for more!"
+                    "That's all folks!"
             );
         }
 

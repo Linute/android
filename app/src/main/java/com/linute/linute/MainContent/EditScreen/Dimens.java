@@ -16,7 +16,7 @@ public class Dimens implements Parcelable {
     boolean needsCropping;
 
 
-    //typically used when image taken with our camera
+    //typically used when capturing video
     public Dimens(int width, int height, boolean isFrontFacing) {
         this.height = height;
         this.width = width;
@@ -26,7 +26,20 @@ public class Dimens implements Parcelable {
         this.needsCropping = true;
     }
 
-    //when uploading from gallery
+
+    //uploading image from galley
+    public Dimens(int width, int height){
+        this.height = height;
+        this.width = width;
+        this.isFrontFacing = false;
+        this.rotation = 0;
+        //should not delete gallery's video
+        this.deleteVideoWhenFinished = false;
+        //width will be height
+        needsCropping = false;
+    }
+
+
     public Dimens(int width, int height, int rotation) {
         this.height = height;
         this.width = width;

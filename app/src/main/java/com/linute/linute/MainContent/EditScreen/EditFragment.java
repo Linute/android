@@ -166,11 +166,11 @@ public class EditFragment extends BaseFragment {
         Bundle args = getArguments();
         mUri = args.getParcelable(ARG_URI);
         mContentType = ContentType.values()[args.getInt(ARG_CONTENT_TYPE)];
-        mContentSubType = (ContentSubType)args.getSerializable(ARG_CONTENT_SUB_TYPE);
-        if(mContentType == ContentType.None){
+        mContentSubType = (ContentSubType) args.getSerializable(ARG_CONTENT_SUB_TYPE);
+        if (mContentType == ContentType.None) {
             mContentType = ContentType.Photo;
         }
-        if(mContentSubType == ContentSubType.None){
+        if (mContentSubType == ContentSubType.None) {
             mContentSubType = ContentSubType.Post;
         }
 //        mCameraType = args.getInt(ARG_CAMERA_TYPE);
@@ -280,9 +280,9 @@ public class EditFragment extends BaseFragment {
                 break;
         }
 
-        if(menuTitle == null) {
+        if (menuTitle == null) {
             mMenu.findItem(R.id.menu_item_done).setIcon(R.drawable.ic_action_action_done);
-        }else{
+        } else {
             mMenu.findItem(R.id.menu_item_done).setTitle(menuTitle);
         }
 
@@ -297,29 +297,32 @@ public class EditFragment extends BaseFragment {
         }
 
         mFinalContentView = root.findViewById(R.id.final_content);
-        mFinalContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-                layoutParams.height = view.getWidth() * 6 / 5;
-                view.setLayoutParams(layoutParams);
-            }
-        });
+
+//        mFinalContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+//            @Override
+//            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+//                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+//                layoutParams.height = view.getWidth() * 6 / 5;
+//                view.setLayoutParams(layoutParams);
+//            }
+//        });
+
+
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
         mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mTools != null)
-                for (int i = 0; i < mTools.length; i++) {
-                    if (mTools[i] instanceof TextTool) {
-                        TextTool mTool = (TextTool) mTools[i];
-                        if (!mTool.hasText()) {
-                            onToolSelected(i);
-                            mTool.selectTextMode(TextTool.MID_TEXT_INDEX);
-                            break;
+                if (mTools != null)
+                    for (int i = 0; i < mTools.length; i++) {
+                        if (mTools[i] instanceof TextTool) {
+                            TextTool mTool = (TextTool) mTools[i];
+                            if (!mTool.hasText()) {
+                                onToolSelected(i);
+                                mTool.selectTextMode(TextTool.MID_TEXT_INDEX);
+                                break;
+                            }
                         }
                     }
-                }
             }
         });
 
@@ -333,9 +336,7 @@ public class EditFragment extends BaseFragment {
             mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
 
             //horrible hack
-            if (!mDimens.needsCropping) {
-                mFinalContentView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height));
-            } else if (!ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
+            if (mDimens.needsCropping && !ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
                 //screen was too small for 6:5 ratio, the video or image is a square, relayout accordingly
                 CustomView view = (CustomView) root.findViewById(R.id.spacer);
                 if (view != null) {
@@ -390,9 +391,9 @@ public class EditFragment extends BaseFragment {
         return root;
     }
 
-    public void selectTool(EditContentTool tool){
-        for (int i=0;i<mTools.length;i++){
-            if(mTools[i] == tool){
+    public void selectTool(EditContentTool tool) {
+        for (int i = 0; i < mTools.length; i++) {
+            if (mTools[i] == tool) {
                 onToolSelected(i);
                 break;
             }
@@ -411,7 +412,7 @@ public class EditFragment extends BaseFragment {
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
 
-        if(mToolbar != null){
+        if (mToolbar != null) {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
         }
 
@@ -503,18 +504,9 @@ public class EditFragment extends BaseFragment {
                     height = mDimens.width;
                 }
 
-                if (height > width)
-                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, (int) ((float) metrics.widthPixels * height / width), Gravity.CENTER));
-                else
-                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+                mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
+                        metrics.widthPixels, (int) ((float) metrics.widthPixels * height / width), mDimens.needsCropping ? Gravity.NO_GRAVITY : Gravity.CENTER));
 
-//                } else {
-//
-//                    mVideoView.setLayoutParams(new FrameLayout.LayoutParams(
-//                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//                }
 
                 mPlaying.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -585,11 +577,11 @@ public class EditFragment extends BaseFragment {
         OverlaysTool overlaysTool;
 
         MediaMetadataRetriever retriever;
-        switch (mContentType){
+        switch (mContentType) {
             case UploadedPhoto:
             case Photo:
                 overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
-                switch (mContentSubType){
+                switch (mContentSubType) {
                     case Post:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
@@ -620,8 +612,8 @@ public class EditFragment extends BaseFragment {
             case Video:
                 retriever = new MediaMetadataRetriever();
                 retriever.setDataSource(mUri.getPath());
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay,retriever.getFrameAtTime(0));
-                switch (mContentSubType){
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, retriever.getFrameAtTime(0));
+                switch (mContentSubType) {
                     case Post:
                         return new EditContentTool[]{
                                 privacySettingTool,
@@ -635,7 +627,6 @@ public class EditFragment extends BaseFragment {
                                 stickersTool,
                         };
                 }
-
 
 
         }
@@ -788,7 +779,7 @@ public class EditFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (getActivity() != null){
+        if (getActivity() != null) {
             View focused = getActivity().getCurrentFocus();
             if (focused != null) {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);

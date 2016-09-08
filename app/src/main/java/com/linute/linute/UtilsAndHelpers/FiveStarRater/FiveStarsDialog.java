@@ -17,9 +17,8 @@ import com.linute.linute.R;
 
 /**
  * Created by angtrim on 12/09/15.
- *
  */
-public class FiveStarsDialog  implements DialogInterface.OnClickListener{
+public class FiveStarsDialog implements DialogInterface.OnClickListener {
 
     private final static String DEFAULT_TITLE = "Rate this app";
     private final static String DEFAULT_TEXT = "How much do you love our app?";
@@ -44,19 +43,19 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
     private ReviewListener reviewListener;
 
 
-    public FiveStarsDialog(Context context,String supportEmail){
+    public FiveStarsDialog(Context context, String supportEmail) {
         this.context = context;
-        sharedPrefs = context.getSharedPreferences(context.getPackageName(),Context.MODE_PRIVATE);
+        sharedPrefs = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
         this.supportEmail = supportEmail;
     }
 
-    private void build(){
+    private void build() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = LayoutInflater.from(context);
         dialogView = inflater.inflate(R.layout.stars, null);
         String titleToAdd = (title == null) ? DEFAULT_TITLE : title;
         String textToAdd = (rateText == null) ? DEFAULT_TEXT : rateText;
-        contentTextView = (TextView)dialogView.findViewById(R.id.text_content);
+        contentTextView = (TextView) dialogView.findViewById(R.id.text_content);
         contentTextView.setText(textToAdd);
         ratingBar = (RatingBar) dialogView.findViewById(R.id.ratingBar);
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -65,19 +64,18 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
                 Log.d(TAG, "Rating changed : " + v);
                 if (isForceMode && v >= upperBound) {
                     openMarket();
-                    if(reviewListener != null)
-                        reviewListener.onReview((int)ratingBar.getRating());
+                    if (reviewListener != null)
+                        reviewListener.onReview((int) ratingBar.getRating());
                 }
             }
         });
         alertDialog = builder.setTitle(titleToAdd)
                 .setView(dialogView)
-                .setNegativeButton(DEFAULT_NEGATIVE,this)
-                .setPositiveButton(DEFAULT_POSITIVE,this)
-                .setNeutralButton(DEFAULT_NEVER,this)
+                .setNegativeButton(DEFAULT_NEGATIVE, this)
+                .setPositiveButton(DEFAULT_POSITIVE, this)
+                .setNeutralButton(DEFAULT_NEVER, this)
                 .create();
     }
-
 
 
     private void disable() {
@@ -110,20 +108,20 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
 
 
     private void show() {
-        boolean disabled  = sharedPrefs.getBoolean(SP_DISABLED, false);
-        if(!disabled){
+        boolean disabled = sharedPrefs.getBoolean(SP_DISABLED, false);
+        if (!disabled) {
             build();
             alertDialog.show();
         }
     }
 
-    public void showAfter(int numberOfAccess){
+    public void showAfter(int numberOfAccess) {
         build();
         SharedPreferences.Editor editor = sharedPrefs.edit();
         int numOfAccess = sharedPrefs.getInt(SP_NUM_OF_ACCESS, 0);
         editor.putInt(SP_NUM_OF_ACCESS, numOfAccess + 1);
         editor.apply();
-        if(numOfAccess + 1 >= numberOfAccess){
+        if (numOfAccess + 1 >= numberOfAccess) {
             show();
         }
     }
@@ -131,25 +129,27 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
 
     @Override
     public void onClick(DialogInterface dialogInterface, int i) {
-        if(i == DialogInterface.BUTTON_POSITIVE){
-            if(ratingBar.getRating() < upperBound){
-                if(negativeReviewListener == null){
-                    sendEmail();
-                }else{
-                    negativeReviewListener.onNegativeReview((int)ratingBar.getRating());
-                }
+        if (i == DialogInterface.BUTTON_POSITIVE) {
+            if (ratingBar.getRating() != 0) {
+                if (ratingBar.getRating() < upperBound) {
+                    if (negativeReviewListener == null) {
+                        sendEmail();
+                    } else {
+                        negativeReviewListener.onNegativeReview((int) ratingBar.getRating());
+                    }
 
-            }else if(!isForceMode){
-                openMarket();
+                } else if (!isForceMode) {
+                    openMarket();
+                }
             }
             disable();
-            if(reviewListener != null)
-                reviewListener.onReview((int)ratingBar.getRating());
+            if (reviewListener != null)
+                reviewListener.onReview((int) ratingBar.getRating());
         }
-        if(i == DialogInterface.BUTTON_NEUTRAL){
+        if (i == DialogInterface.BUTTON_NEUTRAL) {
             disable();
         }
-        if(i == DialogInterface.BUTTON_NEGATIVE){
+        if (i == DialogInterface.BUTTON_NEGATIVE) {
             SharedPreferences.Editor editor = sharedPrefs.edit();
             editor.putInt(SP_NUM_OF_ACCESS, 0);
             editor.apply();
@@ -168,17 +168,18 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
         return this;
     }
 
-    public FiveStarsDialog setRateText(String rateText){
+    public FiveStarsDialog setRateText(String rateText) {
         this.rateText = rateText;
         return this;
     }
 
     /**
      * Set to true if you want to send the user directly to the market
+     *
      * @param isForceMode
      * @return
      */
-    public FiveStarsDialog setForceMode(boolean isForceMode){
+    public FiveStarsDialog setForceMode(boolean isForceMode) {
         this.isForceMode = isForceMode;
         return this;
     }
@@ -186,30 +187,33 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
     /**
      * Set the upper bound for the rating.
      * If the rating is >= of the bound, the market is opened.
+     *
      * @param bound the upper bound
      * @return the dialog
      */
-    public FiveStarsDialog setUpperBound(int bound){
+    public FiveStarsDialog setUpperBound(int bound) {
         this.upperBound = bound;
         return this;
     }
 
     /**
      * Set a custom listener if you want to OVERRIDE the default "send email" action when the user gives a negative review
+     *
      * @param listener
      * @return
      */
-    public FiveStarsDialog setNegativeReviewListener(NegativeReviewListener listener){
+    public FiveStarsDialog setNegativeReviewListener(NegativeReviewListener listener) {
         this.negativeReviewListener = listener;
-        return  this;
+        return this;
     }
 
     /**
      * Set a listener to get notified when a review (positive or negative) is issued, for example for tracking purposes
+     *
      * @param listener
      * @return
      */
-    public FiveStarsDialog setReviewListener(ReviewListener listener){
+    public FiveStarsDialog setReviewListener(ReviewListener listener) {
         this.reviewListener = listener;
         return this;
     }

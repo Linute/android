@@ -285,6 +285,8 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                                             vEmpty.setVisibility(mGlobalChoiceItems.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
                                     });
+
+                                    setFragmentState(FragmentState.NEEDS_UPDATING);
                                 }
                             });
                         }
@@ -350,9 +352,6 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
     public void goToTrend(GlobalChoiceItem item) {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
-            if (item.type == GlobalChoiceItem.TYPE_TREND)
-                setFragmentState(FragmentState.NEEDS_UPDATING);
-
             activity.addFragmentToContainer(TrendingPostsFragment.newInstance(item), "TREND");
         }
     }

@@ -1624,5 +1624,5 @@ limitations under the License.\n\n
         read and agreed to the following
     </string>
     <string name="block_confirmation_text">This person will be blocked, and this conversation will be deleted. They will not be able to message you anymore.</string>
-    <string name="leave_group_chat_dialog_text">This conversation will be deleted from your inbox, and you won\'t be able to retrieve it.</string>
+    <string name="leave_group_chat_dialog_text">Doing this will permanently delete this conversation. Are you sure?.</string>
 </resources>
