@@ -8,11 +8,11 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
-        app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
-        app:titleTextColor="@color/pure_white"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
+        app:titleTextColor="@color/pure_white">
         <ImageView
             android:id="@+id/image_sticker_trash"
             android:layout_width="wrap_content"
@@ -20,6 +20,7 @@
             android:layout_gravity="center"
             android:src="@drawable/trash_icon_closed"/>
     </android.support.v7.widget.Toolbar>
+
     <!--placeholder view that has 6:5 ratio-->
     <!--can be changed to square by calling setMakeSquare() and requestLayout-->
     <com.linute.linute.SquareCamera.CustomView
@@ -33,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-        android:layout_gravity="center">
+        android:focusableInTouchMode="true">
 
         <!-- Photos and videos taken/uploaded by user in this view -->
         <FrameLayout
@@ -56,8 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/spacer"
-        android:orientation="vertical"
-    >
+        android:orientation="vertical">
         <LinearLayout
             android:id="@+id/list_tools"
             android:layout_width="match_parent"

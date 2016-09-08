@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:hint="Check email for pincode"
+        android:hint="Please check your email for pincode"
         android:imeOptions="actionDone"
         android:inputType="number"
         android:lines="1"

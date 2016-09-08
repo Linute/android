@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.CreateContent.Gallery;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
-import android.graphics.PorterDuff;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +11,6 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
@@ -326,7 +324,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(item.path, options);
-        Dimens dimens = new Dimens(options.outWidth, options.outHeight, 0);
+        Dimens dimens = new Dimens(options.outWidth, options.outHeight);
 
 
         goToFragment(

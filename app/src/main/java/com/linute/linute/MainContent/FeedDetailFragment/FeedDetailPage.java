@@ -817,7 +817,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (mFeedDetail.getPostUserId().equals(mViewId)) { //is the viewers post
             String[] ops = new String[]{
                     "Delete post",
-                    mFeedDetail.isAnon() ? "Reveal post" : "Make anonymous",
+                    mFeedDetail.isAnon() ? "Reveal post" : "Become anonymous",
                     mFeedDetail.getPost().isPostMuted() ? "Unmute post" : "Mute post"};
 
             mAlertDialog = new AlertDialog.Builder(getActivity())
@@ -922,8 +922,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getActivity() == null || !mCommentsRetrieved) return;
 
         mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle("Delete Post")
-                .setMessage("Are you sure you want to delete this post?")
+                .setTitle("Delete your post")
+                .setMessage("Are you sure you want to delete what you've created?")
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -997,7 +997,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getActivity() == null || !mCommentsRetrieved) return;
         boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
         mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(isAnon ? "Reveal" : "Hide")
+                .setTitle(isAnon ? "Reveal" : "Wear a mask")
                 .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
@@ -1033,7 +1033,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             emit.put("room", mFeedDetail.getPostId());
             activity.emitSocket(API_Methods.VERSION + ":posts:mute", emit);
             Toast.makeText(activity,
-                    isMuted ? "Unmuted post" : "Muted post",
+                    isMuted ? "You will start getting updates" : "Notifications muted",
                     Toast.LENGTH_SHORT).show();
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
@@ -1046,7 +1046,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getActivity() == null || !mCommentsRetrieved) return;
         mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(mFeedDetail.getPost().isPostHidden() ? "Unhide post" : "Hide it")
-                .setMessage(mFeedDetail.getPost().isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed. Still want to go ahead with it?")
+                .setMessage(mFeedDetail.getPost().isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -1530,7 +1530,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (mFeedDetailAdapter.getDenySwipe()) return;
 
         if (getActivity() != null) {
-            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Delete")
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Delete comment")
                     .setMessage("Are you sure you want to delete this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
@@ -1634,7 +1634,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     @Override
     public void revealComment(final int pos, final String id, final boolean isAnon) {
         if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
-            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Hide")
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Put on your mask")
                     .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to make this comment anonymous?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
@@ -1702,7 +1702,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         public void run() {
                                             comment.setIsAnon(!isAnon);
                                             mFeedDetailAdapter.notifyItemChanged(pos + 1);
-                                            Toast.makeText(activity, isAnon ? "Comment revealed" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(activity, isAnon ? "You've taken off your mask!" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                 }
@@ -1744,7 +1744,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     @Override
     public void reportComment(final String id) {
         if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
-            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Report")
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle("Report comment")
                     .setMessage("Are you sure you want to report this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 

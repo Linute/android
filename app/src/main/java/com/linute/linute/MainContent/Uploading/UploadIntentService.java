@@ -77,7 +77,16 @@ public class UploadIntentService extends IntentService {
 
     private void sendNextFile(PendingUploadPost p) {
         try {
-            Bitmap image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(p.getImagePath()));
+
+            Uri imageUri = Uri.parse(p.getImagePath());
+            File file = new File(imageUri.getPath());
+            if (!file.exists()){
+                failedToPost(p);
+                Log.i(TAG, "sendNextFile: no image");
+                return;
+            }
+
+            Bitmap image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
 
             mBuilder.setContentTitle("Preparing for upload")
                     .setContentText("")
@@ -121,10 +130,17 @@ public class UploadIntentService extends IntentService {
                             Utils.encodeImageBase64HighRes(image) : Utils.encodeImageBase64(image));
 
             params.put("images", imageArray);
-
             if (p.getVideoPath() != null) {
+                file = new File(p.getVideoPath());
+
+                if (!file.exists()){
+                    failedToPost(p);
+                    Log.d(TAG, "sendNextFile: no vid");
+                    return;
+                }
+
                 JSONArray videoArray = new JSONArray();
-                videoArray.put(Utils.encodeFileBase64(new File(p.getVideoPath())));
+                videoArray.put(Utils.encodeFileBase64(file));
                 params.put("videos", videoArray);
             }
 
@@ -156,6 +172,7 @@ public class UploadIntentService extends IntentService {
             failedToPost(p);
 
         }
+
         --mPendingFiles;
     }
 

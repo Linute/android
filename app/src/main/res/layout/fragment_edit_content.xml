@@ -9,9 +9,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
-        app:titleTextColor="@color/pure_white"
+        android:background="@color/colorPrimary"
         app:navigationIcon="@drawable/ic_action_navigation_arrow_back_inverted"
-        android:background="@color/colorPrimary">
+        app:titleTextColor="@color/pure_white">
 
         <ImageView
             android:id="@+id/image_sticker_trash"
@@ -21,18 +21,20 @@
             android:src="@drawable/trash_icon_closed"/>
     </android.support.v7.widget.Toolbar>
 
-    <FrameLayout
+    <com.linute.linute.SquareCamera.CustomFrameLayout
         android:id="@+id/final_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="#000">
+        android:background="#000"
+        android:focusableInTouchMode="true">
 
         <FrameLayout
+            android:id="@+id/inner_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_gravity="center"
+            android:gravity="center"
         >
             <!-- Photos and videos taken/uploaded by user in this view -->
             <FrameLayout
@@ -48,10 +50,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"/>
-
         </FrameLayout>
-
-    </FrameLayout>
+    </com.linute.linute.SquareCamera.CustomFrameLayout>
 
 
     <LinearLayout

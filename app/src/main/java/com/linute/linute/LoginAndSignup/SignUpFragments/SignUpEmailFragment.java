@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import okhttp3.Call;
@@ -213,15 +214,15 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
     private void showConfirm(final String email, final String password) {
         if (getActivity() != null) {
             new AlertDialog.Builder(getActivity())
-                    .setTitle("Confirm")
-                    .setMessage("A pin code will be sent to " + email + ". Is this the correct email address?")
-                    .setNegativeButton("no", new DialogInterface.OnClickListener() {
+                    .setTitle("Confirm email")
+                    .setMessage(String.format(Locale.ENGLISH, "Is this your correct email?\n%s\nWe will send a verification code to this email address", email))
+                    .setNegativeButton("not yet", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
                     })
-                    .setPositiveButton("yes", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("yep", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             checkEmail(email, password);

@@ -757,9 +757,7 @@ public class CameraFragment extends Fragment {
                                                         options.inJustDecodeBounds = true;
                                                         BitmapFactory.decodeFile(uri.getPath(), options);
 
-                                                        Dimens photoDimens = new Dimens(options.outWidth, options.outHeight, 0);
-
-                                                        photoDimens.setNeedsCropping(false);
+                                                        Dimens photoDimens = new Dimens(options.outWidth, options.outHeight);
 
                                                         getFragmentManager()
                                                                 .beginTransaction()
@@ -856,7 +854,8 @@ public class CameraFragment extends Fragment {
 
         mVideoDimen = new Dimens(
                 vidSize.width,
-                vidSize.height, mCameraID == CameraInfo.CAMERA_FACING_FRONT
+                vidSize.height,
+                mCameraID == CameraInfo.CAMERA_FACING_FRONT
         );
 
         mMediaRecorder = new MediaRecorder();

@@ -91,7 +91,7 @@ public class PreLoginActivity extends AppCompatActivity {
                     intent.putExtra(android.content.Intent.EXTRA_TEXT,
                             "If you are having issues with your signin (ie. not receiving pincode, " +
                                     "email not working), swap this text out with the problem you are having.");
-                    startActivity(intent);
+                    startActivity(Intent.createChooser(intent, "Send email"));
                 }
             });
 
@@ -433,7 +433,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-    private void setUpFacebookProfilePictureCallback(final GetPhotoCallback callback){
+    private void setUpFacebookProfilePictureCallback(final GetPhotoCallback callback) {
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -457,12 +457,12 @@ public class PreLoginActivity extends AppCompatActivity {
         });
     }
 
-    public void clearFBCallback(){
+    public void clearFBCallback() {
         LoginManager.getInstance().registerCallback(mCallbackManager, null);
     }
 
 
-    public void getFBProfileImage(GetPhotoCallback callback){
+    public void getFBProfileImage(GetPhotoCallback callback) {
         setUpFacebookProfilePictureCallback(callback);
         LoginManager.getInstance().logInWithReadPermissions(PreLoginActivity.this, Collections.singletonList("public_profile"));
     }
@@ -474,8 +474,9 @@ public class PreLoginActivity extends AppCompatActivity {
         clearFBCallback();
     }
 
-    public interface GetPhotoCallback{
+    public interface GetPhotoCallback {
         void success(String id);
+
         void error();
     }
 

@@ -54,7 +54,7 @@ public class FeedAdapter extends BaseFeedAdapter {
             case LoadMoreViewHolder.FOOTER:
                 return new LoadMoreViewHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
-                        "", "You have reached the end. Come back later for more!");
+                        "", "That's all folks!");
 
             case IMAGE_POST:
                 return new ImageFeedHolder(

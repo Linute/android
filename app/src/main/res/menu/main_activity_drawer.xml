@@ -5,33 +5,33 @@
     <group>
         <item
             android:id="@+id/navigation_item_feed"
-            android:icon="@drawable/ic_action_college"
-            android:title="Campus"
             android:checkable="true"
             android:checked="true"
+            android:icon="@drawable/ic_action_college"
+            android:title="Campus"
             app:actionLayout="@layout/main_activity_nav_action_counter"
-            />
+        />
         <item
             android:id="@+id/navigation_item_global"
-            android:icon="@drawable/global_icon"
-            android:title="Global"
             android:checkable="true"
+            android:icon="@drawable/ic_action_global_icon"
+            android:title="Global"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
         <item
             android:id="@+id/navigation_item_find_friends"
+            android:checkable="true"
             android:icon="@drawable/ic_action_add"
             android:title="Find Friends"
-            android:checkable="true"
             app:actionLayout="@layout/main_activity_nav_action_counter"/>
 
-       <!-- <item
-            android:id="@+id/settings_button"
-            android:icon="@drawable/ic_action_action_settings"
-            android:title="Settings"
-            android:checkable="false"
-            android:enabled="false"
-            android:orderInCategory="200"
-            android:layout_gravity="bottom"
-            />-->
+        <!-- <item
+             android:id="@+id/settings_button"
+             android:icon="@drawable/ic_action_action_settings"
+             android:title="Settings"
+             android:checkable="false"
+             android:enabled="false"
+             android:orderInCategory="200"
+             android:layout_gravity="bottom"
+             />-->
     </group>
 </menu>
