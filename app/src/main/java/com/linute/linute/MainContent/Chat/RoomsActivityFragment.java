@@ -345,7 +345,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 } else {
                                     tempArray = message.getJSONArray("images");
                                     if (tempArray.length() > 0) {
-                                        lastMessage = "sent you an image";
+                                            lastMessage = "sent an image";
                                     } else {
                                         lastMessage = message.getString("text");
                                     }
