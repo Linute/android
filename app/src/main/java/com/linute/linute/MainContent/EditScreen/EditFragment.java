@@ -1067,7 +1067,7 @@ public class EditFragment extends BaseFragment {
                                     .putExtra("image", image)
                                     .putExtra("privacy", options.postAsAnon)
                                     .putExtra("type", CameraActivity.VIDEO)
-                                    /*.putExtra("title", mTextView.getText().toString())*/;
+                                    .putExtra("title", options.text);
 
 //                            mProgressDialog.dismiss();
                             getActivity().setResult(Activity.RESULT_OK, i);
@@ -1116,7 +1116,7 @@ public class EditFragment extends BaseFragment {
                 options.postAsAnon ? 1 : 0,
                 options.isAnonCommentsDisabled ? 0 : 1,
 //                mTextView.getText().toString(),
-                "",
+                options.text,
                 2,
                 imagepath,
                 videopath,
