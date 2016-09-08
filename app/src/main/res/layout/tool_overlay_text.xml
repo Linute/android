@@ -54,6 +54,7 @@
         android:padding="4dp"
         android:textColor="@color/pure_white"
         android:textSize="16dp"
+        android:imeOptions="actionDone"
         android:minHeight="24dp"
         android:inputType="textCapSentences|textNoSuggestions"
     />
