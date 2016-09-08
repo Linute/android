@@ -22,19 +22,23 @@
         />
     </android.support.design.widget.AppBarLayout>
 
-    <TextView
-        android:id="@+id/empty_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="150dp"
-        android:drawablePadding="@dimen/activity_horizontal_margin"
-        android:drawableTop="@drawable/no_updates"
-        android:gravity="center"
-        android:text="@string/updates_no_updates"
-        android:visibility="gone"
-    />
+
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_empty_screen"
+            android:layout_marginStart="@dimen/margin_empty_screen"
+            android:layout_marginTop="150dp"
+            android:drawablePadding="@dimen/margin_empty_image"
+            android:drawableTop="@drawable/ic_couple"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:text="@string/updates_no_updates"
+            android:visibility="gone"
+            />
+
+
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/updatesFragment_swipe_refresh"

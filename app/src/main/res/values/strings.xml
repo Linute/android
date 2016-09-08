@@ -149,11 +149,12 @@
 
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
-    <string name="need_contant_permission">To find friends, Tapt needs permission to view your
-        contacts
+    <string name="need_contant_permission">
+Find friends on Tapt through your contacts
+
     </string>
-    <string name="facebook_rationale">Tapt needs access to you\'re facebook friends to find
-        friends.
+    <string name="facebook_rationale">Find your friends on Tapt
+
     </string>
     <string name="no_friends_posts">Your friends haven\'t posted anything yet.</string>
     <string name="no_campus_post">Your school hasn\'t posted anything yet</string>
@@ -166,21 +167,26 @@
         that are near you.
     </string>
     <string name="need_location">Tapt needs your location to find friends near you</string>
-    <string name="no_comment">Start the conversation with a comment!</string>
+    <string name="no_comment">Start it off with a comment</string>
 
     <string name="no_results">No results found</string>
 
-    <string name="discover_no_posts_campus">Is anybody out there?!\n\n Looks like you\'re the first
-        one here. Make a post so the rest of the campus can recognize
+    <string name="discover_no_posts_campus">Looks like you’re a pioneer.\n
+        See what other campuses are doing while you spread the word on yours!
     </string>
-    <string name="discover_no_posts_hot">No posts at this time</string>
-
-    <string name="profile_no_posts">Your Story \n\n It\'s a ghost town out here! Make a post so the
-        rest of the campus can recognize
+    <string name="discover_no_posts_hot">
+        As your campus feed picks up you’ll see the best posts here!
     </string>
 
-    <string name="updates_no_updates">Feel the vibrations \n\n add your friends, comment on some
-        stuff, leave the studying for later
+    <string name="profile_no_posts">
+        Create your first post. \n
+Make it anonymous, \n
+have fun with it!
+
+    </string>
+
+    <string name="updates_no_updates">Get updates here by interacting with your friends from class or a different college!
+
     </string>
 
     <string name="attp"><![CDATA[
@@ -1625,4 +1631,7 @@ limitations under the License.\n\n
     </string>
     <string name="block_confirmation_text">This person will be blocked, and this conversation will be deleted. They will not be able to message you anymore.</string>
     <string name="leave_group_chat_dialog_text">This conversation will be deleted from your inbox, and you won\'t be able to retrieve it.</string>
+    <string name="empty_find_friends">Find your friends on Tapt</string>
+    <string name="empty_fragment_rooms">Message a friend or the entire squad with group messaging</string>
+    <string name="no_messages">Say something to start the conversation</string>
 </resources>

@@ -53,7 +53,7 @@ public class FiveStarsDialog  implements DialogInterface.OnClickListener{
     private void build(){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         LayoutInflater inflater = LayoutInflater.from(context);
-        dialogView = inflater.inflate(R.layout.stars, null);
+        dialogView = inflater.inflate(R.layout.stars, null, false);
         String titleToAdd = (title == null) ? DEFAULT_TITLE : title;
         String textToAdd = (rateText == null) ? DEFAULT_TEXT : rateText;
         contentTextView = (TextView)dialogView.findViewById(R.id.text_content);

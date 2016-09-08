@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.linute.linute.API.LSDKEvents;
@@ -84,6 +85,11 @@ public class FeedFragment extends BaseFeedFragment {
         return root;
     }
 
+    /*@Override
+    protected int getEmptyLayout() {
+        return 0;
+    }*/
+
     @Override
     public void onResume() {
         super.onResume();
@@ -106,16 +112,30 @@ public class FeedFragment extends BaseFeedFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mSectionTwo && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
+
+                ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                        R.drawable.ic_rocket
+                );
+
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
-                vEmptyView.requestLayout();
-                vEmptyView.setVisibility(View.VISIBLE);
+                showEmptyView();
 
             } else if (mSectionTwo && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
+
+                ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                        R.drawable.ic_fire_emoji
+                );
+
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
-                vEmptyView.requestLayout();
-                vEmptyView.setVisibility(View.VISIBLE);
+                showEmptyView();
             }
         }
+    }
+
+    private void showEmptyView() {
+        vEmptyView.requestLayout();
+        vEmptyView.setVisibility(View.VISIBLE);
+//        vSwipeRefreshLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -323,9 +343,12 @@ public class FeedFragment extends BaseFeedFragment {
 
                                             if (refreshedPosts.isEmpty()) {
                                                 if (vEmptyView.getVisibility() == View.GONE) {
+                                                    ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                                                            mSectionTwo? R.drawable.ic_fire_emoji : R.drawable.ic_rocket
+                                                    );
                                                     ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
                                                             R.string.discover_no_posts_hot : R.string.discover_no_posts_campus);
-                                                    vEmptyView.setVisibility(View.VISIBLE);
+                                                    showEmptyView();
                                                 }
                                             } else if (vEmptyView.getVisibility() == View.VISIBLE) {
                                                 vEmptyView.setVisibility(View.GONE);
