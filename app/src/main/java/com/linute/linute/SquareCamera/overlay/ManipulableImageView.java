@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -47,8 +48,9 @@ public class ManipulableImageView extends FrameLayout {
 
         setClipChildren(false);
 
-        int x = (int)(Math.random()*(context.getResources().getDisplayMetrics().widthPixels));
-        int y = (int)(Math.random()*320)+200;
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int x = displayMetrics.widthPixels / 2;
+        int y = displayMetrics.heightPixels/ 2;
 
 
         addView(mImageView);
@@ -314,7 +316,16 @@ public class ManipulableImageView extends FrameLayout {
             bigD = bitmap.getHeight();
         }
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(bigD, bigD));
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        int screenWidth = displayMetrics.widthPixels;
+        int x = displayMetrics.widthPixels / 2 - bigD/2;
+        int y = displayMetrics.heightPixels/ 4 - bigD/2;
+
+        mImageView.setX(x);
+        mImageView.setY(y);
+
         mTotalScale = (float) screenWidth /5/bigD;
         mImageView.setScaleX(mTotalScale);
         mImageView.setScaleY(mTotalScale);
