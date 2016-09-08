@@ -3,12 +3,15 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -82,6 +85,55 @@ public class FeedFragment extends BaseFeedFragment {
             }
         });
 
+        vEmptyView.findViewById(R.id.empty_view_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final MainActivity activity = (MainActivity)getActivity();
+                activity.openDrawer();
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.GLOBAL);
+                    }
+                }, 600);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.closeDrawer();
+                    }
+                }, 1200);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        final RecyclerView globalrv = (RecyclerView) activity.findViewById(R.id.recycler_view);
+                        final View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
+                            @Override
+                            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        globalrv.getChildAt(0).setPressed(true);
+                                        globalrv.invalidate();
+                                    }
+                                }, 200);
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        globalrv.getChildAt(0).performClick();
+                                    }
+                                }, 700);
+                                globalrv.removeOnLayoutChangeListener(this);
+                            }
+                        };
+                        globalrv.addOnLayoutChangeListener(listener);
+                        globalrv.requestLayout();
+                    }
+                }, 1800);
+            }
+        });
+
+
         return root;
     }
 
@@ -118,6 +170,8 @@ public class FeedFragment extends BaseFeedFragment {
                 );
 
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
+                ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText(R.string.empty_feed_button_campus);
+
                 showEmptyView();
 
             } else if (mSectionTwo && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
@@ -127,6 +181,8 @@ public class FeedFragment extends BaseFeedFragment {
                 );
 
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
+                ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText(R.string.empty_feed_button_hot);
+
                 showEmptyView();
             }
         }
@@ -135,7 +191,7 @@ public class FeedFragment extends BaseFeedFragment {
     private void showEmptyView() {
         vEmptyView.requestLayout();
         vEmptyView.setVisibility(View.VISIBLE);
-//        vSwipeRefreshLayout.setVisibility(View.GONE);
+        vSwipeRefreshLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -348,6 +404,9 @@ public class FeedFragment extends BaseFeedFragment {
                                                     );
                                                     ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
                                                             R.string.discover_no_posts_hot : R.string.discover_no_posts_campus);
+
+                                                    ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText((mSectionTwo ? R.string.empty_feed_button_hot : R.string.empty_feed_button_campus));
+
                                                     showEmptyView();
                                                 }
                                             } else if (vEmptyView.getVisibility() == View.VISIBLE) {

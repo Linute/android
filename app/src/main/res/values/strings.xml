@@ -1634,4 +1634,6 @@ limitations under the License.\n\n
     <string name="empty_find_friends">Find your friends on Tapt</string>
     <string name="empty_fragment_rooms">Message a friend or the entire squad with group messaging</string>
     <string name="no_messages">Say something to start the conversation</string>
+    <string name="empty_feed_button_campus">Take me there!</string>
+    <string name="empty_feed_button_hot">See other Campuses</string>
 </resources>

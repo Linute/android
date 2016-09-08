@@ -228,6 +228,9 @@ public class MainActivity extends BaseTaptActivity {
                 .showAfter(10);
     }
 
+    public void selectDrawerItem(int pos){
+        navItemSelected((short)pos, mNavigationView.getMenu().getItem(pos-1));
+    }
 
     private void navItemSelected(short position, MenuItem item) {
         int backstack = getSupportFragmentManager().getBackStackEntryCount();
@@ -1298,6 +1301,10 @@ public class MainActivity extends BaseTaptActivity {
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+    }
+
 
     public void addActivityFragment() {
         addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY), UpdatesFragment.TAG);
