@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true">
 
     <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
         android:id="@+id/text_top"
@@ -11,6 +13,7 @@
         android:layout_gravity="top"
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
+        android:imeOptions="actionDone"
         android:inputType="none|textNoSuggestions"
         android:padding="8dp"
         android:textColor="@color/pure_white"
@@ -25,6 +28,7 @@
         android:layout_gravity="bottom"
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
+        android:imeOptions="actionDone"
         android:inputType="none|textNoSuggestions"
         android:padding="8dp"
         android:textColor="@color/pure_white"
@@ -32,17 +36,17 @@
         tools:text="Bottom Text"
     />
 
-   <!-- <TextView
-        android:id="@+id/text_mid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:background="@color/edit_fragment_meme_text_bg"
-        android:gravity="center"
-        android:padding="4dp"
-        android:textColor="@color/pure_white"
-        android:textSize="14sp"
-    />-->
+    <!-- <TextView
+         android:id="@+id/text_mid"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_gravity="center_vertical"
+         android:background="@color/edit_fragment_meme_text_bg"
+         android:gravity="center"
+         android:padding="4dp"
+         android:textColor="@color/pure_white"
+         android:textSize="14sp"
+     />-->
 
     <com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText
         android:id="@+id/edit_text_mid"
@@ -51,13 +55,19 @@
         android:layout_gravity="center_vertical"
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="textCapSentences|textNoSuggestions"
+        android:minHeight="24dp"
         android:padding="4dp"
         android:textColor="@color/pure_white"
         android:textSize="16dp"
-        android:imeOptions="actionDone"
-        android:minHeight="24dp"
-        android:inputType="textCapSentences|textNoSuggestions"
     />
+
+    <android.support.v4.widget.Space
+        android:id="@+id/focus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusableInTouchMode="true"/>
 
 
 </FrameLayout>

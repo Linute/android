@@ -310,7 +310,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         }
                         else {
                             i = new Intent(getContext(), GalleryActivity.class);
-                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.ALL);
+                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_ALL);
                             i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
                         }
 

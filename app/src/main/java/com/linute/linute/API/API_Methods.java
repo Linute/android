@@ -42,7 +42,7 @@ public class API_Methods {
 //    public static String HOST = "api.tapt.io";
     public static String HOST = "devapi2.tapt.io";
 
-    public static final String HOST_DEV = "devapi2.tapt.io";
+    public static final String HOST_DEV = "devapi.tapt.io";
     public static final String HOST_LIVE = "api.tapt.io";
 
     public static final String VERSION_DEV = "v1.4.4";
@@ -118,7 +118,6 @@ public class API_Methods {
                                             Map<String, String> headers,
                                             Map<String, Object> parameters,
                                             CountingRequestBody.Listener listener) throws IOException{
-
 
         JSONObject json = new JSONObject(parameters);
 

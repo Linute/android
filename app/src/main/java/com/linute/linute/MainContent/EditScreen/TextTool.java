@@ -5,12 +5,17 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.support.v4.widget.Space;
 import android.text.InputType;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,12 +28,15 @@ import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
  */
 public class TextTool extends EditContentTool {
 
+    private static final String TAG = TextTool.class.getSimpleName();
+    private Space vFocusView; //so we can focus on this
 
     private final View[] textModeViews;
     int midTvPost = 0;
     private final View mTextContainer;
-
     public static final int MID_TEXT_INDEX = 1;
+
+    private boolean mMidETCanBeMoved = false;
 
 
     private static class TextMode {
@@ -46,24 +54,26 @@ public class TextTool extends EditContentTool {
         public void onSelected() {
             for (int i = 0; i < mextViews.length; i++) {
                 TextView tv = mextViews[i];
-                tv.setText(savedText[i]);
+                tv.setText("");
+
+                if (savedText[i] != null)
+                    tv.append(savedText[i]);
+
                 tv.setVisibility(View.VISIBLE);
             }
+
             if (mextViews.length > 0)
                 showKeyboard(mextViews[0]);
-
         }
 
 
         public void onUnSelected() {
             for (int i = 0; i < mextViews.length; i++) {
                 TextView tv = mextViews[i];
-                tv.setVisibility(View.GONE);
+                tv.setVisibility(View.INVISIBLE);
                 savedText[i] = tv.getText().toString();
             }
         }
-
-        ;
     }
 
     private final CustomBackPressedEditText topET;
@@ -82,27 +92,26 @@ public class TextTool extends EditContentTool {
 
         TextMode.savedText = new String[3];
 
+        vFocusView = (Space) mTextContainer.findViewById(R.id.focus);
         topET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.text_top);
         botET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.text_bot);
         midET = (CustomBackPressedEditText) mTextContainer.findViewById(R.id.edit_text_mid);
-
 
         topET.setTypeface(font);
         botET.setTypeface(font);
 
 
-        topET.setVisibility(View.GONE);
-        botET.setVisibility(View.GONE);
-//        midTV.setVisibility(View.GONE);
-        midET.setVisibility(View.GONE);
+        topET.setVisibility(View.INVISIBLE);
+        botET.setVisibility(View.INVISIBLE);
+        midET.setVisibility(View.INVISIBLE);
 
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
                 frag.selectTool(TextTool.this);
-                topET.setCursorVisible(b);
-                botET.setCursorVisible(b);
-                midET.setCursorVisible(b);
+                //topET.setCursorVisible(b);
+                //botET.setCursorVisible(b);
+                //midET.setCursorVisible(b);
             }
         };
 
@@ -113,42 +122,60 @@ public class TextTool extends EditContentTool {
         midET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
-                hideKeyboard(midET);
-
-                midET.setCursorVisible(false);
+                //hideKeyboard(midET);
+                clearFocus(midET);
+                //midET.setFocusable(false);
 
                 String text = midET.getText().toString().trim();
                 midET.setText(text);
-//                midTV.setText(text);
-//
-//                midET.setVisibility(View.GONE);
-//                midTV.setVisibility(View.VISIBLE);
-//                midTV.setY(midET.getY());
-                //TODO animate?
+                if (text.isEmpty())
+                    selectTextMode(0);
+                else
+                    mMidETCanBeMoved = true;
+
+            }
+        });
+
+        topET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+            @Override
+            public void backPressed() {
+                clearFocus(topET);
+            }
+        });
+
+        botET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
+            @Override
+            public void backPressed() {
+                clearFocus(botET);
             }
         });
 
         midET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
             @Override
             public void enterPressed() {
-                if (midET.getText().toString().trim().equals("")) {
+                if (midET.getText().toString().trim().isEmpty())
                     selectTextMode(0);
-                    hideKeyboard(midET);
-                }
+
+                hideKeyboard(midET);
+                clearFocus(midET);
+                //midET.setFocusable(false);
+                mMidETCanBeMoved = true;
             }
         });
 
         botET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
             @Override
             public void enterPressed() {
-//                botET.setCursorVisible(false);
+                hideKeyboard(botET);
+                clearFocus(botET);
             }
         });
 
         topET.setEnterAction(new CustomBackPressedEditText.EnterButtonAction() {
             @Override
             public void enterPressed() {
-//                topET.setCursorVisible(false);
+                hideKeyboard(topET);
+                clearFocus(topET);
             }
         });
 
@@ -156,29 +183,38 @@ public class TextTool extends EditContentTool {
 
             float downY, initY;
             long timeDown;
+            int max;
+            FrameLayout.LayoutParams params;
 
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                view.onTouchEvent(motionEvent);
                 switch (motionEvent.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        midET.setCursorVisible(true);
                         downY = motionEvent.getRawY();
                         initY = view.getY();
                         timeDown = System.currentTimeMillis();
+                        max = mTextContainer.getHeight() - view.getHeight();
+                        params = (FrameLayout.LayoutParams)view.getLayoutParams();
                         return true;
                     case MotionEvent.ACTION_MOVE:
-                        view.setY(initY + (motionEvent.getRawY() - downY));
-
+                        //setY() doesn't allow screen to panAdjust correctly sp using margins instead
+                        if (mMidETCanBeMoved) {
+                            params.gravity = Gravity.NO_GRAVITY;
+                            params.setMargins(0,clipTopMargin(0, max, (int)(initY + motionEvent.getRawY() - downY)),0,0);
+                            view.setLayoutParams(params);
+                        }
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (System.currentTimeMillis() - timeDown < 400
-                                && Math.abs(motionEvent.getRawY() - downY) < 20) {
-                            swapSnapchatET();
+                        if (Math.abs(motionEvent.getRawY() - downY) < 20) {
+                            //midET.setFocusableInTouchMode(true);
+                            midET.requestFocus();
+                            showKeyboard(midET);
+                            mMidETCanBeMoved = false;
                         }
                         return true;
                 }
-                return false;
+
+                return true;
             }
         });
 
@@ -187,30 +223,30 @@ public class TextTool extends EditContentTool {
                     @Override
                     public void onSelected() {
                         super.onSelected();
-                        topET.setVisibility(View.GONE);
-                        botET.setVisibility(View.GONE);
-                        midET.setVisibility(View.GONE);
+                        topET.setVisibility(View.INVISIBLE);
+                        botET.setVisibility(View.INVISIBLE);
+                        midET.setVisibility(View.INVISIBLE);
                     }
                 },//None
-                new TextMode(R.drawable.middle_text_icon, midET) {
+                new TextMode(R.drawable.middle_text_icon, midET){
                     @Override
                     public void onSelected() {
+                        //midET.setFocusableInTouchMode(true);
                         super.onSelected();
-                        swapSnapchatET();
                     }
-                },//Snapchat
+                },//middle
                 new TextMode(R.drawable.text_meme_icon, topET, botET) {
                     @Override
                     public void onSelected() {
+                        topET.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+                        topET.setNextFocusForwardId(R.id.text_bot);
                         super.onSelected();
-                        topET.setNextFocusDownId(R.id.text_bot);
-//                        botET.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     }
 
                     @Override
                     public void onUnSelected() {
                         super.onUnSelected();
-                        topET.setNextFocusDownId(0);
+                        topET.setImeOptions(EditorInfo.IME_ACTION_DONE);
                     }
                 },//Full Meme
                 new TextMode(R.drawable.top_text_icon, topET),//Top
@@ -224,13 +260,23 @@ public class TextTool extends EditContentTool {
         mTextContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(mSelected == MID_TEXT_INDEX){
+                if (mSelected == MID_TEXT_INDEX) {
                     hideKeyboard(midET);
-                }else
-                if (mSelected != 0) {
+                    if (midET.getText().toString().trim().isEmpty())
+                        selectTextMode(0);
+                    else {
+                        clearFocus(midET);
+                        mMidETCanBeMoved = true;
+                    }
+
+                } else if (mSelected != 0) {
                     hideKeyboard(view);
+                    botET.clearFocus();
+                    topET.clearFocus();
+                    vFocusView.requestFocus();
                 } else {
                     selectTextMode(MID_TEXT_INDEX);
+                    mMidETCanBeMoved = false;
                 }
             }
         });
@@ -240,22 +286,21 @@ public class TextTool extends EditContentTool {
         mOverlaysView.addView(mTextContainer);
     }
 
-    public void hideKeyboard(View view) {
-        view.clearFocus(); //release focus from EditText and hide keyboard
-        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-        if (view == midET) {
-            if (midET.getText().toString().trim().equals("")) {
-                selectTextMode(0);
-            }
-        }
+    private int clipTopMargin(int min, int max, int newMargin){
+        if (newMargin <= min) return min;
+        else if (newMargin >= max) return max;
+        else return newMargin;
     }
 
-    public void swapSnapchatET() {
-        midET.setVisibility(View.VISIBLE);
-//        midTV.setVisibility(View.GONE);
-        showKeyboard(midET);
+    private void clearFocus(View v) {
+        v.clearFocus();
+        vFocusView.requestFocus();
+    }
+
+    public void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     private int mSelected;
@@ -298,6 +343,7 @@ public class TextTool extends EditContentTool {
     }
 
     public void selectTextMode(int index) {
+
         int oldSelected = mSelected;
         mSelected = index;
 
@@ -310,19 +356,17 @@ public class TextTool extends EditContentTool {
                     textModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                     PorterDuff.Mode.MULTIPLY
             ));
-
         }
     }
 
     public boolean hasText() {
-        return
-                botET.getVisibility() == View.VISIBLE || midET.getVisibility() == View.VISIBLE || topET.getVisibility() == View.VISIBLE;
+        return botET.getVisibility() == View.VISIBLE || midET.getVisibility() == View.VISIBLE || topET.getVisibility() == View.VISIBLE;
     }
 
     @Override
     public void onOpen() {
         super.onOpen();
-        midET.setCursorVisible(true);
+        //midET.setCursorVisible(true);
         botET.setInputType(InputType.TYPE_CLASS_TEXT);
         topET.setInputType(InputType.TYPE_CLASS_TEXT);
         mTextContainer.setClickable(true);
@@ -336,23 +380,29 @@ public class TextTool extends EditContentTool {
         mTextContainer.setClickable(false);
 
         if (midET.getText().toString().trim().length() == 0) {
-            midET.setVisibility(View.GONE);
+            midET.setVisibility(View.INVISIBLE);
         }
         if (botET.getText().toString().trim().length() == 0) {
-            botET.setVisibility(View.GONE);
+            botET.setVisibility(View.INVISIBLE);
         }
         if (topET.getText().toString().trim().length() == 0) {
-            topET.setVisibility(View.GONE);
+            topET.setVisibility(View.INVISIBLE);
         }
+    }
 
-        midET.setCursorVisible(false);
 
+    private void updateMidETVisibility() {
+        if (midET.getText().toString().trim().isEmpty())
+            midET.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-        if(mSelected == MID_TEXT_INDEX)
+        if (mSelected == MID_TEXT_INDEX) {
             hideKeyboard(midET);
+            updateMidETVisibility();
+        }
+
         hideKeyboard(botET);
         hideKeyboard(topET);
         midET.setFocusable(false);
@@ -377,14 +427,23 @@ public class TextTool extends EditContentTool {
 //        midTV.setY(midET.getY());
 
 
-        options.text = topET.getText().toString() + " " + midET.getText().toString() + " "+botET.getText().toString();
+        options.text = topET.getText().toString() + " " + midET.getText().toString() + " " + botET.getText().toString();
 
-        midET.setCursorVisible(false);
+        //midET.setCursorVisible(false);
     }
 
     @Override
     public String getName() {
         return "Meme";
+    }
+
+    @Override
+    public void onPause() {
+        if (mSelected == MID_TEXT_INDEX){
+            if (midET.getText().toString().trim().isEmpty()){
+                selectTextMode(0);
+            }
+        }
     }
 
     @Override

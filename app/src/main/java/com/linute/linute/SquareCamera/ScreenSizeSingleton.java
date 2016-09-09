@@ -1,7 +1,6 @@
 package com.linute.linute.SquareCamera;
 
 import android.graphics.Point;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 

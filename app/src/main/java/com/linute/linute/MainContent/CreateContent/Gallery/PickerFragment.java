@@ -48,9 +48,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     public static final String PICKER_TYPE_KEY = "picker_type_key";
     public static final String RETURN_TYPE_KEY = "return_type";
     public static final String KEY_CONTENT_SUBTYPE = "content_type";
-    public static final int PICK_IMAGE = 0;
-    public static final int PICK_VIDEO = 1;
-    public static final int PICK_ALL = 2;
 
     public ArrayList<GalleryItem> mUnfilteredGalleryItems = new ArrayList<>();
     public ArrayList<GalleryItem> mFiltedGalleryItems = new ArrayList<>();
@@ -100,7 +97,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mPickerType = getArguments().getInt(PICKER_TYPE_KEY, PICK_ALL);
+            mPickerType = getArguments().getInt(PICKER_TYPE_KEY, GalleryActivity.PICK_ALL);
             mReturnType = getArguments().getInt(RETURN_TYPE_KEY, RETURN_URI);
             mContentSubType = (EditFragment.ContentSubType)getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
             if(mContentSubType == null){
@@ -180,7 +177,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
             String selection = MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                     + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
-            if (mPickerType != PICK_IMAGE) {
+            if (mPickerType != GalleryActivity.PICK_IMAGE) {
                 selection += " OR "
                         + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                         + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
