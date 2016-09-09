@@ -1,14 +1,23 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.linute.linute.API.LSDKEvents;
@@ -81,8 +90,151 @@ public class FeedFragment extends BaseFeedFragment {
             }
         });
 
+        //code for empty view button 'tutorial'
+        final View emptyButton = vEmptyView.findViewById(R.id.empty_view_button);
+        emptyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final MainActivity activity = (MainActivity) getActivity();
+                final Handler handler = new Handler();
+
+                final int[] pos = new int[2];
+                emptyButton.getLocationInWindow(pos);
+
+
+                final View fairy = activity.findViewById(R.id.fairy_tutorial);
+                fairy.setX(pos[0] + emptyButton.getWidth() / 2 - fairy.getWidth() / 2);
+                fairy.setY(pos[1] + emptyButton.getHeight() / 2 - fairy.getHeight() / 2);
+//                fairy.setX(pos[0]);
+//                fairy.setY(pos[1]);
+                fairy.setVisibility(View.VISIBLE);
+
+                fairy.bringToFront();
+               /* fairy.animate().x(32).y(32).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.GLOBAL);
+                    }
+                })*/
+
+                Animator moveToDrawerToggleX = ObjectAnimator.ofFloat(fairy, "x", 32);
+                Animator moveToDrawerToggleY = ObjectAnimator.ofFloat(fairy, "y", 32);
+
+                moveToDrawerToggleX.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+//                        handler.postDelayed(new Runnable() {
+//                            @Override
+//                            public void run() {
+                        activity.lockDrawer(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
+                        activity.openDrawer();
+//                            }
+//                        }, 200);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                });
+
+                ((NavigationView) activity.findViewById(R.id.mainActivity_navigation_view)).getMenu().getItem(0).getActionView().getLocationInWindow(pos);
+
+                Animator moveToDrawerItemX = ObjectAnimator.ofFloat(fairy, "y", pos[1]+30);
+                moveToDrawerItemX.addListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.GLOBAL);
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                activity.closeDrawer();
+
+                                final View frag = activity.findViewById(R.id.mainActivity_fragment_holder);
+                                if (frag != null)
+                                    frag.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                                        @Override
+                                        public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                            final RecyclerView globalrv = (RecyclerView) activity.findViewById(R.id.recycler_view);
+                                            final View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
+                                                @Override
+                                                public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                                    if (globalrv != null && globalrv.getChildCount() > 0) {
+                                                        final View hottestView = globalrv.getChildAt(0);
+                                                        hottestView.getLocationInWindow(pos);
+                                                        fairy.animate()
+                                                                .x(pos[0] + hottestView.getWidth() / 2)
+                                                                .y(pos[1])
+                                                                .withEndAction(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        hottestView.setPressed(true);
+                                                                        globalrv.invalidate();
+                                                                        handler.postDelayed(new Runnable() {
+                                                                            @Override
+                                                                            public void run() {
+                                                                                hottestView.performClick();
+                                                                                fairy.setVisibility(View.GONE);
+                                                                                activity.lockDrawer(DrawerLayout.LOCK_MODE_UNLOCKED);
+                                                                            }
+                                                                        }, 700);
+                                                                    }
+                                                                }).start();
+                                                        globalrv.removeOnLayoutChangeListener(this);
+                                                    }
+                                                }
+                                            };
+                                            globalrv.addOnLayoutChangeListener(listener);
+                                            frag.removeOnLayoutChangeListener(this);
+                                        }
+                                    });
+                            }
+                        }, 300);
+                    }
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animator animator) {
+
+                    }
+                });
+
+
+                AnimatorSet set = new AnimatorSet();
+                set.play(moveToDrawerToggleX).with(moveToDrawerToggleY);
+                set.play(moveToDrawerItemX).after(moveToDrawerToggleX).after(1000);
+                set.start();
+
+            }
+        });
+
+
         return root;
     }
+
+    /*@Override
+    protected int getEmptyLayout() {
+        return 0;
+    }*/
 
     @Override
     public void onResume() {
@@ -106,16 +258,34 @@ public class FeedFragment extends BaseFeedFragment {
             fragment.setFriendsFeedNeedsUpdating(false);
         } else {
             if (!mSectionTwo && !fragment.getCampusFeedNeedsUpdating() && mPosts.isEmpty()) {
+
+                ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                        R.drawable.ic_rocket
+                );
+
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_campus);
-                vEmptyView.requestLayout();
-                vEmptyView.setVisibility(View.VISIBLE);
+                ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText(R.string.empty_feed_button_campus);
+
+                showEmptyView();
 
             } else if (mSectionTwo && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
+
+                ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                        R.drawable.ic_fire_emoji
+                );
+
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
-                vEmptyView.requestLayout();
-                vEmptyView.setVisibility(View.VISIBLE);
+                ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText(R.string.empty_feed_button_hot);
+
+                showEmptyView();
             }
         }
+    }
+
+    private void showEmptyView() {
+        vEmptyView.requestLayout();
+        vEmptyView.setVisibility(View.VISIBLE);
+        vSwipeRefreshLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -323,9 +493,15 @@ public class FeedFragment extends BaseFeedFragment {
 
                                             if (refreshedPosts.isEmpty()) {
                                                 if (vEmptyView.getVisibility() == View.GONE) {
+                                                    ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
+                                                            mSectionTwo ? R.drawable.ic_fire_emoji : R.drawable.ic_rocket
+                                                    );
                                                     ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
                                                             R.string.discover_no_posts_hot : R.string.discover_no_posts_campus);
-                                                    vEmptyView.setVisibility(View.VISIBLE);
+
+                                                    ((Button) vEmptyView.findViewById(R.id.empty_view_button)).setText((mSectionTwo ? R.string.empty_feed_button_hot : R.string.empty_feed_button_campus));
+
+                                                    showEmptyView();
                                                 }
                                             } else if (vEmptyView.getVisibility() == View.VISIBLE) {
                                                 vEmptyView.setVisibility(View.GONE);

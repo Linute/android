@@ -154,6 +154,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private boolean mSocketConnected = false;
 
     private AlertDialog mAlertDialog;
+    private View mEmptyView;
 
 
     public ChatFragment() {
@@ -272,6 +273,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             });
         }*/
 
+        mEmptyView = view.findViewById(R.id.empty_view);
 
         View settingsButton = toolbar.findViewById(R.id.toolbar_chat_settings);
         settingsButton.setOnClickListener(new View.OnClickListener() {
@@ -902,6 +904,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                     @Override
                                     public void run() {
                                         mProgressBar.setVisibility(View.GONE);
+                                        mEmptyView.setVisibility(View.VISIBLE);
                                     }
                                 });
                             }
@@ -1486,6 +1489,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
         joinRoom(activity, false);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mEmptyView.setVisibility(View.GONE);
+            }
+        });
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 

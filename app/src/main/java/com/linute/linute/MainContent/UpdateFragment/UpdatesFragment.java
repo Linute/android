@@ -12,14 +12,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKActivity;
-import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
-import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.Chat.RoomsActivityFragment;
+import com.linute.linute.MainContent.EventBuses.NewMessageBus;
+import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -144,17 +145,47 @@ public class UpdatesFragment extends BaseFragment {
 
         mUpdatesAdapter.setRequestManager(Glide.with(this));
 
-
-        mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
-
-        mEmptyView = rootView.findViewById(R.id.empty_view);
-
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 getUpdatesInformation();
             }
         });
+
+
+        mUpdatesRecyclerView.setAdapter(mUpdatesAdapter);
+
+        mEmptyView = rootView.findViewById(R.id.empty_view);
+        Button emptyButton = (Button)mEmptyView.findViewById(R.id.empty_view_button);
+        emptyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final MainActivity mainActivity = (MainActivity)getActivity();
+                Handler handler = new Handler();
+
+                mainActivity.getSupportFragmentManager().popBackStack();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.openDrawer();
+                    }
+                },600);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.FIND_FRIENDS);
+                    }
+                },1200);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainActivity.closeDrawer();
+                    }
+                },1600);
+
+            }
+        });
+
 
         return rootView;
     }
@@ -207,11 +238,23 @@ public class UpdatesFragment extends BaseFragment {
 
             if (mRecentUpdates.isEmpty() && mOldUpdates.isEmpty()) {
                 if (mEmptyView.getVisibility() == View.GONE) {
-                    mEmptyView.setVisibility(View.VISIBLE);
+                    showEmptyView(true);
                 }
             }
         }
     }
+
+    private void showEmptyView(boolean show) {
+        if(show) {
+            mEmptyView.setVisibility(View.VISIBLE);
+            mSwipeRefreshLayout.setVisibility(View.GONE);
+        }else{
+            mEmptyView.setVisibility(View.GONE);
+            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+
 
     @Override
     public void onPause() {
@@ -316,10 +359,10 @@ public class UpdatesFragment extends BaseFragment {
 
                                             if (mRecentUpdates.size() + mOldUpdates.size() == 0) {
                                                 if (mEmptyView.getVisibility() == View.GONE)
-                                                    mEmptyView.setVisibility(View.VISIBLE);
+                                                    showEmptyView(true);
                                             } else {
                                                 if (mEmptyView.getVisibility() == View.VISIBLE)
-                                                    mEmptyView.setVisibility(View.GONE);
+                                                    showEmptyView(false);
                                             }
                                         }
                                     });
@@ -341,6 +384,8 @@ public class UpdatesFragment extends BaseFragment {
             }
         });
     }
+
+
 
     private boolean mLoadingMore = false;
 
@@ -500,7 +545,7 @@ public class UpdatesFragment extends BaseFragment {
                         mUpdatesAdapter.notifyItemInserted(1);
                     }
                     if (mEmptyView.getVisibility() == View.VISIBLE) {
-                        mEmptyView.setVisibility(View.GONE);
+                        showEmptyView(false);
                     }
                 }
             });

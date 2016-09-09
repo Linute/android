@@ -20,8 +20,12 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="100dp"
-        android:text="No messages"
+        android:layout_marginLeft="@dimen/margin_empty_screen"
+        android:layout_marginRight="@dimen/margin_empty_screen"
+        android:drawableTop="@drawable/ic_mail"
+        android:text="@string/empty_fragment_rooms"
         android:textSize="@dimen/header_font_size"
+        android:textAlignment="center"
         android:visibility="gone" />
 
     <android.support.v4.widget.SwipeRefreshLayout
