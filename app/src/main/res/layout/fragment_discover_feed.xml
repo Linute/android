@@ -41,6 +41,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/margin_empty_screen"
             android:text="Take me there!"
+            style="@style/EmptyViewButton"
             />
     </LinearLayout>
 

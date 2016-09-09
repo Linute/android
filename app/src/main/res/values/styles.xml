@@ -110,4 +110,6 @@
         <item name="android:textColor">@color/chat_subtext</item>
         <item name="android:textSize">12sp</item>
     </style>
+
+    <style name="EmptyViewButton"></style>
 </resources>
