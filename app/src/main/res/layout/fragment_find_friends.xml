@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    android:id="@+id/postContainer"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/postContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.linute.linute.LoginAndSignup.CollegePickerActivity">
 
-    <TextView android:id="@+id/findFriends_text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              android:layout_marginEnd="64dp"
-              android:layout_marginStart="64dp"
-              android:text="No results found"
-              android:textSize="18sp"
-              android:visibility="gone"
-    />
+    <TextView
+        android:id="@+id/findFriends_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginEnd="64dp"
+        android:layout_marginStart="64dp"
+        android:drawableTop="@drawable/ic_couple"
+        android:drawablePadding="@dimen/margin_empty_image"
+        android:text="@string/empty_find_friends"
+        android:textSize="18sp"
+        android:visibility="gone" />
 
     <ProgressBar
         android:id="@+id/findFriends_progressbar"
@@ -24,46 +25,54 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="gone"
-    />
+        android:visibility="gone" />
 
 
-    <android.support.v7.widget.RecyclerView android:id="@+id/findFriends_recycler_view"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-    />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/findFriends_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <LinearLayout android:id="@+id/findFriends_rationale_text"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginTop="64dp"
-                  android:orientation="vertical"
-    >
+    <LinearLayout
+        android:id="@+id/findFriends_rationale_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="64dp"
+        android:orientation="vertical">
 
 
-        <TextView android:id="@+id/findFriends_rat_text"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_horizontal"
-                  android:layout_marginEnd="64dp"
-                  android:layout_marginStart="64dp"
-                  android:layout_marginTop="@dimen/activity_horizontal_margin"
-                  android:drawablePadding="16dp"
-                  android:gravity="center"
-                  android:text="@string/need_contant_permission"/>
+        <TextView
+            android:id="@+id/findFriends_rat_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="64dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:drawableTop="@drawable/ic_couple"
+            android:drawablePadding="16dp"
+            android:gravity="center"
+            android:text="@string/need_contant_permission" />
 
-        <Button android:id="@+id/findFriends_turn_on"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/activity_horizontal_margin"
-                android:alpha="0.75"
-                android:background="@drawable/fb_button"
-                android:foreground="?attr/selectableItemBackground"
-                android:padding="@dimen/activity_horizontal_margin"
-                android:text="connect with facebook"
-                android:textColor="@color/pure_white"
-        />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+        <Button
+            android:id="@+id/findFriends_turn_on"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:baselineAligned="false"
+            android:layout_marginBottom="128dp"
+            android:alpha="0.75"
+            android:background="@drawable/fb_button"
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:text="connect with facebook"
+            android:textColor="@color/pure_white" />
 
     </LinearLayout>
 

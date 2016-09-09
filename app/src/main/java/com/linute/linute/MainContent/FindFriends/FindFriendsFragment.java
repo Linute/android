@@ -33,8 +33,6 @@ import com.facebook.login.LoginResult;
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.R;
-import com.linute.linute.UtilsAndHelpers.DividerItemDecoration;
-
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -270,8 +268,10 @@ public class FindFriendsFragment extends BaseFragment {
 
         } else { //contacts. This process takes forever to get emails. We will use async task
             rationaleText.setText(R.string.need_contant_permission);
+            rationaleText.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_telephone,0,0);
             reloadButton.setBackgroundResource(R.drawable.yellow_button);
             reloadButton.setText("Search contacts");
+            reloadButton.setVisibility(View.GONE);
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);

@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    >
 
-    <TextView android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              android:layout_marginStart="64dp"
-              android:layout_marginEnd="64dp"
-              android:layout_marginTop="32dp"
-              android:layout_marginBottom="32dp"
-              android:textSize="@dimen/header_font_size"
-              android:textColor="@color/eighty_black"
-              android:gravity="center"
-              android:text="@string/no_comment"
-        />
+    <ImageView
+        android:id="@+id/center_monkey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/ic_hear_no_monkey" />
 
-</FrameLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/center_monkey"
+        android:src="@drawable/ic_see_no_monkey" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/center_monkey"
+        android:src="@drawable/ic_speak_no_monkey" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:text="@string/no_comment"
+        android:textColor="@color/eighty_black"
+        android:textSize="@dimen/header_font_size" />
+
+</RelativeLayout>

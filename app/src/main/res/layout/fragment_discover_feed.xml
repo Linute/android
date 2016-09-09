@@ -1,36 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout android:id="@+id/discover_fragment_background"
-             xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/discover_fragment_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <LinearLayout android:id="@+id/empty_view"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_horizontal"
-                  android:layout_marginTop="50dp"
-                  android:orientation="vertical"
-                  android:visibility="gone"
-    >
+    <LinearLayout
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginLeft="@dimen/margin_empty_screen"
+        android:layout_marginRight="@dimen/margin_empty_screen"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical"
+        android:visibility="gone">
 
-        <ImageView android:id="@+id/discover_no_posts"
-                   android:layout_width="wrap_content"
-                   android:layout_height="wrap_content"
-                   android:layout_gravity="center_horizontal"
-                   android:src="@drawable/campus"
-        />
+        <ImageView
+            android:id="@+id/discover_no_posts"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_rocket" />
 
-        <TextView android:id="@+id/dicover_no_posts_text"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_gravity="center_horizontal"
-                  android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                  android:layout_marginStart="@dimen/activity_horizontal_margin"
-                  android:layout_marginTop="16dp"
-                  android:gravity="center"
-                  tools:text="@string/discover_no_posts_campus"
-        />
+        <TextView
+            android:id="@+id/dicover_no_posts_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/margin_empty_image"
+            android:gravity="center"
+            tools:text="@string/discover_no_posts_campus" />
+
+        <Button
+            android:id="@+id/empty_view_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_empty_screen"
+            android:text="Take me there!"
+            style="@style/EmptyViewButton"
+            />
     </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -41,7 +53,7 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
