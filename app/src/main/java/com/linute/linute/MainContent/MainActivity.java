@@ -46,6 +46,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.MainContent.Global.GlobalFragment;
+import com.linute.linute.MainContent.ProfileFragment.EmptyProfileHolder;
 import com.linute.linute.MainContent.ProfileFragment.Profile;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -112,8 +113,8 @@ public class MainActivity extends BaseTaptActivity {
         public static final short PROFILE = 0;
         public static final short FEED = 1;
         public static final short GLOBAL = 2;
-        public static final short ACTIVITY = 3;
-        public static final short FIND_FRIENDS = 4;
+        public static final short FIND_FRIENDS = 3;
+        public static final short ACTIVITY = 4;
     }
 
 
@@ -126,10 +127,13 @@ public class MainActivity extends BaseTaptActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        EmptyProfileHolder.activity = this;
+
         mRealm = Realm.getDefaultInstance();
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mFragments = new BaseFragment[4];
+        mFragments = new BaseFragment[5];
         mWatchForRefresh = false;
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.mainActivity_drawerLayout);
@@ -228,6 +232,9 @@ public class MainActivity extends BaseTaptActivity {
                 .showAfter(10);
     }
 
+    public void selectDrawerItem(int pos){
+        navItemSelected((short)pos, mNavigationView.getMenu().getItem(pos-1));
+    }
 
     private void navItemSelected(short position, MenuItem item) {
         int backstack = getSupportFragmentManager().getBackStackEntryCount();
@@ -1298,6 +1305,10 @@ public class MainActivity extends BaseTaptActivity {
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+    }
+
 
     public void addActivityFragment() {
         addFragmentToContainer(getFragment(FRAGMENT_INDEXES.ACTIVITY), UpdatesFragment.TAG);

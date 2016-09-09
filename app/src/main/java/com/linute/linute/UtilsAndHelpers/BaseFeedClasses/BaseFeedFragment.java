@@ -48,6 +48,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         mFeedAdapter.setRequestManager(Glide.with(this));
 
         vEmptyView = rootView.findViewById(R.id.empty_view);
+//        inflater.inflate(getEmptyLayout(), (ViewGroup)vEmptyView, true);
 
         vRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
 
@@ -79,6 +80,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
     protected abstract void initAdapter();
 
     protected abstract int getLayout();
+//    protected abstract int getEmptyLayout();
 
     protected abstract void getPosts();
     protected abstract void getMorePosts();
