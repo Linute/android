@@ -1308,6 +1308,9 @@ public class MainActivity extends BaseTaptActivity {
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
+    public void lockDrawer(int lock){
+        mDrawerLayout.setDrawerLockMode(lock);
+    }
 
 
     public void addActivityFragment() {
