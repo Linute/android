@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -62,6 +63,7 @@ public class CameraFragment extends Fragment {
 
     public static final String CAMERA_ID_KEY = "camera_id";
     public static final String CAMERA_FLASH_KEY = "flash_on";
+    public static final String KEY_LAST_CAMERA = "last_camera";
 
     private CameraType mCameraType;
     private int mCameraID;
@@ -123,7 +125,7 @@ public class CameraFragment extends Fragment {
         // in the backstack will cause improper state restoration
         // onCreate() -> onSavedInstanceState() instead of going through onCreateView()
         if (savedInstanceState == null) {
-            mCameraID = getBackCameraID();
+            mCameraID = PreferenceManager.getDefaultSharedPreferences(getContext()).getInt(KEY_LAST_CAMERA, getBackCameraID());
             mFlashOn = CameraSettingPreferences.getCameraFlashMode(getActivity());
         } else {
             mCameraID = savedInstanceState.getInt(CAMERA_ID_KEY);
@@ -265,6 +267,7 @@ public class CameraFragment extends Fragment {
                         mCameraID = getFrontCameraID();
                     }
                     restartPreview();
+                    PreferenceManager.getDefaultSharedPreferences(getContext()).edit().putInt(KEY_LAST_CAMERA, mCameraID).apply();
                 }
             }
         });
