@@ -997,8 +997,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getActivity() == null || !mCommentsRetrieved) return;
         boolean isAnon = mFeedDetail.getPostPrivacy() == 1;
         mAlertDialog = new AlertDialog.Builder(getActivity())
-                .setTitle(isAnon ? "Reveal" : "Wear a mask")
-                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
+                .setTitle(isAnon ? "Reveal yourself" : "Wear a mask")
+                .setMessage(isAnon ? "Show everyone the person behind the mask! Would you like to reveal your identity for this post?" : "Are you sure you want to become anonymous for this comment?")
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
