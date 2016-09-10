@@ -287,12 +287,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         private void setUpLikes(Comment comment) {
             if (comment.getNumberOfLikes() > 0) {
                 vLikesText.setText(comment.getNumberOfLikes() + "");
-                if (comment.isLiked())
-                    vFireIcon.setColorFilter(ContextCompat.getColor(context, R.color.red));
                 vFireIcon.setColorFilter(
                         comment.isLiked() ?
                                 ContextCompat.getColor(context, R.color.red) :
-                                ContextCompat.getColor(context, R.color.twentyfive_black)
+                                ContextCompat.getColor(context, R.color.inactive_grey)
                 );
 
                 vLikesText.setVisibility(View.VISIBLE);

@@ -1,11 +1,14 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,8 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKEvents;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
@@ -25,8 +30,11 @@ import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
+import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -49,7 +57,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-public class Profile extends BaseFragment {
+public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction {
     public static final String TAG = Profile.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
@@ -71,6 +79,8 @@ public class Profile extends BaseFragment {
     //causes crashes if else
     private Handler mHandler = new Handler();
 
+    private AlertDialog mAlertDialog;
+
     private Runnable rServerErrorAction = new Runnable() {
         @Override
         public void run() {
@@ -91,6 +101,8 @@ public class Profile extends BaseFragment {
 
     private int mSkip = 0;
     private boolean mCanLoadMore = false;
+
+    private String mUserid;
     //private boolean mTitleIsVisible = false;
 
     public Profile() {
@@ -110,6 +122,7 @@ public class Profile extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_profile2, container, false);
 
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUserid = mSharedPreferences.getString("userID", null);
 
         vRecList = (RecyclerView) rootView.findViewById(R.id.prof_frag_rec);
         vRecList.setHasFixedSize(true);
@@ -130,6 +143,7 @@ public class Profile extends BaseFragment {
                 }
             });
         }
+        mProfileAdapter.setPostAction(this);
 
         vRecList.setAdapter(mProfileAdapter);
 
@@ -285,7 +299,7 @@ public class Profile extends BaseFragment {
     //get user information from server
     public void updateAndSetHeader() {
         if (getActivity() == null) return;
-        new LSDKUser(getActivity()).getProfileInfo(mSharedPreferences.getString("userID", null), new Callback() {
+        new LSDKUser(getActivity()).getProfileInfo(mUserid, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (getActivity() != null) {
@@ -358,11 +372,10 @@ public class Profile extends BaseFragment {
     public void setActivities() {
         if (getContext() == null) return;
 
-        String owner = mSharedPreferences.getString("userID", null);
-        if (owner == null) return;
+        if (mUserid == null) return;
 
         HashMap<String, String> params = new HashMap<>();
-        params.put("owner", owner);
+        params.put("owner", mUserid);
         params.put("limit", "20");
 
         new LSDKEvents(getContext()).getEvents("profile", params, new Callback() {
@@ -423,14 +436,14 @@ public class Profile extends BaseFragment {
                         }
 
 
-                    }catch (JSONException e){
+                    } catch (JSONException e) {
                         e.printStackTrace();
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(rServerErrorAction);
                         }
                     }
 
-                }else {
+                } else {
                     if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -538,7 +551,7 @@ public class Profile extends BaseFragment {
         });
     }
 
-    private ArrayList<Post> getPosts(JSONArray posts){
+    private ArrayList<Post> getPosts(JSONArray posts) {
         ArrayList<Post> tempPosts = new ArrayList<>();
 
         for (int i = posts.length() - 1; i >= 0; i--) {
@@ -550,6 +563,15 @@ public class Profile extends BaseFragment {
         }
 
         return tempPosts;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAlertDialog != null) {
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
     }
 
     @Override
@@ -571,4 +593,341 @@ public class Profile extends BaseFragment {
             }
         }
     };
+
+    @Override
+    public void clickedOptions(final Post p, final int position) {
+        if (getContext() == null || mUserid == null) return;
+
+        final boolean isOwner = p.getUserId().equals(mUserid);
+        String[] options;
+        if (isOwner) {
+            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+        } else {
+            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+        }
+        mAlertDialog = new AlertDialog.Builder(getContext())
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                if (isOwner) confirmDeletePost(p, position);
+                                else confirmReportPost(p);
+                                return;
+                            case 1:
+                                if (isOwner) confirmToggleAnon(p, position);
+                                else confirmToggleHidden(p, position);
+                                return;
+                            case 2:
+                                sharePost(p);
+                        }
+                    }
+                }).show();
+    }
+
+    private void confirmDeletePost(final Post p, final int position) {
+        if (getContext() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Delete your post")
+                .setMessage("Are you sure you want to delete what you've created?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deletePost(p, position);
+                    }
+                })
+                .show();
+    }
+
+
+    private void deletePost(final Post p, final int pos) {
+        if (getActivity() == null || !mUserid.equals(p.getUserId())) return;
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
+
+        new LSDKEvents(getActivity()).deleteEvent(p.getPostId(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+
+                    final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+                    if (activity == null) return;
+                    activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!mPosts.get(pos - 2).equals(p)) { //check this is correct post
+                                        int position = mPosts.indexOf(p);
+                                        if (position >= 0) {
+                                            mPosts.remove(position);
+                                            mProfileAdapter.notifyItemRemoved(position + 2);
+                                        }
+                                    } else {
+                                        mPosts.remove(pos - 2);
+                                        mProfileAdapter.notifyItemRemoved(pos);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+
+    private void confirmReportPost(final Post p) {
+        if (getActivity() == null) return;
+        final CharSequence options[] = new CharSequence[]{"Spam", "Inappropriate", "Harassment"};
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Report As")
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        reportPost(p, which);
+                    }
+                })
+                .create();
+        mAlertDialog.show();
+    }
+
+    private void reportPost(Post p, int reason) {
+        if (getActivity() == null) return;
+        new LSDKEvents(getActivity()).reportEvent(reason, p.getPostId(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity(), "Post reported", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
+    private void confirmToggleAnon(final Post p, final int pos) {
+        if (getActivity() == null) return;
+
+        boolean isAnon = p.getPrivacy() == 1;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(isAnon ? "Reveal" : "Wear a mask")
+                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleAnon(p, pos);
+                    }
+                })
+                .show();
+    }
+
+
+    private void toggleAnon(final Post p, final int position) {
+        if (getActivity() == null || !mUserid.equals(p.getUserId())) return;
+        final boolean isAnon = p.getPrivacy() == 1;
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
+        new LSDKEvents(getActivity()).revealEvent(p.getPostId(), !isAnon, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String res = response.body().string();
+
+                if (response.isSuccessful()) {
+                    try {
+
+                        if (!isAnon) {
+                            JSONObject obj = new JSONObject(res);
+                            p.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));
+                        }
+
+                        BaseTaptActivity act = (BaseTaptActivity) getActivity();
+
+                        if (act != null) {
+                            act.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+                            act.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    p.setPostPrivacy(isAnon ? 0 : 1);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            if (!mPosts.get(position - 2).equals(p)) {
+                                                int pos = mPosts.indexOf(p);
+                                                if (pos >= 0) {
+                                                    mProfileAdapter.notifyItemChanged(pos + 2);
+                                                }
+                                            } else {
+                                                mProfileAdapter.notifyItemChanged(position);
+                                            }
+                                        }
+
+                                    });
+                                    Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onResponse: " + res);
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + res);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+
+    private void confirmToggleHidden(final Post p, final int pos) {
+        if (getActivity() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(p.isPostHidden() ? "Unhide post" : "Hide it")
+                .setMessage(p.isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
+                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleHidden(p, pos);
+                    }
+                })
+                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void toggleHidden(Post p, int position) {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity == null) return;
+
+        if (!activity.socketConnected()) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
+
+        Toast.makeText(activity,
+                p.isPostHidden() ? "Post unhidden" : "Post hidden",
+                Toast.LENGTH_SHORT).show();
+
+        activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+        JSONObject emit = new JSONObject();
+        try {
+            emit.put("hide", !p.isPostHidden());
+            emit.put("room", p.getPostId());
+            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+        } catch (JSONException e) {
+            Utils.showServerErrorToast(activity);
+            e.printStackTrace();
+        }
+    }
+
+    private void sharePost(Post p) {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null)
+            activity.addFragmentOnTop(SendToFragment.newInstance(p.getPostId()), "send_to");
+    }
 }

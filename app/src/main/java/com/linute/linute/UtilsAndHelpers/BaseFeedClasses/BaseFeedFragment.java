@@ -163,6 +163,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
     protected abstract void getMorePosts();
 
     private void confirmDeletePost(final Post p, final int position) {
+        if(getActivity() == null) return;
         mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle("Delete your post")
                 .setMessage("Are you sure you want to delete what you've created?")
@@ -226,8 +227,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
                                     }
 
                                     if (position >= 0) {
-                                        getPostsArray().remove(pos);
-                                        mFeedAdapter.notifyItemRemoved(pos);
+                                        getPostsArray().remove(position);
+                                        mFeedAdapter.notifyItemRemoved(position);
                                     }
                                 }
                             });
@@ -466,8 +467,6 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
         if (notifyFeedNeedsUpdating())
             activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
-
-        activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING,MainActivity.FRAGMENT_INDEXES.PROFILE);
 
         JSONObject emit = new JSONObject();
         try {

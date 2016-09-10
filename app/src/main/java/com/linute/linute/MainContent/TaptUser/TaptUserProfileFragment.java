@@ -1,5 +1,6 @@
 package com.linute.linute.MainContent.TaptUser;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -28,9 +29,11 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.ProfileFragment.ProfileAdapter;
+import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -54,7 +57,7 @@ import okhttp3.Response;
 /**
  * Created by Arman on 1/9/16.
  */
-public class TaptUserProfileFragment extends BaseFragment implements ProfileAdapter.OnClickFollow {
+public class TaptUserProfileFragment extends BaseFragment implements ProfileAdapter.OnClickFollow, BaseFeedAdapter.PostAction {
     public static final String TAG = TaptUserProfileFragment.class.getSimpleName();
 
     private ProfileAdapter mProfileAdapter;
@@ -65,10 +68,13 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     private LinuteUser mLinuteUser = new LinuteUser();
     private String mUserName;
     private String mTaptUserId;
+    private String mViewerId;
+
+
 
     private Toolbar mToolbar;
 
-    private AlertDialog mDialog;
+    private AlertDialog mAlertDialog;
 
     private boolean mOtherSectionUpdated = false;
 
@@ -162,7 +168,8 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
             }
         });
 
-        mOwnerIsViewer = mTaptUserId.equals(sharedPreferences.getString("userID", ""));
+        mViewerId = sharedPreferences.getString("userID", "");
+        mOwnerIsViewer = mTaptUserId.equals(mViewerId);
         mToolbar.inflateMenu(mOwnerIsViewer ? R.menu.my_profile_action_bar : R.menu.tapt_user_profile_menu);
 
         mToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -181,7 +188,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                                     mLinuteUser.isSubscribed() ? "Stop post notifications" : "Get post notifications"
                             };
 
-                            mDialog = new AlertDialog
+                            mAlertDialog = new AlertDialog
                                     .Builder(getActivity())
                                     .setItems(options, new DialogInterface.OnClickListener() {
                                         @Override
@@ -227,6 +234,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         if (mProfileAdapter.titleShown()) mToolbar.setTitle(mUserName);
 
         mProfileAdapter.setOnClickFollow(this);
+        mProfileAdapter.setPostAction(this);
 
         recList.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
@@ -293,12 +301,16 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     public void onPause() {
         super.onPause();
 
-        if (mDialog != null) {
-            mDialog.dismiss();
-            mDialog = null;
-        }
-
         VideoPlayerSingleton.getSingleVideoPlaybackManager().stopPlayback();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAlertDialog != null){
+            mAlertDialog.dismiss();
+            mAlertDialog = null;
+        }
     }
 
     //get user information from server
@@ -454,7 +466,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
     private void subscribeConfirmation() {
         if (getActivity() == null || mOwnerIsViewer || !mProfileInfoHasLoaded) return;
-        mDialog = new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(mLinuteUser.isSubscribed() ? "Unsubscribe" : "Subscribe")
                 .setMessage(mLinuteUser.isSubscribed() ? "Disabling this removes you from future updates when " + mLinuteUser.getFirstName() + " posts something"
                         : "Enabling this gives you updates when " + mLinuteUser.getFirstName() + " posts something")
@@ -512,7 +524,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 "Suspected professor"
         };
 
-        mDialog = new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle("Report as")
                 .setItems(reasons, new DialogInterface.OnClickListener() {
                     @Override
@@ -569,7 +581,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
     private void blockConfirmation() {
         if (getActivity() == null || mOwnerIsViewer || !mProfileInfoHasLoaded) return;
-        mDialog = new AlertDialog.Builder(getActivity())
+        mAlertDialog = new AlertDialog.Builder(getActivity())
                 .setTitle(mLinuteUser.isBlocked() ? "Unblock user?" : "Block user?")
                 .setMessage(mLinuteUser.isBlocked() ? R.string.unblock_user : R.string.block_user_android)
                 .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
@@ -740,7 +752,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         if (follow) followUser(followingText, user);
         else {
-            mDialog = new AlertDialog.Builder(getContext()).setTitle("Unfollow")
+            mAlertDialog = new AlertDialog.Builder(getContext()).setTitle("Unfollow")
                     .setMessage("Unfollow " + user.getFirstName() + " " + user.getLastName() + "?")
                     .setPositiveButton("Unfollow", new DialogInterface.OnClickListener() {
                         @Override
@@ -875,5 +887,345 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
                 }
             }
         });
+    }
+
+    @Override
+    public void clickedOptions(final Post p, final int position) {
+        if (getContext() == null || mViewerId == null) return;
+
+        final boolean isOwner = p.getUserId().equals(mViewerId);
+        String[] options;
+        if (isOwner) {
+            options = new String[]{"Delete post", p.getPrivacy() == 1 ? "Reveal identity" : "Make anonymous", "Share post"};
+        } else {
+            options = new String[]{"Report post", p.isPostHidden() ? "Unhide post" : "Hide post", "Share post"};
+        }
+        mAlertDialog = new AlertDialog.Builder(getContext())
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                if (isOwner) confirmDeletePost(p, position);
+                                else confirmReportPost(p);
+                                return;
+                            case 1:
+                                if (isOwner) confirmToggleAnon(p, position);
+                                else confirmToggleHidden(p);
+                                return;
+                            case 2:
+                                sharePost(p);
+                        }
+                    }
+                }).show();
+    }
+
+    private void confirmDeletePost(final Post p, final int position) {
+        if (getContext() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Delete your post")
+                .setMessage("Are you sure you want to delete what you've created?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deletePost(p, position);
+                    }
+                })
+                .show();
+    }
+
+
+    private void deletePost(final Post p, final int pos) {
+        if (getActivity() == null || !mViewerId.equals(p.getUserId())) return;
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "", "Deleting", true, false);
+
+        new LSDKEvents(getActivity()).deleteEvent(p.getPostId(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+
+                    final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+
+                    if (activity == null) return;
+                    activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                    activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.PROFILE);
+
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(activity, "Post deleted", Toast.LENGTH_SHORT).show();
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!mPosts.get(pos - 2).equals(p)) { //check this is correct post
+                                        int position = mPosts.indexOf(p);
+                                        if (position >= 0) {
+                                            mPosts.remove(position);
+                                            mProfileAdapter.notifyItemRemoved(position + 2);
+                                        }
+                                    } else {
+                                        mPosts.remove(pos - 2);
+                                        mProfileAdapter.notifyItemRemoved(pos);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                } else {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+
+    private void confirmReportPost(final Post p) {
+        if (getActivity() == null) return;
+        final CharSequence options[] = new CharSequence[]{"Spam", "Inappropriate", "Harassment"};
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("Report As")
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        reportPost(p, which);
+                    }
+                })
+                .create();
+        mAlertDialog.show();
+    }
+
+    private void reportPost(Post p, int reason) {
+        if (getActivity() == null) return;
+        new LSDKEvents(getActivity()).reportEvent(reason, p.getPostId(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    response.body().close();
+                    if (getActivity() == null) return;
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getActivity(), "Post reported", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "onResponse: " + response.body().string());
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+
+    private void confirmToggleAnon(final Post p, final int pos) {
+        if (getActivity() == null) return;
+
+        boolean isAnon = p.getPrivacy() == 1;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(isAnon ? "Reveal" : "Wear a mask")
+                .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this post?" : "Are you sure you want to make this post anonymous?")
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleAnon(p, pos);
+                    }
+                })
+                .show();
+    }
+
+
+    private void toggleAnon(final Post p, final int position) {
+        if (getActivity() == null || !mViewerId.equals(p.getUserId())) return;
+        final boolean isAnon = p.getPrivacy() == 1;
+        final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing post..." : "Making post anonymous...", true, false);
+        new LSDKEvents(getActivity()).revealEvent(p.getPostId(), !isAnon, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                progressDialog.dismiss();
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Utils.showBadConnectionToast(getActivity());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String res = response.body().string();
+
+                if (response.isSuccessful()) {
+                    try {
+
+                        if (!isAnon) {
+                            JSONObject obj = new JSONObject(res);
+                            p.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));
+                        }
+
+                        BaseTaptActivity act = (BaseTaptActivity) getActivity();
+
+                        if (act != null) {
+                            act.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+                            act.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.PROFILE);
+
+                            act.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    p.setPostPrivacy(isAnon ? 0 : 1);
+                                    mHandler.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            if (!mPosts.get(position - 2).equals(p)) {
+                                                int pos = mPosts.indexOf(p);
+                                                if (pos >= 0) {
+                                                    mProfileAdapter.notifyItemChanged(pos + 2);
+                                                }
+                                            } else {
+                                                mProfileAdapter.notifyItemChanged(position);
+                                            }
+                                        }
+
+                                    });
+                                    Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Log.e(TAG, "onResponse: " + res);
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Utils.showServerErrorToast(getActivity());
+                                }
+                            });
+                        }
+                    }
+                } else {
+                    Log.e(TAG, "onResponse: " + res);
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Utils.showServerErrorToast(getActivity());
+                            }
+                        });
+                    }
+                }
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+
+    private void confirmToggleHidden(final Post p) {
+        if (getActivity() == null) return;
+        mAlertDialog = new AlertDialog.Builder(getActivity())
+                .setTitle(p.isPostHidden() ? "Unhide post" : "Hide it")
+                .setMessage(p.isPostHidden() ? "This will make this post viewable on your feed. Still want to go ahead with it?" : "This will remove this post from your feed, go ahead with it?")
+                .setPositiveButton("let's do it!", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toggleHidden(p);
+                    }
+                })
+                .setNegativeButton("no, thanks", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    private void toggleHidden(Post p) {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity == null) return;
+
+        if (!activity.socketConnected()) {
+            Utils.showBadConnectionToast(activity);
+            return;
+        }
+
+        p.setPostHidden(!p.isPostHidden());
+        Toast.makeText(activity,
+                p.isPostHidden() ?  "Post hidden on feed" : "Post unhidden on feed",
+                Toast.LENGTH_SHORT).show();
+
+        activity.setFragmentOfIndexNeedsUpdating(FragmentState.NEEDS_UPDATING, MainActivity.FRAGMENT_INDEXES.FEED);
+
+        JSONObject emit = new JSONObject();
+        try {
+            emit.put("hide", p.isPostHidden());
+            emit.put("room", p.getPostId());
+            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+        } catch (JSONException e) {
+            Utils.showServerErrorToast(activity);
+            e.printStackTrace();
+        }
+    }
+
+    private void sharePost(Post p) {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null)
+            activity.addFragmentOnTop(SendToFragment.newInstance(p.getPostId()), "send_to");
     }
 }
