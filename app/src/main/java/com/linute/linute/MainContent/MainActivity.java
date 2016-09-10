@@ -260,7 +260,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
 
-    private BaseFragment getFragment(short index) {
+    public BaseFragment getFragment(short index) {
         if (mFragments[index] == null) { //if fragment haven't been created yet, create it
             BaseFragment fragment;
 
