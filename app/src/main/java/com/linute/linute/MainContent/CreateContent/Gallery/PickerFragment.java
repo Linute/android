@@ -18,7 +18,6 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -288,7 +287,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
             if (length > 1750 && length < 15000) {
-                mContentSubType = EditFragment.ContentSubType.None;
+//                mContentSubType = EditFragment.ContentSubType.None;
                 goToFragment(EditFragment.newInstance(
                         path,
                         EditFragment.ContentType.UploadedVideo,

@@ -654,6 +654,13 @@ public class EditFragment extends BaseFragment {
                                 textTool,
                                 stickersTool,
                         };
+                    case Comment:
+                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay);
+                        return new EditContentTool[]{
+                                commentPrivacyTool,
+                                textTool,
+                                stickersTool
+                        };
                 }
 
 
