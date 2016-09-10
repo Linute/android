@@ -466,6 +466,8 @@ public class CropTool extends EditContentTool {
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
 
+        boundCropper();
+
         options.topInset = mTopY;
         options.bottomInset = mBotY;
         botHandle.setVisibility(View.GONE);
