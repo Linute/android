@@ -98,7 +98,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     //private static final int TYPING_TIMER_LENGTH = 600;
 
     private String mRoomId;
-    private boolean mRoomExists = false;
+
+    private enum RoomExists {
+        Exists, DoesntExist, Undetermined
+    }
+    private RoomExists mRoomExists = RoomExists.Undetermined;
 
     //    private String mOtherPersonId;
     private ArrayList<User> mUsers;
@@ -310,6 +314,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
                             i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
                         }
+
                         else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.ALL);
@@ -605,19 +610,22 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return;
         }
 
+        if(mRoomId != null && mRoomExists == RoomExists.DoesntExist){
+//            vEmptyChatView.setVisibility(View.VISIBLE);
+        }else
         if (mRoomId == null) { //occurs when we didn't come from room fragment
-            mRoomExists = false;
+            mRoomExists = RoomExists.DoesntExist;
             getRoomAndChat();
 
 
         } else if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
 
             getChat();//Chat();
-            mRoomExists = true;
+            mRoomExists = RoomExists.Exists;
 
 //            joinRoom(activity, false);
         } else {
-            mRoomExists = true;
+            mRoomExists = RoomExists.Exists;
             getChat();
 //            joinRoom(activity, true);
 
@@ -625,7 +633,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         if (getFragmentState() == FragmentState.FINISHED_UPDATING && mChatList.isEmpty()) {
-            vEmptyChatView.setVisibility(View.VISIBLE);
+//            vEmptyChatView.setVisibility(View.VISIBLE);
         }
 
         updateToolbar();
@@ -844,7 +852,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
         toolbae.setTitle(getChatName());
         View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
-        chatSettingsbutton.setVisibility(mRoomExists ? View.VISIBLE : View.GONE);
+        chatSettingsbutton.setVisibility(mRoomExists == RoomExists.Exists ? View.VISIBLE : View.GONE);
     }
 
 
@@ -891,7 +899,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         //room doesn't exist
                         if (mRoomId.equals("null")) {
-                            mRoomExists = false;
+                            mRoomExists = RoomExists.DoesntExist;
                             mRoomId = ObjectId.get().toString();
                             joinRoom(activity, true);
                             mCanLoadMore = false;
@@ -911,7 +919,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             setFragmentState(FragmentState.FINISHED_UPDATING);
                             return;
                         } else {
-                            mRoomExists = true;
+                            mRoomExists = RoomExists.Exists;
                             mChatType = object.getInt("type");
                             mChatName = object.getString("name");
                             mChatImage = object.getJSONObject("profileImage").getString("original");
@@ -969,7 +977,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                                     //show empty view
                                     if (mChatList.isEmpty()) {
-                                        vEmptyChatView.setVisibility(View.VISIBLE);
+//                                        vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
 //                                        updateTopTimeHeader();
                                     }
@@ -1147,7 +1155,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                                     //show empty view
                                     if (mChatList.isEmpty()) {
-                                        vEmptyChatView.setVisibility(View.VISIBLE);
+//                                        vEmptyChatView.setVisibility(View.VISIBLE);
                                     } else {
 //                                        updateTopTimeHeader();
                                     }
@@ -1410,7 +1418,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         message = message.replaceAll("[\\n\\s]+$", "");
 
-        if (!mRoomExists) {
+        if (mRoomExists == RoomExists.DoesntExist) {
             createRoom(message);
             return;
         }
@@ -1485,7 +1493,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         // perform the sending message attempt.
         activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
-        mRoomExists = true;
+        mRoomExists = RoomExists.Exists;
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
         joinRoom(activity, false);
@@ -1555,8 +1563,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 delivered.put("id", data.getString("id"));
                                 activity.emitSocket(API_Methods.VERSION + ":messages:delivered", delivered);
 
-                                if (vEmptyChatView.getVisibility() == View.VISIBLE)
-                                    vEmptyChatView.setVisibility(View.GONE);
+//                                if (vEmptyChatView.getVisibility() == View.VISIBLE)
+                                    //vEmptyChatView.setVisibility(View.GONE);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
