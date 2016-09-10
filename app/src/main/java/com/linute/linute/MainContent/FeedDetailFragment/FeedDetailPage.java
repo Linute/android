@@ -389,7 +389,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getActivity() != null) {
             if (show) {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+                imm.showSoftInput(editText, InputMethodManager.SHOW_FORCED);
             } else {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
@@ -1635,7 +1635,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     public void revealComment(final int pos, final String id, final boolean isAnon) {
         if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
             mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Put on your mask")
-                    .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to make this comment anonymous?")
+                    .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to become anonymous for this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

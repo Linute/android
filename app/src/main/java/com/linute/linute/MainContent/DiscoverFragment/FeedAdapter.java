@@ -53,7 +53,7 @@ public class FeedAdapter extends BaseFeedAdapter {
         switch (viewType) {
             case LoadMoreViewHolder.FOOTER:
                 return new LoadMoreViewHolder(
-                        LayoutInflater.from(parent.getContext()).inflate(R.layout.wrapping_footer_dark, parent, false),
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_load_more, parent, false),
                         "", "That's all folks!");
 
             case IMAGE_POST:

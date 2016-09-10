@@ -5,6 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
     <LinearLayout
         android:id="@+id/empty_view"
         android:layout_width="wrap_content"
@@ -12,7 +24,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginLeft="@dimen/margin_empty_screen"
         android:layout_marginRight="@dimen/margin_empty_screen"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="64dp"
         android:orientation="vertical"
         android:visibility="gone">
 
@@ -42,19 +54,8 @@
             android:layout_marginTop="@dimen/margin_empty_screen"
             android:text="Take me there!"
             style="@style/EmptyViewButton"
-            />
+        />
     </LinearLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </android.support.v4.widget.SwipeRefreshLayout>
 
 </FrameLayout>

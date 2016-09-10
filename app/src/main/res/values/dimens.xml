@@ -102,7 +102,7 @@
     <dimen name="feed_item_bar_height">48dp</dimen>
 
     <dimen name="profile_border_width">1dp</dimen>
-    <dimen name="margin_empty_screen">64dp</dimen>
+    <dimen name="margin_empty_screen">48dp</dimen>
     <dimen name="margin_empty_image">0dp</dimen>
 
 

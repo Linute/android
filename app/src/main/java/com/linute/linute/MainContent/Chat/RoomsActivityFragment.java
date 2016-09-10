@@ -227,6 +227,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
+                            mSwipeRefreshLayout.setRefreshing(false);
                         }
                     });
                 }

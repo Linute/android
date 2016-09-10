@@ -63,7 +63,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
     private RequestManager mRequestManager;
 
-    public FeedDetailAdapter(FeedDetail feedDetail, RequestManager manager,Context context) {
+    public FeedDetailAdapter(FeedDetail feedDetail, RequestManager manager, Context context) {
         this.context = context;
         mFeedDetail = feedDetail;
         mRequestManager = manager;
@@ -247,6 +247,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             rightControls.findViewById(R.id.comment_reveal).setOnClickListener(this);
             rightControls.findViewById(R.id.comment_report).setOnClickListener(this);
             leftControls.setOnClickListener(this);
+
+            ((ImageView) leftControls.findViewById(R.id.like))
+                    .setColorFilter(ContextCompat.getColor(context, R.color.pure_white));
         }
 
 
@@ -481,7 +484,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             int size = (int) context.getResources().getDimension(R.dimen.comment_image_size);
             vImageView.setLayoutParams(new ViewGroup.LayoutParams(size, size));
             vImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            ((ViewGroup)itemView.findViewById(R.id.content)).addView(vImageView);
+            ((ViewGroup) itemView.findViewById(R.id.content)).addView(vImageView);
 
             vImageView.setOnClickListener(new View.OnClickListener() {
                 @Override

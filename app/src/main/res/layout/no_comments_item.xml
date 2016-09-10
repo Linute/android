@@ -1,42 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="center"
-    >
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+>
 
     <ImageView
         android:id="@+id/center_monkey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_hear_no_monkey" />
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_hear_no_monkey"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_toLeftOf="@id/center_monkey"
-        android:src="@drawable/ic_see_no_monkey" />
+        android:src="@drawable/ic_see_no_monkey"/>
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:layout_toRightOf="@id/center_monkey"
-        android:src="@drawable/ic_speak_no_monkey" />
+        android:src="@drawable/ic_speak_no_monkey"/>
 
     <TextView
+        android:id="@id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/center_monkey"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="@dimen/double_margin"
         android:layout_marginEnd="64dp"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="32dp"
         android:gravity="center"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center"
         android:text="@string/no_comment"
-        android:textColor="@color/eighty_black"
-        android:textSize="@dimen/header_font_size" />
+        android:textAlignment="center"
+        android:textSize="@dimen/header_font_size"/>
 
 </RelativeLayout>

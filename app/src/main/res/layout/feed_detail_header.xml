@@ -5,8 +5,6 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:paddingBottom="8dp"
-              android:paddingEnd="@dimen/activity_horizontal_margin"
-              android:paddingStart="@dimen/activity_horizontal_margin"
               android:paddingTop="8dp"
               tools:showIn="@layout/feed_detail_image">
 
@@ -16,6 +14,7 @@
         android:layout_height="@dimen/profile_image_radius"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:scaleType="centerCrop"
         android:src="@drawable/image_loading_background"
     />
@@ -41,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:layout_marginRight="16dp"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical"
         android:singleLine="true"
         android:textColor="@color/twentyfive_black"

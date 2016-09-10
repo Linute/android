@@ -503,9 +503,8 @@ public class Profile extends BaseFragment {
                                         @Override
                                         public void run() {
                                             mSkip -= 24; //skip 24 posts
-                                            int size = mPosts.size() + 2;
                                             mPosts.addAll(tempPosts);
-                                            mProfileAdapter.notifyItemRangeInserted(size, tempPosts.size());
+                                            mProfileAdapter.notifyDataSetChanged();
                                         }
                                     });
                                 }
