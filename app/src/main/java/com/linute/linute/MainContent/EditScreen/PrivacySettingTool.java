@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.EditScreen;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,12 +51,12 @@ public class PrivacySettingTool extends EditContentTool {
         SwitchCompat anonCommentsSwitch = (SwitchCompat) rightSwitch.findViewById(R.id.switch_main);
         anonCommentsHeader.setText("Anon comments");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            postingAsSwitch.setShowText(false);
+        if (!postingAsSwitch.getShowText()) {
+//            postingAsSwitch.setShowText(false);
             postingAsLeftText.setText("Self");
             postingAsRightText.setText("Anon");
 
-            anonCommentsSwitch.setShowText(false);
+//            anonCommentsSwitch.setShowText(false);
             anonCommentsLeftText.setText("Yes");
             anonCommentsRightText.setText("No");
 

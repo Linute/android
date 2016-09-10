@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.EditScreen;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,8 +47,7 @@ public class CommentPrivacyTool extends EditContentTool {
         View rightSwitch = root.findViewById(R.id.switch_right);
         rightSwitch.setVisibility(View.GONE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            postingAsSwitch.setShowText(false);
+        if (!postingAsSwitch.getShowText()) {
             postingAsLeftText.setText("Self");
             postingAsRightText.setText("Anon");
 
