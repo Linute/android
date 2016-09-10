@@ -267,7 +267,7 @@ public class GlobalFragment extends BaseFragment implements GlobalChoicesAdapter
                             }
                         }
 
-                        GlobalChoiceItem.sort(tempList);
+//                        GlobalChoiceItem.sort(tempList);
 
 
                         if (getActivity() != null) {
