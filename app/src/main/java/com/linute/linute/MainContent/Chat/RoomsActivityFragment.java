@@ -341,11 +341,11 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                 tempArray = message.getJSONArray("videos");
 
                                 if (tempArray.length() > 0) {
-                                    lastMessage = "sent you a video";
+                                    lastMessage = isOwner ? "sent a video" : "sent you a video";
                                 } else {
                                     tempArray = message.getJSONArray("images");
                                     if (tempArray.length() > 0) {
-                                            lastMessage = "sent an image";
+                                            lastMessage = isOwner ? "sent an image" : "sent you an image";
                                     } else {
                                         lastMessage = message.getString("text");
                                     }

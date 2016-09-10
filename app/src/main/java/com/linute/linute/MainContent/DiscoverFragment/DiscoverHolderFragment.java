@@ -146,7 +146,7 @@ public class DiscoverHolderFragment extends BaseFragment {
         });
 
         tabLayout.setupWithViewPager(mViewPager);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire);
+        tabLayout.getTabAt(1).setIcon(R.drawable.ic_fire1);
         tabLayout.setOnTabSelectedListener(
                 new TabLayout.ViewPagerOnTabSelectedListener(mViewPager) {
                     @Override

@@ -26,6 +26,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKUser;
@@ -159,6 +160,7 @@ public class LinuteLoginFragment extends Fragment {
             devSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    Toast.makeText(getContext(), b ? "Live" : "Dev", Toast.LENGTH_SHORT).show();
                     API_Methods.HOST = b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV;
                     API_Methods.VERSION = b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV;
                     SharedPreferences sharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE);
