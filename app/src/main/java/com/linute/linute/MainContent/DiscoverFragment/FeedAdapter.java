@@ -38,7 +38,6 @@ public class FeedAdapter extends BaseFeedAdapter {
 
     private boolean mSectionTwo;
 
-
     public FeedAdapter(List<Post> posts, Context context, boolean sectiontwo) {
         mSectionTwo = sectiontwo;
         mPosts = posts;
@@ -60,21 +59,24 @@ public class FeedAdapter extends BaseFeedAdapter {
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_image, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
 
             case VIDEO_POST:
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_video, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
 
             default: //status post
                 return new StatusFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_status, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
         }
     }

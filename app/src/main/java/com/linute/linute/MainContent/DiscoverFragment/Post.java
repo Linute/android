@@ -143,7 +143,7 @@ public class Post implements Parcelable {
             JSONObject size = jsonObject.getJSONObject("imageSizes");
             mImageSize = new PostSize(size.getInt("width"), size.getInt("height"));
         }catch (JSONException e){
-            e.printStackTrace();
+            //e.printStackTrace();
             mImageSize = null;
         }
 
@@ -392,6 +392,16 @@ public class Post implements Parcelable {
 
     public boolean isCommentAnonDisabled() {
         return mCommentAnonDisabled;
+    }
+
+    @Override
+    public int hashCode() {
+        return mPostId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Post && ((Post) o).getPostId().equals(mPostId);
     }
 
     @Override

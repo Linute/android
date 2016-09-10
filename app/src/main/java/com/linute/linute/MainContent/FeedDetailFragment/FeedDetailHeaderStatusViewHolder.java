@@ -6,6 +6,7 @@ import android.view.View;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.StatusFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 /**
@@ -17,7 +18,8 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
     public static final String TAG = FeedDetailHeaderStatusViewHolder.class.getSimpleName();
 
     public FeedDetailHeaderStatusViewHolder(View view, Context context, RequestManager manager){
-        super(view, context, manager);
+        super(view, context, manager, null);
+        view.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 
     @Override

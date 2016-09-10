@@ -56,8 +56,6 @@ public class FeedFragment extends BaseFeedFragment {
     protected SwipeRefreshLayout vSwipeRefreshLayout;
     private boolean mSectionTwo = false;
 
-    private String mCollegeId;
-
     public static FeedFragment newInstance(boolean friendsOnly) {
         FeedFragment fragment = new FeedFragment();
         Bundle args = new Bundle();
@@ -69,9 +67,6 @@ public class FeedFragment extends BaseFeedFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mCollegeId = sharedPreferences.getString("collegeId", "");
-
         if (getArguments() != null) {
             mSectionTwo = getArguments().getBoolean(SECTION_KEY);
         }
@@ -396,6 +391,11 @@ public class FeedFragment extends BaseFeedFragment {
     }
 
     @Override
+    public ArrayList<Post> getPostsArray() {
+        return mPosts;
+    }
+
+    @Override
     protected void initAdapter() {
         if (mFeedAdapter == null) {
             mFeedAdapter = new FeedAdapter(mPosts, getContext(), mSectionTwo);
@@ -588,5 +588,10 @@ public class FeedFragment extends BaseFeedFragment {
 
 
         return true;
+    }
+
+    @Override
+    protected boolean notifyFeedNeedsUpdating() {
+        return false;
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/feed_item_bar_height"
@@ -15,65 +16,13 @@
     />
 
 
-    <!--<LinearLayout android:id="@+id/feed_control_bar_like_button"
-                  android:layout_width="0px"
-                  android:layout_height="match_parent"
-                  android:layout_gravity="center"
-                  android:layout_weight="1"
-                  android:background="?android:selectableItemBackground"
-                  android:gravity="center">
-
-
-        <CheckBox
-            android:id="@+id/postHeart"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:background="@drawable/post_likes_selector"
-            android:button="@null"
-            android:checked="false"
-        />
-
-        <TextView android:id="@+id/postNumHearts"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginStart="8dp"
-                  android:text="Like (0)"
-                  android:textColor="@color/twentyfive_black"
-                  android:textSize="@dimen/sub_font_size"/>
-
-    </LinearLayout>
-
-    <LinearLayout android:id="@+id/feed_control_bar_comments_button"
-                  android:layout_width="0px"
-                  android:layout_height="match_parent"
-                  android:layout_gravity="center"
-                  android:layout_weight="1"
-                  android:background="?android:selectableItemBackground"
-                  android:gravity="center">
-
-
-        <ImageView android:id="@+id/postComments"
-                   android:layout_width="20dp"
-                   android:layout_height="20dp"
-                   android:src="@drawable/ic_comment"
-        />
-
-        <TextView android:id="@+id/postNumComments"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_marginStart="8dp"
-                  android:text="Comment (0)"
-                  android:textColor="@color/twentyfive_black"
-                  android:textSize="@dimen/sub_font_size"/>
-    </LinearLayout>-->
-
     <LinearLayout
         android:id="@+id/feed_control_bar_like_button"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="22dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
@@ -83,7 +32,7 @@
             android:layout_width="@dimen/feed_detail_action_size"
             android:layout_height="@dimen/feed_detail_action_size"
             android:layout_gravity="center_vertical"
-            android:layout_margin="4dp"
+            android:layout_marginEnd="4dp"
             android:background="@drawable/post_likes_selector"
             android:button="@null"
             android:checked="false"
@@ -91,9 +40,10 @@
 
         <TextView
             android:id="@+id/postNumHearts"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|right"
+            android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="12sp"
             tools:text="237"/>
@@ -103,9 +53,9 @@
         android:id="@+id/feed_control_bar_comments_button"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="76dp"
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_toRightOf="@id/feed_control_bar_like_button"
         android:gravity="center_vertical"
         android:orientation="horizontal"
     >
@@ -115,27 +65,32 @@
             android:layout_width="@dimen/feed_detail_action_size"
             android:layout_height="@dimen/feed_detail_action_size"
             android:layout_gravity="center_vertical"
-            android:layout_margin="4dp"
+            android:layout_marginEnd="4dp"
             android:src="@drawable/ic_comment"/>
 
         <TextView
             android:id="@+id/postNumComments"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_vertical|right"
+            android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="12sp"
             tools:text="237"/>
     </LinearLayout>
 
     <ImageView
-        android:id="@+id/share"
-        android:layout_width="@dimen/feed_detail_action_size"
-        android:layout_height="@dimen/feed_detail_action_size"
+        android:id="@+id/more"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:padding="20dp"
-        android:src="@drawable/ic_share_arrow"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp"
+        android:src="@drawable/ic_hardware_keyboard_control"
+
     />
 
 </RelativeLayout>
