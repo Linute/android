@@ -3,6 +3,7 @@ package com.linute.linute.UtilsAndHelpers.BaseFeedClasses;
 import android.support.v7.widget.RecyclerView;
 
 import com.bumptech.glide.RequestManager;
+import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 
 /**
@@ -13,6 +14,7 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
     protected short mLoadState;
     protected RequestManager mRequestManager;
     protected LoadMoreViewHolder.OnLoadMore mGetMoreFeed; //interface that gets more feed
+    protected PostAction mPostAction;
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -22,6 +24,11 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
     protected void loadMoreFeed(){
         if (mGetMoreFeed != null)
             mGetMoreFeed.loadMore();
+    }
+
+
+    public void setPostAction(PostAction action){
+        mPostAction = action;
     }
 
     public void setLoadState(short loadState) {
@@ -44,4 +51,8 @@ public abstract class BaseFeedAdapter extends RecyclerView.Adapter<RecyclerView.
         mGetMoreFeed = moreFeed;
     }
 
+
+    public interface PostAction{
+        void clickedOptions(Post p, int position);
+    }
 }

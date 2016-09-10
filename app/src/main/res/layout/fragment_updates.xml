@@ -23,41 +23,6 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <LinearLayout
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/margin_empty_screen"
-            android:layout_marginStart="@dimen/margin_empty_screen"
-            android:layout_marginTop="150dp"
-            android:drawablePadding="@dimen/margin_empty_image"
-            android:drawableTop="@drawable/ic_couple"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:text="@string/updates_no_updates"
-            android:visibility="gone"
-            />
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            />
-        <Button
-            android:id="@+id/empty_view_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:text="Find friends"
-            style="@style/EmptyViewButton"
-            />
-
-    </LinearLayout>
-
-
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/updatesFragment_swipe_refresh"
         android:layout_width="match_parent"
@@ -69,5 +34,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone"
+    >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/margin_empty_screen"
+            android:layout_marginStart="@dimen/margin_empty_screen"
+            android:layout_marginTop="150dp"
+            android:drawablePadding="@dimen/margin_empty_image"
+            android:drawableTop="@drawable/ic_couple"
+            android:gravity="center"
+            android:text="@string/updates_no_updates"
+            android:textAlignment="center"
+        />
+
+        <Button
+            android:id="@+id/empty_view_button"
+            style="@style/EmptyViewButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginTop="@dimen/activity_horizontal_margin"
+            android:text="Find friends"
+        />
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

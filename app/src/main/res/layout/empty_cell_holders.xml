@@ -14,25 +14,26 @@
     />
 
     <TextView android:id="@+id/empty_cell_bg_text"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_gravity="center_horizontal"
-              android:layout_marginStart="@dimen/margin_empty_screen"
-              android:layout_marginEnd="@dimen/margin_empty_screen"
-              android:layout_marginTop="@dimen/margin_empty_image"
               android:layout_marginBottom="32dp"
-              xmlns:tools="http://schemas.android.com/tools"
-              tools:text = "@string/profile_no_posts"
+              android:layout_marginEnd="@dimen/margin_empty_screen"
+              android:layout_marginStart="@dimen/margin_empty_screen"
+              android:layout_marginTop="@dimen/margin_empty_image"
               android:gravity="center"
+              tools:text="@string/profile_no_posts"
     />
 
     <Button
         android:id="@+id/empty_cell_button"
+        style="@style/EmptyViewButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="32dp"
         android:text="Create"
-        style="@style/EmptyViewButton"
-        />
+    />
 
 </LinearLayout>

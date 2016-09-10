@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.VideoClasses.TextureVideoView;
@@ -33,8 +34,8 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
 
     private View vCinemaIcon;
 
-    public VideoFeedHolder(final View itemView, Context context, RequestManager manager) {
-        super(itemView, context, manager);
+    public VideoFeedHolder(final View itemView, Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+        super(itemView, context, manager, action);
         //weird thing with this library where we have to seat a source before we do anything else
         vVideoView = (TextureVideoView) itemView.findViewById(R.id.video);
         vVideoView.setHideVideo(this);

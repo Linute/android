@@ -42,7 +42,7 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     GlobalChoiceItem mGlobalItem;
 
 
-    TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
+    public TrendingItemAdapter(List<Post> posts, Context context, RequestManager manager, GlobalChoiceItem item) {
         mContext = context;
         mRequestManager = manager;
         mPosts = posts;
@@ -60,12 +60,12 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
         if (viewType == Post.POST_TYPE_VIDEO) {
             return new VideoTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item_video, parent, false),
-                    mContext, mRequestManager);
+                    mContext, mRequestManager, mPostAction);
         } else if (viewType == Post.POST_TYPE_IMAGE) {
             return new BaseTrendViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_item, parent, false),
-                    mContext, mRequestManager);
+                    mContext, mRequestManager, mPostAction);
         } else if (viewType == LoadMoreViewHolder.FOOTER) {
-            return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.trending_footer, parent, false),
+            return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_load_more, parent, false),
                     "",
                     "That's all folks!"
             );
@@ -113,8 +113,8 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
     public class BaseTrendViewHolder extends ImageFeedHolder {
         protected TextView vCollegeText;
 
-        public BaseTrendViewHolder(View itemView, Context context, RequestManager requestManager) {
-            super(itemView, context, requestManager);
+        public BaseTrendViewHolder(View itemView, Context context, RequestManager requestManager, PostAction action) {
+            super(itemView, context, requestManager, action);
             vCollegeText = (TextView) itemView.findViewById(R.id.college_name);
         }
 
@@ -132,8 +132,8 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
 
         protected TextView vCollegeName;
 
-        public VideoTrendViewHolder(View itemView, Context context, RequestManager manager) {
-            super(itemView, context, manager);
+        public VideoTrendViewHolder(View itemView, Context context, RequestManager manager, PostAction action) {
+            super(itemView, context, manager, action);
             vCollegeName = (TextView) itemView.findViewById(R.id.college_name);
         }
 

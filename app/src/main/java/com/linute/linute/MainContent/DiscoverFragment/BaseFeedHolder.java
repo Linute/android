@@ -18,6 +18,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProfileImageView;
@@ -41,16 +42,18 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected ProfileImageView vUserImage;
     protected Context mContext;
-//    protected View vShareButton;
 
     private String mUserId;
     private String mImageSignature;
     protected RequestManager mRequestManager;
+    protected BaseFeedAdapter.PostAction mPostAction;
 
     protected Post mPost;
 
-    public BaseFeedHolder(final View itemView, final Context context, RequestManager manager) {
+    public BaseFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView);
+
+        mPostAction = action;
         mRequestManager = manager;
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
@@ -66,7 +69,6 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vUserImage = (ProfileImageView) itemView.findViewById(R.id.feedDetail_profile_image);
-//        vShareButton = itemView.findViewById(R.id.share);
 
         //vLikesHeart.setClickable(false);
         vLikesHeart.setOnCheckedChangeListener(this);
@@ -75,14 +77,14 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vCommentButton.setOnClickListener(this);
         vPostUserName.setOnClickListener(this);
         vUserImage.setOnClickListener(this);
-        /*vShareButton.setOnItemTouchListener(new View.OnClickListener() {
+        itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BaseTaptActivity activity = (BaseTaptActivity) mContext;
-                if (activity != null && mPost != null)
-                    activity.addFragmentOnTop(SendToFragment.newInstance(mPost.getPostId()), "send_to");
+                if (mPostAction != null && mPost != null){
+                    mPostAction.clickedOptions(mPost, getAdapterPosition());
+                }
             }
-        });*/
+        });
     }
 
     public void bindModel(Post post) {

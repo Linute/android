@@ -6,6 +6,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.DoubleClickListener;
 
 /**
@@ -19,8 +20,8 @@ public class StatusFeedHolder extends BaseFeedHolder {
     protected TextView vStatus;
     protected View vStatusContainer; //so status is easier to press
 
-    public StatusFeedHolder(View itemView, Context context, RequestManager manager) {
-        super(itemView, context, manager);
+    public StatusFeedHolder(View itemView, Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+        super(itemView, context, manager, action);
 
         vStatus = (TextView) itemView.findViewById(R.id.feedDetail_status_post);
 

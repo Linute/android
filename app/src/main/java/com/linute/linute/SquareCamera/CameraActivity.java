@@ -200,13 +200,13 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null) {
-                getSupportFragmentManager().popBackStack();
-                return;
-            }
-
+//            if (getSupportFragmentManager().findFragmentByTag(SendToFragment.TAG) != null) {
+//                getSupportFragmentManager().popBackStack();
+//                return;
+//            }
+//
             Fragment fragment = getSupportFragmentManager()
-                    .findFragmentByTag(AbstractEditSaveFragment.TAG);
+                    .findFragmentByTag(EditFragment.TAG);
 
             if (fragment != null) {
                 getSupportFragmentManager().popBackStack();

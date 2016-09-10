@@ -317,7 +317,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         else {
                             i = new Intent(getContext(), GalleryActivity.class);
-                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, CameraActivity.ALL);
+                            i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_ALL);
                             i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
                         }
 
@@ -1298,7 +1298,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         try {
             post = data.getJSONObject("post");
             if (post != null) {
-                chat.setPost(getPost(post));
+                chat.setPost(new Post(post));
                 chat.setMessageType(
                         chat.getPost().getType() == Post.POST_TYPE_VIDEO ?
                                 Chat.MESSAGE_SHARE_VIDEO :
@@ -1904,6 +1904,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 message = messages.getJSONObject(i);
 
+                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
+
                 //Log.d(TAG, "parseMessagesJSON: " + message.toString(4));
                 owner = message.getJSONObject("owner");
                 ownerId = owner.getString("id");
@@ -1959,7 +1961,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 try {
                     post = message.getJSONObject("post");
                     if (post != null) {
-                        chat.setPost(getPost(post));
+                        chat.setPost(new Post(post));
                         chat.setMessageType(
                                 chat.getPost().getType() == Post.POST_TYPE_VIDEO ?
                                         Chat.MESSAGE_SHARE_VIDEO :
@@ -2039,36 +2041,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
     }
 
-    private Post getPost(JSONObject obj) throws JSONException {
-
-        Post p = new Post(obj.getString("id"));
-
-        JSONObject owner = obj.getJSONObject("owner");
-        p.setUserId(owner.getString("id"));
-        p.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));
-        p.setUserImage(Utils.getImageUrlOfUser(owner.getString("profileImage")));
-        p.setUserName(owner.getString("fullName"));
-
-        p.setPostPrivacy(obj.getInt("privacy"));
-
-        int type = obj.getInt("type");
-        p.setType(type);
-
-        JSONArray images = obj.getJSONArray("images");
-        if (images != null && images.length() > 0) {
-            p.setImage(Utils.getEventImageURL(images.getString(0)));
-        }
-
-        images = obj.getJSONArray("videos");
-        if (images != null && images.length() > 0) {
-            p.setVideoURL(Utils.getVideoURL(images.getString(0)));
-        }
-
-        p.setPostLiked(obj.getBoolean("isLiked"));
-        p.setTitle(obj.getString("title"));
-
-        return p;
-    }
+//    private Post getPost(JSONObject obj) throws JSONException {
+//
+//        Post p = new Post(obj);
+//
+//        return p;
+//    }
 
   /*  private void updateTopTimeHeader() {
         //-1 to compensate for footer

@@ -42,9 +42,6 @@ public class OverlaysTool extends EditContentTool {
         mOverlays.add(null);
         overlayView = new ImageView(overlaysView.getContext());
         overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
-
-
         mOverlaysView.addView(overlayView);
         initFiltersAsync(overlaysView.getContext());
     }

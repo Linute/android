@@ -387,7 +387,7 @@ public class CameraFragment extends Fragment {
                         .replace(
                                 R.id.fragment_container,
                                 EditFragment.newInstance(uri, EditFragment.ContentType.Video, contentType, returnType, videoDimen),
-                                AbstractEditSaveFragment.TAG)
+                                EditFragment.TAG)
                         .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                         .commit();
             } catch (IllegalStateException e) {
@@ -767,7 +767,7 @@ public class CameraFragment extends Fragment {
                                                                 .replace(
                                                                         R.id.fragment_container,
                                                                         EditFragment.newInstance(uri, EditFragment.ContentType.Photo, contentType, returnType, photoDimens),
-                                                                        AbstractEditSaveFragment.TAG)
+                                                                        EditFragment.TAG)
                                                                 .addToBackStack(CameraActivity.EDIT_AND_GALLERY_STACK_NAME)
                                                                 .commit();
 

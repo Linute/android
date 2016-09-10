@@ -21,6 +21,7 @@ import com.linute.linute.MainContent.FriendsList.FriendsListHolder;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.Settings.EditProfileInfoActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
@@ -53,6 +54,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private String mUserid;
     private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
 
+    private BaseFeedAdapter.PostAction mPostAction;
+
 
     private LoadMoreViewHolder.OnLoadMore mLoadMorePosts;
 
@@ -66,6 +69,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 .getString("userID", "");
         mPosts = posts;
         mUser = user;
+    }
+
+    public void setPostAction(BaseFeedAdapter.PostAction action){
+        mPostAction = action;
     }
 
     public void setRequestManager(RequestManager manager) {
@@ -83,19 +90,22 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 return new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_image, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
             case TYPE_ITEM_VIDEO:
                 return new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_video, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
             case TYPE_ITEM_STATUS:
                 return new StatusFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_status, parent, false),
                         context,
-                        mRequestManager
+                        mRequestManager,
+                        mPostAction
                 );
             case TYPE_HEADER_IMAGE:
                 return new ProfileHeaderViewHolder(LayoutInflater

@@ -286,27 +286,7 @@ public class EditFragment extends BaseFragment {
             mMenu.findItem(R.id.menu_item_done).setTitle(menuTitle);
         }
 
-        final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
-        int displayWidth = metrics.widthPixels;
-        int height;
-
-        if (isPortrait()) {
-            height = mDimens.width * displayWidth / mDimens.height;
-        } else {
-            height = mDimens.height * displayWidth / mDimens.width;
-        }
-
         mFinalContentView = root.findViewById(R.id.final_content);
-
-//        mFinalContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-//            @Override
-//            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-//                ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
-//                layoutParams.height = view.getWidth() * 6 / 5;
-//                view.setLayoutParams(layoutParams);
-//            }
-//        });
-
 
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
         mContentContainer.setOnClickListener(new View.OnClickListener() {
@@ -326,17 +306,16 @@ public class EditFragment extends BaseFragment {
             }
         });
 
-
+        final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         try {
             setupMainContent(mUri, mContentType, metrics);
 
-
             mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
-
             mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
 
+            ScreenSizeSingleton screenSingleton = ScreenSizeSingleton.getSingleton();
             //horrible hack
-            if (mDimens.needsCropping && !ScreenSizeSingleton.getSingleton().mHasRatioRequirement) {
+            if (mDimens.needsCropping && !screenSingleton.mHasRatioRequirement) {
                 //screen was too small for 6:5 ratio, the video or image is a square, relayout accordingly
                 CustomView view = (CustomView) root.findViewById(R.id.spacer);
                 if (view != null) {
@@ -349,6 +328,28 @@ public class EditFragment extends BaseFragment {
                 }
 
                 root.requestLayout();
+            } else if (!mDimens.needsCropping) { //need to check if item is smaller than 6:5
+
+                //resize the overlays to match landscape image sizes
+                //won't resize if image is bigger than 1.2f ratio
+                FrameLayout inner = (FrameLayout) mFinalContentView.findViewById(R.id.inner_content);
+                if (inner != null && overlaysNeedResizing(screenSingleton.mHasRatioRequirement ? ScreenSizeSingleton.MIN_RATIO : 1f)) {
+                    int displayWidth = metrics.widthPixels;
+                    int height;
+                    if (isPortrait()) {
+                        height = mDimens.width * displayWidth / mDimens.height;
+                    } else {
+                        height = mDimens.height * displayWidth / mDimens.width;
+                    }
+                    inner.setLayoutParams(new FrameLayout.LayoutParams(displayWidth, height, Gravity.CENTER));
+                }
+
+                //have to make it square
+                if (!screenSingleton.mHasRatioRequirement && mFinalContentView instanceof CustomFrameLayout) {
+                    ((CustomFrameLayout) mFinalContentView).setMakeSquare(true);
+                    root.requestLayout();
+                }
+
             }
 
             mTools = setupTools(mOverlaysContainer);
@@ -389,6 +390,15 @@ public class EditFragment extends BaseFragment {
             e.printStackTrace();
         }
         return root;
+    }
+
+    private boolean overlaysNeedResizing(float minRatio) {
+        if (isPortrait()) {
+            return (float) mDimens.width / mDimens.height < minRatio;
+        }
+
+        return (float) mDimens.height / mDimens.width < minRatio;
+
     }
 
     public void selectTool(EditContentTool tool) {
@@ -562,6 +572,24 @@ public class EditFragment extends BaseFragment {
         }
     };
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (getActivity() != null) {
+            View v = getActivity().getCurrentFocus();
+            if (v != null) {
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                v.clearFocus();
+                mFinalContentView.requestFocus();
+            }
+
+            for (EditContentTool tool : mTools) {
+                if (tool != null) tool.onPause();
+            }
+        }
+    }
+
     private EditContentTool[] setupTools(ViewGroup overlay) {
 
         DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
@@ -696,8 +724,8 @@ public class EditFragment extends BaseFragment {
         showProgress(true);
         if (getActivity() == null) return;
 
-
-        Bitmap bitmapFromView = ImageUtility.getBitmapFromView(mFinalContentView);
+        View inner = mFinalContentView.findViewById(R.id.inner_content);
+        Bitmap bitmapFromView = ImageUtility.getBitmapFromView(inner == null ? mFinalContentView : inner);
         Bitmap bitmap;
         if (options.topInset != 0 || options.bottomInset != 0) {
             bitmap = Bitmap.createBitmap(bitmapFromView, 0, options.topInset, bitmapFromView.getWidth(), bitmapFromView.getHeight() - options.topInset - options.bottomInset);

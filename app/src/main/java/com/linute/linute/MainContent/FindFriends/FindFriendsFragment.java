@@ -271,7 +271,6 @@ public class FindFriendsFragment extends BaseFragment {
             rationaleText.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_telephone,0,0);
             reloadButton.setBackgroundResource(R.drawable.yellow_button);
             reloadButton.setText("Search contacts");
-            reloadButton.setVisibility(View.GONE);
 
             if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
                 mFindFriendsRationale.setVisibility(View.VISIBLE);

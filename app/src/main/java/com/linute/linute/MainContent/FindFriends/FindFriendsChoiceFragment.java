@@ -158,21 +158,6 @@ public class FindFriendsChoiceFragment extends BaseFragment {
 
         ((TabLayout) rootView.findViewById(R.id.tabs)).setupWithViewPager(mViewPager);
 
-        if(getFragmentState() == FragmentState.NEEDS_UPDATING) {
-            setFragmentState(FragmentState.FINISHED_UPDATING);
-            mSearchView.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (getActivity() != null) {
-                        //hide keyboard
-                        mSearchView.requestFocus();
-                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(mSearchView, 0);
-                    }
-                }
-            });
-        }
-
         return rootView;
     }
 

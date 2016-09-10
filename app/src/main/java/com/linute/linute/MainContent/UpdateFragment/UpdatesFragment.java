@@ -247,10 +247,10 @@ public class UpdatesFragment extends BaseFragment {
     private void showEmptyView(boolean show) {
         if(show) {
             mEmptyView.setVisibility(View.VISIBLE);
-            mSwipeRefreshLayout.setVisibility(View.GONE);
+            //mSwipeRefreshLayout.setVisibility(View.GONE);
         }else{
             mEmptyView.setVisibility(View.GONE);
-            mSwipeRefreshLayout.setVisibility(View.VISIBLE);
+            //mSwipeRefreshLayout.setVisibility(View.VISIBLE);
         }
     }
 

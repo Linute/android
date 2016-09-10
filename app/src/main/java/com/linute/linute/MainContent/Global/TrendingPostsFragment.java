@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.Global;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
@@ -366,6 +367,12 @@ public class TrendingPostsFragment extends BaseFeedFragment {
 
         new LSDKEvents(getContext()).getEvents(getUrlPathEnding(), getParams(skip, limit), getMorePostsCallback(skip));
     }
+
+    @Override
+    public ArrayList<Post> getPostsArray() {
+        return mPostList;
+    }
+
 
     @Override
     protected void initAdapter() {

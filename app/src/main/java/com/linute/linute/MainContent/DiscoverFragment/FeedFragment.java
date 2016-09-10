@@ -52,8 +52,6 @@ public class FeedFragment extends BaseFeedFragment {
     protected SwipeRefreshLayout vSwipeRefreshLayout;
     private boolean mSectionTwo = false;
 
-    private String mCollegeId;
-
     public static FeedFragment newInstance(boolean friendsOnly) {
         FeedFragment fragment = new FeedFragment();
         Bundle args = new Bundle();
@@ -65,9 +63,6 @@ public class FeedFragment extends BaseFeedFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-        mCollegeId = sharedPreferences.getString("collegeId", "");
-
         if (getArguments() != null) {
             mSectionTwo = getArguments().getBoolean(SECTION_KEY);
         }
@@ -149,7 +144,7 @@ public class FeedFragment extends BaseFeedFragment {
             } else if (mSectionTwo && !fragment.getFriendsFeedNeedsUpdating() && mPosts.isEmpty()) {
 
                 ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
-                        R.drawable.ic_fire_emoji
+                        R.drawable.ic_fire1
                 );
 
                 ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(R.string.discover_no_posts_hot);
@@ -163,7 +158,7 @@ public class FeedFragment extends BaseFeedFragment {
     private void showEmptyView() {
         vEmptyView.requestLayout();
         vEmptyView.setVisibility(View.VISIBLE);
-        vSwipeRefreshLayout.setVisibility(View.GONE);
+        //vSwipeRefreshLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -274,6 +269,11 @@ public class FeedFragment extends BaseFeedFragment {
     }
 
     @Override
+    public ArrayList<Post> getPostsArray() {
+        return mPosts;
+    }
+
+    @Override
     protected void initAdapter() {
         if (mFeedAdapter == null) {
             mFeedAdapter = new FeedAdapter(mPosts, getContext(), mSectionTwo);
@@ -310,6 +310,8 @@ public class FeedFragment extends BaseFeedFragment {
                     public void onFailure(Call call, IOException e) {
                         setFragmentState(FragmentState.FINISHED_UPDATING);
                         noInternet();
+                        if (mPosts.isEmpty())
+                            mFeedAdapter.setLoadState(LoadMoreViewHolder.STATE_END);
                     }
 
                     @Override
@@ -372,7 +374,7 @@ public class FeedFragment extends BaseFeedFragment {
                                             if (refreshedPosts.isEmpty()) {
                                                 if (vEmptyView.getVisibility() == View.GONE) {
                                                     ((ImageView) vEmptyView.findViewById(R.id.discover_no_posts)).setImageResource(
-                                                            mSectionTwo ? R.drawable.ic_fire_emoji : R.drawable.ic_rocket
+                                                            mSectionTwo ? R.drawable.ic_fire1 : R.drawable.ic_rocket
                                                     );
                                                     ((TextView) vEmptyView.findViewById(R.id.dicover_no_posts_text)).setText(mSectionTwo ?
                                                             R.string.discover_no_posts_hot : R.string.discover_no_posts_campus);
@@ -462,6 +464,12 @@ public class FeedFragment extends BaseFeedFragment {
         if (vEmptyView != null && vEmptyView.getVisibility() == View.VISIBLE)
             vEmptyView.setVisibility(View.GONE);
 
+
         return true;
+    }
+
+    @Override
+    protected boolean notifyFeedNeedsUpdating() {
+        return false;
     }
 }

@@ -10,8 +10,6 @@ import android.view.ViewGroup;
  */
 public abstract class EditContentTool {
 
-
-
     //View where all content should be added
     protected ViewGroup mOverlaysView;
     protected Uri mUri;
@@ -21,8 +19,9 @@ public abstract class EditContentTool {
         mOverlaysView = overlays;
         mUri = uri;
         mContentType = type;
-    };
+    }
 
+    public void onPause(){}
 
     //Binds icon and text of item to menu item
 //    public abstract void bindMenuItem(EditContentToolAdapter.ToolHolder holder, boolean isSelected);

@@ -6,6 +6,7 @@ import android.view.View;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 
@@ -15,7 +16,8 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 public class FeedDetailHeaderVideoViewHolder extends VideoFeedHolder {
 
     public FeedDetailHeaderVideoViewHolder(View view, Context context, RequestManager manager){
-        super(view, context, manager);
+        super(view, context, manager, null);
+        view.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 
     @Override

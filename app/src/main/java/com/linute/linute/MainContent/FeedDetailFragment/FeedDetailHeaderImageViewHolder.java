@@ -6,6 +6,7 @@ import android.view.View;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 
 /**
@@ -17,12 +18,12 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
 
 
     public FeedDetailHeaderImageViewHolder(final View itemView, Context context, RequestManager manager) {
-        super(itemView, context, manager);
+        super(itemView, context, manager, null);
+        itemView.findViewById(R.id.more).setVisibility(View.INVISIBLE);
     }
 
     @Override
     public void onClick(View v) {
-
         BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
         if (activity == null || mPost == null || mPost.getUserId() == null) return;
@@ -41,7 +42,4 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
             vLikesHeart.toggle();
         }
     }
-
-
-
 }

@@ -34,6 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
+        android:focusable="true"
         android:focusableInTouchMode="true">
 
         <!-- Photos and videos taken/uploaded by user in this view -->

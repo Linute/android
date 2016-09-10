@@ -24,6 +24,7 @@ import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
 
 /**
@@ -39,8 +40,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
     protected int mType;
     protected int mScreenWidth;
 
-    public ImageFeedHolder(final View itemView, Context context, RequestManager manager) {
-        super(itemView, context, manager);
+    public ImageFeedHolder(final View itemView, Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
+        super(itemView, context, manager, action);
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
         vProgressBar = itemView.findViewById(R.id.post_image_progress_bar);

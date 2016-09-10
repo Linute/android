@@ -32,6 +32,7 @@ public class API_Methods {
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
     public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
+    public static final boolean ENABLE_CRASHLYTICS = true;
     //CHANGE ONLY THIS TO SWITCH TO PROD
 
 
@@ -118,7 +119,6 @@ public class API_Methods {
                                             Map<String, String> headers,
                                             Map<String, Object> parameters,
                                             CountingRequestBody.Listener listener) throws IOException{
-
 
         JSONObject json = new JSONObject(parameters);
 

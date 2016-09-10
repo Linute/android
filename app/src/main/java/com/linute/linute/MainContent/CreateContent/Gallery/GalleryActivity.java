@@ -8,7 +8,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
@@ -30,12 +29,16 @@ public class GalleryActivity extends AppCompatActivity {
     public static final String ARG_RETURN_TYPE = "return_type";
     public static final String ARG_CONTENT_SUB_TYPE = "content_type";
 
+    public static final int PICK_IMAGE = 0;
+    public static final int PICK_VIDEO = 1;
+    public static final int PICK_ALL = 2;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
 
-        mGalleryType = getIntent().getIntExtra(ARG_GALLERY_TYPE, PickerFragment.PICK_ALL);
+        mGalleryType = getIntent().getIntExtra(ARG_GALLERY_TYPE, PICK_ALL);
         mReturnType = getIntent().getIntExtra(ARG_RETURN_TYPE, CameraActivity.RETURN_URI_AND_PRIVACY);
         mContentSubType = (EditFragment.ContentSubType)getIntent().getSerializableExtra(ARG_CONTENT_SUB_TYPE);
         if(mContentSubType == null){mContentSubType = EditFragment.ContentSubType.None;}
