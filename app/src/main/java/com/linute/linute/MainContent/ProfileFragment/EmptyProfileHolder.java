@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 
@@ -31,7 +32,7 @@ public class EmptyProfileHolder extends RecyclerView.ViewHolder {
             public void onClick(View view) {
                 // activity.getSupportFragmentManager().popBackStack();
                 final View fairy = activity.findViewById(R.id.fairy_tutorial);
-                int[] pos = new int[2];
+                final int[] pos = new int[2];
                 view.getLocationOnScreen(pos);
                 fairy.setX(pos[0]);
                 fairy.setY(pos[1]);
@@ -45,18 +46,17 @@ public class EmptyProfileHolder extends RecyclerView.ViewHolder {
 
                     @Override
                     public void onAnimationEnd(Animator animator) {
+                        activity.getSupportFragmentManager().popBackStack();
                         activity.openDrawer();
                         activity.lockDrawer(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
                     }
 
                     @Override
                     public void onAnimationCancel(Animator animator) {
-
                     }
 
                     @Override
                     public void onAnimationRepeat(Animator animator) {
-
                     }
                 });
 
@@ -69,32 +69,58 @@ public class EmptyProfileHolder extends RecyclerView.ViewHolder {
 
                     @Override
                     public void onAnimationEnd(Animator animator) {
-                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.GLOBAL);
+                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.FEED);
+
                         new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+
+
+                                final View frag = activity.findViewById(R.id.mainActivity_fragment_holder);
+                                frag.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                                    @Override
+                                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                        final FloatingActionsMenu createFab = (FloatingActionsMenu)activity.findViewById(R.id.create_menu);
+                                        if(createFab != null){
+                                            frag.removeOnLayoutChangeListener(this);
+
+                                            createFab.getLocationOnScreen(pos);
+
+                                            fairy.animate().x(pos[0]).y(pos[1]+createFab.getHeight()*3/4).withEndAction(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    createFab.expand();
+                                                    fairy.setVisibility(View.GONE);
+                                                }
+                                            }).start();
+                                        }
+                                    }
+                                });
+
+                                activity.lockDrawer(DrawerLayout.LOCK_MODE_UNLOCKED);
+                                activity.closeDrawer();
+
+                                frag.requestLayout();
+
+                                /*new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        View createFab = activity.findViewById(R.id.create_menu);
+                                        createFab.performClick();
+                                    }
+                                }, 200);*/
+                            }
+                        }, 500);
+
+
+                   /*     new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 activity.lockDrawer(DrawerLayout.LOCK_MODE_UNLOCKED);
                                 activity.closeDrawer();
-                                final View fragmentLayout = activity.findViewById(R.id.mainActivity_fragment_holder);
-//                                fragmentLayout.requestLayout();
-                                // activity.findViewById(R.id.create_menu).performClick();
-                                fragmentLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                                    @Override
-                                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                                        if (activity.findViewById(R.id.create_menu) != null) {
-                                            fragmentLayout.removeOnLayoutChangeListener(this);
-                                            new Handler().postDelayed(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    View createFab = activity.findViewById(R.id.create_menu);
-                                                    createFab.performClick();
-                                                }
-                                            }, 200);
-                                        }
-                                    }
-                                });
+
                             }
-                        }, 500);
+                        }, 500);*/
                     }
 
                     @Override
@@ -110,9 +136,40 @@ public class EmptyProfileHolder extends RecyclerView.ViewHolder {
 
                 AnimatorSet set = new AnimatorSet();
                 set.play(moveToDrawerX).with(moveToDrawerY);
-                set.play(moveToDrawerItemX).after(moveToDrawerX).after(200);
+                set.play(moveToDrawerItemX).after(moveToDrawerX).after(1000);
                 set.start();
 
+                /* activity.openDrawer();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.selectDrawerItem(MainActivity.FRAGMENT_INDEXES.FEED);
+                        // activity.findViewById(R.id.create_menu).performClick();
+                    }
+                }, 600);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.closeDrawer();
+                        // activity.findViewById(R.id.create_menu).performClick();
+                        final View fragmentLayout = activity.findViewById(R.id.mainActivity_fragment_holder);
+                        fragmentLayout.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                            @Override
+                            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                if(activity.findViewById(R.id.create_menu) != null) {
+                                    fragmentLayout.removeOnLayoutChangeListener(this);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            View createFab = activity.findViewById(R.id.create_menu);
+                                            createFab.performClick();
+                                        }
+                                    }, 200);
+                                }
+                            }
+                        });
+                    }
+                }, 1200);*/
 
             }
         });
