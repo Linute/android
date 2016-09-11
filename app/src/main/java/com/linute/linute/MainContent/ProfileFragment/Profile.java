@@ -596,7 +596,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
     @Override
     public void clickedOptions(final Post p, final int position) {
-        if (getContext() == null || mUserid == null) return;
+        if (getContext() == null || mUserid == null || mSwipeRefreshLayout.isRefreshing()) return;
 
         final boolean isOwner = p.getUserId().equals(mUserid);
         String[] options;

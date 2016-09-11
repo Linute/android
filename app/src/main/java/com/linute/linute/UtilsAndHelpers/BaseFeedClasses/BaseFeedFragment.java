@@ -83,7 +83,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         mFeedAdapter.setPostAction(new BaseFeedAdapter.PostAction() {
             @Override
             public void clickedOptions(final Post p, final int position) {
-                if (getContext() == null || mUserId == null) return;
+                if (getContext() == null || mUserId == null || disableOptions()) return;
 
                 final boolean isOwner = p.getUserId().equals(mUserId);
                 String[] options;
@@ -141,6 +141,11 @@ public abstract class BaseFeedFragment extends BaseFragment {
 
         vRecyclerView.setAdapter(mFeedAdapter);
         return rootView;
+    }
+
+
+    protected boolean disableOptions(){
+        return false;
     }
 
 
