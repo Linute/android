@@ -808,7 +808,7 @@ public class MainActivity extends BaseTaptActivity {
                                         .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
-                                    newEventSnackbar(update.getDescription(), update.getPost());
+                                    newEventSnackbar(update.getUserFullName() + " " + update.getDescription(), update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
 
@@ -879,7 +879,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void newProfileSnackBar(final Update update) {
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getDescription(), CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getUserFullName()+ " " + update.getDescription(), CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
