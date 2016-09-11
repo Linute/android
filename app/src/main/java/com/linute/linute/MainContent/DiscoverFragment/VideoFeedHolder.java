@@ -25,8 +25,7 @@ import org.json.JSONObject;
  * Created by QiFeng on 3/8/16.
  */
 public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnCompletionListener, TextureVideoView.HideVideo {
-
+        MediaPlayer.OnCompletionListener, TextureVideoView.HideVideo, TextureVideoView.CustomSurfaceTextureListener {
 
     private TextureVideoView vVideoView;
     private String mCollegeId;
@@ -39,6 +38,7 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         //weird thing with this library where we have to seat a source before we do anything else
         vVideoView = (TextureVideoView) itemView.findViewById(R.id.video);
         vVideoView.setHideVideo(this);
+        vVideoView.setCustomSurfaceTextureListener(this);
 
         final SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mCollegeId = mSharedPreferences.getString("collegeId", "");
@@ -154,4 +154,9 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
         vCinemaIcon.setAlpha(1);
     }
 
+    @Override
+    public void onSurfaceDestroyed() {
+        vVideoView.stopPlayback();
+        hideVideo();
+    }
 }

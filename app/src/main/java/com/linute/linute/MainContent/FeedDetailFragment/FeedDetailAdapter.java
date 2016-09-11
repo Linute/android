@@ -340,6 +340,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 }
             } else {
                 if (mDenySwipe || mCommentActions == null) return;
+
+                mSwipeLayout.close();
+
                 switch (v.getId()) {
                     case R.id.comment_reply:
                         mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mUserName, mCommenterUserId, ""));
@@ -366,8 +369,6 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                         mCommentActions.likeComment(mIsLiked, mCommentId);
                 }
-
-                mSwipeLayout.close();
             }
         }
 
