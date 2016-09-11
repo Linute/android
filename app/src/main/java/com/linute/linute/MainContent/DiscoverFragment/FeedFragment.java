@@ -472,4 +472,9 @@ public class FeedFragment extends BaseFeedFragment {
     protected boolean notifyFeedNeedsUpdating() {
         return false;
     }
+
+    @Override
+    protected boolean disableOptions() {
+        return vSwipeRefreshLayout.isRefreshing();
+    }
 }

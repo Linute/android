@@ -40,6 +40,7 @@
         android:gravity="center"
         android:text="@string/no_comment"
         android:textAlignment="center"
+        android:textColor="@color/inactive_grey"
         android:textSize="@dimen/header_font_size"/>
 
 </RelativeLayout>

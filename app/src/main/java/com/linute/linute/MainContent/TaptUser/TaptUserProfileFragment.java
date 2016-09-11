@@ -891,7 +891,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
     @Override
     public void clickedOptions(final Post p, final int position) {
-        if (getContext() == null || mViewerId == null) return;
+        if (getContext() == null || mViewerId == null || mSwipeRefreshLayout.isRefreshing()) return;
 
         final boolean isOwner = p.getUserId().equals(mViewerId);
         String[] options;

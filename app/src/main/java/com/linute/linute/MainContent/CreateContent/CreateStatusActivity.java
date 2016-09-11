@@ -276,7 +276,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
     private void showConfirmDialog() {
         new AlertDialog.Builder(this)
-                .setTitle("Uou sure?")
+                .setTitle("You sure?")
                 .setMessage("Would you like to throw away what you have currently?")
                 .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override

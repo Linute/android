@@ -1634,7 +1634,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     @Override
     public void revealComment(final int pos, final String id, final boolean isAnon) {
         if (getActivity() != null && !mFeedDetailAdapter.getDenySwipe())
-            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Put on your mask")
+            mAlertDialog = new AlertDialog.Builder(getActivity()).setTitle(isAnon ? "Reveal" : "Wear a mask")
                     .setMessage(isAnon ? "Are you sure you want to turn anonymous off for this comment?" : "Are you sure you want to become anonymous for this comment?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
