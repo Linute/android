@@ -194,7 +194,7 @@ public class CropTool extends EditContentTool {
 
     }
 
-    private void boundCropper() {
+    public void boundCropper() {
         int cropperLayoutHeight = mCropperLayout.getHeight();
 
         if(cropperLayoutHeight == 0) return;
@@ -368,7 +368,7 @@ public class CropTool extends EditContentTool {
         mOverlaysView.invalidate();
 
         if (reqDisableToolListener != null)
-            reqDisableToolListener.requestDisable(OverlaysTool.class, mTopY != 0 || mBotY != 0);
+            reqDisableToolListener.requestDisable(OverlaysTool.class, mTopY != 0 || mBotY != 0 || mCropperLayout.getHeight() != mCropperLayout.getWidth()*6/5);
 
     }
 
