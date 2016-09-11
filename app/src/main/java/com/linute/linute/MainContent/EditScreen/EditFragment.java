@@ -401,6 +401,7 @@ public class EditFragment extends BaseFragment {
 
     }
 
+
     public void selectTool(EditContentTool tool) {
         for (int i = 0; i < mTools.length; i++) {
             if (mTools[i] == tool) {
@@ -455,12 +456,13 @@ public class EditFragment extends BaseFragment {
                 opts.inJustDecodeBounds = false;
                 final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
 
-                int scalewidth = image.getWidth();
-                if (scalewidth < metrics.widthPixels) {
-                    scalewidth = metrics.widthPixels;
+                int testWidth = image.getWidth();
+                if (testWidth < metrics.widthPixels) {
+                    testWidth = metrics.widthPixels;
                 }
 
-                int scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
+                final int scalewidth = testWidth;
+                final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
 
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
                 mDimens.height = scaleheight;
@@ -477,6 +479,7 @@ public class EditFragment extends BaseFragment {
                         view.removeOnLayoutChangeListener(this);
                     }
                 });*/
+
                 mContentView = imageView;
                 mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
@@ -486,6 +489,9 @@ public class EditFragment extends BaseFragment {
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                         imageView.invalidate();
                         imageView.centerImage();
+                        if(scaleheight != scalewidth * 6/5){
+                            requestDisableToolListener.requestDisable(OverlaysTool.class, true);
+                        }
                         layouts++;
                         if (layouts >= 2) {
                             mContentView.removeOnLayoutChangeListener(this);
