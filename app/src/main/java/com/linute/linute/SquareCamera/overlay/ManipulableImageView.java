@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.linute.linute.R;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +60,8 @@ public class ManipulableImageView extends FrameLayout {
         mImageView.setX(x);
         mImageView.setY(y);
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(200, 200));
+
+        mImageView.setBackgroundResource(R.drawable.bg_sticker);
 
 
     /*    bPaint = new Paint();
@@ -134,8 +138,10 @@ public class ManipulableImageView extends FrameLayout {
             Matrix m = mImageView.getImageMatrix();
 
             mSubRotation = rotationDetector.getAngle();
-            m.setRotate(-mScaleXFlip * (mTotalRotation + mSubRotation), mImageView.getWidth() / 2, mImageView.getHeight() / 2);
-            mImageView.setImageMatrix(m);
+            mImageView.setPivotX(mImageView.getWidth()/2);
+            mImageView.setPivotY(mImageView.getHeight()/2);
+            mImageView.setRotation(-mScaleXFlip * (mTotalRotation + mSubRotation));
+//            mImageView.setImageMatrix(m);
             mImageView.invalidate();
         }
 
@@ -315,7 +321,7 @@ public class ManipulableImageView extends FrameLayout {
         if (bigD < bitmap.getHeight()) {
             bigD = bitmap.getHeight();
         }
-        mImageView.setLayoutParams(new FrameLayout.LayoutParams(bigD, bigD));
+        mImageView.setLayoutParams(new FrameLayout.LayoutParams(bitmap.getWidth(), bitmap.getHeight()));
 
 
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
