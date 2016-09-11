@@ -187,7 +187,7 @@ public class ManipulableImageView extends FrameLayout {
 
 
             //double tap
-            long time = event.getDownTime();
+            /*long time = event.getDownTime();
 
             if (time - timeDown < 500) {
                 mScaleXFlip *= -1;
@@ -196,7 +196,7 @@ public class ManipulableImageView extends FrameLayout {
                 timeDown = 0;
             } else {
                 timeDown = time;
-            }
+            }*/
             if (mCollisionListener != null) mCollisionListener.onViewPickedUp(this);
         }
 
