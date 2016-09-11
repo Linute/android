@@ -226,8 +226,8 @@ public class MainActivity extends BaseTaptActivity {
         }
 
         new FiveStarsDialog(this, "support@tapt.io")
-                .setRateText("how are we doing?")
-                .setRateText("wasup! we see you come here often, how are you liking it so far?")
+                .setRateText("How are we doing?")
+                .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
     }
