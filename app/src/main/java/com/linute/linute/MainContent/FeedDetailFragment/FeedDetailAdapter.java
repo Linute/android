@@ -260,6 +260,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mCommentId = comment.getCommentPostId();
             mIsLiked = comment.isLiked();
 
+            mSwipeLayout.close(false);
+
             mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
 
             if (mIsAnon) {
