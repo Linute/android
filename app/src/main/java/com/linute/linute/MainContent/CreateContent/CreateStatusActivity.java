@@ -14,7 +14,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -197,7 +196,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         vAnonComments = (SwitchCompat) findViewById(R.id.anon_comments).findViewById(R.id.switch_main);
         vAnonPost = (SwitchCompat) findViewById(R.id.anon_post).findViewById(R.id.switch_main);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        if (!vAnonPost.getShowText()) {
             vAnonPost.setShowText(false);
             postingAsLeftText.setText("Self");
             postingAsRightText.setText("Anon");
