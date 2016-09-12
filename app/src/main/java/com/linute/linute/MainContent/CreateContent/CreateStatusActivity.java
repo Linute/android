@@ -446,5 +446,4 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
-
 }

@@ -443,7 +443,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity == null) return;
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
-        } catch (JSONException | IOException e) {
+        } catch (JSONException | IOException | NullPointerException e) { //nullpointer when creating bitmap
             e.printStackTrace();
         }
 

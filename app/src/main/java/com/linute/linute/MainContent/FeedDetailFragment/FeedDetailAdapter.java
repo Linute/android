@@ -260,8 +260,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mCommentId = comment.getCommentPostId();
             mIsLiked = comment.isLiked();
 
+            //close when rebind
             mSwipeLayout.close(false);
 
+            //if owner of comment, don't allow them to like
             mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
 
             if (mIsAnon) {
@@ -333,7 +335,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
-            if (v == vCommentUserName || v == vCommentUserImage) {
+            if (v == vCommentUserName || v == vCommentUserImage) { //take them to user profile
                 if (!mIsAnon) {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
                     if (activity != null) {
@@ -387,7 +389,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         public void setAnonImage(String image) {
             mRequestManager
-                    .load(image == null || image.equals("") ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(image))
+                    .load(image == null || image.isEmpty() ? R.drawable.profile_picture_placeholder : Utils.getAnonImageUrl(image))
                     .asBitmap()
                     .signature(new StringSignature(mImageSignature))
                     .placeholder(R.drawable.image_loading_background)
@@ -451,12 +453,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                     ClickableSpan clickableSpan = new ClickableSpan() { //what happens when clicked
                         @Override
-                        public void onClick(View widget) {
+                        public void onClick(View widget) { //go to user profile when clicked
                             activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(person.getFullName(), person.getId()));
                         }
 
                         @Override
-                        public void updateDrawState(TextPaint ds) {
+                        public void updateDrawState(TextPaint ds) { //so name isn't underlined
                             super.updateDrawState(ds);
                             ds.setUnderlineText(false);
                         }
@@ -492,6 +494,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 public void onClick(View v) {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
                     if (activity != null && mImageUrl != null) {
+                        //full screen view
                         activity.addFragmentOnTop(
                                 ViewFullScreenFragment.newInstance(
                                         Uri.parse(mImageUrl),
@@ -559,6 +562,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
+            //don't allow load if currently loading
             if (!mDenySwipe && !mLoadMoreItem.isLoading() && mLoadMoreCommentsRunnable != null) {
                 if (mCommentActions != null) mCommentActions.closeAllDialogs();
                 vLoadMoreProgressBar.setVisibility(View.VISIBLE);

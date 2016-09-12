@@ -872,7 +872,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         users.put(mUserId);
 
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
-
             @Override
             public void onFailure(Call call, IOException e) {
                 setFragmentState(FragmentState.FINISHED_UPDATING);
@@ -1064,8 +1063,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         new LSDKChat(getActivity()).getChat(chat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "getchat failure");
-
+                //Log.i(TAG, "getchat failure");
                 setFragmentState(FragmentState.FINISHED_UPDATING);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
