@@ -128,7 +128,6 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
-                hideKeyboard();
                 if (!mPostEditText.getText().toString().isEmpty()) {
                     showTextView();
                 }
