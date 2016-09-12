@@ -480,6 +480,7 @@ public class EditFragment extends BaseFragment {
                     }
                 });*/
 
+
                 mContentView = imageView;
                 mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
@@ -489,9 +490,12 @@ public class EditFragment extends BaseFragment {
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
                         imageView.invalidate();
                         imageView.centerImage();
+
                         if(scaleheight != scalewidth * 6/5){
                             requestDisableToolListener.requestDisable(OverlaysTool.class, true);
                         }
+
+
                         layouts++;
                         if (layouts >= 2) {
                             mContentView.removeOnLayoutChangeListener(this);
@@ -554,6 +558,23 @@ public class EditFragment extends BaseFragment {
                 });
                 mContentView = mVideoView;
                 mContentContainer.addView(mContentView);
+
+
+                final int finalheight = height;
+                final int finalwidth = width;
+
+                mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
+
+                    @Override
+                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                        if(!mDimens.needsCropping && finalheight != finalwidth * 6/5){
+                            requestDisableToolListener.requestDisable(OverlaysTool.class, true);
+                        }
+
+                            mContentView.removeOnLayoutChangeListener(this);
+                    }
+                });
                 break;
         }
     }
