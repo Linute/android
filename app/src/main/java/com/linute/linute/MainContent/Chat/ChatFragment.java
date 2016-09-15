@@ -102,6 +102,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private enum RoomExists {
         Exists, DoesntExist, Undetermined
     }
+
     private RoomExists mRoomExists = RoomExists.Undetermined;
 
     //    private String mOtherPersonId;
@@ -313,9 +314,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             i = new Intent(getContext(), CameraActivity.class);
                             i.putExtra(CameraActivity.CAMERA_TYPE, new CameraType(CameraType.CAMERA_PICTURE).add(CameraType.CAMERA_STATUS).add(CameraType.CAMERA_VIDEO));
                             i.putExtra(CameraActivity.CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
-                        }
-
-                        else {
+                        } else {
                             i = new Intent(getContext(), GalleryActivity.class);
                             i.putExtra(GalleryActivity.ARG_GALLERY_TYPE, GalleryActivity.PICK_ALL);
                             i.putExtra(GalleryActivity.ARG_CONTENT_SUB_TYPE, EditFragment.ContentSubType.Chat);
@@ -343,9 +342,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         recList.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                if(view.getHeight() >= ((View)view.getParent()).getHeight()){
+                if (view.getHeight() >= ((View) view.getParent()).getHeight()) {
                     view.setOverScrollMode(View.OVER_SCROLL_ALWAYS);
-                }else{
+                } else {
                     view.setOverScrollMode(View.OVER_SCROLL_NEVER);
                 }
             }
@@ -610,10 +609,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return;
         }
 
-        if(mRoomId != null && mRoomExists == RoomExists.DoesntExist){
+        if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
 //            vEmptyChatView.setVisibility(View.VISIBLE);
-        }else
-        if (mRoomId == null) { //occurs when we didn't come from room fragment
+        } else if (mRoomId == null) { //occurs when we didn't come from room fragment
             mRoomExists = RoomExists.DoesntExist;
             getRoomAndChat();
 
@@ -954,7 +952,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
-                        }else {
+                        } else {
                             mCanLoadMore = true;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
                         }
@@ -1139,7 +1137,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         if (mSkip <= 0) {
                             mCanLoadMore = false;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
-                        }else {
+                        } else {
                             mCanLoadMore = true;
                             mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
                         }
@@ -1564,7 +1562,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 activity.emitSocket(API_Methods.VERSION + ":messages:delivered", delivered);
 
 //                                if (vEmptyChatView.getVisibility() == View.VISIBLE)
-                                    //vEmptyChatView.setVisibility(View.GONE);
+                                //vEmptyChatView.setVisibility(View.GONE);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -1904,7 +1902,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             try {
                 message = messages.getJSONObject(i);
 
-                Log.i(TAG, "parseMessagesJSON: "+message.toString(4));
+                Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
 
                 //Log.d(TAG, "parseMessagesJSON: " + message.toString(4));
                 owner = message.getJSONObject("owner");
@@ -1938,7 +1936,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 String text;
                 try {
                     text = message.getString("text");
-                }catch (JSONException e){
+                } catch (JSONException e) {
                     e.printStackTrace();
                     text = "";
                 }
@@ -2039,6 +2037,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 return lhs.getDate().compareTo(rhs.getDate());
             }
         });
+        for (int i = chatList.size() - 1; i > 0; i--) {
+            if (chatList.get(i).getType() == Chat.TYPE_DATE_HEADER &&
+                    chatList.get(i-1).getType() == Chat.TYPE_DATE_HEADER){
+                chatList.remove(i);
+            }
+        }
     }
 
 //    private Post getPost(JSONObject obj) throws JSONException {
