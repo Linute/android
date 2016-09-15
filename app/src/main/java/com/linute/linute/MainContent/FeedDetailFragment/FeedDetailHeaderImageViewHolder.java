@@ -42,4 +42,5 @@ public class FeedDetailHeaderImageViewHolder extends ImageFeedHolder {
             vLikesHeart.toggle();
         }
     }
+
 }

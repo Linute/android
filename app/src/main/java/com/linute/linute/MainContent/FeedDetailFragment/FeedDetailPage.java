@@ -89,6 +89,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
     private static final int CAMERA_GALLERY_REQUEST = 65;
     private static final String TAG = FeedDetail.class.getSimpleName();
+    private static final String ARG_POST = "post_data";
+    private static final String ARG_SHOW_POST = "show_post_data";
+
     private RecyclerView recList;
 
     private FeedDetail mFeedDetail;
@@ -117,6 +120,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private AlertDialog mAlertDialog;
     private LinearLayoutManager mFeedDetailLLM;
 
+    private boolean mShowPostDetail;
+
     public FeedDetailPage() {
     }
 
@@ -124,17 +129,23 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     public static FeedDetailPage newInstance(Post post) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
-        args.putParcelable("POST", post);
+        args.putParcelable(ARG_POST, post);
         fragment.setArguments(args);
         return fragment;
     }
 
+    public static FeedDetailPage newInstance(Post post, boolean showPost) {
+        FeedDetailPage page = newInstance(post);
+        page.getArguments().putBoolean(ARG_SHOW_POST, showPost);
+        return page;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mFeedDetail = new FeedDetail((Post) getArguments().getParcelable("POST"));
+            mFeedDetail = new FeedDetail((Post) getArguments().getParcelable(ARG_POST));
+            mShowPostDetail = getArguments().getBoolean(ARG_SHOW_POST, true);
         }
     }
 
@@ -186,7 +197,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(mFeedDetailLLM);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext());
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext(), mShowPostDetail);
         mFeedDetailAdapter.setCommentActions(this);
         recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
@@ -624,7 +635,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                     recList.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            recList.scrollToPosition(tempComments.size());
+                                            recList.scrollToPosition(mShowPostDetail ? tempComments.size() : tempComments.size() - 1);
                                         }
                                     });
                                 }
@@ -786,10 +797,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         public void run() {
                                             mSkip = skip1;
                                             mFeedDetail.getComments().remove(0);
+                                            mFeedDetailAdapter.notifyItemRemoved(0);
                                             mFeedDetail.getComments().addAll(0, tempComments);
+                                            mFeedDetailAdapter.notifyItemRangeInserted(0, tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(lastPos + tempComments.size());
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyItemRangeInserted(0,tempComments.size());
-                                            mFeedDetailLLM.scrollToPosition(lastPos+tempComments.size());
                                         }
                                     });
                                 }
@@ -1126,12 +1138,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                 @Override
                                 public void run() {
                                     mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mFeedDetailAdapter.notifyItemChanged(0);
-                                        }
-                                    });
+                                    if (mShowPostDetail) {
+                                        mHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mFeedDetailAdapter.notifyItemChanged(0);
+                                            }
+                                        });
+                                    }
                                     Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -1376,11 +1390,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 Log.i(TAG, "call: Error retrieving new comment");
                 return;
             }
+
             //will check if we can scroll down
             //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
             //neg is scroll up, positive is scroll down
-
             boolean canScrollDown = false;
+
             try {
                 canScrollDown = recList != null &&
                         recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
@@ -1458,7 +1473,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                     }
 
                                     if (finalSmoothScroll || !mCanScrollDown)
-                                        recList.scrollToPosition(mFeedDetail.getComments().size());
+                                        recList.scrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
                                 }
                             });
 
@@ -1551,7 +1566,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private void confirmDeleteComment(final int in, final String id) {
         if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
 
-        final int pos = in - 1;
+        final int pos = mShowPostDetail ? in - 1 : in;
         final Comment com = (Comment) mFeedDetail.getComments().get(pos);
 
         //if viewer is not the owner of the comment, return
@@ -1594,8 +1609,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                     public void run() {
                                         //mItemManger.removeShownLayouts(mSwipeLayout);
                                         mFeedDetail.getComments().remove(pos);
-                                        mFeedDetailAdapter.notifyItemRemoved(pos + 1);
-                                        mFeedDetailAdapter.notifyItemRangeChanged(pos + 1, mFeedDetail.getComments().size() + 1);
+                                        mFeedDetailAdapter.notifyItemRemoved(in);
+                                        mFeedDetailAdapter.notifyItemRangeChanged(in, mFeedDetail.getComments().size());
                                         mFeedDetail.refreshCommentCount();
 
                                         Toast.makeText(act, "Comment deleted", Toast.LENGTH_SHORT).show();
@@ -1654,7 +1669,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
     private void confirmRevealComment(final int in, final String id, final boolean isAnon) {
         if (mFeedDetailAdapter.getDenySwipe() || getActivity() == null) return;
 
-        final int pos = in - 1;
+        final int pos = mShowPostDetail ? in - 1 : in;
         final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
 
         //safe check
@@ -1701,7 +1716,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         @Override
                                         public void run() {
                                             comment.setIsAnon(!isAnon);
-                                            mFeedDetailAdapter.notifyItemChanged(pos + 1);
+                                            mFeedDetailAdapter.notifyItemChanged(in);
                                             Toast.makeText(activity, isAnon ? "You've taken off your mask!" : "Comment made anonymous", Toast.LENGTH_SHORT).show();
                                         }
                                     });
