@@ -464,6 +464,8 @@ public class EditFragment extends BaseFragment {
                 imageView.rightBound = getContext().getResources().getDisplayMetrics().widthPixels;
                 imageView.topBound = -3;
                 imageView.botBound = -3;
+                imageView.topStickyBound = 0;
+                imageView.botStickyBound = -2;
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 

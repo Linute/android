@@ -31,6 +31,9 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
     public int botBound = -1;
     public int leftBound = -1;
     public int rightBound = -1;
+    public int topStickyBound = -1;
+    public int botStickyBound = -1;
+
 
     public MoveZoomImageView(Context context) {
         super(context);
@@ -252,13 +255,16 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
                 return true;
             case MotionEvent.ACTION_POINTER_UP:
                 id = event.getPointerId(event.getActionIndex());
+
                 initialX[id] = 0;
                 initialY[id] = 0;
                 positionX[id] = 0;
                 positionY[id] = 0;
 
+
                 return true;
             case MotionEvent.ACTION_UP:
+                stickyBoundPosition(event);
                 if (mCollisionListener != null) {
                     mCollisionListener.onViewDropped(this);
                     if (isInCollision) {
@@ -304,6 +310,9 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         float topCorrection = mImageView.getY() - rect.top;
         float botCorrection = mImageView.getY() + mImageView.getHeight() - rect.bottom;
 
+
+
+
         if (leftBound != -1 && posX - leftCorrection > leftBound) {
             posX = leftBound + leftCorrection;
         }
@@ -332,6 +341,8 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
             posY = botBound - mImageView.getHeight() + botCorrection;
         }
 
+
+
         mImageView.setX(posX);
         mImageView.setY(posY);
 
@@ -339,6 +350,58 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
             mCollisionListener.onViewMoved(this);
         }
     }
+
+
+
+    //code to make IV "stick" to bounds if it's close
+    private void stickyBoundPosition(MotionEvent event) {
+        float posX = mImageView.getX();
+        float posY = mImageView.getY();
+        float nPosX, nPosY;
+        for (int i = 0; i < event.getPointerCount(); i++) {
+            int pid = event.getPointerId(i);
+            nPosX = event.getX(i) - initialX[pid];
+            nPosY = event.getY(i) - initialY[pid];
+
+
+            posX += (nPosX - positionX[pid]) / event.getPointerCount();
+            posY += (nPosY - positionY[pid]) / event.getPointerCount();
+
+            positionX[pid] = nPosX;
+            positionY[pid] = nPosY;
+        }
+
+        getImageBounds(rect);
+
+
+        //corrects for the fact that view scaling doesn't affect View's
+        //x and y values
+
+        float leftCorrection = mImageView.getX() - rect.left;
+        float rightCorrection = mImageView.getX() + mImageView.getWidth() - rect.right;
+        float topCorrection = mImageView.getY() - rect.top;
+        float botCorrection = mImageView.getY() + mImageView.getHeight() - rect.bottom;
+
+
+        if (topStickyBound != -1 && posY - topCorrection > topStickyBound - 20 && posY - botCorrection < topStickyBound + 20) {
+            posY = topStickyBound + topCorrection;
+        }
+
+        if (botStickyBound == -2) {
+            botStickyBound = getHeight();
+        }
+
+        if (botStickyBound != -1 && posY - botCorrection > botStickyBound - 20 && posY - botCorrection < botStickyBound + 20) {
+            posY = botStickyBound + botCorrection;
+        }
+
+
+        mImageView.setX(posX);
+        mImageView.setY(posY);
+
+    }
+
+
 
     @Override
     public void invalidate() {
