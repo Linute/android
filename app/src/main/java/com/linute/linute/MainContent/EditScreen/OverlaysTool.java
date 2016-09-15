@@ -60,6 +60,10 @@ public class OverlaysTool extends EditContentTool {
         initFiltersAsync(overlaysView.getContext());
     }
 
+    public void setBackingBitmap(Bitmap back){
+        mBackingBitmap = back;
+    }
+
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
