@@ -379,7 +379,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
     public void selectStyle(int selected) {
         //change text view and edit text colors
         mPostEditText.setTextColor(mPostTextColors[selected]);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 70)); //hint will be 70% of text color
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 80)); //hint will be 80% of text color
         mTextView.setTextColor(mPostTextColors[selected]);
         mTextFrame.setBackgroundColor(mPostBackgroundColors[selected]);
 

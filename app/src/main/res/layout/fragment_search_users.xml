@@ -21,12 +21,11 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="16dp"
             android:background="@null"
+            android:inputType="text"
             android:gravity="center_vertical"
             android:hint="Search for friends..."
-            android:imeOptions="actionDone"
+            android:imeOptions="actionSearch"
             android:textColor="@color/pure_white"/>
-
-
     </android.support.v7.widget.Toolbar>
 
     <FrameLayout

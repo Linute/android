@@ -12,12 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
@@ -121,6 +123,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
             }
         });
 
+
         toolbar.inflateMenu(R.menu.menu_create_chat);
 
         toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -129,13 +132,16 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                 BaseTaptActivity activity = (BaseTaptActivity)getActivity();
 
                 activity.getSupportFragmentManager().popBackStack();
-                if(mUsersSelectedListener != null){
+                if(mUsersSelectedListener != null && !mSelectedUsers.isEmpty()){
                     mUsersSelectedListener.onUsersSelected(mSelectedUsers);
                 }
 //                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));
                 return true;
             }
         });
+
+
+
 
 
         mSearchAdapter = createSearchAdapter();
@@ -186,7 +192,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
 
 
-        editText = (EditText) view.findViewById(R.id.search_users_entry);
+        editText = (EditText) toolbar.findViewById(R.id.search_users_entry);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -204,8 +210,22 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
             }
         });
 
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                onSearchPressed();
+                return true;
+            }
+        });
 
         search("");
+    }
+
+    protected void onSearchPressed(){
+        if (getActivity() == null) return;
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm == null) return;
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
     protected UserSelectAdapter createSearchAdapter() {
