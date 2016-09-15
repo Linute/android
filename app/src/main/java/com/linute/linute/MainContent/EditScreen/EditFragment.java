@@ -469,15 +469,27 @@ public class EditFragment extends BaseFragment {
 
                 int testWidth = image.getWidth();
                 if (testWidth < metrics.widthPixels) {
-                    testWidth = metrics.widthPixels;
+                    final int scalewidth = metrics.widthPixels;
+                    final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
+                            image.recycle();
+                        }
+                    }).start();
+
+                    mDimens.height = scaleheight;
+                    mDimens.width = scalewidth;
+                }else{
+                    imageView.setImageBitmap(image);
+                    mDimens.height = image.getHeight();
+                    mDimens.width = image.getWidth();
                 }
 
-                final int scalewidth = testWidth;
-                final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
 
-                imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
-                mDimens.height = scaleheight;
-                mDimens.width = scalewidth;
+
 
 //                mFinalContentView.setLayoutParams(new FrameLayout.LayoutParams(scalewidth, scaleheight));
 
@@ -499,18 +511,20 @@ public class EditFragment extends BaseFragment {
 
                     @Override
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                        imageView.invalidate();
-                        imageView.centerImage();
+                        if(layouts <= 2) {
+                            imageView.invalidate();
+                            imageView.centerImage();
+                        }
 
-                        if(scaleheight != scalewidth * 6/5){
+                        if(mDimens.height != mDimens.height * 6/5){
                             requestDisableToolListener.requestDisable(OverlaysTool.class, true);
                         }
 
 
                         layouts++;
-                        if (layouts >= 2) {
+                        /*if (layouts >= 2) {
                             mContentView.removeOnLayoutChangeListener(this);
-                        }
+                        }*/
                     }
                 });
 //                imageView.setImageURI(uri);
