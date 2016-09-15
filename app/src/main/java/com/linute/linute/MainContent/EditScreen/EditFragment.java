@@ -328,7 +328,7 @@ public class EditFragment extends BaseFragment {
                 }
 
                 root.requestLayout();
-            } else if (!mDimens.needsCropping) { //need to check if item is smaller than 6:5
+            } else if (!mDimens.needsCropping && mContentType == ContentType.Video) { //need to check if item is smaller than 6:5
 
                 //resize the overlays to match landscape image sizes
                 //won't resize if image is bigger than 1.2f ratio
