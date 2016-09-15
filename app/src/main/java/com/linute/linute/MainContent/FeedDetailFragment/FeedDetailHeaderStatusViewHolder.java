@@ -93,4 +93,5 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
             });
         }
     }
+
 }

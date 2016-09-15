@@ -234,7 +234,7 @@ public class ArticleFragment extends Fragment implements View.OnClickListener {
     }
     private void openComments() {
         BaseTaptActivity activity = (BaseTaptActivity)getActivity();
-        activity.addFragmentToContainer(FeedDetailPage.newInstance(mArticle.getPost()));
+        activity.addFragmentToContainer(FeedDetailPage.newInstance(mArticle.getPost(), false));
     }
 
     private void startShare() {

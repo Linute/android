@@ -218,7 +218,7 @@ public abstract class BasePostFeedHolder extends RecyclerView.ViewHolder impleme
                 }
             }, 500);
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(mPost)
+                    FeedDetailPage.newInstance(mPost, true)
             );
         }else if(v == vShareButton){
             vShareButton.findViewById(R.id.shareProgress).setVisibility(View.VISIBLE);

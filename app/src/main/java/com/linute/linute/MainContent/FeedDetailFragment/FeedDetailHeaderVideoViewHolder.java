@@ -90,4 +90,5 @@ public class FeedDetailHeaderVideoViewHolder extends VideoFeedHolder {
             });
         }
     }
+
 }

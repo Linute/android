@@ -74,10 +74,13 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private int contextMenuPosition = -1;
     private String contextMenuId = null;
 
-    public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context) {
+    private boolean mShowPost = true;
+
+    public FeedDetailAdapter(BaseFeedDetail feedDetail, RequestManager manager, Context context, boolean showPost) {
         this.context = context;
         mFeedDetail = feedDetail;
         mRequestManager = manager;
+        mShowPost = showPost;
         SharedPreferences mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mViewerUserId = mSharedPreferences.getString("userID", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
@@ -105,7 +108,6 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
         switch (viewType) {
             case TYPE_COMMENT_TEXT:
                 return new FeedDetailViewHolderText(LayoutInflater.
@@ -154,7 +156,6 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView((LoadMoreItem) mFeedDetail.getComments().get(0));
         } else if (holder instanceof BaseFeedDetailViewHolder) {
@@ -173,7 +174,7 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
     @Override
     public int getItemCount() {
-        return mFeedDetail.getComments().size() + 1;
+        return mShowPost ? mFeedDetail.getComments().size() + 1 : mFeedDetail.getComments().size();
     }
 
     @Override
@@ -192,11 +193,13 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             }
         }
 
-        if (mFeedDetail.getComments().get(position - 1) == null)  //first item is null, means no comments
+        position = getItemPosition(position);
+
+        if (mFeedDetail.getComments().get(position) == null)  //first item is null, means no comments
             return TYPE_NO_COMMENTS;
 
-        if (mFeedDetail.getComments().get(position - 1) instanceof Comment) {
-            if (((Comment) mFeedDetail.getComments().get(position - 1)).getType() == Comment.COMMENT_IMAGE)
+        if (mFeedDetail.getComments().get(position) instanceof Comment) {
+            if (((Comment) mFeedDetail.getComments().get(position)).getType() == Comment.COMMENT_IMAGE)
                 return TYPE_COMMENT_IMAGE;
             else
                 return TYPE_COMMENT_TEXT;
@@ -206,8 +209,14 @@ public class FeedDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
+
+    private int getItemPosition(int pos) {
+        if (pos == 0 ) return 0;
+        return mShowPost ? pos - 1 : pos;
+    }
+
     private boolean isPositionHeader(int position) {
-        return position == 0;
+        return mShowPost && position == 0;
     }
 
     public void setMentionedTextAdder(MentionedTextAdder mentioned) {

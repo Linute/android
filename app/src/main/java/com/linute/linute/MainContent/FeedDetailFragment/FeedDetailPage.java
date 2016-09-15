@@ -101,6 +101,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private static final int CAMERA_GALLERY_REQUEST = 65;
     private static final String TAG = BaseFeedDetail.class.getSimpleName();
+    private static final String ARG_POST = "post_data";
+    private static final String ARG_SHOW_POST = "show_post_data";
+
     private RecyclerView recList;
 
     private BaseFeedDetail mFeedDetail;
@@ -137,6 +140,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private boolean mSendCommentEnabled = false;
     private BaseFeedItem shareItem;
+    private boolean mShowPostDetail;
 
     public FeedDetailPage() {
     }
@@ -148,18 +152,24 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     public static FeedDetailPage newInstance(BaseFeedItem post) {
         FeedDetailPage fragment = new FeedDetailPage();
         Bundle args = new Bundle();
-        args.putParcelable("POST", post);
+        args.putParcelable(ARG_POST, post);
         fragment.setArguments(args);
         return fragment;
     }
 
+    public static FeedDetailPage newInstance(Post post, boolean showPost) {
+        FeedDetailPage page = newInstance(post);
+        page.getArguments().putBoolean(ARG_SHOW_POST, showPost);
+        return page;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            BaseFeedItem item = getArguments().getParcelable("POST");
+            BaseFeedItem item = getArguments().getParcelable(ARG_POST);
             mFeedDetail = item instanceof Poll ? new PollFeedDetail((Poll) item) : new PostFeedDetail((Post) item);
+            mShowPostDetail = getArguments().getBoolean(ARG_SHOW_POST, true);
         }
 
     }
@@ -214,7 +224,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
         recList.setLayoutManager(mFeedDetailLLM);
 
-        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext());
+        mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext(), mShowPostDetail);
         mFeedDetailAdapter.setCommentActions(this);
         mFeedDetailAdapter.setPostAction(this);
         recList.setAdapter(mFeedDetailAdapter);
@@ -701,7 +711,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     recList.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            recList.scrollToPosition(tempComments.size());
+                                            recList.scrollToPosition(mShowPostDetail ? tempComments.size() : tempComments.size() - 1);
                                         }
                                     });
                                 }
@@ -1160,12 +1170,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 @Override
                                 public void run() {
                                     mFeedDetail.setPostPrivacy(isAnon ? 0 : 1);
-                                    mHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mFeedDetailAdapter.notifyItemChanged(0);
-                                        }
-                                    });
+                                    if (mShowPostDetail) {
+                                        mHandler.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mFeedDetailAdapter.notifyItemChanged(0);
+                                            }
+                                        });
+                                    }
                                     Toast.makeText(getActivity(), isAnon ? "Post revealed" : "Post made anonymous", Toast.LENGTH_SHORT).show();
                                 }
                             });
@@ -1436,6 +1448,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 Log.i(TAG, "call: Error retrieving new comment");
                 return;
             }
+
             //will check if we can scroll down
             //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
             //neg is scroll up, positive is scroll down
@@ -1604,7 +1617,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private void confirmDeleteComment(final int in, final String id) {
 
-        final int pos = in - 1;
+        final int pos = mShowPostDetail ? in - 1 : in;
         final Comment com = (Comment) mFeedDetail.getComments().get(pos);
 
         //if viewer is not the owner of the comment, return
@@ -1706,7 +1719,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private void confirmRevealComment(final int in, final String id, final boolean isAnon) {
         if (getActivity() == null) return;
 
-        final int pos = in - 1;
+        final int pos = mShowPostDetail ? in - 1 : in;
         final Comment comment = (Comment) mFeedDetail.getComments().get(pos);
 
         //safe check

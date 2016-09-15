@@ -139,8 +139,8 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
             public boolean onMenuItemClick(MenuItem menuItem) {
                 if (mSelectedUsers.isEmpty()) return true;
 
-                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
+                BaseTaptActivity activity = (BaseTaptActivity)getActivity();
                 activity.getSupportFragmentManager().popBackStack();
                 if (mUsersSelectedListener != null && !mSelectedUsers.isEmpty()) {
                     mUsersSelectedListener.onUsersSelected(mSelectedUsers);
