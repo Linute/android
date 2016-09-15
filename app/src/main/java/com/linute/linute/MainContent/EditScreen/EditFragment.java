@@ -289,7 +289,7 @@ public class EditFragment extends BaseFragment {
         mFinalContentView = root.findViewById(R.id.final_content);
 
         mContentContainer = (ViewGroup) root.findViewById(R.id.base_content);
-        mContentContainer.setOnClickListener(new View.OnClickListener() {
+        /*mContentContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (mTools != null)
@@ -304,7 +304,7 @@ public class EditFragment extends BaseFragment {
                         }
                     }
             }
-        });
+        });*/
 
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         try {
@@ -402,13 +402,24 @@ public class EditFragment extends BaseFragment {
     }
 
 
-    public void selectTool(EditContentTool tool) {
+    public EditContentTool selectTool(EditContentTool tool) {
         for (int i = 0; i < mTools.length; i++) {
             if (mTools[i] == tool) {
                 onToolSelected(i);
-                break;
+                return tool;
             }
         }
+        return null;
+    }
+
+    public EditContentTool selectTool(Class<? extends EditContentTool> tool){
+        for (int i = 0; i < mTools.length; i++) {
+            if (mTools[i].getClass() == tool) {
+                onToolSelected(i);
+                return mTools[i];
+            }
+        }
+        return null;
     }
 
     protected void onToolSelected(int i) {
@@ -625,7 +636,7 @@ public class EditFragment extends BaseFragment {
 
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
-        PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay);
+        PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay, this);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
         CropTool cropTool;
@@ -654,7 +665,7 @@ public class EditFragment extends BaseFragment {
                                 stickersTool
                         };
                     case Comment:
-                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay);
+                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
@@ -682,7 +693,7 @@ public class EditFragment extends BaseFragment {
                                 stickersTool,
                         };
                     case Comment:
-                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay);
+                        CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 textTool,

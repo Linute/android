@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,9 +23,19 @@ public class CommentPrivacyTool extends EditContentTool {
 
     private boolean isAnonCommentsDisabled = ProcessingOptions.DEFAULT_ANON_COMMENTS_DISABLED;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
+    private final FrameLayout mMidTextTarget;
 
-    public CommentPrivacyTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays) {
+    public CommentPrivacyTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, final EditFragment frag) {
         super(uri, type, overlays);
+        mMidTextTarget = new FrameLayout(overlays.getContext());
+        mMidTextTarget.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mMidTextTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((TextTool)frag.selectTool(TextTool.class)).selectTextMode(TextTool.MID_TEXT_INDEX);
+            }
+        });
+        mOverlaysView.addView(mMidTextTarget);
     }
 
     @Override
@@ -89,6 +100,18 @@ public class CommentPrivacyTool extends EditContentTool {
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
         options.isAnonCommentsDisabled = isAnonCommentsDisabled;
         options.postAsAnon = postAsAnon;
+    }
+
+    @Override
+    public void onOpen() {
+        super.onOpen();
+        mMidTextTarget.setClickable(true);
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        mMidTextTarget.setClickable(false);
     }
 
     @Override
