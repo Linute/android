@@ -26,6 +26,7 @@ public class ManipulableImageView extends FrameLayout {
     private ImageView mImageView;
     private Bitmap image;
     private Bitmap flipped;
+    private boolean drawBorder = false;
 
     private static Map<Bitmap, Bitmap> flips = new HashMap<>();
 
@@ -43,7 +44,11 @@ public class ManipulableImageView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         init(context);
     }
-
+    public void setDrawBorder(boolean drawBorder){
+        this.drawBorder = drawBorder;
+        mImageView.setBackgroundResource(drawBorder ? R.drawable.bg_sticker : 0);
+        invalidate();
+    }
 
     private void init(Context context) {
         mImageView = new ImageView(context);
@@ -336,7 +341,7 @@ public class ManipulableImageView extends FrameLayout {
         mImageView.setScaleX(mTotalScale);
         mImageView.setScaleY(mTotalScale);
         this.image = bitmap;
-        Matrix m = new Matrix();
+        /*Matrix m = new Matrix();
         m.setScale(-1, 1);
             if (flips.containsKey(bitmap)) {
                 this.flipped = flips.get(bitmap);
@@ -347,7 +352,7 @@ public class ManipulableImageView extends FrameLayout {
                 }catch(OutOfMemoryError e){
                     e.printStackTrace();
                 }
-            }
+            }*/
 
     }
 
