@@ -10,7 +10,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -1365,7 +1368,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
-                scrollToBottom();
+//                scrollToBottom();
+                if (mLinearLayoutManager.findLastVisibleItemPosition() != mChatList.size() - 1) {
+                    final Snackbar sn = Snackbar.make(mInputMessageView, "New Message", Snackbar.LENGTH_LONG);
+                    TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
+                    snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    sn.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                    sn.getView().setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            scrollToBottom();
+                            sn.dismiss();
+                        }
+                    });
+                    sn.show();
+                } else {
+                    scrollToBottom();
+                }
 //                updateTopTimeHeader();
             }
         });
@@ -1387,7 +1407,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void run() {
                 mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
                 mChatAdapter.notifyItemInserted(mChatList.size());
-                scrollToBottom();
+                if (mLinearLayoutManager.findLastVisibleItemPosition() != mChatList.size() - 1)
+                    scrollToBottom();
             }
         });
 
@@ -2039,7 +2060,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });
         for (int i = chatList.size() - 1; i > 0; i--) {
             if (chatList.get(i).getType() == Chat.TYPE_DATE_HEADER &&
-                    chatList.get(i-1).getType() == Chat.TYPE_DATE_HEADER){
+                    chatList.get(i - 1).getType() == Chat.TYPE_DATE_HEADER) {
                 chatList.remove(i);
             }
         }
