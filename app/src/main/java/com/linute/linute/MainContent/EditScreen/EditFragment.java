@@ -328,7 +328,7 @@ public class EditFragment extends BaseFragment {
                 }
 
                 root.requestLayout();
-            } else if (!mDimens.needsCropping) { //need to check if item is smaller than 6:5
+            } else if (!mDimens.needsCropping && mContentType == ContentType.Video) { //need to check if item is smaller than 6:5
 
                 //resize the overlays to match landscape image sizes
                 //won't resize if image is bigger than 1.2f ratio
@@ -433,6 +433,15 @@ public class EditFragment extends BaseFragment {
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
+
+        if(mTools[mSelectedTool] instanceof OverlaysTool){
+            mContentView.setDrawingCacheEnabled(true);
+            mContentView.buildDrawingCache();
+
+            Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
+            mContentView.destroyDrawingCache();
+            ((OverlaysTool)mTools[mSelectedTool]).setBackingBitmap(bm);
+        }
 
         if (mToolbar != null) {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
