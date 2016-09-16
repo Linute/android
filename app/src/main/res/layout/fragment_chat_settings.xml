@@ -92,7 +92,9 @@
             android:id="@+id/setting_group_name_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/pure_white">
+            android:background="@color/pure_white"
+            android:visibility="gone"
+            >
 
             <LinearLayout
                 android:id="@+id/setting_group_name"
@@ -256,7 +258,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:background="@color/pure_white" />
+            android:background="@color/pure_white"
+            android:visibility="gone"
+            />
 
         <FrameLayout
             android:layout_width="match_parent"
