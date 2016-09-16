@@ -36,6 +36,7 @@ public class StickersTool extends EditContentTool {
     private FrameLayout mStickersContainer;
     private ManipulableImageView.ViewManipulationListener mManipulationListener;
     private final ImageView mTrashCanIV;
+    private ArrayList<ManipulableImageView> mPlacedStickers = new ArrayList<>();
 
     public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, ImageView trashCan) {
         super(uri, type, overlaysView);
@@ -58,6 +59,7 @@ public class StickersTool extends EditContentTool {
             @Override
             public void onViewPickedUp(View me) {
                 mTrashCanIV.setVisibility(View.VISIBLE);
+                me.bringToFront();
             }
 
             @Override
@@ -82,6 +84,7 @@ public class StickersTool extends EditContentTool {
             @Override
             public void onViewDropCollision(View me) {
                 mStickersContainer.removeView(me);
+                mPlacedStickers.remove(me);
                 mTrashCanIV.setImageResource(R.drawable.trash_icon_closed);
             }
 
@@ -94,7 +97,21 @@ public class StickersTool extends EditContentTool {
         mOverlaysView.addView(container);
     }
 
+    @Override
+    public void onOpen() {
+        super.onOpen();
+        for(ManipulableImageView view: mPlacedStickers){
+            view.setDrawBorder(true);
+        }
+    }
 
+    @Override
+    public void onClose() {
+        super.onClose();
+        for(ManipulableImageView view: mPlacedStickers){
+            view.setDrawBorder(false);
+        }
+    }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
@@ -148,6 +165,7 @@ public class StickersTool extends EditContentTool {
 
 
             mStickersContainer.addView(stickerIV);
+            mPlacedStickers.add(stickerIV);
 
             /*stickerIV.setX(view.getX());
             stickerIV.setY(view.getY());*/

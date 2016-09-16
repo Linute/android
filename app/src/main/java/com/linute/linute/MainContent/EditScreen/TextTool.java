@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.widget.Space;
 import android.text.InputType;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -274,9 +273,6 @@ public class TextTool extends EditContentTool {
                     botET.clearFocus();
                     topET.clearFocus();
                     vFocusView.requestFocus();
-                } else {
-                    selectTextMode(MID_TEXT_INDEX);
-                    mMidETCanBeMoved = false;
                 }
             }
         });
