@@ -118,8 +118,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             case TYPE_EMPTY:
                 return new EmptyProfileHolder(LayoutInflater
                         .from(parent.getContext())
-                        .inflate(R.layout.empty_cell_holders, parent, false)
-                );
+                        .inflate(R.layout.empty_cell_holders, parent, false), mUser.getUserID().equals(mUserid));
             case LoadMoreViewHolder.FOOTER:
                 return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");

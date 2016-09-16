@@ -34,10 +34,6 @@ public class API_Methods {
     public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
     public static final boolean ENABLE_CRASHLYTICS = false;
 
-
-    //CHANGE ONLY THIS TO SWITCH TO PROD
-
-
     // API ENDPOINT URL
     public static final String SCHEME = "https";
 
@@ -45,10 +41,10 @@ public class API_Methods {
     public static final String HOST_DEV = "devapi.tapt.io";
     public static final String HOST_LIVE = "api.tapt.io";
 
-    public static final String VERSION_DEV = "v1.4.4";
+    public static final String VERSION_DEV = "v1.4.5";
     public static final String VERSION_LIVE = "v1.4.4";
 
-    //set default tp live, just in case
+    //set default to live, just in case
     public static String HOST = HOST_LIVE;
     public static String VERSION = VERSION_LIVE;
 
