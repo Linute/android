@@ -137,6 +137,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         if (getArguments() != null) {
             mFeedDetail = new FeedDetail((Post) getArguments().getParcelable("POST"));
         }
+
     }
 
     @Override
@@ -1461,7 +1462,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                    /* if (finalSmoothScroll || !mCanScrollDown)
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
-                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < mFeedDetail.getComments().size()-1){
+                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < mFeedDetail.getComments().size()-1 && !com.getCommentUserId().equals(mViewId)){
                                         final Snackbar sn = Snackbar.make(mCommentEditText, "New Comment", Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));

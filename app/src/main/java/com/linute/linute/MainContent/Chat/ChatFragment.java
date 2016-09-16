@@ -1369,7 +1369,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
 //                scrollToBottom();
-                if (mLinearLayoutManager.findLastVisibleItemPosition() != mChatList.size() - 1) {
+                if (mLinearLayoutManager.findLastVisibleItemPosition() != mChatList.size() - 1 && !chat.getOwnerId().equals(mUserId)) {
                     final Snackbar sn = Snackbar.make(mInputMessageView, "New Message", Snackbar.LENGTH_LONG);
                     TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
                     snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
