@@ -808,8 +808,8 @@ public class MainActivity extends BaseTaptActivity {
                                         .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
-                                    String name = update.getPost().getPrivacy() == 1 ? "Anonymous" : update.getUserFullName();
-                                    newEventSnackbar(name + " " + update.getDescription(), update.getPost());
+                                    String text = update.isAnon() ?  update.getDescription() : update.getUserFullName() + " " +  update.getDescription();
+                                    newEventSnackbar(text, update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
 
