@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -443,9 +442,9 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(bitmap.getWidth(), bitmap.getHeight()));
 
         this.image = bitmap;
-        Matrix m = new Matrix();
-        m.setScale(-1, 1);
-        this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
+//        Matrix m = new Matrix();
+//        m.setScale(-1, 1);
+//        this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
     }
 
     public interface ViewManipulationListener {
