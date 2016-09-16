@@ -150,7 +150,7 @@
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
     <string name="need_contant_permission">
-Find friends on Tapt through your contacts
+        Find friends on Tapt through your contacts
 
     </string>
     <string name="facebook_rationale">Find your friends on Tapt
@@ -161,7 +161,8 @@ Find friends on Tapt through your contacts
 
     <string name="action_send">Send</string>
     <string name="prompt_message">Type a message…</string>
-    <string name="error_connect">Failed to connect with server. Make sure you have internet!</string>
+    <string name="error_connect">Failed to connect with server. Make sure you have internet!
+    </string>
     <string name="user_action_typing">is typing</string>
     <string name="find_people_near_you">Tapt needs access to your location so we can find friends
         that are near you.
@@ -178,14 +179,19 @@ Find friends on Tapt through your contacts
         As your campus feed picks up you’ll see the best posts here!
     </string>
 
-    <string name="profile_no_posts">
+    <string name="profile_owner_no_posts">
         Create your first post. \n
-Make it anonymous, \n
-have fun with it!
-
+        Make it anonymous, \n
+        have fun with it!
     </string>
 
-    <string name="updates_no_updates">Get updates here by interacting with your friends from class or a different college!
+    <string name="profile_not_owner_no_posts">
+        This person currently has\n
+        no posts
+    </string>
+
+    <string name="updates_no_updates">Get updates here by interacting with your friends from class
+        or a different college!
 
     </string>
 
@@ -1629,10 +1635,15 @@ limitations under the License.\n\n
     <string name="create_account_agree">By tapping to continue, you are indicating that you have
         read and agreed to the following
     </string>
-    <string name="block_confirmation_text">This person will be blocked, and this conversation will be deleted. They will not be able to message you anymore.</string>
-    <string name="leave_group_chat_dialog_text">This conversation will be deleted from your inbox, and you won\'t be able to retrieve it.</string>
+    <string name="block_confirmation_text">This person will be blocked, and this conversation will
+        be deleted. They will not be able to message you anymore.
+    </string>
+    <string name="leave_group_chat_dialog_text">This conversation will be deleted from your inbox,
+        and you won\'t be able to retrieve it.
+    </string>
     <string name="empty_find_friends">No results</string>
-    <string name="empty_fragment_rooms">Message a friend or the entire squad with group messaging</string>
+    <string name="empty_fragment_rooms">Message a friend or the entire squad with group messaging
+    </string>
     <string name="no_messages">Say something to start the conversation</string>
     <string name="empty_feed_button_campus">Take me there!</string>
     <string name="empty_feed_button_hot">See other Campuses</string>

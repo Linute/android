@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/feed_item_bar_height"
                 android:orientation="vertical"
-                tools:showIn="@layout/feed_detail_image"
->
+                tools:showIn="@layout/feed_detail_image">
 
     <View
         android:layout_width="match_parent"
@@ -18,13 +16,14 @@
 
     <LinearLayout
         android:id="@+id/feed_control_bar_like_button"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
+        android:layout_width="72dp"
+        android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingEnd="@dimen/half_margin"
+        android:paddingStart="@dimen/activity_horizontal_margin"
     >
 
         <CheckBox
@@ -51,13 +50,14 @@
 
     <LinearLayout
         android:id="@+id/feed_control_bar_comments_button"
-        android:layout_width="48dp"
-        android:layout_height="wrap_content"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
         android:layout_centerVertical="true"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:layout_toRightOf="@id/feed_control_bar_like_button"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:paddingStart="@dimen/half_margin"
     >
 
         <ImageView
@@ -71,8 +71,8 @@
         <TextView
             android:id="@+id/postNumComments"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|right"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="12sp"

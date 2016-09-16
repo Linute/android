@@ -82,6 +82,7 @@ public class Utils {
 
     //toast saying bad connection
     public static void showBadConnectionToast(Context context) {
+        if (context == null) return;
         Toast.makeText(context, R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
     }
 

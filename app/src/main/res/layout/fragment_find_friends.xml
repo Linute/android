@@ -10,6 +10,7 @@
         android:id="@+id/findFriends_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
         android:layout_marginEnd="64dp"
         android:layout_marginStart="64dp"
         android:layout_marginTop="64dp"
@@ -17,7 +18,8 @@
         android:drawableTop="@drawable/ic_couple"
         android:text="@string/empty_find_friends"
         android:textSize="18sp"
-        android:visibility="gone"/>
+        android:visibility="gone"
+    />
 
     <ProgressBar
         android:id="@+id/findFriends_progressbar"

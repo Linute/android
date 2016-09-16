@@ -32,24 +32,21 @@ public class API_Methods {
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
     public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
-    public static final boolean ENABLE_CRASHLYTICS = true;
-    //CHANGE ONLY THIS TO SWITCH TO PROD
-
-
+    public static final boolean ENABLE_CRASHLYTICS = false;
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
 
-//    public static String HOST = "api.tapt.io";
-    public static String HOST = "devapi.tapt.io";
-
+    //    public static String HOST = "api.tapt.io";
     public static final String HOST_DEV = "devapi.tapt.io";
     public static final String HOST_LIVE = "api.tapt.io";
 
-    public static final String VERSION_DEV = "v1.4.4";
+    public static final String VERSION_DEV = "v1.4.5";
     public static final String VERSION_LIVE = "v1.4.4";
 
-    public static String VERSION = "v1.4.4";
+    //set default to live, just in case
+    public static String HOST = HOST_LIVE;
+    public static String VERSION = VERSION_LIVE;
 
 
     //JSON TYPE
@@ -61,7 +58,7 @@ public class API_Methods {
     public static String USER_ID;
 
 
-    public static String getURL(){
+    public static String getURL() {
         return SCHEME + "://" + HOST + "/";
     }
 
@@ -118,7 +115,7 @@ public class API_Methods {
     public static Response postWithProgress(String path,
                                             Map<String, String> headers,
                                             Map<String, Object> parameters,
-                                            CountingRequestBody.Listener listener) throws IOException{
+                                            CountingRequestBody.Listener listener) throws IOException {
 
         JSONObject json = new JSONObject(parameters);
 
@@ -182,7 +179,7 @@ public class API_Methods {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
-        header.put("User-Agent", "("+Build.BRAND + " " + Build.DEVICE + " "+Build.MODEL+"; Android "+Build.VERSION.RELEASE+")/ Ver ["+VERSION+"] UserID ["+USER_ID+"]");
+        header.put("User-Agent", "(" + Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
         return header;
     }
 

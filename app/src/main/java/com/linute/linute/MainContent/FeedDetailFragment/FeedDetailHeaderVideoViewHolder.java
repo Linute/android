@@ -40,4 +40,5 @@ public class FeedDetailHeaderVideoViewHolder extends VideoFeedHolder {
             vLikesHeart.toggle();
         }
     }
+
 }

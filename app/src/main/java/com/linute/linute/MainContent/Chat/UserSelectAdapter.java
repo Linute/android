@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -87,14 +88,14 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public class SearchViewHolder extends RecyclerView.ViewHolder {
-        protected LinearLayout vSearchItemLinear;
+        //protected RelativeLayout vSearchItemLinear;
         protected ImageView vUserImage;
         protected TextView vUserName;
 
         public SearchViewHolder(View itemView) {
             super(itemView);
 
-            vSearchItemLinear = (LinearLayout) itemView.findViewById(R.id.search_users_list_layout);
+            //vSearchItemLinear = (RelativeLayout) itemView.findViewById(R.id.search_users_list_layout);
             vUserImage = (ImageView) itemView.findViewById(R.id.search_users_list_image);
             vUserName = (TextView) itemView.findViewById(R.id.search_users_list_name);
 

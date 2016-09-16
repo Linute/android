@@ -622,8 +622,10 @@ public class EditFragment extends BaseFragment {
                 mFinalContentView.requestFocus();
             }
 
-            for (EditContentTool tool : mTools) {
-                if (tool != null) tool.onPause();
+            if(mTools != null) {
+                for (EditContentTool tool : mTools) {
+                    if (tool != null) tool.onPause();
+                }
             }
         }
     }
