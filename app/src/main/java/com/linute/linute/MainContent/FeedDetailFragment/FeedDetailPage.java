@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -788,8 +789,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                             mFeedDetail.getComments().remove(0);
                                             mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyItemRangeInserted(0,tempComments.size());
-                                            mFeedDetailLLM.scrollToPosition(lastPos+tempComments.size());
+                                            mFeedDetailAdapter.notifyItemRangeInserted(0, tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(lastPos + tempComments.size());
                                         }
                                     });
                                 }
@@ -1457,8 +1458,27 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     }
 
-                                    if (finalSmoothScroll || !mCanScrollDown)
+                                   /* if (finalSmoothScroll || !mCanScrollDown)
+                                        recList.scrollToPosition(mFeedDetail.getComments().size());*/
+
+                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < mFeedDetail.getComments().size()-1){
+                                        final Snackbar sn = Snackbar.make(mCommentEditText, "New Comment", Snackbar.LENGTH_LONG);
+                                        TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
+                                        snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
+                                        snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                                        sn.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                                        sn.getView().setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                recList.scrollToPosition(mFeedDetail.getComments().size());
+                                                sn.dismiss();
+                                            }
+                                        });
+                                        sn.show();
+                                    }else{
                                         recList.scrollToPosition(mFeedDetail.getComments().size());
+                                    }
+
                                 }
                             });
 
