@@ -99,7 +99,11 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             vUserName.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             vUserName.setGravity(Gravity.CENTER_VERTICAL);
             vUserName.requestLayout();
-            /*TextView vUserCollege = (TextView) */itemView.findViewById(R.id.search_users_list_college).setVisibility(View.GONE);
+
+            /*TextView vUserCollege = (TextView) */
+            View college = itemView.findViewById(R.id.search_users_list_college);
+            if(college != null)
+            college.setVisibility(View.GONE);
 
         }
 
