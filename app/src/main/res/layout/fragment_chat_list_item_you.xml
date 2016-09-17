@@ -51,7 +51,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:visibility="invisible"
-        />
+    />
 
 
     <LinearLayout
@@ -87,8 +87,8 @@
                         android:id="@+id/image"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        app:riv_corner_radius="@dimen/message_bubble_corner_radius"
                         android:scaleType="centerCrop"
+                        app:riv_corner_radius="@dimen/message_bubble_corner_radius"
                     />
 
                     <ImageView
@@ -154,6 +154,21 @@
                 tools:text="test dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf dftest dfsdf sdf ddf df "/>
 
 
+            <TextView
+                android:id="@+id/deleted"
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:background="@drawable/chat_item_you"
+                android:padding="8dp"
+                android:text="Post unavailable"
+                android:textSize="@dimen/body_font_size"
+                android:textStyle="bold"
+                android:visibility="gone"
+            />
+
         </FrameLayout>
     </LinearLayout>
+
+
 </RelativeLayout>
