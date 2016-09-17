@@ -216,17 +216,9 @@ public class Post implements Parcelable {
             mPostLiked = false;
         }
 
-        try {
-            mPostHidden = jsonObject.getBoolean("isHidden");
-        } catch (JSONException e) {
-            mPostHidden = false;
-        }
-
-        try {
-            mPostMuted = jsonObject.getBoolean("isMuted");
-        } catch (JSONException e) {
-            mPostMuted = false;
-        }
+        mPostHidden = JsonHelpers.getBoolean(jsonObject, "isHidden");
+        mPostMuted = JsonHelpers.getBoolean(jsonObject, "isMuted");
+        mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
 
         try {
             JSONObject size = jsonObject.getJSONObject("imageSizes");
@@ -388,6 +380,10 @@ public class Post implements Parcelable {
 
     public boolean isCommentAnonDisabled() {
         return mCommentAnonDisabled;
+    }
+
+    public boolean isDeleted() {
+        return mIsDeleted;
     }
 
     @Override

@@ -47,8 +47,6 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private String mUserId;
 
-
-
     private boolean isDM = false;
 
     private Map<String, User> mUsers;
@@ -68,7 +66,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mUserId = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
     }
 
-    public void setIsDM( boolean isdm) {
+    public void setIsDM(boolean isdm) {
         this.isDM = isdm;
     }
 
@@ -152,6 +150,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         protected View vFrame;
         protected View vLikeBar;
 
+        protected View vDeleted;
+
         protected View vMessageBubble;
 
         private int mType;
@@ -168,6 +168,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             vFrame = itemView.findViewById(R.id.frame);
             vImage = (ImageView) itemView.findViewById(R.id.image);
             vProfileImage = (ImageView) itemView.findViewById(R.id.profile_image);
+            vDeleted = itemView.findViewById(R.id.deleted);
 
             vUserName = (TextView) itemView.findViewById(R.id.user_name);
             vLikeBar = vFrame.findViewById(R.id.action_bar);
@@ -208,7 +209,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
 
-        private void likePost(ToggleImageView checkbox){
+        private void likePost(ToggleImageView checkbox) {
             BaseTaptActivity activity = (BaseTaptActivity) aContext;
             if (activity != null && mPost != null) {
                 try {
@@ -238,13 +239,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
 
-        private void imageClicked(){
-            if(mPost != null){
+        private void imageClicked() {
+            if (mPost != null) {
                 ((BaseTaptActivity) aContext).addFragmentToContainer(
                         FeedDetailPage.newInstance(mPost),
                         "full_view"
                 );
-            }else {
+            } else {
                 int type = -1;
 
                 if (mType == Chat.MESSAGE_IMAGE)
@@ -266,7 +267,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
 
-        private void goToProfile(String name, String id){
+        private void goToProfile(String name, String id) {
             ((BaseTaptActivity) aContext).addFragmentToContainer(
                     TaptUserProfileFragment.newInstance(name, id),
                     "full_view"
@@ -276,20 +277,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindModel(Chat chat, boolean isHead) {
             mType = chat.getMessageType();
 
-
-
             if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
-                 if (isHead) {
+                if (isHead) {
                     final User u = mUsers.get(chat.getOwnerId());
                     if (u != null) {
-                        if(!isDM) {
+                        if (!isDM) {
                             vUserName.setVisibility(View.VISIBLE);
                             vUserName.setText(u.firstName);
-                        }else{
+                        } else {
                             vUserName.setVisibility(View.GONE);
                         }
                         vProfileImage.setVisibility(View.VISIBLE);
-                       // Log.i("TEST", "bindModel: "+u.userImage);
+                        // Log.i("TEST", "bindModel: "+u.userImage);
                         Glide.with(itemView.getContext())
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .asBitmap()
@@ -317,26 +316,41 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             switch (chat.getMessageType()) {
                 case Chat.MESSAGE_SHARE_IMAGE:
-                    vFrame.setVisibility(View.VISIBLE);
-                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
-                    vUserMessage.setVisibility(View.GONE);
-                    showShareStuff(chat.getPost());
-                    setImage(chat.getPost().getImage());
-                    mUrl = chat.getPost().getImage();
                     mPost = chat.getPost();
+                    vUserMessage.setVisibility(View.GONE);
+
+                    if (mPost.isDeleted()) {
+                        vFrame.setVisibility(View.GONE);
+                        vDeleted.setVisibility(View.VISIBLE);
+                    } else {
+                        vDeleted.setVisibility(View.GONE);
+                        vFrame.setVisibility(View.VISIBLE);
+                        vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
+                        showShareStuff(chat.getPost());
+                        setImage(mPost.getImage());
+                        mUrl = mPost.getImage();
+                    }
                     break;
                 case Chat.MESSAGE_SHARE_VIDEO:
-                    vFrame.setVisibility(View.VISIBLE);
-                    vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
-                    vUserMessage.setVisibility(View.GONE);
-                    showShareStuff(chat.getPost());
-                    setImage(chat.getPost().getImage());
-                    mUrl = chat.getPost().getVideoUrl();
                     mPost = chat.getPost();
+                    vUserMessage.setVisibility(View.GONE);
+
+                    if (mPost.isDeleted()) {
+                        vFrame.setVisibility(View.GONE);
+                        vDeleted.setVisibility(View.VISIBLE);
+                    } else {
+                        vFrame.setVisibility(View.VISIBLE);
+                        vDeleted.setVisibility(View.GONE);
+                        vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
+                        showShareStuff(chat.getPost());
+                        setImage(mPost.getImage());
+                        mUrl = mPost.getVideoUrl();
+                    }
                     break;
                 case Chat.MESSAGE_IMAGE:
                     vFrame.setVisibility(View.VISIBLE);
                     vUserMessage.setVisibility(View.GONE);
+                    vDeleted.setVisibility(View.GONE);
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.GONE);
                     hideShareStuff();
                     mUrl = Utils.getMessageImageURL(chat.getImageId());
@@ -346,6 +360,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 case Chat.MESSAGE_VIDEO:
                     vFrame.setVisibility(View.VISIBLE);
                     vUserMessage.setVisibility(View.GONE);
+                    vDeleted.setVisibility(View.GONE);
                     vFrame.findViewById(R.id.cinema_icon).setVisibility(View.VISIBLE);
                     hideShareStuff();
                     setImage(Utils.getMessageImageURL(chat.getImageId()));
@@ -354,6 +369,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     break;
                 default:
                     vFrame.setVisibility(View.GONE);
+                    vDeleted.setVisibility(View.GONE);
                     vUserMessage.setVisibility(View.VISIBLE);
                     vUserMessage.setText(chat.getMessage());
                     mUrl = "";
@@ -438,7 +454,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             //loads gif
             Glide.with(itemView.getContext())
                     .load(R.drawable.typing_three_dots_android)
-                    .into(new GlideDrawableImageViewTarget((ImageView)itemView.findViewById(R.id.gif)));
+                    .into(new GlideDrawableImageViewTarget((ImageView) itemView.findViewById(R.id.gif)));
         }
     }
 }
