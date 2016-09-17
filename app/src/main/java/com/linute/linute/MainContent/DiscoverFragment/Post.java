@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.linute.linute.UtilsAndHelpers.JsonHelpers;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
@@ -44,6 +45,8 @@ public class Post implements Parcelable {
     private boolean mPostHidden;    //post hidden from user
     private boolean mPostMuted;     //post muted from user
 
+    private boolean mIsDeleted;     //post has been deleted
+
     private boolean mCommentAnonDisabled;
 
     private int mType;
@@ -69,6 +72,7 @@ public class Post implements Parcelable {
         mPostLiked = false;
         mPostHidden = false;
         mPostMuted = false;
+        mIsDeleted = false;
     }
 
 
@@ -147,17 +151,9 @@ public class Post implements Parcelable {
             mImageSize = null;
         }
 
-        try {
-            mPostHidden = jsonObject.getBoolean("isHidden");
-        } catch (JSONException e) {
-            mPostHidden = false;
-        }
-
-        try {
-            mPostMuted = jsonObject.getBoolean("isMuted");
-        } catch (JSONException e) {
-            mPostMuted = false;
-        }
+        mPostHidden = JsonHelpers.getBoolean(jsonObject, "isHidden");
+        mPostMuted = JsonHelpers.getBoolean(jsonObject, "isMuted");
+        mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
     }
 
 
@@ -427,6 +423,7 @@ public class Post implements Parcelable {
         dest.writeString(mCollegeName);
 
         dest.writeParcelable(mImageSize, 0);
+        dest.writeByte((byte) (mIsDeleted ? 1 : 0));
     }
 
     private Post(Parcel in) {
@@ -446,6 +443,7 @@ public class Post implements Parcelable {
         mCollegeName = in.readString();
 
         mImageSize = in.readParcelable(PostSize.class.getClassLoader());
+        mIsDeleted = in.readByte() != 0;
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {
