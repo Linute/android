@@ -63,7 +63,6 @@
             android:hint="WHAT WOULD YOU SAY TO YOUR ENTIRE CAMPUS?"
             android:imeOptions="actionDone"
             android:inputType="textMultiLine|textCapSentences"
-            android:maxLines="8"
             android:textColor="#000000"
             android:textSize="32sp"
         />
@@ -78,7 +77,6 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:gravity="center"
-            android:maxLines="8"
             android:textColor="#000000"
             android:textSize="32sp"
             android:visibility="gone"

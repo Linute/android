@@ -16,7 +16,8 @@
 
     <LinearLayout
         android:id="@+id/feed_control_bar_like_button"
-        android:layout_width="72dp"
+        android:layout_width="wrap_content"
+        android:minWidth="64dp"
         android:layout_height="match_parent"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
@@ -25,13 +26,12 @@
         android:paddingEnd="@dimen/half_margin"
         android:paddingStart="@dimen/activity_horizontal_margin"
     >
-
         <CheckBox
             android:id="@+id/postHeart"
             android:layout_width="@dimen/feed_detail_action_size"
             android:layout_height="@dimen/feed_detail_action_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
             android:background="@drawable/post_likes_selector"
             android:button="@null"
             android:checked="false"
@@ -50,7 +50,8 @@
 
     <LinearLayout
         android:id="@+id/feed_control_bar_comments_button"
-        android:layout_width="64dp"
+        android:layout_width="wrap_content"
+        android:minWidth="64dp"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_toRightOf="@id/feed_control_bar_like_button"
@@ -59,20 +60,21 @@
         android:paddingEnd="@dimen/activity_horizontal_margin"
         android:paddingStart="@dimen/half_margin"
     >
-
         <ImageView
             android:id="@+id/postComments"
             android:layout_width="@dimen/feed_detail_action_size"
             android:layout_height="@dimen/feed_detail_action_size"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="4dp"
-            android:src="@drawable/ic_comment"/>
+            android:gravity="center"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/ic_comment"
+            />
 
         <TextView
             android:id="@+id/postNumComments"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="center_vertical|right"
             android:lines="1"
             android:textColor="@color/twentyfive_black"
             android:textSize="12sp"

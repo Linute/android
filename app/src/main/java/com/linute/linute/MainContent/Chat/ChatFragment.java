@@ -10,7 +10,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
@@ -1383,6 +1386,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 tempChat.add(chat);
                 int position = mChatList.size();
 
+
                 if (mOtherUserTyping){
                     if (viewerIsOwnerOfMessage){
                         mChatList.addAll(position - 1, tempChat);
@@ -1398,15 +1402,23 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatList.addAll(tempChat);
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
-//                if (wasTyping && viewerIsOwnerOfMessage) {
-//                    mOtherUserTyping = true;
-//                    tempChat.add(new Chat(Chat.TYPE_ACTION_TYPING));
-//                }
-
-
-//                mChatList.addAll(tempChat);
-                scrollToBottom();
-//                updateTopTimeHeader();
+                if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
+                    final Snackbar sn = Snackbar.make(mInputMessageView, "New Message", Snackbar.LENGTH_LONG);
+                    TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
+                    snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    sn.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                    sn.getView().setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            scrollToBottom();
+                            sn.dismiss();
+                        }
+                    });
+                    sn.show();
+                } else {
+                    scrollToBottom();
+                }
             }
         });
 
@@ -1439,8 +1451,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void run() {
                 mChatList.add(new Chat(Chat.TYPE_ACTION_TYPING));
-                mChatAdapter.notifyItemInserted(mChatList.size()); //first item is load more progress
-                scrollToBottom();
+                mChatAdapter.notifyItemInserted(mChatList.size());
+                if (mLinearLayoutManager.findLastVisibleItemPosition() == mChatList.size() - 1)
+                    scrollToBottom();
                 mOtherUserTyping = true;
             }
         });

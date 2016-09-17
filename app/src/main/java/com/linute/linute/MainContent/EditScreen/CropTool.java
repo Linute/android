@@ -149,7 +149,15 @@ public class CropTool extends EditContentTool {
 
             @Override
             public void onViewDropped(View me) {
+                ((MoveZoomImageView) me).getImageBounds(imageBounds);
 
+                updateCropperBounds();
+                boundCropper();
+                updateCropperView();
+                updateCropperModes(imageBounds);
+
+//                if (reqDisableToolListener != null)
+//                    reqDisableToolListener.requestDisable(OverlaysTool.class, mTopY != 0 || mBotY != 0 || mCropperLayout.getHeight() != mCropperLayout.getWidth()*6/5);
             }
 
             @Override

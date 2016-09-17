@@ -31,8 +31,27 @@ public class OverlaysTool extends EditContentTool {
     private final ImageView overlayView;
     private Bitmap mBackingBitmap;
 
-    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
-        this(uri, type, overlaysView, BitmapFactory.decodeFile(uri.getPath()));
+    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+        super(uri,type, overlaysView);
+        final BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(uri.getPath(), opts);
+        opts.inSampleSize = opts.outWidth/overlaysView.getResources().getDisplayMetrics().widthPixels/5;
+        opts.inJustDecodeBounds = false;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mBackingBitmap =  BitmapFactory.decodeFile(uri.getPath(), opts);
+            }
+        }).start();;
+        mOverlays = new ArrayList<>();
+        mOverlays.add(null);
+        overlayView = new ImageView(overlaysView.getContext());
+        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mOverlaysView.addView(overlayView);
+        initFiltersAsync(overlaysView.getContext());
+
     }
 
     public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, Bitmap back) {
@@ -44,6 +63,10 @@ public class OverlaysTool extends EditContentTool {
         overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mOverlaysView.addView(overlayView);
         initFiltersAsync(overlaysView.getContext());
+    }
+
+    public void setBackingBitmap(Bitmap back){
+        mBackingBitmap = back;
     }
 
     @Override
