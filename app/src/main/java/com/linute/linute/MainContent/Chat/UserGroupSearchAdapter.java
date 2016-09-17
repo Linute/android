@@ -43,7 +43,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         switch(viewType){
             case TYPE_ITEM:
-                return new ItemVH(inflater.inflate(R.layout.list_item_user_w_college, parent, false));
+                return new ItemVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
             case TYPE_HEADER:
                 return new HeaderVH(inflater.inflate(R.layout.list_header, parent, false));
         }
@@ -133,7 +133,8 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         public ItemVH(View itemView) {
             super(itemView);
 
-            tvCollege = (TextView)itemView.findViewById(R.id.text_college);
+            tvCollege = (TextView)itemView.findViewById(R.id.search_users_list_college);
+            tvCollege.setVisibility(View.VISIBLE);
         }
 
         public void bindModel(User user, ItemStatus status) {

@@ -321,7 +321,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                                     user.getString("id"),
                                     user.getString("firstName"),
                                     user.getString("lastName"),
-                                    user.getString("profileImage")
+                                    user.getString("profileImage"),
+                                    user.getJSONObject("college").getString("name")
                             ));
                             /*if(findUser(mSelectedUsers, user.getString("id")) != -1) {
                                 tempUsers.add(new User(
