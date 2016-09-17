@@ -2,12 +2,11 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -98,6 +97,10 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             //vSearchItemLinear = (RelativeLayout) itemView.findViewById(R.id.search_users_list_layout);
             vUserImage = (ImageView) itemView.findViewById(R.id.search_users_list_image);
             vUserName = (TextView) itemView.findViewById(R.id.search_users_list_name);
+            vUserName.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            vUserName.setGravity(Gravity.CENTER_VERTICAL);
+            vUserName.requestLayout();
+            /*TextView vUserCollege = (TextView) */itemView.findViewById(R.id.search_users_list_college).setVisibility(View.GONE);
 
         }
 
