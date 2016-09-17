@@ -1402,10 +1402,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatList.addAll(tempChat);
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
-//<<<<<<< HEAD
-//                mChatList.add(chat);
-//                mChatAdapter.notifyItemInserted(mChatList.size());
-//                scrollToBottom();
                 if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
                     final Snackbar sn = Snackbar.make(mInputMessageView, "New Message", Snackbar.LENGTH_LONG);
                     TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
@@ -1423,18 +1419,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 } else {
                     scrollToBottom();
                 }
-//=======
-
-//                if (wasTyping && viewerIsOwnerOfMessage) {
-//                    mOtherUserTyping = true;
-//                    tempChat.add(new Chat(Chat.TYPE_ACTION_TYPING));
-//                }
-
-
-//                mChatList.addAll(tempChat);
-//                scrollToBottom();
-//>>>>>>> c38969ad9441c3;d656c2bff0f8cb09e5a44f3ebb
-//                updateTopTimeHeader();
             }
         });
 
