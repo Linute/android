@@ -141,7 +141,6 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         mPostEditText.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
             public void backPressed() {
-                hideKeyboard();
                 if (!mPostEditText.getText().toString().isEmpty()) {
                     showTextView();
                 }
@@ -392,7 +391,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
     public void selectStyle(int selected) {
         //change text view and edit text colors
         mPostEditText.setTextColor(mPostTextColors[selected]);
-        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 70)); //hint will be 70% of text color
+        mPostEditText.setHintTextColor(ColorUtils.setAlphaComponent(mPostTextColors[selected], 80)); //hint will be 80% of text color
         mTextView.setTextColor(mPostTextColors[selected]);
         mTextFrame.setBackgroundColor(mPostBackgroundColors[selected]);
 
@@ -458,5 +457,4 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
         return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED;
     }
-
 }

@@ -1,7 +1,5 @@
 package com.linute.linute.MainContent.DiscoverFragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -22,7 +20,6 @@ import com.linute.linute.MainContent.Global.TrendingPostsFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedFragment;
-import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.TutorialAnimations;
 import com.linute.linute.UtilsAndHelpers.Utils;

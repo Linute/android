@@ -650,6 +650,7 @@ public class TextureVideoView extends TextureView
 
     @Override
     public void pause() {
+        Log.i(TAG, "pause: tt");
         if (isInPlaybackState()) {
             if (mMediaPlayer.isPlaying()) {
                 mMediaPlayer.pause();
@@ -660,6 +661,7 @@ public class TextureVideoView extends TextureView
     }
 
     public void suspend() {
+        Log.i(TAG, "suspend: tt");
         release(false);
     }
 

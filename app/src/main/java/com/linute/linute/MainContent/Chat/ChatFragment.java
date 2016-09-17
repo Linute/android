@@ -156,6 +156,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private Handler mHandler = new Handler();
+    private Handler mTypingHandler = new Handler();
+
     private LinearLayoutManager mLinearLayoutManager;
     private Map<String, User> mUserMap;
 
@@ -500,11 +502,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
 
+                mTypingHandler.removeCallbacksAndMessages(null);
                 if (mAmAlreadyTyping) {
-                    new Handler().postDelayed(new Runnable() {
+                    mTypingHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                            mAmAlreadyTyping = false;
                         }
                     }, 3000);
                 }
@@ -612,9 +616,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return;
         }
 
-        if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
-//            vEmptyChatView.setVisibility(View.VISIBLE);
-        } else if (mRoomId == null) { //occurs when we didn't come from room fragment
+//        if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
+////            vEmptyChatView.setVisibility(View.VISIBLE);
+//        } else
+        if (mRoomId == null) { //occurs when we didn't come from room fragment
+
             mRoomExists = RoomExists.DoesntExist;
             getRoomAndChat();
 
@@ -633,9 +639,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             //finished loading and there were no messages
         }
 
-        if (getFragmentState() == FragmentState.FINISHED_UPDATING && mChatList.isEmpty()) {
-//            vEmptyChatView.setVisibility(View.VISIBLE);
-        }
+//        if (getFragmentState() == FragmentState.FINISHED_UPDATING && mChatList.isEmpty()) {
+////            vEmptyChatView.setVisibility(View.VISIBLE);
+//        }
 
         updateToolbar();
 
@@ -647,6 +653,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             leaveRooms();
         }
 
+        //Log.i(TAG, "joinRoom: "+mRoomId);
         mSocketConnected = true;
 
 
@@ -873,12 +880,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         users.put(mUserId);
 
         new LSDKChat(getActivity()).getPastMessages(users, new Callback() {
-
             @Override
             public void onFailure(Call call, IOException e) {
                 setFragmentState(FragmentState.FINISHED_UPDATING);
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
@@ -909,7 +916,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             //room doesn't exist, we stop loading.
                             //next message sent will create the room
                             if (activity != null) {
-                                getActivity().runOnUiThread(new Runnable() {
+                                activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         mProgressBar.setVisibility(View.GONE);
@@ -926,7 +933,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             mChatImage = object.getJSONObject("profileImage").getString("original");
 
                             if (activity != null) {
-                                getActivity().runOnUiThread(new Runnable() {
+                                activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         updateToolbar();
@@ -1063,177 +1070,177 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (mChatList.isEmpty()) mProgressBar.setVisibility(View.VISIBLE);
 
         new LSDKChat(getActivity()).getChat(chat, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.i(TAG, "getchat failure");
-
-                setFragmentState(FragmentState.FINISHED_UPDATING);
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Utils.showBadConnectionToast(getActivity());
-                            mProgressBar.setVisibility(View.GONE);
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                if (response.isSuccessful()) {
-                    try {
-
-                        //Log.i(TAG, "getchat get chat");
-
-                        JSONObject object = new JSONObject(response.body().string());
-
-                        //Log.i(TAG, "get chat onResponse: "+object.toString(4));
-
-                        JSONArray messages = object.getJSONArray("messages");
-
-                        mSkip = object.getInt("skip");
-
-                        final ArrayList<Chat> tempChatList = new ArrayList<>();
-                        JSONArray listOfUnreadMessages = new JSONArray();
-                        parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
-
-                        JSONObject room = object.getJSONObject("room");
-                        JSONArray users = room.getJSONArray("users");
-                        mUsers.clear();
-//                        if (mOtherPersonProfileImage == null && mUserId != null) {
-                        for (int i = 0; i < users.length(); i++) {
-                            JSONObject userJSON = users.getJSONObject(i);
-                            User user = new User(
-                                    userJSON.getString("id"),
-                                    userJSON.getString("firstName"),
-                                    userJSON.getString("lastName"),
-                                    userJSON.getString("profileImage"),
-                                    userJSON.getJSONObject("college").getString("name")
-
-                            );
-                            mUsers.add(user);
-                            mUserMap.put(userJSON.getString("id"), user);
-
-
-                        }
-
-                        mChatType = room.getInt("type");
-                        mChatName = room.getString("name");
-                        mChatImage = room.getJSONObject("profileImage").getString("original");
-
-
-                        sortLists(tempChatList);
-
-                        if (activity != null) {
-                            joinRoom(activity, false);
-                            getActivity().runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    updateToolbar();
-                                }
-                            });
-                        }
-//                        }
-
-                        if (mSkip <= 0) {
-                            mCanLoadMore = false;
-                            mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
-                        } else {
-                            mCanLoadMore = true;
-                            mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
-                        }
-
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        //Log.i(TAG, "getchat failure");
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
+                        Activity activity = getActivity();
                         if (activity != null) {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-
-                                    mChatList.clear();
-                                    mChatList.addAll(tempChatList);
-                                    mSkip -= 20;
-
-                                    //show empty view
-                                    if (mChatList.isEmpty()) {
-//                                        vEmptyChatView.setVisibility(View.VISIBLE);
-                                    } else {
-//                                        updateTopTimeHeader();
-                                    }
-
+                                    Utils.showBadConnectionToast(getActivity());
                                     mProgressBar.setVisibility(View.GONE);
+                                }
+                            });
+                        }
+                    }
 
-                                    mHandler.post(new Runnable() {
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                        if (response.isSuccessful()) {
+                            try {
+
+                                //Log.i(TAG, "getchat get chat");
+
+                                JSONObject object = new JSONObject(response.body().string());
+
+                                //Log.i(TAG, "get chat onResponse: "+object.toString(4));
+
+                                JSONArray messages = object.getJSONArray("messages");
+
+                                mSkip = object.getInt("skip");
+
+                                final ArrayList<Chat> tempChatList = new ArrayList<>();
+                                JSONArray listOfUnreadMessages = new JSONArray();
+                                parseMessagesJSON(messages, tempChatList, listOfUnreadMessages);
+
+                                JSONObject room = object.getJSONObject("room");
+                                JSONArray users = room.getJSONArray("users");
+                                mUsers.clear();
+//                        if (mOtherPersonProfileImage == null && mUserId != null) {
+                                for (int i = 0; i < users.length(); i++) {
+                                    JSONObject userJSON = users.getJSONObject(i);
+                                    User user = new User(
+                                            userJSON.getString("id"),
+                                            userJSON.getString("firstName"),
+                                            userJSON.getString("lastName"),
+                                            userJSON.getString("profileImage"),
+                                            userJSON.getJSONObject("college").getString("name")
+
+                                    );
+                                    mUsers.add(user);
+                                    mUserMap.put(userJSON.getString("id"), user);
+
+
+                                }
+
+                                mChatType = room.getInt("type");
+                                mChatName = room.getString("name");
+                                mChatImage = room.getJSONObject("profileImage").getString("original");
+
+                                sortLists(tempChatList);
+                                if (activity != null) {
+                                    joinRoom(activity, false);
+                                    activity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mChatAdapter.notifyDataSetChanged();
-                                            scrollToBottom();
+                                            updateToolbar();
+                                        }
+                                    });
+                                }
+
+//                        }
+
+                                if (mSkip <= 0) {
+                                    mCanLoadMore = false;
+                                    mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_END);
+                                } else {
+                                    mCanLoadMore = true;
+                                    mChatAdapter.setFooterState(LoadMoreViewHolder.STATE_LOADING);
+                                }
+
+                                if (activity != null) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mChatList.clear();
+                                            mChatList.addAll(tempChatList);
+                                            mSkip -= 20;
+
+                                            //show empty view
+//                                            if (mChatList.isEmpty()) {
+////                                        vEmptyChatView.setVisibility(View.VISIBLE);
+//                                            } else {
+////                                        updateTopTimeHeader();
+//                                            }
+
+                                            mProgressBar.setVisibility(View.GONE);
+
+                                            mHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mChatAdapter.notifyDataSetChanged();
+                                                    scrollToBottom();
+                                                }
+                                            });
+
                                         }
                                     });
 
+                                    //there were messages we need to mark as read
+                                    if (listOfUnreadMessages.length() > 0) {
+                                        JSONObject obj = new JSONObject();
+                                        obj.put("room", mRoomId);
+                                        obj.put("messages", listOfUnreadMessages);
+                                        activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                                    }
                                 }
-                            });
+                                Date date = null;
+                                try {
+                                    date = Utils.getDateFormat().parse(room.getString("date"));
+                                } catch (ParseException e) {
 
-                            //there were messages we need to mark as read
-                            if (listOfUnreadMessages.length() > 0) {
-                                JSONObject obj = new JSONObject();
-                                obj.put("room", mRoomId);
-                                obj.put("messages", listOfUnreadMessages);
-                                activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                                }
+
+                                String unMuteAtString = room.getString("unMuteAt");
+                                mChatRoom = new ChatRoom(
+                                        mRoomId,
+                                        mChatType,
+                                        mChatName,
+                                        mChatImage,
+                                        mUsers,
+                                        "",
+                                        false,
+                                        date == null ? 0 : ~date.getTime(),
+                                        room.getBoolean("isMuted"),
+                                        unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
+                                );
+
+                                mChatAdapter.setIsDM(mChatRoom.isDM());
+
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                if (activity != null) {
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Utils.showServerErrorToast(activity);
+                                            mProgressBar.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                            }
+                        } else {
+                            if (getActivity() != null) {
+                                getActivity().runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Utils.showServerErrorToast(getActivity());
+                                        mProgressBar.setVisibility(View.GONE);
+                                    }
+                                });
                             }
                         }
-                        Date date = null;
-                        try {
-                            Utils.getDateFormat().parse(room.getString("date"));
-                        } catch (ParseException e) {
-
-                        }
-
-                        String unMuteAtString = room.getString("unMuteAt");
-                        mChatRoom = new ChatRoom(
-                                mRoomId,
-                                mChatType,
-                                mChatName,
-                                mChatImage,
-                                mUsers,
-                                "",
-                                false,
-                                date == null ? 0 : ~date.getTime(),
-                                room.getBoolean("isMuted"),
-                                unMuteAtString.equals("null") ? 0 : Long.parseLong(unMuteAtString)
-                        );
-
-                        mChatAdapter.setIsDM(mChatRoom.isDM());
 
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        if (activity != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Utils.showServerErrorToast(activity);
-                                    mProgressBar.setVisibility(View.GONE);
-                                }
-                            });
-                        }
-                    }
-                } else {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Utils.showServerErrorToast(getActivity());
-                                mProgressBar.setVisibility(View.GONE);
-                            }
-                        });
+                        setFragmentState(FragmentState.FINISHED_UPDATING);
                     }
                 }
 
-
-                setFragmentState(FragmentState.FINISHED_UPDATING);
-            }
-        });
+        );
     }
 
 
@@ -1251,14 +1258,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
 
     private void addMessage(JSONObject data) throws JSONException {
-        //Log.d(TAG, "addMessage: " + data.toString(4));
+        Log.d(TAG, "addMessage: " + data.toString(4));
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
 
         JSONObject owner = data.getJSONObject("owner");
         String ownerId = owner.getString("id");
-        boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
+        final boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
 
 
         if (!mUserMap.containsKey(ownerId)) {
@@ -1365,6 +1372,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatList.add(header);
                 }
 
+                int position = mChatList.size();
+                if (viewerIsOwnerOfMessage) mChatList.add(mChatList.size() - 1, chat);
+                else mChatList.add(chat);
 
                 mChatList.add(chat);
                 mChatAdapter.notifyItemInserted(mChatList.size());
@@ -1427,7 +1437,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
                     mChatList.remove(pos);
-                    mChatAdapter.notifyItemRemoved(pos + 1);
+                    mChatAdapter.notifyItemRemoved(pos + 1); //first item is load more progress
                 }
             }
         });
@@ -1516,12 +1526,13 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
         joinRoom(activity, false);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mEmptyView.setVisibility(View.GONE);
-            }
-        });
+        if (getActivity() != null)
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mEmptyView.setVisibility(View.GONE);
+                }
+            });
 //        setFragmentState(FragmentState.FINISHED_UPDATING);
     }
 
@@ -1575,7 +1586,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         public void run() {
 
                             final JSONObject data = (JSONObject) args[0];
-                            removeTyping();
+                            //removeTyping();
 
                             try {
                                 addMessage(data);
@@ -1801,8 +1812,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         new LSDKChat(getActivity()).getChat(chat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Utils.showBadConnectionToast(getActivity());
@@ -1924,6 +1936,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 message = messages.getJSONObject(i);
 
                 Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
+
+                // Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
 
                 //Log.d(TAG, "parseMessagesJSON: " + message.toString(4));
                 owner = message.getJSONObject("owner");

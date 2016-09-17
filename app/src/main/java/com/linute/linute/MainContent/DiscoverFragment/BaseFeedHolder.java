@@ -190,7 +190,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
             vLikesHeart.toggle();
         } else if (v == vCommentButton) {
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(mPost)
+                    FeedDetailPage.newInstance(mPost, false)
             );
         }
     }
