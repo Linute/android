@@ -111,6 +111,19 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
+        mPostEditText.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                if(view.getHeight() > 0){
+                    int maxLines = (int)(mPostEditText.getHeight()/mPostEditText.getLineHeight());
+                    mPostEditText.setLines(maxLines);
+                    mTextView.setLines(maxLines);
+                    view.removeOnLayoutChangeListener(this);
+                    mPostEditText.getMaxLines();
+                }
+            }
+        });
+
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,7 +169,6 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
         mPostEditText.addTextChangedListener(new TextWatcher() {
             String beforeText;
-            final int maxLines = 8;
 
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -165,7 +177,7 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (mPostEditText.getLineCount() > maxLines) {
+                if (mPostEditText.getLineCount() > mPostEditText.getMaxLines()) {
                     mPostEditText.setText(beforeText);
                     mPostEditText.setSelection(mPostEditText.getText().length());
                 }
