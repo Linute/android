@@ -455,7 +455,7 @@ public class EditFragment extends BaseFragment {
     }
 
 
-    private void setupMainContent(Uri uri, ContentType contentType, DisplayMetrics metrics) {
+    private void setupMainContent(final Uri uri, ContentType contentType, final DisplayMetrics metrics) {
         switch (contentType) {
             case Photo:
             case UploadedPhoto:
@@ -469,51 +469,50 @@ public class EditFragment extends BaseFragment {
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
-                BitmapFactory.Options opts = new BitmapFactory.Options();
+                final BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(uri.getPath(), opts);
                 if (opts.outWidth > metrics.widthPixels) {
                     opts.inSampleSize = opts.outWidth / metrics.widthPixels + 2;
                 }
                 opts.inJustDecodeBounds = false;
-                final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
 
-                int testWidth = image.getWidth();
-                if (testWidth < metrics.widthPixels) {
-                    final int scalewidth = metrics.widthPixels;
-                    final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
 
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
-                            image.recycle();
+
+                        int testWidth = image.getWidth();
+                        if (testWidth < metrics.widthPixels) {
+                            final int scalewidth = metrics.widthPixels;
+                            final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
+                                    image.recycle();
+                                }
+                            }).start();
+
+                            mDimens.height = scaleheight;
+                            mDimens.width = scalewidth;
+                        }else{
+                            mDimens.height = image.getHeight();
+                            mDimens.width = image.getWidth();
+                            imageView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    imageView.setImageBitmap(image);
+                                }
+                            });
                         }
-                    }).start();
 
-                    mDimens.height = scaleheight;
-                    mDimens.width = scalewidth;
-                }else{
-                    imageView.setImageBitmap(image);
-                    mDimens.height = image.getHeight();
-                    mDimens.width = image.getWidth();
-                }
-
-
-
-
-//                mFinalContentView.setLayoutParams(new FrameLayout.LayoutParams(scalewidth, scaleheight));
+                    }
+                }).start();
 
                 imageView.setActive(false);
-
-               /* mContentContainer.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                    @Override
-                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                        imageView.centerImage();
-                        view.removeOnLayoutChangeListener(this);
-                    }
-                });*/
-
 
                 mContentView = imageView;
                 mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -527,18 +526,19 @@ public class EditFragment extends BaseFragment {
                             imageView.centerImage();
                         }
 
-                        if(mDimens.height != mDimens.height * 6/5){
+                        if(mDimens.height != mDimens.width * 6/5){
                             requestDisableToolListener.requestDisable(OverlaysTool.class, true);
+                        }else{
+                            requestDisableToolListener.requestDisable(OverlaysTool.class, false);
                         }
 
 
                         layouts++;
-                        /*if (layouts >= 2) {
+                        if (layouts >= 2) {
                             mContentView.removeOnLayoutChangeListener(this);
-                        }*/
+                        }
                     }
                 });
-//                imageView.setImageURI(uri);
                 break;
             case Video:
             case UploadedVideo:

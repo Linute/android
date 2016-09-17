@@ -31,15 +31,20 @@ public class OverlaysTool extends EditContentTool {
     private final ImageView overlayView;
     private Bitmap mBackingBitmap;
 
-    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri,type, overlaysView);
-        BitmapFactory.Options opts = new BitmapFactory.Options();
+        final BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(uri.getPath(), opts);
         opts.inSampleSize = opts.outWidth/overlaysView.getResources().getDisplayMetrics().widthPixels/5;
         opts.inJustDecodeBounds = false;
 
-        mBackingBitmap =  BitmapFactory.decodeFile(uri.getPath(), opts);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mBackingBitmap =  BitmapFactory.decodeFile(uri.getPath(), opts);
+            }
+        }).start();;
         mOverlays = new ArrayList<>();
         mOverlays.add(null);
         overlayView = new ImageView(overlaysView.getContext());
