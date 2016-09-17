@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -48,11 +49,14 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected RequestManager mRequestManager;
     protected BaseFeedAdapter.PostAction mPostAction;
 
+    protected int mFilterColor;
+
     protected Post mPost;
 
     public BaseFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView);
 
+        mFilterColor = ContextCompat.getColor(context, R.color.inactive_grey);
         mPostAction = action;
         mRequestManager = manager;
         mContext = context;
@@ -109,7 +113,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
             ((ImageView) vCommentButton.findViewById(R.id.postComments)).clearColorFilter();
         } else if (mContext != null) {
             ((ImageView) vCommentButton.findViewById(R.id.postComments))
-                    .setColorFilter(ContextCompat.getColor(mContext, R.color.inactive_grey), PorterDuff.Mode.SRC_ATOP);
+                    .setColorFilter(mFilterColor, PorterDuff.Mode.SRC_ATOP);
         }
     }
 

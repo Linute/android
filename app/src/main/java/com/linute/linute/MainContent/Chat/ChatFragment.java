@@ -989,6 +989,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                                     mProgressBar.setVisibility(View.GONE);
                                     mChatAdapter.notifyDataSetChanged();
+                                    mOtherUserTyping = false;
                                     scrollToBottom();
                                 }
                             });
@@ -1170,6 +1171,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                                 @Override
                                                 public void run() {
                                                     mChatAdapter.notifyDataSetChanged();
+                                                    mOtherUserTyping = false;
                                                     scrollToBottom();
                                                 }
                                             });
@@ -1261,20 +1263,27 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        JSONObject owner = data.getJSONObject("owner");
-        String ownerId = owner.getString("id");
-        final boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
 
-        if (!mUserMap.containsKey(ownerId)) {
-            mUserMap.put(ownerId,
-                    new User(
-                            ownerId,
-                            owner.getString("firstName"),
-                            owner.getString("lastName"),
-                            owner.getString("profileImage")
-                    ));
+        String ownerId;
+        boolean systemMessage = data.getInt("type") == 1;
+        if (systemMessage){
+            ownerId = data.getString("owner");
+        } else {
+            JSONObject owner = data.getJSONObject("owner");
+            ownerId = owner.getString("id");
+
+            if (!mUserMap.containsKey(ownerId)) {
+                mUserMap.put(ownerId,
+                        new User(
+                                ownerId,
+                                owner.getString("firstName"),
+                                owner.getString("lastName"),
+                                owner.getString("profileImage")
+                        ));
+            }
         }
 
+        final boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
         Date time;
         try {
             time = Utils.getDateFormat().parse(data.getString("date"));
@@ -1332,7 +1341,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         }
 
-        if (data.getInt("type") == 1) {
+        if (systemMessage) {
             chat.setType(Chat.TYPE_SYSTEM_MESSAGE);
         }
 
@@ -1443,7 +1452,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 new Runnable() {
                     @Override
                     public void run() {
+                        Log.i(TAG, "run: ;");
                         if (!mOtherUserTyping) return;
+
+                        Log.i(TAG, "run: k");
 
                         int pos = mChatList.size() - 1;
                         if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
@@ -1640,6 +1652,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Log.i(TAG, "run: jhj");
                     removeTyping();
                 }
             });

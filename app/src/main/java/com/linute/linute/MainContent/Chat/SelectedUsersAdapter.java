@@ -43,7 +43,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
             public void onClick(View view) {
                 if(mUserSelectedListener != null){
                     int position = holder.getAdapterPosition();
-                    Log.i("AAA", position+"");
+                    //Log.i("AAA", position+"");
                     mUserSelectedListener.onUserSelected(mUsers.get(holder.getAdapterPosition()), holder.getAdapterPosition());
                 }
             }

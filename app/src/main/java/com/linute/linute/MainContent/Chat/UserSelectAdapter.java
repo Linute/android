@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,8 +95,6 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         public SearchViewHolder(View itemView) {
             super(itemView);
-
-            //vSearchItemLinear = (RelativeLayout) itemView.findViewById(R.id.search_users_list_layout);
             vUserImage = (ImageView) itemView.findViewById(R.id.search_users_list_image);
             vUserName = (TextView) itemView.findViewById(R.id.search_users_list_name);
 
@@ -113,8 +112,9 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
 
             String name = user.firstName+" "+user.lastName;
-            //Log.i(TAG, "bindModel: "+name);
             vUserName.setText(name);
+
+            Log.i(TAG, "bindModel: mm"+user.collegeName);
 
             switch (status){
                 case None:

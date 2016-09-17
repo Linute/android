@@ -296,7 +296,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
             public void onResponse(Call call, Response response) throws IOException {
 
                 if (!response.isSuccessful()) {
-                    Log.d(TAG, "onResponseNotSuccessful: " + response.body().string());
+                    Log.i(TAG, "onResponseNotSuccessful: " + response.body().string());
                     if (getActivity() != null){
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -312,7 +312,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                     JSONArray friends;
                     try {
                         jsonObject = new JSONObject(response.body().string());
-                        Log.d(TAG, jsonObject.toString(4));
+                        //Log.d(TAG, jsonObject.toString(4));
                         friends = jsonObject.getJSONArray("users");
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
