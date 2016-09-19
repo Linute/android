@@ -1462,15 +1462,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     }
 
     private void removeTyping() {
-        if (getActivity() == null || !mOtherUserTyping) return;
+        if (getActivity() == null) return;
         mHandler.post(
                 new Runnable() {
                     @Override
                     public void run() {
-                        Log.i(TAG, "run: ;");
                         if (!mOtherUserTyping) return;
-
-                        Log.i(TAG, "run: k");
 
                         int pos = mChatList.size() - 1;
                         if (pos >= 0 && mChatList.get(pos).getType() == Chat.TYPE_ACTION_TYPING) {
@@ -1977,10 +1974,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         for (int i = 0; i < messages.length(); i++) {
             try {
                 message = messages.getJSONObject(i);
-
-                Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
-
-                // Log.i(TAG, "parseMessagesJSON: " + message.toString(4));
 
                 //Log.d(TAG, "parseMessagesJSON: " + message.toString(4));
                 owner = message.getJSONObject("owner");

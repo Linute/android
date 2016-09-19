@@ -411,7 +411,6 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
     }
 
     public void centerImage() {
-
         getImageBounds(rect);
        /* float leftCorrection = mImageView.getX() - rect.left;
         float rightCorrection = mImageView.getX()+mImageView.getWidth() - rect.right;

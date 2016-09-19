@@ -14,6 +14,8 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +32,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -102,6 +105,8 @@ public class EditFragment extends BaseFragment {
     private ViewGroup mContentContainer;
     private View mFinalContentView;
     private ViewGroup mToolOptionsView;
+
+
     private int mSelectedTool = 1;
     private ToolHolder[] toolHolders;
     private ViewGroup mOverlaysContainer;
@@ -308,10 +313,15 @@ public class EditFragment extends BaseFragment {
 
         final DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
         try {
-            setupMainContent(mUri, mContentType, metrics);
-
             mToolOptionsView = (ViewGroup) root.findViewById(R.id.layout_tools_menu);
             mOverlaysContainer = (ViewGroup) root.findViewById(R.id.overlays);
+
+            setupMainContent(mUri, mContentType, metrics);
+
+            mTools = setupTools(mOverlaysContainer);
+            mIsDisabled = new boolean[mTools.length];
+            mToolViews = new View[mTools.length];
+            toolHolders = new ToolHolder[mTools.length];
 
             ScreenSizeSingleton screenSingleton = ScreenSizeSingleton.getSingleton();
             //horrible hack
@@ -328,7 +338,8 @@ public class EditFragment extends BaseFragment {
                 }
 
                 root.requestLayout();
-            } else if (!mDimens.needsCropping && mContentType == ContentType.Video) { //need to check if item is smaller than 6:5
+
+            } else if (!mDimens.needsCropping) { //need to check if item is smaller than 6:5
 
                 //resize the overlays to match landscape image sizes
                 //won't resize if image is bigger than 1.2f ratio
@@ -352,22 +363,14 @@ public class EditFragment extends BaseFragment {
 
             }
 
-            mTools = setupTools(mOverlaysContainer);
-            mIsDisabled = new boolean[mTools.length];
-            mToolViews = new View[mTools.length];
-
-
             //Set up adapter that controls tool selection
             LinearLayout toolsListRV = (LinearLayout) root.findViewById(R.id.list_tools);
-
             View.OnClickListener onClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     onToolSelected((Integer) view.getTag());
                 }
             };
-
-            toolHolders = new ToolHolder[mTools.length];
 
             for (int i = 0; i < mTools.length; i++) {
                 EditContentTool tool = mTools[i];
@@ -412,7 +415,7 @@ public class EditFragment extends BaseFragment {
         return null;
     }
 
-    public EditContentTool selectTool(Class<? extends EditContentTool> tool){
+    public EditContentTool selectTool(Class<? extends EditContentTool> tool) {
         for (int i = 0; i < mTools.length; i++) {
             if (mTools[i].getClass() == tool) {
                 onToolSelected(i);
@@ -434,13 +437,13 @@ public class EditFragment extends BaseFragment {
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
 
-        if(mTools[mSelectedTool] instanceof OverlaysTool){
+        if (mTools[mSelectedTool] instanceof OverlaysTool) {
             mContentView.setDrawingCacheEnabled(true);
             mContentView.buildDrawingCache();
 
             Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
             mContentView.destroyDrawingCache();
-            ((OverlaysTool)mTools[mSelectedTool]).setBackingBitmap(bm);
+            ((OverlaysTool) mTools[mSelectedTool]).setBackingBitmap(bm);
         }
 
         if (mToolbar != null) {
@@ -481,64 +484,48 @@ public class EditFragment extends BaseFragment {
                     @Override
                     public void run() {
                         final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
-
-
                         int testWidth = image.getWidth();
                         if (testWidth < metrics.widthPixels) {
                             final int scalewidth = metrics.widthPixels;
-                            final int scaleheight = (int) ((float) image.getHeight() * testWidth / image.getWidth());
-
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    imageView.setImageBitmap(Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false));
-                                    image.recycle();
-                                }
-                            }).start();
+                            final int scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
 
                             mDimens.height = scaleheight;
                             mDimens.width = scalewidth;
-                        }else{
+
+                            //scale image
+                            final Bitmap scaled = Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false);
+
+                            //set image on main thread
+                            new Handler(Looper.getMainLooper()).post(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            imageView.setImageBitmap(scaled);
+                                            imageView.invalidate();
+                                            imageView.centerImage();
+                                            //i believe some phones will modify 'image'. don't want to recycle if that is the case
+                                            if (scaled != image) image.recycle();
+                                        }
+                                    });
+                        } else {
                             mDimens.height = image.getHeight();
                             mDimens.width = image.getWidth();
-                            imageView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    imageView.setImageBitmap(image);
-                                }
-                            });
+                            new Handler(Looper.getMainLooper()).post(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            imageView.setImageBitmap(image);
+                                            imageView.invalidate();
+                                            imageView.centerImage();
+                                        }
+                                    });
                         }
 
                     }
                 }).start();
 
                 imageView.setActive(false);
-
                 mContentView = imageView;
-                mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                    //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
-                    int layouts = 0;
-
-                    @Override
-                    public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                        if(layouts <= 2) {
-                            imageView.invalidate();
-                            imageView.centerImage();
-                        }
-
-                        if(mDimens.height != mDimens.width * 6/5){
-                            requestDisableToolListener.requestDisable(OverlaysTool.class, true);
-                        }else{
-                            requestDisableToolListener.requestDisable(OverlaysTool.class, false);
-                        }
-
-
-                        layouts++;
-                        if (layouts >= 2) {
-                            mContentView.removeOnLayoutChangeListener(this);
-                        }
-                    }
-                });
                 break;
             case Video:
             case UploadedVideo:
@@ -595,20 +582,20 @@ public class EditFragment extends BaseFragment {
                 mContentView = mVideoView;
                 mContentContainer.addView(mContentView);
 
-
                 final int finalheight = height;
                 final int finalwidth = width;
+
 
                 mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                     //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
 
                     @Override
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                        if(!mDimens.needsCropping && finalheight != finalwidth * 6/5){
+                        if (!mDimens.needsCropping && finalheight * 5 != finalwidth * 6 ) {
                             requestDisableToolListener.requestDisable(OverlaysTool.class, true);
                         }
 
-                            mContentView.removeOnLayoutChangeListener(this);
+                        mContentView.removeOnLayoutChangeListener(this);
                     }
                 });
                 break;
@@ -629,7 +616,8 @@ public class EditFragment extends BaseFragment {
                     }
                 }
 
-                toolHolders[i].setSelected(mSelectedTool == i, mIsDisabled[i]);
+                if (toolHolders[i] != null)
+                    toolHolders[i].setSelected(mSelectedTool == i, mIsDisabled[i]);
 
             }
         }
@@ -647,7 +635,7 @@ public class EditFragment extends BaseFragment {
                 mFinalContentView.requestFocus();
             }
 
-            if(mTools != null) {
+            if (mTools != null) {
                 for (EditContentTool tool : mTools) {
                     if (tool != null) tool.onPause();
                 }
@@ -874,6 +862,10 @@ public class EditFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
         if (mSubscription != null) mSubscription.unsubscribe();
+
+        if (mContentView != null && mContentView instanceof TextureVideoView) {
+            ((TextureVideoView) mContentView).stopPlayback();
+        }
     }
 
     @Override
@@ -922,12 +914,10 @@ public class EditFragment extends BaseFragment {
         }
     }
 
+
+
     @Override
     public void onDestroy() {
-        if (mContentView != null && mContentView instanceof TextureVideoView) {
-            ((TextureVideoView) mContentView).stopPlayback();
-        }
-
         if (mContentType == ContentType.Video && mDimens.deleteVideoWhenFinished)
             ImageUtility.deleteCachedVideo(mUri);
 
