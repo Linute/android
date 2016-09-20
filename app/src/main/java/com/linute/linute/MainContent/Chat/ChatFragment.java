@@ -363,7 +363,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         });*/
         final int width = getResources().getDisplayMetrics().widthPixels;
 //        recList.getLayoutParams().width = width;
-        recList.setOnTouchListener(new View.OnTouchListener() {
+        View.OnTouchListener swipeViewTimeListener = new View.OnTouchListener() {
             private float lastX = 0;
             private float lastY = 0;
 
@@ -397,7 +397,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                         lastX = motionEvent.getRawX();
                         lastY = motionEvent.getRawY();
-                        return false;
+                        return view != recList;
+//                        return false;
                     case MotionEvent.ACTION_MOVE:
 
                         float x = motionEvent.getRawX();
@@ -465,7 +466,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                         return false;
                 }
             }
-        });
+        };
+        recList.setOnTouchListener(swipeViewTimeListener);
+        view.setOnTouchListener(swipeViewTimeListener);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
 
