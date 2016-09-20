@@ -115,6 +115,14 @@ public class StickersTool extends EditContentTool {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (Sticker sticker : mStickers) {
+            sticker.bitmap.recycle();
+        }
+    }
+
+    @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mStickersRV = new RecyclerView(parent.getContext());
 
@@ -132,6 +140,7 @@ public class StickersTool extends EditContentTool {
 
         return mStickersRV;
     }
+
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {

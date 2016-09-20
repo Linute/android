@@ -353,7 +353,15 @@ public class ManipulableImageView extends FrameLayout {
                     e.printStackTrace();
                 }
             }*/
+    }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        mImageView.setImageBitmap(null);
+
+        if (image != null) image.recycle();
+        if (flipped != null) flipped.recycle();
     }
 
     public interface ViewManipulationListener {

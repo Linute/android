@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
@@ -460,6 +461,17 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         void onViewDropCollision(View me);
 
         View getCollisionSensor();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        mImageView.setImageBitmap(null);
+
+        if (image != null) image.recycle();
+        if (flipped != null) flipped.recycle();
+
     }
 
     @Override

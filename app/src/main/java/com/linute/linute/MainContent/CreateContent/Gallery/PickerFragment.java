@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.CreateContent.Gallery;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.GridSpacingItemDecoration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -98,8 +100,8 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         if (getArguments() != null) {
             mPickerType = getArguments().getInt(PICKER_TYPE_KEY, GalleryActivity.PICK_ALL);
             mReturnType = getArguments().getInt(RETURN_TYPE_KEY, RETURN_URI);
-            mContentSubType = (EditFragment.ContentSubType)getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
-            if(mContentSubType == null){
+            mContentSubType = (EditFragment.ContentSubType) getArguments().getSerializable(KEY_CONTENT_SUBTYPE);
+            if (mContentSubType == null) {
                 mContentSubType = EditFragment.ContentSubType.None;
             }
         }
@@ -234,7 +236,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         mBucketList.addAll(bucketItems);
         mSpinnerAdapter.notifyDataSetChanged();
         if (vSpinner.getSelectedItemPosition() == 0) {
-            onItemSelected(null,null,0,0);
+            onItemSelected(null, null, 0, 0);
         }
     }
 
@@ -288,16 +290,21 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 
             if (length > 1750 && length < 15000) {
 //                mContentSubType = EditFragment.ContentSubType.None;
-                goToFragment(EditFragment.newInstance(
-                        path,
-                        EditFragment.ContentType.UploadedVideo,
-                        mContentSubType,
-                        mReturnType,
-                        new Dimens(
-                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
-                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)),
-                                Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION))
-                        )), EditFragment.TAG
+                Dimens dim = new Dimens(
+                        Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
+                        Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)));
+
+                dim.setRotation(Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)));
+                dim.setNeedsCropping(dim.getRotation());
+
+                goToFragment(
+                        EditFragment.newInstance(
+                                path,
+                                EditFragment.ContentType.UploadedVideo,
+                                mContentSubType,
+                                mReturnType,
+                                dim),
+                        EditFragment.TAG
                 );
             } else {
                 mAlertDialog = new AlertDialog.Builder(getContext())
@@ -320,13 +327,37 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(item.path, options);
-        Dimens dimens = new Dimens(options.outWidth, options.outHeight);
 
+        int rotation = 0;
+        try {
+            ExifInterface exif = new ExifInterface(item.path);
+            rotation = getRotation(exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Dimens dimens = new Dimens(options.outWidth, options.outHeight);
+        dimens.setRotation(rotation);
 
         goToFragment(
                 EditFragment.newInstance(Uri.parse(item.path), EditFragment.ContentType.UploadedPhoto, mContentSubType, mReturnType, dimens),
                 EditFragment.TAG
         );
+    }
+
+    private int getRotation(int exif){
+        switch (exif){
+            case ExifInterface.ORIENTATION_NORMAL:
+                return 0;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return 90;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return 180;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return 270;
+            default:
+                return 0;
+        }
     }
 
     private void goToFragment(Fragment fragment, String tag) {
@@ -369,4 +400,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
 }

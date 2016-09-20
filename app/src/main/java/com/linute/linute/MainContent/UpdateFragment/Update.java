@@ -1,6 +1,8 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
+import android.util.Log;
+
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -99,9 +101,13 @@ public class Update {
         if (hasEventInformation())
             setUpEvent(json);
 
+        String text = getStringFromJson(json, "text");
+        Log.i(TAG, "Update: "+text);
         if(!mUserFullName.isEmpty()){
             mDescription = getStringFromJson(json, "text").replace(mUserFullName+" ","");
         }
+
+        mDescription = getStringFromJson(json, "text").replaceFirst(mUserFullName+" ","");
 
         mIsViewed = getBooleanFromJson(json, "isViewed");
     }
