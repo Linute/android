@@ -376,7 +376,7 @@ public class EditFragment extends BaseFragment {
                 View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
                 toolHolders[i] = new ToolHolder(toolView);
                 toolHolders[i].bind(tool);
-                toolHolders[i].setSelected(false, false);
+                toolHolders[i].setSelected(false, mIsDisabled[i]);
 
                 toolView.setTag(i);
                 toolView.setOnClickListener(onClickListener);
@@ -430,8 +430,8 @@ public class EditFragment extends BaseFragment {
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
 
-        toolHolders[oldSelectedTool].setSelected(false, false);
-        toolHolders[mSelectedTool].setSelected(true, false);
+        toolHolders[oldSelectedTool].setSelected(false, mIsDisabled[oldSelectedTool]);
+        toolHolders[mSelectedTool].setSelected(true, mIsDisabled[mSelectedTool]);
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
@@ -749,11 +749,7 @@ public class EditFragment extends BaseFragment {
     }
 
     private void showProgress(boolean show) {
-        /*if(show) {
-            mProcessingDialog.show();
-        }else {
-            mProcessingDialog.hide();
-        }*/
+
         if (show) {
             ProgressBar loaderView = new ProgressBar(getContext());
             mMenu.findItem(R.id.menu_item_done).setActionView(loaderView);
@@ -869,6 +865,10 @@ public class EditFragment extends BaseFragment {
         if (mContentView != null && mContentView instanceof TextureVideoView) {
             ((TextureVideoView) mContentView).stopPlayback();
         }
+
+        if(mFfmpeg != null){
+            mFfmpeg.killRunningProcesses();
+        }
     }
 
     @Override
@@ -963,6 +963,11 @@ public class EditFragment extends BaseFragment {
 
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
+        for(int i = 0;i < mIsDisabled.length;i++){
+            mIsDisabled[i] = true;
+            toolHolders[i].setSelected(false, true);
+        }
+
 
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
             @Override
@@ -1187,6 +1192,7 @@ public class EditFragment extends BaseFragment {
             return null;
         }
     }
+
 
 
     private boolean isPortrait() {
