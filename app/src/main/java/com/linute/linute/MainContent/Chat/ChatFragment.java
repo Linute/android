@@ -616,9 +616,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             return;
         }
 
-//        if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
-////            vEmptyChatView.setVisibility(View.VISIBLE);
-//        } else
+
+//fixes server crash caused by looking up empty room
+        if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
+//            vEmptyChatView.setVisibility(View.VISIBLE);
+        } else
         if (mRoomId == null) { //occurs when we didn't come from room fragment
 
             mRoomExists = RoomExists.DoesntExist;
