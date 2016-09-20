@@ -19,6 +19,7 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -335,6 +336,8 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Log.i(TAG, "goToImageEdit: "+rotation);
 
         Dimens dimens = new Dimens(options.outWidth, options.outHeight);
         dimens.setRotation(rotation);
