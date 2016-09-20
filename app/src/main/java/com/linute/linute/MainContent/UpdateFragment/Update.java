@@ -99,7 +99,9 @@ public class Update {
         if (hasEventInformation())
             setUpEvent(json);
 
-        mDescription = getStringFromJson(json, "text").replace(mUserFullName+" ","");
+        if(!mUserFullName.isEmpty()){
+            mDescription = getStringFromJson(json, "text").replace(mUserFullName+" ","");
+        }
 
         mIsViewed = getBooleanFromJson(json, "isViewed");
     }
