@@ -1539,6 +1539,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
             mProgressbar.setVisibility(View.VISIBLE);
             mCommentEditText.setText("");
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
+
+            mFeedDetail.getPost().setNumOfComments(mFeedDetail.getPost().getNumOfComments()+1);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
