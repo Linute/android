@@ -27,6 +27,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -993,6 +994,19 @@ public class EditFragment extends BaseFragment {
             mIsDisabled[i] = true;
             toolHolders[i].setSelected(false, true);
         }
+
+        //adds view to soak up all input on tool view
+        View coverView = new View(getContext());
+        coverView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        coverView.setBackgroundColor(0x44000000);
+        coverView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
+        mToolOptionsView.addView(coverView);
+
 
 
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
