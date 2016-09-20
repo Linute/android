@@ -284,12 +284,14 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         //won't be loaded again is user gets here using onBack
         if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
             mOtherSectionUpdated = false;
+
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
                     mSwipeRefreshLayout.setRefreshing(true);
                 }
             });
+
             updateAndSetHeader();
             setActivities(); //get activities
             setFragmentState(FragmentState.FINISHED_UPDATING);

@@ -43,6 +43,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
+import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.bson.types.ObjectId;
@@ -82,7 +83,7 @@ import static android.app.Activity.RESULT_OK;
  */
 
 
-public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore {
+public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnLoadMore, SocketListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = ChatFragment.class.getSimpleName();
     private static final String ARG_ROOM_ID = "room";
@@ -620,8 +621,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //fixes server crash caused by looking up empty room
         if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
 //            vEmptyChatView.setVisibility(View.VISIBLE);
-        } else
-        if (mRoomId == null) { //occurs when we didn't come from room fragment
+        } else if (mRoomId == null) { //occurs when we didn't come from room fragment
 
             mRoomExists = RoomExists.DoesntExist;
             getRoomAndChat();
@@ -646,6 +646,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //        }
 
         updateToolbar();
+
+        activity.setSocketListener(this);
 
     }
 
@@ -805,6 +807,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             mAlertDialog.dismiss();
             mAlertDialog = null;
         }
+
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) activity.setSocketListener(null);
 
         leaveRooms();
     }
@@ -1271,7 +1276,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         String ownerId;
         boolean systemMessage = data.getInt("type") == 1;
-        if (systemMessage){
+        if (systemMessage) {
             ownerId = data.getString("owner");
         } else {
             JSONObject owner = data.getJSONObject("owner");
@@ -1328,8 +1333,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //  Log.i(TAG, "parseMessagesJSON: none");
             //Log.d(TAG, "parseMessagesJSON: no value for post");
         }
-
-
 
 
         if (post == null) {
@@ -1389,10 +1392,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 int position = mChatList.size();
 
 
-                if (mOtherUserTyping){
-                    if (viewerIsOwnerOfMessage){
+                if (mOtherUserTyping) {
+                    if (viewerIsOwnerOfMessage) {
                         mChatList.addAll(position - 1, tempChat);
-                    }else {
+                    } else {
                         mChatList.remove(position - 1);
                         mChatAdapter.notifyItemRemoved(position);
                         mOtherUserTyping = false;
@@ -1400,7 +1403,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
 
                     mChatAdapter.notifyItemRangeInserted(position, tempChat.size());
-                }else {
+                } else {
                     mChatList.addAll(tempChat);
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
@@ -2178,4 +2181,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         return calendar.getTime();
     }
 
+    @Override
+    public void onReconnect() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null && mRoomId != null && mRoomExists == RoomExists.Exists) {
+            joinRoom(activity, true);
+        }
+    }
 }

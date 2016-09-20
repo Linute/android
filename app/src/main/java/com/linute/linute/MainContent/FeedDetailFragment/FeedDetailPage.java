@@ -57,6 +57,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -86,7 +87,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Arman on 1/11/16.
  */
 
-public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
+public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, SocketListener,
         SuggestionsResultListener, SuggestionsVisibilityManager, FeedDetailAdapter.CommentActions {
 
     private static final int CAMERA_GALLERY_REQUEST = 65;
@@ -365,23 +366,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            //user -- user Id
-            //room -- id of event
-
-            JSONObject joinParam = new JSONObject();
-
-            try {
-                joinParam.put("room", mFeedDetail.getPostId());
-                joinParam.put("user", mViewId);
-                activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                if (getActivity() != null) {
-                    Utils.showServerErrorToast(getActivity());
-                }
-            }
-
+            joinRoomSocket(activity);
             activity.connectSocket("new comment", newComment);
+            activity.setSocketListener(this);
             activity.setSocketErrorResponse(new BaseTaptActivity.SocketErrorResponse() {
                 @Override
                 public void runSocketError() {
@@ -482,7 +469,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
         if (activity != null) {
-
+            activity.setSocketListener(null);
             JSONObject leaveParam = new JSONObject();
             try {
                 leaveParam.put("room", mFeedDetail.getPostId());
@@ -1315,6 +1302,32 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
         return mMentionedList.getVisibility() == View.VISIBLE;
     }
 
+    @Override
+    public void onReconnect() {
+        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+        if (activity != null) {
+            joinRoomSocket(activity);
+        }
+    }
+
+    private void joinRoomSocket(BaseTaptActivity activity) {
+        //user -- user Id
+        //room -- id of event
+
+        JSONObject joinParam = new JSONObject();
+
+        try {
+            joinParam.put("room", mFeedDetail.getPostId());
+            joinParam.put("user", mViewId);
+            activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            if (getActivity() != null) {
+                Utils.showServerErrorToast(getActivity());
+            }
+        }
+    }
+
 
     private class MentionedPersonAdapter extends RecyclerView.Adapter<MentionedPersonAdapter.MentionedPersonViewHolder> {
 
@@ -1462,7 +1475,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
                                     int pos = mShowPostDetail ? mFeedDetail.getComments().size() - 1 : mFeedDetail.getComments().size() - 2;
-                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)){
+                                    if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)) {
                                         final Snackbar sn = Snackbar.make(mCommentEditText, "New Comment", Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
@@ -1477,7 +1490,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                             }
                                         });
                                         sn.show();
-                                    }else{
+                                    } else {
                                         recList.scrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
                                     }
 

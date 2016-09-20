@@ -60,6 +60,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -563,6 +564,7 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.on("sync contacts", syncContacts);
                     mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
                     mSocket.on(Socket.EVENT_ERROR, onEventError);
+                    mSocket.on(Socket.EVENT_RECONNECT, onReconnect);
                     mSocket.connect();
                     mConnecting = false;
 
@@ -609,6 +611,7 @@ public class MainActivity extends BaseTaptActivity {
             mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             mSocket.off(Socket.EVENT_ERROR, onEventError);
+            mSocket.off(Socket.EVENT_RECONNECT, onReconnect);
         }
     }
 
@@ -1275,6 +1278,15 @@ public class MainActivity extends BaseTaptActivity {
         });
     }
 
+    private Emitter.Listener onReconnect = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if (mSocketListener != null){
+                mSocketListener.onReconnect();
+            }
+        }
+    };
+
     private TaptUser getUser(JSONObject object, boolean insert) throws JSONException {
         return new TaptUser(
                 object.getString("id"),
@@ -1323,4 +1335,6 @@ public class MainActivity extends BaseTaptActivity {
         super.onDestroy();
         mRealm.close();
     }
+
+
 }
