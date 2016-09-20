@@ -11,7 +11,7 @@ public class Dimens implements Parcelable {
     int height;                         //vid height
     int width;                          //vid width
     boolean isFrontFacing;              //image was taken with front facing camera
-    int rotation;                       //video rotation
+    int rotation;                       //image/video rotation
     boolean deleteVideoWhenFinished;    //delete cached video
     boolean needsCropping;
 
@@ -39,18 +39,30 @@ public class Dimens implements Parcelable {
         needsCropping = false;
     }
 
+//    //used for video
+//    public Dimens(int width, int height, int rotation) {
+//        this.height = height;
+//        this.width = width;
+//        this.isFrontFacing = false;
+//        this.rotation = rotation;
+//
+//        //should not delete gallery's video
+//        this.deleteVideoWhenFinished = false;
+//
+//        //width will be height
+//        needsCropping = (rotation == 90 || rotation == 270) && ((float) width / height) > 1.2;
+//    }
 
-    public Dimens(int width, int height, int rotation) {
-        this.height = height;
-        this.width = width;
-        this.isFrontFacing = false;
+    public int getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(int rotation) {
         this.rotation = rotation;
+    }
 
-        //should not delete gallery's video
-        this.deleteVideoWhenFinished = false;
-
-        //width will be height
-        needsCropping = (rotation == 90 || rotation == 270) && ((float) width / height) > 1.2;
+    public void setNeedsCropping(int rotation){
+        this.needsCropping = (rotation == 90 || rotation == 270) && ((float) width / height) > 1.2;
     }
 
     public void setNeedsCropping(boolean needsCropping) {

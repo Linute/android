@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.media.MediaMetadataRetriever;
@@ -495,6 +496,9 @@ public class EditFragment extends BaseFragment {
                             //scale image
                             final Bitmap scaled = Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false);
 
+                            //i believe some phones will modify 'image'. don't want to recycle if that is the case
+                            if (scaled != image) image.recycle();
+
                             //set image on main thread
                             new Handler(Looper.getMainLooper()).post(
                                     new Runnable() {
@@ -503,24 +507,21 @@ public class EditFragment extends BaseFragment {
                                             imageView.setImageBitmap(scaled);
                                             imageView.invalidate();
                                             imageView.centerImage();
-                                            //i believe some phones will modify 'image'. don't want to recycle if that is the case
-                                            if (scaled != image) image.recycle();
                                         }
                                     });
                         } else {
-                            mDimens.height = image.getHeight();
-                            mDimens.width = image.getWidth();
-                            new Handler(Looper.getMainLooper()).post(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            imageView.setImageBitmap(image);
-                                            imageView.invalidate();
-                                            imageView.centerImage();
-                                        }
-                                    });
-                        }
+                            if (mDimens.rotation != 0) {
+                                Matrix m = new Matrix();
+                                m.postRotate(mDimens.rotation);
+                                final Bitmap rotated = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), m, true);
+                                if (rotated != image) image.recycle();
 
+                                setImage(rotated, imageView);
+                            } else {
+                                setImage(image, imageView);
+                            }
+
+                        }
                     }
                 }).start();
 
@@ -591,7 +592,7 @@ public class EditFragment extends BaseFragment {
 
                     @Override
                     public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                        if (!mDimens.needsCropping && finalheight * 5 != finalwidth * 6 ) {
+                        if (!mDimens.needsCropping && finalheight * 5 != finalwidth * 6) {
                             requestDisableToolListener.requestDisable(OverlaysTool.class, true);
                         }
 
@@ -601,6 +602,21 @@ public class EditFragment extends BaseFragment {
                 break;
         }
     }
+
+    private void setImage(final Bitmap image, final MoveZoomImageView imageView){
+        mDimens.height = image.getHeight();
+        mDimens.width = image.getWidth();
+        new Handler(Looper.getMainLooper()).post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView.setImageBitmap(image);
+                        imageView.invalidate();
+                        imageView.centerImage();
+                    }
+                });
+    }
+
 
     RequestDisableToolListener requestDisableToolListener = new RequestDisableToolListener() {
         @Override
@@ -878,6 +894,12 @@ public class EditFragment extends BaseFragment {
                 imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
             }
         }
+
+        if (mTools != null) {
+            for (EditContentTool tool : mTools)
+                tool.onDestroy();
+        }
+
     }
 
     public static class ToolHolder extends RecyclerView.ViewHolder {
@@ -913,7 +935,6 @@ public class EditFragment extends BaseFragment {
             }
         }
     }
-
 
 
     @Override
@@ -1004,8 +1025,8 @@ public class EditFragment extends BaseFragment {
                     newHeight = temp;
                 }
 
-                Log.i(TAG, "call: new " + newWidth + " " + newHeight);
-                Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
+                // Log.i(TAG, "call: new " + newWidth + " " + newHeight);
+                //Log.i(TAG, "call: old " + mDimens.width + " " + mDimens.height);
                 //Log.i(TAG, "call: rotation " + mDimens.rotation);
 
                 overlay = saveViewAsImage(mOverlaysContainer);

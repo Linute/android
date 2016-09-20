@@ -44,7 +44,8 @@ public class OverlaysTool extends EditContentTool {
             public void run() {
                 mBackingBitmap =  BitmapFactory.decodeFile(uri.getPath(), opts);
             }
-        }).start();;
+        }).start();
+
         mOverlays = new ArrayList<>();
         mOverlays.add(null);
         overlayView = new ImageView(overlaysView.getContext());
@@ -165,6 +166,20 @@ public class OverlaysTool extends EditContentTool {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        overlayView.setImageBitmap(null);
+        if (mBackingBitmap != null){
+            mBackingBitmap.recycle();
+        }
+
+        for (Bitmap bitmap : mOverlays){
+            if (bitmap != null)
+                bitmap.recycle();
+        }
+    }
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {
 

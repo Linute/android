@@ -39,4 +39,6 @@ public abstract class EditContentTool {
     public void onDisable(){}
     public void onEnable(){}
 
+    public void onDestroy(){}
+
 }

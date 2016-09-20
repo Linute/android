@@ -58,7 +58,7 @@
         android:paddingEnd="@dimen/activity_horizontal_margin"
         android:paddingStart="@dimen/activity_horizontal_margin"
         android:textAllCaps="true"
-        android:textColor="#8067CDC9"
+        android:textColor="@color/secondaryColor"
         android:textSize="@dimen/sub_font_size"
         tools:text="City College of New York"
     />
