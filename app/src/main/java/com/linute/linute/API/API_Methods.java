@@ -183,4 +183,17 @@ public class API_Methods {
         return header;
     }
 
+    public static Call sendErrorReport(Throwable throwable, String token, Callback cb){
+        Map<String, Object> parms = new HashMap<>();
+        StringBuilder trace = new StringBuilder();
+        for(StackTraceElement s:throwable.getStackTrace()){
+            trace.append(s.toString()).append(" \n ");
+        }
+        parms.put("stackTrace", trace);
+        parms.put("name", throwable.toString());
+        parms.put("userAgent",  Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
+        parms.put("os", "android");
+        return API_Methods.post("errors",getMainHeader(token), parms, cb);
+    }
+
 }
