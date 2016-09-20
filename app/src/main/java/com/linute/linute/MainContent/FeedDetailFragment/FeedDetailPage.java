@@ -1394,22 +1394,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                 return;
             }
 
-            //will check if we can scroll down
-            //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
-            //neg is scroll up, positive is scroll down
-            boolean canScrollDown = false;
-
-            try {
-                canScrollDown = recList != null &&
-                        recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
-                        recList.canScrollVertically(1);
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-
-            final boolean mCanScrollDown = canScrollDown;
-
             try {
                 Date myDate;
                 myDate = Utils.getDateFormat().parse(object.getString("date"));
@@ -1447,15 +1431,14 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            boolean smoothScroll = false;
                             if (com.getCommentUserId().equals(mViewId)) { //was the user that posted the comment
                                 mSendButton.setVisibility(View.VISIBLE);
                                 mProgressbar.setVisibility(View.GONE);
-                                smoothScroll = true;
+                                //smoothScroll = true;
                             }
 
                             //because of header we can use size, change if decide to add it to array
-                            final boolean finalSmoothScroll = smoothScroll;
+                            //final boolean finalSmoothScroll = smoothScroll;
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1478,7 +1461,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                    /* if (finalSmoothScroll || !mCanScrollDown)
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
-                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < mFeedDetail.getComments().size()-1 && !com.getCommentUserId().equals(mViewId)){
+                                    int pos = mShowPostDetail ? mFeedDetail.getComments().size() - 1 : mFeedDetail.getComments().size() - 2;
+                                    if(mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)){
                                         final Snackbar sn = Snackbar.make(mCommentEditText, "New Comment", Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
@@ -1488,13 +1472,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         sn.getView().setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                recList.smoothScrollToPosition(mFeedDetail.getComments().size()-1);
+                                                recList.smoothScrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
                                                 sn.dismiss();
                                             }
                                         });
                                         sn.show();
                                     }else{
-                                        recList.scrollToPosition(mFeedDetail.getComments().size());
+                                        recList.scrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
                                     }
 
                                 }
