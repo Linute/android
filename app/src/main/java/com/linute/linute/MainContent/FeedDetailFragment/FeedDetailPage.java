@@ -1494,7 +1494,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver,
                                         });
                                         sn.show();
                                     }else{
-                                        recList.scrollToPosition(mFeedDetail.getComments().size());
+                                        recList.smoothScrollToPosition(mFeedDetail.getComments().size()-1);
                                     }
 
                                 }
