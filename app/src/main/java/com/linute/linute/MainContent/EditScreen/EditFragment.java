@@ -32,7 +32,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -807,7 +806,9 @@ public class EditFragment extends BaseFragment {
                                         .putExtra("type", CameraActivity.IMAGE)
                                         .putExtra("privacy", options.postAsAnon)
                                         .putExtra("isAnonymousCommentsDisabled", options.isAnonCommentsDisabled)
-                                        .putExtra("title", options.text);
+                                        .putExtra("title", options.text)
+                                        .putExtra("stickers", options.stickers)
+                                        .putExtra("filters", options.filters);
                                 getActivity().setResult(Activity.RESULT_OK, i);
                                 getActivity().finish();
                             } else {
@@ -837,6 +838,8 @@ public class EditFragment extends BaseFragment {
                                                 1,
                                                 uri.toString(),
                                                 null,
+                                                options.stickers,
+                                                options.filters,
                                                 mUserId,
                                                 mUserToken
                                         );
@@ -1148,7 +1151,10 @@ public class EditFragment extends BaseFragment {
                                     .putExtra("image", image)
                                     .putExtra("privacy", options.postAsAnon)
                                     .putExtra("type", CameraActivity.VIDEO)
-                                    .putExtra("title", options.text);
+                                    .putExtra("title", options.text)
+                                    .putExtra("stickers", options.stickers)
+                                    .putExtra("filters", options.filters);
+
 
 //                            mProgressDialog.dismiss();
                             getActivity().setResult(Activity.RESULT_OK, i);
@@ -1201,6 +1207,8 @@ public class EditFragment extends BaseFragment {
                 2,
                 imagepath,
                 videopath,
+                options.stickers,
+                options.filters,
                 mUserId,
                 mUserToken
         );

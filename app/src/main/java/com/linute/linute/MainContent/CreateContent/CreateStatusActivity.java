@@ -334,6 +334,8 @@ public class CreateStatusActivity extends AppCompatActivity implements View.OnCl
                             0,
                             image.toString(),
                             null,
+                            null,
+                            null,
                             mSharedPreferences.getString("userID", ""),
                             mSharedPreferences.getString("userToken", "")
                     );

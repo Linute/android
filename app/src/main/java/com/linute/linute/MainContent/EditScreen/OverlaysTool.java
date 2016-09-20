@@ -25,11 +25,13 @@ import java.util.ArrayList;
  */
 public class OverlaysTool extends EditContentTool {
 
-    ArrayList<Bitmap> mOverlays;
+    ArrayList<Overlay> mOverlays;
     private OverlaysAdapter mOverlaysAdapter;
     private RecyclerView mOverlaysRV;
     private final ImageView overlayView;
     private Bitmap mBackingBitmap;
+
+    private Overlay mSelectedOverlay;
 
     public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
         super(uri,type, overlaysView);
@@ -77,7 +79,8 @@ public class OverlaysTool extends EditContentTool {
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-                overlayView.setImageBitmap(mOverlays.get(i));
+                overlayView.setImageBitmap(mOverlays.get(i).bitmap);
+                mSelectedOverlay = mOverlays.get(i);
             }
         });
 
@@ -91,7 +94,10 @@ public class OverlaysTool extends EditContentTool {
 
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
-
+        options.filters.clear();
+        if(mSelectedOverlay != null){
+            options.filters.add(mSelectedOverlay.filename);
+        }
     }
 
     @Override
@@ -108,7 +114,7 @@ public class OverlaysTool extends EditContentTool {
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
         private final Bitmap mBackingBitmap;
-        ArrayList<Bitmap> overlays;
+        ArrayList<Overlay> overlays;
 
         int mSelectedItem;
 
@@ -116,7 +122,7 @@ public class OverlaysTool extends EditContentTool {
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Bitmap> overlays, Bitmap back) {
+        public OverlaysAdapter(ArrayList<Overlay> overlays, Bitmap back) {
             this.overlays = overlays;
             mBackingBitmap = back;
         }
@@ -176,8 +182,8 @@ public class OverlaysTool extends EditContentTool {
             vOverlay = (ImageView) itemView.findViewById(R.id.image_overlay);
         }
 
-        public void bind(Bitmap overlay, boolean isSelected) {
-            vOverlay.setImageBitmap(overlay);
+        public void bind(Overlay overlay, boolean isSelected) {
+            vOverlay.setImageBitmap(overlay == null ? null : overlay.bitmap);
         }
     }
 
@@ -204,7 +210,7 @@ public class OverlaysTool extends EditContentTool {
 
                             scaled = Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false);
                             try {
-                                mOverlays.add(scaled);
+                                mOverlays.add(new Overlay(f.getName(), scaled));
                             } catch (OutOfMemoryError e) {
                                 e.printStackTrace();
                             } catch (NullPointerException np) {
@@ -253,5 +259,15 @@ public class OverlaysTool extends EditContentTool {
 
     interface OnItemSelectedListener {
         void onItemSelected(int i);
+    }
+
+    protected static class Overlay{
+        String filename;
+        Bitmap bitmap;
+
+        public Overlay(String filename, Bitmap bitmap) {
+            this.filename = filename;
+            this.bitmap = bitmap;
+        }
     }
 }

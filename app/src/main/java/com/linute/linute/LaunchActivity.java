@@ -17,7 +17,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.appsflyer.AppsFlyerLib;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.linute.linute.API.API_Methods;
@@ -39,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import io.fabric.sdk.android.Fabric;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -66,7 +64,7 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (API_Methods.ENABLE_CRASHLYTICS) {
-            Fabric.with(this, new Crashlytics());
+//            Fabric.with(this, new Crashlytics());
         }
 
         AppsFlyerLib.getInstance().startTracking(this.getApplication(),"VPnL9y82TinTofd5XRZ6TJ");

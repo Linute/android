@@ -30,13 +30,14 @@ import java.util.ArrayList;
 public class StickersTool extends EditContentTool {
 
 
-    ArrayList<Bitmap> mStickers;
+    ArrayList<Sticker> mStickers;
     private StickersAdapter mStickersAdapter;
     private RecyclerView mStickersRV;
     private FrameLayout mStickersContainer;
     private ManipulableImageView.ViewManipulationListener mManipulationListener;
     private final ImageView mTrashCanIV;
-    private ArrayList<ManipulableImageView> mPlacedStickers = new ArrayList<>();
+    private ArrayList<PlacedSticker> mPlacedStickers = new ArrayList<>();
+
 
     public StickersTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, ImageView trashCan) {
         super(uri, type, overlaysView);
@@ -46,13 +47,13 @@ public class StickersTool extends EditContentTool {
 
         mStickers = new ArrayList<>();
 
-        mStickersContainer = (FrameLayout)container.findViewById(R.id.layout_stickers);
+        mStickersContainer = (FrameLayout) container.findViewById(R.id.layout_stickers);
 
         mTrashCanIV = trashCan;
         mTrashCanIV.setVisibility(View.GONE);
         mTrashCanIV.setLayoutParams(new Toolbar.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER));
-        int pad = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,4,mTrashCanIV.getResources().getDisplayMetrics());
-        mTrashCanIV.setPadding(pad,pad,pad,pad);
+        int pad = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4, mTrashCanIV.getResources().getDisplayMetrics());
+        mTrashCanIV.setPadding(pad, pad, pad, pad);
 
 
         mManipulationListener = new ManipulableImageView.ViewManipulationListener() {
@@ -100,16 +101,16 @@ public class StickersTool extends EditContentTool {
     @Override
     public void onOpen() {
         super.onOpen();
-        for(ManipulableImageView view: mPlacedStickers){
-            view.setDrawBorder(true);
+        for (PlacedSticker sticker : mPlacedStickers) {
+            sticker.imageView.setDrawBorder(true);
         }
     }
 
     @Override
     public void onClose() {
         super.onClose();
-        for(ManipulableImageView view: mPlacedStickers){
-            view.setDrawBorder(false);
+        for (PlacedSticker sticker : mPlacedStickers) {
+            sticker.imageView.setDrawBorder(false);
         }
     }
 
@@ -135,6 +136,10 @@ public class StickersTool extends EditContentTool {
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
         mTrashCanIV.setVisibility(View.GONE);
+        options.stickers.clear();
+        for(PlacedSticker sticker:mPlacedStickers){
+            options.stickers.add(sticker.fileName);
+        }
     }
 
     @Override
@@ -150,11 +155,11 @@ public class StickersTool extends EditContentTool {
 
     private StickersAdapter.OnStickerTouchListener onStickerTouchListener = new StickersAdapter.OnStickerTouchListener() {
         @Override
-        public boolean onStickerTouch(View view, int index, Bitmap bitmap) {
+        public boolean onStickerTouch(View view, int index, Sticker sticker) {
 
 
             ManipulableImageView stickerIV = new ManipulableImageView(mOverlaysView.getContext());
-            stickerIV.setImageBitmap(bitmap);
+            stickerIV.setImageBitmap(sticker.bitmap);
 
             stickerIV.setManipulationListener(mManipulationListener);
 
@@ -163,9 +168,8 @@ public class StickersTool extends EditContentTool {
             stickerIV.setLayoutParams(params);
 
 
-
             mStickersContainer.addView(stickerIV);
-            mPlacedStickers.add(stickerIV);
+            mPlacedStickers.add(new PlacedSticker(sticker, stickerIV));
 
             /*stickerIV.setX(view.getX());
             stickerIV.setY(view.getY());*/
@@ -176,7 +180,7 @@ public class StickersTool extends EditContentTool {
 
     protected static class StickersAdapter extends RecyclerView.Adapter<StickerVH> {
 
-        ArrayList<Bitmap> stickers;
+        ArrayList<Sticker> stickers;
 
         int mSelectedItem;
 
@@ -184,7 +188,7 @@ public class StickersTool extends EditContentTool {
         OnStickerTouchListener mOnTouchListener;
 
 
-        public StickersAdapter(ArrayList<Bitmap> stickers) {
+        public StickersAdapter(ArrayList<Sticker> stickers) {
             this.stickers = stickers;
         }
 
@@ -195,7 +199,7 @@ public class StickersTool extends EditContentTool {
 //            int width = parent.getContext().getResources().getDisplayMetrics().widthPixels/5;
             view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             view.setLayoutParams(new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            view.setPadding(16,16,16,16);
+            view.setPadding(16, 16, 16, 16);
             return new StickerVH(view);
         }
 
@@ -230,12 +234,10 @@ public class StickersTool extends EditContentTool {
         }
 
         interface OnStickerTouchListener {
-            public boolean onStickerTouch(View view, int index, Bitmap bitmap);
+            boolean onStickerTouch(View view, int index, Sticker sticker);
         }
 
     }
-
-
 
 
     protected static class StickerVH extends RecyclerView.ViewHolder {
@@ -248,9 +250,10 @@ public class StickersTool extends EditContentTool {
             vPreview = (ImageView) itemView;
         }
 
-        public void bind(Bitmap overlay, boolean isSelected) {
+        public void bind(Sticker sticker, boolean isSelected) {
+            Bitmap overlay = sticker.bitmap;
             vPreview.setImageBitmap(overlay);
-            vPreview.setLayoutParams(new RecyclerView.LayoutParams(overlay.getWidth()*containerHeight/overlay.getHeight(), containerHeight));
+            vPreview.setLayoutParams(new RecyclerView.LayoutParams(overlay.getWidth() * containerHeight / overlay.getHeight(), containerHeight));
             vPreview.setScaleType(ImageView.ScaleType.FIT_CENTER);
         }
     }
@@ -266,7 +269,12 @@ public class StickersTool extends EditContentTool {
                 if (memes != null) {
                     for (File f : memes) {
                         try {
-                            mStickers.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
+                            mStickers.add(
+                                    new Sticker(
+                                            f.getName(),
+                                            BitmapFactory.decodeFile(f.getAbsolutePath(), options)
+                                    )
+                            );
 
                            /* mStickersRV.post(new Runnable() {
                                 @Override
@@ -291,7 +299,33 @@ public class StickersTool extends EditContentTool {
             }
 
         }).start();
-
-
     }
+
+
+    protected static class Sticker {
+        public String fileName;
+        public Bitmap bitmap;
+
+        public Sticker(String fileName, Bitmap bitmap) {
+            this.fileName = fileName;
+            this.bitmap = bitmap;
+        }
+
+        public Sticker(Sticker copy) {
+            this.fileName = copy.fileName;
+            this.bitmap = copy.bitmap;
+        }
+    }
+
+    protected static class PlacedSticker extends Sticker {
+
+        public final ManipulableImageView imageView;
+
+        public PlacedSticker(Sticker copy, ManipulableImageView imageView) {
+            super(copy);
+            this.imageView = imageView;
+        }
+    }
+
+
 }
