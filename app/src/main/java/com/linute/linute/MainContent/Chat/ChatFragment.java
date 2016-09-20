@@ -166,6 +166,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private AlertDialog mAlertDialog;
     private View mEmptyView;
 
+    private HashMap<Date, Chat> mDateHeaders;
+
 
     public ChatFragment() {
         // Required empty public constructor
@@ -176,6 +178,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     public void onAttach(Context context) {
         super.onAttach(context);
         mUserMap = new HashMap<>();
+        mDateHeaders = new HashMap<>();
         mChatAdapter = new ChatAdapter(getActivity(), mChatList, mUserMap);
     }
 
@@ -623,8 +626,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 //fixes server crash caused by looking up empty room
         if (mRoomId != null && mRoomExists == RoomExists.DoesntExist) {
 //            vEmptyChatView.setVisibility(View.VISIBLE);
-        } else
-        if (mRoomId == null) { //occurs when we didn't come from room fragment
+        } else if (mRoomId == null) { //occurs when we didn't come from room fragment
 
             mRoomExists = RoomExists.DoesntExist;
             getRoomAndChat();
@@ -1274,7 +1276,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         String ownerId;
         boolean systemMessage = data.getInt("type") == 1;
-        if (systemMessage){
+        if (systemMessage) {
             ownerId = data.getString("owner");
         } else {
             JSONObject owner = data.getJSONObject("owner");
@@ -1333,8 +1335,6 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
 
-
-
         if (post == null) {
             JSONArray imageAndVideo = data.getJSONArray("images");
             if (imageAndVideo.length() > 0) {
@@ -1361,41 +1361,24 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 if (previousMessage != null) {
                     if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
                         Date date = getStartOfDay(chat.getDate());
-                        Chat header = new Chat(
-                                previousMessage.getRoomId(),
-                                date,
-                                chat.getOwnerId(),
-                                "-1",
-                                (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
-                                true,
-                                true
-                        );
-                        header.setType(Chat.TYPE_DATE_HEADER);
-                        tempChat.add(header);
+                        addDateHeader(tempChat, date, previousMessage.getRoomId(), chat.getOwnerId());
                     }
                 } else {
                     Date date = getStartOfDay(chat.getDate());
-                    Chat header = new Chat(
-                            chat.getRoomId(),
-                            date,
-                            chat.getOwnerId(),
-                            "-1",
-                            (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
-                            true,
-                            true
-                    );
-                    header.setType(Chat.TYPE_DATE_HEADER);
-                    tempChat.add(header);
+                    if (!mDateHeaders.containsKey(date)) {
+                        addDateHeader(tempChat, date, chat.getRoomId(), chat.getOwnerId());
+
+                    }
                 }
 
                 tempChat.add(chat);
                 int position = mChatList.size();
 
 
-                if (mOtherUserTyping){
-                    if (viewerIsOwnerOfMessage){
+                if (mOtherUserTyping) {
+                    if (viewerIsOwnerOfMessage) {
                         mChatList.addAll(position - 1, tempChat);
-                    }else {
+                    } else {
                         mChatList.remove(position - 1);
                         mChatAdapter.notifyItemRemoved(position);
                         mOtherUserTyping = false;
@@ -1403,7 +1386,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     }
 
                     mChatAdapter.notifyItemRangeInserted(position, tempChat.size());
-                }else {
+                } else {
                     mChatList.addAll(tempChat);
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
@@ -1434,6 +1417,22 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             read.put("messages", unreadArray);
             activity.emitSocket(API_Methods.VERSION + ":messages:read", read);
         }
+    }
+
+    private void addDateHeader(List<Chat> tempChat, Date date, String roomId, String ownerId) {
+        if(mDateHeaders.containsKey(date)) return;
+        Chat header = new Chat(
+                roomId,
+                date,
+                ownerId,
+                "-1",
+                (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
+                true,
+                true
+        );
+        header.setType(Chat.TYPE_DATE_HEADER);
+        tempChat.add(header);
+        mDateHeaders.put(date, header);
     }
 
 
@@ -2069,31 +2068,11 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     Chat previousMessage = intoChatList.get(intoChatList.size() - 1);
                     if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
                         Date date = getStartOfDay(chat.getDate());
-                        Chat header = new Chat(
-                                previousMessage.getRoomId(),
-                                date,
-                                chat.getOwnerId(),
-                                "-1",
-                                (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
-                                true,
-                                true
-                        );
-                        header.setType(Chat.TYPE_DATE_HEADER);
-                        intoChatList.add(header);
+                        addDateHeader(intoChatList, date, chat.getRoomId(), chat.getOwnerId());
                     }
                 } else {
                     Date date = getStartOfDay(chat.getDate());
-                    Chat header = new Chat(
-                            chat.getRoomId(),
-                            date,
-                            chat.getOwnerId(),
-                            "-1",
-                            (sameDay(date, new Date()) ? "Today" : DATE_DIVIDER_DATE_FORMAT.format(date)),
-                            true,
-                            true
-                    );
-                    header.setType(Chat.TYPE_DATE_HEADER);
-                    intoChatList.add(header);
+                    addDateHeader(intoChatList, date, chat.getRoomId(), chat.getOwnerId());
                 }
 
                 intoChatList.add(chat);
