@@ -882,6 +882,11 @@ public class EditFragment extends BaseFragment {
             ((TextureVideoView) mContentView).stopPlayback();
         }
 
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
         if(mFfmpeg != null){
             mFfmpeg.killRunningProcesses();
         }
