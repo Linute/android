@@ -566,8 +566,6 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.connect();
                     mConnecting = false;
 
-                    mSocket.emit(API_Methods.VERSION + ":posts:refresh", new JSONObject());
-
                     try {
                         JSONObject object = new JSONObject();
                         object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));

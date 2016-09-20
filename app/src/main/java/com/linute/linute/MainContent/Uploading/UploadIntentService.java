@@ -105,7 +105,7 @@ public class UploadIntentService extends IntentService {
             params.put("privacy", p.getPrivacy());
             params.put("isAnonymousCommentsDisabled", p.getIsAnonymousCommentsDisabled());
             params.put("title", p.getTitle());
-            params.put("stickers", new JSONArray(p.getStickers()));
+            params.put("memes", new JSONArray(p.getStickers()));
             params.put("filters", new JSONArray(p.getFilters()));
 
             JSONArray coord = new JSONArray();
