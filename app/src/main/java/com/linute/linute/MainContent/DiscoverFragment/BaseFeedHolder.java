@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.DiscoverFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -193,6 +192,13 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         else if (v == vLikeButton) {
             vLikesHeart.toggle();
         } else if (v == vCommentButton) {
+            vCommentButton.setAlpha(.5f);
+            vCommentButton.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    vCommentButton.setAlpha(1);
+                }
+            }, 500);
             activity.addFragmentToContainer(
                     FeedDetailPage.newInstance(mPost, false)
             );
