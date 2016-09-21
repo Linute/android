@@ -217,12 +217,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected TextView vCommentUserName;
         protected TextView vTimeStamp;
         protected TextView vLikesText;
-        private String mCommenterUserId;
-        private String mUserName;
-        private String mCommentId;
-        private boolean mIsAnon;
-        private boolean mIsLiked;
         private ImageView vFireIcon;
+
+        private Comment mComment;
 
         protected abstract void bindContent(Comment comment);
 
@@ -263,11 +260,12 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
 
         void bindModel(Comment comment) {
-            mIsAnon = comment.isAnon();
-            mCommenterUserId = comment.getCommentUserId();
-            mUserName = comment.getCommentUserName();
-            mCommentId = comment.getCommentPostId();
-            mIsLiked = comment.isLiked();
+            mComment = comment;
+//            mIsAnon = comment.isAnon();
+//            mCommenterUserId = comment.getCommentUserId();
+//            mUserName = comment.getCommentUserName();
+//            mCommentId = comment.getCommentPostId();
+//            mIsLiked = comment.isLiked();
 
             //close when rebind
             mSwipeLayout.close(false);
@@ -275,7 +273,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             //if owner of comment, don't allow them to like
             mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
 
-            if (mIsAnon) {
+            if (comment.isAnon()) {
                 setAnonImage(comment.getAnonImage());
                 vCommentUserName.setText("Anonymous");
             } else {
@@ -287,7 +285,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             vTimeStamp.setText(comment.getDateString());
 
-            if (mCommenterUserId.equals(mViewerUserId)) {
+            if (comment.getCommentUserId().equals(mViewerUserId)) {
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_comment_color));
             } else {
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_name_blue));
@@ -315,7 +313,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
         private void setUpPulloutButtons() {
-            if (mViewerUserId.equals(mCommenterUserId)) {
+            if (mViewerUserId.equals(mComment.getCommentUserId())) {
                 mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(
@@ -325,7 +323,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.VISIBLE);
 
-                if (mIsAnon) { //comment is anonymous
+                if (mComment.isAnon()) { //comment is anonymous
                     mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
 
                     //viewer is owner of post? then can delete anon comments
@@ -345,10 +343,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         @Override
         public void onClick(View v) {
             if (v == vCommentUserName || v == vCommentUserImage) { //take them to user profile
-                if (!mIsAnon) {
+                if (!mComment.isAnon()) {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
                     if (activity != null) {
-                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mUserName, mCommenterUserId));
+                        activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mComment.getCommentUserName(), mComment.getCommentUserId()));
                     }
                 }
             } else {
@@ -358,29 +356,28 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                 switch (v.getId()) {
                     case R.id.comment_reply:
-                        mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mUserName, mCommenterUserId, ""));
+                        mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
                         break;
                     case R.id.comment_delete:
-                        mCommentActions.deleteComment(getAdapterPosition(), mCommentId);
+                        mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());
                         break;
                     case R.id.comment_report:
-                        mCommentActions.reportComment(mCommentId);
+                        mCommentActions.reportComment(mComment.getCommentPostId());
                         break;
                     case R.id.comment_reveal:
-                        mCommentActions.revealComment(getAdapterPosition(), mCommentId, mIsAnon);
+                        mCommentActions.revealComment(getAdapterPosition(), mComment.getCommentPostId(), mComment.isAnon());
                         break;
                     case R.id.left_controls:
-                        Comment c = (Comment) mFeedDetail.getComments().get(getAdapterPosition() - 1);
-                        mIsLiked = c.toggleLiked();
-                        if (mIsLiked) {
-                            c.incrementLikes();
-                            setUpLikes(c);
+                        boolean isLiked = mComment.toggleLiked();
+                        if (isLiked) {
+                            mComment.incrementLikes();
+                            setUpLikes(mComment);
                         } else {
-                            c.decrementLikes();
-                            setUpLikes(c);
+                            mComment.decrementLikes();
+                            setUpLikes(mComment);
                         }
 
-                        mCommentActions.likeComment(mIsLiked, mCommentId);
+                        mCommentActions.likeComment(isLiked, mComment.getCommentPostId());
                 }
             }
         }
