@@ -269,8 +269,11 @@ public class StickersTool extends EditContentTool {
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 File[] memes = memeDir.listFiles();
-                if (memes != null) {
+                if (memes != null && !mDestroyed) {
                     for (File f : memes) {
+                        if (mDestroyed)
+                            break;
+
                         try {
                             mStickers.add(BitmapFactory.decodeFile(f.getAbsolutePath(), options));
 
@@ -294,10 +297,16 @@ public class StickersTool extends EditContentTool {
                         mStickersAdapter.notifyDataSetChanged();
                     }
                 });
+
+                if (mDestroyed) {
+                    for (Bitmap bitmap : mStickers) {
+                        if (bitmap != null) {
+                            bitmap.recycle();
+                        }
+                    }
+                }
             }
 
         }).start();
-
-
     }
 }

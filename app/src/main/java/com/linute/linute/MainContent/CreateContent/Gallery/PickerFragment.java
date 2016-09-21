@@ -337,8 +337,6 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
             e.printStackTrace();
         }
 
-        Log.i(TAG, "goToImageEdit: "+rotation);
-
         Dimens dimens = new Dimens(options.outWidth, options.outHeight);
         dimens.setRotation(rotation);
 

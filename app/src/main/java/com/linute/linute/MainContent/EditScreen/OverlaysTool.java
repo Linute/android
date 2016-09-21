@@ -32,17 +32,24 @@ public class OverlaysTool extends EditContentTool {
     private Bitmap mBackingBitmap;
 
     public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
-        super(uri,type, overlaysView);
+        super(uri, type, overlaysView);
         final BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(uri.getPath(), opts);
-        opts.inSampleSize = opts.outWidth/overlaysView.getResources().getDisplayMetrics().widthPixels/5;
+        opts.inSampleSize = opts.outWidth / overlaysView.getResources().getDisplayMetrics().widthPixels / 5;
         opts.inJustDecodeBounds = false;
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mBackingBitmap =  BitmapFactory.decodeFile(uri.getPath(), opts);
+                if (!mDestroyed) {
+                    mBackingBitmap = BitmapFactory.decodeFile(uri.getPath(), opts);
+                }
+
+                //do after decoding
+                if (mDestroyed){
+                    mBackingBitmap.recycle();
+                }
             }
         }).start();
 
@@ -66,7 +73,7 @@ public class OverlaysTool extends EditContentTool {
         initFiltersAsync(overlaysView.getContext());
     }
 
-    public void setBackingBitmap(Bitmap back){
+    public void setBackingBitmap(Bitmap back) {
         mBackingBitmap = back;
     }
 
@@ -171,11 +178,11 @@ public class OverlaysTool extends EditContentTool {
         super.onDestroy();
 
         overlayView.setImageBitmap(null);
-        if (mBackingBitmap != null){
+        if (mBackingBitmap != null) {
             mBackingBitmap.recycle();
         }
 
-        for (Bitmap bitmap : mOverlays){
+        for (Bitmap bitmap : mOverlays) {
             if (bitmap != null)
                 bitmap.recycle();
         }
@@ -209,8 +216,11 @@ public class OverlaysTool extends EditContentTool {
                 measureOptions.inJustDecodeBounds = true;
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 File[] filters = filterDir.listFiles();
-                if (filters != null) {
+                if (filters != null && !mDestroyed) {
                     for (File f : filters) {
+                        if (mDestroyed)
+                            break;
+
                         Bitmap b = null;
                         Bitmap scaled = null;
                         b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
@@ -242,8 +252,13 @@ public class OverlaysTool extends EditContentTool {
                                 }
                             });
                         }
+                    }
+                }
 
-
+                if (mDestroyed) {
+                    for (Bitmap bitmap : mOverlays){
+                        if (bitmap != null)
+                            bitmap.recycle();
                     }
 
                 }
