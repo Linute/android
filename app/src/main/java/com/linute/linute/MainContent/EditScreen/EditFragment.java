@@ -27,13 +27,13 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -378,7 +378,7 @@ public class EditFragment extends BaseFragment {
                 View toolView = inflater.inflate(R.layout.list_item_tool, toolsListRV, false);
                 toolHolders[i] = new ToolHolder(toolView);
                 toolHolders[i].bind(tool);
-                toolHolders[i].setSelected(false, false);
+                toolHolders[i].setSelected(false, mIsDisabled[i]);
 
                 toolView.setTag(i);
                 toolView.setOnClickListener(onClickListener);
@@ -432,8 +432,8 @@ public class EditFragment extends BaseFragment {
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
 
-        toolHolders[oldSelectedTool].setSelected(false, false);
-        toolHolders[mSelectedTool].setSelected(true, false);
+        toolHolders[oldSelectedTool].setSelected(false, mIsDisabled[oldSelectedTool]);
+        toolHolders[mSelectedTool].setSelected(true, mIsDisabled[mSelectedTool]);
 
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
@@ -787,11 +787,7 @@ public class EditFragment extends BaseFragment {
     }
 
     private void showProgress(boolean show) {
-        /*if(show) {
-            mProcessingDialog.show();
-        }else {
-            mProcessingDialog.hide();
-        }*/
+
         if (show) {
             ProgressBar loaderView = new ProgressBar(getContext());
             mMenu.findItem(R.id.menu_item_done).setActionView(loaderView);
@@ -844,7 +840,9 @@ public class EditFragment extends BaseFragment {
                                         .putExtra("type", CameraActivity.IMAGE)
                                         .putExtra("privacy", options.postAsAnon)
                                         .putExtra("isAnonymousCommentsDisabled", options.isAnonCommentsDisabled)
-                                        .putExtra("title", options.text);
+                                        .putExtra("title", options.text)
+                                        .putExtra("stickers", options.stickers)
+                                        .putExtra("filters", options.filters);
                                 getActivity().setResult(Activity.RESULT_OK, i);
                                 getActivity().finish();
                             } else {
@@ -874,6 +872,8 @@ public class EditFragment extends BaseFragment {
                                                 1,
                                                 uri.toString(),
                                                 null,
+                                                options.stickers,
+                                                options.filters,
                                                 mUserId,
                                                 mUserToken
                                         );
@@ -902,6 +902,15 @@ public class EditFragment extends BaseFragment {
 
         if (mContentView != null && mContentView instanceof TextureVideoView) {
             ((TextureVideoView) mContentView).stopPlayback();
+        }
+
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if(mFfmpeg != null){
+            mFfmpeg.killRunningProcesses();
         }
     }
 
@@ -1002,6 +1011,24 @@ public class EditFragment extends BaseFragment {
 
         final String outputFile = ImageUtility.getVideoUri();
         showProgress(true);
+        for(int i = 0;i < mIsDisabled.length;i++){
+            mIsDisabled[i] = true;
+            toolHolders[i].setSelected(false, true);
+        }
+
+        //adds view to soak up all input on tool view
+        View coverView = new View(getContext());
+        coverView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        coverView.setBackgroundColor(0x44000000);
+        coverView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return true;
+            }
+        });
+        mToolOptionsView.addView(coverView);
+
+
 
         mVideoProcessSubscription = Observable.create(new Observable.OnSubscribe<Uri>() {
             @Override
@@ -1190,7 +1217,10 @@ public class EditFragment extends BaseFragment {
                                     .putExtra("image", image)
                                     .putExtra("privacy", options.postAsAnon)
                                     .putExtra("type", CameraActivity.VIDEO)
-                                    .putExtra("title", options.text);
+                                    .putExtra("title", options.text)
+                                    .putExtra("stickers", options.stickers)
+                                    .putExtra("filters", options.filters);
+
 
 //                            mProgressDialog.dismiss();
                             getActivity().setResult(Activity.RESULT_OK, i);
@@ -1225,6 +1255,7 @@ public class EditFragment extends BaseFragment {
     }
 
 
+
     private boolean isPortrait() {
         return mDimens.rotation == 90 || mDimens.rotation == 270;
     }
@@ -1243,6 +1274,8 @@ public class EditFragment extends BaseFragment {
                 2,
                 imagepath,
                 videopath,
+                options.stickers,
+                options.filters,
                 mUserId,
                 mUserToken
         );

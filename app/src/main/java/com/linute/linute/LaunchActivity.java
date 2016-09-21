@@ -69,6 +69,40 @@ public class LaunchActivity extends Activity {
             Fabric.with(this, new Crashlytics());
         }
 
+
+        //Initialize sending crash reports to backend. This comes up in the #android-crash channel
+        final Thread.UncaughtExceptionHandler oldHandler = Thread.getDefaultUncaughtExceptionHandler();
+
+        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable throwable) {
+               String token = getApplicationContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
+                throwable.printStackTrace();
+                API_Methods.sendErrorReport(throwable, token, new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.e(TAG, e.toString());
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.i(TAG, response.body().string());
+                    }
+                });
+
+                if (oldHandler != null)
+                    oldHandler.uncaughtException(
+                            thread,
+                            throwable
+                    ); //Delegates to Android's error handling
+                else
+                    System.exit(2); //Prevents the service/app from freezing
+            }
+        });
+
+
+
+
         AppsFlyerLib.getInstance().startTracking(this.getApplication(),"VPnL9y82TinTofd5XRZ6TJ");
 
         generateNewSigniture();

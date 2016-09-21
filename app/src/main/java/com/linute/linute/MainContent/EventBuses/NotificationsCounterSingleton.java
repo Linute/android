@@ -35,8 +35,9 @@ public class NotificationsCounterSingleton {
         mNumOfNewActivities = numOfNewActivities;
     }
 
-    public void setNumOfNewPosts(int i){
+    public int setNumOfNewPosts(int i){
         mNumOfNewPosts = i;
+        return mNumOfNewPosts;
     }
 
     public boolean hasMessage() {

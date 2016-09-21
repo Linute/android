@@ -28,6 +28,11 @@ public class PendingUploadPost implements Parcelable {
     private ArrayList<String> mTrends;
     private ArrayList<String> mPeople;
 
+
+
+    private ArrayList<String> mStickers;
+    private ArrayList<String> mFilters;
+
     public PendingUploadPost(String id,
                              String collegeId,
                              int privacy,
@@ -36,6 +41,8 @@ public class PendingUploadPost implements Parcelable {
                              int type,
                              String imagePath,
                              String videoPath,
+                             ArrayList<String> stickers,
+                             ArrayList<String> filters,
                              String owner,
                              String userToken
     ){
@@ -49,9 +56,13 @@ public class PendingUploadPost implements Parcelable {
         mType = type;
         mImagePath = imagePath;
         mVideoPath = videoPath;
+        mStickers = stickers;
+        mFilters = filters;
         mOwner = owner;
         mUserToken = userToken;
     }
+
+
 
     public void setCollege(String collegeId){
         mCollegeId = collegeId;
@@ -119,6 +130,14 @@ public class PendingUploadPost implements Parcelable {
         return mImagePath;
     }
 
+    public ArrayList<String> getStickers() {
+        return mStickers;
+    }
+
+    public ArrayList<String> getFilters() {
+        return mFilters;
+    }
+
     protected PendingUploadPost(Parcel in) {
         mId = in.readString();
         mCollegeId = in.readString();
@@ -136,6 +155,10 @@ public class PendingUploadPost implements Parcelable {
         in.readStringList(mPeople);
         mTrends = new ArrayList<>();
         in.readStringList(mTrends);
+        mStickers = new ArrayList<>();
+        in.readStringList(mStickers);
+        mFilters = new ArrayList<>();
+        in.readStringList(mFilters);
     }
 
     @Override
@@ -154,6 +177,8 @@ public class PendingUploadPost implements Parcelable {
         dest.writeString(mUserToken);
         dest.writeStringList(mPeople);
         dest.writeStringList(mTrends);
+        dest.writeStringList(mStickers);
+        dest.writeStringList(mFilters);
     }
 
     public static final Creator<PendingUploadPost> CREATOR = new Creator<PendingUploadPost>() {

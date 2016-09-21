@@ -79,7 +79,7 @@
                 android:layout_centerHorizontal="true"
                 android:textAlignment="center"
                 android:text="@string/no_messages"
-                android:textColor="@color/eighty_black"
+                android:textColor="@color/fifty_black"
                 android:textSize="@dimen/header_font_size" />
 
         </RelativeLayout>

@@ -568,8 +568,6 @@ public class MainActivity extends BaseTaptActivity {
                     mSocket.connect();
                     mConnecting = false;
 
-                    mSocket.emit(API_Methods.VERSION + ":posts:refresh", new JSONObject());
-
                     try {
                         JSONObject object = new JSONObject();
                         object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));
@@ -695,7 +693,8 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             if (mFragments[FRAGMENT_INDEXES.FEED] != null) {
                 try {
-                    final Post postObj = new Post((JSONObject) args[0]);
+                    final JSONObject arg = (JSONObject) args[0];
+                    final Post postObj = new Post(arg);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -1011,11 +1010,12 @@ public class MainActivity extends BaseTaptActivity {
             if (mWatchForRefresh) {
                 try {
                     final int posts = new JSONObject(args[0].toString()).getInt("posts");
+                    final JSONObject obj = new JSONObject(args[0].toString());
                     if (posts > 0) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts(posts));
+                                setFeedNotification(NotificationsCounterSingleton.getInstance().setNumOfNewPosts(posts));
                             }
                         });
 
