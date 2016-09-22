@@ -129,11 +129,10 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                if (mSelectedUsers.isEmpty()) return true;
-
                 BaseTaptActivity activity = (BaseTaptActivity)getActivity();
+
                 activity.getSupportFragmentManager().popBackStack();
-                if(mUsersSelectedListener != null){
+                if(mUsersSelectedListener != null && !mSelectedUsers.isEmpty()){
                     mUsersSelectedListener.onUsersSelected(mSelectedUsers);
                 }
 //                activity.replaceContainerWithFragment(ChatFragment.newInstance(null, mSelectedUsers));

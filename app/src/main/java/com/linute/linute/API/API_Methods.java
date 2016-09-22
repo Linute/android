@@ -32,6 +32,10 @@ public class API_Methods {
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
     public static final boolean IS_DEV_BUILD = true;   //change this flag for dev
+    public static final boolean ENABLE_CRASHLYTICS = true;
+    //CHANGE ONLY THIS TO SWITCH TO PROD
+
+
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
