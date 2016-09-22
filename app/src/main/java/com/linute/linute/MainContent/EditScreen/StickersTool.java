@@ -275,8 +275,11 @@ public class StickersTool extends EditContentTool {
             public void run() {
                 final BitmapFactory.Options options = new BitmapFactory.Options();
                 File[] memes = memeDir.listFiles();
-                if (memes != null) {
+                if (memes != null && !mDestroyed) {
                     for (File f : memes) {
+                        if (mDestroyed)
+                            break;
+
                         try {
                             mStickers.add(
                                     new Sticker(
@@ -305,6 +308,14 @@ public class StickersTool extends EditContentTool {
                         mStickersAdapter.notifyDataSetChanged();
                     }
                 });
+
+                if (mDestroyed) {
+                    for (Sticker bitmap : mStickers) {
+                        if (bitmap != null) {
+                            bitmap.bitmap.recycle();
+                        }
+                    }
+                }
             }
 
         }).start();

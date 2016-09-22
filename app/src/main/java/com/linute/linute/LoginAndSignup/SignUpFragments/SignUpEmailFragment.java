@@ -215,8 +215,8 @@ public class SignUpEmailFragment extends BaseSignUpFragment {
         if (getActivity() != null) {
             new AlertDialog.Builder(getActivity())
                     .setTitle("Confirm email")
-                    .setMessage(String.format(Locale.ENGLISH, "Is this your correct email?\n%s\nWe will send a verification code to this email address", email))
-                    .setNegativeButton("not yet", new DialogInterface.OnClickListener() {
+                    .setMessage(String.format(Locale.ENGLISH, "Is this your correct email?\n%s\nWe will send a verification code to this email address.", email))
+                    .setNegativeButton("no", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();

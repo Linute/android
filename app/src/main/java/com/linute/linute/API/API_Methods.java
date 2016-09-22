@@ -42,7 +42,7 @@ public class API_Methods {
     public static final String HOST_LIVE = "api.tapt.io";
 
     public static final String VERSION_DEV = "v1.4.5";
-    public static final String VERSION_LIVE = "v1.4.4";
+    public static final String VERSION_LIVE = "v1.4.5";
 
     //set default to live, just in case
     public static String HOST = HOST_LIVE;

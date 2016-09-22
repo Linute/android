@@ -476,25 +476,45 @@ public class EditFragment extends BaseFragment {
                 final BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(uri.getPath(), opts);
-                if (opts.outWidth > metrics.widthPixels) {
-                    opts.inSampleSize = opts.outWidth / metrics.widthPixels + 2;
-                }
+
+                //if image has rotation, we'll have to use height as it's width
+                final int imageWidth = isPortrait() ? opts.outHeight : opts.outWidth;
+
+                if (imageWidth > metrics.widthPixels)
+                    opts.inSampleSize = imageWidth / metrics.widthPixels + 2;
+
                 opts.inJustDecodeBounds = false;
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
-                        int testWidth = image.getWidth();
+                        int testWidth = isPortrait() ? image.getHeight() : image.getWidth();
+
                         if (testWidth < metrics.widthPixels) {
-                            final int scalewidth = metrics.widthPixels;
-                            final int scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
+                            final int scalewidth;
+                            final int scaleheight ;
+                            if (isPortrait()){ //need to swap height and width
+                                scaleheight = metrics.widthPixels;
+                                scalewidth = (int) ((float) image.getWidth() * scaleheight / image.getHeight());
+                            }else {
+                                scalewidth = metrics.widthPixels;
+                                scaleheight = (int) ((float) image.getHeight() * scalewidth / image.getWidth());
+
+                            }
 
                             mDimens.height = scaleheight;
                             mDimens.width = scalewidth;
 
+                            Log.i(TAG, "run: "+image.getWidth() + " "+image.getHeight());
+                            Log.i(TAG, "run: "+scalewidth + " " + scaleheight);
+
+                            Matrix m = new Matrix();
+                            m.postScale((float)scalewidth / image.getWidth(), (float) scaleheight / image.getHeight());
+                            m.postRotate(mDimens.rotation);
+
                             //scale image
-                            final Bitmap scaled = Bitmap.createScaledBitmap(image, scalewidth, scaleheight, false);
+                            final Bitmap scaled = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), m, true);
 
                             //i believe some phones will modify 'image'. don't want to recycle if that is the case
                             if (scaled != image) image.recycle();
@@ -511,6 +531,7 @@ public class EditFragment extends BaseFragment {
                                     });
                         } else {
                             if (mDimens.rotation != 0) {
+                                Log.i(TAG, "run: ");
                                 Matrix m = new Matrix();
                                 m.postRotate(mDimens.rotation);
                                 final Bitmap rotated = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), m, true);
@@ -518,9 +539,9 @@ public class EditFragment extends BaseFragment {
 
                                 setImage(rotated, imageView);
                             } else {
+                                Log.i(TAG, "run:nn ");
                                 setImage(image, imageView);
                             }
-
                         }
                     }
                 }).start();
@@ -603,7 +624,7 @@ public class EditFragment extends BaseFragment {
         }
     }
 
-    private void setImage(final Bitmap image, final MoveZoomImageView imageView){
+    private void setImage(final Bitmap image, final MoveZoomImageView imageView) {
         mDimens.height = image.getHeight();
         mDimens.width = image.getWidth();
         new Handler(Looper.getMainLooper()).post(

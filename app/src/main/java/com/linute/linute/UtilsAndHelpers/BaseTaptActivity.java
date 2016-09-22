@@ -9,6 +9,8 @@ import io.socket.emitter.Emitter;
  */
 public abstract class BaseTaptActivity extends AppCompatActivity {
 
+    protected SocketListener mSocketListener;
+
     /* MainActivity has tabs of Updatable fragments
      *  use this function to tell tab it needs to reload
      */
@@ -42,5 +44,10 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     public interface SocketErrorResponse{
         void runSocketError();
     }
+
+    public void setSocketListener(SocketListener lister){
+        mSocketListener = lister;
+    }
 }
+
 

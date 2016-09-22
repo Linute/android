@@ -14,6 +14,7 @@ public abstract class EditContentTool {
     protected ViewGroup mOverlaysView;
     protected Uri mUri;
     protected EditFragment.ContentType mContentType;
+    protected boolean mDestroyed;
 
     public EditContentTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays){
         mOverlaysView = overlays;
@@ -39,6 +40,8 @@ public abstract class EditContentTool {
     public void onDisable(){}
     public void onEnable(){}
 
-    public void onDestroy(){}
+    public void onDestroy(){
+        mDestroyed = true;
+    }
 
 }
