@@ -356,7 +356,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                 switch (v.getId()) {
                     case R.id.comment_reply:
-                        mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
+                        if (!mComment.isAnon())
+                            mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
                         break;
                     case R.id.comment_delete:
                         mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());
