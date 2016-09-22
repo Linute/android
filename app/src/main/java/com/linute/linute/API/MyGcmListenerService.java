@@ -113,12 +113,22 @@ public class MyGcmListenerService extends GcmListenerService {
         //String name = data.getString("ownerFullName");
         boolean isAnon = "1".equals(data.getString("privacy"));
         String profileImage = null;
-        try{
-            JSONObject image = new JSONObject(data.getString("roomProfileImage"));
-            profileImage = image.getString("thumbnail");
-        }catch(JSONException|NullPointerException e){
-
+        switch (action){
+            case "messager":
+                try{
+                    JSONObject image = new JSONObject(data.getString("roomProfileImage"));
+                    profileImage = image.getString("thumbnail");
+                }catch(JSONException|NullPointerException e){}
+            break;
+            default:
+                profileImage = data.getString("ownerProfileImage");
+                profileImage =
+                        (isAnon
+                                ? Utils.getAnonImageUrl(String.valueOf(profileImage))
+                                : Utils.getImageUrlOfUser(String.valueOf(profileImage))
+                        );
         }
+
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         ChatRoom chatRoom = (ChatRoom) intent.getParcelableExtra("chatRoom");
@@ -135,19 +145,11 @@ public class MyGcmListenerService extends GcmListenerService {
         if (profileImage != null) {
             File image = null;
             try {
-                String url =
-                        (isAnon
-                                ? Utils.getAnonImageUrl(String.valueOf(profileImage))
-                                : Utils.getImageUrlOfUser(String.valueOf(profileImage))
-                        );
-                Log.d("AAA", profileImage);
                 image = Glide.with(this).load(profileImage).downloadOnly(256, 256).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             if (image != null)
-
-
                 notificationBuilder.setLargeIcon(BitmapFactory.decodeFile(image.getAbsolutePath()));
         }
 
