@@ -124,9 +124,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private LinearLayoutManager mFeedDetailLLM;
 
     private boolean mShowPostDetail;
+    private Snackbar mNewCommentSnackbar;
 
     public FeedDetailPage() {
     }
+
+    //used in displaying bottom snackbar on new comment socket
+    private int newCommentCount = 0;
 
 
     public static FeedDetailPage newInstance(Post post) {
@@ -220,6 +224,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     //close keyboard
                     showKeyboard(recyclerView, false);
                 }
+
+                if(mFeedDetailLLM.findLastVisibleItemPosition() == mFeedDetailAdapter.getItemCount()-1){
+                    newCommentCount = 0;
+                    if(mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
+                        mNewCommentSnackbar.dismiss();
+                }
+
             }
 
 
@@ -1444,6 +1455,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         getImageUrl(object.getJSONArray("images"))
                 );
 
+
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -1473,25 +1485,30 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     }
 
+                                    if(mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()){
+                                        newCommentCount ++;
+                                    }
+
+
                                    /* if (finalSmoothScroll || !mCanScrollDown)
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
                                     int pos = mShowPostDetail ? mFeedDetail.getComments().size() - 1 : mFeedDetail.getComments().size() - 2;
                                     if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)) {
-                                        final Snackbar sn = Snackbar.make(mCommentEditText, "New Comment", Snackbar.LENGTH_LONG);
-                                        TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
+                                        mNewCommentSnackbar = Snackbar.make(mCommentEditText, (newCommentCount > 1 ? newCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
+                                        TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                                         snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                                         snackbarTV.setGravity(Gravity.CENTER);
-                                        sn.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
-                                        sn.getView().setOnClickListener(new View.OnClickListener() {
+                                        mNewCommentSnackbar.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                                        mNewCommentSnackbar.getView().setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
                                                 recList.smoothScrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
-                                                sn.dismiss();
+                                                mNewCommentSnackbar.dismiss();
                                             }
                                         });
-                                        sn.show();
+                                        mNewCommentSnackbar.show();
                                     } else {
                                         recList.scrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
                                     }
