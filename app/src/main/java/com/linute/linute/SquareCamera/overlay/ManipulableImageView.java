@@ -359,9 +359,8 @@ public class ManipulableImageView extends FrameLayout {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mImageView.setImageBitmap(null);
-
-        if (image != null) image.recycle();
-        if (flipped != null) flipped.recycle();
+        image = null;
+        flipped = null;
     }
 
     public interface ViewManipulationListener {
