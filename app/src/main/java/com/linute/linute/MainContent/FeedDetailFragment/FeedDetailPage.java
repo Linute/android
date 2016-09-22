@@ -1450,8 +1450,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 //smoothScroll = true;
                             }
 
-                            //because of header we can use size, change if decide to add it to array
-                            //final boolean finalSmoothScroll = smoothScroll;
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -1463,7 +1461,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     }
 
                                     mFeedDetail.getComments().add(com);
-                                    mFeedDetail.refreshCommentCount();
+                                    mFeedDetail.addComment();
 
                                     if (notifyChange) {
                                         mFeedDetailAdapter.notifyDataSetChanged();
@@ -1552,8 +1550,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             mProgressbar.setVisibility(View.VISIBLE);
             mCommentEditText.setText("");
             activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
-
-            mFeedDetail.getPost().setNumOfComments(mFeedDetail.getPost().getNumOfComments()+1);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
@@ -1633,7 +1629,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         mFeedDetail.getComments().remove(pos);
                                         mFeedDetailAdapter.notifyItemRemoved(in);
                                         mFeedDetailAdapter.notifyItemRangeChanged(in, mFeedDetail.getComments().size());
-                                        mFeedDetail.refreshCommentCount();
+                                        mFeedDetail.removeComment();
 
                                         Toast.makeText(act, "Comment deleted", Toast.LENGTH_SHORT).show();
                                     }

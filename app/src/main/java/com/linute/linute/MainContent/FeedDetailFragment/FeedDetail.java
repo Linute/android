@@ -50,8 +50,12 @@ public class FeedDetail {
         mPost.setPostPrivacy(privacy);
     }
 
-    public void refreshCommentCount(){
-        mPost.setNumOfComments(mComments.size());
+    public void addComment(){
+        mPost.setNumOfComments(mPost.getNumOfComments()+1);
+    }
+
+    public void removeComment(){
+        mPost.setNumOfComments(mPost.getNumOfComments()-1);
     }
 
     public void setAnonImage(String image){

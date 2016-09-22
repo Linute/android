@@ -65,7 +65,7 @@ public class LaunchActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (API_Methods.ENABLE_CRASHLYTICS) {
+        if (!API_Methods.IS_DEV_BUILD) {
             Fabric.with(this, new Crashlytics());
         }
 
