@@ -200,7 +200,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
                 }
             }, 500);
             activity.addFragmentToContainer(
-                    FeedDetailPage.newInstance(mPost, false)
+                    FeedDetailPage.newInstance(mPost)
             );
         }
     }
