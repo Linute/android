@@ -263,7 +263,7 @@ public class OverlaysTool extends EditContentTool {
 
                 if (mDestroyed) {
                     for (Overlay bitmap : mOverlays){
-                        if (bitmap != null)
+                        if (bitmap != null && bitmap.bitmap != null)
                             bitmap.bitmap.recycle();
                     }
                 }

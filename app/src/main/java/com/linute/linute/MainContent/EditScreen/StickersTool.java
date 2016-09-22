@@ -311,7 +311,7 @@ public class StickersTool extends EditContentTool {
 
                 if (mDestroyed) {
                     for (Sticker bitmap : mStickers) {
-                        if (bitmap != null) {
+                        if (bitmap != null && bitmap.bitmap != null) {
                             bitmap.bitmap.recycle();
                         }
                     }
