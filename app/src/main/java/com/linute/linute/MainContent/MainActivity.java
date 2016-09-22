@@ -1335,6 +1335,4 @@ public class MainActivity extends BaseTaptActivity {
         super.onDestroy();
         mRealm.close();
     }
-
-
 }
