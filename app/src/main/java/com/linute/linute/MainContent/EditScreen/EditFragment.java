@@ -1154,7 +1154,7 @@ public class EditFragment extends BaseFragment {
 
                         @Override
                         public void onSuccess(String message) {
-                            //get first frame in video as bitmap
+                            //get first frame in video as thumbnail
                             if (getActivity() == null) return;
 
                             MediaMetadataRetriever media = new MediaMetadataRetriever();

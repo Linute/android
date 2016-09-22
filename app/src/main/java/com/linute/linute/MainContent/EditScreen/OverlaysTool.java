@@ -49,14 +49,14 @@ public class OverlaysTool extends EditContentTool {
                 }
 
                 //do after decoding
-                if (mDestroyed){
+                if (mDestroyed) {
                     mBackingBitmap.recycle();
                 }
             }
         }).start();
 
         mOverlays = new ArrayList<>();
-        mOverlays.add(null);
+        mOverlays.add(new Overlay(null, null, null));
         overlayView = new ImageView(overlaysView.getContext());
         overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mOverlaysView.addView(overlayView);
@@ -87,8 +87,16 @@ public class OverlaysTool extends EditContentTool {
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-                overlayView.setImageBitmap(mOverlays.get(i).bitmap);
-                mSelectedOverlay = mOverlays.get(i);
+                /*if(mOverlaysFullSize.size() <= i){
+                    mOverlaysFullSize.ensureCapacity(i+1);
+                }
+                if(mOverlaysFullSize.get(i) == null){
+                    mOverlaysFullSize.set(i, Bitmap.createBitmap());
+                }*/
+                Overlay overlay = mOverlays.get(i);
+                if (overlay != null)
+                    overlayView.setImageBitmap(overlay.getFullPhoto(overlayView.getContext()));
+                mSelectedOverlay = overlay;
             }
         });
 
@@ -103,7 +111,7 @@ public class OverlaysTool extends EditContentTool {
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
         options.filters.clear();
-        if(mSelectedOverlay != null){
+        if (mSelectedOverlay != null) {
             options.filters.add(mSelectedOverlay.filename);
         }
     }
@@ -188,9 +196,9 @@ public class OverlaysTool extends EditContentTool {
             mBackingBitmap.recycle();
         }
 
-        for (Overlay overlay : mOverlays){
+        for (Overlay overlay : mOverlays) {
             if (overlay != null)
-                overlay.bitmap.recycle();
+                overlay.recycle();
         }
     }
 
@@ -205,7 +213,7 @@ public class OverlaysTool extends EditContentTool {
         }
 
         public void bind(Overlay overlay, boolean isSelected) {
-            vOverlay.setImageBitmap(overlay == null ? null : overlay.bitmap);
+            vOverlay.setImageBitmap(overlay == null ? null : overlay.thumbnail);
         }
     }
 
@@ -227,25 +235,21 @@ public class OverlaysTool extends EditContentTool {
                         if (mDestroyed)
                             break;
 
-                        Bitmap b = null;
-                        Bitmap scaled = null;
-                        b = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
-                        if (b != null) {
-                            float scale = (float) metrics.widthPixels / b.getWidth();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                        if (options.outWidth != 0) {
+//                            float scale = (float) metrics.widthPixels/ 5 / b.getWidth();
 
-                            scaled = Bitmap.createScaledBitmap(b, (int) (b.getWidth() * scale), (int) (b.getHeight() * scale), false);
+                            options.inJustDecodeBounds = false;
+                            options.inSampleSize = metrics.widthPixels / 5 / options.outWidth;
+
+                            Bitmap scaled = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                             try {
-                                mOverlays.add(new Overlay(f.getName(), scaled));
+                                mOverlays.add(new Overlay(f.getName(), f, scaled));
                             } catch (OutOfMemoryError e) {
                                 e.printStackTrace();
                             } catch (NullPointerException np) {
                                 np.printStackTrace();
-                            } finally {
-                                //It turns out the original image may be passed back as an optimisation,
-                                // if the width/height of the resize match the original image
-                                if (b != scaled) {
-                                    b.recycle();
-                                }
                             }
 
                         }
@@ -262,9 +266,9 @@ public class OverlaysTool extends EditContentTool {
                 }
 
                 if (mDestroyed) {
-                    for (Overlay bitmap : mOverlays){
-                        if (bitmap != null && bitmap.bitmap != null)
-                            bitmap.bitmap.recycle();
+                    for (Overlay bitmap : mOverlays) {
+                        if (bitmap != null)
+                            bitmap.recycle();
                     }
                 }
             }
@@ -289,13 +293,35 @@ public class OverlaysTool extends EditContentTool {
         void onItemSelected(int i);
     }
 
-    protected static class Overlay{
+    protected static class Overlay {
         String filename;
-        Bitmap bitmap;
+        File file;
+        Bitmap thumbnail;
+        Bitmap fullSize;
 
-        public Overlay(String filename, Bitmap bitmap) {
+        public Overlay(String filename, File file, Bitmap thumbnail) {
             this.filename = filename;
-            this.bitmap = bitmap;
+            this.file = file;
+            this.thumbnail = thumbnail;
         }
+
+        public Bitmap getFullPhoto(Context context) {
+            if (fullSize == null && file != null) {
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
+                opts.inJustDecodeBounds = false;
+                opts.inSampleSize = opts.outWidth / context.getResources().getDisplayMetrics().widthPixels;
+                fullSize = BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
+            }
+
+            return fullSize;
+        }
+
+        public void recycle() {
+            if (fullSize != null) fullSize.recycle();
+            if (thumbnail != null) thumbnail.recycle();
+        }
+
     }
 }

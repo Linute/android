@@ -6,7 +6,9 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.widget.Space;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -134,6 +137,10 @@ public class TextTool extends EditContentTool {
 
             }
         });
+
+        topET.addTextChangedListener(new LimitTextWatcher(topET));
+        midET.addTextChangedListener(new LimitTextWatcher(midET));
+        botET.addTextChangedListener(new LimitTextWatcher(botET));
 
         topET.setBackAction(new CustomBackPressedEditText.BackButtonAction() {
             @Override
@@ -282,6 +289,33 @@ public class TextTool extends EditContentTool {
         mOverlaysView.addView(mTextContainer);
     }
 
+    protected class LimitTextWatcher implements TextWatcher{
+        String beforeText;
+
+        public LimitTextWatcher(EditText mTV) {
+            this.mTV = mTV;
+        }
+
+        EditText mTV;
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            beforeText = s.toString();
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (mTV.getLineCount() > mTV.getMaxLines()) {
+                mTV.setText(beforeText);
+                mTV.setSelection(mTV.getText().length());
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    }
+
 
     private int clipTopMargin(int min, int max, int newMargin){
         if (newMargin <= min) return min;
@@ -363,16 +397,16 @@ public class TextTool extends EditContentTool {
     public void onOpen() {
         super.onOpen();
         //midET.setCursorVisible(true);
-        botET.setInputType(InputType.TYPE_CLASS_TEXT);
-        topET.setInputType(InputType.TYPE_CLASS_TEXT);
+//        botET.setInputType(InputType.TYPE_CLASS_TEXT);
+//        topET.setInputType(InputType.TYPE_CLASS_TEXT);
         mTextContainer.setClickable(true);
     }
 
     @Override
     public void onClose() {
         super.onClose();
-        botET.setInputType(InputType.TYPE_NULL);
-        topET.setInputType(InputType.TYPE_NULL);
+//        botET.setInputType(InputType.TYPE_NULL);
+//        topET.setInputType(InputType.TYPE_NULL);
         mTextContainer.setClickable(false);
 
         if (midET.getText().toString().trim().length() == 0) {
