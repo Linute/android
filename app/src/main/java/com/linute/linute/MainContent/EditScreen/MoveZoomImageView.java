@@ -444,7 +444,7 @@ public class MoveZoomImageView extends FrameLayout implements EditFragment.Activ
         this.image = bitmap;
 //        Matrix m = new Matrix();
 //        m.setScale(-1, 1);
-//        this.flipped = Bitmap.createBitmap(image, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, false);
+//        this.flipped = Bitmap.createBitmap(image, 0, 0, thumbnail.getWidth(), thumbnail.getHeight(), m, false);
     }
 
     public interface ViewManipulationListener {
