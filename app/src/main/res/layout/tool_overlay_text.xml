@@ -14,7 +14,8 @@
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:imeOptions="actionDone"
-        android:inputType="none|textNoSuggestions"
+        android:inputType="textCapSentences|textNoSuggestions|textMultiLine"
+        android:maxLines="1"
         android:padding="8dp"
         android:textColor="@color/pure_white"
         android:textSize="32dp"
@@ -29,10 +30,12 @@
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:imeOptions="actionDone"
-        android:inputType="none|textNoSuggestions"
+        android:inputType="textCapSentences|textNoSuggestions|textMultiLine"
+        android:maxLines="1"
         android:padding="8dp"
         android:textColor="@color/pure_white"
         android:textSize="32dp"
+        android:minHeight="48dp"
         tools:text="Bottom Text"
     />
 
@@ -56,11 +59,13 @@
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:imeOptions="actionDone"
-        android:inputType="textCapSentences|textNoSuggestions"
+        android:inputType="textCapSentences|textNoSuggestions|textMultiLine"
+        android:maxLines="1"
         android:minHeight="24dp"
         android:padding="4dp"
         android:textColor="@color/pure_white"
         android:textSize="16dp"
+
     />
 
     <android.support.v4.widget.Space
