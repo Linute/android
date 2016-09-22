@@ -291,12 +291,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         });
 
         mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
-        mAnonCheckBoxContainer.setVisibility(
-                mFeedDetail.getPost().isCommentAnonDisabled() ?
-                        View.GONE :
-                        View.VISIBLE);
+
 
         mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
+        updateAnonCheckboxState();
 
         mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -327,6 +325,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         });
 
         return rootView;
+    }
+
+    private void updateAnonCheckboxState() {
+        mAnonCheckBoxContainer.setEnabled(
+                ! mFeedDetail.getPost().isCommentAnonDisabled());
+        TextView anonCheckboxText = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
+        anonCheckboxText.setVisibility(mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
     }
 
     private void showCameraGalleryOption() {
@@ -617,10 +622,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                                     mCommentsRetrieved = true;
                                     mFeedDetailAdapter.notifyDataSetChanged();
-                                    mAnonCheckBoxContainer.setVisibility(
-                                            mFeedDetail.getPost().isCommentAnonDisabled() ?
-                                                    View.GONE :
-                                                    View.VISIBLE);
+                                    updateAnonCheckboxState();
 
                                     recList.post(new Runnable() {
                                         @Override
@@ -648,6 +650,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         });
     }
+
+
 
 
     private String getImageUrl(JSONArray images) {
