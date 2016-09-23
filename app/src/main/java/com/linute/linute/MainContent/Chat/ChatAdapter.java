@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
@@ -49,6 +49,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private boolean isDM = false;
 
+    private RequestManager mRequestManager;
+
     private Map<String, User> mUsers;
 
     static {
@@ -64,6 +66,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.mUsers = users;
 
         mUserId = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", "");
+    }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     public void setIsDM(boolean isdm) {
@@ -294,7 +304,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         }
                         vProfileImage.setVisibility(View.VISIBLE);
                         // Log.i("TEST", "bindModel: "+u.userImage);
-                        Glide.with(itemView.getContext())
+                        mRequestManager
                                 .load(Utils.getImageUrlOfUser(u.userImage))
                                 .asBitmap()
                                 .placeholder(R.color.seperator_color)
@@ -423,7 +433,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 name = post.getUserName();
             }
 
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(url)
                     .asBitmap()
                     .dontAnimate()
@@ -436,7 +446,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void setImage(String image) {
             vImage.setImageResource(android.R.color.transparent);
-            Glide.with(aContext)
+            mRequestManager
                     .load(image)
                     .asBitmap()
                     .dontAnimate()
@@ -460,7 +470,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(itemView);
 
             //loads gif
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(R.drawable.typing_three_dots_android)
                     .into(new GlideDrawableImageViewTarget((ImageView) itemView.findViewById(R.id.gif)));
         }

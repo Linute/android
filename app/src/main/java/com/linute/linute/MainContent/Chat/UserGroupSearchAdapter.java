@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 
@@ -22,11 +22,9 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
 
     private OnRoomSelectedListener onRoomSelectedListener;
 
-
     private static final int TYPE_ITEM = 0;
 
     private static final int TYPE_HEADER = 1;
-
 
 
     public UserGroupSearchAdapter(Context context, List<ChatRoom> roomsList, List<User> usersList) {
@@ -144,7 +142,7 @@ public class UserGroupSearchAdapter extends UserSelectAdapter {
         }
 
         public void bindModel(ChatRoom chat) {
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(chat.roomImage)
                     .signature(new StringSignature(mImageSign))
                     .placeholder(R.color.seperator_color)

@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.EventBuses.NewMessageBus;
@@ -153,6 +154,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
             }
         });
         mRoomsAdapter.setContextMenuCreator(this);
+        mRoomsAdapter.setRequestManager(Glide.with(this));
 
         mEmptyText = view.findViewById(R.id.rooms_empty_text);
         RecyclerView recList = (RecyclerView) view.findViewById(R.id.rooms_list);

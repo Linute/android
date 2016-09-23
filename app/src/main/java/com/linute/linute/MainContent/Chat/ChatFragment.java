@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.CreateContent.Gallery.GalleryActivity;
@@ -302,6 +303,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         //when reaches end of list, we want to try to load more
         mChatAdapter.setLoadMoreListener(this);
+        mChatAdapter.setRequestManager(Glide.with(this));
 
         vEmptyChatView = view.findViewById(R.id.empty_view_messanger);
         mProgressBar = view.findViewById(R.id.chat_load_progress);
@@ -1820,6 +1822,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         }
     };
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mChatAdapter.getRequestManager() != null) mChatAdapter.getRequestManager().onDestroy();
+    }
 
     @Override
     public void onDestroy() {

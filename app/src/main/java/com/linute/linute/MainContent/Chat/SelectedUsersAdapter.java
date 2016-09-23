@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -20,19 +21,28 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
 
 
     ArrayList<User> mUsers;
+    RequestManager mRequestManager;
 
-    public SelectedUsersAdapter(ArrayList<User> mUsers) {
+
+    public SelectedUsersAdapter(ArrayList<User> mUsers ) {
         this.mUsers = mUsers;
     }
 
     private UserSelectAdapter.OnUserSelectedListener mUserSelectedListener;
 
 
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
+    }
 
     @Override
     public UserVH onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        return new UserVH(inflater.inflate(R.layout.fragment_create_chat_selected_users, parent, false));
+        return new UserVH(inflater.inflate(R.layout.fragment_create_chat_selected_users, parent, false), mRequestManager);
     }
 
     @Override
@@ -58,14 +68,16 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
     protected static class UserVH extends RecyclerView.ViewHolder{
 
         public final ImageView userIV;
+        private RequestManager mRequestManager;
 
-        public UserVH(View itemView) {
+        public UserVH(View itemView, RequestManager manager) {
             super(itemView);
+            mRequestManager = manager;
             userIV = (ImageView)itemView.findViewById(R.id.image_user);
         }
 
         public void bind(User user){
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(user.userImage))
                     .dontAnimate()
                     .placeholder(R.color.seperator_color)

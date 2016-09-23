@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
@@ -31,15 +31,25 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     protected List<User> mLockedUserList;
     protected List<User> mSelectedUserList;
     protected OnUserSelectedListener mOnUserSelectedListener;
+    protected RequestManager mRequestManager;
 
     public void setOnUserSelectedListener(OnUserSelectedListener onUserSelectedListener) {
         this.mOnUserSelectedListener = onUserSelectedListener;
     }
 
+
     public UserSelectAdapter(Context aContext, List<User> searchUserList) {
         mSearchUserList = searchUserList;
         mImageSign = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("imageSigniture", "000");
 
+    }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
     }
 
     @Override
@@ -109,7 +119,7 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
 
         void bindModel(User user, ItemStatus status) {
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(user.userImage))
                     .dontAnimate()
                     .signature(new StringSignature(mImageSign))
@@ -120,8 +130,6 @@ public class UserSelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
             String name = user.firstName+" "+user.lastName;
             vUserName.setText(name);
-
-            Log.i(TAG, "bindModel: mm"+user.collegeName);
 
             switch (status){
                 case None:
