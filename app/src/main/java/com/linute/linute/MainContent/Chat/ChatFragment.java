@@ -102,6 +102,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     //private static final int TYPING_TIMER_LENGTH = 600;
 
     private String mRoomId;
+    private Snackbar mNewMessageSnackbar;
+    private int mNewMessageCount = 0;
 
     private enum RoomExists {
         Exists, DoesntExist, Undetermined
@@ -358,13 +360,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
             }
         });
-       /* recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                updateTopTimeHeader();
+                if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() == mChatAdapter.getItemCount()-1){
+                    mNewMessageCount = 0;
+                    if(mNewMessageSnackbar != null && mNewMessageSnackbar.isShown())
+                        mNewMessageSnackbar.dismiss();
+                }
             }
-        });*/
+        });
         final int width = getResources().getDisplayMetrics().widthPixels;
 //        recList.getLayoutParams().width = width;
         View.OnTouchListener swipeViewTimeListener = new View.OnTouchListener() {
@@ -1317,6 +1323,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 viewerIsOwnerOfMessage
         );
 
+        mNewMessageCount++;
+
         JSONArray unreadArray = new JSONArray();
         if (!viewerIsOwnerOfMessage) {
             unreadArray.put(chat.getMessageId());
@@ -1397,19 +1405,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
                 if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
-                    final Snackbar sn = Snackbar.make(mInputMessageView, "New Message", Snackbar.LENGTH_LONG);
-                    TextView snackbarTV = (TextView) sn.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    mNewMessageSnackbar = Snackbar.make(mInputMessageView,(mNewMessageCount > 1 ? mNewMessageCount + " New Messages" :  "New Message"), Snackbar.LENGTH_LONG);
+                    TextView snackbarTV = (TextView) mNewMessageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                     snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                     snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                    sn.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
-                    sn.getView().setOnClickListener(new View.OnClickListener() {
+                    mNewMessageSnackbar.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                    mNewMessageSnackbar.getView().setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             scrollToBottom();
-                            sn.dismiss();
+                            mNewMessageSnackbar.dismiss();
                         }
                     });
-                    sn.show();
+                    mNewMessageSnackbar.show();
                 } else {
                     scrollToBottom();
                 }
