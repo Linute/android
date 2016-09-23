@@ -5,14 +5,14 @@
         <bitmap android:src="@drawable/ic_action_navigation_menu"/>
     </item>
 
-    <item android:height="16dp"
-          android:width="16dp"
-          android:top="2dp"
-          android:right="2dp"
+    <item android:width="16dp"
+          android:height="16dp"
           android:bottom="16dp"
-          android:left="16dp"
           android:drawable="@drawable/circle_indicator"
           android:gravity="top|end"
+          android:left="16dp"
+          android:right="2dp"
+          android:top="2dp"
     />
 
 </layer-list>
