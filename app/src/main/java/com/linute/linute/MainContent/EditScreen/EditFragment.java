@@ -439,14 +439,14 @@ public class EditFragment extends BaseFragment {
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
 
-        if (mTools[mSelectedTool] instanceof OverlaysTool) {
+        //if (mTools[mSelectedTool] instanceof OverlaysTool) {
 //            mContentView.setDrawingCacheEnabled(true);
 //            mContentView.buildDrawingCache();
 //
 //            Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
 //            mContentView.destroyDrawingCache();
 //            ((OverlaysTool) mTools[mSelectedTool]).setBackingBitmap(bm);
-        }
+       // }
 
         if (mToolbar != null) {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
