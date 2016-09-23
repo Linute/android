@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 
@@ -29,31 +32,33 @@ public class OverlaysTool extends EditContentTool {
     private OverlaysAdapter mOverlaysAdapter;
     private RecyclerView mOverlaysRV;
     private final ImageView overlayView;
-    private Bitmap mBackingBitmap;
+    //private Bitmap mBackingBitmap;
+    private RequestManager mRequestManager;
 
     private Overlay mSelectedOverlay;
 
-    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, RequestManager manager) {
         super(uri, type, overlaysView);
-        final BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(uri.getPath(), opts);
-        opts.inSampleSize = opts.outWidth / overlaysView.getResources().getDisplayMetrics().widthPixels / 5;
-        opts.inJustDecodeBounds = false;
+//        final BitmapFactory.Options opts = new BitmapFactory.Options();
+//        opts.inJustDecodeBounds = true;
+//        BitmapFactory.decodeFile(uri.getPath(), opts);
+//        opts.inSampleSize = opts.outWidth / overlaysView.getResources().getDisplayMetrics().widthPixels / 5;
+//        opts.inJustDecodeBounds = false;
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if (!mDestroyed) {
-                    mBackingBitmap = BitmapFactory.decodeFile(uri.getPath(), opts);
-                }
-
-                //do after decoding
-                if (mDestroyed) {
-                    mBackingBitmap.recycle();
-                }
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (!mDestroyed) {
+//                    mBackingBitmap = BitmapFactory.decodeFile(uri.getPath(), opts);
+//                }
+//
+//                //do after decoding
+//                if (mDestroyed) {
+//                    mBackingBitmap.recycle();
+//                }
+//            }
+//        }).start();
+        mRequestManager = manager;
 
         mOverlays = new ArrayList<>();
         mOverlays.add(new Overlay(null, null, null));
@@ -64,26 +69,26 @@ public class OverlaysTool extends EditContentTool {
 
     }
 
-    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, Bitmap back) {
-        super(uri, type, overlaysView);
-        mBackingBitmap = back;
-        mOverlays = new ArrayList<>();
-        mOverlays.add(null);
-        overlayView = new ImageView(overlaysView.getContext());
-        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mOverlaysView.addView(overlayView);
-        initFiltersAsync(overlaysView.getContext());
-    }
+//    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, Bitmap back) {
+//        super(uri, type, overlaysView);
+//        mBackingBitmap = back;
+//        mOverlays = new ArrayList<>();
+//        mOverlays.add(null);
+//        overlayView = new ImageView(overlaysView.getContext());
+//        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        mOverlaysView.addView(overlayView);
+//        initFiltersAsync(overlaysView.getContext());
+//    }
 
-    public void setBackingBitmap(Bitmap back) {
-        mBackingBitmap = back;
-    }
+//    public void setBackingBitmap(Bitmap back) {
+//        mBackingBitmap = back;
+//    }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
 
-        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mBackingBitmap);
+        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mUri, mRequestManager);
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
@@ -95,7 +100,11 @@ public class OverlaysTool extends EditContentTool {
                 }*/
                 Overlay overlay = mOverlays.get(i);
                 if (overlay != null)
-                    overlayView.setImageBitmap(overlay.getFullPhoto(overlayView.getContext()));
+                    mRequestManager
+                            .load(overlay.file)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(overlayView);
+
                 mSelectedOverlay = overlay;
             }
         });
@@ -129,18 +138,19 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
-        private final Bitmap mBackingBitmap;
+        protected Uri mImage;
         ArrayList<Overlay> overlays;
-
         int mSelectedItem;
+        RequestManager mRequestManager;
 
 
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Overlay> overlays, Bitmap back) {
+        public OverlaysAdapter(ArrayList<Overlay> overlays, Uri image, RequestManager manager) {
             this.overlays = overlays;
-            mBackingBitmap = back;
+            mImage = image;
+            mRequestManager = manager;
         }
 
         @Override
@@ -148,8 +158,12 @@ public class OverlaysTool extends EditContentTool {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_overlay, parent, false);
             int height = parent.getHeight();
             int width = height / 6 * 5;
-            ((ImageView) v.findViewById(R.id.image_back)).setImageBitmap(mBackingBitmap);
             v.setLayoutParams(new RecyclerView.LayoutParams(width, height));
+
+            mRequestManager.load(mImage)
+                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                    .into((ImageView) v.findViewById(R.id.image_back));
+
             return new OverlayItemVH(v);
         }
 
@@ -192,19 +206,17 @@ public class OverlaysTool extends EditContentTool {
         super.onDestroy();
 
         overlayView.setImageBitmap(null);
-        if (mBackingBitmap != null) {
-            mBackingBitmap.recycle();
-        }
 
         for (Overlay overlay : mOverlays) {
             if (overlay != null)
                 overlay.recycle();
         }
+
+        mRequestManager.onDestroy();
     }
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {
 
-        ImageView vBack;
         ImageView vOverlay;
 
         public OverlayItemVH(View itemView) {
@@ -251,7 +263,6 @@ public class OverlaysTool extends EditContentTool {
                             } catch (NullPointerException np) {
                                 np.printStackTrace();
                             }
-
                         }
 
                         if (mOverlaysAdapter != null) {
@@ -297,7 +308,6 @@ public class OverlaysTool extends EditContentTool {
         String filename;
         File file;
         Bitmap thumbnail;
-        Bitmap fullSize;
 
         public Overlay(String filename, File file, Bitmap thumbnail) {
             this.filename = filename;
@@ -305,21 +315,8 @@ public class OverlaysTool extends EditContentTool {
             this.thumbnail = thumbnail;
         }
 
-        public Bitmap getFullPhoto(Context context) {
-            if (fullSize == null && file != null) {
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
-                opts.inJustDecodeBounds = false;
-                opts.inSampleSize = opts.outWidth / context.getResources().getDisplayMetrics().widthPixels;
-                fullSize = BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
-            }
-
-            return fullSize;
-        }
 
         public void recycle() {
-            if (fullSize != null) fullSize.recycle();
             if (thumbnail != null) thumbnail.recycle();
         }
 
