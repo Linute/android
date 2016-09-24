@@ -31,7 +31,7 @@ public class API_Methods {
 
 
     //CHANGE ONLY THIS TO SWITCH TO PROD
-    public static final boolean IS_DEV_BUILD = false;   //change this flag for dev
+    public static final boolean IS_DEV_BUILD = true;
 
     // API ENDPOINT URL
     public static final String SCHEME = "https";
@@ -182,17 +182,17 @@ public class API_Methods {
         return header;
     }
 
-    public static Call sendErrorReport(Throwable throwable, String token, Callback cb){
+    public static Call sendErrorReport(Throwable throwable, String token, Callback cb) {
         Map<String, Object> parms = new HashMap<>();
         StringBuilder trace = new StringBuilder();
-        for(StackTraceElement s:throwable.getStackTrace()){
+        for (StackTraceElement s : throwable.getStackTrace()) {
             trace.append(s.toString()).append(" \n ");
         }
         parms.put("stackTrace", trace);
         parms.put("name", throwable.toString());
-        parms.put("userAgent",  Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
+        parms.put("userAgent", Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
         parms.put("os", "android");
-        return API_Methods.post("errors",getMainHeader(token), parms, cb);
+        return API_Methods.post("errors", getMainHeader(token), parms, cb);
     }
 
 }

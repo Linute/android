@@ -364,7 +364,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() == mChatAdapter.getItemCount()-1){
+                if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() >= mChatAdapter.getItemCount()-mNewMessageCount-2){
                     mNewMessageCount = 0;
                     if(mNewMessageSnackbar != null && mNewMessageSnackbar.isShown())
                         mNewMessageSnackbar.dismiss();
@@ -1413,7 +1413,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mNewMessageSnackbar.getView().setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            scrollToBottom();
+                            scrollToPositionFromBottom(mNewMessageCount);
                             mNewMessageSnackbar.dismiss();
                         }
                     });
@@ -1611,6 +1611,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             }
         });
 */
+    }
+
+    private void scrollToPositionFromBottom(final int count) {
+
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - mNewMessageCount-2, 0);
+                }
+            });
+        }
     }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
