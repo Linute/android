@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.View;
 
 import com.bumptech.glide.RequestManager;
-import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.StatusFeedHolder;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
@@ -44,5 +43,4 @@ public class FeedDetailHeaderStatusViewHolder extends StatusFeedHolder {
             vLikesHeart.toggle();
         }
     }
-
 }
