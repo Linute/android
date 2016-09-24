@@ -6,7 +6,7 @@
         <Preference android:key="edit_profile"
                     android:title="Edit Profile"/>
         <Preference android:key="change_email"
-                    android:title="Change email"/>
+                    android:title="Change Email"/>
         <Preference android:key="change_phone_number"
                     android:title="Change Phone Number"/>
     </PreferenceCategory>
