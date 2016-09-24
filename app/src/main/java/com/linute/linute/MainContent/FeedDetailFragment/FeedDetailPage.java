@@ -130,7 +130,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     //used in displaying bottom snackbar on new comment socket
-    private int newCommentCount = 0;
+    private int mNewCommentCount = 0;
 
 
     public static FeedDetailPage newInstance(Post post) {
@@ -225,8 +225,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     showKeyboard(recyclerView, false);
                 }
 
-                if(mFeedDetailLLM.findLastVisibleItemPosition() == mFeedDetailAdapter.getItemCount()-1){
-                    newCommentCount = 0;
+                if(mFeedDetailLLM.findLastVisibleItemPosition() >= mFeedDetailAdapter.getItemCount()-mNewCommentCount){
+                    mNewCommentCount = 0;
                     if(mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
                         mNewCommentSnackbar.dismiss();
                 }
@@ -1486,7 +1486,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     }
 
                                     if(mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()){
-                                        newCommentCount ++;
+                                        mNewCommentCount++;
                                     }
 
 
@@ -1495,7 +1495,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                                     int pos = mShowPostDetail ? mFeedDetail.getComments().size() - 1 : mFeedDetail.getComments().size() - 2;
                                     if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)) {
-                                        mNewCommentSnackbar = Snackbar.make(mCommentEditText, (newCommentCount > 1 ? newCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
+                                        mNewCommentSnackbar = Snackbar.make(mCommentEditText, (mNewCommentCount > 1 ? mNewCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                                         snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -1504,7 +1504,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         mNewCommentSnackbar.getView().setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
-                                                recList.smoothScrollToPosition(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - 1);
+                                                Log.i("AAA", mNewCommentCount + " " + recList.getHeight());
+                                                mFeedDetailLLM.scrollToPositionWithOffset(mShowPostDetail ? mFeedDetail.getComments().size() : mFeedDetail.getComments().size() - mNewCommentCount, 0);
                                                 mNewCommentSnackbar.dismiss();
                                             }
                                         });
