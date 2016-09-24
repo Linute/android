@@ -74,8 +74,11 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         View rootView = inflater.inflate(R.layout.fragment_findfriends_choices, container, false);
 
         if (mFindFriendsFragments == null) {
-            mFindFriendsFragments = new FindFriendsFragment[]{FindFriendsFragment.newInstance(0),
-                    FindFriendsFragment.newInstance(1), FindFriendsFragment.newInstance(2)};
+            mFindFriendsFragments = new FindFriendsFragment[]{
+                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_CAMPUS),
+                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_NAME),
+                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_FACEBOOK)
+            };
         }
 
         FragmentPagerAdapter fragmentPagerAdapter = new FindFriendsFragmentAdapter(getChildFragmentManager(), mFindFriendsFragments);
@@ -151,7 +154,6 @@ public class FindFriendsChoiceFragment extends BaseFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                //Log.i("TEST", "afterTextChanged: "+s.toString());
                 (mFindFriendsFragments[mViewPager.getCurrentItem()]).searchWithQuery(s.toString());
             }
         });
@@ -185,7 +187,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         }
     }
 
-    public void hideKeyboard(){
+    public void hideKeyboard() {
         if (getActivity() != null) {
             //hide keyboard
             if (mSearchView.hasFocus()) {

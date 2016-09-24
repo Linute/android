@@ -29,13 +29,13 @@ public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position){
+        switch (position) {
             case 0:
-                return "Name";
+                return "Campus";
             case 1:
-                return "Facebook";
+                return "Name";
             case 2:
-                return "Contacts";
+                return "Facebook";
         }
 
         return super.getPageTitle(position);

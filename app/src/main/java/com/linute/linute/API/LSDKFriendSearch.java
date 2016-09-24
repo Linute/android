@@ -40,6 +40,14 @@ public class LSDKFriendSearch {
     }
 
 
+    public Call searchFriendByName(Map<String, Object> params, Callback callback){
+
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+
+        return API_Methods.post("friends/search", header, params, callback);
+    }
+
+
     public Call searchFriendByFacebook(String fbToken, Callback callback){
 
         Map<String, String> header = API_Methods.getMainHeader(mToken);
@@ -51,14 +59,4 @@ public class LSDKFriendSearch {
         return API_Methods.post("friends/facebook", header, param, callback);
     }
 
-    public Call searchFriendByContacts(JSONArray phone, JSONArray email, Callback callback){
-
-        Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("phones", phone);
-        param.put("emails", email);
-
-        return API_Methods.post("friends/contacts", header, param, callback);
-    }
 }

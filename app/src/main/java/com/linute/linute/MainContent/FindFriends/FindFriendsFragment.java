@@ -1,16 +1,9 @@
 package com.linute.linute.MainContent.FindFriends;
 
-import android.Manifest;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -54,13 +47,11 @@ import okhttp3.Response;
  * Created by QiFeng on 1/16/16.
  */
 
-
-//TODO: ADD RELOAD BUTTON
-
 public class FindFriendsFragment extends BaseFragment {
 
-    public static final int SEARCH_TYPE_NAME = 0;
-    public static final int SEARCH_TYPE_FACEBOOK = 1;
+    public static final int SEARCH_TYPE_CAMPUS = 0;
+    public static final int SEARCH_TYPE_NAME = 1;
+    public static final int SEARCH_TYPE_FACEBOOK = 2;
 
     public static final String TAG = FindFriendsFragment.class.getSimpleName();
 
@@ -266,28 +257,8 @@ public class FindFriendsFragment extends BaseFragment {
                 }
             }
 
-        } else { //contacts. This process takes forever to get emails. We will use async task
-            rationaleText.setText(R.string.need_contant_permission);
-            rationaleText.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_telephone,0,0);
-            reloadButton.setBackgroundResource(R.drawable.yellow_button);
-            reloadButton.setText("Search contacts");
-
-            if (getFragmentState() == FragmentState.NEEDS_UPDATING) {
-                mFindFriendsRationale.setVisibility(View.VISIBLE);
-                reloadButton.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View v) {
-                        setUpContactsList();
-                    }
-                });
-            } else {
-                mFindFriendsRationale.setVisibility(View.GONE);
-                if (mFriendFoundList.isEmpty()) {
-                    mEmptyText.setVisibility(View.VISIBLE);
-                }
-            }
         }
+
         return rootView;
     }
 
@@ -543,154 +514,6 @@ public class FindFriendsFragment extends BaseFragment {
         });
     }
 
-    private static final int READ_CONTACTS_PERMISSION = 19;
-
-    private void setUpContactsList() {
-        //check for contact permissions
-        //no permissions: ask for them
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, READ_CONTACTS_PERMISSION);
-        }
-        //have permissions
-        else {
-            mFindFriendsRationale.setVisibility(View.GONE);
-            mProgressBar.setVisibility(View.VISIBLE);
-            new GetContactsInBackground().execute();
-        }
-    }
-
-    private void loadContacts() {
-        JSONArray phoneNumbers = new JSONArray();
-        JSONArray emails = new JSONArray();
-
-        if (getActivity() == null) return;
-
-        ContentResolver cr = getActivity().getContentResolver();
-
-        if (cr == null) return;
-
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
-
-        if (cur == null) return;
-
-        if (cur.getCount() > 0) {
-            while (cur.moveToNext()) {
-                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
-                if (Integer.parseInt(cur.getString(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-
-                    // get the phone number
-                    Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
-
-                    if (pCur == null) continue;
-
-                    while (pCur.moveToNext()) {
-                        phoneNumbers.put(pCur.getString(
-                                pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)));
-                    }
-                    pCur.close();
-
-
-                    // get email and type
-
-                    Cursor emailCur = cr.query(
-                            ContactsContract.CommonDataKinds.Email.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
-
-                    if (emailCur == null) continue;
-
-                    while (emailCur.moveToNext()) {
-                        // This would allow you get several email addresses
-                        // if the email addresses were stored in an array
-
-                        emails.put(emailCur.getString(
-                                emailCur.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)));
-                    }
-                    emailCur.close();
-                }
-            }
-        }
-
-        cur.close();
-
-        //send info to backend
-        new LSDKFriendSearch(getActivity()).searchFriendByContacts(phoneNumbers, emails, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (getActivity() == null) return;
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Utils.showBadConnectionToast(getActivity());
-                        mProgressBar.setVisibility(View.GONE);
-                        mFindFriendsRationale.setVisibility(View.VISIBLE);
-                        //showRetryButton(true);
-                    }
-                });
-
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-
-                    try {
-                        JSONObject json = new JSONObject(response.body().string());
-                        JSONArray friends = json.getJSONArray("friends");
-
-                        if (friends != null) {
-                            mUnfilteredList.clear();
-                            for (int i = 0; i < friends.length(); i++) {
-                                FriendSearchUser user = new FriendSearchUser(friends.getJSONObject(i));
-                                mUnfilteredList.add(user);
-                            }
-                        }
-
-                        setFragmentState(FragmentState.FINISHED_UPDATING);
-
-                        if (getActivity() == null) return;
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressBar.setVisibility(View.GONE);
-                                if (mFriendFoundList.isEmpty()) {
-                                    mEmptyText.setVisibility(View.VISIBLE);
-                                }
-
-                                mMainHandler.removeCallbacksAndMessages(null);
-                                mMainHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mFriendFoundList.clear();
-                                        mFriendFoundList.addAll(mUnfilteredList);
-                                        mFriendSearchAdapter.notifyDataSetChanged();
-                                    }
-                                });
-                            }
-                        });
-
-                        //TODO: need to implement invite
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        if (getActivity() == null) return;
-                        showServerErrorWithRetryButton();
-                    }
-
-                } else {
-                    Log.e(TAG, "onResponse: " + response.body().string());
-                    if (getActivity() == null) return;
-                    showServerErrorWithRetryButton();
-                }
-            }
-
-        });
-    }
-
     private void setUpFacebookCallback() {
 
         LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -758,14 +581,6 @@ public class FindFriendsFragment extends BaseFragment {
     }
 
 
-    public class GetContactsInBackground extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            loadContacts();
-            return null;
-        }
-    }
-
     private void showServerErrorWithRetryButton() {
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -773,7 +588,6 @@ public class FindFriendsFragment extends BaseFragment {
                 mProgressBar.setVisibility(View.GONE);
                 Utils.showServerErrorToast(getActivity());
                 mFindFriendsRationale.setVisibility(View.VISIBLE);
-                //showRetryButton(true);
             }
         });
     }
