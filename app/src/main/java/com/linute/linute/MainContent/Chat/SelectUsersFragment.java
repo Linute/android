@@ -317,12 +317,16 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                         JSONObject user;
                         for (int i = 0; i < friends.length(); i++) {
                             user = friends.getJSONObject(i);
+                            String college = null;
+                            if(!user.getString("college").equals("null")){
+                                college = user.getJSONObject("college").getString("name");
+                            }
                             tempUsers.add(new User(
                                     user.getString("id"),
                                     user.getString("firstName"),
                                     user.getString("lastName"),
                                     user.getString("profileImage"),
-                                    user.getJSONObject("college").getString("name")
+                                    college
                             ));
                             /*if(findUser(mSelectedUsers, user.getString("id")) != -1) {
                                 tempUsers.add(new User(
