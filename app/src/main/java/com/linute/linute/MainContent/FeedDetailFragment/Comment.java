@@ -1,7 +1,12 @@
 package com.linute.linute.MainContent.FeedDetailFragment;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +14,7 @@ import java.util.List;
 /**
  * Created by Arman on 1/13/16.
  */
-public class Comment {
+public class Comment implements Parcelable {
 
     public static final short COMMENT_TEXT = 0;
     public static final short COMMENT_IMAGE = 1;
@@ -72,6 +77,38 @@ public class Comment {
         mImageUrl = imageUrl;
         mType = imageUrl == null ? 0 : 1;
     }
+
+
+    public Comment(JSONObject object) throws JSONException {
+
+    }
+
+    protected Comment(Parcel in) {
+        mCommentUserId = in.readString();
+        mCommentUserProfileImage = in.readString();
+        mCommentUserName = in.readString();
+        mCommentPostText = in.readString();
+        mCommentPostId = in.readString();
+        mDateLong = in.readLong();
+        mIsAnon = in.readByte() != 0;
+        mIsLiked = in.readByte() != 0;
+        mAnonImage = in.readString();
+        mNumberOfLikes = in.readInt();
+        mImageUrl = in.readString();
+        mType = in.readInt();
+    }
+
+    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+        @Override
+        public Comment createFromParcel(Parcel in) {
+            return new Comment(in);
+        }
+
+        @Override
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
 
     public String getCommentUserId() {
         return mCommentUserId;
@@ -146,6 +183,40 @@ public class Comment {
         return mType;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+//    private String mCommentUserId;
+//    private String mCommentUserProfileImage;
+//    private String mCommentUserName;
+//    private String mCommentPostText;
+//    private String mCommentPostId;
+//    private long mDateLong;
+//    private boolean mIsAnon;
+//    private boolean mIsLiked;
+//    private String mAnonImage;
+//    private int mNumberOfLikes;
+//
+//    private String mImageUrl;
+//    private int mType;
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mCommentUserId);
+        dest.writeString(mCommentUserProfileImage);
+        dest.writeString(mCommentUserName);
+        dest.writeString(mCommentPostText);
+        dest.writeString(mCommentPostId);
+        dest.writeLong(mDateLong);
+        dest.writeByte((byte)(mIsAnon ? 1 : 0));
+        dest.writeByte((byte)(mIsLiked ? 1 : 0));
+        dest.writeString(mAnonImage);
+        dest.writeInt(mNumberOfLikes);
+        dest.writeString(mImageUrl);
+        dest.writeInt(mType);
+    }
 
 
     public static class MentionedPersonLight{
@@ -172,6 +243,6 @@ public class Comment {
         public String getFormatedFullName(){
             return mFormattedName;
         }
-
     }
 }
+

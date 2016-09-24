@@ -12,6 +12,7 @@ import java.util.List;
 public class FeedDetail {
     private Post mPost;
 
+    //Can contain a load more header
     private List<Object> mComments = new ArrayList<>();
 
     public FeedDetail(Post post) {

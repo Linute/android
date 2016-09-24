@@ -2,18 +2,15 @@ package com.linute.linute.MainContent.FriendsList;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
@@ -42,6 +39,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private boolean mFollowing;
 
     private SharedPreferences mSharedPreferences;
+    private RequestManager mRequestManager;
 
     public FriendsListAdapter(List<Friend> friends, Context context, boolean following) {
         mFriendsList = friends;
@@ -50,6 +48,13 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         mSharedPreferences = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
+    public void setRequestManager(RequestManager manager){
+        mRequestManager = manager;
+    }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -130,7 +135,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         public void bindView(Friend friend) {
-            Glide.with(aContext)
+            mRequestManager
                     .load(Utils.getImageUrlOfUser(mFollowing ? friend.getOwnerProfile() : friend.getUserProfile()))
                     .dontAnimate()
                     .placeholder(R.drawable.image_loading_background)

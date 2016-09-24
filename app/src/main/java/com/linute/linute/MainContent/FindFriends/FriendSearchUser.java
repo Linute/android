@@ -2,7 +2,6 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,24 +10,31 @@ import org.json.JSONObject;
  */
 public class FriendSearchUser implements Parcelable {
 
-    private String mProfileImage;
-    private String mUserId;
-    private String mFirstName;
-    private String mLastName;
-    private String mFullName;
+    public final String profileImage;
+    public final String userId;
+    public final String firstName;
+    public final String lastName;
+    public final String fullName;
+    public final String collegeName;
     private boolean mIsFollowing = false;
 
     public FriendSearchUser(JSONObject user)throws JSONException{
-        mProfileImage = getStringFromJson("profileImage", user);
-        mUserId = user.getString("id");
+        profileImage = getStringFromJson("profileImage", user);
+        userId = user.getString("id");
 
-        mFirstName = getStringFromJson("firstName", user);
-        mLastName = getStringFromJson("lastName", user);
+        firstName = getStringFromJson("firstName", user);
+        lastName = getStringFromJson("lastName", user);
 
-        if (mFirstName == null) mFirstName = "";
-        if (mLastName == null) mLastName = "";
+        fullName = firstName + " " + lastName;
 
-        mFullName = mFirstName + " " + mLastName;
+        String college;
+        try{
+            college = user.getJSONObject("college").getString("name");
+        }catch (JSONException e){
+            college = "";
+        }
+
+        collegeName = college;
 
         try {
             JSONObject friend = user.getJSONObject("friend");
@@ -40,16 +46,22 @@ public class FriendSearchUser implements Parcelable {
 
 
     public FriendSearchUser(JSONObject owner, JSONObject friend) throws JSONException {
-        mProfileImage = getStringFromJson("profileImage", owner);
-        mUserId = owner.getString("id");
+        profileImage = getStringFromJson("profileImage", owner);
+        userId = owner.getString("id");
 
-        mFirstName = getStringFromJson("firstName", owner);
-        mLastName = getStringFromJson("lastName", owner);
+        firstName = getStringFromJson("firstName", owner);
+        lastName = getStringFromJson("lastName", owner);
 
-        if (mFirstName == null) mFirstName = "";
-        if (mLastName == null) mLastName = "";
+        fullName = firstName + " " + lastName;
 
-        mFullName = mFirstName + " " + mLastName;
+        String college;
+        try{
+            college = owner.getJSONObject("college").getString("name");
+        }catch (JSONException e){
+            college = "";
+        }
+
+        collegeName = college;
 
         if (friend != null) {
             try {
@@ -64,7 +76,7 @@ public class FriendSearchUser implements Parcelable {
 
     public void setFollowing(JSONObject friendship) throws JSONException {
         String friendUserId = friendship.getString("user");
-        mIsFollowing = friendUserId.equals(mUserId) || getBooleanFromJson("followedBack", friendship);
+        mIsFollowing = friendUserId.equals(userId) || getBooleanFromJson("followedBack", friendship);
     }
 
 
@@ -72,7 +84,7 @@ public class FriendSearchUser implements Parcelable {
         try {
             return object.getString(key);
         } catch (JSONException e) {
-            return null;
+            return "";
         }
     }
 
@@ -94,28 +106,8 @@ public class FriendSearchUser implements Parcelable {
     }
 
 
-    public String getProfileImage() {
-        return mProfileImage;
-    }
-
-    public String getUserId() {
-        return mUserId;
-    }
-
-    public String getFullName() {
-        return mFullName;
-    }
-
-    public String getFirstName() {
-        return mFirstName;
-    }
-
-    public String getLastName() {
-        return mLastName;
-    }
-
     public boolean nameContains(String pre) {
-        return mFullName.toLowerCase().contains(pre.toLowerCase());
+        return fullName.toLowerCase().contains(pre.toLowerCase());
     }
 
     @Override
@@ -125,21 +117,22 @@ public class FriendSearchUser implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mProfileImage);
-        dest.writeString(mUserId);
-        dest.writeString(mFirstName);
-        dest.writeString(mLastName);
+        dest.writeString(profileImage);
+        dest.writeString(userId);
+        dest.writeString(firstName);
+        dest.writeString(lastName);
+        dest.writeString(collegeName);
         dest.writeByte((byte) (mIsFollowing ? 1 : 0));
     }
 
     private FriendSearchUser(Parcel in) {
-        mProfileImage = in.readString();
-        mUserId = in.readString();
-        mFirstName = in.readString();
-        mLastName = in.readString();
+        profileImage = in.readString();
+        userId = in.readString();
+        firstName = in.readString();
+        lastName = in.readString();
+        collegeName = in.readString();
         mIsFollowing = in.readByte() != 0;
-
-        mFullName = mFirstName + " " + mLastName;
+        fullName = firstName + " " + lastName;
     }
 
     public static final Creator<FriendSearchUser> CREATOR = new Creator<FriendSearchUser>() {

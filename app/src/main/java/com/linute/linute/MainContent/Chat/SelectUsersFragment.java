@@ -21,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKChat;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -143,8 +144,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
 
 
-
         mSearchAdapter = createSearchAdapter();
+        mSearchAdapter.setRequestManager(Glide.with(this));
         mSearchAdapter.setLockedUserList(mLockedUsers);
         mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
@@ -156,6 +157,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSearchAdapter.setOnUserSelectedListener(this);
 
         mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
+        mSelectedAdapter.setRequestManager(Glide.with(this));
         mSelectedRV = (RecyclerView) view.findViewById(R.id.selected_users);
         LinearLayoutManager selectedLLM = new LinearLayoutManager(getActivity());
         selectedLLM.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -376,6 +378,13 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
     }
 
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mSearchAdapter.getRequestManager() != null) mSearchAdapter.getRequestManager().onDestroy();
+        if (mSelectedAdapter.getRequestManager() != null) mSelectedAdapter.getRequestManager().onDestroy();
+    }
 
     private OnUsersSelectedListener mUsersSelectedListener;
 

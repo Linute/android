@@ -40,6 +40,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.github.hiteshsondhi88.libffmpeg.FFmpeg;
 import com.github.hiteshsondhi88.libffmpeg.FFmpegExecuteResponseHandler;
 import com.github.hiteshsondhi88.libffmpeg.LoadBinaryResponseHandler;
@@ -438,14 +439,14 @@ public class EditFragment extends BaseFragment {
         mTools[oldSelectedTool].onClose();
         mTools[mSelectedTool].onOpen();
 
-        if (mTools[mSelectedTool] instanceof OverlaysTool) {
-            mContentView.setDrawingCacheEnabled(true);
-            mContentView.buildDrawingCache();
-
-            Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
-            mContentView.destroyDrawingCache();
-            ((OverlaysTool) mTools[mSelectedTool]).setBackingBitmap(bm);
-        }
+        //if (mTools[mSelectedTool] instanceof OverlaysTool) {
+//            mContentView.setDrawingCacheEnabled(true);
+//            mContentView.buildDrawingCache();
+//
+//            Bitmap bm = Bitmap.createBitmap(mContentView.getDrawingCache(), 0, 0, mContentView.getWidth(), mContentView.getHeight());
+//            mContentView.destroyDrawingCache();
+//            ((OverlaysTool) mTools[mSelectedTool]).setBackingBitmap(bm);
+       // }
 
         if (mToolbar != null) {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
@@ -694,11 +695,11 @@ public class EditFragment extends BaseFragment {
         CropTool cropTool;
         OverlaysTool overlaysTool;
 
-        MediaMetadataRetriever retriever;
+        //MediaMetadataRetriever retriever;
         switch (mContentType) {
             case UploadedPhoto:
             case Photo:
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay);
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
                 switch (mContentSubType) {
                     case Post:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
@@ -728,9 +729,9 @@ public class EditFragment extends BaseFragment {
                 }
             case UploadedVideo:
             case Video:
-                retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(mUri.getPath());
-                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, retriever.getFrameAtTime(0));
+                //retriever = new MediaMetadataRetriever();
+                //retriever.setDataSource(mUri.getPath());
+                overlaysTool = new OverlaysTool(mUri, mContentType, overlay, Glide.with(this));
                 switch (mContentSubType) {
                     case Post:
                         return new EditContentTool[]{
