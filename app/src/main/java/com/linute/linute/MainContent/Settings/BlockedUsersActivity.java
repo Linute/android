@@ -63,6 +63,13 @@ public class BlockedUsersActivity extends Activity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Blocked Users");
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
 
         final RecyclerView blockedUsersRV = (RecyclerView) findViewById(R.id.list_blocked_users);
