@@ -109,7 +109,7 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
     private void setUpFacebookList(){
         if (getContext() == null) return;
         mProgressBar.setVisibility(View.VISIBLE);
-        mFindFriendsSearchPresenter.request(getContext(), getParams(""));
+        mFindFriendsSearchPresenter.request(getContext(), getParams());
     }
 
     private void showRationalTextFacebook() {
