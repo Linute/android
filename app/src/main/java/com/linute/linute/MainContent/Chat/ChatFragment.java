@@ -500,12 +500,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !activity.socketConnected())
+                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
                         return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !activity.socketConnected())
+                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
                         return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
@@ -520,6 +520,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mTypingHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            if(typingJson == null) return;
                             activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                             mAmAlreadyTyping = false;
                         }
@@ -534,7 +535,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !activity.socketConnected())
+                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
                         return;
                     activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
@@ -693,7 +694,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         joinLeft = new JSONObject();
         delivered = new JSONObject();
 
+
+
         try {
+
             typingJson.put("room", mRoomId);
             typingJson.put("user", mUserId);
 
