@@ -1,13 +1,11 @@
 package com.linute.linute.MainContent.Chat;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -28,7 +26,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         this.mUsers = mUsers;
     }
 
-    private UserSelectAdapter.OnUserSelectedListener mUserSelectedListener;
+    private UserSelectAdapter2.OnUserClickListener mUserSelectedListener;
 
 
     public RequestManager getRequestManager() {
@@ -54,7 +52,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
                 if(mUserSelectedListener != null){
                     int position = holder.getAdapterPosition();
                     //Log.i("AAA", position+"");
-                    mUserSelectedListener.onUserSelected(mUsers.get(holder.getAdapterPosition()), holder.getAdapterPosition());
+                    mUserSelectedListener.onUserClick(mUsers.get(holder.getAdapterPosition()));
                 }
             }
         });
@@ -85,7 +83,7 @@ public class SelectedUsersAdapter extends RecyclerView.Adapter<SelectedUsersAdap
         }
     }
 
-    public void setUserSelectedListener(UserSelectAdapter.OnUserSelectedListener mUserSelectedListener) {
+    public void setUserSelectedListener(UserSelectAdapter2.OnUserClickListener mUserSelectedListener) {
         this.mUserSelectedListener = mUserSelectedListener;
     }
 

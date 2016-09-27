@@ -125,9 +125,9 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                         }
                     });
-                    selectUserFragment.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                    selectUserFragment.setOnRoomSelectedListener(new UserGroupSearchAdapter2.OnRoomClickListener() {
                         @Override
-                        public void onRoomSelected(ChatRoom room) {
+                        public void onRoomClick(ChatRoom room) {
                             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }

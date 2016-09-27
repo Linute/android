@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -42,11 +43,12 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class SelectUsersFragment extends Fragment implements UserSelectAdapter.OnUserSelectedListener{
+public class SelectUsersFragment extends Fragment implements UserGroupSearchAdapter2.OnUserClickListener {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String TAG = SelectUsersFragment.class.getSimpleName();
 
-    protected UserSelectAdapter mSearchAdapter;
+    //    protected UserSelectAdapter mSearchAdapter;
+    protected UserSelectAdapter2 mSearchAdapter2;
     protected SelectedUsersAdapter mSelectedAdapter;
 
     protected ArrayList<User> mSelectedUsers = new ArrayList<>();
@@ -55,6 +57,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     protected ArrayList<User> mLockedUsers;
 
     private EditText editText;
+    private TextView firstUserName;
 
     protected Handler mHandler = new Handler();
     protected RecyclerView mSelectedRV;
@@ -73,14 +76,15 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
     SharedPreferences mSharedPreferences;
 
-    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers){
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers) {
         Bundle arguments = new Bundle();
         arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
         SelectUsersFragment selectUserFragment = new SelectUsersFragment();
         selectUserFragment.setArguments(arguments);
         return selectUserFragment;
     }
-    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers, ArrayList<User> selectedUsers){
+
+    public static SelectUsersFragment newInstance(ArrayList<User> lockedUsers, ArrayList<User> selectedUsers) {
         Bundle arguments = new Bundle();
         arguments.putParcelableArrayList(KEY_LOCKED_USERS, lockedUsers);
         arguments.putParcelableArrayList(KEY_SELECTED_USERS, selectedUsers);
@@ -93,11 +97,11 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
-        if(arguments != null) {
+        if (arguments != null) {
             ArrayList<User> lockedUsersArg = arguments.getParcelableArrayList(KEY_LOCKED_USERS);
-            if(lockedUsersArg != null) mLockedUsers = lockedUsersArg;
+            if (lockedUsersArg != null) mLockedUsers = lockedUsersArg;
             ArrayList<User> selectedUsersArg = arguments.getParcelableArrayList(KEY_SELECTED_USERS);
-            if(selectedUsersArg != null) mSelectedUsers = selectedUsersArg;
+            if (selectedUsersArg != null) mSelectedUsers = selectedUsersArg;
         }
         mSharedPreferences = getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
@@ -118,7 +122,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().onBackPressed();
                 }
             }
@@ -130,6 +134,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         toolbar.getMenu().findItem(R.id.menu_item_create).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
+                if (mSelectedUsers.isEmpty()) return true;
+
                 BaseTaptActivity activity = (BaseTaptActivity)getActivity();
 
                 activity.getSupportFragmentManager().popBackStack();
@@ -142,19 +148,17 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
 
 
-
-
-        mSearchAdapter = createSearchAdapter();
-        mSearchAdapter.setRequestManager(Glide.with(this));
-        mSearchAdapter.setLockedUserList(mLockedUsers);
-        mSearchAdapter.setSelectedUserList(mSelectedUsers);
+        mSearchAdapter2 = createSearchAdapter();
+//        mSearchAdapter.setLockedUserList(mLockedUsers);
+//        mSearchAdapter.setSelectedUserList(mSelectedUsers);
         mSearchRV = (RecyclerView) view.findViewById(R.id.search_users);
         mSearchRV.setHasFixedSize(true);
         final LinearLayoutManager searchLLM = new LinearLayoutManager(getActivity());
         searchLLM.setOrientation(LinearLayoutManager.VERTICAL);
         mSearchRV.setLayoutManager(searchLLM);
-        mSearchRV.setAdapter(mSearchAdapter);
-        mSearchAdapter.setOnUserSelectedListener(this);
+//        mSearchRV.setAdapter(mSearchAdapter);
+        mSearchRV.setAdapter(mSearchAdapter2);
+//        mSearchAdapter.setOnUserSelectedListener(this);
 
         mSelectedAdapter = new SelectedUsersAdapter(mSelectedUsers);
         mSelectedAdapter.setRequestManager(Glide.with(this));
@@ -164,30 +168,41 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         mSelectedRV.setLayoutManager(selectedLLM);
         mSelectedRV.setAdapter(mSelectedAdapter);
 
-        mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter.OnUserSelectedListener() {
+        mSearchAdapter2.setSelectedUserList(mSelectedUsers);
+        mSearchAdapter2.setLockedUserList(mLockedUsers);
+
+        mSelectedAdapter.setUserSelectedListener(new UserSelectAdapter2.OnUserClickListener() {
             @Override
-            public void onUserSelected(final User user, final int position) {
+            public void onUserClick(final User user) {
 
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        int listPosition = User.findUser(mSearchUserList, user);
+                        /*int listPosition = User.findUser(mSearchUserList, user);
                         if(listPosition != -1){
                             mSearchUserList.remove(listPosition);
-                            mSearchAdapter.notifyItemRemoved(listPosition);
+                            mSearchAdapter2.notifyItemRemoved(listPosition);
                         }
 
                         if(focusedUser != null){
                             mSearchUserList.remove(0);
-                            mSearchAdapter.notifyItemRemoved(0);
+                            mSearchAdapter2.notifyItemRemoved(0);
                         }
 
                         mSearchUserList.add(0, user);
-                        mSearchAdapter.notifyItemInserted(0);
+                        mSearchAdapter2.notifyItemInserted(0);
                         searchLLM.scrollToPosition(0);
-                        focusedUser = user;
+                        focusedUser = user;*/
 
-                        mSearchAdapter.notifyDataSetChanged();
+                        if (user.equals(mSearchAdapter2.getFocusedUser())) {
+                            mSearchAdapter2.clearFocusedUser();
+                        } else {
+                            mSearchAdapter2.setFocusedUser(user);
+                            mSearchRV.smoothScrollToPosition(0);
+                        }
+
+
+//                        mSearchAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -195,6 +210,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
 
         editText = (EditText) toolbar.findViewById(R.id.search_users_entry);
+        firstUserName = (TextView) view.findViewById(R.id.text_single_user_name);
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -223,39 +239,50 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         search("");
     }
 
-    protected void onSearchPressed(){
+    protected void onSearchPressed() {
         if (getActivity() == null) return;
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm == null) return;
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
 
-    protected UserSelectAdapter createSearchAdapter() {
-        return new UserSelectAdapter(getActivity(), mSearchUserList);
+    protected UserSelectAdapter2 createSearchAdapter() {
+        UserSelectAdapter2 userSelectAdapter = new UserSelectAdapter2(getActivity());
+        userSelectAdapter.setUserSelectListener(this);
+        userSelectAdapter.setUsers(mSearchUserList);
+        return userSelectAdapter;
+
     }
 
     @Override
-    public void onUserSelected(final User user, final int adapterPosition) {
+    public void onUserClick(final User user /*final int adapterPosition*/) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 int listPosition = User.findUser(mSelectedUsers, user);
 
-                if(listPosition == -1) {
+                if (listPosition == -1) {
                     mSelectedUsers.add(user);
-                    // mSearchUserList.remove(user);
-                    mSelectedAdapter.notifyItemInserted(mSelectedUsers.size()-1);
-                    mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size()-1);
+//                    mSearchUserList.remove(user);
+                    mSelectedAdapter.notifyItemInserted(mSelectedUsers.size() - 1);
+                    if (mSelectedAdapter.getItemCount() == 2) mSelectedAdapter.notifyItemChanged(0);
+                    mSelectedRV.getLayoutManager().scrollToPosition(mSelectedUsers.size() - 1);
                     editText.setText("");
 //            mSearchAdapter.notifyDataSetChanged();
-                }else{
+                } else {
                     mSelectedUsers.remove(listPosition);
                     mSelectedRV.getLayoutManager().scrollToPosition(listPosition);
                     mSelectedAdapter.notifyItemRemoved(listPosition);
+                    if (mSelectedAdapter.getItemCount() == 1) mSelectedAdapter.notifyItemChanged(0);
                     editText.setText("");
-
                 }
-                mSearchAdapter.notifyItemChanged(adapterPosition);
+//                mSearchAdapter.notifyItemChanged(adapterPosition);
+                mSearchAdapter2.clearFocusedUser();
+                mSearchAdapter2.notifyDataSetChanged();
+
+
+                showName(mSelectedUsers.size() == 1);
+
             }
         });
     }
@@ -264,7 +291,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     public void onStop() {
         super.onStop();
 
-        if (editText.hasFocus() && getActivity() != null){
+        if (editText.hasFocus() && getActivity() != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
         }
@@ -283,7 +310,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         users.getUsersAndRooms(newChat, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -298,7 +325,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
                 if (!response.isSuccessful()) {
                     Log.i(TAG, "onResponseNotSuccessful: " + response.body().string());
-                    if (getActivity() != null){
+                    if (getActivity() != null) {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -341,7 +368,6 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                         }
 
 
-
                         if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
@@ -352,9 +378,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                                         public void run() {
                                             mSearchUserList.clear();
                                             mSearchUserList.addAll(tempUsers);
-                                            mSearchAdapter.notifyDataSetChanged();
+                                            mSearchAdapter2.notifyDataSetChanged();
                                             View view = getView();
-                                            if(view != null)
+                                            if (view != null)
                                                 view.findViewById(R.id.empty_view).setVisibility(tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
                                         }
                                     });
@@ -364,7 +390,7 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        if (getActivity() != null){
+                        if (getActivity() != null) {
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -378,21 +404,28 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
     }
 
+    public void showName(boolean show) {
+        firstUserName.setVisibility(show ? View.VISIBLE : View.GONE);
+        mSelectedRV.animate().x(show ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()) : 0);
+        if (show) {
+            firstUserName.setText(mSelectedUsers.get(0).getFullName());
+        }
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mSearchAdapter.getRequestManager() != null) mSearchAdapter.getRequestManager().onDestroy();
+//   TODO     if (mSearchAdapter.getRequestManager() != null) mSearchAdapter.getRequestManager().onDestroy();
         if (mSelectedAdapter.getRequestManager() != null) mSelectedAdapter.getRequestManager().onDestroy();
     }
 
     private OnUsersSelectedListener mUsersSelectedListener;
 
-    public void setOnUsersSelectedListener(OnUsersSelectedListener listener){
+    public void setOnUsersSelectedListener(OnUsersSelectedListener listener) {
         mUsersSelectedListener = listener;
     }
 
-    interface OnUsersSelectedListener{
+    interface OnUsersSelectedListener {
         void onUsersSelected(ArrayList<User> users);
     }
 

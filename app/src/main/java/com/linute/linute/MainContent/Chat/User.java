@@ -83,4 +83,13 @@ public class User implements Parcelable {
         return firstName + " " + lastName;
     }
 
+    @Override
+    public String toString() {
+        return userId + " " + getFullName();
+    }
+
+    public boolean equals(User o) {
+        if(o == null) return false;
+        return userId.equals(o.userId);
+    }
 }

@@ -34,17 +34,20 @@ public class CreateChatFragment extends SelectUsersFragment {
 
     private static final String TAG = CreateChatFragment.class.getSimpleName();
 
-    UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener;
+    UserGroupSearchAdapter2.OnRoomClickListener onRoomSelectedListener;
 
-    public void setOnRoomSelectedListener(UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener) {
+    public void setOnRoomSelectedListener(UserGroupSearchAdapter2.OnRoomClickListener onRoomSelectedListener) {
         this.onRoomSelectedListener = onRoomSelectedListener;
 //        ((UserGroupSearchAdapter)mSearchAdapter).setOnRoomSelectedListener(onRoomSelectedListener);
     }
 
     @Override
-    protected UserSelectAdapter createSearchAdapter() {
-        UserGroupSearchAdapter userGroupSearchAdapter = new UserGroupSearchAdapter(getContext(), mSearchRoomList, mSearchUserList);
-        userGroupSearchAdapter.setOnRoomSelectedListener(onRoomSelectedListener);
+    protected UserSelectAdapter2 createSearchAdapter() {
+        UserGroupSearchAdapter2 userGroupSearchAdapter = new UserGroupSearchAdapter2(getContext());
+        userGroupSearchAdapter.setUsers(mSearchUserList);
+        userGroupSearchAdapter.setRooms(mSearchRoomList);
+        userGroupSearchAdapter.setRoomClickListener(onRoomSelectedListener);
+        userGroupSearchAdapter.setUserClickListener(this);
         return userGroupSearchAdapter;
     }
 
@@ -204,7 +207,7 @@ public class CreateChatFragment extends SelectUsersFragment {
                                             mSearchRoomList.clear();
                                             mSearchRoomList.addAll(tempRoomList);
 
-                                            mSearchAdapter.notifyDataSetChanged();
+                                            mSearchAdapter2.notifyDataSetChanged();
                                         }
                                     });
 

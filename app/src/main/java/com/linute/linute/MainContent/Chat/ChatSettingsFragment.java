@@ -365,9 +365,9 @@ room: id of room
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(null, users));
                         }
                     });
-                    frag.setOnRoomSelectedListener(new UserGroupSearchAdapter.OnRoomSelectedListener() {
+                    frag.setOnRoomSelectedListener(new UserGroupSearchAdapter2.OnRoomClickListener() {
                         @Override
-                        public void onRoomSelected(ChatRoom room) {
+                        public void onRoomClick(ChatRoom room) {
                             activity.replaceContainerWithFragment(ChatFragment.newInstance(room));
                         }
                     });
