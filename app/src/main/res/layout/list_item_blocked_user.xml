@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/search_users_list_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:background="?android:selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    >
+
+    <com.linute.linute.UtilsAndHelpers.ProfileImageView
+        android:id="@+id/image_profile"
+        android:layout_width="@dimen/profile_image_radius"
+        android:layout_height="@dimen/profile_image_radius"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        >
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/eighty_black"
+            android:textSize="16sp"
+            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"/>
+
+        <TextView
+            android:id="@+id/text_college_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/fifty_black"
+            android:textSize="12sp"
+            tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/button_toggle_block"
+        android:minWidth="64dp"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="right|center_vertical"
+        android:text="unblock"
+        />
+
+
+</LinearLayout>

@@ -1,44 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:title="ACCOUNT">
-        <Preference android:key="edit_profile"
-                    android:title="Edit Profile"/>
-        <Preference android:key="change_email"
-                    android:title="Change email"/>
-        <Preference android:key="change_phone_number"
-                    android:title="Change Phone Number"/>
+    <PreferenceCategory android:title="ACCOUNT">
+        <Preference
+            android:key="edit_profile"
+            android:title="Edit Profile" />
+        <Preference
+            android:key="change_email"
+            android:title="Change email" />
+        <Preference
+            android:key="change_phone_number"
+            android:title="Change Phone Number" />
+        <Preference
+            android:key="blocked_users"
+            android:title="Blocked Users"/>
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="SUPPORT">
-        <Preference android:key="give_feedback"
-                    android:title="Give Feedback"/>
-        <Preference android:key="notifications"
-                    android:title="Notification Settings"
-        />
+    <PreferenceCategory android:title="SUPPORT">
+        <Preference
+            android:key="give_feedback"
+            android:title="Give Feedback" />
+        <Preference
+            android:key="notifications"
+            android:title="Notification Settings" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="ABOUT">
-        <Preference android:key="privacy policy"
-                    android:title="Privacy Policy"/>
-        <Preference android:key="terms_of_service"
-                    android:title="Terms of Service"/>
-        <Preference android:key="attributions"
-                    android:title="Attributions"
-        />
+    <PreferenceCategory android:title="ABOUT">
+        <Preference
+            android:key="privacy policy"
+            android:title="Privacy Policy" />
+        <Preference
+            android:key="terms_of_service"
+            android:title="Terms of Service" />
+        <Preference
+            android:key="attributions"
+            android:title="Attributions" />
     </PreferenceCategory>
 
     <PreferenceCategory>
-        <com.linute.linute.MainContent.Settings.ColoredPreference android:key="logout"
-                    android:title="Log Out"
-        />
-        <Preference android:key="version"
-                    android:title="About"
-        />
+        <com.linute.linute.MainContent.Settings.ColoredPreference
+            android:key="logout"
+            android:title="Log Out" />
+        <Preference
+            android:key="version"
+            android:title="About" />
     </PreferenceCategory>
 
 </PreferenceScreen>

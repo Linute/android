@@ -9,6 +9,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
 
 import org.apache.commons.io.FileUtils;
@@ -279,7 +280,15 @@ public class Utils {
             e.printStackTrace();
             return 0;
         }
+    }
 
+    private static StringSignature mGlideSignature;
+
+    public static StringSignature getGlideSignature(Context context){
+        if(mGlideSignature == null) {
+            mGlideSignature = new StringSignature(context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, context.MODE_PRIVATE).getString("imageSigniture", "000"));
+        }
+        return mGlideSignature;
     }
 
 

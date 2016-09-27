@@ -2,7 +2,6 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
@@ -211,5 +210,14 @@ public class LSDKUser {
         params.put("reason", reason);
 
         return API_Methods.post("reports", header, params, callback);
+    }
+
+    public Call getBlockedUsers(Callback callback){
+        String[] url = {"users","blocked"};
+
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>(0);
+
+        return API_Methods.post("users/blocked",header,params, callback);
     }
 }
