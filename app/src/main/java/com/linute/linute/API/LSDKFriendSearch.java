@@ -48,13 +48,8 @@ public class LSDKFriendSearch {
     }
 
 
-    public Call searchFriendByFacebook(String fbToken, Callback callback){
-
+    public Call searchFriendByFacebook(Map<String, Object> param, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("token", fbToken);
-
 
         return API_Methods.post("friends/facebook", header, param, callback);
     }

@@ -5,33 +5,21 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookSdk;
-import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 /**
  * Created by QiFeng on 9/24/16.
@@ -46,26 +34,26 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
     // filtered list of users
     protected List<FriendSearchUser> mFriendFoundList = new ArrayList<>();
 
-    private CallbackManager mCallbackManager;
-    private ProgressBar mProgressBar;
-    private View mFindFriendsRationale;
+    protected ProgressBar mProgressBar;
+    protected View mFindFriendsRationale;
+    protected View mReloadButton;
 
-    private View mEmptyText;
+    protected View mEmptyText;
 
-    private Handler mMainHandler = new Handler();
+    protected Handler mMainHandler = new Handler();
+    protected Handler mSearchHandler = new Handler(); //handles filtering and searchign
+
+    protected FindFriendsSearchPresenter mFindFriendsSearchPresenter;
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_find_friends, container, false);
-
-        TextView rationaleText = (TextView) rootView.findViewById(R.id.findFriends_rat_text);
         final RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.findFriends_recycler_view);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.findFriends_progressbar);
         mFindFriendsRationale = rootView.findViewById(R.id.findFriends_rationale_text);
-
-        Button reloadButton = (Button) rootView.findViewById(R.id.findFriends_turn_on);
+        mReloadButton = rootView.findViewById(R.id.findFriends_turn_on);
 
         mEmptyText = rootView.findViewById(R.id.findFriends_text);
 
@@ -77,7 +65,6 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
         mFriendSearchAdapter.setRequestManager(Glide.with(this));
 
         recyclerView.setAdapter(mFriendSearchAdapter);
-        //recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), null));
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -90,8 +77,71 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
             }
         });
 
+        setUpPresenter();
+        initScreen();
 
         return rootView;
     }
 
+    protected abstract void setUpPresenter();
+    protected abstract void initScreen();
+    public abstract void searchWithQuery(String query);
+
+    @Override
+    public void onSuccess(final ArrayList<FriendSearchUser> list, boolean canLoadMore) {
+        if (getActivity() == null) return;
+
+        mProgressBar.setVisibility(View.GONE);
+        mEmptyText.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mFriendFoundList.clear();
+                mFriendFoundList.addAll(list);
+                Log.i(TAG, "run: "+list.size());
+
+                mMainHandler.removeCallbacksAndMessages(null);
+                mFriendSearchAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    @Override
+    public void onError(String response) {
+        Log.d(TAG, "onError: "+response);
+        if (getActivity() == null) return;
+        mProgressBar.setVisibility(View.GONE);
+        Utils.showServerErrorToast(getActivity());
+        if (mFriendFoundList.isEmpty()){
+            mFindFriendsRationale.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onFailure() {
+        if (getActivity() == null) return;
+        mProgressBar.setVisibility(View.GONE);
+        Utils.showBadConnectionToast(getActivity());
+        if (mFriendFoundList.isEmpty()){
+            mFindFriendsRationale.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        if (mFriendSearchAdapter.getRequestManager() != null)
+            mFriendSearchAdapter.getRequestManager().onDestroy();
+
+        mFriendSearchAdapter.setRequestManager(null);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFriendSearchAdapter != null) mFriendSearchAdapter.clearContext();
+        if (mFindFriendsSearchPresenter != null) mFindFriendsSearchPresenter.cancelRequest();
+    }
 }

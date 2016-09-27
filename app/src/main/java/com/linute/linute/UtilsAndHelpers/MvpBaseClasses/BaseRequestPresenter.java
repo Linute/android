@@ -1,6 +1,10 @@
-package com.linute.linute.MainContent.FindFriends;
+package com.linute.linute.UtilsAndHelpers.MvpBaseClasses;
 
 import android.content.Context;
+
+import com.linute.linute.MainContent.FindFriends.FriendSearchUser;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.OnFinishedRequest;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;
 
 import java.util.ArrayList;
 import java.util.Map;

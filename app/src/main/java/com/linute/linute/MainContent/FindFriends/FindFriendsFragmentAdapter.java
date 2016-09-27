@@ -9,9 +9,9 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
 
-    private FindFriendsFragment[] mFindFriendsFragments;
+    private BaseFindFriendsFragment[] mFindFriendsFragments;
 
-    public FindFriendsFragmentAdapter(FragmentManager fm, FindFriendsFragment[] array) {
+    public FindFriendsFragmentAdapter(FragmentManager fm, BaseFindFriendsFragment[] array) {
         super(fm);
         mFindFriendsFragments = array;
     }

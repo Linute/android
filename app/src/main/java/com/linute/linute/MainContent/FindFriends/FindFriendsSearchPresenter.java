@@ -2,6 +2,9 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.content.Context;
 
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.BaseRequestPresenter;
+import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;
+
 import java.util.Map;
 
 /**
@@ -9,16 +12,19 @@ import java.util.Map;
  */
 public class FindFriendsSearchPresenter extends BaseRequestPresenter {
 
-    protected FindFriendsInteractor mFindFriendsInteractor;
+    protected BaseFindFriendsInteratctor mFindFriendsInteractor;
 
-    public FindFriendsSearchPresenter(RequestCallbackView friendsView) {
+    public static final int TYPE_FB = 0;
+    public static final int TYPE_SEARCH = 1;
+
+    public FindFriendsSearchPresenter(RequestCallbackView friendsView, int type) {
         super(friendsView);
-        mFindFriendsInteractor = new FindFriendsInteractor();
+        mFindFriendsInteractor = type == TYPE_FB ? new FindFriendsFbInteractor() : new FindFriendsInteractor();
     }
 
     @Override
     public void request(Context context, Map<String, Object> params) {
-        mFindFriendsInteractor.search(context,params, this);
+        mFindFriendsInteractor.query(context,params, this);
     }
 
     @Override
@@ -26,5 +32,7 @@ public class FindFriendsSearchPresenter extends BaseRequestPresenter {
         mFindFriendsInteractor.cancelRequest();
     }
 
-
+    public boolean originalListLoaded(){
+        return mFindFriendsInteractor.mInitialListLoaded;
+    }
 }

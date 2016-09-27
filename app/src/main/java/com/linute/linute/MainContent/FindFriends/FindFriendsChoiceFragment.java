@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -25,6 +26,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -50,7 +52,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     //      pressing hamburger opens drawer
     private boolean mOnlyFragmentInStack = false;
 
-    private FindFriendsFragment[] mFindFriendsFragments;
+    private BaseFindFriendsFragment[] mFindFriendsFragments;
 
     public static FindFriendsChoiceFragment newInstance(boolean onlyFragmentInStack) {
         Bundle b = new Bundle();
@@ -73,11 +75,13 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_findfriends_choices, container, false);
 
+        String collegeId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("collegeId", "");
+
         if (mFindFriendsFragments == null) {
-            mFindFriendsFragments = new FindFriendsFragment[]{
-                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_CAMPUS),
-                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_NAME),
-                    FindFriendsFragment.newInstance(FindFriendsFragment.SEARCH_TYPE_FACEBOOK)
+            mFindFriendsFragments = new BaseFindFriendsFragment[]{
+                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
+                    FindFriendsFragment.newInstance(new SearchFilter[]{}),
+                    new FindFriendsFBFragment()
             };
         }
 
