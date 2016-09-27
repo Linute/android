@@ -1,10 +1,10 @@
 package com.linute.linute.MainContent.Settings;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -20,6 +20,7 @@ import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -53,9 +54,12 @@ public class BlockedUsersActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_blocked_users);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Blocked Users");
@@ -147,8 +151,6 @@ public class BlockedUsersActivity extends Activity {
 
                 mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
 
-                mSocket.open();
-
                 mSocket.connect();
                 mConnecting = false;
 
@@ -158,7 +160,6 @@ public class BlockedUsersActivity extends Activity {
 
         }
     }
-
 
     @Override
     protected void onPause() {
