@@ -51,14 +51,14 @@ public class BlockedUsersActivity extends Activity {
 
     private ArrayList<BlockedUser> mBlockedUserList;
     private BlockedUserAdapter mBlockedUserAdapter;
+    private View mLoadingView;
+    private View mEmptyView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_blocked_users);
-
-
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
 
@@ -73,6 +73,9 @@ public class BlockedUsersActivity extends Activity {
         });
 
 
+        mLoadingView = findViewById(R.id.progress_bar);
+        mEmptyView = findViewById(R.id.empty_view);
+
         final RecyclerView blockedUsersRV = (RecyclerView) findViewById(R.id.list_blocked_users);
 
         mBlockedUserList = new ArrayList<>();
@@ -84,6 +87,8 @@ public class BlockedUsersActivity extends Activity {
         blockedUsersRV.setAdapter(mBlockedUserAdapter);
         blockedUsersRV.setLayoutManager(new LinearLayoutManager(this));
 
+        mEmptyView.setVisibility(View.GONE);
+        mLoadingView.setVisibility(View.VISIBLE);
         new LSDKUser(this).getBlockedUsers(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -121,6 +126,10 @@ public class BlockedUsersActivity extends Activity {
                         @Override
                         public void run() {
                             mBlockedUserAdapter.notifyDataSetChanged();
+                            if(mBlockedUserList.size() == 0){
+                                mEmptyView.setVisibility(View.VISIBLE);
+                            }
+                            mLoadingView.setVisibility(View.GONE);
                         }
                     });
 
