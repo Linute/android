@@ -3,6 +3,7 @@ package com.linute.linute.UtilsAndHelpers;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.text.format.DateUtils;
 import android.util.Base64;
@@ -69,6 +70,14 @@ public class Utils {
         byte[] filebyte = FileUtils.readFileToByteArray(file);
         return Base64.encodeToString(filebyte, Base64.NO_WRAP);
         //return Base64.encodeToString(byteFormat, Base64.URL_SAFE);
+    }
+
+    public static Bitmap decodeImageBase64(String base64){
+        if(base64 == null) return null;
+        if(base64.contains(","))
+            base64 = base64.substring(base64.indexOf(",") + 1);
+        byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(bytes,0,bytes.length);
     }
 
 

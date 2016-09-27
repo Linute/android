@@ -50,6 +50,7 @@ public class Post implements Parcelable {
     private boolean mCommentAnonDisabled;
 
     private int mType;
+    public String imageBase64;
 
     public Post() {
 
@@ -154,6 +155,8 @@ public class Post implements Parcelable {
         mPostHidden = JsonHelpers.getBoolean(jsonObject, "isHidden");
         mPostMuted = JsonHelpers.getBoolean(jsonObject, "isMuted");
         mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
+
+        if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0) imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
     }
 
 

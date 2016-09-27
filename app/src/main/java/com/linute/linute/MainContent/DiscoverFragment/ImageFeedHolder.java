@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.CustomOnTouchListener;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 /**
  * Created by QiFeng on 2/3/16.
@@ -183,6 +185,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
         super.bindModel(post);
         // Set Post Image
         mType = post.getType();
+        Bitmap bm = Utils.decodeImageBase64(post.imageBase64);
+        vPostImage.setImageBitmap(bm);
         resizeViews(getNewViewHeight(post.getImageSize()));
         getEventImage(post.getImage());
     }
@@ -204,7 +208,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
     private void getEventImage(String image) {
         if (vProgressBar != null)
             vProgressBar.setVisibility(View.VISIBLE);
-
 
         mRequestManager
                 .load(image)
