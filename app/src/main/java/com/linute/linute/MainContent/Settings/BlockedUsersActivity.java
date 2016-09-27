@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.Settings;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -268,6 +269,8 @@ public class BlockedUsersActivity extends Activity {
             vUserName.setText(user.getFullName());
             vCollegeName.setText(user.collegeName);
             vToggleBlock.setText(user.isBlocked ? "Unblock" : "Block");
+            vToggleBlock.setTextColor(itemView.getContext().getResources().getColor(user.isBlocked ? R.color.secondaryColor : R.color.red));
+            vToggleBlock.getBackground().setColorFilter(itemView.getContext().getResources().getColor(user.isBlocked ? R.color.secondaryColor : R.color.red), PorterDuff.Mode.MULTIPLY);
 
         }
     }

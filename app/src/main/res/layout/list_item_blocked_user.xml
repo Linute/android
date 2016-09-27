@@ -47,14 +47,16 @@
             tools:text="fdsf sfsdf sf dsffdsf sfsdf sf dsffdsf sfs"/>
     </LinearLayout>
 
-    <Button
+    <TextView
         android:id="@+id/button_toggle_block"
-        android:minWidth="64dp"
+        android:minWidth="72dp"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:gravity="center"
         android:layout_gravity="right|center_vertical"
-        android:text="unblock"
+        android:text="Unblock"
+        android:layout_margin="4dp"
+        android:background="@drawable/bg_unblock_button"
         />
 
 
