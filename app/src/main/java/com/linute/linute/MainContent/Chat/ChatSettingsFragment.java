@@ -197,6 +197,7 @@ room: id of room
         llm.setAutoMeasureEnabled(true);
         participantsRV.setLayoutManager(llm);
         mParticipantsAdapter = new ChatParticipantsAdapter(mChatRoom.users);
+        mParticipantsAdapter.setRequestManager(Glide.with(this));
         participantsRV.setAdapter(mParticipantsAdapter);
         mParticipantsAdapter.notifyDataSetChanged();
 
@@ -479,11 +480,11 @@ room: id of room
             view.findViewById(R.id.setting_group_image_container).setVisibility(View.GONE);
             User u = mChatRoom.users.get(0);
 
-            Glide.with(getContext())
+            Glide.with(this)
                     .load(Utils.getImageUrlOfUser(u.userImage))
                     .into(((ImageView) view.findViewById(R.id.dm_user_icon)));
         } else {
-            Glide.with(getContext())
+            Glide.with(this)
                     .load(mChatRoom.roomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
 //                    .signature(new StringSignature(getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, getContext().MODE_PRIVATE).getString("imageSigniture", "000")))
@@ -815,4 +816,9 @@ room: id of room
         }
     };
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mParticipantsAdapter.getRequestManager() != null) mParticipantsAdapter.getRequestManager().onDestroy();
+    }
 }

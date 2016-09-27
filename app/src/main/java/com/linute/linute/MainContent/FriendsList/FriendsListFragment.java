@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
@@ -94,6 +95,8 @@ public class FriendsListFragment extends BaseFragment {
         final RecyclerView recyclerView = (RecyclerView) rootView.findViewById(R.id.friendsList_recycler_view);
         mListEmptyLayout = (ViewGroup) rootView.findViewById(R.id.layout_empty_list);
         mFailLayout = (ViewGroup) rootView.findViewById(R.id.layout_loading_failed);
+
+        mFriendsListAdapter.setRequestManager(Glide.with(this));
 
         boolean viewIsOwner = getActivity()
                 .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
@@ -345,7 +348,14 @@ public class FriendsListFragment extends BaseFragment {
         });
     }
 
-//    public void setEmptyView(View mEmptyView) {
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mFriendsListAdapter.getRequestManager() != null)
+            mFriendsListAdapter.getRequestManager().onDestroy();
+    }
+
+    //    public void setEmptyView(View mEmptyView) {
 //        this.mListEmptyView = mEmptyView;
 //        if(mListEmptyLayout != null){
 //            mListEmptyLayout.removeAllViews();

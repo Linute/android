@@ -83,17 +83,21 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
     public class FriendSearchViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mNameView;
+        private TextView mCollegeName;
         private ImageView mAddButton;
         private ImageView mProfileImage;
+        private StringSignature mStringSignature;
 
         private FriendSearchUser mFriendSearchUser;
 
         public FriendSearchViewHolder(View itemView) {
             super(itemView);
 
+            mStringSignature = new StringSignature(mSharedPreferences.getString("imageSigniture", "000"));
             mNameView = (TextView) itemView.findViewById(R.id.friendSearchItem_full_name);
             mProfileImage = (ImageView) itemView.findViewById(R.id.friendSearchItem_profile_image);
             mAddButton = (ImageView) itemView.findViewById(R.id.friendSearchItem_add_button);
+            mCollegeName = (TextView) itemView.findViewById(R.id.college_name);
             setUpOnClickListeners();
 
         }
@@ -102,12 +106,13 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
         public void bindViews(FriendSearchUser user) {
             mFriendSearchUser = user;
 
-            mNameView.setText(user.getFullName());
+            mNameView.setText(user.fullName);
+            mCollegeName.setText(user.collegeName);
 
             mRequestManager
-                    .load(Utils.getImageUrlOfUser(user.getProfileImage()))
+                    .load(Utils.getImageUrlOfUser(user.profileImage))
                     .dontAnimate()
-                    .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000"))) //so profile images update
+                    .signature(mStringSignature) //so profile images update
                     .placeholder(R.drawable.image_loading_background)
                     .diskCacheStrategy(DiskCacheStrategy.RESULT) //only cache the scaled image
                     .into(mProfileImage);
@@ -125,7 +130,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                             if (mFriendSearchUser == null) return;
                             BaseTaptActivity activity = (BaseTaptActivity) mContext;
                             if (activity != null) {
-                                activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.getFullName(), mFriendSearchUser.getUserId()));
+                                activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mFriendSearchUser.fullName, mFriendSearchUser.userId));
                             }
                         }
                     }
@@ -142,7 +147,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                     if (mFriendSearchUser.isFollowing()) {
                         BaseTaptActivity activity = (BaseTaptActivity) mContext;
                         if (activity != null) {
-                            activity.addFragmentToContainer(ChatFragment.newInstance(null, mFriendSearchUser.getFirstName(), mFriendSearchUser.getLastName(), mFriendSearchUser.getUserId()));
+                            activity.addFragmentToContainer(ChatFragment.newInstance(null, mFriendSearchUser.firstName, mFriendSearchUser.lastName, mFriendSearchUser.userId));
                         }
                     }
 
@@ -154,7 +159,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                         mAddButton.setImageResource(R.drawable.message_friend); //change icon
                         mFriendSearchUser.setFollowing(true);
                         Map<String, Object> params = new HashMap<>();
-                        params.put("user", mFriendSearchUser.getUserId());
+                        params.put("user", mFriendSearchUser.userId);
 
                         new LSDKPeople(mContext).postFollow(params, new Callback() {
                             FriendSearchUser user = mFriendSearchUser;
@@ -168,7 +173,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                                     @Override
                                     public void run() {
                                         Utils.showBadConnectionToast(mContext);
-                                        if (mFriendSearchUser.getUserId().equals(user.getUserId()))
+                                        if (mFriendSearchUser.userId.equals(user.userId))
                                             mAddButton.setImageResource(R.drawable.add_friend);
                                     }
                                 });
@@ -187,7 +192,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
                                         @Override
                                         public void run() {
                                             Utils.showServerErrorToast(mContext);
-                                            if (mFriendSearchUser.getUserId().equals(user.getUserId()))
+                                            if (mFriendSearchUser.userId.equals(user.userId))
                                                 mAddButton.setImageResource(R.drawable.add_friend);
                                         }
                                     });

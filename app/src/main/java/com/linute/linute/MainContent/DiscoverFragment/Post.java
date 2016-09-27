@@ -52,18 +52,20 @@ public class Post implements Parcelable {
     private int mType;
     public String imageBase64;
 
+    //private ArrayList<Object> mComments = new ArrayList<>();
+
     public Post() {
 
     }
 
-    public Post(String imageurl, String postid, String userid, String userName){
-        mImage  = imageurl;
+    public Post(String imageurl, String postid, String userid, String userName) {
+        mImage = imageurl;
         mPostId = postid;
         mPostTime = 0;
         mUserId = userid;
         mUserName = userName;
         mUserImage = "";
-        mTitle="";
+        mTitle = "";
         mPrivacy = 0;
         mCommentAnonDisabled = true;
         mAnonImage = "";
@@ -77,12 +79,12 @@ public class Post implements Parcelable {
     }
 
 
-    public Post(String postId){
+    public Post(String postId) {
         mPostId = postId;
     }
 
     /**
-     * @param jsonObject  - post json object
+     * @param jsonObject - post json object
      */
     public Post(JSONObject jsonObject) throws JSONException {
 
@@ -115,7 +117,7 @@ public class Post implements Parcelable {
 
             try {
                 mCollegeName = owner.getJSONObject("college").getString("name");
-            }catch (JSONException e){
+            } catch (JSONException e) {
                 mCollegeName = "";
             }
         } catch (JSONException e) {
@@ -147,7 +149,7 @@ public class Post implements Parcelable {
         try {
             JSONObject size = jsonObject.getJSONObject("imageSizes");
             mImageSize = new PostSize(size.getInt("width"), size.getInt("height"));
-        }catch (JSONException e){
+        } catch (JSONException e) {
             //e.printStackTrace();
             mImageSize = null;
         }
@@ -157,10 +159,18 @@ public class Post implements Parcelable {
         mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
 
         if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0) imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
+//        JSONArray comments = jsonObject.getJSONArray("comments");
+//        for (int i = 0; i < comments.length(); i++) {
+//            try {
+//                mComments.add(new Comment(comments.getJSONObject(i)));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
     }
 
 
-    public void updateInfo(JSONObject jsonObject) throws JSONException{
+    public void updateInfo(JSONObject jsonObject) throws JSONException {
         mType = jsonObject.getInt("type");
 
         if (jsonObject.getJSONArray("images").length() > 0)
@@ -226,7 +236,7 @@ public class Post implements Parcelable {
         try {
             JSONObject size = jsonObject.getJSONObject("imageSizes");
             mImageSize = new PostSize(size.getInt("width"), size.getInt("height"));
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
             mImageSize = null;
         }
@@ -234,10 +244,6 @@ public class Post implements Parcelable {
 
     public PostSize getImageSize() {
         return mImageSize;
-    }
-
-    public void setImageSize(PostSize imageSize) {
-        mImageSize = imageSize;
     }
 
     public String getCollegeName() {
@@ -320,10 +326,6 @@ public class Post implements Parcelable {
         return mAnonImage;
     }
 
-    public void setUserName(String name) {
-        mUserName = name;
-    }
-
     @Override
     public String toString() {
         return getImage().equals("") ? getTitle() : "Content: Image - " + getTitle();
@@ -351,10 +353,6 @@ public class Post implements Parcelable {
 
     public void setUserImage(String userImage) {
         mUserImage = userImage;
-    }
-
-    public void setVideoURL(String videoURL) {
-        mVideoURL = videoURL;
     }
 
     public void setImage(String image) {
@@ -404,6 +402,10 @@ public class Post implements Parcelable {
         return 0;
     }
 
+//    public ArrayList<Object> getComments() {
+//        return mComments;
+//    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mUserId);
@@ -423,6 +425,7 @@ public class Post implements Parcelable {
 
         dest.writeParcelable(mImageSize, 0);
         dest.writeByte((byte) (mIsDeleted ? 1 : 0));
+        //dest.writeList(mComments);
     }
 
     private Post(Parcel in) {
@@ -443,6 +446,8 @@ public class Post implements Parcelable {
 
         mImageSize = in.readParcelable(PostSize.class.getClassLoader());
         mIsDeleted = in.readByte() != 0;
+       // mComments = new ArrayList<>();
+        //in.readList(mComments, Object.class.getClassLoader());
     }
 
     public static final Creator<Post> CREATOR = new Creator<Post>() {

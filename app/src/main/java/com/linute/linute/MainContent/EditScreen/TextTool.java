@@ -438,9 +438,9 @@ public class TextTool extends EditContentTool {
         midET.setFocusable(false);
         botET.setFocusable(false);
         topET.setFocusable(false);
-        midET.setInputType(InputType.TYPE_NULL);
-        botET.setInputType(InputType.TYPE_NULL);
-        topET.setInputType(InputType.TYPE_NULL);
+        //midET.setInputType(InputType.TYPE_NULL);
+        //botET.setInputType(InputType.TYPE_NULL);
+        //topET.setInputType(InputType.TYPE_NULL);
         midET.clearComposingText();
         botET.clearComposingText();
         topET.clearComposingText();

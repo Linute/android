@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -28,6 +28,8 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
     private View.OnClickListener mAddPeopleListener;
     private OnUserClickListener mUserClickListener;
 
+    protected RequestManager mRequestManager;
+
 
     public void setAddPeopleListener(View.OnClickListener addPeopleListener) {
         this.mAddPeopleListener = addPeopleListener;
@@ -37,8 +39,13 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         this.mUserClickListener = mPeopleClickListener;
     }
 
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
 
-
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
+    }
 
     public ChatParticipantsAdapter(List<User> participants) {
         this.mParticipants = participants;
@@ -51,7 +58,7 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
             case TYPE_ADD:
                 return new AddVH(inflater.inflate(R.layout.fragment_chat_settings_add_user, parent, false));
             case TYPE_PARTICIPANT:
-                return new ParticipantVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false));
+                return new ParticipantVH(inflater.inflate(R.layout.fragment_search_user_list_item, parent, false), mRequestManager);
         }
         return null;
     }
@@ -107,17 +114,19 @@ public class ChatParticipantsAdapter extends RecyclerView.Adapter<RecyclerView.V
         public final ImageView profileImageIV;
         public final TextView nameTV;
         public final TextView collegeTV;
+        protected RequestManager mRequestManager;
 
-        public ParticipantVH(View itemView) {
+        public ParticipantVH(View itemView, RequestManager manager) {
             super(itemView);
             profileImageIV = (ImageView)itemView.findViewById(R.id.search_users_list_image);
             nameTV = (TextView) itemView.findViewById(R.id.search_users_list_name);
             collegeTV = (TextView) itemView.findViewById(R.id.search_users_list_college);
+            mRequestManager = manager;
         }
 
         public void bind(User user){
             String imageUrlOfUser = Utils.getImageUrlOfUser(user.userImage);
-            Glide.with(itemView.getContext())
+            mRequestManager
                     .load(imageUrlOfUser)
                     .asBitmap()
                     .placeholder(R.color.seperator_color)

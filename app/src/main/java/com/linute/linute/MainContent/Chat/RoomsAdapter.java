@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linute.linute.R;
@@ -36,12 +37,22 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
     private short mLoadingMoreState = LoadMoreViewHolder.STATE_LOADING;
     private RoomContextMenuCreator mRoomContextMenuCreator;
+    protected RequestManager mRequestManager;
 
     public RoomsAdapter(Context aContext, List<ChatRoom> roomsList) {
         this.aContext = aContext;
         mRoomsList = roomsList;
         mSharedPreferences = aContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
+
+    public RequestManager getRequestManager() {
+        return mRequestManager;
+    }
+
+    public void setRequestManager(RequestManager requestManager) {
+        mRequestManager = requestManager;
+    }
+
 
     public void setContextMenuCreator(RoomContextMenuCreator creator) {
         mRoomContextMenuCreator = creator;
@@ -108,10 +119,12 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         protected TextView vTimeStamp;
         protected ChatRoom mRoom;
         protected View vIsMuted;
+        private StringSignature mSignature;
 
         public RoomsViewHolder(View itemView) {
             super(itemView);
 
+            mSignature = new StringSignature(mSharedPreferences.getString("imageSigniture", "000"));
             vUserImage = (ImageView) itemView.findViewById(R.id.rooms_user_image);
             vUserName = (TextView) itemView.findViewById(R.id.rooms_user_name);
             vLastMessage = (TextView) itemView.findViewById(R.id.rooms_user_last_message);
@@ -142,10 +155,10 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             mRoom = room;
 
-            Glide.with(aContext)
+            mRequestManager
                     .load(room.roomImage)
                     .dontAnimate()
-                    .signature(new StringSignature(mSharedPreferences.getString("imageSigniture", "000")))
+                    .signature(mSignature)
                     .placeholder(R.color.seperator_color)
                     .diskCacheStrategy(DiskCacheStrategy.NONE) //only cache the scaled image
                     .into(vUserImage);

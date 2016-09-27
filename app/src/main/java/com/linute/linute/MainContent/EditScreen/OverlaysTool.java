@@ -3,8 +3,11 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -14,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.SpaceItemDecoration;
 
@@ -30,15 +35,36 @@ public class OverlaysTool extends EditContentTool {
     private RecyclerView mOverlaysRV;
     private final ImageView overlayView;
     private Bitmap mBackingBitmap;
+    private RequestManager mRequestManager;
 
     private Overlay mSelectedOverlay;
 
-    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView) {
+    public OverlaysTool(final Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, RequestManager manager) {
         super(uri, type, overlaysView);
+
+        //image
+        if (type == EditFragment.ContentType.Photo || type == EditFragment.ContentType.UploadedPhoto)
+            setImageBackground(uri, overlaysView.getResources().getDisplayMetrics().widthPixels);
+        else  //video
+            setVideoBackground(uri, overlaysView.getResources().getDisplayMetrics().widthPixels);
+
+        mRequestManager = manager;
+
+        mOverlays = new ArrayList<>();
+        mOverlays.add(new Overlay(null, null, null));
+        overlayView = new ImageView(overlaysView.getContext());
+        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mOverlaysView.addView(overlayView);
+        initFiltersAsync(overlaysView.getContext());
+
+    }
+
+    private void setImageBackground(final Uri uri, int width) {
+
         final BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(uri.getPath(), opts);
-        opts.inSampleSize = opts.outWidth / overlaysView.getResources().getDisplayMetrics().widthPixels / 5;
+        opts.inSampleSize = opts.outWidth / width / 5;
         opts.inJustDecodeBounds = false;
 
         new Thread(new Runnable() {
@@ -51,39 +77,84 @@ public class OverlaysTool extends EditContentTool {
                 //do after decoding
                 if (mDestroyed) {
                     mBackingBitmap.recycle();
+                } else {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mOverlaysAdapter != null) {
+                                mOverlaysAdapter.setBackBitmap(mBackingBitmap);
+                                mOverlaysAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
                 }
             }
         }).start();
+    }
 
-        mOverlays = new ArrayList<>();
-        mOverlays.add(new Overlay(null, null, null));
-        overlayView = new ImageView(overlaysView.getContext());
-        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mOverlaysView.addView(overlayView);
-        initFiltersAsync(overlaysView.getContext());
+    private void setVideoBackground(Uri uri, final int screenwidth) {
+
+        final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(uri.getPath());
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap frame = retriever.getFrameAtTime(0);
+
+                if (!mDestroyed) {
+                    float scale = (float) screenwidth / 5 / frame.getWidth();
+                    mBackingBitmap = Bitmap.createScaledBitmap(frame, (int) (scale * frame.getWidth()), (int) (scale * frame.getHeight()), false);
+                    if (mBackingBitmap != frame) frame.recycle();
+
+                    new Handler(Looper.getMainLooper()).post(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mOverlaysAdapter != null) {
+                                        mOverlaysAdapter.setBackBitmap(mBackingBitmap);
+                                        mOverlaysAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                }
+
+                //check one more time after finishing
+                if (mDestroyed) {
+                    mBackingBitmap.recycle();
+                }
+
+            }
+        }).start();
 
     }
 
-    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, Bitmap back) {
-        super(uri, type, overlaysView);
-        mBackingBitmap = back;
-        mOverlays = new ArrayList<>();
-        mOverlays.add(null);
-        overlayView = new ImageView(overlaysView.getContext());
-        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mOverlaysView.addView(overlayView);
-        initFiltersAsync(overlaysView.getContext());
-    }
+//    public OverlaysTool(Uri uri, EditFragment.ContentType type, ViewGroup overlaysView, RequestManager manager) {
+//        super(uri, type, overlaysView);
+//        mRequestManager = manager;
+//
+//
+//        mOverlays = new ArrayList<>();
+//        mOverlays.add(null);
+//        overlayView = new ImageView(overlaysView.getContext());
+//        overlayView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        mOverlaysView.addView(overlayView);
+//        initFiltersAsync(overlaysView.getContext());
+//    }
 
-    public void setBackingBitmap(Bitmap back) {
-        mBackingBitmap = back;
-    }
+//    public void setBackingBitmap(Bitmap back) {
+//        mBackingBitmap = back;
+//        mOverlaysAdapter.setBackBitmap(mBackingBitmap);
+//        mOverlaysAdapter.notifyDataSetChanged();
+//    }
 
     @Override
     public View createToolOptionsView(LayoutInflater inflater, ViewGroup parent) {
         mOverlaysRV = new RecyclerView(parent.getContext());
 
-        mOverlaysAdapter = new OverlaysAdapter(mOverlays, mBackingBitmap);
+        mOverlaysAdapter = new OverlaysAdapter(mOverlays);
+        mOverlaysAdapter.setBackBitmap(mBackingBitmap);
+
         mOverlaysAdapter.setOnItemSelectedListener(new OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
@@ -95,7 +166,12 @@ public class OverlaysTool extends EditContentTool {
                 }*/
                 Overlay overlay = mOverlays.get(i);
                 if (overlay != null)
-                    overlayView.setImageBitmap(overlay.getFullPhoto(overlayView.getContext()));
+                    mRequestManager
+                            .load(overlay.file)
+                            .dontAnimate()
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(overlayView);
+
                 mSelectedOverlay = overlay;
             }
         });
@@ -129,18 +205,19 @@ public class OverlaysTool extends EditContentTool {
 
     protected static class OverlaysAdapter extends RecyclerView.Adapter<OverlayItemVH> {
 
-        private final Bitmap mBackingBitmap;
+        Bitmap mBackBitmap;
         ArrayList<Overlay> overlays;
-
         int mSelectedItem;
-
 
         OnItemSelectedListener mOnItemSelectedListener;
 
 
-        public OverlaysAdapter(ArrayList<Overlay> overlays, Bitmap back) {
+        public OverlaysAdapter(ArrayList<Overlay> overlays) {
             this.overlays = overlays;
-            mBackingBitmap = back;
+        }
+
+        protected void setBackBitmap(Bitmap bitmap) {
+            mBackBitmap = bitmap;
         }
 
         @Override
@@ -148,14 +225,13 @@ public class OverlaysTool extends EditContentTool {
             View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_overlay, parent, false);
             int height = parent.getHeight();
             int width = height / 6 * 5;
-            ((ImageView) v.findViewById(R.id.image_back)).setImageBitmap(mBackingBitmap);
             v.setLayoutParams(new RecyclerView.LayoutParams(width, height));
             return new OverlayItemVH(v);
         }
 
         @Override
         public void onBindViewHolder(final OverlayItemVH holder, int position) {
-            holder.bind(overlays.get(position), mSelectedItem == position);
+            holder.bind(overlays.get(position), mSelectedItem == position, mBackBitmap);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -192,28 +268,30 @@ public class OverlaysTool extends EditContentTool {
         super.onDestroy();
 
         overlayView.setImageBitmap(null);
-        if (mBackingBitmap != null) {
-            mBackingBitmap.recycle();
-        }
 
         for (Overlay overlay : mOverlays) {
             if (overlay != null)
                 overlay.recycle();
         }
+
+        mRequestManager.onDestroy();
     }
 
     protected static class OverlayItemVH extends RecyclerView.ViewHolder {
 
-        ImageView vBack;
         ImageView vOverlay;
+        ImageView vBackground;
 
         public OverlayItemVH(View itemView) {
             super(itemView);
             vOverlay = (ImageView) itemView.findViewById(R.id.image_overlay);
+
+            vBackground = ((ImageView) itemView.findViewById(R.id.image_back));
         }
 
-        public void bind(Overlay overlay, boolean isSelected) {
+        public void bind(Overlay overlay, boolean isSelected, Bitmap backBitmap) {
             vOverlay.setImageBitmap(overlay == null ? null : overlay.thumbnail);
+            vBackground.setImageBitmap(backBitmap);
         }
     }
 
@@ -251,7 +329,6 @@ public class OverlaysTool extends EditContentTool {
                             } catch (NullPointerException np) {
                                 np.printStackTrace();
                             }
-
                         }
 
                         if (mOverlaysAdapter != null) {
@@ -297,7 +374,6 @@ public class OverlaysTool extends EditContentTool {
         String filename;
         File file;
         Bitmap thumbnail;
-        Bitmap fullSize;
 
         public Overlay(String filename, File file, Bitmap thumbnail) {
             this.filename = filename;
@@ -305,21 +381,8 @@ public class OverlaysTool extends EditContentTool {
             this.thumbnail = thumbnail;
         }
 
-        public Bitmap getFullPhoto(Context context) {
-            if (fullSize == null && file != null) {
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
-                opts.inJustDecodeBounds = false;
-                opts.inSampleSize = opts.outWidth / context.getResources().getDisplayMetrics().widthPixels;
-                fullSize = BitmapFactory.decodeFile(file.getAbsolutePath(), opts);
-            }
-
-            return fullSize;
-        }
 
         public void recycle() {
-            if (fullSize != null) fullSize.recycle();
             if (thumbnail != null) thumbnail.recycle();
         }
 
