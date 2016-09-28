@@ -33,6 +33,8 @@ public class Comment implements Parcelable {
     private String mImageUrl;
     private int mType;
 
+    public boolean hasPrivacyChanged;
+
 
     private List<MentionedPersonLight> mMentionedPeople;
 
@@ -61,7 +63,8 @@ public class Comment implements Parcelable {
                    long date,
                    boolean isLiked,
                    int numberOfLikes,
-                   String imageUrl
+                   String imageUrl,
+                   boolean hasPrivacyChanged
     ) {
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
@@ -76,6 +79,7 @@ public class Comment implements Parcelable {
         mNumberOfLikes = numberOfLikes;
         mImageUrl = imageUrl;
         mType = imageUrl == null ? 0 : 1;
+        this.hasPrivacyChanged = hasPrivacyChanged;
     }
 
 

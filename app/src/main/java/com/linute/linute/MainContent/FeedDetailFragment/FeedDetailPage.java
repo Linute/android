@@ -567,15 +567,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
 
                         //get date
+                        JSONObject comment = comments.getJSONObject(i);
                         try {
-                            myDate = format.parse(comments.getJSONObject(i).getString("date"));
+                            myDate = format.parse(comment.getString("date"));
                         } catch (ParseException e) {
                             e.printStackTrace();
                             myDate = null;
                         }
 
                         List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                        mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
+                        mentionedPeople = comment.getJSONArray("mentions");
 
                         for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
                             mentionedPersonLightArrayList.add(
@@ -586,22 +587,23 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             );
                         }
 
-                        owner = comments.getJSONObject(i).getJSONObject("owner");
+                        owner = comment.getJSONObject("owner");
 
                         tempComments
                                 .add(new Comment(
                                                 owner.getString("id"),
                                                 owner.getString("profileImage"),
                                                 owner.getString("fullName"),
-                                                comments.getJSONObject(i).getString("text"),
-                                                comments.getJSONObject(i).getString("id"),
-                                                comments.getJSONObject(i).getInt("privacy") == 1,
-                                                comments.getJSONObject(i).getString("anonymousImage"),
+                                                comment.getString("text"),
+                                                comment.getString("id"),
+                                                comment.getInt("privacy") == 1,
+                                                comment.getString("anonymousImage"),
                                                 mentionedPersonLightArrayList,
                                                 myDate == null ? 0 : myDate.getTime(),
-                                                comments.getJSONObject(i).getBoolean("isLiked"),
-                                                comments.getJSONObject(i).getInt("numberOfLikes"),
-                                                getImageUrl(comments.getJSONObject(i).getJSONArray("images"))
+                                                comment.getBoolean("isLiked"),
+                                                comment.getInt("numberOfLikes"),
+                                                getImageUrl(comment.getJSONArray("images")),
+                                                comment.getBoolean("isPrivacyChanged")
                                         )
                                 );
                     }
@@ -743,15 +745,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
 
                                 //get date
+                                JSONObject comment = comments.getJSONObject(i);
                                 try {
-                                    myDate = format.parse(comments.getJSONObject(i).getString("date"));
+                                    myDate = format.parse(comment.getString("date"));
                                 } catch (ParseException e) {
                                     e.printStackTrace();
                                     myDate = null;
                                 }
 
                                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                                mentionedPeople = comments.getJSONObject(i).getJSONArray("mentions");
+                                mentionedPeople = comment.getJSONArray("mentions");
 
                                 for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
                                     mentionedPersonLightArrayList.add(
@@ -762,21 +765,22 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                     );
                                 }
 
-                                owner = comments.getJSONObject(i).getJSONObject("owner");
+                                owner = comment.getJSONObject("owner");
                                 tempComments
                                         .add(new Comment(
                                                         owner.getString("id"),
                                                         owner.getString("profileImage"),
                                                         owner.getString("fullName"),
-                                                        comments.getJSONObject(i).getString("text"),
-                                                        comments.getJSONObject(i).getString("id"),
-                                                        comments.getJSONObject(i).getInt("privacy") == 1,
-                                                        comments.getJSONObject(i).getString("anonymousImage"),
+                                                        comment.getString("text"),
+                                                        comment.getString("id"),
+                                                        comment.getInt("privacy") == 1,
+                                                        comment.getString("anonymousImage"),
                                                         mentionedPersonLightArrayList,
                                                         myDate == null ? 0 : myDate.getTime(),
-                                                        comments.getJSONObject(i).getBoolean("isLiked"),
-                                                        comments.getJSONObject(i).getInt("numberOfLikes"),
-                                                        getImageUrl(comments.getJSONObject(i).getJSONArray("images"))
+                                                        comment.getBoolean("isLiked"),
+                                                        comment.getInt("numberOfLikes"),
+                                                        getImageUrl(comment.getJSONArray("images")),
+                                                        comment.getBoolean("isPrivacyChanged")
                                                 )
                                         );
                             }
@@ -1454,7 +1458,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         myDate.getTime(),
                         false,
                         0,
-                        getImageUrl(object.getJSONArray("images"))
+                        getImageUrl(object.getJSONArray("images")),
+                        object.getBoolean("isPrivacyChanged")
                 );
 
 

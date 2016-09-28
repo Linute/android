@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.daimajia.swipe.SwipeLayout
-    android:id="@+id/comment_swipe_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/comment_swipe_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:leftEdgeSwipeOffset="0dp"
@@ -23,8 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_fire"
-        />
+            android:src="@drawable/ic_fire" />
 
     </FrameLayout>
 
@@ -44,8 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_delete"
-            />
+                android:src="@drawable/ic_action_delete" />
 
         </FrameLayout>
 
@@ -59,8 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_reveal"
-            />
+                android:src="@drawable/ic_action_reveal" />
 
         </FrameLayout>
 
@@ -74,8 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_whistle14"
-            />
+                android:src="@drawable/ic_action_whistle14" />
 
         </FrameLayout>
 
@@ -89,8 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_reply"
-            />
+                android:src="@drawable/ic_action_reply" />
 
         </FrameLayout>
 
@@ -105,12 +99,26 @@
         android:orientation="horizontal">
 
 
-        <com.linute.linute.UtilsAndHelpers.ProfileImageView
-            android:id="@+id/comment_user_image"
-            android:layout_width="@dimen/profile_image_radius"
-            android:layout_height="@dimen/profile_image_radius"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-        />
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.linute.linute.UtilsAndHelpers.ProfileImageView
+                android:id="@+id/comment_user_image"
+                android:layout_width="@dimen/profile_image_radius"
+                android:layout_height="@dimen/profile_image_radius"
+                android:layout_margin="@dimen/activity_horizontal_margin" />
+            <com.makeramen.roundedimageview.RoundedImageView
+                android:id="@+id/image_revealed"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_gravity="bottom|right"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                android:src="@drawable/ic_revealed_icon"
+                android:visibility="gone"
+                />
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/content"
@@ -133,8 +141,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="2dp"
                     android:src="@drawable/ic_fire"
-                    android:tint="@color/red"
-                />
+                    android:tint="@color/red" />
 
                 <TextView
                     android:id="@+id/num_likes"
@@ -146,8 +153,7 @@
                     android:lines="1"
                     android:text="123"
                     android:textColor="@color/twentyfive_black"
-                    android:textSize="@dimen/sub_font_size"
-                />
+                    android:textSize="@dimen/sub_font_size" />
 
 
                 <TextView
@@ -160,7 +166,7 @@
                     android:textColor="@color/user_name_blue"
                     android:textSize="@dimen/body_font_size"
                     android:textStyle="bold"
-                    tools:text="Name NameName Nddsa adasd asdaddame"/>
+                    tools:text="Name NameName Nddsa adasd asdaddame" />
 
 
                 <TextView
@@ -174,8 +180,7 @@
                     android:minEms="4"
                     android:textColor="@color/twentyfive_black"
                     android:textSize="@dimen/sub_font_size"
-                    tools:text="1h"
-                />
+                    tools:text="1h" />
 
             </RelativeLayout>
         </LinearLayout>
