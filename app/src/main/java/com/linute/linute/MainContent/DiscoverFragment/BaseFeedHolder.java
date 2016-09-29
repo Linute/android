@@ -108,7 +108,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesText.setText(String.valueOf(post.getNumLike()));
         vCommentText.setText(String.valueOf(post.getNumOfComments()));
 
-        vPrivacyChanged.setVisibility(post.isPrivacyChanged ? View.VISIBLE : View.GONE);
+        if(vPrivacyChanged != null) vPrivacyChanged.setVisibility(post.isPrivacyChanged ? View.VISIBLE : View.GONE);
 
 //        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
 //                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
