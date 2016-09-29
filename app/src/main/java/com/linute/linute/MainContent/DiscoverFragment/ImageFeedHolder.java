@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AlphaAnimation;
@@ -206,8 +205,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void getEventImage(String image) {
-        if (vProgressBar != null)
-            vProgressBar.setVisibility(View.VISIBLE);
+        /*if (vProgressBar != null)
+            vProgressBar.setVisibility(View.VISIBLE);*/
 
         mRequestManager
                 .load(image)

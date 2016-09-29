@@ -35,6 +35,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/post_image_progress_bar"
             android:layout_gravity="center"
+            android:visibility="gone"
             android:indeterminate="true" />
 
         <View
