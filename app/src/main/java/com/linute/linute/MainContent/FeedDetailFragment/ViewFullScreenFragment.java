@@ -24,6 +24,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -311,7 +312,7 @@ public class ViewFullScreenFragment extends BaseFragment {
                     body.put("college", mCollegeId);
                     body.put("user", mUserId);
                     body.put("room", id);
-                    activity.emitSocket(API_Methods.VERSION + ":posts:loops", body);
+                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:loops", body);
 
                 } catch (JSONException e) {
                     e.printStackTrace();

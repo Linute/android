@@ -33,6 +33,7 @@ import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
@@ -505,7 +506,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         try {
             emit.put("subscribe", !isSubscribed);
             emit.put("user", mTaptUserId);
-            activity.emitSocket(API_Methods.VERSION + ":users:subscribe", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:subscribe", emit);
             Toast.makeText(activity,
                     isSubscribed ? "Unsubscribed from user" : "Subscribed to user",
                     Toast.LENGTH_SHORT).show();
@@ -615,7 +616,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         try {
             emit.put("block", !mLinuteUser.isBlocked());
             emit.put("user", mTaptUserId);
-            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:block:real", emit);
 
             String message;
             if (mLinuteUser.isBlocked()) {
@@ -1218,7 +1219,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         try {
             emit.put("hide", p.isPostHidden());
             emit.put("room", p.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
             e.printStackTrace();

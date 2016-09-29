@@ -15,6 +15,7 @@ import com.linute.linute.MainContent.DiscoverFragment.ImageFeedHolder;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.DiscoverFragment.VideoFeedHolder;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -168,7 +169,7 @@ public class TrendingItemAdapter extends BaseFeedAdapter {
                     BaseTaptActivity activity = (BaseTaptActivity) mContext;
 
                     if (activity != null) {
-                        activity.emitSocket(API_Methods.VERSION + ":posts:impressions", body);
+                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:impressions", body);
                         //Log.i(TAG, "run: impression sent");
                     }
                 } catch (JSONException e) {

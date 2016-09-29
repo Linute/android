@@ -12,13 +12,14 @@ import android.support.v7.app.AppCompatActivity;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.CameraActivity;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 
 /**
  * Created by mikhail on 8/20/16.
  */
 
 //// TODO: 8/30/16 Permission
-public class GalleryActivity extends AppCompatActivity {
+public class GalleryActivity extends BaseSocketActivity {
     public static final String TAG = GalleryActivity.class.getSimpleName();
     public static final int REQ_READ_EXT_STORAGE = 52;
 

@@ -27,7 +27,6 @@ import com.bumptech.glide.signature.StringSignature;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKFriends;
 import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
@@ -55,12 +54,12 @@ import com.linute.linute.MainContent.UpdateFragment.UpdatesFragment;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.MainContent.Uploading.UploadIntentService;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
-import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -71,16 +70,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
-import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -118,16 +114,13 @@ public class MainActivity extends BaseTaptActivity {
         public static final short ACTIVITY = 4;
     }
 
-
-    private Socket mSocket;
-    private boolean mConnecting;
-
     private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        TaptSocket.initSocketConnection(this);
 
         EmptyProfileHolder.activity = this;
 
@@ -200,18 +193,6 @@ public class MainActivity extends BaseTaptActivity {
             }
         });
 
-        /*if (API_Methods.IS_DEV_BUILD) {
-            mNavigationView.addView(LayoutInflater.from(this).inflate(R.layout.dev_switch, mNavigationView, false));
-            ((Switch) mNavigationView.findViewById(R.id.dev_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    ((TextView) mNavigationView.findViewById(R.id.dev_switch_text)).setText((b ? "Live" : "Development"));
-                    API_Methods.HOST = (b ? API_Methods.HOST_LIVE : API_Methods.HOST_DEV);
-                    API_Methods.VERSION = (b ? API_Methods.VERSION_LIVE : API_Methods.VERSION_DEV);
-                }
-            });
-        }*/
-
         clearBackStack();
 
         if (mPreviousItem != null) mPreviousItem.setChecked(false);
@@ -233,8 +214,8 @@ public class MainActivity extends BaseTaptActivity {
                 .showAfter(10);
     }
 
-    public void selectDrawerItem(int pos){
-        navItemSelected((short)pos, mNavigationView.getMenu().getItem(pos-1));
+    public void selectDrawerItem(int pos) {
+        navItemSelected((short) pos, mNavigationView.getMenu().getItem(pos - 1));
     }
 
     private void navItemSelected(short position, MenuItem item) {
@@ -525,63 +506,33 @@ public class MainActivity extends BaseTaptActivity {
         super.onResume();
 
         mSafeForFragmentTransaction = true;
+        TaptSocket socket = TaptSocket.getInstance();
+        socket.on("activity", newActivity);
+        socket.on("new post", newPostListener);
+        socket.on("user banned", userBanned);
+        socket.on("update", update);
+        socket.on("badge", badge);
+        socket.on("unread", haveUnread);
+        socket.on("posts refresh", refresh);
+        socket.on("memes", meme);
+        socket.on("filters", filter);
+        socket.on("status colors", statusColors);
+        socket.on("blocked", blocked);
+        socket.on("sync contacts", syncContacts);
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        socket.on(Socket.EVENT_ERROR, onEventError);
+        socket.on(Socket.EVENT_RECONNECT, onReconnect);
+        socket.connectSocket();
 
-        if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
-            mConnecting = true;
+        try {
+            JSONObject object = new JSONObject();
+            object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));
 
-            {
-                try {
-                    IO.Options op = new IO.Options();
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
-                    op.query =
-                            "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersionName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&platform=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION +
-                                    "&model=" + device.getModel();
-
-                    op.reconnectionDelay = 5;
-                    op.secure = true;
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-
-                    mSocket.on("activity", newActivity);
-                    mSocket.on("new post", newPostListener);
-                    mSocket.on("user banned", userBanned);
-                    mSocket.on("update", update);
-                    mSocket.on("badge", badge);
-                    mSocket.on("unread", haveUnread);
-                    mSocket.on("posts refresh", refresh);
-                    mSocket.on("memes", meme);
-                    mSocket.on("filters", filter);
-                    mSocket.on("status colors", statusColors);
-                    mSocket.on("blocked", blocked);
-                    mSocket.on("sync contacts", syncContacts);
-                    mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-                    mSocket.on(Socket.EVENT_ERROR, onEventError);
-                    mSocket.on(Socket.EVENT_RECONNECT, onReconnect);
-                    mSocket.connect();
-                    mConnecting = false;
-
-                    try {
-                        JSONObject object = new JSONObject();
-                        object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));
-
-                        mSocket.emit(API_Methods.VERSION + ":users:sync contacts", object);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    //emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            socket.emit(API_Methods.VERSION + ":users:sync contacts", object);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+        //emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
     }
 
 
@@ -591,53 +542,34 @@ public class MainActivity extends BaseTaptActivity {
 
         mWatchForRefresh = true;
         mSafeForFragmentTransaction = false;
+    }
 
-        if (mSocket != null) {
-            mSocket.disconnect();
-            mSocket.off("activity", newActivity);
-            mSocket.off("new post", newPostListener);
-            mSocket.off("user banned", userBanned);
-            mSocket.off("update", update);
-            mSocket.off("badge", badge);
-            mSocket.off("unread", haveUnread);
-            mSocket.off("posts refresh", refresh);
-            mSocket.off("memes", meme);
-            mSocket.off("filters", filter);
-            mSocket.off("status colors", statusColors);
-            mSocket.off("blocked", blocked);
-            mSocket.off("sync contacts", syncContacts);
-            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
-            mSocket.off(Socket.EVENT_ERROR, onEventError);
-            mSocket.off(Socket.EVENT_RECONNECT, onReconnect);
+    @Override
+    protected void onStop() {
+        super.onStop();
+        TaptSocket socket = TaptSocket.getInstance();
+        if (socket != null) {
+            socket.disconnectSocket();
+
+            socket.off("activity", newActivity);
+            socket.off("new post", newPostListener);
+            socket.off("user banned", userBanned);
+            socket.off("update", update);
+            socket.off("badge", badge);
+            socket.off("unread", haveUnread);
+            socket.off("posts refresh", refresh);
+            socket.off("memes", meme);
+            socket.off("filters", filter);
+            socket.off("status colors", statusColors);
+            socket.off("blocked", blocked);
+            socket.off("sync contacts", syncContacts);
+            socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            socket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
+            socket.off(Socket.EVENT_ERROR, onEventError);
+            socket.off(Socket.EVENT_RECONNECT, onReconnect);
         }
     }
 
-
-    @Override
-    public void connectSocket(String event, Emitter.Listener emitter) {
-        if (mSocket != null) {
-            mSocket.on(event, emitter);
-        }
-    }
-
-    @Override
-    public void emitSocket(String event, Object arg) {
-        if (mSocket != null)
-            mSocket.emit(event, arg);
-    }
-
-    @Override
-    public void disconnectSocket(String event, Emitter.Listener emitter) {
-        if (mSocket != null) {
-            mSocket.off(event, emitter);
-        }
-    }
-
-    @Override
-    public boolean socketConnected() {
-        return mSocket.connected();
-    }
 
 
     @Override
@@ -648,14 +580,14 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
+            Log.d(TAG, "call: failed socket connection");
         }
     };
 
     private Emitter.Listener onEventError = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            Log.i(TAG, "ERROR: " + args[0]);
+            Log.d(TAG, "ERROR: " + args[0]);
 
             //our fragments might have something they must do if an error occurs with socket
             //i.e. if a progressbar is shown, we should hide it if error occured
@@ -787,7 +719,8 @@ public class MainActivity extends BaseTaptActivity {
                         });
                     }
 
-                    mSocket.emit(API_Methods.VERSION+":badge");
+
+                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":badge");
                     final NewMessageEvent chatEvent = new NewMessageEvent(true);
                     chatEvent.setRoomId(chat.roomId);
                     chatEvent.setMessage(activity.getString("messageText"));
@@ -810,7 +743,7 @@ public class MainActivity extends BaseTaptActivity {
                                         .setNotification(new NotificationEvent(NotificationEvent.ACTIVITY, true));
 
                                 if (update.hasEventInformation()) {
-                                    String text = update.isAnon() ?  update.getDescription() : update.getUserFullName() + " " +  update.getDescription();
+                                    String text = update.isAnon() ? update.getDescription() : update.getUserFullName() + " " + update.getDescription();
                                     newEventSnackbar(text, update.getPost());
                                 } else {
                                     newProfileSnackBar(update);
@@ -882,7 +815,7 @@ public class MainActivity extends BaseTaptActivity {
     }
 
     private void newProfileSnackBar(final Update update) {
-        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getUserFullName()+ " " + update.getDescription(), CustomSnackbar.LENGTH_SHORT);
+        final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, update.getUserFullName() + " " + update.getDescription(), CustomSnackbar.LENGTH_SHORT);
         sn.getView().setBackgroundColor(ContextCompat.getColor(this, R.color.secondaryColor));
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -905,6 +838,7 @@ public class MainActivity extends BaseTaptActivity {
         super.onNewIntent(intent);
         checkIntent(intent);
     }
+
 
     private void checkIntent(Intent intent) {
         int type = intent.getIntExtra("NOTIFICATION", LinuteConstants.MISC);
@@ -956,11 +890,14 @@ public class MainActivity extends BaseTaptActivity {
                 //Log.i(TAG, "call: " + body.toString(4));
                 final String text = body.getString("text");
 
-                emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
+                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
                 Utils.resetUserInformation(getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                 Utils.deleteTempSharedPreference(getSharedPreferences(LinuteConstants.SHARED_TEMP_NAME, MODE_PRIVATE));
                 if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                     LoginManager.getInstance().logOut();
+
+                TaptSocket.getInstance().forceDisconnect();
+                TaptSocket.clear();
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -1281,7 +1218,7 @@ public class MainActivity extends BaseTaptActivity {
     private Emitter.Listener onReconnect = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            if (mSocketListener != null){
+            if (mSocketListener != null) {
                 mSocketListener.onReconnect();
             }
         }
@@ -1318,10 +1255,12 @@ public class MainActivity extends BaseTaptActivity {
     public void openDrawer() {
         mDrawerLayout.openDrawer(GravityCompat.START);
     }
+
     public void closeDrawer() {
         mDrawerLayout.closeDrawer(GravityCompat.START);
     }
-    public void lockDrawer(int lock){
+
+    public void lockDrawer(int lock) {
         mDrawerLayout.setDrawerLockMode(lock);
     }
 

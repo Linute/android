@@ -1,42 +1,30 @@
 package com.linute.linute.MainContent.Settings;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.SwitchPreference;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 
 /**
  * Created by QiFeng on 4/17/16.
  */
-public class NotificationSettingsActivity extends AppCompatActivity {
+public class NotificationSettingsActivity extends BaseSocketActivity {
 
     private static final String TAG = NotificationSettingsActivity.class.getSimpleName();
-    private Socket mSocket;
-    private boolean mConnecting;
-
-    private SharedPreferences mSharedPreferences;
 
 
     @Override
@@ -44,8 +32,6 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_settings);
-
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         //get toolbar
         setUpToolbar();
@@ -73,74 +59,16 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         return false;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
-            {
-                try {
-                    IO.Options op = new IO.Options();
-
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
-                    op.query =
-                            "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersionName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&platform=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION +
-                                    "&model=" + device.getModel();
-
-
-                    op.forceNew = true;
-                    op.reconnectionDelay = 5;
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.connect();
-            mConnecting = false;
-        }
-    }
 
     public boolean emitSocket(String key, Object obj) {
-        if (mSocket != null && mSocket.connected()) {
-            mSocket.emit(key, obj);
+        TaptSocket socket = TaptSocket.getInstance();
+        if (socket.socketConnected()) {
+            socket.emit(key, obj);
             return true;
         }
         return false;
     }
 
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(NotificationSettingsActivity.this, R.string.error_connect, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    };
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSocket.disconnect();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-    }
 
 
     public static class NotificationFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {

@@ -24,6 +24,7 @@ import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -228,7 +229,7 @@ public class UpdatesFragment extends BaseFragment {
                     JSONObject obj = new JSONObject();
                     try {
                         obj.put("activities", mUnreadArray);
-                        activity.emitSocket(API_Methods.VERSION + ":activities:read", obj);
+                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":activities:read", obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -323,7 +324,7 @@ public class UpdatesFragment extends BaseFragment {
                             if (unread.length() > 0) {
                                 JSONObject read = new JSONObject();
                                 read.put("activities", unread);
-                                activity.emitSocket(API_Methods.VERSION + ":activities:read", read);
+                                TaptSocket.getInstance().emit(API_Methods.VERSION + ":activities:read", read);
                             }
 
                             mSkip = obj.getInt("skip");
@@ -453,7 +454,7 @@ public class UpdatesFragment extends BaseFragment {
                             if (unread.length() > 0) {
                                 JSONObject read = new JSONObject();
                                 read.put("activities", unread);
-                                activity.emitSocket(API_Methods.VERSION + ":activities:read", read);
+                                TaptSocket.getInstance().emit(API_Methods.VERSION + ":activities:read", read);
                             }
 
                             //no more information to load
@@ -558,7 +559,7 @@ public class UpdatesFragment extends BaseFragment {
                     JSONObject obj = new JSONObject();
                     try {
                         obj.put("activities", mUnreadArray);
-                        activity.emitSocket(API_Methods.VERSION + ":activities:read", obj);
+                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":activities:read", obj);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
