@@ -441,7 +441,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             final BaseTaptActivity activity = (BaseTaptActivity) context;
             if (activity == null) {
-                vCommentText.setText(comment.getCommentPostText());
+                vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
                 return;
             }
 

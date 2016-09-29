@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -308,5 +309,17 @@ public class Utils {
 
     public static String getMyId(Context context){
         return context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
+    }
+
+    public static String stripUnsupportedCharacters(String in){
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M){
+            return in;
+        }
+        String out = in.replaceAll("[(\\uD83C\\udffb)" +
+                "(\\uD83C\\uDFFc)" +
+                "(\\uD83C\\uDFFd)" +
+                "(\\uD83C\\uDFFe)" +
+                "(\\uD83C\\uDFFF)]", "");
+        return out;
     }
 }
