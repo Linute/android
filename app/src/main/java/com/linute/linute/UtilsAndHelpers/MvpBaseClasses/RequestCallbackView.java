@@ -1,6 +1,6 @@
 package com.linute.linute.UtilsAndHelpers.MvpBaseClasses;
 
-import com.linute.linute.MainContent.FindFriends.FriendSearchUser;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FriendSearchUser;
 
 import java.util.ArrayList;
 

@@ -1,8 +1,7 @@
-package com.linute.linute.MainContent.FindFriends;
+package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
 import java.util.HashMap;

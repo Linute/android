@@ -4,8 +4,6 @@ import android.content.Context;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
-import org.json.JSONArray;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -1,17 +1,14 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,10 +19,13 @@ import android.widget.TextView;
 
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFBFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.SearchFilter;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import rx.Subscription;

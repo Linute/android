@@ -33,7 +33,6 @@ public class CreateChatFragment extends SelectUsersFragment {
     public List<ChatRoom> mSearchRoomList = new ArrayList<>();
 
     private static final String TAG = CreateChatFragment.class.getSimpleName();
-
     UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener;
 
     public void setOnRoomSelectedListener(UserGroupSearchAdapter.OnRoomSelectedListener onRoomSelectedListener) {
@@ -147,7 +146,6 @@ public class CreateChatFragment extends SelectUsersFragment {
                         }
 
 
-
                         roomsJson = jsonObject.getJSONArray("rooms");
 
                         final ArrayList<ChatRoom> tempRoomList = new ArrayList<ChatRoom>();
@@ -203,18 +201,14 @@ public class CreateChatFragment extends SelectUsersFragment {
                                             mSearchUserList.addAll(tempUsers);
                                             mSearchRoomList.clear();
                                             mSearchRoomList.addAll(tempRoomList);
-
                                             mSearchAdapter.notifyDataSetChanged();
                                         }
                                     });
 
                                     //mSearchRV.getRecycledViewPool().clear();
 
-                                    View view = getView();
-                                    if (view != null)
-                                        view.findViewById(R.id.empty_view)
-                                                .setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ?
-                                                        View.VISIBLE : View.GONE);
+                                    vEmpty.setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
+                                    vProgress.setVisibility(View.GONE);
 
 
                                 }

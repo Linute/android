@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.FindFriends;
+package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
+import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;

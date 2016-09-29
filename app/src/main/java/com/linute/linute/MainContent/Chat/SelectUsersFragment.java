@@ -70,6 +70,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
     * If a user is already focused, they'll refocus to draw attention to the user
     * */
     protected User focusedUser = null;
+    protected View vEmpty;
+    protected View vProgress;
 
     SharedPreferences mSharedPreferences;
 
@@ -222,6 +224,8 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
         });
 
         search("");
+        vProgress = view.findViewById(R.id.progressBar);
+        vEmpty = view.findViewById(R.id.empty_view);
     }
 
     protected void onSearchPressed(){
@@ -350,9 +354,9 @@ public class SelectUsersFragment extends Fragment implements UserSelectAdapter.O
                                             mSearchUserList.clear();
                                             mSearchUserList.addAll(tempUsers);
                                             mSearchAdapter.notifyDataSetChanged();
-                                            View view = getView();
-                                            if(view != null)
-                                                view.findViewById(R.id.empty_view).setVisibility(tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
+
+                                            vEmpty.setVisibility(tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
+                                            vProgress.setVisibility(View.GONE);
                                         }
                                     });
                                 }

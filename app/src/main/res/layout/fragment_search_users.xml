@@ -1,10 +1,10 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="#FFFFFFFF"
-              android:orientation="vertical"
-              tools:context=".MainContent.Chat.SelectUsersFragment">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#FFFFFFFF"
+                android:orientation="vertical"
+                tools:context=".MainContent.Chat.SelectUsersFragment">
 
 
     <android.support.v7.widget.Toolbar
@@ -21,37 +21,40 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="16dp"
             android:background="@null"
-            android:inputType="text"
             android:gravity="center_vertical"
             android:hint="Search for friends..."
             android:imeOptions="actionSearch"
+            android:inputType="text"
             android:textColor="@color/pure_white"/>
     </android.support.v7.widget.Toolbar>
 
-    <FrameLayout
-        android:id="@+id/empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/pure_white">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-    </FrameLayout>
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="No results found"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/selected_users"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_user_toolbar"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/search_users"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/selected_users"/>
 
-    </android.support.v7.widget.RecyclerView>
-
-</LinearLayout>
+</RelativeLayout>

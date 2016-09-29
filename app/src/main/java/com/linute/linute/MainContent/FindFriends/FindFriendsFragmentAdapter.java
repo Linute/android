@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
+
 /**
  * Created by QiFeng on 4/6/16.
  */

@@ -1,7 +1,6 @@
-package com.linute.linute.MainContent.FindFriends;
+package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 
 import android.content.Intent;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
