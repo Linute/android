@@ -413,6 +413,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vCommentText.setAutoLinkMask(WEB_URLS | EMAIL_ADDRESSES);
             vCommentText.setTextColor(ContextCompat.getColor(context, R.color.eighty_black));
             vCommentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            vCommentText.setTextIsSelectable(true);
             ((ViewGroup) itemView.findViewById(R.id.content)).addView(vCommentText);
 
         }

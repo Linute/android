@@ -127,6 +127,7 @@
                 android:padding="@dimen/chat_message_bubble_padding"
                 android:textColor="@color/pure_white"
                 android:textSize="@dimen/body_font_size"
+                android:textIsSelectable="true"
                 tools:text="test dfsdf sdf fsdf sdf ddf df "/>
 
             <ImageView
