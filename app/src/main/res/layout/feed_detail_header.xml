@@ -1,23 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:paddingBottom="8dp"
-              android:paddingTop="8dp"
-              tools:showIn="@layout/feed_detail_image">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="8dp"
+    android:paddingTop="8dp"
+    tools:showIn="@layout/feed_detail_image">
 
-    <com.linute.linute.UtilsAndHelpers.ProfileImageView
-        android:id="@+id/feedDetail_profile_image"
-        android:layout_width="@dimen/profile_image_radius"
-        android:layout_height="@dimen/profile_image_radius"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:scaleType="centerCrop"
-        android:src="@drawable/image_loading_background"
-    />
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.linute.linute.UtilsAndHelpers.ProfileImageView
+            android:id="@+id/feedDetail_profile_image"
+            android:layout_width="@dimen/profile_image_radius"
+            android:layout_height="@dimen/profile_image_radius"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:scaleType="centerCrop"
+            android:src="@drawable/image_loading_background" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/privacy_changed"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="bottom|right"
+            android:src="@drawable/ic_revealed_icon"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
 
     <TextView
@@ -33,7 +46,7 @@
         android:singleLine="true"
         android:textColor="@color/user_name_blue"
         android:textSize="@dimen/header_font_size"
-        tools:text="John Snow"/>
+        tools:text="John Snow" />
 
     <TextView
         android:id="@+id/feedDetail_time_stamp"
@@ -45,7 +58,7 @@
         android:singleLine="true"
         android:textColor="@color/twentyfive_black"
         android:textSize="@dimen/sub_font_size"
-        tools:text="1m"/>
+        tools:text="1m" />
 
     <!--    <ImageView
             android:id="@+id/share"

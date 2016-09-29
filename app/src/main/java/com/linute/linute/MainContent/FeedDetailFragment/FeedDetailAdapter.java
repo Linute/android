@@ -205,7 +205,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         private SwipeLayout mSwipeLayout;
 
         protected ImageView vCommentUserImage;
-        protected View vRevealedImage;
+        protected View vPrivacyChanged;
         protected TextView vCommentUserName;
         protected TextView vTimeStamp;
         protected TextView vLikesText;
@@ -237,7 +237,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vTimeStamp = (TextView) itemView.findViewById(R.id.comment_time_ago);
             vLikesText = (TextView) itemView.findViewById(R.id.num_likes);
             vFireIcon = (ImageView) itemView.findViewById(R.id.fire_icon);
-            vRevealedImage = itemView.findViewById(R.id.image_revealed);
+            vPrivacyChanged = itemView.findViewById(R.id.privacy_changed);
 
             vCommentUserName.setOnClickListener(this);
             vCommentUserImage.setOnClickListener(this);
@@ -275,7 +275,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserName.setText(comment.getCommentUserName());
             }
 
-            vRevealedImage.setVisibility(comment.hasPrivacyChanged ? View.VISIBLE : View.GONE);
+            vPrivacyChanged.setVisibility(comment.hasPrivacyChanged ? View.VISIBLE : View.GONE);
 
             setUpPulloutButtons();
 
