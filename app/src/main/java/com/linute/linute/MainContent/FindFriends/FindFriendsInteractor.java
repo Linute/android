@@ -31,19 +31,23 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     public void query(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
         if (mCall != null) mCall.cancel();
 
-        mQuery = (String) params.get("fullName");
-        Handler handler = new Handler(Looper.getMainLooper());
-        if (mQuery.trim().isEmpty()) {
-            if (mInitialListLoaded)
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onFinishedQuery.onSuccess(mUnfilteredList, false);
-                    }
-                });
-            else initList(context, params, onFinishedQuery);
-        } else {
-            search(context, params, onFinishedQuery);
+        String query = (String) params.get("fullName");
+
+        if (!query.equals(mQuery)) {
+            mQuery = query;
+            Handler handler = new Handler(Looper.getMainLooper());
+            if (mQuery.trim().isEmpty()) {
+                if (mInitialListLoaded)
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onFinishedQuery.onSuccess(mUnfilteredList, false);
+                        }
+                    });
+                else initList(context, params, onFinishedQuery);
+            } else {
+                search(context, params, onFinishedQuery);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.FindFriends;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,11 +24,11 @@ import java.util.HashMap;
 public class FindFriendsFBFragment extends BaseFindFriendsFragment {
 
     private CallbackManager mCallbackManager;
-    private String mToken;
 
     @Override
     protected void setUpPresenter() {
-        mFindFriendsSearchPresenter = new FindFriendsSearchPresenter(this, FindFriendsSearchPresenter.TYPE_FB);
+        if (mFindFriendsSearchPresenter == null)
+            mFindFriendsSearchPresenter = new FindFriendsSearchPresenter(this, FindFriendsSearchPresenter.TYPE_FB);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
             @Override
             public void run() {
                 if (getContext() == null) return;
-                mFindFriendsSearchPresenter.request(getContext(), getParams(query));
+                mFindFriendsSearchPresenter.request(getContext(), getSearchParams(query));
             }
         }, 300);
     }
@@ -85,9 +86,7 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
                 }
 
                 mFindFriendsRationale.setVisibility(View.GONE);
-
-                mToken = loginResult.getAccessToken().getToken();
-
+                setUpFacebookList(loginResult.getAccessToken().getToken());
             }
 
             @Override
@@ -106,10 +105,10 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
         });
     }
 
-    private void setUpFacebookList(){
+    private void setUpFacebookList(String token) {
         if (getContext() == null) return;
         mProgressBar.setVisibility(View.VISIBLE);
-        mFindFriendsSearchPresenter.request(getContext(), getParams());
+        mFindFriendsSearchPresenter.request(getContext(), getTokenParams(token));
     }
 
     private void showRationalTextFacebook() {
@@ -130,22 +129,23 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
     public void loginFacebook() {
         AccessToken token = AccessToken.getCurrentAccessToken();
 
-        if (token != null && token.getPermissions().contains("user_friends") && !token.isExpired())
-            setUpFacebookList();
-
-        else
+        if (token != null && token.getPermissions().contains("user_friends") && !token.isExpired()) {
+            setUpFacebookList(token.getToken());
+        }
+        else {
             LoginManager.getInstance().logInWithReadPermissions(FindFriendsFBFragment.this, Collections.singletonList("user_friends"));
+        }
     }
 
-    private HashMap<String, Object> getParams(String q){
+    private HashMap<String, Object> getSearchParams(String q) {
         HashMap<String, Object> param = new HashMap<>();
         param.put("fullName", q);
         return param;
     }
 
-    private HashMap<String, Object> getParams(){
+    private HashMap<String, Object> getTokenParams(String token) {
         HashMap<String, Object> param = new HashMap<>();
-        param.put("token", mToken);
+        param.put("token", token);
         return param;
     }
 
@@ -159,7 +159,6 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
     private void showFacebookErrorToast() {
         Toast.makeText(getActivity(), R.string.bad_connection_text, Toast.LENGTH_SHORT).show();
     }
-
 
 
 }

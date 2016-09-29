@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.FindFriends;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 public class FindFriendsFragment extends BaseFindFriendsFragment {
 
     public static final String TAG = FindFriendsFragment.class.getSimpleName();
-    public static final String ARG_FILTERS= "filters_arg";
+    public static final String ARG_FILTERS = "filters_arg";
 
     private SearchFilter[] mSearchFilters;
 
@@ -28,24 +29,25 @@ public class FindFriendsFragment extends BaseFindFriendsFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null){
+        if (getArguments() != null) {
             mSearchFilters = (SearchFilter[]) getArguments().getParcelableArray(ARG_FILTERS);
         }
     }
 
     @Override
     protected void setUpPresenter() {
-        mFindFriendsSearchPresenter = new FindFriendsSearchPresenter(this, FindFriendsSearchPresenter.TYPE_SEARCH);
+        if (mFindFriendsSearchPresenter == null)
+            mFindFriendsSearchPresenter = new FindFriendsSearchPresenter(this, FindFriendsSearchPresenter.TYPE_SEARCH);
     }
 
     @Override
     protected void initScreen() {
-        if(!mFindFriendsSearchPresenter.originalListLoaded()){
+        if (!mFindFriendsSearchPresenter.originalListLoaded()) {
             mFindFriendsRationale.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.GONE);
             mProgressBar.setVisibility(View.VISIBLE);
             mFindFriendsSearchPresenter.request(getContext(), getParms(""));
-        }else {
+        } else {
             mEmptyText.setVisibility(mFriendFoundList.isEmpty() ? View.VISIBLE : View.GONE);
         }
 
@@ -65,7 +67,7 @@ public class FindFriendsFragment extends BaseFindFriendsFragment {
         }, 300);
     }
 
-    private HashMap<String, Object> getParms(String name){
+    private HashMap<String, Object> getParms(String name) {
         HashMap<String, Object> params = new HashMap<>();
         params.put("fullName", name);
         for (SearchFilter f : mSearchFilters)

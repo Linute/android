@@ -41,9 +41,7 @@ public class LSDKFriendSearch {
 
 
     public Call searchFriendByName(Map<String, Object> params, Callback callback){
-
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-
         return API_Methods.post("friends/search", header, params, callback);
     }
 

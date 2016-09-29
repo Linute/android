@@ -27,20 +27,24 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
     @Override
     public void query(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
         Handler handler = new Handler(Looper.getMainLooper());
-        mQuery = (String) params.get("fullName");
-        if (mInitialListLoaded && mQuery != null) {
-            if (mQuery.trim().isEmpty()) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        onFinishedQuery.onSuccess(mUnfilteredList, false);
-                    }
-                });
-            } else {
-                filterList(mQuery, onFinishedQuery);
+        String query = (String) params.get("fullName");
+
+        if (mQuery == null || !query.equals(mQuery)) {
+            mQuery = query;
+            if (mInitialListLoaded) {
+                if (mQuery.trim().isEmpty()) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            onFinishedQuery.onSuccess(mUnfilteredList, false);
+                        }
+                    });
+                } else {
+                    filterList(mQuery, onFinishedQuery);
+                }
+            } else if (mCall == null) {
+                search(context, params, onFinishedQuery);
             }
-        } else if (mCall == null) {
-            search(context, params, onFinishedQuery);
         }
     }
 
@@ -70,7 +74,7 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onFinishedQuery.onSuccess(mQuery.trim().isEmpty() ? mUnfilteredList : getFilteredList(mQuery), false);
+                                        onFinishedQuery.onSuccess(mQuery == null || mQuery.isEmpty() ? mUnfilteredList : getFilteredList(mQuery), false);
                                     }
                                 });
 

@@ -16,6 +16,6 @@ public abstract class BaseInteractor {
     public abstract void query(Context context, Map<String, Object> params, OnFinishedRequest onFinishedQuery);
 
     public void cancelRequest() {
-        mCall.cancel();
+        if (mCall != null) mCall.cancel();
     }
 }
