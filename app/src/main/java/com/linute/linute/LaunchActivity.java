@@ -76,7 +76,7 @@ public class LaunchActivity extends Activity {
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread thread, Throwable throwable) {
-               String token = getApplicationContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
+                String token = getApplicationContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", "");
                 throwable.printStackTrace();
                 API_Methods.sendErrorReport(throwable, token, new Callback() {
                     @Override
@@ -100,10 +100,8 @@ public class LaunchActivity extends Activity {
             }
         });
 
-
-
-
-        AppsFlyerLib.getInstance().startTracking(this.getApplication(),"VPnL9y82TinTofd5XRZ6TJ");
+        AppsFlyerLib.getInstance().setDebugLog(false);
+        AppsFlyerLib.getInstance().startTracking(this.getApplication(), "VPnL9y82TinTofd5XRZ6TJ");
 
         generateNewSigniture();
         updateLocationIfPossible();
@@ -211,7 +209,7 @@ public class LaunchActivity extends Activity {
                 nextActivity = MainActivity.class;
 
                 //college was not set. go to college picker
-            }else {
+            } else {
                 nextActivity = CollegePickerActivity.class;
             }
         }

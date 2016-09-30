@@ -26,8 +26,8 @@ public class BaseSocketActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
         if (!mNoToken && TaptSocket.getInstance() != null)
             TaptSocket.getInstance().connectSocket();
     }

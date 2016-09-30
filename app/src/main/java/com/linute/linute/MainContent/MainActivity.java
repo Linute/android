@@ -497,15 +497,10 @@ public class MainActivity extends BaseTaptActivity {
 
     private boolean mSafeForFragmentTransaction = true;
 
-    /******
-     * Socket stuff
-     ********/
-
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
-        mSafeForFragmentTransaction = true;
         TaptSocket socket = TaptSocket.getInstance();
         socket.on("activity", newActivity);
         socket.on("new post", newPostListener);
@@ -532,7 +527,18 @@ public class MainActivity extends BaseTaptActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        //emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
+    }
+
+    /******
+     * Socket stuff
+     ********/
+
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mSafeForFragmentTransaction = true;
     }
 
 
@@ -568,6 +574,8 @@ public class MainActivity extends BaseTaptActivity {
             socket.off(Socket.EVENT_ERROR, onEventError);
             socket.off(Socket.EVENT_RECONNECT, onReconnect);
         }
+
+        Log.i(TAG, "onStop: ");
     }
 
 

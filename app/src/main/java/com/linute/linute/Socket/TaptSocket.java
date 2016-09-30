@@ -37,6 +37,7 @@ public class TaptSocket {
             DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(context);
             String token = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", null);
             if (token == null) throw new NullPointerException("No user token");
+
             op.query =
                     "token=" + token +
                             "&deviceToken=" + device.getDeviceToken() +
@@ -72,7 +73,7 @@ public class TaptSocket {
     public void connectSocket() {
         if (mSocket == null) return;
         if (!mSocket.connected()) {
-            Log.i(TAG, "connectSocket: ");
+            Log.d(TAG, "connectSocket: ");
             mSocket.connect();
         }
         mConnections++;
@@ -84,7 +85,7 @@ public class TaptSocket {
         mConnections--;
         // disconnect when no more activities need it
         if (mConnections < 1) {
-            Log.i(TAG, "disconnectSocket: ");
+            Log.d(TAG, "disconnectSocket: ");
             mSocket.disconnect();
         }
     }
@@ -93,7 +94,7 @@ public class TaptSocket {
     public void forceDisconnect(){
         mConnections = 0;
         mSocket.disconnect();
-        Log.i(TAG, "forceDisconnect: ");
+        Log.d(TAG, "forceDisconnect: ");
     }
 
 

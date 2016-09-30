@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.R;
@@ -88,6 +89,7 @@ public class CameraActivity extends BaseSocketActivity {
         }
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -98,7 +100,6 @@ public class CameraActivity extends BaseSocketActivity {
             mReceivedRequestPermissionResults = false;
         }
     }
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
