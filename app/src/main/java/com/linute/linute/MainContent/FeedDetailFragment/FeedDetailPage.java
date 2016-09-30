@@ -592,6 +592,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                         owner = comment.getJSONObject("owner");
 
+                        boolean isPrivacyChanged = false;
+                        if(comment.has("isPrivacyChanged")) isPrivacyChanged = comment.getBoolean("isPrivacyChanged");
                         tempComments
                                 .add(new Comment(
                                                 owner.getString("id"),
@@ -606,7 +608,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                                 comment.getBoolean("isLiked"),
                                                 comment.getInt("numberOfLikes"),
                                                 getImageUrl(comment.getJSONArray("images")),
-                                                comment.getBoolean("isPrivacyChanged")
+                                        isPrivacyChanged
                                         )
                                 );
                     }

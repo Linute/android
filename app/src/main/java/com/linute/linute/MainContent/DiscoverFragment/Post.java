@@ -51,11 +51,12 @@ public class Post implements Parcelable {
 
     private int mType;
     public String imageBase64;
+    public final boolean isPrivacyChanged;
 
     //private ArrayList<Object> mComments = new ArrayList<>();
 
     public Post() {
-
+        isPrivacyChanged = false;
     }
 
     public Post(String imageurl, String postid, String userid, String userName) {
@@ -76,11 +77,13 @@ public class Post implements Parcelable {
         mPostHidden = false;
         mPostMuted = false;
         mIsDeleted = false;
+        isPrivacyChanged = false;
     }
 
 
     public Post(String postId) {
         mPostId = postId;
+        isPrivacyChanged = false;
     }
 
     /**
@@ -157,6 +160,8 @@ public class Post implements Parcelable {
         mPostHidden = JsonHelpers.getBoolean(jsonObject, "isHidden");
         mPostMuted = JsonHelpers.getBoolean(jsonObject, "isMuted");
         mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
+
+        isPrivacyChanged = JsonHelpers.getBoolean(jsonObject, "isPrivacyChanged");
 
         if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0) imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
 //        JSONArray comments = jsonObject.getJSONArray("comments");
@@ -425,6 +430,7 @@ public class Post implements Parcelable {
 
         dest.writeParcelable(mImageSize, 0);
         dest.writeByte((byte) (mIsDeleted ? 1 : 0));
+        dest.writeByte((byte) (isPrivacyChanged ? 1 : 0));
         //dest.writeList(mComments);
     }
 
@@ -446,6 +452,7 @@ public class Post implements Parcelable {
 
         mImageSize = in.readParcelable(PostSize.class.getClassLoader());
         mIsDeleted = in.readByte() != 0;
+        isPrivacyChanged = in.readByte()!=0;
        // mComments = new ArrayList<>();
         //in.readList(mComments, Object.class.getClassLoader());
     }

@@ -40,6 +40,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
     protected TextView vCommentText; //how many comments we have
     protected TextView vPostTime;
     protected CheckBox vLikesHeart; //toggle heart
+    protected View vPrivacyChanged;
 
     protected ProfileImageView vUserImage;
     protected Context mContext;
@@ -73,6 +74,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vPostTime = (TextView) itemView.findViewById(R.id.feedDetail_time_stamp);
         vLikesHeart = (CheckBox) itemView.findViewById(R.id.postHeart);
         vUserImage = (ProfileImageView) itemView.findViewById(R.id.feedDetail_profile_image);
+        vPrivacyChanged = itemView.findViewById(R.id.privacy_changed);
 
         //vLikesHeart.setClickable(false);
         vLikesHeart.setOnCheckedChangeListener(this);
@@ -106,6 +108,9 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesHeart.setChecked(post.isPostLiked());
         vLikesText.setText(String.valueOf(post.getNumLike()));
         vCommentText.setText(String.valueOf(post.getNumOfComments()));
+
+        if(vPrivacyChanged != null) vPrivacyChanged.setVisibility(post.isPrivacyChanged ? View.VISIBLE : View.GONE);
+
 //        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
 //                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
         if (post.getNumOfComments() > 0) {

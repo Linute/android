@@ -388,7 +388,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     vFrame.setVisibility(View.GONE);
                     vDeleted.setVisibility(View.GONE);
                     vUserMessage.setVisibility(View.VISIBLE);
-                    vUserMessage.setText(chat.getMessage());
+                    vUserMessage.setText(Utils.stripUnsupportedCharacters(chat.getMessage()));
                     mUrl = "";
                     mPost = null;
                     break;
