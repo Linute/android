@@ -96,6 +96,10 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private static final String TAG = FeedDetail.class.getSimpleName();
     private RecyclerView recList;
 
+    private RecyclerView vMentionedRV;
+    private MentionedListAdapter mMentionedListAdapter;
+    private ArrayList<MentionedPerson> mMentionedList = new ArrayList<>();
+
     private FeedDetail mFeedDetail;
 
     private FeedDetailAdapter mFeedDetailAdapter;
@@ -103,9 +107,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     private View mAnonCheckBoxContainer;
 
-    private RecyclerView mMentionedList;
+    private RecyclerView vMentionedSearchRV;
 
-    private MentionedPersonAdapter mMentionedPersonAdapter;
+    private MentionSearchAdapter mMentionedSearchAdapter;
 
     private View mProgressbar;
     private ToggleImageView mSendButton;
@@ -173,7 +177,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (recList != null && mMentionedList.getVisibility() != View.VISIBLE)
+                if (recList != null && vMentionedSearchRV.getVisibility() != View.VISIBLE)
                     recList.smoothScrollToPosition(0);
             }
         });
@@ -195,95 +199,26 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mSendButton.setImageViews(R.drawable.ic_upload_picture, R.drawable.ic_send);
 
         recList = (RecyclerView) rootView.findViewById(R.id.feed_detail_recyc);
-        mFeedDetailLLM = new CustomLinearLayoutManager(getActivity());
-        mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
-        recList.setLayoutManager(mFeedDetailLLM);
-
         mFeedDetailAdapter = new FeedDetailAdapter(mFeedDetail, Glide.with(this), getContext());
         mFeedDetailAdapter.setCommentActions(this);
-        recList.setAdapter(mFeedDetailAdapter);
         mFeedDetailAdapter.setLoadMoreCommentsRunnable(new Runnable() {
             @Override
             public void run() {
                 loadMoreComments();
             }
         });
+        setUpFeedRV();
 
-        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                //when passing last item and scrolling upward
-                if (mFeedDetailLLM.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
-                    //close keyboard
-                    showKeyboard(recyclerView, false);
-                }
+        vMentionedSearchRV = (RecyclerView) rootView.findViewById(R.id.feed_detail_mentions);
+        mMentionedSearchAdapter = new MentionSearchAdapter(new ArrayList<MentionedPerson>());
+        setUpMentionSearchRV();
 
-                if(mFeedDetailLLM.findLastVisibleItemPosition() >= mFeedDetailAdapter.getItemCount()-mNewCommentCount){
-                    mNewCommentCount = 0;
-                    if(mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
-                        mNewCommentSnackbar.dismiss();
-                }
-
-            }
-
-
-        });
-
-
-        //mention recyclerview
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        manager.setOrientation(LinearLayoutManager.VERTICAL);
-        mMentionedList = (RecyclerView) rootView.findViewById(R.id.feed_detail_mentions);
-        mMentionedList.setLayoutManager(manager);
-        mMentionedList.setHasFixedSize(true);
-        mMentionedPersonAdapter = new MentionedPersonAdapter(new ArrayList<MentionedPerson>());
-        mMentionedList.setAdapter(mMentionedPersonAdapter);
+        vMentionedRV = (RecyclerView) rootView.findViewById(R.id.added_mentions);
+        mMentionedListAdapter = new MentionedListAdapter(mMentionedList, Glide.with(this));
+        setUpMentionedRV();
 
         mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
-        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    if (mFeedDetailLLM != null) {
-                        mFeedDetailLLM.scrollToPosition(mFeedDetailLLM.getItemCount() - 1);
-                    }
-                }
-            }
-        });
-        mCommentEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                mSendButton.setActive(!s.toString().trim().isEmpty());
-            }
-        });
-
-        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEvent.ACTION_UP == event.getAction())
-                    recList.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
-                        }
-                    }, 500);
-
-                return false;
-            }
-        });
-
-        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
-        mCommentEditText.setQueryTokenReceiver(this);
-        mCommentEditText.setSuggestionsVisibilityManager(this);
+        setUpEditText();
 
         mFeedDetailAdapter.setMentionedTextAdder(new FeedDetailAdapter.MentionedTextAdder() {
             @Override
@@ -332,9 +267,127 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         return rootView;
     }
 
+
+    private void setUpFeedRV() {
+        mFeedDetailLLM = new CustomLinearLayoutManager(getActivity());
+        mFeedDetailLLM.setOrientation(LinearLayoutManager.VERTICAL);
+        recList.setLayoutManager(mFeedDetailLLM);
+        recList.setAdapter(mFeedDetailAdapter);
+
+        recList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                //when passing last item and scrolling upward
+                if (mFeedDetailLLM.findLastCompletelyVisibleItemPosition() == RecyclerView.NO_POSITION && dy < 0) {
+                    //close keyboard
+                    showKeyboard(recyclerView, false);
+                }
+
+                if (mFeedDetailLLM.findLastVisibleItemPosition() >= mFeedDetailAdapter.getItemCount() - mNewCommentCount) {
+                    mNewCommentCount = 0;
+                    if (mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
+                        mNewCommentSnackbar.dismiss();
+                }
+
+            }
+
+
+        });
+    }
+
+    private void setUpMentionSearchRV() {
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        manager.setOrientation(LinearLayoutManager.VERTICAL);
+        vMentionedSearchRV.setLayoutManager(manager);
+        vMentionedSearchRV.setHasFixedSize(true);
+        vMentionedSearchRV.setAdapter(mMentionedSearchAdapter);
+    }
+
+    private void setUpMentionedRV() {
+        LinearLayoutManager manager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        vMentionedRV.setLayoutManager(manager);
+        vMentionedRV.setHasFixedSize(true);
+        vMentionedRV.setAdapter(mMentionedListAdapter);
+    }
+
+    private void setUpEditText() {
+        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if (b) {
+                    if (mFeedDetailLLM != null) {
+                        mFeedDetailLLM.scrollToPosition(mFeedDetailLLM.getItemCount() - 1);
+                    }
+                }
+            }
+        });
+
+        mCommentEditText.addMentionWatcher(new MentionsEditText.MentionWatcher() {
+            @Override
+            public void onMentionAdded(@NonNull final Mentionable mention, @NonNull String text, int start, int end) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMentionedList.add((MentionedPerson) mention);
+                        mMentionedListAdapter.notifyItemInserted(mMentionedList.size() - 1);
+                    }
+                });
+            }
+
+            @Override
+            public void onMentionDeleted(@NonNull final Mentionable mention, @NonNull String text, int start, int end) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int index = mMentionedList.indexOf((MentionedPerson) mention);
+                        if (index >= 0) {
+                            mMentionedList.remove(index);
+                            mMentionedListAdapter.notifyItemRemoved(index);
+                        }
+                    }
+                });
+            }
+        });
+
+        mCommentEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                mSendButton.setActive(!s.toString().trim().isEmpty());
+            }
+        });
+
+        mCommentEditText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (MotionEvent.ACTION_UP == event.getAction())
+                    recList.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            recList.smoothScrollToPosition(mFeedDetailAdapter.getItemCount() - 1);
+                        }
+                    }, 500);
+
+                return false;
+            }
+        });
+
+        mCommentEditText.setTokenizer(new WordTokenizer(new WordTokenizerConfig.Builder().setMaxNumKeywords(4).setThreshold(2).build()));
+        mCommentEditText.setQueryTokenReceiver(this);
+        mCommentEditText.setSuggestionsVisibilityManager(this);
+    }
+
     private void updateAnonCheckboxState() {
         mAnonCheckBoxContainer.setEnabled(
-                ! mFeedDetail.getPost().isCommentAnonDisabled());
+                !mFeedDetail.getPost().isCommentAnonDisabled());
         TextView anonCheckboxText = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
         anonCheckboxText.setVisibility(mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
     }
@@ -508,7 +561,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         if (mFeedDetailAdapter.getRequestManager() != null)
             mFeedDetailAdapter.getRequestManager().onDestroy();
 
+        if (mMentionedListAdapter.getRequestManager() != null)
+            mMentionedListAdapter.getRequestManager().onDestroy();
+
         mFeedDetailAdapter.setRequestManager(null);
+        mMentionedListAdapter.setRequestManager(null);
     }
 
     private void displayCommentsAndPost() {
@@ -594,7 +651,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         owner = comment.getJSONObject("owner");
 
                         boolean isPrivacyChanged = false;
-                        if(comment.has("isPrivacyChanged")) isPrivacyChanged = comment.getBoolean("isPrivacyChanged");
+                        if (comment.has("isPrivacyChanged"))
+                            isPrivacyChanged = comment.getBoolean("isPrivacyChanged");
                         tempComments
                                 .add(new Comment(
                                                 comment.getString("id"),
@@ -610,7 +668,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                                 comment.getBoolean("isLiked"),
                                                 comment.getInt("numberOfLikes"),
                                                 getImageUrl(comment.getJSONArray("images")),
-                                        isPrivacyChanged
+                                                isPrivacyChanged
                                         )
                                 );
                     }
@@ -660,8 +718,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         });
     }
-
-
 
 
     private String getImageUrl(JSONArray images) {
@@ -806,8 +862,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                             mFeedDetail.getComments().remove(0);
                                             mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyItemRangeInserted(0,tempComments.size());
-                                            mFeedDetailLLM.scrollToPosition(lastPos+tempComments.size());
+                                            mFeedDetailAdapter.notifyItemRangeInserted(0, tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(lastPos + tempComments.size());
                                         }
                                     });
                                 }
@@ -1037,7 +1093,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         if (activity == null) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -1086,7 +1142,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         if (activity == null) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -1245,8 +1301,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                             getActivity().runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mMentionedPersonAdapter = new MentionedPersonAdapter(personList);
-                                    mMentionedList.swapAdapter(mMentionedPersonAdapter, true);
+                                    mMentionedSearchAdapter = new MentionSearchAdapter(personList);
+                                    vMentionedSearchRV.swapAdapter(mMentionedSearchAdapter, true);
                                     if (mDisplayList) {
                                         displaySuggestions(!personList.isEmpty());
                                     } else if (personList.isEmpty()) {
@@ -1308,12 +1364,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
     @Override
     public void displaySuggestions(boolean display) {
-        mMentionedList.setVisibility(display ? View.VISIBLE : View.GONE);
+        vMentionedSearchRV.setVisibility(display ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public boolean isDisplayingSuggestions() {
-        return mMentionedList.getVisibility() == View.VISIBLE;
+        return vMentionedSearchRV.getVisibility() == View.VISIBLE;
     }
 
     @Override
@@ -1343,23 +1399,23 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
 
-    private class MentionedPersonAdapter extends RecyclerView.Adapter<MentionedPersonAdapter.MentionedPersonViewHolder> {
+    private class MentionSearchAdapter extends RecyclerView.Adapter<MentionSearchAdapter.MentionSearchVH> {
 
         private ArrayList<MentionedPerson> mMentionedPersons;
 
-        public MentionedPersonAdapter(ArrayList<MentionedPerson> personList) {
+        public MentionSearchAdapter(ArrayList<MentionedPerson> personList) {
             mMentionedPersons = personList;
         }
 
         @Override
-        public MentionedPersonViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new MentionedPersonViewHolder(LayoutInflater
+        public MentionSearchVH onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new MentionSearchVH(LayoutInflater
                     .from(parent.getContext())
                     .inflate(R.layout.item_mentioned_person, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(MentionedPersonViewHolder holder, final int position) {
+        public void onBindViewHolder(MentionSearchVH holder, final int position) {
             holder.bindView(mMentionedPersons.get(position));
         }
 
@@ -1368,12 +1424,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             return mMentionedPersons.size();
         }
 
-        public class MentionedPersonViewHolder extends RecyclerView.ViewHolder {
+        public class MentionSearchVH extends RecyclerView.ViewHolder {
 
             public CircleImageView mProfileImageView;
             public TextView mName;
 
-            public MentionedPersonViewHolder(View itemView) {
+            public MentionSearchVH(View itemView) {
                 super(itemView);
                 mProfileImageView = (CircleImageView) itemView.findViewById(R.id.mentioned_person_profile_image);
                 mName = (TextView) itemView.findViewById(R.id.mentioned_person_name);
@@ -1393,7 +1449,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     @Override
                     public void onClick(View v) {
                         mCommentEditText.insertMention(person);
-                        mMentionedList.swapAdapter(new MentionedPersonAdapter(new ArrayList<MentionedPerson>()), true);
+                        vMentionedSearchRV.swapAdapter(new MentionSearchAdapter(new ArrayList<MentionedPerson>()), true);
                         displaySuggestions(false);
                         mSearchHandler.removeCallbacks(mSearchRunnable);
                         mCommentEditText.requestFocus();
@@ -1501,7 +1557,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     }
 
-                                    if(mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()){
+                                    if (mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()) {
                                         mNewCommentCount++;
                                     }
 
@@ -1547,8 +1603,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
 
-        if (mMentionedList.getVisibility() == View.VISIBLE) {
-            mMentionedList.setVisibility(View.GONE);
+        if (vMentionedSearchRV.getVisibility() == View.VISIBLE) {
+            vMentionedSearchRV.setVisibility(View.GONE);
         }
 
         String commentText = mCommentEditText.getText().toString().trim();
@@ -1556,7 +1612,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         if (commentText.isEmpty() || getActivity() == null || mFeedDetail.getPostId() == null || activity == null)
             return;
 
-        if (!activity.socketConnected() || !Utils.isNetworkAvailable(activity)) {
+        if (!TaptSocket.getInstance().socketConnected()|| !Utils.isNetworkAvailable(activity)) {
             Utils.showBadConnectionToast(activity);
             return;
         }

@@ -544,7 +544,7 @@ room: id of room
 
                         if (activity == null) return;
 
-                        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+                        if (!Utils.isNetworkAvailable(activity) || !mSocket.socketConnected()) {
                             Utils.showBadConnectionToast(activity);
                             return;
                         }

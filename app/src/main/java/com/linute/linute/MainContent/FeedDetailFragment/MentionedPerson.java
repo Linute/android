@@ -20,6 +20,7 @@ public class MentionedPerson implements Mentionable {
         mFullname = fullname;
         mUserId = userID;
         mProfileImage = profileImage;
+
     }
 
 
@@ -64,6 +65,16 @@ public class MentionedPerson implements Mentionable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MentionedPerson && ((MentionedPerson)o).getUserId().equals(this.mUserId);
+    }
+
+    @Override
+    public int hashCode() {
+        return mUserId.hashCode();
     }
 
     @Override

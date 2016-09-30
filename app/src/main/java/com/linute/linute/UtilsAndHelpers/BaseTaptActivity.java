@@ -33,10 +33,6 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
 
     public abstract void setSocketErrorResponse(SocketErrorResponse error);
 
-    public boolean socketConnected(){
-        return false;
-    }
-
     public interface SocketErrorResponse{
         void runSocketError();
     }

@@ -16,7 +16,15 @@ public class MentionedAnon extends MentionedPerson {
         this.mCommentId = commentId;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MentionedAnon && ((MentionedAnon) o).getCommentId().equals(this.mCommentId);
+    }
 
+    @Override
+    public int hashCode() {
+        return mCommentId.hashCode();
+    }
 
     public String getCommentId(){
         return mCommentId;

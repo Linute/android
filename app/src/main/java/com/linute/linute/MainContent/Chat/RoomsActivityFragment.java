@@ -710,7 +710,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         if (activity != null) {
             JSONObject object = new JSONObject();
             try {
-                if (activity.socketConnected()) {
+                if (mTaptSocket.socketConnected()) {
                     object.put("room", room.roomId);
                     mTaptSocket.emit(API_Methods.VERSION + ":rooms:delete", object);
                     activity.runOnUiThread(new Runnable() {
