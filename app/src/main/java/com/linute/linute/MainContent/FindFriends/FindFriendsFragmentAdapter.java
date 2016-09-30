@@ -4,14 +4,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
+
 /**
  * Created by QiFeng on 4/6/16.
  */
 public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
 
-    private FindFriendsFragment[] mFindFriendsFragments;
+    private BaseFindFriendsFragment[] mFindFriendsFragments;
 
-    public FindFriendsFragmentAdapter(FragmentManager fm, FindFriendsFragment[] array) {
+    public FindFriendsFragmentAdapter(FragmentManager fm, BaseFindFriendsFragment[] array) {
         super(fm);
         mFindFriendsFragments = array;
     }
@@ -29,13 +31,13 @@ public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        switch (position){
+        switch (position) {
             case 0:
-                return "Name";
+                return "Campus";
             case 1:
-                return "Facebook";
+                return "Name";
             case 2:
-                return "Contacts";
+                return "Facebook";
         }
 
         return super.getPageTitle(position);

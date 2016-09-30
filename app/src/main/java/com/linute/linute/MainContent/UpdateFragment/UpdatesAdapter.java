@@ -20,6 +20,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.SectionedRecyclerViewAdapter;
@@ -344,7 +345,7 @@ public class UpdatesAdapter extends SectionedRecyclerViewAdapter<RecyclerView.Vi
                             JSONArray activities = new JSONArray();
                             activities.put(id);
                             obj.put("activities", activities);
-                            ((MainActivity)mContext).emitSocket(API_Methods.VERSION + ":activities:viewed", obj);
+                            TaptSocket.getInstance().emit(API_Methods.VERSION + ":activities:viewed", obj);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

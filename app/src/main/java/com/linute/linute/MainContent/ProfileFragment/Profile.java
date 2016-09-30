@@ -33,6 +33,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -918,7 +919,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         try {
             emit.put("hide", !p.isPostHidden());
             emit.put("room", p.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
             e.printStackTrace();

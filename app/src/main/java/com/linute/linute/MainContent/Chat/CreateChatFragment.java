@@ -36,6 +36,7 @@ public class CreateChatFragment extends SelectUsersFragment {
 
     UserGroupSearchAdapter2.OnRoomClickListener onRoomSelectedListener;
 
+
     public void setOnRoomSelectedListener(UserGroupSearchAdapter2.OnRoomClickListener onRoomSelectedListener) {
         this.onRoomSelectedListener = onRoomSelectedListener;
 //        ((UserGroupSearchAdapter)mSearchAdapter).setOnRoomSelectedListener(onRoomSelectedListener);
@@ -150,7 +151,6 @@ public class CreateChatFragment extends SelectUsersFragment {
                         }
 
 
-
                         roomsJson = jsonObject.getJSONArray("rooms");
 
                         final ArrayList<ChatRoom> tempRoomList = new ArrayList<ChatRoom>();
@@ -206,18 +206,15 @@ public class CreateChatFragment extends SelectUsersFragment {
                                             mSearchUserList.addAll(tempUsers);
                                             mSearchRoomList.clear();
                                             mSearchRoomList.addAll(tempRoomList);
-
                                             mSearchAdapter2.notifyDataSetChanged();
+
                                         }
                                     });
 
                                     //mSearchRV.getRecycledViewPool().clear();
 
-                                    View view = getView();
-                                    if (view != null)
-                                        view.findViewById(R.id.empty_view)
-                                                .setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ?
-                                                        View.VISIBLE : View.GONE);
+                                    vEmpty.setVisibility(tempRoomList.isEmpty() && tempUsers.isEmpty() ? View.VISIBLE : View.GONE);
+                                    vProgress.setVisibility(View.GONE);
 
 
                                 }

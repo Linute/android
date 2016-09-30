@@ -11,11 +11,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 
-public class EditProfileInfoActivity extends AppCompatActivity {
+public class EditProfileInfoActivity extends BaseSocketActivity {
 
     public static final String TAG = "EditProfileInfoActivity";
 
@@ -41,7 +43,6 @@ public class EditProfileInfoActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.settingactivity_toolbar);
         mToolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
-
         setSupportActionBar(mToolbar);
 
     }

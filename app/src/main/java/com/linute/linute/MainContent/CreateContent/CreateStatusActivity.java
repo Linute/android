@@ -38,13 +38,14 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.Uploading.PendingUploadPost;
 import com.linute.linute.R;
 import com.linute.linute.SquareCamera.ImageUtility;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.CustomBackPressedEditText;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.bson.types.ObjectId;
 
-public class CreateStatusActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateStatusActivity extends BaseSocketActivity implements View.OnClickListener {
     public static final String TAG = CreateStatusActivity.class.getSimpleName();
 
     private CustomBackPressedEditText mPostEditText;

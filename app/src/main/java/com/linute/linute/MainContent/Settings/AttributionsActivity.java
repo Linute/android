@@ -9,8 +9,9 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 
-public class AttributionsActivity extends AppCompatActivity {
+public class AttributionsActivity extends BaseSocketActivity {
 
 
     private TextView mAttributionsText;

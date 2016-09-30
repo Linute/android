@@ -18,6 +18,7 @@ import com.linute.linute.API.API_Methods;
 import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -140,7 +141,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
                 JSONObject body = new JSONObject();
                 body.put("user", mUserId);
                 body.put("room", mPost.getPostId());
-                activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
+                TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

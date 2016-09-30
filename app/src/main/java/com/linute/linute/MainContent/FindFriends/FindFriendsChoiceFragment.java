@@ -4,13 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,10 +19,14 @@ import android.widget.TextView;
 
 import com.linute.linute.MainContent.EventBuses.NotificationEvent;
 import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.BaseFindFriendsFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFBFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.FindFriendsFragment;
+import com.linute.linute.MainContent.FindFriends.FindFriendsFragment.SearchFilter;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
-import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -50,7 +52,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     //      pressing hamburger opens drawer
     private boolean mOnlyFragmentInStack = false;
 
-    private FindFriendsFragment[] mFindFriendsFragments;
+    private BaseFindFriendsFragment[] mFindFriendsFragments;
 
     public static FindFriendsChoiceFragment newInstance(boolean onlyFragmentInStack) {
         Bundle b = new Bundle();
@@ -73,9 +75,14 @@ public class FindFriendsChoiceFragment extends BaseFragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_findfriends_choices, container, false);
 
+        String collegeId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("collegeId", "");
+
         if (mFindFriendsFragments == null) {
-            mFindFriendsFragments = new FindFriendsFragment[]{FindFriendsFragment.newInstance(0),
-                    FindFriendsFragment.newInstance(1), FindFriendsFragment.newInstance(2)};
+            mFindFriendsFragments = new BaseFindFriendsFragment[]{
+                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
+                    FindFriendsFragment.newInstance(new SearchFilter[]{}),
+                    new FindFriendsFBFragment()
+            };
         }
 
         FragmentPagerAdapter fragmentPagerAdapter = new FindFriendsFragmentAdapter(getChildFragmentManager(), mFindFriendsFragments);
@@ -151,7 +158,6 @@ public class FindFriendsChoiceFragment extends BaseFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                //Log.i("TEST", "afterTextChanged: "+s.toString());
                 (mFindFriendsFragments[mViewPager.getCurrentItem()]).searchWithQuery(s.toString());
             }
         });
@@ -185,7 +191,7 @@ public class FindFriendsChoiceFragment extends BaseFragment {
         }
     }
 
-    public void hideKeyboard(){
+    public void hideKeyboard() {
         if (getActivity() != null) {
             //hide keyboard
             if (mSearchView.hasFocus()) {

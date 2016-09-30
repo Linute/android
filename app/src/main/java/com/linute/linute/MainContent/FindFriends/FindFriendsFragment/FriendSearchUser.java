@@ -1,4 +1,4 @@
-package com.linute.linute.MainContent.FindFriends;
+package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 
 import android.os.Parcel;
 import android.os.Parcelable;

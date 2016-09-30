@@ -51,6 +51,7 @@ import com.linute.linute.MainContent.DiscoverFragment.VideoPlayerSingleton;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -121,6 +122,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private LinearLayoutManager mFeedDetailLLM;
 
     private Snackbar mNewCommentSnackbar;
+
+    protected TaptSocket mTaptSocket = TaptSocket.getInstance();
 
     public FeedDetailPage() {
     }
@@ -373,7 +376,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
             joinRoomSocket(activity);
-            activity.connectSocket("new comment", newComment);
+            mTaptSocket.on("new comment", newComment);
             activity.setSocketListener(this);
             activity.setSocketErrorResponse(new BaseTaptActivity.SocketErrorResponse() {
                 @Override
@@ -449,7 +452,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity == null) return;
-            activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
+            mTaptSocket.emit(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException | IOException | NullPointerException e) { //nullpointer when creating bitmap
             e.printStackTrace();
         }
@@ -480,12 +483,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             try {
                 leaveParam.put("room", mFeedDetail.getPostId());
                 leaveParam.put("user", mViewId);
-                activity.emitSocket(API_Methods.VERSION + ":comments:left", leaveParam);
+                mTaptSocket.emit(API_Methods.VERSION + ":comments:left", leaveParam);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            activity.disconnectSocket("new comment", newComment);
+            mTaptSocket.off("new comment", newComment);
             activity.setSocketErrorResponse(null);
         }
     }
@@ -1041,7 +1044,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         try {
             emit.put("mute", !isMuted);
             emit.put("room", mFeedDetail.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:mute", emit);
+            mTaptSocket.emit(API_Methods.VERSION + ":posts:mute", emit);
             Toast.makeText(activity,
                     isMuted ? "You will start getting updates" : "Notifications muted",
                     Toast.LENGTH_SHORT).show();
@@ -1090,7 +1093,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         try {
             emit.put("hide", !isHidden);
             emit.put("room", mFeedDetail.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+            mTaptSocket.emit(API_Methods.VERSION + ":posts:hide", emit);
             Toast.makeText(activity,
                     isHidden ? "Post unhidden" : "Post hidden",
                     Toast.LENGTH_SHORT).show();
@@ -1325,7 +1328,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         try {
             joinParam.put("room", mFeedDetail.getPostId());
             joinParam.put("user", mViewId);
-            activity.emitSocket(API_Methods.VERSION + ":comments:joined", joinParam);
+            mTaptSocket.emit(API_Methods.VERSION + ":comments:joined", joinParam);
         } catch (JSONException e) {
             e.printStackTrace();
             if (getActivity() != null) {
@@ -1577,7 +1580,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
             mCommentEditText.setText("");
-            activity.emitSocket(API_Methods.VERSION + ":comments:new comment", comment);
+            mTaptSocket.emit(API_Methods.VERSION + ":comments:new comment", comment);
         } catch (JSONException e) {
             e.printStackTrace();
             Utils.showServerErrorToast(getActivity());
@@ -1831,7 +1834,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 JSONObject obj = new JSONObject();
                 obj.put("comment", id);
                 obj.put("liked", like);
-                activity.emitSocket(API_Methods.VERSION + ":comments:liked", obj);
+                mTaptSocket.emit(API_Methods.VERSION + ":comments:liked", obj);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

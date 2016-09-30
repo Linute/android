@@ -9,17 +9,17 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.linute.linute.MainContent.EditScreen.EditFragment;
-import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class CameraActivity extends AppCompatActivity {
+public class CameraActivity extends BaseSocketActivity {
 
     public final static int SEND_POST = 14;  //send image/video to server
     public final static int RETURN_URI = 15; //save image and return image/video uri
@@ -88,6 +88,7 @@ public class CameraActivity extends AppCompatActivity {
                     .commit();
         }
     }
+
 
     @Override
     protected void onResume() {

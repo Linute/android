@@ -22,6 +22,7 @@ import com.linute.linute.MainContent.EventBuses.NewMessageBus;
 import com.linute.linute.MainContent.EventBuses.NewMessageEvent;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -73,6 +74,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
     private boolean mCanLoadMore = false;
 
     private Handler mHandler = new Handler();
+    TaptSocket mTaptSocket = TaptSocket.getInstance();
 
     public RoomsActivityFragment() {
     }
@@ -208,7 +210,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
         super.onDestroy();
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity != null) {
-            activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
+            mTaptSocket.emit(API_Methods.VERSION + ":messages:unread", new JSONObject());
         }
     }
 
@@ -710,7 +712,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
             try {
                 if (activity.socketConnected()) {
                     object.put("room", room.roomId);
-                    activity.emitSocket(API_Methods.VERSION + ":rooms:delete", object);
+                    mTaptSocket.emit(API_Methods.VERSION + ":rooms:delete", object);
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -786,7 +788,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                             jsonParams.put("mute", true);
                                             jsonParams.put("room", room.roomId);
                                             jsonParams.put("time", item);
-                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            mTaptSocket.emit(API_Methods.VERSION + ":rooms:mute", jsonParams);
 //                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
 //                                            updateNotificationView();
                                             room.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
@@ -807,7 +809,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                             jsonParams.put("mute", false);
                             jsonParams.put("room", room.roomId);
                             jsonParams.put("time", 0);
-                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                            mTaptSocket.emit(API_Methods.VERSION + ":rooms:mute", jsonParams);
                             room.setMute(false, 0);
                             mRoomsAdapter.notifyItemChanged(position);
                         } catch (JSONException e) {

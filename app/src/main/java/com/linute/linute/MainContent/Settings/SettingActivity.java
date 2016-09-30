@@ -1,15 +1,11 @@
 package com.linute.linute.MainContent.Settings;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.facebook.AccessToken;
@@ -20,31 +16,25 @@ import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
 import org.json.JSONObject;
 
-import java.net.URISyntaxException;
 
 import io.realm.Realm;
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
-import io.socket.engineio.client.transports.WebSocket;
 
 
-public class SettingActivity extends AppCompatActivity {
+public class SettingActivity extends BaseSocketActivity {
 
     //use a variable to keep track of if user made changes to account info
     //if user did change account information, let the parent "ProfileFragment" know, so it can update info
     public static String TAG = "SettingActivity";
 
     private boolean mUpdateNeeded;
-    private Socket mSocket;
-    private SharedPreferences mSharedPreferences;
-    private boolean mConnecting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,8 +42,6 @@ public class SettingActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_settings);
-
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
         //get toolbar
         setUpToolbar();
@@ -100,67 +88,6 @@ public class SettingActivity extends AppCompatActivity {
         }
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (mSocket == null || !mSocket.connected() && !mConnecting) {
-            mConnecting = true;
-            {
-                try {
-                    IO.Options op = new IO.Options();
-
-                    DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
-                    op.query =
-                            "token=" + mSharedPreferences.getString("userToken", "") +
-                                    "&deviceToken=" + device.getDeviceToken() +
-                                    "&udid=" + device.getUdid() +
-                                    "&version=" + device.getVersionName() +
-                                    "&build=" + device.getVersionCode() +
-                                    "&os=" + device.getOS() +
-                                    "&platform=" + device.getType() +
-                                    "&api=" + API_Methods.VERSION +
-                                    "&model=" + device.getModel();
-
-                    op.forceNew = true;
-                    op.reconnectionDelay = 5;
-                    op.transports = new String[]{WebSocket.NAME};
-
-                    mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-                } catch (URISyntaxException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-            mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mSocket.connect();
-            mConnecting = false;
-        }
-    }
-
-    public void emitSocket(String key, Object obj) {
-        if (mSocket != null) {
-            mSocket.emit(key, obj);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSocket.disconnect();
-        mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-    }
-
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            Log.i(TAG, "call: failed socket connection");
-        }
-    };
 
     //fragment with our settings layout
     public static class LinutePreferenceFragment extends PreferenceFragment {
@@ -217,8 +144,7 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     //clear saved information
-                    ((SettingActivity) getActivity()).emitSocket(API_Methods.VERSION + ":users:logout", new JSONObject());
-
+                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:logout", new JSONObject());
                     Utils.resetUserInformation(getActivity()
                             .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE));
                     Utils.deleteTempSharedPreference(getActivity()
@@ -226,6 +152,9 @@ public class SettingActivity extends AppCompatActivity {
 
                     if (AccessToken.getCurrentAccessToken() != null) //log out facebook if logged in
                         LoginManager.getInstance().logOut();
+
+                    TaptSocket.getInstance().forceDisconnect();
+                    TaptSocket.clear();
 
                     mRealm.executeTransactionAsync(new Realm.Transaction() {
                         @Override
