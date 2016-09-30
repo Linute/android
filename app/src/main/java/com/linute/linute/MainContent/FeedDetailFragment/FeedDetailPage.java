@@ -34,6 +34,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.signature.StringSignature;
 import com.linkedin.android.spyglass.mentions.MentionSpan;
+import com.linkedin.android.spyglass.mentions.Mentionable;
 import com.linkedin.android.spyglass.suggestions.SuggestionsResult;
 import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsResultListener;
 import com.linkedin.android.spyglass.suggestions.interfaces.SuggestionsVisibilityManager;
@@ -593,6 +594,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         if(comment.has("isPrivacyChanged")) isPrivacyChanged = comment.getBoolean("isPrivacyChanged");
                         tempComments
                                 .add(new Comment(
+                                                comment.getString("id"),
                                                 owner.getString("id"),
                                                 owner.getString("profileImage"),
                                                 owner.getString("fullName"),
@@ -770,6 +772,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 owner = comment.getJSONObject("owner");
                                 tempComments
                                         .add(new Comment(
+                                                        comment.getString("id"),
                                                         owner.getString("id"),
                                                         owner.getString("profileImage"),
                                                         owner.getString("fullName"),
@@ -1449,6 +1452,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 JSONObject owner = object.getJSONObject("owner");
 
                 final Comment com = new Comment(
+                        object.getString("id"),
                         owner.getString("id"),
                         owner.getString("profileImage"),
                         owner.getString("fullName"),
@@ -1568,14 +1572,22 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             //add people mentioned in comment
             List<MentionSpan> spanList = mCommentEditText.getMentionsText().getMentionSpans();
             JSONArray mentions = new JSONArray();
+            //mentioned anons are added to a separate field and mentioned by comment id
+            JSONArray replys = new JSONArray();
 
             if (!spanList.isEmpty()) {
                 for (MentionSpan s : spanList) {
-                    mentions.put(((MentionedPerson) s.getMention()).getUserId()); //add user ids
+                        Mentionable mention = s.getMention();
+                        if(mention instanceof MentionedAnon){
+                            replys.put(((MentionedAnon)mention).getCommentId());
+                        }else if(mention instanceof MentionedPerson){
+                            mentions.put(((MentionedPerson) mention).getUserId()); //add user ids
+                        }
                 }
             }
 
             comment.put("mentions", mentions);
+            comment.put("replys", replys);
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
             mCommentEditText.setText("");
