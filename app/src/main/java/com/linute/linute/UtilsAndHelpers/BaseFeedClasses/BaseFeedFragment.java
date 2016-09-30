@@ -446,7 +446,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        if (!activity.socketConnected()){
+        if (!TaptSocket.getInstance().socketConnected()){
             Utils.showBadConnectionToast(activity);
             return;
         }

@@ -904,7 +904,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        if (!activity.socketConnected()) {
+        if (!TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }

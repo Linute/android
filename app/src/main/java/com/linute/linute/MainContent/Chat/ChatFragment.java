@@ -505,12 +505,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
                     mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
                     mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
@@ -540,7 +540,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
                     mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
@@ -1515,7 +1515,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !activity.socketConnected() || mUserId == null
+        if (activity == null || !mSocket.socketConnected() || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
         }

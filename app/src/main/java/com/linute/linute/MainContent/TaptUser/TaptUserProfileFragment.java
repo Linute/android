@@ -494,7 +494,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         if (activity == null || mOwnerIsViewer) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -607,7 +607,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         if (activity == null || mOwnerIsViewer) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -1203,7 +1203,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        if (!activity.socketConnected()) {
+        if (!TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }

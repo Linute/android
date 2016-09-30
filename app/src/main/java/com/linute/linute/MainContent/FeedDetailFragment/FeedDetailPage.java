@@ -1034,7 +1034,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         if (activity == null) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !mTaptSocket.socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -1083,7 +1083,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         if (activity == null) return;
 
-        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+        if (!Utils.isNetworkAvailable(activity) || !mTaptSocket.socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -1552,7 +1552,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         if (commentText.isEmpty() || getActivity() == null || mFeedDetail.getPostId() == null || activity == null)
             return;
 
-        if (!activity.socketConnected() || !Utils.isNetworkAvailable(activity)) {
+        if (!mTaptSocket.socketConnected() || !Utils.isNetworkAvailable(activity)) {
             Utils.showBadConnectionToast(activity);
             return;
         }

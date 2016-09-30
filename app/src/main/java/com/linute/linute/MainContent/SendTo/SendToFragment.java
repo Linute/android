@@ -288,7 +288,7 @@ public class SendToFragment extends BaseFragment {
         if (activity == null) return;
 
 
-        if (!activity.socketConnected()) {
+        if (!TaptSocket.getInstance().socketConnected()) {
             Toast.makeText(activity, "Failed to share post", Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
             return;
