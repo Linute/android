@@ -320,7 +320,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 mSwipeLayout.findViewById(R.id.comment_report).setVisibility(View.VISIBLE);
 
                 if (mComment.isAnon()) { //comment is anonymous
-                    mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
+                    mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.VISIBLE);
 
                     //viewer is owner of post? then can delete anon comments
                     if (mFeedDetail.getPost().getUserId().equals(mViewerUserId)) {
@@ -354,6 +354,9 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                     case R.id.comment_reply:
                         if (!mComment.isAnon())
                             mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
+                        else
+                            mMentionedTextAdder.addMentionedPerson(new MentionedAnon(mComment.getAnonName(), mComment.getCommentId(), mComment.getAnonImage()));
+
                         break;
                     case R.id.comment_delete:
                         mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());

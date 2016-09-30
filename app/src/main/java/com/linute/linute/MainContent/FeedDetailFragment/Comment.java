@@ -37,9 +37,11 @@ public class Comment implements Parcelable {
 
 
     private List<MentionedPersonLight> mMentionedPeople;
+    private String mCommentId;
 
 
     public Comment() {
+        mCommentId = "";
         mCommentUserId = "";
         mCommentUserProfileImage = "";
         mCommentUserName = "";
@@ -52,7 +54,9 @@ public class Comment implements Parcelable {
         mType = 0;
     }
 
-    public Comment(String commentUserId,
+    public Comment(
+                   String commentId,
+                   String commentUserId,
                    String commentUserProfileImage,
                    String commentUserName,
                    String commentPostText,
@@ -66,6 +70,7 @@ public class Comment implements Parcelable {
                    String imageUrl,
                    boolean hasPrivacyChanged
     ) {
+        mCommentId = commentId;
         mCommentUserId = commentUserId;
         mCommentUserProfileImage = commentUserProfileImage;
         mCommentUserName = commentUserName;
@@ -88,6 +93,7 @@ public class Comment implements Parcelable {
     }
 
     protected Comment(Parcel in) {
+        mCommentId = in.readString();
         mCommentUserId = in.readString();
         mCommentUserProfileImage = in.readString();
         mCommentUserName = in.readString();
@@ -113,6 +119,10 @@ public class Comment implements Parcelable {
             return new Comment[size];
         }
     };
+
+    public String getCommentId(){
+        return mCommentId;
+    }
 
     public String getCommentUserId() {
         return mCommentUserId;
@@ -167,6 +177,10 @@ public class Comment implements Parcelable {
         return mAnonImage;
     }
 
+    public String getAnonName(){
+        return "Anonymous";
+    }
+
     public void setIsAnon(boolean anon) {
         mIsAnon = anon;
     }
@@ -208,6 +222,7 @@ public class Comment implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mCommentId);
         dest.writeString(mCommentUserId);
         dest.writeString(mCommentUserProfileImage);
         dest.writeString(mCommentUserName);
