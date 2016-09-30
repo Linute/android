@@ -352,8 +352,11 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                 switch (v.getId()) {
                     case R.id.comment_reply:
-                        if (!mComment.isAnon())
-                            mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
+                        mMentionedTextAdder.addMentionedPerson(
+                                mComment.isAnon() ?
+                                        new MentionedPerson(mComment.getCommentUserId(), mComment.getAnonImage()) :
+                                        new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), "")
+                        );
                         break;
                     case R.id.comment_delete:
                         mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());
@@ -429,7 +432,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
 
-        private void setUpMentionedOnClicks(Comment comment) {
+        private void setUpMentionedOnClicks(final Comment comment) {
             String commentText = comment.getCommentPostText();
             SpannableString commentSpannable = new SpannableString(commentText);
 

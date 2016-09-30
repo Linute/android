@@ -16,110 +16,112 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
 
 
+
     <LinearLayout
-        android:id="@+id/comment_container"
+        android:id="@+id/comments_entry"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
         android:background="#FFFFFF"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/seperator_color"/>
+        <FrameLayout
+            android:id="@+id/comment_checkbox_container"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical">
 
-        <LinearLayout
-            android:id="@+id/comments_entry"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            <CheckBox
+                android:id="@+id/comment_anon_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:button="@drawable/anon_checkbox"
+                android:clickable="false"/>
 
-            <FrameLayout
-                android:id="@+id/comment_checkbox_container"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center_vertical">
-
-                <CheckBox
-                    android:id="@+id/comment_anon_checkbox"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:button="@drawable/anon_checkbox"
-                    android:clickable="false"/>
-
-                <TextView
-                    android:id="@+id/comment_anon_checkbox_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="8dp"
-                    android:text="OFF"
-                    android:textColor="@color/twentyfive_black"
-                    android:textSize="@dimen/sub_font_size"
-                />
-            </FrameLayout>
-
-            <com.linkedin.android.spyglass.ui.MentionsEditText
-                android:id="@+id/comment_field"
-                android:layout_width="0px"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:background="#FFFFFF"
-                android:hint="Enter your comment... "
-                android:inputType="textCapSentences|textMultiLine|textShortMessage"
-                android:maxLines="2"
-                android:singleLine="false"
-                android:textColor="@color/eighty_black"
+            <TextView
+                android:id="@+id/comment_anon_checkbox_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:text="OFF"
+                android:textColor="@color/twentyfive_black"
                 android:textSize="@dimen/sub_font_size"
-                tools:text="Hello there eat my ass. I love cock. fight me. swing first. don't dwing first. i need more text to test this comment box out"/>
+            />
+        </FrameLayout>
+
+        <com.linkedin.android.spyglass.ui.MentionsEditText
+            android:id="@+id/comment_field"
+            android:layout_width="0px"
+            android:layout_height="match_parent"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:hint="Enter your comment... "
+            android:inputType="textCapSentences|textMultiLine|textShortMessage"
+            android:maxLines="2"
+            android:singleLine="false"
+            android:textColor="@color/eighty_black"
+            android:textSize="@dimen/sub_font_size"
+            tools:text="Hello there eat my ass. I love cock. fight me. swing first. don't dwing first. i need more text to test this comment box out"/>
 
 
-            <FrameLayout
-                android:layout_width="52dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center_vertical">
+        <FrameLayout
+            android:layout_width="52dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_vertical">
 
-                <com.linute.linute.UtilsAndHelpers.ToggleImageView
-                    android:id="@+id/feed_detail_send_comment"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:scaleType="fitCenter"
-                    android:padding="4dp"
-                    android:src="@drawable/ic_upload_picture"/>
+            <com.linute.linute.UtilsAndHelpers.ToggleImageView
+                android:id="@+id/feed_detail_send_comment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_upload_picture"/>
 
-                <ProgressBar
-                    android:id="@+id/comment_progressbar"
-                    style="?android:attr/progressBarStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:visibility="gone"
-                />
+            <ProgressBar
+                android:id="@+id/comment_progressbar"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:visibility="gone"
+            />
 
-            </FrameLayout>
-
-        </LinearLayout>
-
+        </FrameLayout>
     </LinearLayout>
+
+    <View
+        android:id="@+id/separation_line"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/comments_entry"
+        android:background="@color/seperator_color"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/added_mentions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/separation_line"
+    />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/feed_detail_recyc"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/comment_container"
+        android:layout_above="@id/added_mentions"
         android:layout_below="@id/feed_detail_toolbar"
     />
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/feed_detail_mentions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/comment_container"
+        android:layout_above="@id/added_mentions"
         android:layout_below="@id/feed_detail_toolbar"
         android:background="@color/white"
         android:visibility="gone"/>

@@ -14,12 +14,22 @@ public class MentionedPerson implements Mentionable {
     private String mFullname;
     private String mUserId;
     private String mProfileImage;
+    private boolean mIsAnon;
 
 
     public MentionedPerson(String fullname, String userID, String profileImage){
         mFullname = fullname;
         mUserId = userID;
         mProfileImage = profileImage;
+
+    }
+
+    //use this to make anon
+    public MentionedPerson(String user, String profileImage){
+        mIsAnon = true;
+        mUserId = user;
+        mProfileImage = profileImage;
+        mFullname = "Anon";
     }
 
 
@@ -37,6 +47,10 @@ public class MentionedPerson implements Mentionable {
 
     public String getUserName() {
         return "@"+mFullname.replaceAll("[^a-zA-Z]", "")+" ";
+    }
+
+    public boolean isAnon() {
+        return mIsAnon;
     }
 
 
@@ -64,6 +78,16 @@ public class MentionedPerson implements Mentionable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MentionedPerson && ((MentionedPerson)o).getUserId().equals(this.mUserId);
+    }
+
+    @Override
+    public int hashCode() {
+        return mUserId.hashCode();
     }
 
     @Override
