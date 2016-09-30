@@ -144,8 +144,8 @@ public class TrendingPostsFragment extends BaseFeedFragment {
         }
     }
 
-    private Map<String,String> getParams(int skip, int limit){
-        Map<String, String> params = new HashMap<>();
+    private Map<String,Object> getParams(int skip, int limit){
+        Map<String, Object> params = new HashMap<>();
         if (mGlobalItem.type == GlobalChoiceItem.TYPE_TREND){
             params.put("trend", mGlobalItem.key);
         }

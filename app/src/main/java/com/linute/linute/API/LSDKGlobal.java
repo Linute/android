@@ -22,11 +22,11 @@ public class LSDKGlobal {
 
     public Call getTrending(Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
-        return API_Methods.get(new String[] {"trends"}, header, new HashMap<String, String>(), callback);
+        return API_Methods.get(new String[] {"trends"}, header, new HashMap<String, Object>(), callback);
     }
 
 
-    public Call getPosts(Map<String, String> param, Callback callback){
+    public Call getPosts(Map<String, Object> param, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         return API_Methods.get(new String[]{"events", "trend"}, header, param, callback);
     }

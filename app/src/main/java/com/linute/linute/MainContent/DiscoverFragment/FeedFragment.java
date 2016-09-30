@@ -175,7 +175,7 @@ public class FeedFragment extends BaseFeedFragment {
 
         final int skip1 = skip;
 
-        Map<String, String> events = new HashMap<>();
+        Map<String, Object> events = new HashMap<>();
 
         events.put("college", mCollegeId);
         events.put("skip", skip + "");
@@ -296,7 +296,7 @@ public class FeedFragment extends BaseFeedFragment {
         }
 
         setFragmentState(FragmentState.LOADING_DATA);
-        Map<String, String> events = new HashMap<>();
+        Map<String, Object> events = new HashMap<>();
 
         events.put("college", mCollegeId);
         events.put("limit", "25");

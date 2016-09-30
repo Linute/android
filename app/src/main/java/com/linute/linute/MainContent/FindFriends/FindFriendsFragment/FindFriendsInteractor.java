@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.linute.linute.API.LSDKFriendSearch;
+import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.OnFinishedRequest;
 
 import org.json.JSONArray;
@@ -52,10 +53,8 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     }
 
     private void initList(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
-        HashMap<String, Object> filters = new HashMap<>();
-        filters.put("filters", params);
 
-        mInitCall = new LSDKFriendSearch(context).searchFriendByName(filters, new Callback() {
+        mInitCall = new LSDKPeople(context).getPeople(params, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         if (!call.isCanceled()) {
@@ -72,10 +71,11 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         Handler handler = new Handler(Looper.getMainLooper());
+
                         if (response.isSuccessful()) {
                             mInitialListLoaded = true;
                             try {
-                                mUnfilteredList = parseJson(new JSONObject(response.body().string()));
+                                mUnfilteredList = parseInitJson(new JSONObject(response.body().string()));
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
@@ -184,6 +184,33 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
         }
 
         return tempFriends;
+    }
+
+    protected ArrayList<FriendSearchUser> parseInitJson(JSONObject object) throws JSONException {
+        JSONArray friends = object.getJSONArray("people");
+
+        ArrayList<FriendSearchUser> users = new ArrayList<>();
+        JSONObject user;
+        JSONObject friend;
+        if (friends != null){
+            for (int i = 0 ; i < friends.length(); i++){
+                try {
+                    user = friends.getJSONObject(i);
+
+                    try{
+                        friend = user.getJSONObject("friend");
+                    }catch (JSONException e){
+                        friend = null;
+                    }
+
+                    users.add(new FriendSearchUser(user.getJSONObject("owner"), friend));
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return users;
     }
 
 

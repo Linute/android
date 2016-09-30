@@ -1091,7 +1091,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void getChat() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
-        Map<String, String> chat = new HashMap<>();
+        Map<String, Object> chat = new HashMap<>();
         chat.put(ARG_ROOM_ID, mRoomId);
 
 
@@ -1881,7 +1881,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mLoadingMoreMessages = true;
 
-        Map<String, String> chat = new HashMap<>();
+        Map<String, Object> chat = new HashMap<>();
         chat.put(ARG_ROOM_ID, mRoomId);
 
         if (mSkip < 0) {

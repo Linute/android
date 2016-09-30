@@ -648,8 +648,8 @@ public class MainActivity extends BaseTaptActivity {
 
                                 setFeedNotification(NotificationsCounterSingleton.getInstance().incrementPosts());
 
-                                if (!((DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED])
-                                        .addPostToFeed(postObj)) {
+                                DiscoverHolderFragment fragment = (DiscoverHolderFragment) mFragments[FRAGMENT_INDEXES.FEED];
+                                if (fragment != null && !fragment.addPostToFeed(postObj)) {
                                     NotificationsCounterSingleton.getInstance().setDiscoverNeedsRefreshing(true);
                                 }
                             }

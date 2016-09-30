@@ -686,7 +686,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         int skip = mSkip - 20;
         int limit = 20;
 
-        Map<String, String> eventComments = new HashMap<>();
+        Map<String, Object> eventComments = new HashMap<>();
         eventComments.put("event", mFeedDetail.getPostId());
         if (skip < 0) {
             limit += skip;

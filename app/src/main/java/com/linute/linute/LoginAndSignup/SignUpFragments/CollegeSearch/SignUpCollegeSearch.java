@@ -189,7 +189,7 @@ public class SignUpCollegeSearch extends Fragment {
 
         mUpdated = true;
         showProgress();
-        HashMap<String, String> param = new HashMap<>();
+        HashMap<String, Object> param = new HashMap<>();
 
         param.put("latitude", mLatitude + "");
         param.put("longitude", mLongitude + "");
@@ -303,7 +303,7 @@ public class SignUpCollegeSearch extends Fragment {
 
         showProgress();
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
 
         params.put("name", "");
         params.put("limit", "30");
@@ -417,7 +417,7 @@ public class SignUpCollegeSearch extends Fragment {
 
         showProgress();
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
 
         params.put("name", name);
         params.put("limit", "30");

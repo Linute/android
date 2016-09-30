@@ -219,7 +219,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
         setFragmentState(FragmentState.LOADING_DATA);
 
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("limit", "20");
 
         new LSDKChat(getActivity()).getRooms(params, new Callback() {
@@ -470,7 +470,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
         final int skip1 = skip;
 
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("skip", skip + "");
         params.put("limit", limit + "");
 

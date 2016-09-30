@@ -376,7 +376,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
     public void setActivities() {
         if (getContext() == null) return;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mTaptUserId);
         params.put("limit", "20");
 
@@ -663,7 +663,7 @@ public class TaptUserProfileFragment extends BaseFragment implements ProfileAdap
 
         final int skip1 = skip;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mTaptUserId);
         params.put("skip", skip1 + "");
         params.put("limit", limit + "");

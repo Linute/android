@@ -108,7 +108,7 @@ public class ChatSettingsFragment extends BaseFragment {
             mChatRoom = getArguments().getParcelable(ARG_ROOM_ID);
         }
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
 
         if(mChatRoom.roomImage == null)
         new LSDKChat(getContext()).getRoom(mChatRoom.roomId, params, getRoomCallback);

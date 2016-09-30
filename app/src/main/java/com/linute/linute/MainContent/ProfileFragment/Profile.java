@@ -375,7 +375,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         if (mUserid == null) return;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mUserid);
         params.put("limit", "20");
 
@@ -480,7 +480,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         final int skip1 = skip;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", owner);
         params.put("skip", skip1 + "");
         params.put("limit", limit + "");

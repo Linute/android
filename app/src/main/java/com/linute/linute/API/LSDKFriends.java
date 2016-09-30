@@ -26,7 +26,7 @@ public class LSDKFriends {
     public Call getFriends(String userId, boolean following, String skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("action[0]", following ? "following" : "follower");
         param.put("owner", userId);
         param.put("limit", "25");
@@ -38,7 +38,7 @@ public class LSDKFriends {
     public Call getFriendsForMention(String userId, String fullname, String skip, Callback callback) {
         Map<String, String> header = API_Methods.getMainHeader(mToken);
 
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("owner", userId);
         param.put("limit", "25");
         param.put("skip", skip);

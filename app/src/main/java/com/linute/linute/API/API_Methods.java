@@ -64,7 +64,7 @@ public class API_Methods {
     // API get method
     public static Call get(String[] path,
                            Map<String, String> headers,
-                           Map<String, String> parameters,
+                           Map<String, Object> parameters,
                            Callback callback) {
 
         OkHttpClient client = new OkHttpClient();
@@ -83,8 +83,8 @@ public class API_Methods {
         }
 
         if (parameters != null) {
-            for (Map.Entry<String, String> parameter : parameters.entrySet()) { //add parameters
-                url.addQueryParameter(parameter.getKey(), parameter.getValue());
+            for (Map.Entry<String, Object> parameter : parameters.entrySet()) { //add parameters
+                url.addQueryParameter(parameter.getKey(), parameter.getValue().toString());
             }
         }
 

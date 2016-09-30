@@ -163,7 +163,9 @@ public class Post implements Parcelable {
 
         isPrivacyChanged = JsonHelpers.getBoolean(jsonObject, "isPrivacyChanged");
 
-        if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0) imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
+        if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0)
+            imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
+
 //        JSONArray comments = jsonObject.getJSONArray("comments");
 //        for (int i = 0; i < comments.length(); i++) {
 //            try {

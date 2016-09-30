@@ -4,7 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -18,9 +18,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -36,7 +33,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
     public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
-    protected View vProgressBar;
     protected View vTopLayer;
     protected int mType;
     protected int mScreenWidth;
@@ -45,7 +41,6 @@ public class ImageFeedHolder extends BaseFeedHolder {
         super(itemView, context, manager, action);
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
-        vProgressBar = itemView.findViewById(R.id.post_image_progress_bar);
         vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
         setUpOnClicks(itemView.findViewById(R.id.parent));
 
@@ -184,10 +179,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
         super.bindModel(post);
         // Set Post Image
         mType = post.getType();
-        Bitmap bm = Utils.decodeImageBase64(post.imageBase64);
-        vPostImage.setImageBitmap(bm);
         resizeViews(getNewViewHeight(post.getImageSize()));
-        getEventImage(post.getImage());
+        setEventImage(post.getImage());
     }
 
     protected void singleClick() {
@@ -204,27 +197,14 @@ public class ImageFeedHolder extends BaseFeedHolder {
     }
 
 
-    private void getEventImage(String image) {
+    private void setEventImage(String image) {
         /*if (vProgressBar != null)
             vProgressBar.setVisibility(View.VISIBLE);*/
 
         mRequestManager
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .listener(new RequestListener<String, GlideDrawable>() {
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        if (vProgressBar != null)
-                            vProgressBar.setVisibility(View.GONE);
-                        return false;
-
-                    }
-                })
+                .placeholder(mPost.imageBase64 == null ? null : new BitmapDrawable(mContext.getResources(), Utils.decodeImageBase64(mPost.imageBase64)))
                 .into(vPostImage);
     }
 }
