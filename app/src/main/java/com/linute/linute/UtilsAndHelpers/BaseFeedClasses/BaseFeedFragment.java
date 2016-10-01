@@ -23,6 +23,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -445,7 +446,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        if (!activity.socketConnected()){
+        if (!TaptSocket.getInstance().socketConnected()){
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -477,7 +478,7 @@ public abstract class BaseFeedFragment extends BaseFragment {
         try {
             emit.put("hide", !p.isPostHidden());
             emit.put("room", p.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
             e.printStackTrace();

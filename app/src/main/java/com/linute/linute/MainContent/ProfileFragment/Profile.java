@@ -33,6 +33,7 @@ import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.SendTo.SendToFragment;
 import com.linute.linute.MainContent.Settings.SettingActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -374,7 +375,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         if (mUserid == null) return;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", mUserid);
         params.put("limit", "20");
 
@@ -479,7 +480,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
 
         final int skip1 = skip;
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("owner", owner);
         params.put("skip", skip1 + "");
         params.put("limit", limit + "");
@@ -903,7 +904,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
         if (activity == null) return;
 
-        if (!activity.socketConnected()) {
+        if (!TaptSocket.getInstance().socketConnected()) {
             Utils.showBadConnectionToast(activity);
             return;
         }
@@ -918,7 +919,7 @@ public class Profile extends BaseFragment implements BaseFeedAdapter.PostAction 
         try {
             emit.put("hide", !p.isPostHidden());
             emit.put("room", p.getPostId());
-            activity.emitSocket(API_Methods.VERSION + ":posts:hide", emit);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:hide", emit);
         } catch (JSONException e) {
             Utils.showServerErrorToast(activity);
             e.printStackTrace();

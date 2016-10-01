@@ -21,7 +21,7 @@ import com.linute.linute.R;
  * Provide this activty with toolbar title and url
  *
  */
-public class WebViewActivity extends AppCompatActivity {
+public class WebViewActivity extends BaseSocketActivity {
 
     public static final String LOAD_URL = "url_to_load";
 

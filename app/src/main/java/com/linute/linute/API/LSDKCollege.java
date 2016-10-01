@@ -21,7 +21,7 @@ public class LSDKCollege {
         mToken = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken","");
     }
 
-    public Call getColleges(Map<String, String> params, Callback callback){
+    public Call getColleges(Map<String, Object> params, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         String[] path = {"colleges"};
         return API_Methods.get(path, header,params, callback);

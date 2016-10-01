@@ -38,6 +38,7 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.MainContent.EditScreen.EditFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.SquareCamera.CameraActivity;
 import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
@@ -171,6 +172,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private View mEmptyView;
 
     private HashMap<Date, Chat> mDateHeaders;
+
+    private TaptSocket mSocket = TaptSocket.getInstance();
 
 
     public ChatFragment() {
@@ -366,9 +369,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(mLinearLayoutManager.findLastCompletelyVisibleItemPosition() >= mChatAdapter.getItemCount()-mNewMessageCount-2){
+                if (mLinearLayoutManager.findLastCompletelyVisibleItemPosition() >= mChatAdapter.getItemCount() - mNewMessageCount - 2) {
                     mNewMessageCount = 0;
-                    if(mNewMessageSnackbar != null && mNewMessageSnackbar.isShown())
+                    if (mNewMessageSnackbar != null && mNewMessageSnackbar.isShown())
                         mNewMessageSnackbar.dismiss();
                 }
             }
@@ -500,16 +503,16 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mInputMessageView.setText("");
                 }
 
-                final BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                BaseTaptActivity activity = (BaseTaptActivity) getActivity();
                 if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
-                    activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                    mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
-                    activity.emitSocket(API_Methods.VERSION + ":messages:typing", typingJson);
+                    mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
                     mAmAlreadyTyping = true;
                 }
 
@@ -522,8 +525,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mTypingHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if(typingJson == null) return;
-                            activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                            if (typingJson == null) return;
+                            mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
                             mAmAlreadyTyping = false;
                         }
                     }, 3000);
@@ -537,9 +540,9 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
                     BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !activity.socketConnected() || typingJson == null)
+                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
                         return;
-                    activity.emitSocket(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                    mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
                     mAmAlreadyTyping = false;
                 }
             }
@@ -676,26 +679,25 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mSocketConnected = true;
 
 
-        activity.connectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
-        activity.connectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
 
-        activity.connectSocket("new message", onNewMessage);
-        activity.connectSocket("typing", onTyping);
-        activity.connectSocket("stop typing", onStopTyping);
-        activity.connectSocket("read", onRead);
-        activity.connectSocket("joined", onJoin);
-        activity.connectSocket("left", onLeave);
-        activity.connectSocket("error", onError);
-        activity.connectSocket("delivered", onDelivered);
-        activity.connectSocket("messages refresh", onRefresh);
+        mSocket.on("new message", onNewMessage);
+        mSocket.on("typing", onTyping);
+        mSocket.on("stop typing", onStopTyping);
+        mSocket.on("read", onRead);
+        mSocket.on("joined", onJoin);
+        mSocket.on("left", onLeave);
+        mSocket.on("error", onError);
+        mSocket.on("delivered", onDelivered);
+        mSocket.on("messages refresh", onRefresh);
 
-        activity.connectSocket("add users", onAddUsers);
+        mSocket.on("add users", onAddUsers);
 
 
         typingJson = new JSONObject();
         joinLeft = new JSONObject();
         delivered = new JSONObject();
-
 
 
         try {
@@ -709,14 +711,14 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             delivered.put("user", mUserId);
             delivered.put("room", mRoomId);
 
-            activity.emitSocket(API_Methods.VERSION + ":messages:joined", joinLeft);
+            mSocket.emit(API_Methods.VERSION + ":messages:joined", joinLeft);
 
             if (emitRefresh) {
                 //check if we have new messages
                 //we'll have to refresh fragment if thats the case
                 JSONObject refresh = new JSONObject();
                 refresh.put("room", mRoomId);
-                activity.emitSocket(API_Methods.VERSION + ":messages:refresh", refresh);
+                mSocket.emit(API_Methods.VERSION + ":messages:refresh", refresh);
             }
 
             if (mAttachType < 0) return;
@@ -765,7 +767,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("geo", jsonObject);
                     postData.put("room", mRoomId);
 
-                    activity.emitSocket(API_Methods.VERSION + ":messages:new message", postData);
+                    mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -805,7 +807,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     postData.put("geo", jsonObject);
                     postData.put("room", mRoomId);
 
-                    activity.emitSocket(API_Methods.VERSION + ":messages:new message", postData);
+                    mSocket.emit(API_Methods.VERSION + ":messages:new message", postData);
                 } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
@@ -844,23 +846,23 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            activity.emitSocket(API_Methods.VERSION + ":messages:left", joinLeft);
+            mSocket.emit(API_Methods.VERSION + ":messages:left", joinLeft);
 
-            activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            activity.disconnectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
 
-            activity.disconnectSocket(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            activity.disconnectSocket(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            activity.disconnectSocket("new message", onNewMessage);
-            activity.disconnectSocket("typing", onTyping);
-            activity.disconnectSocket("stop typing", onStopTyping);
-            activity.disconnectSocket("read", onRead);
-            activity.disconnectSocket("joined", onJoin);
-            activity.disconnectSocket("left", onLeave);
-            activity.disconnectSocket("error", onError);
-            activity.disconnectSocket("delivered", onDelivered);
-            activity.disconnectSocket("messages refresh", onRefresh);
-            activity.disconnectSocket("add users", onAddUsers);
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off("new message", onNewMessage);
+            mSocket.off("typing", onTyping);
+            mSocket.off("stop typing", onStopTyping);
+            mSocket.off("read", onRead);
+            mSocket.off("joined", onJoin);
+            mSocket.off("left", onLeave);
+            mSocket.off("error", onError);
+            mSocket.off("delivered", onDelivered);
+            mSocket.off("messages refresh", onRefresh);
+            mSocket.off("add users", onAddUsers);
 
             mSocketConnected = false;
         }
@@ -1027,7 +1029,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 JSONObject obj = new JSONObject();
                                 obj.put("room", mRoomId);
                                 obj.put("messages", listOfUnreadMessages);
-                                activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                                mSocket.emit(API_Methods.VERSION + ":messages:read", obj);
                             }
 
 //                            Date date = null;
@@ -1089,7 +1091,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private void getChat() {
         if (getActivity() == null || getFragmentState() == FragmentState.LOADING_DATA) return;
 
-        Map<String, String> chat = new HashMap<>();
+        Map<String, Object> chat = new HashMap<>();
         chat.put(ARG_ROOM_ID, mRoomId);
 
 
@@ -1212,7 +1214,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                         JSONObject obj = new JSONObject();
                                         obj.put("room", mRoomId);
                                         obj.put("messages", listOfUnreadMessages);
-                                        activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                                        mSocket.emit(API_Methods.VERSION + ":messages:read", obj);
                                     }
                                 }
 //                                Date date = null;
@@ -1411,7 +1413,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                     mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
                 }
                 if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
-                    mNewMessageSnackbar = Snackbar.make(mInputMessageView,(mNewMessageCount > 1 ? mNewMessageCount + " New Messages" :  "New Message"), Snackbar.LENGTH_LONG);
+                    mNewMessageSnackbar = Snackbar.make(mInputMessageView, (mNewMessageCount > 1 ? mNewMessageCount + " New Messages" : "New Message"), Snackbar.LENGTH_LONG);
                     TextView snackbarTV = (TextView) mNewMessageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                     snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
                     snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -1435,12 +1437,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             JSONObject read = new JSONObject();
             read.put("room", mRoomId);
             read.put("messages", unreadArray);
-            activity.emitSocket(API_Methods.VERSION + ":messages:read", read);
+            mSocket.emit(API_Methods.VERSION + ":messages:read", read);
         }
     }
 
     private void addDateHeader(List<Chat> tempChat, Date date, String roomId, String ownerId) {
-        if(mDateHeaders.containsKey(date)) return;
+        if (mDateHeaders.containsKey(date)) return;
         Chat header = new Chat(
                 roomId,
                 date,
@@ -1513,7 +1515,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !activity.socketConnected() || mUserId == null
+        if (activity == null || !mSocket.socketConnected() || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
         }
@@ -1542,7 +1544,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         // perform the sending message attempt.
-        activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+        mSocket.emit(API_Methods.VERSION + ":messages:new message", newMessage);
     }
 
     private void createRoom(final String message) {
@@ -1581,7 +1583,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         // perform the sending message attempt.
-        activity.emitSocket(API_Methods.VERSION + ":messages:new message", newMessage);
+        mSocket.emit(API_Methods.VERSION + ":messages:new message", newMessage);
         mRoomExists = RoomExists.Exists;
         mChatRoom = new ChatRoom(mRoomId, (mUsers.size() == 1 ? ChatRoom.ROOM_TYPE_DM : ChatRoom.ROOM_TYPE_GROUP), null, null, mUsers, "", false, 0, false, 0);
         updateToolbar();
@@ -1626,7 +1628,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - mNewMessageCount-2, 0);
+                    mLinearLayoutManager.scrollToPositionWithOffset(mChatAdapter.getItemCount() - mNewMessageCount - 2, 0);
                 }
             });
         }
@@ -1664,7 +1666,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                             try {
                                 addMessage(data);
                                 delivered.put("id", data.getString("id"));
-                                activity.emitSocket(API_Methods.VERSION + ":messages:delivered", delivered);
+                                mSocket.emit(API_Methods.VERSION + ":messages:delivered", delivered);
 
 //                                if (vEmptyChatView.getVisibility() == View.VISIBLE)
                                 //vEmptyChatView.setVisibility(View.GONE);
@@ -1861,7 +1863,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (getFragmentManager().findFragmentByTag(RoomsActivityFragment.TAG) == null) {
             BaseTaptActivity activity = (BaseTaptActivity) getActivity();
             if (activity != null) {
-                activity.emitSocket(API_Methods.VERSION + ":messages:unread", new JSONObject());
+                mSocket.emit(API_Methods.VERSION + ":messages:unread", new JSONObject());
             }
         }
     }
@@ -1879,7 +1881,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         mLoadingMoreMessages = true;
 
-        Map<String, String> chat = new HashMap<>();
+        Map<String, Object> chat = new HashMap<>();
         chat.put(ARG_ROOM_ID, mRoomId);
 
         if (mSkip < 0) {
@@ -1969,7 +1971,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                                 JSONObject obj = new JSONObject();
                                 obj.put("room", mRoomId);
                                 obj.put("messages", listOfUnreadMessages);
-                                activity.emitSocket(API_Methods.VERSION + ":messages:read", obj);
+                                mSocket.emit(API_Methods.VERSION + ":messages:read", obj);
                             }
                         }
                     } catch (JSONException e) {

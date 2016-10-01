@@ -12,6 +12,7 @@ import android.widget.FrameLayout;
 import com.bumptech.glide.RequestManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -117,7 +118,7 @@ public class VideoFeedHolder extends ImageFeedHolder implements MediaPlayer.OnPr
 
                     body.put("room", id);
 
-                    activity.emitSocket(API_Methods.VERSION + ":posts:loops", body);
+                    TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:loops", body);
 
                 } catch (JSONException e) {
                     e.printStackTrace();

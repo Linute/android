@@ -16,6 +16,7 @@ import android.widget.ViewSwitcher;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -32,7 +33,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class ChangePhoneActivity extends AppCompatActivity {
+public class ChangePhoneActivity extends BaseSocketActivity {
 
     public static final String TAG = "ChangePhone";
 

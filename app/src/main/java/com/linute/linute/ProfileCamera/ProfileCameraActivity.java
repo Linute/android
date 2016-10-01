@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * Created by QiFeng on 7/5/16.
  */
-public class ProfileCameraActivity extends AppCompatActivity {
+public class ProfileCameraActivity extends BaseSocketActivity {
 
     public static final String TAG = ProfileCameraActivity.class.getSimpleName();
     public static final int TYPE_GALLERY = 99;

@@ -20,14 +20,6 @@
         android:layout_height="match_parent"
         android:background="@color/seperator_color">
 
-        <ProgressBar
-            android:id="@+id/post_image_progress_bar"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"/>
-
         <ImageView
             android:id="@+id/feedDetail_event_image"
             android:layout_width="match_parent"

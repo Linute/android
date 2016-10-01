@@ -17,6 +17,7 @@ import android.widget.ViewFlipper;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.Utils;
@@ -32,7 +33,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class ChangeEmailActivity extends AppCompatActivity {
+public class ChangeEmailActivity extends BaseSocketActivity {
 
     public static final String TAG = "ChangeEmailActivity";
     private SharedPreferences mSharedPreferences;

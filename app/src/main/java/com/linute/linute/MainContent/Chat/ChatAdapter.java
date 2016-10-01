@@ -18,6 +18,7 @@ import com.linute.linute.MainContent.FeedDetailFragment.FeedDetailPage;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -239,7 +240,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         JSONObject body = new JSONObject();
                         body.put("user", mUserId);
                         body.put("room", mPost.getPostId());
-                        activity.emitSocket(API_Methods.VERSION + ":posts:like", body);
+                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:like", body);
                     }
 
                 } catch (JSONException e) {

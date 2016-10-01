@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.Database.TaptUser;
@@ -287,7 +288,7 @@ public class SendToFragment extends BaseFragment {
         if (activity == null) return;
 
 
-        if (!activity.socketConnected()) {
+        if (!TaptSocket.getInstance().socketConnected()) {
             Toast.makeText(activity, "Failed to share post", Toast.LENGTH_SHORT).show();
             getFragmentManager().popBackStack();
             return;
@@ -323,7 +324,7 @@ public class SendToFragment extends BaseFragment {
             send.put("trends", trends);
             send.put("post", mPostId);
 
-            activity.emitSocket(API_Methods.VERSION + ":posts:share", send);
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:share", send);
 
             String text;
             if (people.length() > 1) {

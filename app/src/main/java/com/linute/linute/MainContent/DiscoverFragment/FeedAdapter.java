@@ -14,6 +14,7 @@ import com.linute.linute.MainContent.EventBuses.NotificationEventBus;
 import com.linute.linute.MainContent.EventBuses.NotificationsCounterSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -148,7 +149,7 @@ public class FeedAdapter extends BaseFeedAdapter {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
 
                     if (activity != null) {
-                        activity.emitSocket(API_Methods.VERSION + ":posts:impressions", body);
+                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:impressions", body);
                         //Log.i(TAG, "run: impression sent");
                     } else {
                         Log.i(TAG, "impression not sent: no activity");

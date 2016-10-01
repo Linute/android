@@ -90,7 +90,7 @@ public class LSDKUser {
     //use negative skip if you don't want to add skip
     public Call getUserActivities(String userId, int skip, int limit, Callback callback) {
 
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("action[0]", "posted status");
         params.put("action[1]", "posted photo");
         params.put("action[2]", "posted video");

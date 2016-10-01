@@ -30,7 +30,7 @@ public class LSDKActivity {
     public Call getActivities(int skip, int limit, Callback callback) {
         HashMap<String, String> header = API_Methods.getMainHeader(mToken);
 
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
 
         if (skip >= 0) {
             params.put("skip", skip + "");

@@ -43,6 +43,7 @@ import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.FileUtils;
@@ -89,6 +90,8 @@ public class ChatSettingsFragment extends BaseFragment {
     private TextView mNotificationSettingsView;
     private TextView mNotificationSettingsIndicatorView;
 
+    private TaptSocket mSocket = TaptSocket.getInstance();
+
     public static ChatSettingsFragment newInstance(ChatRoom chatRoom) {
         ChatSettingsFragment fragment = new ChatSettingsFragment();
         Bundle args = new Bundle();
@@ -105,7 +108,7 @@ public class ChatSettingsFragment extends BaseFragment {
             mChatRoom = getArguments().getParcelable(ARG_ROOM_ID);
         }
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
 
         if(mChatRoom.roomImage == null)
         new LSDKChat(getContext()).getRoom(mChatRoom.roomId, params, getRoomCallback);
@@ -289,7 +292,7 @@ room: id of room
                                             jsonParams.put("mute", true);
                                             jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", item);
-                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            mSocket.emit(API_Methods.VERSION + ":rooms:mute", jsonParams);
                                             mChatRoom.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
                                             updateNotificationView();
 
@@ -313,7 +316,7 @@ room: id of room
                                             jsonParams.put("mute", false);
                                             jsonParams.put("room", mChatRoom.roomId);
                                             jsonParams.put("time", 0);
-                                            activity.emitSocket(API_Methods.VERSION + ":rooms:mute", jsonParams);
+                                            mSocket.emit(API_Methods.VERSION + ":rooms:mute", jsonParams);
                                             mChatRoom.setMute(false, 0);
                                             updateNotificationView();
                                         } catch (JSONException e) {
@@ -541,7 +544,7 @@ room: id of room
 
                         if (activity == null) return;
 
-                        if (!Utils.isNetworkAvailable(activity) || !activity.socketConnected()) {
+                        if (!Utils.isNetworkAvailable(activity) || !mSocket.socketConnected()) {
                             Utils.showBadConnectionToast(activity);
                             return;
                         }
@@ -550,7 +553,7 @@ room: id of room
                         try {
                             emit.put("block", true);
                             emit.put("user", mChatRoom.users.get(0).userId);
-                            activity.emitSocket(API_Methods.VERSION + ":users:block:real", emit);
+                            mSocket.emit(API_Methods.VERSION + ":users:block:real", emit);
 
                             String message;
                             message = "You will no longer see this user and they won't be able to see you";
@@ -595,7 +598,7 @@ room: id of room
         paramsJSON.put("users", usersJSON);
 
 
-        activity.emitSocket(API_Methods.VERSION + ":rooms:delete users", paramsJSON);
+        mSocket.emit(API_Methods.VERSION + ":rooms:delete users", paramsJSON);
     }
 
     private void addUsers(ArrayList<User> users) throws JSONException {
@@ -612,15 +615,14 @@ room: id of room
         paramsJSON.put("users", usersJSON);
 
 
-        activity.emitSocket(API_Methods.VERSION + ":rooms:add users", paramsJSON);
+        mSocket.emit(API_Methods.VERSION + ":rooms:add users", paramsJSON);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        activity.connectSocket("add users", onAddUsers);
-        activity.connectSocket("delete users", onDeleteUsers);
+        mSocket.on("add users", onAddUsers);
+        mSocket.on("delete users", onDeleteUsers);
 
 
     }
@@ -638,9 +640,8 @@ room: id of room
     @Override
     public void onPause() {
         super.onPause();
-        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        activity.disconnectSocket("add users", onAddUsers);
-        activity.disconnectSocket("delete users", onDeleteUsers);
+        mSocket.off("add users", onAddUsers);
+        mSocket.off("delete users", onDeleteUsers);
     }
 
     private Emitter.Listener onAddUsers = new Emitter.Listener() {

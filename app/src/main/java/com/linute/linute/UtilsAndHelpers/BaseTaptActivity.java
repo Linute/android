@@ -31,15 +31,7 @@ public abstract class BaseTaptActivity extends AppCompatActivity {
     /* action when toolbar is pressed */
     //public abstract void setToolbarOnClickListener(View.OnClickListener listener);
 
-    /* socket stuff */
-    public abstract void connectSocket(String event, Emitter.Listener emitter);
-    public abstract void disconnectSocket(String event, Emitter.Listener emitter);
-    public abstract void emitSocket(String event, Object arg);
     public abstract void setSocketErrorResponse(SocketErrorResponse error);
-
-    public boolean socketConnected(){
-        return false;
-    }
 
     public interface SocketErrorResponse{
         void runSocketError();
