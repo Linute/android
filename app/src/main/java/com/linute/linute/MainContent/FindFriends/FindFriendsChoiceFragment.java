@@ -79,8 +79,8 @@ public class FindFriendsChoiceFragment extends BaseFragment {
 
         if (mFindFriendsFragments == null) {
             mFindFriendsFragments = new BaseFindFriendsFragment[]{
-                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
                     FindFriendsFragment.newInstance(new SearchFilter[]{}),
+                    FindFriendsFragment.newInstance(new SearchFilter[]{new SearchFilter("college", collegeId)}),
                     new FindFriendsFBFragment()
             };
         }

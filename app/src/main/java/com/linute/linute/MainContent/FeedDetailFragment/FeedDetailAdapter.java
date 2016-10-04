@@ -21,9 +21,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.signature.StringSignature;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
@@ -493,6 +490,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             ((ViewGroup) itemView.findViewById(R.id.content)).addView(vImageView);
 
+            vImageView.setCornerRadius(itemView.getResources().getDimensionPixelSize(R.dimen.message_bubble_corner_radius));
+
             vImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -518,14 +517,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mImageUrl = Utils.getCommentImageUrl(comment.getImageUrl());
             mRequestManager.load(mImageUrl)
                     .placeholder(R.color.seperator_color)
-                    .into(new SimpleTarget<GlideDrawable>() {
-                        @Override
-                        public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                            vImageView.setImageDrawable(resource);
-                            int dimensionPixelSize = itemView.getResources().getDimensionPixelSize(R.dimen.message_bubble_corner_radius);
-                            vImageView.setCornerRadius(dimensionPixelSize);
-                        }
-                    });
+                    .into(vImageView);
         }
     }
 
