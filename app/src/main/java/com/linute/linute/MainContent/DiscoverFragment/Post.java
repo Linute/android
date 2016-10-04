@@ -121,7 +121,11 @@ public class Post implements Parcelable {
             try {
                 mCollegeName = owner.getJSONObject("college").getString("name");
             } catch (JSONException e) {
-                mCollegeName = "";
+                try{
+                    mCollegeName = jsonObject.getJSONObject("college").getString("name");
+                }catch (JSONException eq){
+                    mCollegeName = "";
+                }
             }
         } catch (JSONException e) {
             mUserId = jsonObject.getString("owner");
