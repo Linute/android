@@ -272,7 +272,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vCommentUserName.setText("Anonymous");
             } else {
                 setProfileImage(comment.getCommentUserProfileImage());
-                vCommentUserName.setText(comment.getCommentUserName());
+                vCommentUserName.setText(Utils.stripUnsupportedCharacters(comment.getCommentUserName()));
             }
 
             vPrivacyChanged.setVisibility(comment.hasPrivacyChanged ? View.VISIBLE : View.GONE);
@@ -408,6 +408,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         public FeedDetailViewHolderText(View itemView) {
             super(itemView);
 
+
+            //TODO Viewholder should not setup text view, moev this to xml file or oncCeateViewholder
             vCommentText = new TextView(context);
             vCommentText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             vCommentText.setAutoLinkMask(WEB_URLS | EMAIL_ADDRESSES);
@@ -424,7 +426,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
                 setUpMentionedOnClicks(comment);
             } else { //set text to comment's text
-                vCommentText.setText(comment.getCommentPostText());
+                vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
             }
         }
 

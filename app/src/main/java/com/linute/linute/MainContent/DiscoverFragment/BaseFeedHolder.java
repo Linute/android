@@ -23,6 +23,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProfileImageView;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,7 +99,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
         if (post.getPrivacy() == 0) {
             getProfileImage(post.getUserImage());
-            vPostUserName.setText(post.getUserName());
+            vPostUserName.setText(Utils.stripUnsupportedCharacters(post.getUserName()));
         } else {
             getAnonImage(post.getAnonImage());
             vPostUserName.setText("Anonymous");
