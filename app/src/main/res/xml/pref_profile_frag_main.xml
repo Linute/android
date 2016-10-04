@@ -13,8 +13,10 @@
             android:title="Change Phone Number" />
         <Preference
             android:key="blocked_users"
-            android:title="Blocked Users"/>
+            android:title="Blocked Users" />
     </PreferenceCategory>
+
+
 
     <PreferenceCategory android:title="SUPPORT">
         <Preference
@@ -23,19 +25,25 @@
         <Preference
             android:key="notifications"
             android:title="Notification Settings" />
+        <Preference
+            android:key="attributions"
+            android:title="Attributions" />
 
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="ABOUT">
+    <PreferenceCategory android:title="Privacy">
         <Preference
             android:key="privacy policy"
             android:title="Privacy Policy" />
         <Preference
             android:key="terms_of_service"
             android:title="Terms of Service" />
-        <Preference
-            android:key="attributions"
-            android:title="Attributions" />
+        <Preference android:title="Deactivate Account">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetPackage="com.linute.linute"
+                android:targetClass="com.linute.linute.MainContent.Settings.DeactivateAccountActivity" />
+        </Preference>
     </PreferenceCategory>
 
     <PreferenceCategory>

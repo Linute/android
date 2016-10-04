@@ -1647,4 +1647,9 @@ limitations under the License.\n\n
     <string name="no_messages">Say something to start the conversation</string>
     <string name="empty_feed_button_campus">Take me there!</string>
     <string name="empty_feed_button_hot">See other Campuses</string>
+    <string name="deactivata_account_text">
+        Deactivating your Tapt account will disable your profile and remove your dad and being searched anywhere, including your posts on the campus feed. To reactivate your account, simply log in with your .edu email and password.
+        \n\n\n
+        If you would like to delete your account permanently, please contact support@tapt.io
+    </string>
 </resources>

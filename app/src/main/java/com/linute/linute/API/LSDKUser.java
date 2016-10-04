@@ -220,4 +220,13 @@ public class LSDKUser {
 
         return API_Methods.post("users/blocked",header,params, callback);
     }
+
+    public Call deactivateAccount(Callback callback){
+
+        HashMap<String, String> header = API_Methods.getMainHeader(mToken);
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("isDeleted", "false");
+        String url = "user/" + mSharedPreferences.getString("userId", "");
+        return API_Methods.put(url, header, params, callback);
+    }
 }
