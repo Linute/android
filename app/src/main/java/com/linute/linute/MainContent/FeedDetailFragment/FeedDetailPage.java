@@ -579,7 +579,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                         }
 
                         List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                        mentionedPeople = comment.getJSONArray("mentions");
+                        mentionedPeople = comment.getJSONArray("userMentions");
 
                         for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
                             mentionedPersonLightArrayList.add(
@@ -759,7 +759,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                 }
 
                                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                                mentionedPeople = comment.getJSONArray("mentions");
+                                mentionedPeople = comment.getJSONArray("userMentions");
 
                                 for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
                                     mentionedPersonLightArrayList.add(
@@ -1438,7 +1438,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 myDate = Utils.getDateFormat().parse(object.getString("date"));
 
                 List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                JSONArray mentionedPeople = object.getJSONArray("mentions");
+                JSONArray mentionedPeople = object.getJSONArray("userMentions");
 
                 for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
                     mentionedPersonLightArrayList.add(
@@ -1578,7 +1578,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 }
             }
 
-            comment.put("mentions", mentions);
+            comment.put("userMentions", mentions);
             mSendButton.setVisibility(View.GONE);
             mProgressbar.setVisibility(View.VISIBLE);
             mCommentEditText.setText("");
