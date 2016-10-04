@@ -85,6 +85,7 @@ public class MainActivity extends BaseTaptActivity {
 
     public static String TAG = MainActivity.class.getSimpleName();
     public static final int PHOTO_STATUS_POSTED = 19;
+    public static final int REQ_LOCATION_PERMISSION = 27;
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
     private DrawerLayout mDrawerLayout;
@@ -120,13 +121,22 @@ public class MainActivity extends BaseTaptActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+
+
+       /* if (!mSharedPreferences.getBoolean("askedForLocation", false) && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION_PERMISSION);
+            mSharedPreferences.edit().putBoolean("askedForLocation", true).apply();
+        }*/
+
+
         TaptSocket.initSocketConnection(this);
 
         EmptyProfileHolder.activity = this;
 
         mRealm = Realm.getDefaultInstance();
 
-        mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mFragments = new BaseFragment[5];
         mWatchForRefresh = false;
 

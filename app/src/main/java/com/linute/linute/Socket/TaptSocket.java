@@ -1,11 +1,19 @@
 package com.linute.linute.Socket;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.net.URISyntaxException;
 
@@ -38,6 +46,21 @@ public class TaptSocket {
             String token = context.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userToken", null);
             if (token == null) throw new NullPointerException("No user token");
 
+            JSONArray coord = new JSONArray();
+
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                Location loca = ((LocationManager) context.getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+                try {
+                    coord.put(loca.getLatitude());
+                    coord.put(loca.getLongitude());
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+            }
+
+
             op.query =
                     "token=" + token +
                             "&deviceToken=" + device.getDeviceToken() +
@@ -47,7 +70,10 @@ public class TaptSocket {
                             "&os=" + device.getOS() +
                             "&platform=" + device.getType() +
                             "&api=" + API_Methods.VERSION +
-                            "&model=" + device.getModel();
+                            "&model=" + device.getModel() +
+                            "&geo=" + coord;
+
+            ;
 
             op.reconnectionDelay = 5;
             op.secure = true;
