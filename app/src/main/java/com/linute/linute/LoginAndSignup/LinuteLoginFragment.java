@@ -80,7 +80,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView = (EditText) rootView.findViewById(R.id.signin_email_password_text);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.signin_progress_bar);
 
-        mSigninButton =  (Button) rootView.findViewById(R.id.log_in);
+        mSigninButton = (Button) rootView.findViewById(R.id.log_in);
         mSigninButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,10 +99,10 @@ public class LinuteLoginFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() >= 6){
+                if (!mEmailView.getText().toString().isEmpty() && mPasswordView.getText().toString().length() >= 6) {
                     mSigninButton.setBackgroundResource(R.drawable.active_button);
                     mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.pure_white));
-                }else {
+                } else {
                     mSigninButton.setBackgroundResource(R.drawable.inactive_button);
                     mSigninButton.setTextColor(ContextCompat.getColor(mEmailView.getContext(), R.color.secondaryColor));
                 }
@@ -115,7 +115,7 @@ public class LinuteLoginFragment extends Fragment {
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE){
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
                     mSigninButton.callOnClick();
                 }
                 return false;
@@ -146,15 +146,15 @@ public class LinuteLoginFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Activity activity = getActivity();
-                if (activity != null && mSafeForButtonAction){
+                if (activity != null && mSafeForButtonAction) {
                     activity.onBackPressed();
                 }
             }
         });
 
 
-        SwitchCompat devSwitch = (SwitchCompat)rootView.findViewById(R.id.dev_switch);
-        if(API_Methods.IS_DEV_BUILD){
+        SwitchCompat devSwitch = (SwitchCompat) rootView.findViewById(R.id.dev_switch);
+        if (API_Methods.IS_DEV_BUILD) {
             devSwitch.setVisibility(View.VISIBLE);
             devSwitch.setChecked(API_Methods.HOST.equals(API_Methods.HOST_LIVE));
             devSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -285,7 +285,7 @@ public class LinuteLoginFragment extends Fragment {
             }
 
             @Override
-            public void onResponse(Call call , Response response) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
 
                 String res = response.body().string();
 
@@ -299,7 +299,7 @@ public class LinuteLoginFragment extends Fragment {
                         if (activity == null) return;
                         //occurs on first login after deactivating account
 //                        if(user.has("isDeleted"))
-                       final boolean reactivated = "true".equals(user.getString("isDeleted"));
+                        final boolean reactivated = "true".equals(user.getString("isDeactivated"));
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -320,10 +320,9 @@ public class LinuteLoginFragment extends Fragment {
                             }
                         });
                     }
-                }
-                else if (response.code() == 404) { //bad credentials
+                } else if (response.code() == 404) { //bad credentials
 
-                    try{
+                    try {
                         JSONObject obj = new JSONObject(res);
                         final boolean emailError = obj.getString("error").equals("email");
 
@@ -332,17 +331,17 @@ public class LinuteLoginFragment extends Fragment {
                             @Override
                             public void run() {
                                 showProgress(false);
-                                if (emailError){
+                                if (emailError) {
                                     mEmailView.setError("No account with this email");
                                     mEmailView.requestFocus();
-                                }else {
+                                } else {
                                     mPasswordView.setError("Invalid password");
                                     mPasswordView.requestFocus();
                                 }
                             }
                         });
 
-                    }catch (JSONException e){
+                    } catch (JSONException e) {
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -394,12 +393,12 @@ public class LinuteLoginFragment extends Fragment {
         try {
             JSONObject settings = response.getJSONObject("notificationSettings");
             sharedPreferences.putBoolean("notif_follow", getBooleanFromJSONObj("follow", settings));
-            sharedPreferences.putBoolean("notif_message",getBooleanFromJSONObj("message", settings));
+            sharedPreferences.putBoolean("notif_message", getBooleanFromJSONObj("message", settings));
             sharedPreferences.putBoolean("notif_mention", getBooleanFromJSONObj("mention", settings));
             sharedPreferences.putBoolean("notif_alsoComment", getBooleanFromJSONObj("alsoComment", settings));
             sharedPreferences.putBoolean("notif_comment", getBooleanFromJSONObj("comment", settings));
             sharedPreferences.putBoolean("notif_like", getBooleanFromJSONObj("like", settings));
-        }catch (JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
             sharedPreferences.putBoolean("notif_follow", true);
             sharedPreferences.putBoolean("notif_message", true);
@@ -433,10 +432,10 @@ public class LinuteLoginFragment extends Fragment {
         sharedPreferences.apply();
     }
 
-    public boolean getBooleanFromJSONObj(String key, JSONObject obj){
+    public boolean getBooleanFromJSONObj(String key, JSONObject obj) {
         try {
-           return obj.getBoolean(key);
-        }catch (JSONException e){
+            return obj.getBoolean(key);
+        } catch (JSONException e) {
             e.printStackTrace();
             return true;
         }
@@ -446,10 +445,10 @@ public class LinuteLoginFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (mEmailView.hasFocus()){
+        if (mEmailView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mEmailView.getWindowToken(), 0);
-        }else if (mPasswordView.hasFocus()){
+        } else if (mPasswordView.hasFocus()) {
             final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(mPasswordView.getWindowToken(), 0);
         }

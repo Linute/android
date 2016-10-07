@@ -208,7 +208,7 @@ public class PreLoginActivity extends AppCompatActivity {
                     try {
                         String responseString = response.body().string();
                         //Log.i(TAG, "onResponse: " + responseString);
-                        JSONObject object = new JSONObject(responseString);
+                        final JSONObject object = new JSONObject(responseString);
                         //Log.i(TAG, "onResponse: "+object.toString());
                         boolean isUnique = object.getBoolean("isUnique");
 
@@ -236,6 +236,8 @@ public class PreLoginActivity extends AppCompatActivity {
 
                         //has signed up already and using edu email
                         else {
+                            final boolean isDeactivated = "true".equals(object.getString("isDeactivated"));
+
                             Log.i(TAG, "onResponse: going to college picker or logging in");
                             persistData(user); //save data
                             saveNotificationPreferences(object);
@@ -245,7 +247,7 @@ public class PreLoginActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     progress.dismiss();
-                                    goToNextActivity("true".equals(user.getIsDeleted()));
+                                    goToNextActivity(isDeactivated);
                                 }
                             });
                         }
