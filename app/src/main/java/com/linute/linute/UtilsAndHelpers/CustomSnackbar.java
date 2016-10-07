@@ -33,6 +33,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.ColorInt;
+import android.support.annotation.ColorRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -358,6 +359,11 @@ public final class CustomSnackbar {
     public CustomSnackbar setText(@NonNull CharSequence message) {
         final TextView tv = mView.getMessageView();
         tv.setText(message);
+        return this;
+    }
+
+    public CustomSnackbar setBackgroundColor(@ColorRes int color){
+        getView().setBackgroundResource(color);
         return this;
     }
 

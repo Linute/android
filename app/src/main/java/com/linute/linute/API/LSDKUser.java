@@ -2,6 +2,7 @@ package com.linute.linute.API;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 
@@ -232,13 +233,14 @@ public class LSDKUser {
     public Call sendFeedback( String text, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         Map<String, Object> params = new HashMap<>();
-
         params.put("owner", mSharedPreferences.getString("userID", ""));
         params.put("name", mSharedPreferences.getString("userName",""));
         params.put("email", mSharedPreferences.getString("email","") );
         params.put("text", text);
 
-
-        return API_Methods.put("feedback", header, params, callback);
+        for (Map.Entry<String, Object> entry : params.entrySet()){
+            Log.i("TEST", "sendFeedback: "+entry.getKey() + " "+entry.getValue());
+        }
+        return API_Methods.post("feedbacks", header, params, callback);
     }
 }

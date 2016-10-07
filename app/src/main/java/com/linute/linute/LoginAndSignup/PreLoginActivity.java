@@ -247,7 +247,7 @@ public class PreLoginActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     progress.dismiss();
-                                    goToNextActivity(isDeactivated);
+                                    goToNextActivity();
                                 }
                             });
                         }
@@ -402,10 +402,6 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     public void goToNextActivity() {
-        goToNextActivity(false);
-    }
-
-    public void goToNextActivity(boolean goToReactivationNotice) {
         final SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
 
@@ -418,7 +414,7 @@ public class PreLoginActivity extends AppCompatActivity {
                 if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
                     nextActivity = MainActivity.class;
                     //college picker is not set. go to college picker
-                }else {
+                } else {
                     nextActivity = CollegePickerActivity.class;
                 }
                 Intent i = new Intent(PreLoginActivity.this, nextActivity);
@@ -428,18 +424,7 @@ public class PreLoginActivity extends AppCompatActivity {
             }
         };
 
-        if(goToReactivationNotice)
-        {
-            new AlertDialog.Builder(this).setMessage(R.string.reactivvate_acount_message).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    dialogInterface.dismiss();
-                    nextActivityRunnable.run();
-                }
-            }).create().show();
-        }else{
-            nextActivityRunnable.run();
-        }
+        nextActivityRunnable.run();
     }
 
 

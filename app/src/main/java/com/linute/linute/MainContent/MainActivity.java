@@ -267,9 +267,6 @@ public class MainActivity extends BaseTaptActivity {
             if(lastLoca != null) {
                 loca.put("longitude", lastLoca.getLongitude());
                 loca.put("latitude", lastLoca.getLatitude());
-
-                Log.i(TAG, "sendLocation: "+lastLoca.getLatitude());
-                Log.i(TAG, "sendLocation: "+lastLoca.getLongitude());
                 TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:geo", loca);
             }
         }catch (SecurityException|JSONException e){
@@ -591,6 +588,8 @@ public class MainActivity extends BaseTaptActivity {
         socket.on("status colors", statusColors);
         socket.on("blocked", blocked);
         socket.on("sync contacts", syncContacts);
+        socket.on("message", message);
+        socket.on("alert", alert);
         socket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         socket.on(Socket.EVENT_ERROR, onEventError);
         socket.on(Socket.EVENT_RECONNECT, onReconnect);
@@ -655,6 +654,8 @@ public class MainActivity extends BaseTaptActivity {
             socket.off("status colors", statusColors);
             socket.off("blocked", blocked);
             socket.off("sync contacts", syncContacts);
+            socket.off("message", message);
+            socket.off("alert", alert);
             socket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             socket.off(Socket.EVENT_CONNECT_TIMEOUT, onSocketTimeOut);
             socket.off(Socket.EVENT_ERROR, onEventError);
@@ -1311,6 +1312,57 @@ public class MainActivity extends BaseTaptActivity {
         public void call(Object... args) {
             if (mSocketListener != null) {
                 mSocketListener.onReconnect();
+            }
+        }
+    };
+
+    //when max sends message (blue dropdown)
+    private Emitter.Listener message = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                //Log.i(TAG, "call: "+args[0].toString());
+                JSONObject message = new JSONObject(args[0].toString());
+                final String text = message.getString("text");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG)
+                                .setBackgroundColor(R.color.secondaryColor)
+                                .show();
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    //when max sends alert (dialog popup)
+    private Emitter.Listener alert = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            try {
+                //Log.i(TAG, "call: "+args[0].toString());
+                JSONObject alert = new JSONObject(args[0].toString());
+                final String title = alert.getString("title");
+                final String text = alert.getString("text");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        new AlertDialog.Builder(MainActivity.this)
+                                .setTitle(title)
+                                .setMessage(text)
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                }).show();
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     };

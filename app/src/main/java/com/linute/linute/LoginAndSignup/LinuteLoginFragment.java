@@ -302,7 +302,7 @@ public class LinuteLoginFragment extends Fragment {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                activity.goToNextActivity(reactivated);
+                                activity.goToNextActivity();
                             }
                         });
 

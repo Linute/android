@@ -96,8 +96,6 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
         mEmptyText.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
         setFragmentState(FragmentState.FINISHED_UPDATING);
 
-        Log.d(TAG, "onSuccess: ");
-
         mMainHandler.post(new Runnable() {
             @Override
             public void run() {

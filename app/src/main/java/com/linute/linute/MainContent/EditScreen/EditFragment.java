@@ -507,8 +507,8 @@ public class EditFragment extends BaseFragment {
                             mDimens.height = scaleheight;
                             mDimens.width = scalewidth;
 
-                            Log.i(TAG, "run: "+image.getWidth() + " "+image.getHeight());
-                            Log.i(TAG, "run: "+scalewidth + " " + scaleheight);
+                           // Log.i(TAG, "run: "+image.getWidth() + " "+image.getHeight());
+                            //Log.i(TAG, "run: "+scalewidth + " " + scaleheight);
 
                             Matrix m = new Matrix();
                             m.postScale((float)scalewidth / image.getWidth(), (float) scaleheight / image.getHeight());
@@ -532,7 +532,6 @@ public class EditFragment extends BaseFragment {
                                     });
                         } else {
                             if (mDimens.rotation != 0) {
-                                Log.i(TAG, "run: ");
                                 Matrix m = new Matrix();
                                 m.postRotate(mDimens.rotation);
                                 final Bitmap rotated = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), m, true);
@@ -540,7 +539,6 @@ public class EditFragment extends BaseFragment {
 
                                 setImage(rotated, imageView);
                             } else {
-                                Log.i(TAG, "run:nn ");
                                 setImage(image, imageView);
                             }
                         }
