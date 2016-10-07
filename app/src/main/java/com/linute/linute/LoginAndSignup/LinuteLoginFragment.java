@@ -298,6 +298,7 @@ public class LinuteLoginFragment extends Fragment {
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
                         //occurs on first login after deactivating account
+//                        if(user.has("isDeleted"))
                        final boolean reactivated = "true".equals(user.getString("isDeleted"));
                         activity.runOnUiThread(new Runnable() {
                             @Override

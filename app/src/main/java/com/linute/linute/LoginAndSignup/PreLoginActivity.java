@@ -239,14 +239,13 @@ public class PreLoginActivity extends AppCompatActivity {
                             Log.i(TAG, "onResponse: going to college picker or logging in");
                             persistData(user); //save data
                             saveNotificationPreferences(object);
-                            //if no college id or name, go to colleg picker activity
-                            //else go to main
+                            //if no college id or name, go to college picker activity
+                            //else go to main/
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     progress.dismiss();
-                                    goToNextActivity((user.getCollegeName() == null || user.getCollegeId() == null)
-                                            ? CollegePickerActivity.class : MainActivity.class);
+                                    goToNextActivity("true".equals(user.getIsDeleted()));
                                 }
                             });
                         }
@@ -369,7 +368,7 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
 
-    private void goToNextActivity(final Class nextActivity) {
+   /* private void goToNextActivity(final Class nextActivity) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -379,7 +378,7 @@ public class PreLoginActivity extends AppCompatActivity {
                 finish();
             }
         });
-    }
+    }*/
 
     private void goToFBSignUpFragment(final ProgressDialog progressDialog, final FBSignUpInfo info) {
         runOnUiThread(new Runnable() {
@@ -405,8 +404,27 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     public void goToNextActivity(boolean goToReactivationNotice) {
-        Class nextActivity;
-        SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+        final SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
+
+
+        //college set, go to college
+        final Runnable nextActivityRunnable = new Runnable() {
+            @Override
+            public void run() {
+                Class nextActivity;
+
+                if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
+                    nextActivity = MainActivity.class;
+                    //college picker is not set. go to college picker
+                }else {
+                    nextActivity = CollegePickerActivity.class;
+                }
+                Intent i = new Intent(PreLoginActivity.this, nextActivity);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
+                startActivity(i); //start new activity
+                finish();
+            }
+        };
 
         if(goToReactivationNotice)
         {
@@ -414,20 +432,12 @@ public class PreLoginActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     dialogInterface.dismiss();
+                    nextActivityRunnable.run();
                 }
-            });
+            }).create().show();
+        }else{
+            nextActivityRunnable.run();
         }
-        //college set, go to college
-        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
-                nextActivity = MainActivity.class;
-            //college picker is not set. go to college picker
-        }else {
-            nextActivity = CollegePickerActivity.class;
-        }
-        Intent i = new Intent(this, nextActivity);
-        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
-        startActivity(i); //start new activity
-        finish();
     }
 
 
