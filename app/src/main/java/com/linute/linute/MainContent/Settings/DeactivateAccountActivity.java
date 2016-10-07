@@ -5,8 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -31,36 +33,81 @@ import okhttp3.Response;
 
 public class DeactivateAccountActivity extends BaseSocketActivity {
 
+    private EditText mFeedBackET;
+    private Button deactivateButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deactivate_account);
 
-        findViewById(R.id.button_deactivate).setOnClickListener(new View.OnClickListener() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(R.drawable.ic_action_navigation_arrow_back_inverted);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AlertDialog.Builder(DeactivateAccountActivity.this)
-                        .setTitle("Are you sure?")
-                        .setMessage("")
-                        .setPositiveButton("Deactivate", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                deactivateAccount();
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create()
-                        .show();
+                finish();
             }
         });
+        toolbar.setTitle("Deactivate Account");
+
+        deactivateButton = (Button) findViewById(R.id.button_deactivate);
+        deactivateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mFeedBackET.getText().toString().trim().length() == 0) {
+                    mFeedBackET.setBackgroundColor(0x11FF0000);
+                    mFeedBackET.setHint("Please leave some feedback to deactivate your account");
+                    mFeedBackET.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mFeedBackET.setBackgroundColor(0);
+                        }
+                    }, 2000);
+                } else {
+                    new AlertDialog.Builder(DeactivateAccountActivity.this)
+                            .setMessage("Are you sure?")
+                            .setPositiveButton("Deactivate", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    sendFeedBackAndDeactivate();
+                                }
+                            })
+                            .setNegativeButton("Cancel", null)
+                            .create()
+                            .show();
+                }
+            }
+        });
+
+
+        mFeedBackET = (EditText) findViewById(R.id.input_feedback);
+
 
     }
 
 
-    public void deactivateAccount() {
+    public void sendFeedBackAndDeactivate() {
         final Activity activity = this;
 
-        new LSDKUser(this).deactivateAccount(new Callback() {
+        String feedback = "User Deactivated Their Account \n" + mFeedBackET.getText();
+
+        final LSDKUser lsdkUser = new LSDKUser(this);
+        lsdkUser.sendFeedback(feedback, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                deactivateAccount(activity, lsdkUser);
+            }
+        });
+    }
+
+    private void deactivateAccount(final Activity activity, LSDKUser lsdkUser) {
+        lsdkUser.deactivateAccount(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -84,16 +131,16 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
                     @Override
                     public void execute(Realm realm) {
                         realm.delete(TaptUser.class);
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Intent i = new Intent(activity, PreLoginActivity.class);
-                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
-                                    startActivity(i);
-                                    activity.finish();
-                                }
-                            });
-                        }
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Intent i = new Intent(activity, PreLoginActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK); //don't let them come back
+                                startActivity(i);
+                                activity.finish();
+                            }
+                        });
+                    }
                 });
 
             }

@@ -222,11 +222,23 @@ public class LSDKUser {
     }
 
     public Call deactivateAccount(Callback callback){
-
-        HashMap<String, String> header = API_Methods.getMainHeader(mToken);
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("isDeleted", "true");
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>();
+        params.put("isDeactivated", "true");
         String url = "users/" + mSharedPreferences.getString("userID", "");
         return API_Methods.put(url, header, params, callback);
+    }
+
+    public Call sendFeedback( String text, Callback callback){
+        Map<String, String> header = API_Methods.getMainHeader(mToken);
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("owner", mSharedPreferences.getString("userID", ""));
+        params.put("name", mSharedPreferences.getString("userName",""));
+        params.put("email", mSharedPreferences.getString("email","") );
+        params.put("text", text);
+
+
+        return API_Methods.put("feedback", header, params, callback);
     }
 }
