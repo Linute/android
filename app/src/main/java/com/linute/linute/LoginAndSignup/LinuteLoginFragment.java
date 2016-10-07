@@ -288,12 +288,11 @@ public class LinuteLoginFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
 
                 String res = response.body().string();
+                Log.i(TAG, "onResponse: "+res);
 
                 if (response.isSuccessful()) {
                     try {
                         JSONObject user = new JSONObject(res);
-
-                        //Log.i(TAG, "onResponse: "+res);
                         saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
@@ -324,17 +323,21 @@ public class LinuteLoginFragment extends Fragment {
 
                     try {
                         JSONObject obj = new JSONObject(res);
-                        final boolean emailError = obj.getString("error").equals("email");
+                        final String error = obj.getString("error");
+                        //final boolean emailError = obj.getString("error").equals("email");
 
                         if (getActivity() == null) return;
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 showProgress(false);
-                                if (emailError) {
+                                if (error.equals("email")) {
                                     mEmailView.setError("No account with this email");
                                     mEmailView.requestFocus();
-                                } else {
+                                } else if (error.equals("facebook")){
+                                    mEmailView.setError("Please log in with facebook");
+                                    mEmailView.requestFocus();
+                                }else {
                                     mPasswordView.setError("Invalid password");
                                     mPasswordView.requestFocus();
                                 }

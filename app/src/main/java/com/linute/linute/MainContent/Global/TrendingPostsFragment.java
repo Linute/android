@@ -1,7 +1,6 @@
 package com.linute.linute.MainContent.Global;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.widget.Toolbar;
@@ -95,6 +94,10 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                 getPosts();
             }
         });
+
+        if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND){
+            //later
+        }
 
         mProgressBar = root.findViewById(R.id.progress_bar);
 
@@ -329,6 +332,11 @@ public class TrendingPostsFragment extends BaseFeedFragment {
                                     });
 
                                     mProgressBar.setVisibility(View.GONE);
+
+                                    if (mGlobalItem.type == GlobalChoiceItem.TYPE_HEADER_FRIEND &&
+                                            refreshedPosts.isEmpty() && getView() != null){
+                                        getView().findViewById(R.id.no_friends).setVisibility(View.VISIBLE);
+                                    }
                                 }
                             }
                     );

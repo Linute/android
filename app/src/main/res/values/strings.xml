@@ -150,7 +150,7 @@
     <string name="search_hint">Search</string>
     <string name="find_friends_facebook">Finds Facebook friends who are also using Tapt!</string>
     <string name="need_contant_permission">
-        Find friends on Tapt through your contacts
+        Find friends on Tapt
 
     </string>
     <string name="facebook_rationale">Find your friends on Tapt
@@ -1653,4 +1653,6 @@ limitations under the License.\n\n
         If you would like to delete your account permanently, please contact support@tapt.io
     </string>
     <string name="reactivvate_acount_message">Welcome back to Tapt, we’re excited to have your here again!</string>
+    <string name="empty_text_trend_friend">Follow friends from any college to see their posts here
+    </string>
 </resources>

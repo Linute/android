@@ -201,9 +201,11 @@ public class ImageFeedHolder extends BaseFeedHolder {
         /*if (vProgressBar != null)
             vProgressBar.setVisibility(View.VISIBLE);*/
 
+        //vPostImage.setImageBitmap(mPost.imageBase64 == null ? null :  Utils.decodeImageBase64(mPost.imageBase64));
         mRequestManager
                 .load(image)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .dontAnimate()
                 .placeholder(mPost.imageBase64 == null ? null : new BitmapDrawable(mContext.getResources(), Utils.decodeImageBase64(mPost.imageBase64)))
                 .into(vPostImage);
     }

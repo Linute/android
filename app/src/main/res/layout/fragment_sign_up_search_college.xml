@@ -39,7 +39,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="64dp"
         android:textSize="20sp"
         android:text="No Colleges Found"
         android:visibility="gone"
@@ -50,8 +50,10 @@
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:layout_centerHorizontal="true"
         android:layout_below="@id/elevation"
-        android:layout_centerInParent="true"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        />
 
 </RelativeLayout>
