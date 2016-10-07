@@ -225,8 +225,8 @@ public class LSDKUser {
 
         HashMap<String, String> header = API_Methods.getMainHeader(mToken);
         HashMap<String, Object> params = new HashMap<>();
-        params.put("isDeleted", "false");
-        String url = "user/" + mSharedPreferences.getString("userId", "");
+        params.put("isDeleted", "true");
+        String url = "users/" + mSharedPreferences.getString("userID", "");
         return API_Methods.put(url, header, params, callback);
     }
 }

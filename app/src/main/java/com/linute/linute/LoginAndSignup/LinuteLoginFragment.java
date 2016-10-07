@@ -291,16 +291,22 @@ public class LinuteLoginFragment extends Fragment {
 
                 if (response.isSuccessful()) {
                     try {
+                        JSONObject user = new JSONObject(res);
+
                         //Log.i(TAG, "onResponse: "+res);
                         saveCredentials(res);
                         final PreLoginActivity activity = (PreLoginActivity) getActivity();
                         if (activity == null) return;
+                        //occurs on first login after deactivating account
+                       final boolean reactivated = "true".equals(user.getString("isDeleted"));
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                activity.goToNextActivity();
+                                activity.goToNextActivity(reactivated);
                             }
                         });
+
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Log.e(TAG, "Credentials weren't saved");

@@ -401,17 +401,29 @@ public class PreLoginActivity extends AppCompatActivity {
     }
 
     public void goToNextActivity() {
+        goToNextActivity(false);
+    }
+
+    public void goToNextActivity(boolean goToReactivationNotice) {
         Class nextActivity;
         SharedPreferences sharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE);
 
+        if(goToReactivationNotice)
+        {
+            new AlertDialog.Builder(this).setMessage(R.string.reactivvate_acount_message).setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+        }
         //college set, go to college
-        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null)
-            nextActivity = MainActivity.class;
-
+        if (sharedPreferences.getString("collegeName", null) != null && sharedPreferences.getString("collegeId", null) != null) {
+                nextActivity = MainActivity.class;
             //college picker is not set. go to college picker
-        else
+        }else {
             nextActivity = CollegePickerActivity.class;
-
+        }
         Intent i = new Intent(this, nextActivity);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); //clear stack
         startActivity(i); //start new activity
