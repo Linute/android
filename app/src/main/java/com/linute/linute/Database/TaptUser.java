@@ -1,5 +1,8 @@
 package com.linute.linute.Database;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -26,6 +29,15 @@ public class TaptUser extends RealmObject {
 
     public TaptUser(){
 
+    }
+
+    public static TaptUser getUser(JSONObject object, boolean insert) throws JSONException {
+        return new TaptUser(
+                object.getString("id"),
+                object.getString("fullName"),
+                object.getString("profileImage"),
+                insert
+        );
     }
 
     public TaptUser(String id, String fullName, String profileImage, boolean isFriend){

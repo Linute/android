@@ -1,18 +1,26 @@
 package com.linute.linute.MainContent;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -60,6 +68,7 @@ import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomSnackbar;
 import com.linute.linute.UtilsAndHelpers.FiveStarRater.FiveStarsDialog;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.NetworkUtil;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 import org.json.JSONArray;
@@ -83,9 +92,8 @@ import okhttp3.Response;
 
 public class MainActivity extends BaseTaptActivity {
 
-    public static String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = MainActivity.class.getSimpleName();
     public static final int PHOTO_STATUS_POSTED = 19;
-    public static final int REQ_LOCATION_PERMISSION = 27;
     public static final String PROFILE_OR_EVENT_NAME = "profileOrEvent";
 
     private DrawerLayout mDrawerLayout;
@@ -123,13 +131,6 @@ public class MainActivity extends BaseTaptActivity {
         setContentView(R.layout.activity_main);
 
         mSharedPreferences = getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
-
-
-       /* if (!mSharedPreferences.getBoolean("askedForLocation", false) && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQ_LOCATION_PERMISSION);
-            mSharedPreferences.edit().putBoolean("askedForLocation", true).apply();
-        }*/
-
 
         TaptSocket.initSocketConnection(this);
 
@@ -222,6 +223,70 @@ public class MainActivity extends BaseTaptActivity {
                 .setRateText("Wasup! We see you come here often, how are you liking it so far?")
                 .setUpperBound(4)
                 .showAfter(10);
+    }
+
+
+    public static final int LOCATION_PERM = 82;
+
+
+    public void getPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Need location permission")
+                    .setMessage("Tapt needs access to your location for geo filters")
+                    .setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
+                        }
+                    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                     }}).show();
+        }else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERM);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == LOCATION_PERM){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                sendLocation();
+            }
+        }else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private void sendLocation(){
+        try {
+            JSONObject loca = new JSONObject();
+            Location lastLoca = ((LocationManager) getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            if(lastLoca != null) {
+                loca.put("longitude", lastLoca.getLongitude());
+                loca.put("latitude", lastLoca.getLatitude());
+
+                Log.i(TAG, "sendLocation: "+lastLoca.getLatitude());
+                Log.i(TAG, "sendLocation: "+lastLoca.getLongitude());
+                TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:geo", loca);
+            }
+        }catch (SecurityException|JSONException e){
+            e.printStackTrace();
+        }
+    }
+
+
+    private void sendNetworkInformation(){
+        try{
+            JSONObject object = new JSONObject();
+            object.put("carrier", NetworkUtil.getProvider(this));
+            object.put("speed", NetworkUtil.getNetworkClass(this));
+            TaptSocket.getInstance().emit(API_Methods.VERSION + ":users:network", object);
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
     }
 
     public void selectDrawerItem(int pos) {
@@ -511,6 +576,8 @@ public class MainActivity extends BaseTaptActivity {
     protected void onStart() {
         super.onStart();
 
+        //Log.i(TAG, "onStart: ");
+
         TaptSocket socket = TaptSocket.getInstance();
         socket.on("activity", newActivity);
         socket.on("new post", newPostListener);
@@ -529,20 +596,29 @@ public class MainActivity extends BaseTaptActivity {
         socket.on(Socket.EVENT_RECONNECT, onReconnect);
         socket.connectSocket();
 
+        //get friends list
         try {
             JSONObject object = new JSONObject();
             object.put("timestamp", mSharedPreferences.getLong("timestamp", 0));
-
             socket.emit(API_Methods.VERSION + ":users:sync contacts", object);
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+
+        sendNetworkInformation();
+
+        //try to send location
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            sendLocation();
+        }else {
+            getPermission();
         }
     }
 
     /******
      * Socket stuff
      ********/
-
 
 
     @Override
@@ -585,9 +661,8 @@ public class MainActivity extends BaseTaptActivity {
             socket.off(Socket.EVENT_RECONNECT, onReconnect);
         }
 
-        Log.i(TAG, "onStop: ");
+        //Log.i(TAG, "onStop: ");
     }
-
 
 
     @Override
@@ -986,8 +1061,6 @@ public class MainActivity extends BaseTaptActivity {
         }
     };
 
-
-    //// TODO: 9/3/16 sends boolean. give us int instead?
     private Emitter.Listener haveUnread = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -1202,7 +1275,7 @@ public class MainActivity extends BaseTaptActivity {
                                             TaptUser user;
                                             TaptUser temp;
                                             for (int i = 0; i < insertAndDelete.length(); i++) {
-                                                user = getUser(insertAndDelete.getJSONObject(i), true);
+                                                user = TaptUser.getUser(insertAndDelete.getJSONObject(i), true);
                                                 temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
                                                 if (temp != null) temp.update(user);
                                                 else realm.copyToRealm(user);
@@ -1210,7 +1283,7 @@ public class MainActivity extends BaseTaptActivity {
 
                                             insertAndDelete = object.getJSONArray("delete");
                                             for (int j = 0; j < insertAndDelete.length(); j++) {
-                                                user = getUser(insertAndDelete.getJSONObject(j), false);
+                                                user = TaptUser.getUser(insertAndDelete.getJSONObject(j), false);
                                                 temp = realm.where(TaptUser.class).equalTo("id", user.getId()).findFirst();
                                                 if (temp != null) temp.update(user);
                                             }
@@ -1241,15 +1314,6 @@ public class MainActivity extends BaseTaptActivity {
             }
         }
     };
-
-    private TaptUser getUser(JSONObject object, boolean insert) throws JSONException {
-        return new TaptUser(
-                object.getString("id"),
-                object.getString("fullName"),
-                object.getString("profileImage"),
-                insert
-        );
-    }
 
     private void showUpdateSnackbar(String text) {
         final CustomSnackbar sn = CustomSnackbar.make(mDrawerLayout, text, CustomSnackbar.LENGTH_LONG);

@@ -16,6 +16,7 @@ import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -28,7 +29,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class DeactivateAccountActivity extends AppCompatActivity {
+public class DeactivateAccountActivity extends BaseSocketActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,8 +84,6 @@ public class DeactivateAccountActivity extends AppCompatActivity {
                     @Override
                     public void execute(Realm realm) {
                         realm.delete(TaptUser.class);
-
-
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
