@@ -360,6 +360,8 @@ public abstract class BaseFeedFragment extends BaseFragment {
                 if (response.isSuccessful()) {
                     try {
 
+                        p.setPrivacyChanged(true);
+
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);
                             p.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));

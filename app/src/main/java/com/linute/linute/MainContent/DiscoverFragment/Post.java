@@ -51,12 +51,12 @@ public class Post implements Parcelable {
 
     private int mType;
     public String imageBase64;
-    public final boolean isPrivacyChanged;
+    private boolean isPrivacyChanged;
 
     //private ArrayList<Object> mComments = new ArrayList<>();
 
     public Post() {
-        isPrivacyChanged = false;
+        setPrivacyChanged(false);
     }
 
     public Post(String imageurl, String postid, String userid, String userName) {
@@ -77,13 +77,13 @@ public class Post implements Parcelable {
         mPostHidden = false;
         mPostMuted = false;
         mIsDeleted = false;
-        isPrivacyChanged = false;
+        setPrivacyChanged(false);
     }
 
 
     public Post(String postId) {
         mPostId = postId;
-        isPrivacyChanged = false;
+        setPrivacyChanged(false);
     }
 
     /**
@@ -165,7 +165,7 @@ public class Post implements Parcelable {
         mPostMuted = JsonHelpers.getBoolean(jsonObject, "isMuted");
         mIsDeleted = JsonHelpers.getBoolean(jsonObject, "isDeleted");
 
-        isPrivacyChanged = JsonHelpers.getBoolean(jsonObject, "isPrivacyChanged");
+        setPrivacyChanged(JsonHelpers.getBoolean(jsonObject, "isPrivacyChanged"));
 
         if(jsonObject.has("preloaders") && jsonObject.getJSONArray("preloaders").length() > 0)
             imageBase64 = jsonObject.getJSONArray("preloaders").getString(0);
@@ -436,7 +436,7 @@ public class Post implements Parcelable {
 
         dest.writeParcelable(mImageSize, 0);
         dest.writeByte((byte) (mIsDeleted ? 1 : 0));
-        dest.writeByte((byte) (isPrivacyChanged ? 1 : 0));
+        dest.writeByte((byte) (isPrivacyChanged() ? 1 : 0));
         //dest.writeList(mComments);
     }
 
@@ -458,7 +458,7 @@ public class Post implements Parcelable {
 
         mImageSize = in.readParcelable(PostSize.class.getClassLoader());
         mIsDeleted = in.readByte() != 0;
-        isPrivacyChanged = in.readByte()!=0;
+        setPrivacyChanged(in.readByte()!=0);
        // mComments = new ArrayList<>();
         //in.readList(mComments, Object.class.getClassLoader());
     }
@@ -474,4 +474,12 @@ public class Post implements Parcelable {
             return new Post[size];
         }
     };
+
+    public boolean isPrivacyChanged() {
+        return isPrivacyChanged;
+    }
+
+    public void setPrivacyChanged(boolean privacyChanged) {
+        isPrivacyChanged = privacyChanged;
+    }
 }

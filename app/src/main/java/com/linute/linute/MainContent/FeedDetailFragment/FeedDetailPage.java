@@ -1131,6 +1131,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                 if (response.isSuccessful()) {
                     try {
 
+                        mFeedDetail.getPost().setPrivacyChanged(true);
+
                         if (!isAnon) {
                             JSONObject obj = new JSONObject(res);
                             mFeedDetail.setAnonImage(Utils.getAnonImageUrl(obj.getString("anonymousImage")));

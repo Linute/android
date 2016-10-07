@@ -1,7 +1,6 @@
 package com.linute.linute.API;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.linute.linute.MainContent.Uploading.CountingRequestBody;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
@@ -78,6 +77,8 @@ public class LSDKEvents {
 
         Map<String, Object> params = new HashMap<>();
         params.put("privacy", makeAnon ? 1 : 0);
+        params.put("isPrivacyChanged", 1);
+
 
         return API_Methods.put("events/"+postID, header,params,callback);
     }
