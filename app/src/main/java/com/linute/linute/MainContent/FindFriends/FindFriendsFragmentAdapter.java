@@ -33,9 +33,9 @@ public class FindFriendsFragmentAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position) {
             case 0:
-                return "Campus";
-            case 1:
                 return "Name";
+            case 1:
+                return "Campus";
             case 2:
                 return "Facebook";
         }
