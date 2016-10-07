@@ -236,7 +236,7 @@ public class PreLoginActivity extends AppCompatActivity {
 
                         //has signed up already and using edu email
                         else {
-                            final boolean isDeactivated = "true".equals(object.getString("isDeactivated"));
+                            final boolean isDeactivated = object.has("isDeactivated") && "true".equals(object.getString("isDeactivated"));
 
                             Log.i(TAG, "onResponse: going to college picker or logging in");
                             persistData(user); //save data
