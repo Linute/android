@@ -45,20 +45,18 @@
                     android:id="@+id/comment_anon_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
+                    android:layout_gravity="center"
                     android:button="@drawable/anon_checkbox"
-                    android:clickable="false"/>
+                />
 
-                <TextView
-                    android:id="@+id/comment_anon_checkbox_text"
+                <ImageView
+                    android:id="@+id/disabled_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="8dp"
-                    android:text="OFF"
-                    android:textColor="@color/twentyfive_black"
-                    android:textSize="@dimen/sub_font_size"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_anon_disabled0"
                 />
+
             </FrameLayout>
 
             <com.linkedin.android.spyglass.ui.MentionsEditText
@@ -87,8 +85,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:scaleType="fitCenter"
                     android:padding="4dp"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_upload_picture"/>
 
                 <ProgressBar
