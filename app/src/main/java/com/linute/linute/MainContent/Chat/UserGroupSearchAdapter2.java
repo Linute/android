@@ -64,9 +64,13 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
             case 0:
                 return null;
             case 1:
-                return "Rooms";
+                return "Suggested Groups";
             case 2:
-                return "Users";
+                if(selectedUserList.size() == 0) {
+                    return "People";
+                }else{
+                    return "Add More People";
+                }
         }
         return null;
     }
