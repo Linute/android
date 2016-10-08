@@ -104,7 +104,6 @@ public class LaunchActivity extends Activity {
         AppsFlyerLib.getInstance().startTracking(this.getApplication(), "VPnL9y82TinTofd5XRZ6TJ");
 
         generateNewSigniture();
-        updateLocationIfPossible();
 
         //set broadcast receiver
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
@@ -222,50 +221,5 @@ public class LaunchActivity extends Activity {
         Intent i = new Intent(LaunchActivity.this, nextActivity);
         startActivity(i);
         finish();
-    }
-
-
-    private void updateLocationIfPossible() {
-        if (getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, MODE_PRIVATE).getString("userToken", null) == null) {
-            Log.i(TAG, "updateLocationIfPossible: no user token");
-            return;
-        }
-
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Location loca = ((LocationManager) getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (loca != null) { //if location was from more than 10 min ago, don't sent
-                try {
-                    JSONArray coord = new JSONArray();
-                    coord.put(loca.getLatitude());
-                    coord.put(loca.getLongitude());
-
-                    JSONObject obj = new JSONObject();
-                    obj.put("coordinates", coord);
-
-                    Map<String, Object> param = new HashMap<>();
-                    param.put("geo", obj);
-
-
-                    new LSDKUser(this).updateLocation(param, new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            if (!response.isSuccessful()) {
-                                Log.i(TAG, "onResponse: " + response.body().string());
-                            } else {
-                                response.body().close();
-                            }
-                        }
-                    });
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
     }
 }
