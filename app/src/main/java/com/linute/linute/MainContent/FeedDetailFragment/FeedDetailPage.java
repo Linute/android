@@ -163,6 +163,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         page.getArguments().putBoolean(ARG_SHOW_POST, showPost);
         return page;
     }
+    /*public static FeedDetailPage newInstance(FeedDetail feedDetail) {
+        FeedDetailPage fragment = new FeedDetailPage();
+        Bundle args = new Bundle();
+        args.putParcelable("FEEDDETAIL", feedDetail);
+        fragment.setArguments(args);
+        return fragment;
+    }*/
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -171,6 +178,15 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             BaseFeedItem item = getArguments().getParcelable(ARG_POST);
             mFeedDetail = item instanceof Poll ? new PollFeedDetail((Poll) item) : new PostFeedDetail((Post) item);
             mShowPostDetail = getArguments().getBoolean(ARG_SHOW_POST, true);
+/*=======
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            if(arguments.containsKey("FEEDDETAIL")){
+                mFeedDetail = arguments.getParcelable("FEEDDETAIL");
+            }else{
+                mFeedDetail = new FeedDetail((Post) arguments.getParcelable("POST"));
+            }
+>>>>>>> make use of comments given with posts*/
         }
 
     }
