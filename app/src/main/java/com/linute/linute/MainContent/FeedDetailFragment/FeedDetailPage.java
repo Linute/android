@@ -100,7 +100,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private FeedDetailAdapter mFeedDetailAdapter;
     private MentionsEditText mCommentEditText;
 
-    private View mAnonCheckBoxContainer;
+    //private View mAnonCheckBoxContainer;
 
     private RecyclerView mMentionedList;
 
@@ -110,6 +110,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     private ToggleImageView mSendButton;
 
     private CheckBox mCheckBox;
+    private View mDisabledImage;
 
     private String mViewId;
     private String mImageSignature;
@@ -218,9 +219,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     showKeyboard(recyclerView, false);
                 }
 
-                if(mFeedDetailLLM.findLastVisibleItemPosition() >= mFeedDetailAdapter.getItemCount()-mNewCommentCount){
+                if (mFeedDetailLLM.findLastVisibleItemPosition() >= mFeedDetailAdapter.getItemCount() - mNewCommentCount) {
                     mNewCommentCount = 0;
-                    if(mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
+                    if (mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
                         mNewCommentSnackbar.dismiss();
                 }
 
@@ -294,27 +295,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
         });
 
-        mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
+        View mAnonCheckBoxContainer = rootView.findViewById(R.id.comment_checkbox_container);
 
 
+        mDisabledImage = mAnonCheckBoxContainer.findViewById(R.id.disabled_icon);
         mCheckBox = (CheckBox) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox);
         updateAnonCheckboxState();
-
-        mAnonCheckBoxContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TextView text = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
-                if (mCheckBox.isChecked()) {
-                    text.setText("OFF");
-                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.twentyfive_black));
-                    mCheckBox.setChecked(false);
-                } else {
-                    text.setText("ON");
-                    text.setTextColor(ContextCompat.getColor(getActivity(), R.color.secondaryColor));
-                    mCheckBox.setChecked(true);
-                }
-            }
-        });
 
         mSendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -332,10 +318,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
     }
 
     private void updateAnonCheckboxState() {
-        mAnonCheckBoxContainer.setEnabled(
-                ! mFeedDetail.getPost().isCommentAnonDisabled());
-        TextView anonCheckboxText = (TextView) mAnonCheckBoxContainer.findViewById(R.id.comment_anon_checkbox_text);
-        anonCheckboxText.setVisibility(mFeedDetail.getPost().isCommentAnonDisabled() ? View.GONE : View.VISIBLE);
+        if (mFeedDetail.getPost().isCommentAnonDisabled()) {
+            mDisabledImage.setVisibility(View.VISIBLE);
+            mCheckBox.setVisibility(View.GONE);
+        } else {
+            mDisabledImage.setVisibility(View.GONE);
+            mCheckBox.setVisibility(View.VISIBLE);
+        }
     }
 
     private void showCameraGalleryOption() {
@@ -695,8 +684,8 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                             mFeedDetail.getComments().remove(0);
                                             mFeedDetail.getComments().addAll(0, tempComments);
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyItemRangeInserted(0,tempComments.size());
-                                            mFeedDetailLLM.scrollToPosition(lastPos+tempComments.size());
+                                            mFeedDetailAdapter.notifyItemRangeInserted(0, tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(lastPos + tempComments.size());
                                         }
                                     });
                                 }
@@ -1358,7 +1347,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         mFeedDetailAdapter.notifyItemInserted(mFeedDetail.getComments().size());
                                     }
 
-                                    if(mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()){
+                                    if (mFeedDetailLLM.findLastVisibleItemPosition() != mFeedDetail.getComments().size()) {
                                         mNewCommentCount++;
                                     }
 
