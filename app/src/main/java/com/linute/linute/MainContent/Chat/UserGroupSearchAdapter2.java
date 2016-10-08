@@ -151,7 +151,7 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
             itemView.setBackgroundColor(0);
 
             Glide.with(itemView.getContext())
-                    .load(Utils.getImageUrlOfUser(room.roomImage))
+                    .load(room.roomImage)
                     .dontAnimate()
                     .signature(mImageSign)
                     .placeholder(R.color.seperator_color)
