@@ -262,7 +262,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             mSwipeLayout.close(false);
 
             //if owner of comment, don't allow them to like
-            mSwipeLayout.setLeftSwipeEnabled(!comment.getCommentUserId().equals(mViewerUserId));
+            mSwipeLayout.setLeftSwipeEnabled(comment.getCommentUserId() == null || !comment.getCommentUserId().equals(mViewerUserId));
 
             if (comment.isAnon()) {
                 setAnonImage(comment.getAnonImage());
@@ -278,7 +278,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
             vTimeStamp.setText(comment.getDateString());
 
-            if (comment.getCommentUserId().equals(mViewerUserId)) {
+            if (comment.getCommentUserId() != null && comment.getCommentUserId().equals(mViewerUserId)) {
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_comment_color));
             } else {
                 vCommentUserName.setTextColor(ContextCompat.getColor(context, R.color.user_name_blue));
@@ -306,7 +306,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         }
 
         private void setUpPulloutButtons() {
-            if (mViewerUserId.equals(mComment.getCommentUserId())) {
+            if (mComment.getCommentUserId() != null && mViewerUserId.equals(mComment.getCommentUserId())) {
                 mSwipeLayout.findViewById(R.id.comment_delete).setVisibility(View.VISIBLE);
                 mSwipeLayout.findViewById(R.id.comment_reply).setVisibility(View.GONE);
                 mSwipeLayout.findViewById(R.id.comment_reveal).setVisibility(
@@ -336,7 +336,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         @Override
         public void onClick(View v) {
             if (v == vCommentUserName || v == vCommentUserImage) { //take them to user profile
-                if (!mComment.isAnon()) {
+                if (!mComment.isAnon() && mComment.getCommentUserId() != null) {
                     BaseTaptActivity activity = (BaseTaptActivity) context;
                     if (activity != null) {
                         activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(mComment.getCommentUserName(), mComment.getCommentUserId()));
@@ -349,7 +349,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
 
                 switch (v.getId()) {
                     case R.id.comment_reply:
-                        if (!mComment.isAnon())
+                        if (!mComment.isAnon() && mComment.getCommentUserId() != null)
                             mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
                         break;
                     case R.id.comment_delete:

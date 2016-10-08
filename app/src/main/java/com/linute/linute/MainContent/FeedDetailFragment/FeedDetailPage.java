@@ -543,13 +543,9 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                 JSONObject jsonObject;
                 JSONArray comments;
-                JSONObject owner;
-                JSONArray mentionedPeople;
 
                 try {
                     jsonObject = new JSONObject(response.body().string());
-
-                    //Log.i(TAG, "onResponse: " + jsonObject.toString(4));
 
                     mFeedDetail.getPost().updateInfo(jsonObject);
                     mSkip = mFeedDetail.getPost().getNumOfComments() - 20;
@@ -557,10 +553,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     final ArrayList<Object> tempComments = new ArrayList<>();
                     comments = jsonObject.getJSONArray("comments");
 
-                    //Log.i(TAG, "onResponse: " + comments.toString(4));
-
-                    Date myDate;
-                    SimpleDateFormat format = Utils.getDateFormat();
+                    //Log.d(TAG, "onResponse: " + comments.toString(4));
 
                     if (mSkip > 0) {
                         tempComments.add(new LoadMoreItem());
@@ -568,49 +561,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                     for (int i = 0; i < comments.length(); i++) {
                         //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
-
-                        //get date
-                        JSONObject comment = comments.getJSONObject(i);
-                        try {
-                            myDate = format.parse(comment.getString("date"));
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                            myDate = null;
-                        }
-
-                        List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                        mentionedPeople = comment.getJSONArray("userMentions");
-
-                        for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
-                            mentionedPersonLightArrayList.add(
-                                    new Comment.MentionedPersonLight( //just need fullname and id
-                                            mentionedPeople.getJSONObject(j).getString("fullName"),
-                                            mentionedPeople.getJSONObject(j).getString("id")
-                                    )
-                            );
-                        }
-
-                        owner = comment.getJSONObject("owner");
-
-                        boolean isPrivacyChanged = false;
-                        if(comment.has("isPrivacyChanged")) isPrivacyChanged = comment.getBoolean("isPrivacyChanged");
-                        tempComments
-                                .add(new Comment(
-                                                owner.getString("id"),
-                                                owner.getString("profileImage"),
-                                                owner.getString("fullName"),
-                                                comment.getString("text"),
-                                                comment.getString("id"),
-                                                comment.getInt("privacy") == 1,
-                                                comment.getString("anonymousImage"),
-                                                mentionedPersonLightArrayList,
-                                                myDate == null ? 0 : myDate.getTime(),
-                                                comment.getBoolean("isLiked"),
-                                                comment.getInt("numberOfLikes"),
-                                                getImageUrl(comment.getJSONArray("images")),
-                                        isPrivacyChanged
-                                        )
-                                );
+                        tempComments.add(new Comment(comments.getJSONObject(i)));
                     }
 
                     if (comments.length() == 0) {
@@ -657,19 +608,6 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
 
         });
-    }
-
-
-
-
-    private String getImageUrl(JSONArray images) {
-        if (images == null || images.length() == 0) return null;
-        try {
-            return images.getString(0);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
 
@@ -729,65 +667,19 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
                         JSONObject jsonObject;
                         JSONArray comments;
-                        JSONObject owner;
-                        JSONArray mentionedPeople;
 
                         final ArrayList<Object> tempComments = new ArrayList<>();
 
                         try {
                             jsonObject = new JSONObject(response.body().string());
-
                             comments = jsonObject.getJSONArray("comments");
-
-                            Date myDate;
-                            SimpleDateFormat format = Utils.getDateFormat();
-
                             if (skip1 > 0) {
                                 tempComments.add(new LoadMoreItem());
                             }
 
                             for (int i = 0; i < comments.length(); i++) {
                                 //Log.i(TAG, "onResponse: "+comments.getJSONObject(i).toString());
-
-                                //get date
-                                JSONObject comment = comments.getJSONObject(i);
-                                try {
-                                    myDate = format.parse(comment.getString("date"));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                    myDate = null;
-                                }
-
-                                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                                mentionedPeople = comment.getJSONArray("userMentions");
-
-                                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
-                                    mentionedPersonLightArrayList.add(
-                                            new Comment.MentionedPersonLight( //just need fullname and id
-                                                    mentionedPeople.getJSONObject(j).getString("fullName"),
-                                                    mentionedPeople.getJSONObject(j).getString("id")
-                                            )
-                                    );
-                                }
-
-                                owner = comment.getJSONObject("owner");
-                                tempComments
-                                        .add(new Comment(
-                                                        owner.getString("id"),
-                                                        owner.getString("profileImage"),
-                                                        owner.getString("fullName"),
-                                                        comment.getString("text"),
-                                                        comment.getString("id"),
-                                                        comment.getInt("privacy") == 1,
-                                                        comment.getString("anonymousImage"),
-                                                        mentionedPersonLightArrayList,
-                                                        myDate == null ? 0 : myDate.getTime(),
-                                                        comment.getBoolean("isLiked"),
-                                                        comment.getInt("numberOfLikes"),
-                                                        getImageUrl(comment.getJSONArray("images")),
-                                                        comment.getBoolean("isPrivacyChanged")
-                                                )
-                                        );
+                                tempComments.add(new Comment(comments.getJSONObject(i)));
                             }
 
 
@@ -1436,45 +1328,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             final boolean mCanScrollDown = canScrollDown;
 
             try {
-                Date myDate;
-                myDate = Utils.getDateFormat().parse(object.getString("date"));
-
-                List<Comment.MentionedPersonLight> mentionedPersonLightArrayList = new ArrayList<>();
-                JSONArray mentionedPeople = object.getJSONArray("userMentions");
-
-                for (int j = 0; j < mentionedPeople.length(); j++) { //get all the mentioned people
-                    mentionedPersonLightArrayList.add(
-                            new Comment.MentionedPersonLight( //just need fullname and id
-                                    mentionedPeople.getJSONObject(j).getString("fullName"),
-                                    mentionedPeople.getJSONObject(j).getString("id")
-                            )
-                    );
-                }
-
-                JSONObject owner = object.getJSONObject("owner");
-
-                final Comment com = new Comment(
-                        owner.getString("id"),
-                        owner.getString("profileImage"),
-                        owner.getString("fullName"),
-                        object.getString("text"),
-                        object.getString("id"),
-                        object.getInt("privacy") == 1,
-                        object.getString("anonymousImage"),
-                        mentionedPersonLightArrayList,
-                        myDate.getTime(),
-                        false,
-                        0,
-                        getImageUrl(object.getJSONArray("images")),
-                        object.getBoolean("isPrivacyChanged")
-                );
-
-
+                final Comment com = new Comment(object);
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (com.getCommentUserId().equals(mViewId)) { //was the user that posted the comment
+                            if (com.getCommentUserId() != null && com.getCommentUserId().equals(mViewId)) { //was the user that posted the comment
                                 mSendButton.setVisibility(View.VISIBLE);
                                 mProgressbar.setVisibility(View.GONE);
                                 //smoothScroll = true;
@@ -1508,7 +1367,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         recList.scrollToPosition(mFeedDetail.getComments().size());*/
 
                                     int pos = mFeedDetail.getComments().size() - 1;
-                                    if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && !com.getCommentUserId().equals(mViewId)) {
+                                    if (mFeedDetailLLM.findLastVisibleItemPosition() < pos && (com.getCommentUserId() == null || !com.getCommentUserId().equals(mViewId))) {
                                         mNewCommentSnackbar = Snackbar.make(mCommentEditText, (mNewCommentCount > 1 ? mNewCommentCount + " New Comments" : "New Comment"), Snackbar.LENGTH_LONG);
                                         TextView snackbarTV = (TextView) mNewCommentSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
                                         snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
@@ -1534,7 +1393,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     });
                 }
 
-            } catch (JSONException | ParseException e) {
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
@@ -1624,7 +1483,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         //if viewer is not the owner of the comment, return
         // exception: anon comments can be deleted by post owner
-        if (!com.getCommentPostId().equals(id) || (!com.getCommentUserId().equals(mViewId) && !com.isAnon()))
+        if (!com.getCommentPostId().equals(id) || com.getCommentUserId() == null || (!com.getCommentUserId().equals(mViewId) && !com.isAnon()))
             return;
 
         mFeedDetailAdapter.setDenySwipe(true);
@@ -1727,7 +1586,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         //safe check
         //double check that they are revealing their own comment
-        if (!comment.getCommentUserId().equals(mViewId) || !comment.getCommentPostId().equals(id))
+        if (comment.getCommentUserId() == null || !comment.getCommentUserId().equals(mViewId) || !comment.getCommentPostId().equals(id))
             return;
 
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, isAnon ? "Revealing comment..." : "Making comment anonymous...", true, false);
