@@ -57,6 +57,7 @@ import com.linute.linute.SquareCamera.CameraType;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.CustomLinearLayoutManager;
+import com.linute.linute.UtilsAndHelpers.ImpressionHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.SocketListener;
 import com.linute.linute.UtilsAndHelpers.ToggleImageView;
@@ -67,11 +68,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -314,8 +312,11 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             }
         });
 
+        ImpressionHelper.sendImpressionsAsync(pref.getString("collegeId", ""), mViewId, mFeedDetail.getPostId());
+
         return rootView;
     }
+
 
     private void updateAnonCheckboxState() {
         if (mFeedDetail.getPost().isCommentAnonDisabled()) {

@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public interface OnFinishedRequest {
 
-    void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore);
+    void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore, boolean addToBack);
     void onFailure();
     void onError(String error);
 }

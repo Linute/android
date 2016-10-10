@@ -69,7 +69,7 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
             @Override
             public void run() {
                 if (getContext() == null) return;
-                mFindFriendsSearchPresenter.request(getContext(), getSearchParams(query));
+                mFindFriendsSearchPresenter.request(getContext(), getSearchParams(query), false);
             }
         }, 300);
     }
@@ -107,7 +107,12 @@ public class FindFriendsFBFragment extends BaseFindFriendsFragment {
     private void setUpFacebookList(String token) {
         if (getContext() == null) return;
         mProgressBar.setVisibility(View.VISIBLE);
-        mFindFriendsSearchPresenter.request(getContext(), getTokenParams(token));
+        mFindFriendsSearchPresenter.request(getContext(), getTokenParams(token), false);
+    }
+
+    @Override
+    public void loadMore() {
+
     }
 
     private void showRationalTextFacebook() {

@@ -36,6 +36,7 @@
         android:background="@drawable/rounded_button"
         android:drawableLeft="@drawable/ic_camera_icon"
         android:drawablePadding="4dp"
+        android:gravity="center"
         android:paddingBottom="4dp"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"

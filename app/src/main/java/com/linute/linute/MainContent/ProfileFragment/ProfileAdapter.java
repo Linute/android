@@ -1,6 +1,7 @@
 package com.linute.linute.MainContent.ProfileFragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import com.linute.linute.MainContent.Settings.EditProfileInfoActivity;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.ImpressionHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LinuteUser;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
@@ -52,6 +54,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private OnClickFollow mOnClickFollow;
 
     private String mUserid;
+    private String mCollegeId;
     private short mLoadState = LoadMoreViewHolder.STATE_LOADING;
 
     private BaseFeedAdapter.PostAction mPostAction;
@@ -64,9 +67,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public ProfileAdapter(ArrayList<Post> posts, LinuteUser user, Context context) {
         this.context = context;
-        mUserid = context
-                .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
-                .getString("userID", "");
+        SharedPreferences preferences = context
+                .getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        mUserid = preferences.getString("userID", "");
+        mCollegeId = preferences.getString("collegeId", "");
         mPosts = posts;
         mUser = user;
     }
@@ -138,15 +142,21 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (holder instanceof LoadMoreViewHolder) {
             ((LoadMoreViewHolder) holder).bindView(mLoadState);
         } else if (holder instanceof VideoFeedHolder) {
-            ((VideoFeedHolder) holder).bindModel(mPosts.get(position - 2));
+            Post p = mPosts.get(position - 2);
+            ((VideoFeedHolder) holder).bindModel(p);
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
         } else if (holder instanceof ImageFeedHolder) {
-            ((ImageFeedHolder) holder).bindModel(mPosts.get(position - 2));
+            Post p = mPosts.get(position - 2);
+            ((ImageFeedHolder) holder).bindModel(p);
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
         } else if (holder instanceof ProfileHeaderViewHolder) {
             ((ProfileHeaderViewHolder) holder).bindModel(mUser);
         } else if (holder instanceof ProfileHeaderActions) {
             ((ProfileHeaderActions) holder).bindView();
         } else if (holder instanceof StatusFeedHolder) {
-            ((StatusFeedHolder) holder).bindModel(mPosts.get(position - 2));
+            Post p = mPosts.get(position - 2);
+            ((StatusFeedHolder) holder).bindModel(p);
+            ImpressionHelper.sendImpressionsAsync(mCollegeId, mUserid, p.getPostId());
         }
     }
 

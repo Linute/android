@@ -41,11 +41,12 @@ public class FindFriendsFragment extends BaseFindFriendsFragment {
 
     @Override
     protected void initScreen() {
+        mQueryString = "";
         if (!mFindFriendsSearchPresenter.originalListLoaded()) {
             mFindFriendsRationale.setVisibility(View.GONE);
             mEmptyText.setVisibility(View.GONE);
             mProgressBar.setVisibility(View.VISIBLE);
-            mFindFriendsSearchPresenter.request(getContext(), getParms(""));
+            mFindFriendsSearchPresenter.request(getContext(), getParms(""), false);
         } else {
             mEmptyText.setVisibility(mFriendFoundList.isEmpty() ? View.VISIBLE : View.GONE);
         }
@@ -56,15 +57,25 @@ public class FindFriendsFragment extends BaseFindFriendsFragment {
 
     @Override
     public void searchWithQuery(final String query) {
+        mQueryString = query;
         mSearchHandler.removeCallbacksAndMessages(null);
         mSearchHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (getContext() == null) return;
-                mFindFriendsSearchPresenter.request(getContext(), getParms(query));
+                mFindFriendsSearchPresenter.request(getContext(), getParms(query), false);
             }
         }, 300);
     }
+
+    @Override
+    public void loadMore() {
+        if (!mCanLoadMore || getContext() == null) return;
+
+        mSearchHandler.removeCallbacksAndMessages(null);
+        mFindFriendsSearchPresenter.request(getContext(), getParms(mQueryString), true);
+    }
+
 
     private HashMap<String, Object> getParms(String name) {
         HashMap<String, Object> params = new HashMap<>();

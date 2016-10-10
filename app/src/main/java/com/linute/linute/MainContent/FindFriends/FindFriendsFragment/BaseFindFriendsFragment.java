@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.linute.linute.MainContent.FindFriends.FindFriendsChoiceFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.RequestCallbackView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -25,12 +26,11 @@ import java.util.List;
 /**
  * Created by QiFeng on 9/24/16.
  */
-public abstract class BaseFindFriendsFragment extends BaseFragment implements RequestCallbackView {
+public abstract class BaseFindFriendsFragment extends BaseFragment implements RequestCallbackView, LoadMoreViewHolder.OnLoadMore {
 
     public static final String TAG = BaseFindFriendsFragment.class.getSimpleName();
 
     protected FriendSearchAdapter mFriendSearchAdapter;
-    protected String mQueryString; //what's in the search view
 
     // filtered list of users
     protected List<FriendSearchUser> mFriendFoundList = new ArrayList<>();
@@ -45,6 +45,10 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
     protected Handler mSearchHandler = new Handler(); //handles filtering and searchign
 
     protected FindFriendsSearchPresenter mFindFriendsSearchPresenter;
+
+    protected boolean mCanLoadMore = false;
+
+    protected String mQueryString;
 
 
     @Nullable
@@ -64,6 +68,8 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
 
         mFriendSearchAdapter = new FriendSearchAdapter(getActivity(), mFriendFoundList);
         mFriendSearchAdapter.setRequestManager(Glide.with(this));
+
+        mFriendSearchAdapter.setOnLoadMore(this);
 
         recyclerView.setAdapter(mFriendSearchAdapter);
 
@@ -89,17 +95,22 @@ public abstract class BaseFindFriendsFragment extends BaseFragment implements Re
     public abstract void searchWithQuery(String query);
 
     @Override
-    public void onSuccess(final ArrayList<FriendSearchUser> list, boolean canLoadMore) {
+    public void onSuccess(final ArrayList<FriendSearchUser> list, boolean canLoadMore, final boolean addToBack) {
         if (getActivity() == null) return;
 
         mProgressBar.setVisibility(View.GONE);
-        mEmptyText.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
+        mEmptyText.setVisibility(list.isEmpty() && !addToBack ? View.VISIBLE : View.GONE);
         setFragmentState(FragmentState.FINISHED_UPDATING);
+
+        mCanLoadMore = canLoadMore;
+
+        mFriendSearchAdapter.setLoadState(mCanLoadMore ? LoadMoreViewHolder.STATE_LOADING : LoadMoreViewHolder.STATE_END);
 
         mMainHandler.post(new Runnable() {
             @Override
             public void run() {
-                mFriendFoundList.clear();
+                if (!addToBack) mFriendFoundList.clear();
+
                 mFriendFoundList.addAll(list);
                 mMainHandler.removeCallbacksAndMessages(null);
                 mFriendSearchAdapter.notifyDataSetChanged();

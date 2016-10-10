@@ -17,6 +17,7 @@ import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
+import com.linute.linute.UtilsAndHelpers.ImpressionHelper;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 
@@ -109,7 +110,7 @@ public class FeedAdapter extends BaseFeedAdapter {
 
         //tracking impressions
         if (sendImpression)
-            sendImpressionsAsync(mPosts.get(position).getPostId());
+            ImpressionHelper.sendImpressionsAsync(mCollege, mUserId ,mPosts.get(position).getPostId());
 
     }
 
@@ -132,34 +133,6 @@ public class FeedAdapter extends BaseFeedAdapter {
         return STATUS_POST;
     }
 
-    private void sendImpressionsAsync(final String id) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    JSONObject body = new JSONObject();
-
-                    body.put("college", mCollege);
-                    body.put("user", mUserId);
-
-                    JSONArray mEventIds = new JSONArray();
-                    mEventIds.put(id);
-                    body.put("events", mEventIds);
-
-                    BaseTaptActivity activity = (BaseTaptActivity) context;
-
-                    if (activity != null) {
-                        TaptSocket.getInstance().emit(API_Methods.VERSION + ":posts:impressions", body);
-                        //Log.i(TAG, "run: impression sent");
-                    } else {
-                        Log.i(TAG, "impression not sent: no activity");
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
 
     public void setLoadState(short loadState) {
         mLoadState = loadState;

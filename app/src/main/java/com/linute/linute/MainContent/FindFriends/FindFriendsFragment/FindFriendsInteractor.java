@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.linute.linute.API.LSDKFriendSearch;
 import com.linute.linute.API.LSDKPeople;
@@ -27,34 +28,40 @@ import okhttp3.Response;
 public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
 
     private Call mInitCall;
+    private int mInitSkip;
+    private int mCurrSkip;
 
     @Override
-    public void query(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
+    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
         if (mCall != null) mCall.cancel();
 
         String query = (String) params.get("fullName");
 
-        if (!query.equals(mQuery)) {
+        if (!query.equals(mQuery) || loadMore) {
             mQuery = query;
             Handler handler = new Handler(Looper.getMainLooper());
-            if (mQuery.trim().isEmpty()) {
+            if (mQuery.trim().isEmpty() && !loadMore) {
                 if (mInitialListLoaded)
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            onFinishedQuery.onSuccess(mUnfilteredList, false);
+                            mCurrSkip = mInitSkip - 20;
+                            onFinishedQuery.onSuccess(mUnfilteredList, mCurrSkip > -20, false);
                         }
                     });
+
                 else initList(context, params, onFinishedQuery);
             } else {
-                search(context, params, onFinishedQuery);
+                search(context, params, loadMore, onFinishedQuery);
             }
         }
     }
 
     private void initList(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
+        if (mInitCall != null)
+            mInitCall.cancel();
 
-        mInitCall = new LSDKPeople(context).getPeople(params, new Callback() {
+        mInitCall = new LSDKFriendSearch(context).searchFriendByName(getFiltersAndParams(params, false), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         if (!call.isCanceled()) {
@@ -75,12 +82,18 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                         if (response.isSuccessful()) {
                             mInitialListLoaded = true;
                             try {
-                                mUnfilteredList = parseInitJson(new JSONObject(response.body().string()));
+                                JSONObject object = new JSONObject(response.body().string());
+
+                                mInitSkip = object.getInt("skip");
+                                mCurrSkip = mInitSkip - 20;
+
+                                mUnfilteredList = parseJson(object);
+
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
                                         if (mCall == null)
-                                            onFinishedQuery.onSuccess(mUnfilteredList, false);
+                                            onFinishedQuery.onSuccess(mUnfilteredList, mCurrSkip > -20, false);
                                     }
                                 });
 
@@ -104,16 +117,13 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                         }
                     }
                 }
-
         );
     }
 
     @Override
-    protected void search(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
-        HashMap<String, Object> filters = new HashMap<>();
-        filters.put("filters", params);
+    protected void search(Context context, Map<String, Object> params, final boolean loadMore, final OnFinishedRequest onFinishedQuery) {
 
-        mCall = new LSDKFriendSearch(context).searchFriendByName(filters, new Callback() {
+        mCall = new LSDKFriendSearch(context).searchFriendByName(getFiltersAndParams(params, loadMore), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                         if (!call.isCanceled()) {
@@ -131,13 +141,20 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                     public void onResponse(Call call, Response response) throws IOException {
                         Handler handler = new Handler(Looper.getMainLooper());
                         if (response.isSuccessful()) {
-                            mInitialListLoaded = true;
+
                             try {
-                                final ArrayList<FriendSearchUser> friendSearchUsers = parseJson(new JSONObject(response.body().string()));
+                                JSONObject object = new JSONObject(response.body().string());
+                                if (!loadMore) {
+                                    mCurrSkip = object.getInt("skip");
+                                }
+
+                                mCurrSkip -= 20;
+
+                                final ArrayList<FriendSearchUser> friendSearchUsers = parseJson(object);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onFinishedQuery.onSuccess(friendSearchUsers, false);
+                                        onFinishedQuery.onSuccess(friendSearchUsers, mCurrSkip > -20, loadMore);
                                     }
                                 });
 
@@ -168,7 +185,6 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
 
     @Override
     protected ArrayList<FriendSearchUser> parseJson(JSONObject object) throws JSONException {
-
         JSONArray friends = object.getJSONArray("friends");
 
         ArrayList<FriendSearchUser> tempFriends = new ArrayList<>();
@@ -186,37 +202,31 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
         return tempFriends;
     }
 
-    protected ArrayList<FriendSearchUser> parseInitJson(JSONObject object) throws JSONException {
-        JSONArray friends = object.getJSONArray("people");
-
-        ArrayList<FriendSearchUser> users = new ArrayList<>();
-        JSONObject user;
-        JSONObject friend;
-        if (friends != null){
-            for (int i = 0 ; i < friends.length(); i++){
-                try {
-                    user = friends.getJSONObject(i);
-
-                    try{
-                        friend = user.getJSONObject("friend");
-                    }catch (JSONException e){
-                        friend = null;
-                    }
-
-                    users.add(new FriendSearchUser(user.getJSONObject("owner"), friend));
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return users;
-    }
-
 
     @Override
     public void cancelRequest() {
         super.cancelRequest();
         if (mInitCall != null) mInitCall.cancel();
+    }
+
+
+    private HashMap<String, Object> getFiltersAndParams(Map<String, Object> params, boolean loadMore) {
+        HashMap<String, Object> filters = new HashMap<>();
+        filters.put("filters", params);
+
+        int limit = 20;
+
+        if (loadMore) {
+            if (mCurrSkip < 0) {
+                filters.put("skip", 0);
+                limit += mCurrSkip;
+            } else {
+                filters.put("skip", mCurrSkip);
+            }
+        }
+        filters.put("limit", limit);
+
+
+        return filters;
     }
 }
