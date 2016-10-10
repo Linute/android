@@ -39,6 +39,16 @@
             android:visibility="invisible"
         />
 
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            style="?android:attr/progressBarStyleLarge"
+            android:visibility="gone"
+            />
+
+
     </FrameLayout>
 
 
