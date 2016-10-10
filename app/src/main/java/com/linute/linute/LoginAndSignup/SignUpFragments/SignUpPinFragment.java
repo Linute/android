@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.R;
@@ -169,6 +170,7 @@ public class SignUpPinFragment extends Fragment {
                     if (mButtonCountDownTimer != null) mButtonCountDownTimer.cancel();
                     mButtonCountDownTimer = new ButtonCountDownTimer(30000, 1000);
                     mButtonCountDownTimer.start();
+                    Toast.makeText(getActivity(), "Pincode Resent", Toast.LENGTH_SHORT).show();
                 }
             });
         }
