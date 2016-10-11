@@ -10,6 +10,8 @@ import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -269,6 +271,7 @@ public class StickersTool extends EditContentTool {
 
     private void initStickersAsync(final Context context) {
         final File memeDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "memes/");
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 
         new Thread(new Runnable() {
             @Override
@@ -280,21 +283,26 @@ public class StickersTool extends EditContentTool {
                         if (mDestroyed)
                             break;
 
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+
                         try {
-                            mStickers.add(
-                                    new Sticker(
-                                            f.getName(),
-                                            BitmapFactory.decodeFile(f.getAbsolutePath(), options)
-                                    )
-                            );
+                            if (options.outWidth != 0) {
+//                            float scale = (float) metrics.widthPixels/ 5 / b.getWidth();
 
-                           /* mStickersRV.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mStickersAdapter.notifyItemInserted(mStickers.size() - 1);
-                                }
-                            });*/
+                                options.inJustDecodeBounds = false;
+                                options.inSampleSize = options.outWidth/(metrics.widthPixels / 5);
+                                Log.i("AAA", "STICKER SCALE = " + options.inSampleSize);
 
+
+                                mStickers.add(
+                                        new Sticker(
+                                                f.getName(),
+                                                BitmapFactory.decodeFile(f.getAbsolutePath(), options)
+                                        )
+                                );
+
+                            }
                         } catch (OutOfMemoryError e) {
                             e.printStackTrace();
                         } catch (NullPointerException np) {

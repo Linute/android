@@ -7,8 +7,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.widget.Space;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -106,6 +106,12 @@ public class TextTool extends EditContentTool {
         topET.setVisibility(View.INVISIBLE);
         botET.setVisibility(View.INVISIBLE);
         midET.setVisibility(View.INVISIBLE);
+
+        DisplayMetrics metrics = overlays.getResources().getDisplayMetrics();
+
+        topET.setMaxWidth(metrics.widthPixels);
+        botET.setMaxWidth(metrics.widthPixels);
+        midET.setMaxWidth(metrics.widthPixels);
 
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
@@ -305,14 +311,21 @@ public class TextTool extends EditContentTool {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (mTV.getLineCount() > mTV.getMaxLines()) {
-                mTV.setText(beforeText);
-                mTV.setSelection(mTV.getText().length());
-            }
+
         }
 
         @Override
         public void afterTextChanged(Editable s) {
+            float[] widths = new float[s.length()];
+            mTV.getPaint().getTextWidths(s.toString(),widths);
+            float width = 0;
+            for(float f:widths){
+                width += f;
+            }
+            if (mTV.getLineCount() > mTV.getMaxLines() || width >= mTV.getMaxWidth()) {
+                mTV.setText(beforeText);
+                mTV.setSelection(mTV.getText().length());
+            }
         }
     }
 
@@ -408,6 +421,10 @@ public class TextTool extends EditContentTool {
 //        botET.setInputType(InputType.TYPE_NULL);
 //        topET.setInputType(InputType.TYPE_NULL);
         mTextContainer.setClickable(false);
+
+        midET.setText(midET.getText().toString().trim());
+        botET.setText(botET.getText().toString().trim());
+        topET.setText(topET.getText().toString().trim());
 
         if (midET.getText().toString().trim().length() == 0) {
             midET.setVisibility(View.INVISIBLE);

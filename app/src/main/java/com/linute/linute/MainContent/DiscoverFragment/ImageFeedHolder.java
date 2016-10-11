@@ -15,9 +15,13 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.linute.linute.MainContent.FeedDetailFragment.ViewFullScreenFragment;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.R;
@@ -33,6 +37,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
     public static final String TAG = ImageFeedHolder.class.getSimpleName();
     public static final String FULL_VIEW = "full_view_image_feed";
     protected ImageView vPostImage;
+    protected ProgressBar vProgressBar;
     protected View vTopLayer;
     protected int mType;
     protected int mScreenWidth;
@@ -42,6 +47,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
         mRequestManager = manager;
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
         vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
+        vProgressBar = (ProgressBar)itemView.findViewById(R.id.progress_bar);
         setUpOnClicks(itemView.findViewById(R.id.parent));
 
         DisplayMetrics metrics = new DisplayMetrics();
@@ -198,8 +204,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
 
 
     private void setEventImage(String image) {
-        /*if (vProgressBar != null)
-            vProgressBar.setVisibility(View.VISIBLE);*/
+        if (vProgressBar != null)
+            vProgressBar.setVisibility(View.VISIBLE);
 
         //vPostImage.setImageBitmap(mPost.imageBase64 == null ? null :  Utils.decodeImageBase64(mPost.imageBase64));
         mRequestManager
@@ -207,6 +213,19 @@ public class ImageFeedHolder extends BaseFeedHolder {
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                 .dontAnimate()
                 .placeholder(mPost.imageBase64 == null ? null : new BitmapDrawable(mContext.getResources(), Utils.decodeImageBase64(mPost.imageBase64)))
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        if (vProgressBar != null)
+                            vProgressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
                 .into(vPostImage);
     }
 }

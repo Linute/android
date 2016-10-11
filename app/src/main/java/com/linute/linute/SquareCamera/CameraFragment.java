@@ -100,6 +100,7 @@ public class CameraFragment extends Fragment {
     private EditFragment.ContentSubType contentType = EditFragment.ContentSubType.None;
 
     private static final String KEY_CONTENT_TYPE = "content_type";
+    private Toolbar mToolbar;
 
 
     public static Fragment newInstance(EditFragment.ContentSubType type) {
@@ -157,7 +158,8 @@ public class CameraFragment extends Fragment {
 
         mTakePhotoBtn = (ImageView) root.findViewById(R.id.capture_image_button);
 
-        ((Toolbar) root.findViewById(R.id.toolbar)).setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) root.findViewById(R.id.toolbar);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsSafeToTakePhoto && !mIsRecording && !mVideoProcessing)
@@ -784,16 +786,19 @@ public class CameraFragment extends Fragment {
     private Uri saveBitmap() {
         //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
         //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
-        return ImageUtility.savePicture(getContext(),
-                Bitmap.createBitmap(mPreviewView.getBitmap(),
+        Bitmap previewBitmap = mPreviewView.getBitmap();
+        Uri uri = ImageUtility.savePicture(getContext(),
+                Bitmap.createBitmap(previewBitmap,
                         0,
                         0,
-                        mPreviewView.getBitmap().getWidth(),
+                        previewBitmap.getWidth(),
                         ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
-                                (int) (mPreviewView.getBitmap().getWidth() * 6f / 5f) :
-                                mPreviewView.getBitmap().getWidth()
+                                (int) (previewBitmap.getWidth() * 6f / 5f) :
+                                previewBitmap.getWidth()
                 )
         );
+        previewBitmap.recycle();
+        return uri;
     }
 
     private Void stopCamera() {
@@ -943,6 +948,9 @@ public class CameraFragment extends Fragment {
                 fadeInFlashForgreound(true);
             }
             mIsRecording = true;
+            if(mToolbar != null){
+                mToolbar.setTitle("Recording");
+            }
         }
 
         @Override
@@ -1007,6 +1015,9 @@ public class CameraFragment extends Fragment {
                 duration = mProgressAnimator.getCurrentPlayTime();
                 mProgressAnimator.removeAllListeners();
                 mProgressAnimator.cancel();
+            }
+            if(mToolbar != null){
+                mToolbar.setTitle("Camera");
             }
 
             super.onPreExecute();

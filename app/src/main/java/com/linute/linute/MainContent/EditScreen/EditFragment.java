@@ -116,6 +116,7 @@ public class EditFragment extends BaseFragment {
     private ProgressDialog mProcessingDialog;
     private Menu mMenu;
     private Toolbar mToolbar;
+    private Bitmap mContentBitmap;
 
     public enum ContentType {
         None, Photo, Video, UploadedPhoto, UploadedVideo
@@ -345,7 +346,7 @@ public class EditFragment extends BaseFragment {
 
                 //resize the overlays to match landscape image sizes
                 //won't resize if image is bigger than 1.2f ratio
-                FrameLayout inner = (FrameLayout) mFinalContentView.findViewById(R.id.inner_content);
+                /*FrameLayout inner = (FrameLayout) mFinalContentView.findViewById(R.id.inner_content);
                 if (inner != null && overlaysNeedResizing(screenSingleton.mHasRatioRequirement ? ScreenSizeSingleton.MIN_RATIO : 1f)) {
                     int displayWidth = metrics.widthPixels;
                     int height;
@@ -354,9 +355,9 @@ public class EditFragment extends BaseFragment {
                     } else {
                         height = mDimens.height * displayWidth / mDimens.width;
                     }
-                    inner.setLayoutParams(new FrameLayout.LayoutParams(displayWidth, height, Gravity.CENTER));
+//                    inner.setLayoutParams(new FrameLayout.LayoutParams(displayWidth, height, Gravity.CENTER));
                 }
-
+*/
                 //have to make it square
                 if (!screenSingleton.mHasRatioRequirement && mFinalContentView instanceof CustomFrameLayout) {
                     ((CustomFrameLayout) mFinalContentView).setMakeSquare(true);
@@ -530,6 +531,22 @@ public class EditFragment extends BaseFragment {
                                             imageView.centerImage();
                                         }
                                     });
+                            mContentView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                                //terrible hack. Listener will remove itself after 2 passes to keep from centering image everytime
+                                int layoutPasses = 0;
+                                @Override
+                                public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
+                                    if (!mDimens.needsCropping && scaleheight / 5 != scalewidth / 6) {
+                                        requestDisableToolListener.requestDisable(OverlaysTool.class, true);
+                                    }
+                                        imageView.centerImage();
+
+                                    layoutPasses++;
+                                    if(layoutPasses >= 3)
+                                        mContentView.removeOnLayoutChangeListener(this);
+                                }
+                            });
+
                         } else {
                             if (mDimens.rotation != 0) {
                                 Matrix m = new Matrix();
@@ -542,11 +559,13 @@ public class EditFragment extends BaseFragment {
                                 setImage(image, imageView);
                             }
                         }
+
                     }
                 }).start();
 
                 imageView.setActive(false);
                 mContentView = imageView;
+
                 break;
             case Video:
             case UploadedVideo:
@@ -624,6 +643,7 @@ public class EditFragment extends BaseFragment {
     }
 
     private void setImage(final Bitmap image, final MoveZoomImageView imageView) {
+        mContentBitmap = image;
         mDimens.height = image.getHeight();
         mDimens.width = image.getWidth();
         new Handler(Looper.getMainLooper()).post(
@@ -928,6 +948,12 @@ public class EditFragment extends BaseFragment {
             for (EditContentTool tool : mTools)
                 tool.onDestroy();
         }
+
+        if(mContentBitmap != null){
+            mContentBitmap.recycle();
+        }
+
+
 
     }
 

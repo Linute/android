@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +65,8 @@ public class OverlaysTool extends EditContentTool {
         final BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(uri.getPath(), opts);
-        opts.inSampleSize = opts.outWidth / width / 5;
+        opts.inSampleSize = opts.outWidth / (width / 5);
+        Log.i("AAA","BACK SCALE="+opts.inSampleSize);
         opts.inJustDecodeBounds = false;
 
         new Thread(new Runnable() {
@@ -319,10 +321,10 @@ public class OverlaysTool extends EditContentTool {
 //                            float scale = (float) metrics.widthPixels/ 5 / b.getWidth();
 
                             options.inJustDecodeBounds = false;
-                            options.inSampleSize = metrics.widthPixels / 5 / options.outWidth;
-
-                            Bitmap scaled = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
+                            options.inSampleSize =  options.outWidth/(metrics.widthPixels / 5) + 1;
+                            Log.i("AAA", "OVERLAY SCALE = "+options.inSampleSize);
                             try {
+                                Bitmap scaled = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                                 mOverlays.add(new Overlay(f.getName(), f, scaled));
                             } catch (OutOfMemoryError e) {
                                 e.printStackTrace();
