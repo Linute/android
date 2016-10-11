@@ -48,32 +48,31 @@ public class TaptSocket {
 
             JSONArray coord = new JSONArray();
 
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
                 Location loca = ((LocationManager) context.getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
-                try {
-                    coord.put(loca.getLatitude());
-                    coord.put(loca.getLongitude());
-                }catch(JSONException e){
-                    e.printStackTrace();
+                if (loca != null) {
+                    try {
+                        coord.put(loca.getLatitude());
+                        coord.put(loca.getLongitude());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
-
-            op.query =
-                    "token=" + token +
-                            "&deviceToken=" + device.getDeviceToken() +
-                            "&udid=" + device.getUdid() +
-                            "&version=" + device.getVersionName() +
-                            "&build=" + device.getVersionCode() +
-                            "&os=" + device.getOS() +
-                            "&platform=" + device.getType() +
-                            "&api=" + API_Methods.VERSION +
-                            "&model=" + device.getModel() +
-                            "&geo=" + coord;
-
-            ;
+            op.query = "token=" + token +
+                    "&deviceToken=" + device.getDeviceToken() +
+                    "&udid=" + device.getUdid() +
+                    "&version=" + device.getVersionName() +
+                    "&build=" + device.getVersionCode() +
+                    "&os=" + device.getOS() +
+                    "&platform=" + device.getType() +
+                    "&api=" + API_Methods.VERSION +
+                    "&model=" + device.getModel() +
+                    "&geo=" + coord;
 
             op.reconnectionDelay = 5;
             op.secure = true;
@@ -117,7 +116,7 @@ public class TaptSocket {
     }
 
 
-    public void forceDisconnect(){
+    public void forceDisconnect() {
         mConnections = 0;
         mSocket.disconnect();
         Log.d(TAG, "forceDisconnect: ");
