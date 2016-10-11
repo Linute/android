@@ -1648,11 +1648,22 @@ limitations under the License.\n\n
     <string name="empty_feed_button_campus">Take me there!</string>
     <string name="empty_feed_button_hot">See other Campuses</string>
     <string name="deactivata_account_text">
-        Deactivating your Tapt account will disable your profile and remove your data and being searched anywhere, including your posts on the campus feed. To reactivate your account, simply log in with your .edu email and password.
-        \n\n\n
-        If you would like to delete your account permanently, please contact support@tapt.io
+        Deactivating your Tapt account will disable your profile and remove your data and being
+        searched anywhere, including your posts on the campus feed. To reactivate your account,
+        simply log in with your .edu email and password.
     </string>
-    <string name="reactivvate_acount_message">Welcome back to Tapt, we’re excited to have your here again!</string>
+    <string name="deactivate_perm_text">
+        To delete your account completely, to the point where you won\'t be able to access it anymore,
+        contact Tapt Support by emailing: support@tapt.io
+    </string>
+    <string name="reactivvate_acount_message">Welcome back to Tapt, we’re excited to have your here
+        again!
+    </string>
     <string name="empty_text_trend_friend">Follow friends from any college to see their posts here
+    </string>
+
+    <string name="unblock_users">
+        If there is someone that you have blocked and would like to unblock them, select the option
+        below to see the users you have blocked.
     </string>
 </resources>

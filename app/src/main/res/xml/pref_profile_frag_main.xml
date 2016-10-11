@@ -12,8 +12,8 @@
             android:key="change_phone_number"
             android:title="Change Phone Number" />
         <Preference
-            android:key="blocked_users"
-            android:title="Blocked Users" />
+            android:key="manage_account"
+            android:title="Manage Account" />
     </PreferenceCategory>
 
 
@@ -38,12 +38,6 @@
         <Preference
             android:key="terms_of_service"
             android:title="Terms of Service" />
-        <Preference android:title="Deactivate Account">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetPackage="com.linute.linute"
-                android:targetClass="com.linute.linute.MainContent.Settings.DeactivateAccountActivity" />
-        </Preference>
     </PreferenceCategory>
 
     <PreferenceCategory>

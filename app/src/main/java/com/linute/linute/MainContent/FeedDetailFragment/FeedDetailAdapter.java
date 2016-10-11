@@ -350,7 +350,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 switch (v.getId()) {
                     case R.id.comment_reply:
                         if (!mComment.isAnon() && mComment.getCommentUserId() != null)
-                            mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""));
+                            mMentionedTextAdder.addMentionedPerson(new MentionedPerson(mComment.getCommentUserName(), mComment.getCommentUserId(), ""), getAdapterPosition());
                         break;
                     case R.id.comment_delete:
                         mCommentActions.deleteComment(getAdapterPosition(), mComment.getCommentPostId());
@@ -518,6 +518,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected void bindContent(Comment comment) {
             mImageUrl = Utils.getCommentImageUrl(comment.getImageUrl());
             mRequestManager.load(mImageUrl)
+                    .asBitmap()
                     .placeholder(R.color.seperator_color)
                     .into(vImageView);
         }
@@ -572,7 +573,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     }
 
     public interface MentionedTextAdder {
-        void addMentionedPerson(MentionedPerson person);
+        void addMentionedPerson(MentionedPerson person, int pos);
     }
 
     public void closeAllItems() {

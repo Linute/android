@@ -59,6 +59,8 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     protected Post mPost;
 
+    protected boolean mEnableProfileView = true;
+
     public BaseFeedHolder(final View itemView, final Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView);
 
@@ -127,7 +129,9 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     }
 
-
+    public void setEnableProfileView(boolean enableProfileView){
+        mEnableProfileView = enableProfileView;
+    }
 
 
     @Override
@@ -184,7 +188,6 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         return mUserId;
     }
 
-
     @Override
     public void onClick(View v) {
 
@@ -193,12 +196,13 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         if (activity == null || mPost == null) return;
 
         //tap image or name
-        if ((v == vUserImage || v == vPostUserName) && mPost.getPrivacy() == 0) {
-            activity.addFragmentToContainer(
-                    TaptUserProfileFragment.newInstance(
-                            mPost.getUserName()
-                            , mPost.getUserId())
-            );
+        if ((v == vUserImage || v == vPostUserName)) {
+            if (mPost.getPrivacy() == 0 && mEnableProfileView)
+                activity.addFragmentToContainer(
+                        TaptUserProfileFragment.newInstance(
+                                mPost.getUserName()
+                                , mPost.getUserId())
+                );
         }
 
         //like button pressed

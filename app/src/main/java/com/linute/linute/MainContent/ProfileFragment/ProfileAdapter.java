@@ -91,26 +91,32 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_ITEM_IMAGE:
-                return new ImageFeedHolder(
+                ImageFeedHolder iHolder =  new ImageFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_image, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
                 );
+                iHolder.setEnableProfileView(false);
+                return iHolder;
             case TYPE_ITEM_VIDEO:
-                return new VideoFeedHolder(
+                VideoFeedHolder vHolder =  new VideoFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_video, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
                 );
+                vHolder.setEnableProfileView(false);
+                return vHolder;
             case TYPE_ITEM_STATUS:
-                return new StatusFeedHolder(
+                StatusFeedHolder sHolder =  new StatusFeedHolder(
                         LayoutInflater.from(parent.getContext()).inflate(R.layout.feed_detail_header_status, parent, false),
                         context,
                         mRequestManager,
                         mPostAction
                 );
+                sHolder.setEnableProfileView(false);
+                return sHolder;
             case TYPE_HEADER_IMAGE:
                 return new ProfileHeaderViewHolder(LayoutInflater
                         .from(parent.getContext())
@@ -221,9 +227,6 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             mTitleTextListener.runShowTitle(false);
         }
     }
-
-//horrible hack
-//public FloatingActionButton vMessageButton;
 
     public class ProfileHeaderViewHolder extends RecyclerView.ViewHolder {
         protected ImageView vProfilePicture;

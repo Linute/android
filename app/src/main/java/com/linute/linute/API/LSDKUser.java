@@ -214,8 +214,6 @@ public class LSDKUser {
     }
 
     public Call getBlockedUsers(Callback callback){
-        String[] url = {"users","blocked"};
-
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         Map<String, Object> params = new HashMap<>(0);
 
@@ -233,14 +231,14 @@ public class LSDKUser {
     public Call sendFeedback( String text, Callback callback){
         Map<String, String> header = API_Methods.getMainHeader(mToken);
         Map<String, Object> params = new HashMap<>();
+        StringBuilder name = new StringBuilder();
+        name.append(mSharedPreferences.getString("firstName",""));
+        name.append(" ");
+        name.append(mSharedPreferences.getString("lastName",""));
         params.put("owner", mSharedPreferences.getString("userID", ""));
-        params.put("name", mSharedPreferences.getString("userName",""));
+        params.put("fullName", name.toString());
         params.put("email", mSharedPreferences.getString("email","") );
         params.put("text", text);
-
-        for (Map.Entry<String, Object> entry : params.entrySet()){
-            Log.i("TEST", "sendFeedback: "+entry.getKey() + " "+entry.getValue());
-        }
         return API_Methods.post("feedbacks", header, params, callback);
     }
 }

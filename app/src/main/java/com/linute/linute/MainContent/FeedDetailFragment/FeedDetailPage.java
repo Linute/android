@@ -222,10 +222,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                     if (mNewCommentSnackbar != null && mNewCommentSnackbar.isShown())
                         mNewCommentSnackbar.dismiss();
                 }
-
             }
-
-
         });
 
 
@@ -239,16 +236,16 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
         mMentionedList.setAdapter(mMentionedPersonAdapter);
 
         mCommentEditText = (MentionsEditText) rootView.findViewById(R.id.comment_field);
-        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    if (mFeedDetailLLM != null) {
-                        mFeedDetailLLM.scrollToPosition(mFeedDetailLLM.getItemCount() - 1);
-                    }
-                }
-            }
-        });
+//        mCommentEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//            @Override
+//            public void onFocusChange(View view, boolean b) {
+//                if (b) {
+//                    if (mFeedDetailLLM != null) {
+//                        mFeedDetailLLM.scrollToPosition(mFeedDetailLLM.getItemCount() - 1);
+//                    }
+//                }
+//            }
+//        });
         mCommentEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -285,7 +282,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         mFeedDetailAdapter.setMentionedTextAdder(new FeedDetailAdapter.MentionedTextAdder() {
             @Override
-            public void addMentionedPerson(MentionedPerson person) {
+            public void addMentionedPerson(MentionedPerson person, final int pos) {
                 mCommentEditText.append(" @");
                 mCommentEditText.insertMention(person);
                 mCommentEditText.requestFocus();
@@ -609,7 +606,7 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         mFeedDetailAdapter.setDenySwipe(true);
         mFeedDetailAdapter.closeAllItems();
-        final int lastPos = mFeedDetailLLM.findFirstVisibleItemPosition();
+        //final int lastPos = mFeedDetailLLM.findFirstVisibleItemPosition();
 
         int skip = mSkip - 20;
         int limit = 20;
@@ -682,11 +679,12 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
                                         @Override
                                         public void run() {
                                             mSkip = skip1;
-                                            mFeedDetail.getComments().remove(0);
+                                            mFeedDetail.getComments().remove();
+                                            mFeedDetailAdapter.notifyItemRemoved(1);
                                             mFeedDetail.getComments().addAll(0, tempComments);
+                                            mFeedDetailAdapter.notifyItemRangeInserted(1, tempComments.size());
                                             mFeedDetailAdapter.setDenySwipe(false);
-                                            mFeedDetailAdapter.notifyItemRangeInserted(0, tempComments.size());
-                                            mFeedDetailLLM.scrollToPosition(lastPos + tempComments.size());
+                                            mFeedDetailLLM.scrollToPosition(tempComments.size() + 1);
                                         }
                                     });
                                 }
@@ -1305,17 +1303,17 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
             //if can't scroll down, we are at the bottom. when new comment comes in, move to bottom on new comment
             //neg is scroll up, positive is scroll down
 
-            boolean canScrollDown = false;
-            try {
-                canScrollDown = recList != null &&
-                        recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
-                        recList.canScrollVertically(1);
+//            boolean canScrollDown = false;
+//            try {
+//                canScrollDown = recList != null &&
+//                        recList.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
+//                        recList.canScrollVertically(1);
+//
+//            } catch (NullPointerException e) {
+//                e.printStackTrace();
+//            }
 
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            }
-
-            final boolean mCanScrollDown = canScrollDown;
+            //final boolean mCanScrollDown = canScrollDown;
 
             try {
                 final Comment com = new Comment(object);

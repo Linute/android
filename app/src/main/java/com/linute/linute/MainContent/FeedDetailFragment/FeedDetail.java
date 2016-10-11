@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ public class FeedDetail {
     private Post mPost;
 
     //Can contain a load more header
-    private List<Object> mComments = new ArrayList<>();
+    private LinkedList<Object> mComments = new LinkedList<>();
 
     public FeedDetail(Post post) {
         mPost = post;
@@ -31,7 +32,7 @@ public class FeedDetail {
         return mPost.getPrivacy();
     }
 
-    public List<Object> getComments() {
+    public LinkedList<Object> getComments() {
         return mComments;
     }
 

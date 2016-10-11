@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.linute.linute.MainContent.Settings.DeactivateAccountActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.linute.linute.MainContent.Settings.DeactivateAccountActivity">
 
     <include layout="@layout/tool_bar"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_gravity="center"
-        android:text="@string/deactivata_account_text"
-        android:layout_margin="16dp"
-        />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Tell us why you're leaving:"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_margin="16dp"
-        />
 
     <EditText
         android:id="@+id/input_feedback"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:layout_weight="1"
-        />
+        android:layout_height="160dp"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:background="@null"
+        android:gravity="top"
+        android:hint="Tell us a little about why you are leaving..."
+    />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/seperator_color"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:text="@string/deactivate_perm_text"
+    />
 
     <Button
         android:id="@+id/button_deactivate"

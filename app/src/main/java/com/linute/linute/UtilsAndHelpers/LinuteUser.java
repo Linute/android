@@ -2,6 +2,7 @@ package com.linute.linute.UtilsAndHelpers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -147,7 +148,6 @@ public class LinuteUser {
     }
 
     public LinuteUser(JSONObject userInfo) {
-
         mUserID = getStringFromJson("id", userInfo);
         mUserName = getStringFromJson("userName", userInfo);
         mRegistrationType = getStringFromJson("registrationType", userInfo);

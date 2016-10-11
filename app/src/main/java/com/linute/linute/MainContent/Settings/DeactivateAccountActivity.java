@@ -55,15 +55,9 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
         deactivateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mFeedBackET.getText().toString().trim().length() == 0) {
-                    mFeedBackET.setBackgroundColor(0x11FF0000);
-                    mFeedBackET.setHint("Please leave some feedback to deactivate your account");
-                    mFeedBackET.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mFeedBackET.setBackgroundColor(0);
-                        }
-                    }, 2000);
+                mFeedBackET.setError(null);
+                if (mFeedBackET.getText().toString().trim().isEmpty()) {
+                    mFeedBackET.setError("Please give us some feedback");
                 } else {
                     new AlertDialog.Builder(DeactivateAccountActivity.this)
                             .setMessage("Are you sure?")
@@ -88,8 +82,6 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
 
 
     public void sendFeedBackAndDeactivate() {
-        final Activity activity = this;
-
         String feedback = "User Deactivated Their Account \n" + mFeedBackET.getText();
 
         final LSDKUser lsdkUser = new LSDKUser(this);
@@ -101,7 +93,7 @@ public class DeactivateAccountActivity extends BaseSocketActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                deactivateAccount(activity, lsdkUser);
+                deactivateAccount(DeactivateAccountActivity.this, lsdkUser);
             }
         });
     }

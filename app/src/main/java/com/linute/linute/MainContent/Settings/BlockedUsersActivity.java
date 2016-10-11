@@ -1,6 +1,5 @@
 package com.linute.linute.MainContent.Settings;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
@@ -17,10 +16,11 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
-import com.linute.linute.API.DeviceInfoSingleton;
 import com.linute.linute.API.LSDKUser;
 import com.linute.linute.MainContent.Chat.User;
 import com.linute.linute.R;
+import com.linute.linute.Socket.TaptSocket;
+import com.linute.linute.UtilsAndHelpers.BaseSocketActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -29,12 +29,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import io.socket.client.IO;
 import io.socket.client.Socket;
-import io.socket.engineio.client.transports.WebSocket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -42,12 +39,9 @@ import okhttp3.Response;
 /**
  * Created by mikhail on 9/24/16.
  */
-public class BlockedUsersActivity extends Activity {
+public class BlockedUsersActivity extends BaseSocketActivity {
 
-    Socket mSocket;
     SharedPreferences mSharedPreferences;
-
-    boolean mConnecting = false;
 
     private ArrayList<BlockedUser> mBlockedUserList;
     private BlockedUserAdapter mBlockedUserAdapter;
@@ -141,61 +135,18 @@ public class BlockedUsersActivity extends Activity {
 
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if ((mSocket == null || !mSocket.connected()) && !mConnecting) {
-            mConnecting = true;
-
-
-            try {
-                IO.Options op = new IO.Options();
-                DeviceInfoSingleton device = DeviceInfoSingleton.getInstance(this);
-                op.query =
-                        "token=" + mSharedPreferences.getString("userToken", "") +
-                                "&deviceToken=" + device.getDeviceToken() +
-                                "&udid=" + device.getUdid() +
-                                "&version=" + device.getVersionName() +
-                                "&build=" + device.getVersionCode() +
-                                "&os=" + device.getOS() +
-                                "&platform=" + device.getType() +
-                                "&api=" + API_Methods.VERSION +
-                                "&model=" + device.getModel();
-
-                op.reconnectionDelay = 5;
-                op.secure = true;
-                op.transports = new String[]{WebSocket.NAME};
-
-                mSocket = IO.socket(API_Methods.getURL(), op);/*R.string.DEV_SOCKET_URL*/
-
-                mSocket.connect();
-                mConnecting = false;
-
-            } catch (URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mSocket != null) {
-            mSocket.disconnect();
-        }
-    }
 
     private BlockedUserAdapter.OnBlockToggleListener blockListener = new BlockedUserAdapter.OnBlockToggleListener() {
         @Override
         public void onBlockToggle(BlockedUser user) {
-            if (mSocket != null) {
+            TaptSocket socket = TaptSocket.getInstance();
+            if (socket.socketConnected()) {
                 try {
                     JSONObject params = new JSONObject();
                     params.put("block", !user.isBlocked);
                     params.put("user", user.userId);
 
-                    mSocket.emit(API_Methods.VERSION + ":users:block:real", params);
+                    socket.emit(API_Methods.VERSION + ":users:block:real", params);
 
                     user.isBlocked = !user.isBlocked;
                 } catch (JSONException e) {

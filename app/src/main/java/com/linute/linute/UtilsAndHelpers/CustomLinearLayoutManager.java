@@ -41,6 +41,7 @@ public class CustomLinearLayoutManager extends LinearLayoutManager {
 
                         return num > MAX_SPEED ? MAX_SPEED : num;
                     }
+
                 };
 
         linearSmoothScroller.setTargetPosition(position);

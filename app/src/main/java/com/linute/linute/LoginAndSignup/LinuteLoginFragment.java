@@ -288,7 +288,7 @@ public class LinuteLoginFragment extends Fragment {
             public void onResponse(Call call, Response response) throws IOException {
 
                 String res = response.body().string();
-                Log.i(TAG, "onResponse: "+res);
+                //Log.i(TAG, "onResponse: "+res);
 
                 if (response.isSuccessful()) {
                     try {

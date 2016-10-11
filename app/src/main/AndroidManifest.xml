@@ -175,11 +175,12 @@
         <activity
             android:name=".MainContent.Settings.BlockedUsersActivity"
             android:screenOrientation="portrait"/>
-
         <activity
             android:name=".MainContent.Settings.DeactivateAccountActivity"
-            android:screenOrientation="portrait"
-        />
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".MainContent.Settings.ManageAccountActivity"
+                  android:screenOrientation="portrait"/>
 
         <service
             android:name=".MainContent.Uploading.UploadIntentService"
@@ -188,6 +189,8 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
+
+
     </application>
 
 </manifest>

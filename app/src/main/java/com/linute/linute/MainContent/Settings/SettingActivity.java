@@ -94,7 +94,7 @@ public class SettingActivity extends BaseSocketActivity {
         Preference mEditProfileInfo;
         Preference mChangeEmail;
         Preference mChangePhoneNumber;
-        Preference mBlockedUsers;
+        Preference mManageAccount;
         Preference mGiveFeedback;
         Preference mPrivacyPolicy;
         Preference mTermsOfService;
@@ -119,7 +119,7 @@ public class SettingActivity extends BaseSocketActivity {
             mEditProfileInfo = findPreference("edit_profile");
             mChangeEmail = findPreference("change_email");
             mChangePhoneNumber = findPreference("change_phone_number");
-            mBlockedUsers = findPreference("blocked_users");
+            mManageAccount = findPreference("manage_account");
             mGiveFeedback = findPreference("give_feedback");
             mPrivacyPolicy = findPreference("privacy policy");
             mTermsOfService = findPreference("terms_of_service");
@@ -207,10 +207,10 @@ public class SettingActivity extends BaseSocketActivity {
                 }
             });
 
-            mBlockedUsers.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            mManageAccount.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent i = new Intent(getActivity(), BlockedUsersActivity.class);
+                    Intent i = new Intent(getActivity(), ManageAccountActivity.class);
                     startActivity(i);
                     return true;
                 }
