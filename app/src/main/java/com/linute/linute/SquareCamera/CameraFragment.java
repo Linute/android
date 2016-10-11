@@ -786,16 +786,19 @@ public class CameraFragment extends Fragment {
     private Uri saveBitmap() {
         //Log.d(TAG, "saveBitmap: "+mPreviewView.getBitmap().getWidth());
         //Log.i(TAG, "saveBitmap: "+(int)(mPreviewView.getBitmap().getWidth() * 6f / 5f));
-        return ImageUtility.savePicture(getContext(),
-                Bitmap.createBitmap(mPreviewView.getBitmap(),
+        Bitmap previewBitmap = mPreviewView.getBitmap();
+        Uri uri = ImageUtility.savePicture(getContext(),
+                Bitmap.createBitmap(previewBitmap,
                         0,
                         0,
-                        mPreviewView.getBitmap().getWidth(),
+                        previewBitmap.getWidth(),
                         ScreenSizeSingleton.getSingleton().mHasRatioRequirement ?
-                                (int) (mPreviewView.getBitmap().getWidth() * 6f / 5f) :
-                                mPreviewView.getBitmap().getWidth()
+                                (int) (previewBitmap.getWidth() * 6f / 5f) :
+                                previewBitmap.getWidth()
                 )
         );
+        previewBitmap.recycle();
+        return uri;
     }
 
     private Void stopCamera() {

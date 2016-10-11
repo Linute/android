@@ -116,6 +116,7 @@ public class EditFragment extends BaseFragment {
     private ProgressDialog mProcessingDialog;
     private Menu mMenu;
     private Toolbar mToolbar;
+    private Bitmap mContentBitmap;
 
     public enum ContentType {
         None, Photo, Video, UploadedPhoto, UploadedVideo
@@ -624,6 +625,7 @@ public class EditFragment extends BaseFragment {
     }
 
     private void setImage(final Bitmap image, final MoveZoomImageView imageView) {
+        mContentBitmap = image;
         mDimens.height = image.getHeight();
         mDimens.width = image.getWidth();
         new Handler(Looper.getMainLooper()).post(
@@ -928,6 +930,12 @@ public class EditFragment extends BaseFragment {
             for (EditContentTool tool : mTools)
                 tool.onDestroy();
         }
+
+        if(mContentBitmap != null){
+            mContentBitmap.recycle();
+        }
+
+
 
     }
 
