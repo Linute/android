@@ -23,8 +23,8 @@ public class FindFriendsSearchPresenter extends BaseRequestPresenter {
     }
 
     @Override
-    public void request(Context context, Map<String, Object> params) {
-        mFindFriendsInteractor.query(context,params, this);
+    public void request(Context context, Map<String, Object> params, boolean loadMore) {
+        mFindFriendsInteractor.query(context, params, loadMore, this);
     }
 
     @Override

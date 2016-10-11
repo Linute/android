@@ -3,8 +3,10 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
+import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -25,6 +27,7 @@ import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProfileImageView;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,6 +51,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
     private String mUserId;
     private String mImageSignature;
+    private String mCollegeId;
     protected RequestManager mRequestManager;
     protected BaseFeedAdapter.PostAction mPostAction;
 
@@ -64,6 +68,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         mContext = context;
         SharedPreferences mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         mUserId = mSharedPreferences.getString("userID", "");
+        mCollegeId = mSharedPreferences.getString("collegeId", "");
         mImageSignature = mSharedPreferences.getString("imageSigniture", "000");
 
         vLikeButton = itemView.findViewById(R.id.feed_control_bar_like_button);
@@ -87,7 +92,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPostAction != null && mPost != null){
+                if (mPostAction != null && mPost != null) {
                     mPostAction.clickedOptions(mPost, getAdapterPosition());
                 }
             }
@@ -110,18 +115,19 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
         vLikesText.setText(String.valueOf(post.getNumLike()));
         vCommentText.setText(String.valueOf(post.getNumOfComments()));
 
-        if(vPrivacyChanged != null) vPrivacyChanged.setVisibility(post.isPrivacyChanged() ? View.VISIBLE : View.GONE);
+        if (vPrivacyChanged != null)
+            vPrivacyChanged.setVisibility(post.isPrivacyChanged() ? View.VISIBLE : View.GONE);
 
-//        ((ImageView) vCommentButton.findViewById(R.id.postComments)).setImageResource(post.getNumOfComments() > 0 ?
-//                R.drawable.ic_oval19_blue : R.drawable.ic_oval19);
         if (post.getNumOfComments() > 0) {
-            //979797
             ((ImageView) vCommentButton.findViewById(R.id.postComments)).clearColorFilter();
         } else if (mContext != null) {
             ((ImageView) vCommentButton.findViewById(R.id.postComments))
                     .setColorFilter(mFilterColor, PorterDuff.Mode.SRC_ATOP);
         }
+
     }
+
+
 
 
     @Override

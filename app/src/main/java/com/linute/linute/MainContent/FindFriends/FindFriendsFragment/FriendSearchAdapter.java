@@ -18,6 +18,7 @@ import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
 import com.linute.linute.R;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
+import com.linute.linute.UtilsAndHelpers.LoadMoreViewHolder;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
 
@@ -33,13 +34,17 @@ import okhttp3.Response;
 /**
  * Created by QiFeng on 1/16/16.
  */
-public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapter.FriendSearchViewHolder> {
+public class FriendSearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<FriendSearchUser> mFriendSearchList;
     private Context mContext;
     private RequestManager mRequestManager;
 
     private SharedPreferences mSharedPreferences;
+
+    private short mLoadState = LoadMoreViewHolder.STATE_END;
+
+    private LoadMoreViewHolder.OnLoadMore mOnLoadMore;
 
 
     public FriendSearchAdapter(Context context, List<FriendSearchUser> mSearchList) {
@@ -48,6 +53,13 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
         mSharedPreferences = mContext.getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE);
     }
 
+    public void setOnLoadMore(LoadMoreViewHolder.OnLoadMore onLoadMore){
+        mOnLoadMore = onLoadMore;
+    }
+
+    public void setLoadState(short loadState) {
+        mLoadState = loadState;
+    }
 
     public RequestManager getRequestManager() {
         return mRequestManager;
@@ -64,19 +76,33 @@ public class FriendSearchAdapter extends RecyclerView.Adapter<FriendSearchAdapte
 
 
     @Override
-    public FriendSearchViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == LoadMoreViewHolder.FOOTER){
+            return new LoadMoreViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.wrapping_footer_dark, parent, false), "", "");
+        }
         return new FriendSearchViewHolder(LayoutInflater.from(parent.getContext()).
                 inflate(R.layout.friend_search_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(FriendSearchViewHolder holder, int position) {
-        holder.bindViews(mFriendSearchList.get(position));
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof FriendSearchViewHolder) {
+            ((FriendSearchViewHolder)holder).bindViews(mFriendSearchList.get(position));
+        }else if (holder instanceof LoadMoreViewHolder){
+            ((LoadMoreViewHolder)holder).bindView(mLoadState);
+            if (mOnLoadMore != null) mOnLoadMore.loadMore();
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mFriendSearchList.size();
+        return mFriendSearchList.size() == 0 ? 0 : mFriendSearchList.size() + 1;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position == mFriendSearchList.size() ? LoadMoreViewHolder.FOOTER : 0;
     }
 
     public class FriendSearchViewHolder extends RecyclerView.ViewHolder {

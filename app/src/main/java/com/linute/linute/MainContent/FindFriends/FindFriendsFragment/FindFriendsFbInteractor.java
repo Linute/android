@@ -25,7 +25,7 @@ import okhttp3.Response;
 public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
 
     @Override
-    public void query(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
+    public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
         Handler handler = new Handler(Looper.getMainLooper());
         String query = (String) params.get("fullName");
 
@@ -36,20 +36,20 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            onFinishedQuery.onSuccess(mUnfilteredList, false);
+                            onFinishedQuery.onSuccess(mUnfilteredList, false, false);
                         }
                     });
                 } else {
                     filterList(mQuery, onFinishedQuery);
                 }
             } else if (mCall == null) {
-                search(context, params, onFinishedQuery);
+                search(context, params, false, onFinishedQuery);
             }
         }
     }
 
     @Override
-    protected void search(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
+    protected void search(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
         mCall = new LSDKFriendSearch(context).searchFriendByFacebook(params, new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
@@ -74,7 +74,7 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onFinishedQuery.onSuccess(mQuery == null || mQuery.isEmpty() ? mUnfilteredList : getFilteredList(mQuery), false);
+                                        onFinishedQuery.onSuccess(mQuery == null || mQuery.isEmpty() ? mUnfilteredList : getFilteredList(mQuery), false, false);
                                     }
                                 });
 
@@ -106,7 +106,7 @@ public class FindFriendsFbInteractor extends BaseFindFriendsInteratctor {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                request.onSuccess(getFilteredList(name), false);
+                request.onSuccess(getFilteredList(name), false, false);
             }
         });
     }

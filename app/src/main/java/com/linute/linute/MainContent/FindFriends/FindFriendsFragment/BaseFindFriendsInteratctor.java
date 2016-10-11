@@ -20,7 +20,7 @@ public abstract class BaseFindFriendsInteratctor extends BaseInteractor {
     protected boolean mInitialListLoaded = false;
     protected String mQuery;
 
-    protected abstract void search(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery);
+    protected abstract void search(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery);
 
     protected abstract ArrayList<FriendSearchUser> parseJson(JSONObject object) throws JSONException;
 }

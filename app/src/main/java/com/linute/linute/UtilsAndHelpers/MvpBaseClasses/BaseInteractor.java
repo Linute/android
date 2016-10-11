@@ -13,7 +13,7 @@ public abstract class BaseInteractor {
 
     protected Call mCall;
 
-    public abstract void query(Context context, Map<String, Object> params, OnFinishedRequest onFinishedQuery);
+    public abstract void query(Context context, Map<String, Object> params, boolean loadMore, OnFinishedRequest onFinishedQuery);
 
     public void cancelRequest() {
         if (mCall != null) mCall.cancel();

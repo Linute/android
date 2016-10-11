@@ -65,7 +65,11 @@ public class CustomCameraPreview extends SquareCameraPreview {
             }
             case MotionEvent.ACTION_UP: {
                 if (mIsFocus && mIsFocusReady && !mMoved) {
-                    handleFocus(mCamera.getParameters());
+                    try {
+                        handleFocus(mCamera.getParameters());
+                    }catch (RuntimeException e){
+                        e.printStackTrace();
+                    }
                 }
                 break;
             }

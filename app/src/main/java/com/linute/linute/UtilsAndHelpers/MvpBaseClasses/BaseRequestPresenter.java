@@ -19,8 +19,8 @@ public abstract class BaseRequestPresenter implements OnFinishedRequest {
     }
 
     @Override
-    public void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore) {
-        mRequestCallbackView.onSuccess(users, canLoadMore);
+    public void onSuccess(ArrayList<FriendSearchUser> users, boolean canLoadMore, boolean addToBack) {
+        mRequestCallbackView.onSuccess(users, canLoadMore, addToBack);
     }
 
     @Override
@@ -34,7 +34,7 @@ public abstract class BaseRequestPresenter implements OnFinishedRequest {
     }
 
 
-    public abstract void request(Context context, Map<String, Object> params);
+    public abstract void request(Context context, Map<String, Object> params, boolean loadMore);
 
     public abstract void cancelRequest();
 }
