@@ -28,7 +28,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.linute.linute.API.API_Methods;
@@ -504,32 +503,36 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
                 }
 
                 BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
-                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
-                        return;
-                    mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
-                    mAmAlreadyTyping = false;
-                } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
-                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
-                        return;
-                    mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
-                    mAmAlreadyTyping = true;
+                if (mSocket.socketConnected()) {
+                    if (s.length() == 0 && mAmAlreadyTyping) { //stopped typing
+                        if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
+                            return;
+                        mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                        mAmAlreadyTyping = false;
+                    } else if (s.length() != 0 && !mAmAlreadyTyping) { //started typing
+                        if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
+                            return;
+                        mSocket.emit(API_Methods.VERSION + ":messages:typing", typingJson);
+                        mAmAlreadyTyping = true;
+                    }
                 }
 
                 //change alpha of send button
                 if (!s.toString().trim().isEmpty()) vSendButton.setAlpha(1);
                 else vSendButton.setAlpha(0.25f);
 
-                mTypingHandler.removeCallbacksAndMessages(null);
-                if (mAmAlreadyTyping) {
-                    mTypingHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (typingJson == null) return;
-                            mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
-                            mAmAlreadyTyping = false;
-                        }
-                    }, 3000);
+                if (mSocket.socketConnected()) {
+                    mTypingHandler.removeCallbacksAndMessages(null);
+                    if (mAmAlreadyTyping) {
+                        mTypingHandler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (typingJson == null) return;
+                                mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                                mAmAlreadyTyping = false;
+                            }
+                        }, 3000);
+                    }
                 }
 
             }
@@ -1314,6 +1317,8 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         final boolean viewerIsOwnerOfMessage = ownerId.equals(mUserId);
+
+
         Date time;
         try {
             time = Utils.getDateFormat().parse(data.getString("date"));
@@ -1378,56 +1383,72 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                Chat previousMessage = getMostRecentMessage();
-                ArrayList<Chat> tempChat = new ArrayList<>(2);
-                if (previousMessage != null) {
-                    if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
-                        Date date = getStartOfDay(chat.getDate());
-                        addDateHeader(tempChat, date, previousMessage.getRoomId(), chat.getOwnerId());
-                    }
-                } else {
-                    Date date = getStartOfDay(chat.getDate());
-                    if (!mDateHeaders.containsKey(date)) {
-                        addDateHeader(tempChat, date, chat.getRoomId(), chat.getOwnerId());
-
-                    }
-                }
-
-                tempChat.add(chat);
-                int position = mChatList.size();
-
-
-                if (mOtherUserTyping) {
-                    if (viewerIsOwnerOfMessage) {
-                        mChatList.addAll(position - 1, tempChat);
-                    } else {
-                        mChatList.remove(position - 1);
-                        mChatAdapter.notifyItemRemoved(position);
-                        mOtherUserTyping = false;
-                        mChatList.addAll(tempChat);
-                    }
-
-                    mChatAdapter.notifyItemRangeInserted(position, tempChat.size());
-                } else {
-                    mChatList.addAll(tempChat);
-                    mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
-                }
-                if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
-                    mNewMessageSnackbar = Snackbar.make(mInputMessageView, (mNewMessageCount > 1 ? mNewMessageCount + " New Messages" : "New Message"), Snackbar.LENGTH_LONG);
-                    TextView snackbarTV = (TextView) mNewMessageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-                    snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
-                    snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                    mNewMessageSnackbar.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
-                    mNewMessageSnackbar.getView().setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            scrollToPositionFromBottom(mNewMessageCount);
-                            mNewMessageSnackbar.dismiss();
+                if (viewerIsOwnerOfMessage) {
+                    int i;
+                    for (i = mChatList.size() - 1; i >= 0; i--) {
+                        if (mChatList.get(i).getMessageId().equals(chat.getMessageId())) {
+                            mChatList.set(i, chat);
+                            mChatAdapter.notifyItemChanged(i+1);
+                            break;
                         }
-                    });
-                    mNewMessageSnackbar.show();
+                    }
+                    if (i == -1) {
+                        mChatList.add(chat);
+                        mChatAdapter.notifyDataSetChanged();
+                    }
                 } else {
-                    scrollToBottom();
+
+                    Chat previousMessage = getMostRecentMessage();
+                    ArrayList<Chat> tempChat = new ArrayList<>(2);
+                    if (previousMessage != null) {
+                        if (chat.getDate().getDate() != previousMessage.getDate().getDate()) {
+                            Date date = getStartOfDay(chat.getDate());
+                            addDateHeader(tempChat, date, previousMessage.getRoomId(), chat.getOwnerId());
+                        }
+                    } else {
+                        Date date = getStartOfDay(chat.getDate());
+                        if (!mDateHeaders.containsKey(date)) {
+                            addDateHeader(tempChat, date, chat.getRoomId(), chat.getOwnerId());
+
+                        }
+                    }
+
+                    tempChat.add(chat);
+                    int position = mChatList.size();
+
+
+                    if (mOtherUserTyping) {
+                        if (viewerIsOwnerOfMessage) {
+                            mChatList.addAll(position - 1, tempChat);
+                        } else {
+                            mChatList.remove(position - 1);
+                            mChatAdapter.notifyItemRemoved(position);
+                            mOtherUserTyping = false;
+                            mChatList.addAll(tempChat);
+                        }
+
+                        mChatAdapter.notifyItemRangeInserted(position, tempChat.size());
+                    } else {
+                        mChatList.addAll(tempChat);
+                        mChatAdapter.notifyItemRangeInserted(position + 1, tempChat.size());
+                    }
+                    if (mLinearLayoutManager.findLastVisibleItemPosition() < mChatList.size() - 1 && !viewerIsOwnerOfMessage) {
+                        mNewMessageSnackbar = Snackbar.make(mInputMessageView, (mNewMessageCount > 1 ? mNewMessageCount + " New Messages" : "New Message"), Snackbar.LENGTH_LONG);
+                        TextView snackbarTV = (TextView) mNewMessageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                        snackbarTV.setTextColor(ContextCompat.getColor(getContext(), R.color.secondaryColor));
+                        snackbarTV.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                        mNewMessageSnackbar.getView().setBackgroundColor(ContextCompat.getColor(getContext(), R.color.pure_white));
+                        mNewMessageSnackbar.getView().setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                scrollToPositionFromBottom(mNewMessageCount);
+                                mNewMessageSnackbar.dismiss();
+                            }
+                        });
+                        mNewMessageSnackbar.show();
+                    } else {
+                        scrollToBottom();
+                    }
                 }
             }
         });
@@ -1515,7 +1536,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         }
 
         BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-        if (activity == null || !mSocket.socketConnected() || mUserId == null
+        if (activity == null || mUserId == null
                 || mRoomId == null || mProgressBar.getVisibility() == View.VISIBLE) {
             return;
         }
@@ -1524,6 +1545,10 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
             mInputMessageView.requestFocus();
             return;
         }
+
+
+        String messageId = ObjectId.get().toString();
+
 
         newMessage = new JSONObject();
 
@@ -1534,7 +1559,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         users.put(mUserId);
 
         try {
-            newMessage.put("id", ObjectId.get().toString());
+            newMessage.put("id", messageId);
             newMessage.put("room", mRoomId);
 //            newMessage.put("users", users);
             newMessage.put("message", message);
@@ -1545,6 +1570,12 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
 
         // perform the sending message attempt.
         mSocket.emit(API_Methods.VERSION + ":messages:new message", newMessage);
+
+        Chat chat = new Chat(mRoomId, new Date(), "", messageId, message, false, true);
+        chat.setState(Chat.ChatState.Pending);
+        mChatList.add(chat);
+        scrollToBottom();
+        mChatAdapter.notifyDataSetChanged();
     }
 
     private void createRoom(final String message) {
@@ -1637,14 +1668,17 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-            if (getActivity() == null) return;
+            /*if (getActivity() == null) return;
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getActivity(),
-                            R.string.error_connect, Toast.LENGTH_LONG).show();
+                    if (mSocketConnected) {
+                        Toast.makeText(getActivity(),
+                                R.string.error_connect, Toast.LENGTH_LONG).show();
+                        mSocketConnected = false;
+                    }
                 }
-            });
+            });*/
         }
     };
 
