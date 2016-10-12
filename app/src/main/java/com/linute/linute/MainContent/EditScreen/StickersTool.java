@@ -104,7 +104,7 @@ public class StickersTool extends EditContentTool {
     public void onOpen() {
         super.onOpen();
         for (PlacedSticker sticker : mPlacedStickers) {
-            sticker.imageView.setDrawBorder(true);
+            sticker.imageView.setDrawBorder(false);
         }
     }
 

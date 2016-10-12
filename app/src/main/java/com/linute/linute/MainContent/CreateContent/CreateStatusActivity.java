@@ -20,7 +20,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -320,8 +319,8 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
         //save file to external if we have permission to access it
         //else save to cache
         Uri image = hasWritePermission() ?
-                ImageUtility.savePicture(this, getBitmapFromView(mTextFrame)) :
-                ImageUtility.savePictureToCache(this, getBitmapFromView(mTextFrame));
+                ImageUtility.savePicturePNG(this, getBitmapFromView(mTextFrame)) :
+                ImageUtility.savePictureToCachePNG(this, getBitmapFromView(mTextFrame));
 
 
         if (image != null) {
@@ -442,7 +441,9 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             canvas.drawColor(Color.WHITE);
         view.draw(canvas);
 
-        return Bitmap.createScaledBitmap(returnedBitmap, 720, 720, false);
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(returnedBitmap, 720, 720, false);
+        returnedBitmap.recycle();
+        return scaledBitmap;
     }
 
 
