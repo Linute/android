@@ -87,6 +87,67 @@ public class ImageUtility {
         return Uri.fromFile(image);
     }
 
+
+    public static Uri savePicturePNG(Context context, Bitmap bitmap) {
+        File mediaStorageDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "Tapt"
+        );
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                return null;
+            }
+        }
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile = new File(
+                mediaStorageDir.getPath() + File.separator + "IMG_" + timeStamp + ".png"
+        );
+
+        // Saving the bitmap
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+            FileOutputStream stream = new FileOutputStream(mediaFile);
+            stream.write(out.toByteArray());
+            stream.close();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
+        // Mediascanner need to scan for the image saved
+        Intent mediaScannerIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri fileContentUri = Uri.fromFile(mediaFile);
+        mediaScannerIntent.setData(fileContentUri);
+        context.sendBroadcast(mediaScannerIntent);
+
+        return fileContentUri;
+    }
+
+
+    public static Uri savePictureToCachePNG(Context context, Bitmap bitmap) {
+        if (context == null) return  null;
+        File image = new File(
+                context.getCacheDir() + File.separator + "temp.png");
+        // Saving the bitmap
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+
+            FileOutputStream stream = new FileOutputStream(image);
+            stream.write(out.toByteArray());
+            stream.close();
+
+        } catch (IOException exception) {
+            exception.printStackTrace();
+        }
+
+        return Uri.fromFile(image);
+    }
+
     public static String getTempFilePath(Context context, String url, String end) throws IOException {
         return getTempFile(context, url, end).getPath();
     }
