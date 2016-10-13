@@ -387,8 +387,16 @@ public class EditFragment extends BaseFragment {
                 toolsListRV.addView(toolView);
             }
 
-            if (mTools.length > 0)
-                onToolSelected(0);
+            mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if(v.getHeight() > 0){
+                        if (mTools.length > 0)
+                            onToolSelected(0);
+                        v.removeOnLayoutChangeListener(this);
+                    }
+                }
+            });
 
             showProgress(false);
 
