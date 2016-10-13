@@ -289,7 +289,7 @@ public class PickerFragment extends Fragment implements LoaderManager.LoaderCall
 //                        Log.i(TAG, "onActivityResult: bitrate "+info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE));
 //                        Log.i(TAG, "onActivityResult: frame "+ info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE));
 
-            if (length > 1750 && length < 15000) {
+            if (length > 1750 && length < 15500) {
 //                mContentSubType = EditFragment.ContentSubType.None;
                 Dimens dim = new Dimens(
                         Integer.parseInt(info.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)),
