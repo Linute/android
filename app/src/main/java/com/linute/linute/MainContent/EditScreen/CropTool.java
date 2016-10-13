@@ -1,5 +1,7 @@
 package com.linute.linute.MainContent.EditScreen;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.linute.linute.R;
 
@@ -53,7 +56,7 @@ public class CropTool extends EditContentTool {
     public boolean MOVE_OTHER_BAR = false;
 
     CropMode[] mCropModes;
-    FrameLayout[] mCropModeViews;
+    ViewGroup[] mCropModeViews;
     private int mSelected;
 
     Dimens mDimens;
@@ -94,11 +97,14 @@ public class CropTool extends EditContentTool {
         int displayWidth = metrics.widthPixels;
         int height = mDimens.height * displayWidth / mDimens.width;
 
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inSampleSize = 5;
+        Bitmap backingBitmap = BitmapFactory.decodeFile(uri.getPath(), opts);
 
         float dimenRatio = (float) mDimens.height / mDimens.width;
         mCropModes = new CropMode[]{
                 (dimenRatio == 6.0 / 5) ?
-                        new CropMode(R.drawable.crop_icon_5x6, true, displayWidth * 6 / 5, displayWidth * 6 / 5) {  //6*5
+                        new CropMode("Default", backingBitmap, true, displayWidth * 6 / 5, displayWidth * 6 / 5) {  //6*5
                             @Override
                             public void onSelected() {
                                 super.onSelected();
@@ -122,10 +128,10 @@ public class CropTool extends EditContentTool {
                             }
                         }
                         :
-                        new CropMode(R.drawable.crop_icon_5x6, true, (int) (displayWidth * dimenRatio), (int) (displayWidth * dimenRatio))
+                        new CropMode("Default",backingBitmap, true, (int) (displayWidth * dimenRatio), (int) (displayWidth * dimenRatio))
                 ,        //no crop
-                new CropMode(R.drawable.crop_icon_1x1, true, displayWidth, displayWidth),   //square
-                new CropMode(R.drawable.custom_crop_icon, false, displayWidth / 16 * 9, height) //freeform
+                new CropMode("Square", backingBitmap, true, displayWidth, displayWidth),   //square
+                new CropMode("Custom", backingBitmap, false, displayWidth / 16 * 9, height) //freeform
         };
 
         mActivatable.setManipulationListener(new MoveZoomImageView.ViewManipulationListener() {
@@ -408,7 +414,7 @@ public class CropTool extends EditContentTool {
         };
 
 
-        mCropModeViews = new FrameLayout[mCropModes.length];
+        mCropModeViews = new ViewGroup[mCropModes.length];
 
 
 //        int maxHeight = parent.getHeight();
@@ -417,7 +423,7 @@ public class CropTool extends EditContentTool {
 
         for (int i = 0; i < mCropModes.length; i++) {
             CropMode mode = mCropModes[i];
-            FrameLayout cropSettingLayout = (FrameLayout) inflater.inflate(R.layout.list_item_crop_mode, parent, false);
+            ViewGroup cropSettingLayout = (ViewGroup) inflater.inflate(R.layout.list_item_crop_mode, parent, false);
 
             cropSettingLayout.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 
@@ -427,19 +433,26 @@ public class CropTool extends EditContentTool {
 
             ImageView iv = (ImageView) ivLayout.findViewById(R.id.image_crop_mode);
 
-            float r = (float) mode.maxHeight / mCropperLayout.getWidth();
-            int h = ViewGroup.LayoutParams.WRAP_CONTENT;
-            int w = ViewGroup.LayoutParams.WRAP_CONTENT;
+            float r = (float) (i == 2 ? mode.minHeight : mode.maxHeight)/ mCropperLayout.getWidth();
+            int w = (int)((parent.getHeight()*1/2)/1.2);
+            int h = (int)(w*r);
 
-            iv.setImageResource(mode.icon);
+            iv.setImageBitmap(mode.icon);
             iv.setLayoutParams(new FrameLayout.LayoutParams(w, h));
 
            /* View borderView = cropSettingLayout.findViewById(R.id.layout_image_border);
             borderView.setLayoutParams(new FrameLayout.LayoutParams(w,h));*/
 
 //            iv.setImageURI(mUri);
-            iv.setTag(i);
-            iv.setOnClickListener(listener);
+
+            TextView textView = (TextView)cropSettingLayout.findViewById(R.id.text_crop_name);
+            textView.setText(mode.name);
+
+
+            ivLayout.setTag(i);
+            ivLayout.setOnClickListener(listener);
+
+
 
             rootView.addView(cropSettingLayout);
 
@@ -463,6 +476,8 @@ public class CropTool extends EditContentTool {
                 mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                 PorterDuff.Mode.MULTIPLY
         ));
+
+
 
        /* mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.colorAccent),
@@ -529,7 +544,9 @@ public class CropTool extends EditContentTool {
     }
 
     protected class CropMode {
-        public CropMode(int icon, boolean moveOtherBar, int minHeight, int maxHeight) {
+
+        public CropMode(String name, Bitmap icon, boolean moveOtherBar, int minHeight, int maxHeight) {
+            this.name = name;
             this.icon = icon;
             this.moveOtherBar = moveOtherBar;
             this.minHeight = minHeight;
@@ -540,7 +557,8 @@ public class CropTool extends EditContentTool {
                  the bar being moved makes the content smaller than the minimum
                   or larger than the maximum
                   */
-        int icon;
+        private final String name;
+        Bitmap icon;
         boolean moveOtherBar;
         int minHeight;
         int maxHeight;
