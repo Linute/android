@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.Chat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,10 +46,10 @@ public class ChatRoom implements Parcelable{
     ) {
         this.roomId = roomId;
         this.roomType = roomType;
-        this.roomName = roomName;
+        this.roomName = Utils.stripUnsupportedCharacters(roomName);
         this.roomImage = roomImage;
         this.users = users;
-        this.lastMessage = lastMessage;
+        this.lastMessage = Utils.stripUnsupportedCharacters(lastMessage);
         this.hasUnread = hasUnread;
         this.time = time;
         this.isMuted = isMuted;
@@ -57,7 +59,7 @@ public class ChatRoom implements Parcelable{
     public ChatRoom(String mRoomId, ArrayList<User> users, String mLastMessage, boolean mHasUnread, long mTime) {
         this.roomId = mRoomId;
         this.users = users;
-        this.lastMessage = mLastMessage;
+        this.lastMessage = Utils.stripUnsupportedCharacters(mLastMessage);
         this.hasUnread = mHasUnread;
         this.time = mTime;
     }

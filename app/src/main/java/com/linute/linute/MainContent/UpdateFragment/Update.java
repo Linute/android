@@ -1,8 +1,6 @@
 package com.linute.linute.MainContent.UpdateFragment;
 
 
-import android.util.Log;
-
 import com.linute.linute.MainContent.DiscoverFragment.Post;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -107,6 +105,8 @@ public class Update {
         }
 
         mDescription = getStringFromJson(json, "text").replaceFirst(mUserFullName+" ","");
+
+        mDescription = Utils.stripUnsupportedCharacters(mDescription);
 
         mIsViewed = getBooleanFromJson(json, "isViewed");
     }

@@ -3,6 +3,8 @@ package com.linute.linute.MainContent.Chat;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.linute.linute.UtilsAndHelpers.Utils;
+
 import java.util.List;
 
 /**
@@ -18,16 +20,16 @@ public class User implements Parcelable {
 
     public User(String userId, String firstName, String lastName, String userImage) {
         this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = Utils.stripUnsupportedCharacters(firstName);
+        this.lastName = Utils.stripUnsupportedCharacters(lastName);
         this.userImage = userImage;
         this.collegeName = null;
     }
 
     public User(String userId, String firstName, String lastName, String userImage, String collegeName) {
         this.userId = userId;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = Utils.stripUnsupportedCharacters(firstName);
+        this.lastName = Utils.stripUnsupportedCharacters(lastName);
         this.userImage = userImage;
         this.collegeName = collegeName;
     }

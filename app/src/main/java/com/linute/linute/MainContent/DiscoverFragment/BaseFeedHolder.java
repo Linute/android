@@ -3,10 +3,8 @@ package com.linute.linute.MainContent.DiscoverFragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
-import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -25,9 +23,7 @@ import com.linute.linute.UtilsAndHelpers.BaseFeedClasses.BaseFeedAdapter;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.ProfileImageView;
-import com.linute.linute.UtilsAndHelpers.Utils;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -106,7 +102,7 @@ public class BaseFeedHolder extends RecyclerView.ViewHolder implements CheckBox.
 
         if (post.getPrivacy() == 0) {
             getProfileImage(post.getUserImage());
-            vPostUserName.setText(Utils.stripUnsupportedCharacters(post.getUserName()));
+            vPostUserName.setText(post.getUserName());
         } else {
             getAnonImage(post.getAnonImage());
             vPostUserName.setText("Anonymous");

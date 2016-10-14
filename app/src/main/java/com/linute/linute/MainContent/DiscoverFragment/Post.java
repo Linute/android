@@ -64,7 +64,7 @@ public class Post implements Parcelable {
         mPostId = postid;
         mPostTime = 0;
         mUserId = userid;
-        mUserName = userName;
+        mUserName = Utils.stripUnsupportedCharacters(userName);
         mUserImage = "";
         mTitle = "";
         mPrivacy = 0;
