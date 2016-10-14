@@ -1471,8 +1471,13 @@ public class FeedDetailPage extends BaseFragment implements QueryTokenReceiver, 
 
         //if viewer is not the owner of the comment, return
         // exception: anon comments can be deleted by post owner
-        if (!com.getCommentPostId().equals(id) || com.getCommentUserId() == null || (!com.getCommentUserId().equals(mViewId) && !com.isAnon()))
+        if (com.getCommentUserId() == null ||
+                !com.getCommentPostId().equals(id) ||
+                (!com.isAnon() && !mViewId.equals(com.getCommentUserId())) ||
+                (com.isAnon() && !mViewId.equals(mFeedDetail.getPostUserId())))
             return;
+
+
 
         mFeedDetailAdapter.setDenySwipe(true);
         final ProgressDialog progressDialog = ProgressDialog.show(getActivity(), null, "Deleting comment...", true, false);

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/comment_swipe_layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    app:leftEdgeSwipeOffset="0dp"
-    app:rightEdgeSwipeOffset="0dp">
+<com.daimajia.swipe.SwipeLayout android:id="@+id/comment_swipe_layout"
+                                xmlns:android="http://schemas.android.com/apk/res/android"
+                                xmlns:app="http://schemas.android.com/apk/res-auto"
+                                xmlns:tools="http://schemas.android.com/tools"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                app:leftEdgeSwipeOffset="0dp"
+                                app:rightEdgeSwipeOffset="0dp">
 
 
     <!--left_controls right now is only like button so i won't give it a parent
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:src="@drawable/ic_fire" />
+            android:src="@drawable/ic_fire"/>
 
     </FrameLayout>
 
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_delete" />
+                android:src="@drawable/ic_action_delete"/>
 
         </FrameLayout>
 
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_reveal" />
+                android:src="@drawable/ic_action_reveal"/>
 
         </FrameLayout>
 
@@ -70,7 +70,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_whistle14" />
+                android:src="@drawable/ic_action_whistle14"/>
 
         </FrameLayout>
 
@@ -84,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_action_reply" />
+                android:src="@drawable/ic_action_reply"/>
 
         </FrameLayout>
 
@@ -102,13 +102,13 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/activity_horizontal_margin" >
+            android:layout_margin="@dimen/activity_horizontal_margin">
 
             <com.linute.linute.UtilsAndHelpers.ProfileImageView
                 android:id="@+id/comment_user_image"
                 android:layout_width="@dimen/profile_image_radius"
                 android:layout_height="@dimen/profile_image_radius"
-                />
+            />
             <com.makeramen.roundedimageview.RoundedImageView
                 android:id="@+id/privacy_changed"
                 android:layout_width="16dp"
@@ -116,7 +116,7 @@
                 android:layout_gravity="bottom|right"
                 android:src="@drawable/ic_revealed_icon"
                 android:visibility="gone"
-                />
+            />
         </FrameLayout>
 
         <LinearLayout
@@ -128,60 +128,55 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:orientation="vertical">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/fire_icon"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="2dp"
-                    android:src="@drawable/ic_fire"
-                    android:tint="@color/red" />
-
-                <TextView
-                    android:id="@+id/num_likes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/fire_icon"
-                    android:ellipsize="marquee"
-                    android:gravity="center"
-                    android:lines="1"
-                    android:text="123"
-                    android:textColor="@color/twentyfive_black"
-                    android:textSize="@dimen/sub_font_size" />
-
-
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal">
                 <TextView
                     android:id="@+id/comment_user_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0px"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:ellipsize="end"
+                    android:layout_gravity="center_vertical"
                     android:lines="1"
-                    android:maxEms="10"
                     android:textColor="@color/user_name_blue"
                     android:textSize="@dimen/body_font_size"
                     android:textStyle="bold"
-                    tools:text="Name NameName Nddsa adasd asdaddame" />
-
+                    tools:text="Name NameName Nddsa adasd asdaddame"/>
 
                 <TextView
                     android:id="@+id/comment_time_ago"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginStart="4dp"
-                    android:layout_toLeftOf="@id/num_likes"
-                    android:layout_toRightOf="@id/comment_user_name"
-                    android:minEms="4"
+                    android:paddingEnd="16dp"
                     android:textColor="@color/twentyfive_black"
                     android:textSize="@dimen/sub_font_size"
-                    tools:text="1h" />
+                    tools:text="1h"/>
 
-            </RelativeLayout>
+                <TextView
+                    android:id="@+id/num_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="marquee"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:textColor="@color/fifty_black"
+                    android:textSize="@dimen/sub_font_size"/>
+
+                <ImageView
+                    android:id="@+id/fire_icon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="2dp"
+                    android:src="@drawable/ic_fire"
+                    android:tint="@color/red"/>
+            </LinearLayout>
+
+
         </LinearLayout>
     </LinearLayout>
 </com.daimajia.swipe.SwipeLayout>

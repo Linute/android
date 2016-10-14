@@ -538,12 +538,19 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         mInputMessageView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus && mAmAlreadyTyping) { //lost focus. stopped typing
-                    BaseTaptActivity activity = (BaseTaptActivity) getActivity();
-                    if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
-                        return;
-                    mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
-                    mAmAlreadyTyping = false;
+                if (!hasFocus) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(mInputMessageView.getWindowToken(), 0);
+                    }
+
+                    if (mAmAlreadyTyping) { //lost focus. stopped typing
+                        BaseTaptActivity activity = (BaseTaptActivity) getActivity();
+                        if (activity == null || mUserId == null || !mSocket.socketConnected() || typingJson == null)
+                            return;
+                        mSocket.emit(API_Methods.VERSION + ":messages:stop typing", typingJson);
+                        mAmAlreadyTyping = false;
+                    }
                 }
             }
         });

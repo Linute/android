@@ -102,7 +102,6 @@ public class Update {
             setUpEvent(json);
 
         String text = getStringFromJson(json, "text");
-        Log.i(TAG, "Update: "+text);
         if(!mUserFullName.isEmpty()){
             mDescription = getStringFromJson(json, "text").replace(mUserFullName+" ","");
         }

@@ -11,6 +11,8 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.util.Linkify;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -208,7 +210,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected TextView vLikesText;
         private ImageView vFireIcon;
 
-        private Comment mComment;
+        protected Comment mComment;
 
         protected abstract void bindContent(Comment comment);
 
@@ -300,6 +302,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 vLikesText.setVisibility(View.VISIBLE);
                 vFireIcon.setVisibility(View.VISIBLE);
             } else {
+                vLikesText.setText("");
                 vLikesText.setVisibility(View.INVISIBLE);
                 vFireIcon.setVisibility(View.INVISIBLE);
             }
@@ -412,7 +415,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vCommentText.setAutoLinkMask(WEB_URLS | EMAIL_ADDRESSES);
             vCommentText.setTextColor(ContextCompat.getColor(context, R.color.eighty_black));
             vCommentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            vCommentText.setTextIsSelectable(true);
+            //vCommentText.setTextIsSelectable(true);
             ((ViewGroup) itemView.findViewById(R.id.content)).addView(vCommentText);
 
         }
@@ -423,12 +426,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
                 setUpMentionedOnClicks(comment);
             } else { //set text to comment's text
+                vCommentText.setMovementMethod(null);
                 vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
             }
         }
 
 
         private void setUpMentionedOnClicks(Comment comment) {
+
             String commentText = comment.getCommentPostText();
             SpannableString commentSpannable = new SpannableString(commentText);
 
@@ -444,36 +449,89 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 return;
             }
 
-            ForegroundColorSpan fcs = new ForegroundColorSpan(ContextCompat.getColor(context, R.color.secondaryColor)); //color of span
+            int index = 0;
+            while (startSearchAtIndex + 1 < commentText.length()) {
+                int start = commentText.indexOf('@', startSearchAtIndex);
 
-            for (final Comment.MentionedPersonLight person : comment.getMentionedPeople()) {
-                int start = commentText.indexOf(person.getFormatedFullName(), startSearchAtIndex);
-
-                if (start != -1) { //-1 if string not found
-
-                    int end = person.getFormatedFullName().length() + start;
-                    startSearchAtIndex = end; //next mention will come after the end of this one
-
-                    ClickableSpan clickableSpan = new ClickableSpan() { //what happens when clicked
-                        @Override
-                        public void onClick(View widget) { //go to user profile when clicked
-                            activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(person.getFullName(), person.getId()));
+                //doesn't exist
+                if (start != -1) {
+                    int end = commentText.indexOf(' ', start);
+                    if (end == -1){
+                        //mentions is last item in list, then there wont be a ' ' so set end to very end
+                        if (start != commentText.length() - 1){
+                            end = commentText.length();
+                        }else {
+                            break;
                         }
+                    }
+                    startSearchAtIndex = end + 1;
+                    String name = commentText.substring(start, end);
+                   // Log.i("test", "setUpMentionedOnClicks: "+name +" "+start+" "+end);
+                    commentSpannable.setSpan(new MentionClickSpan(name, index), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    index++;
 
-                        @Override
-                        public void updateDrawState(TextPaint ds) { //so name isn't underlined
-                            super.updateDrawState(ds);
-                            ds.setUnderlineText(false);
-                        }
-                    };
-
-                    commentSpannable.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    commentSpannable.setSpan(fcs, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }else {
+                    break;
                 }
             }
 
+            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.toString());
+            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.length());
+
+            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.getSpans(0, commentSpannable.length(), Object.class).length);
             vCommentText.setText(commentSpannable);
             vCommentText.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+
+
+        private class MentionClickSpan extends ClickableSpan{
+            private String mName;
+
+            //keep track of index
+            //for example, we have the text : "@Andi @John @Max
+            //if mName is "@John", our index is 1
+            //used for faster look ups
+            private int mIndex;
+
+            public MentionClickSpan(String name, int index){
+                super();
+                this.mName = name;
+                this.mIndex = index;
+            }
+
+            @Override
+            public void onClick(View widget) {
+                //out of bounds
+                if (mIndex  >= mComment.getMentionedPeople().size())
+                    mIndex = 0;
+
+                Comment.MentionedPersonLight personLight = mComment.getMentionedPeople().get(mIndex);
+                if (mName.equals(personLight.getFormattedFullName())){ // was correct index
+                    clickedName(personLight);
+                }else { //incorrect index
+                    for (int i = 0; i < mComment.getMentionedPeople().size(); i++){
+                        personLight = mComment.getMentionedPeople().get(i);
+                        if (mName.equals(personLight.getFormattedFullName())){
+                            mIndex = i; //update for faster future look ups
+                            clickedName(personLight);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            public void clickedName(Comment.MentionedPersonLight person){
+                BaseTaptActivity activity = (BaseTaptActivity) context;
+                if (activity != null){
+                    activity.addFragmentToContainer(TaptUserProfileFragment.newInstance(person.getFullName(), person.getId()));
+                }
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) { //so name isn't underlined
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+            }
         }
     }
 
