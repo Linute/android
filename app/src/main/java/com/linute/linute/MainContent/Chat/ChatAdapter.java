@@ -290,6 +290,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) itemView.getLayoutParams();
 
+
+            switch (chat.getState()) {
+                case Pending:
+                    itemView.setAlpha(.5f);
+                    break;
+                default:
+                    itemView.setAlpha(1);
+            }
+
             if (chat.getType() == Chat.TYPE_MESSAGE_OTHER_PERSON) {
                 if (isHead) {
 
@@ -398,7 +407,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (chat.getType() == Chat.TYPE_MESSAGE_ME) {
                 vActionImage.setImageResource(chat.isRead() ? R.drawable.ic_chat_read : R.drawable.delivered_chat);
 //                vReadReceipt.setImageResource(chat.isRead() ? R.drawable.chat_read_receipt_read : R.drawable.chat_read_receipt_delivered);
-                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, isHead ? 4 : 1 , itemView.getResources().getDisplayMetrics());
+                params.topMargin = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, isHead ? 4 : 1, itemView.getResources().getDisplayMetrics());
 
             }
 

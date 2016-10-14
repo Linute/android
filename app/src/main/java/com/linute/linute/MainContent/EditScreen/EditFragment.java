@@ -387,8 +387,16 @@ public class EditFragment extends BaseFragment {
                 toolsListRV.addView(toolView);
             }
 
-            if (mTools.length > 0)
-                onToolSelected(0);
+            mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    if(v.getHeight() > 0){
+                        if (mTools.length > 0)
+                            onToolSelected(0);
+                        v.removeOnLayoutChangeListener(this);
+                    }
+                }
+            });
 
             showProgress(false);
 
@@ -707,9 +715,6 @@ public class EditFragment extends BaseFragment {
 
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
-        PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay, this);
-        StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
-        TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
         CropTool cropTool;
         OverlaysTool overlaysTool;
 
@@ -722,18 +727,18 @@ public class EditFragment extends BaseFragment {
                     case Post:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
-                                privacySettingTool,
+                                new PrivacySettingTool(mUri, mContentType, overlay, this),
                                 cropTool,
-                                textTool,
-                                stickersTool,
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash)),
                                 overlaysTool
                         };
                     case Chat:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
                                 cropTool,
-                                textTool,
-                                stickersTool
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash))
                         };
                     case Comment:
                         CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
@@ -741,8 +746,8 @@ public class EditFragment extends BaseFragment {
                         return new EditContentTool[]{
                                 commentPrivacyTool,
                                 cropTool,
-                                textTool,
-                                stickersTool
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash))
                         };
                 }
             case UploadedVideo:
@@ -753,22 +758,22 @@ public class EditFragment extends BaseFragment {
                 switch (mContentSubType) {
                     case Post:
                         return new EditContentTool[]{
-                                privacySettingTool,
-                                textTool,
-                                stickersTool,
+                                new PrivacySettingTool(mUri, mContentType, overlay, this),
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash)),
                                 overlaysTool
                         };
                     case Chat:
                         return new EditContentTool[]{
-                                textTool,
-                                stickersTool,
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash)),
                         };
                     case Comment:
                         CommentPrivacyTool commentPrivacyTool = new CommentPrivacyTool(mUri, mContentType, overlay, this);
                         return new EditContentTool[]{
                                 commentPrivacyTool,
-                                textTool,
-                                stickersTool
+                                new TextTool(mUri, mContentType, overlay, mDimens, this),
+                                new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash))
                         };
                 }
 

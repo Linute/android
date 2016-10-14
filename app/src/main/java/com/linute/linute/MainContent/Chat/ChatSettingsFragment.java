@@ -42,11 +42,11 @@ import com.linute.linute.API.LSDKChat;
 import com.linute.linute.MainContent.DiscoverFragment.BlockedUsersSingleton;
 import com.linute.linute.MainContent.MainActivity;
 import com.linute.linute.MainContent.TaptUser.TaptUserProfileFragment;
+import com.linute.linute.ProfileCamera.ProfileCameraActivity;
 import com.linute.linute.R;
 import com.linute.linute.Socket.TaptSocket;
 import com.linute.linute.UtilsAndHelpers.BaseFragment;
 import com.linute.linute.UtilsAndHelpers.BaseTaptActivity;
-import com.linute.linute.UtilsAndHelpers.FileUtils;
 import com.linute.linute.UtilsAndHelpers.LinuteConstants;
 import com.linute.linute.UtilsAndHelpers.Utils;
 
@@ -110,8 +110,8 @@ public class ChatSettingsFragment extends BaseFragment {
         mUserId = getActivity().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("userID", null);
         Map<String, Object> params = new HashMap<>();
 
-        if(mChatRoom.roomImage == null)
-        new LSDKChat(getContext()).getRoom(mChatRoom.roomId, params, getRoomCallback);
+        if (mChatRoom.roomImage == null)
+            new LSDKChat(getContext()).getRoom(mChatRoom.roomId, params, getRoomCallback);
 
 
         display();
@@ -577,12 +577,32 @@ room: id of room
     }
 
     protected void startGetImageActivity() {
-        Intent getPhotoIntent = new Intent();
-        getPhotoIntent.setType("image/*");
-        getPhotoIntent.setAction(Intent.ACTION_GET_CONTENT);
-        getPhotoIntent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+        if (getActivity() == null) return;
+        String[] options = {"Camera", "Photo Gallery"};
+        new android.app.AlertDialog.Builder(getActivity())
+                .setItems(options, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int type = 0;
+                        switch (which) {
+                            case 0:
+                                type = ProfileCameraActivity.TYPE_CAMERA;
+                                break;
+                            case 1:
+                                type = ProfileCameraActivity.TYPE_GALLERY;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        Intent getPhotoIntent = new Intent(getContext(), ProfileCameraActivity.class);
+                        getPhotoIntent.putExtra(ProfileCameraActivity.TYPE_KEY, type);
+                        startActivityForResult(getPhotoIntent, REQUEST_PHOTO);
+                    }
+                })
+                .show();
     }
+
 
     private void updateNotificationView() {
         if (mNotificationSettingsIndicatorView == null) return;
@@ -732,7 +752,7 @@ room: id of room
                 @Override
                 public void run() {
                     Uri uri = data.getData();
-                    Uri path = Uri.parse(FileUtils.getPath(getActivity(), uri));
+                    Uri path = uri;
                     try {
                         Bitmap bmp = BitmapFactory.decodeFile(path.getPath());
                         FileOutputStream fos = new FileOutputStream(path.getPath());
@@ -804,13 +824,13 @@ room: id of room
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(getView() != null)
+                        if (getView() != null)
                             updateRoomPhoto(getView());
                     }
                 });
 
 
-            }catch(JSONException e){
+            } catch (JSONException e) {
 
             }
 
@@ -820,6 +840,7 @@ room: id of room
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mParticipantsAdapter.getRequestManager() != null) mParticipantsAdapter.getRequestManager().onDestroy();
+        if (mParticipantsAdapter.getRequestManager() != null)
+            mParticipantsAdapter.getRequestManager().onDestroy();
     }
 }

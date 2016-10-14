@@ -41,6 +41,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
     protected View vTopLayer;
     protected int mType;
     protected int mScreenWidth;
+    private final View vDarkOverlay;
 
     public ImageFeedHolder(final View itemView, Context context, RequestManager manager, BaseFeedAdapter.PostAction action) {
         super(itemView, context, manager, action);
@@ -48,6 +49,7 @@ public class ImageFeedHolder extends BaseFeedHolder {
         vPostImage = (ImageView) itemView.findViewById(R.id.feedDetail_event_image);
         vTopLayer = itemView.findViewById(R.id.feed_detail_hidden_animation);
         vProgressBar = (ProgressBar)itemView.findViewById(R.id.progress_bar);
+        vDarkOverlay = itemView.findViewById(R.id.overlay_darken);
         setUpOnClicks(itemView.findViewById(R.id.parent));
 
         DisplayMetrics metrics = new DisplayMetrics();
@@ -206,6 +208,8 @@ public class ImageFeedHolder extends BaseFeedHolder {
     private void setEventImage(String image) {
         if (vProgressBar != null)
             vProgressBar.setVisibility(View.VISIBLE);
+        if(vDarkOverlay != null)
+            vDarkOverlay.setVisibility(View.VISIBLE);
 
         //vPostImage.setImageBitmap(mPost.imageBase64 == null ? null :  Utils.decodeImageBase64(mPost.imageBase64));
         mRequestManager
@@ -223,6 +227,9 @@ public class ImageFeedHolder extends BaseFeedHolder {
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                         if (vProgressBar != null)
                             vProgressBar.setVisibility(View.GONE);
+                        if(vDarkOverlay != null)
+                            vDarkOverlay.setVisibility(View.GONE);
+
                         return false;
                     }
                 })

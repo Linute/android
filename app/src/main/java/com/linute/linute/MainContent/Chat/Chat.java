@@ -5,6 +5,8 @@ import com.linute.linute.MainContent.DiscoverFragment.Post;
 
 import java.util.Date;
 
+import static com.linute.linute.MainContent.Chat.Chat.ChatState.Posted;
+
 /**
  * Created by Arman on 1/16/16.
  */
@@ -34,6 +36,12 @@ public class Chat {
     private String mImageId;
     private String mVideoId;
     private Post mPost;
+
+    public enum ChatState {
+        Pending, Posted, Failed
+    }
+
+    private ChatState state = Posted;
 
 
     /**
@@ -144,5 +152,13 @@ public class Chat {
 
     public void setIsRead(boolean isRead) {
         mIsRead = isRead;
+    }
+
+    public ChatState getState(){
+        return state;
+    }
+
+    public void setState(ChatState state){
+        this.state = state;
     }
 }

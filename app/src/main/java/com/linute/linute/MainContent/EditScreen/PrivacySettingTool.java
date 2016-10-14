@@ -3,6 +3,7 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.SwitchCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ public class PrivacySettingTool extends EditContentTool {
         mMidTextTarget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.i("AAA", "pay");
                 ((TextTool)frag.selectTool(TextTool.class)).selectTextMode(TextTool.MID_TEXT_INDEX);
             }
         });

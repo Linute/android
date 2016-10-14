@@ -179,6 +179,17 @@ public class API_Methods {
         header.put("Content-Type", Utils.CONTENT_TYPE);
         header.put("authorization", "Basic " + Utils.encode_base64(token));
         header.put("User-Agent", "(" + Build.BRAND + " " + Build.DEVICE + " " + Build.MODEL + "; Android " + Build.VERSION.RELEASE + ")/ Ver [" + VERSION + "] UserID [" + USER_ID + "]");
+        DeviceInfoSingleton instance = null;
+        try {
+            instance = DeviceInfoSingleton.getInstance(null);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        if(instance != null) {
+            header.put("UUID", instance.getUdid());
+        }else{
+            header.put("UUID", "");
+        }
         return header;
     }
 
