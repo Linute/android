@@ -401,10 +401,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     public class FeedDetailViewHolderText extends BaseFeedDetailViewHolder {
 
         protected TextView vCommentText;
+        protected Thread mThread;
 
         public FeedDetailViewHolderText(View itemView) {
             super(itemView);
-
 
             //TODO Viewholder should not setup text view, moev this to xml file or oncCeateViewholder
             vCommentText = new TextView(context);
@@ -421,11 +421,14 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
         protected void bindContent(Comment comment) {
             //setting mentions and comment text
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
+                if (mThread != null){
+                    mThread.interrupt();
+                }
+
                 setUpMentionedOnClicks(comment);
-            } else { //set text to comment's text
-                vCommentText.setMovementMethod(null);
-                vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
             }
+
+            vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
         }
 
 
@@ -479,6 +482,8 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             vCommentText.setText(commentSpannable);
             vCommentText.setMovementMethod(LinkMovementMethod.getInstance());
         }
+
+
 
 
         private class MentionClickSpan extends ClickableSpan{
