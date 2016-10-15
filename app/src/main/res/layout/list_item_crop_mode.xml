@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:padding="2dp"
+            android:padding="@dimen/crop_icon_border_thickness"
 
             >
 
