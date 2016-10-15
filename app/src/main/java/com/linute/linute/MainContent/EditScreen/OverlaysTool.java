@@ -60,20 +60,22 @@ public class OverlaysTool extends EditContentTool {
 
     }
 
-    private void setImageBackground(final Uri uri, int width) {
+    private void setImageBackground(final Uri uri, final int width) {
 
-        final BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(uri.getPath(), opts);
-        opts.inSampleSize = opts.outWidth / (width / 5);
-        Log.i("AAA","BACK SCALE="+opts.inSampleSize);
-        opts.inJustDecodeBounds = false;
 
         new Thread(new Runnable() {
             @Override
             public void run() {
+                final BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(uri.getPath(), opts);
+                opts.inSampleSize = opts.outWidth / (width / 10);
+                //Log.i("AAA","BACK SCALE="+opts.inSampleSize);
+                opts.inJustDecodeBounds = false;
+
                 if (!mDestroyed) {
                     mBackingBitmap = BitmapFactory.decodeFile(uri.getPath(), opts);
+                    //Log.i("test", "run: "+mBackingBitmap.getHeight() + " "+mBackingBitmap.getWidth());
                 }
 
                 //do after decoding
@@ -94,14 +96,13 @@ public class OverlaysTool extends EditContentTool {
         }).start();
     }
 
-    private void setVideoBackground(Uri uri, final int screenwidth) {
-
-        final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(uri.getPath());
+    private void setVideoBackground(final Uri uri, final int screenwidth) {
 
         new Thread(new Runnable() {
             @Override
             public void run() {
+                final MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(uri.getPath());
                 Bitmap frame = retriever.getFrameAtTime(0);
 
                 if (!mDestroyed) {
@@ -321,8 +322,8 @@ public class OverlaysTool extends EditContentTool {
 //                            float scale = (float) metrics.widthPixels/ 5 / b.getWidth();
 
                             options.inJustDecodeBounds = false;
-                            options.inSampleSize =  options.outWidth/(metrics.widthPixels / 5) + 1;
-                            Log.i("AAA", "OVERLAY SCALE = "+options.inSampleSize);
+                            options.inSampleSize =  options.outWidth/(metrics.widthPixels / 10) + 1;
+                            //Log.i("AAA", "OVERLAY SCALE = "+options.inSampleSize);
                             try {
                                 Bitmap scaled = BitmapFactory.decodeFile(f.getAbsolutePath(), options);
                                 mOverlays.add(new Overlay(f.getName(), f, scaled));

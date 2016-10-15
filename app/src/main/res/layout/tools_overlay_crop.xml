@@ -12,6 +12,7 @@
         android:layout_height="16dp"
         android:layout_alignParentTop="true"
         />
+
     <ImageView
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
@@ -62,7 +63,5 @@
         android:layout_above="@id/bot_fade"
         android:layout_marginBottom="-24dp"
         />
-
-
 
 </RelativeLayout>

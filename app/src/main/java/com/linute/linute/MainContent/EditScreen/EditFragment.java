@@ -490,21 +490,22 @@ public class EditFragment extends BaseFragment {
                 imageView.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 mContentContainer.addView(imageView);
 
-                final BitmapFactory.Options opts = new BitmapFactory.Options();
-                opts.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(uri.getPath(), opts);
-
-                //if image has rotation, we'll have to use height as it's width
-                final int imageWidth = isPortrait() ? opts.outHeight : opts.outWidth;
-
-                if (imageWidth > metrics.widthPixels)
-                    opts.inSampleSize = imageWidth / metrics.widthPixels + 2;
-
-                opts.inJustDecodeBounds = false;
 
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        final BitmapFactory.Options opts = new BitmapFactory.Options();
+                        opts.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(uri.getPath(), opts);
+
+                        //if image has rotation, we'll have to use height as it's width
+                        final int imageWidth = isPortrait() ? opts.outHeight : opts.outWidth;
+
+                        if (imageWidth > metrics.widthPixels)
+                            opts.inSampleSize = imageWidth / metrics.widthPixels + 2;
+
+                        opts.inJustDecodeBounds = false;
+
                         final Bitmap image = BitmapFactory.decodeFile(uri.getPath(), opts);
                         int testWidth = isPortrait() ? image.getHeight() : image.getWidth();
 

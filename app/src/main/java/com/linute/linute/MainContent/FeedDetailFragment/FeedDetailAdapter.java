@@ -6,13 +6,11 @@ import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.util.Linkify;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -404,19 +402,21 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
     public class FeedDetailViewHolderText extends BaseFeedDetailViewHolder {
 
         protected TextView vCommentText;
+        protected SpannableStringBuilder mSpannableStringBuilder;
 
         public FeedDetailViewHolderText(View itemView) {
             super(itemView);
 
-
             //TODO Viewholder should not setup text view, moev this to xml file or oncCeateViewholder
             vCommentText = new TextView(context);
-            vCommentText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            vCommentText.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             vCommentText.setAutoLinkMask(WEB_URLS | EMAIL_ADDRESSES);
             vCommentText.setTextColor(ContextCompat.getColor(context, R.color.eighty_black));
             vCommentText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            vCommentText.setMovementMethod(LinkMovementMethod.getInstance());
             //vCommentText.setTextIsSelectable(true);
             ((ViewGroup) itemView.findViewById(R.id.content)).addView(vCommentText);
+            mSpannableStringBuilder = new SpannableStringBuilder();
 
         }
 
@@ -425,17 +425,20 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
             //setting mentions and comment text
             if (comment.getMentionedPeople() != null && !comment.getMentionedPeople().isEmpty()) {
                 setUpMentionedOnClicks(comment);
-            } else { //set text to comment's text
-                vCommentText.setMovementMethod(null);
+            }else {
                 vCommentText.setText(Utils.stripUnsupportedCharacters(comment.getCommentPostText()));
             }
         }
 
 
+
         private void setUpMentionedOnClicks(Comment comment) {
 
             String commentText = comment.getCommentPostText();
-            SpannableString commentSpannable = new SpannableString(commentText);
+            mSpannableStringBuilder.clear();
+            mSpannableStringBuilder.clearSpans();
+
+            mSpannableStringBuilder.append(commentText);
 
             int startSearchAtIndex = 0; //start search from
 
@@ -465,9 +468,7 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                         }
                     }
                     startSearchAtIndex = end + 1;
-                    String name = commentText.substring(start, end);
-                   // Log.i("test", "setUpMentionedOnClicks: "+name +" "+start+" "+end);
-                    commentSpannable.setSpan(new MentionClickSpan(name, index), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    mSpannableStringBuilder.setSpan(new MentionClickSpan(commentText.substring(start, end), index), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     index++;
 
                 }else {
@@ -475,13 +476,10 @@ public class FeedDetailAdapter extends RecyclerSwipeAdapter<RecyclerView.ViewHol
                 }
             }
 
-            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.toString());
-            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.length());
-
-            //Log.i("test", "setUpMentionedOnClicks: "+commentSpannable.getSpans(0, commentSpannable.length(), Object.class).length);
-            vCommentText.setText(commentSpannable);
-            vCommentText.setMovementMethod(LinkMovementMethod.getInstance());
+            vCommentText.setText(mSpannableStringBuilder);
         }
+
+
 
 
         private class MentionClickSpan extends ClickableSpan{

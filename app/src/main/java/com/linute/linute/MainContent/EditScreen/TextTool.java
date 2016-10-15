@@ -206,22 +206,26 @@ public class TextTool extends EditContentTool {
                         initY = view.getY();
                         timeDown = System.currentTimeMillis();
                         max = mTextContainer.getHeight() - view.getHeight();
-                        params = (FrameLayout.LayoutParams)view.getLayoutParams();
+                        params = (FrameLayout.LayoutParams) view.getLayoutParams();
                         return true;
                     case MotionEvent.ACTION_MOVE:
                         //setY() doesn't allow screen to panAdjust correctly sp using margins instead
                         if (mMidETCanBeMoved) {
                             params.gravity = Gravity.NO_GRAVITY;
-                            params.setMargins(0,clipTopMargin(0, max, (int)(initY + motionEvent.getRawY() - downY)),0,0);
+                            params.setMargins(0, clipTopMargin(0, max, (int) (initY + motionEvent.getRawY() - downY)), 0, 0);
                             view.setLayoutParams(params);
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (Math.abs(motionEvent.getRawY() - downY) < 20) {
-                            //midET.setFocusableInTouchMode(true);
-                            midET.requestFocus();
-                            showKeyboard(midET);
-                            mMidETCanBeMoved = false;
+                            if (mMidETCanBeMoved) {
+                                //midET.setFocusableInTouchMode(true);
+                                midET.requestFocus();
+                                showKeyboard(midET);
+                                mMidETCanBeMoved = false;
+                                return true;
+                            }else //so we can move cursor
+                                return false;
                         }
                         return true;
                 }
@@ -240,7 +244,7 @@ public class TextTool extends EditContentTool {
                         midET.setVisibility(View.INVISIBLE);
                     }
                 },//None
-                new TextMode(R.drawable.middle_text_icon, midET){
+                new TextMode(R.drawable.middle_text_icon, midET) {
                     @Override
                     public void onSelected() {
                         //midET.setFocusableInTouchMode(true);
@@ -295,11 +299,14 @@ public class TextTool extends EditContentTool {
         mOverlaysView.addView(mTextContainer);
     }
 
-    protected class LimitTextWatcher implements TextWatcher{
+    protected class LimitTextWatcher implements TextWatcher {
+
         String beforeText;
+        int maxWidth;
 
         public LimitTextWatcher(EditText mTV) {
             this.mTV = mTV;
+            this.maxWidth = mTV.getMaxWidth() - 2 * mTV.getPaddingStart();
         }
 
         EditText mTV;
@@ -311,18 +318,12 @@ public class TextTool extends EditContentTool {
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-            float[] widths = new float[s.length()];
-            mTV.getPaint().getTextWidths(s.toString(),widths);
-            float width = 0;
-            for(float f:widths){
-                width += f;
-            }
-            if (mTV.getLineCount() > mTV.getMaxLines() || width >= mTV.getMaxWidth()) {
+            float width = mTV.getPaint().measureText(s.toString());
+            if (mTV.getLineCount() > mTV.getMaxLines() || width >= maxWidth) {
                 mTV.setText(beforeText);
                 mTV.setSelection(mTV.getText().length());
             }
@@ -330,7 +331,7 @@ public class TextTool extends EditContentTool {
     }
 
 
-    private int clipTopMargin(int min, int max, int newMargin){
+    private int clipTopMargin(int min, int max, int newMargin) {
         if (newMargin <= min) return min;
         else if (newMargin >= max) return max;
         else return newMargin;
@@ -486,8 +487,8 @@ public class TextTool extends EditContentTool {
 
     @Override
     public void onPause() {
-        if (mSelected == MID_TEXT_INDEX){
-            if (midET.getText().toString().trim().isEmpty()){
+        if (mSelected == MID_TEXT_INDEX) {
+            if (midET.getText().toString().trim().isEmpty()) {
                 selectTextMode(0);
             }
         }

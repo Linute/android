@@ -293,6 +293,8 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
 
                             isMuted = room.getBoolean("isMuted");
 
+                            //Log.i(TAG, "onResponse: "+name + " "+isMuted);
+
                             long mutedUntil = 0;
                             Object unMuteAt = room.get("unMuteAt");
 
@@ -791,6 +793,7 @@ public class RoomsActivityFragment extends BaseFragment implements RoomsAdapter.
                                             mTaptSocket.emit(API_Methods.VERSION + ":rooms:mute", jsonParams);
 //                                            mMuteRelease = System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/;
 //                                            updateNotificationView();
+                                            //Log.i(TAG, "onDurationSelected: "+room.getRoomName());
                                             room.setMute(true, System.currentTimeMillis() + item * 60 /*sec*/ * 1000 /*milli*/);
                                             mRoomsAdapter.notifyItemChanged(position);
                                         } catch (JSONException e) {
