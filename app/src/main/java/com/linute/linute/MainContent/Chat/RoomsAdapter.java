@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -153,7 +154,6 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         void bindModel(ChatRoom room) {
 
             mRoom = room;
-
             mRequestManager
                     .load(room.roomImage)
                     .dontAnimate()

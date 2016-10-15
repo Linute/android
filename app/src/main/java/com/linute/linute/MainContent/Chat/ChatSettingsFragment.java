@@ -487,6 +487,7 @@ room: id of room
                     .load(Utils.getImageUrlOfUser(u.userImage))
                     .into(((ImageView) view.findViewById(R.id.dm_user_icon)));
         } else {
+            Log.d(TAG, "updateRoomPhoto: "+mChatRoom.roomImage);
             Glide.with(this)
                     .load(mChatRoom.roomImage)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
