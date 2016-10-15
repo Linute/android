@@ -387,16 +387,22 @@ public class EditFragment extends BaseFragment {
                 toolsListRV.addView(toolView);
             }
 
-            mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    if(v.getHeight() > 0){
-                        if (mTools.length > 0)
+            //for photos, mToolOptionView needs to load before making toolOptionView, so that crop icons can properly be measured
+            if(mContentType == ContentType.Photo | mContentType == ContentType.UploadedPhoto) {
+                mToolOptionsView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+
+                        if (v.getHeight() > 0) {
+                            if (mTools.length > 0)
                             onToolSelected(0);
-                        v.removeOnLayoutChangeListener(this);
+                            v.removeOnLayoutChangeListener(this);
+                        }
                     }
-                }
-            });
+                });
+            }else{ //for video, toolOptionViews will load with width and height 0 unless made immediately. No idea why. This if-else works for now.
+                onToolSelected(0);
+            }
 
             showProgress(false);
 
@@ -437,7 +443,7 @@ public class EditFragment extends BaseFragment {
     }
 
     protected void onToolSelected(int i) {
-        if (mIsDisabled[i] || mSelectedTool == i) return;
+        if (mIsDisabled[i] /*|| mSelectedTool == i*/) return;
 
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
@@ -461,11 +467,12 @@ public class EditFragment extends BaseFragment {
             mToolbar.setTitle(mTools[mSelectedTool].getName());
         }
 
-        mToolOptionsView.removeAllViews();
+        mToolOptionsView.removeAllViewsInLayout();
         if (mToolViews[i] == null) {
             mToolViews[i] = mTools[i].createToolOptionsView(LayoutInflater.from(mToolOptionsView.getContext()), mToolOptionsView);
         }
         mToolOptionsView.addView(mToolViews[i]);
+        mToolOptionsView.requestLayout();
     }
 
 
