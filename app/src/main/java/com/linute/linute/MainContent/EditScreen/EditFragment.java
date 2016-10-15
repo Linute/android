@@ -722,7 +722,6 @@ public class EditFragment extends BaseFragment {
 
         //tools created in reverse priority order
         //(Crop appears above Text, which appears above Overlays, etc)
-        PrivacySettingTool privacySettingTool = new PrivacySettingTool(mUri, mContentType, overlay, this);
         StickersTool stickersTool = new StickersTool(mUri, mContentType, overlay, (ImageView) mToolbar.findViewById(R.id.image_sticker_trash));
         TextTool textTool = new TextTool(mUri, mContentType, overlay, mDimens, this);
         CropTool cropTool;
@@ -737,7 +736,7 @@ public class EditFragment extends BaseFragment {
                     case Post:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
-                                privacySettingTool,
+                                new PrivacySettingTool(mUri, mContentType, overlay, this),
                                 cropTool,
                                 textTool,
                                 stickersTool,
@@ -768,7 +767,7 @@ public class EditFragment extends BaseFragment {
                 switch (mContentSubType) {
                     case Post:
                         return new EditContentTool[]{
-                                privacySettingTool,
+                                new PrivacySettingTool(mUri, mContentType, overlay, this),
                                 textTool,
                                 stickersTool,
                                 overlaysTool
