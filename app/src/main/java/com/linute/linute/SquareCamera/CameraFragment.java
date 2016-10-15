@@ -949,7 +949,7 @@ public class CameraFragment extends Fragment {
             }
             mIsRecording = true;
             if(mToolbar != null){
-                mToolbar.setTitle("Recording");
+                mToolbar.setTitle("Recording...");
             }
         }
 

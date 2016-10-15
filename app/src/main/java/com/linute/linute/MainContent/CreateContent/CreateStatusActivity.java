@@ -229,10 +229,14 @@ public class CreateStatusActivity extends BaseSocketActivity implements View.OnC
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if(b){
-                    profileImageView.setImageResource(R.drawable.anon_switch_on);
+                    Glide.with(CreateStatusActivity.this)
+                            .load(R.drawable.anon_switch_on)
+                            .into(profileImageView);
                 }else {
                     String profileImageUrl = Utils.getImageUrlOfUser(profileImageView.getContext().getSharedPreferences(LinuteConstants.SHARED_PREF_NAME, Context.MODE_PRIVATE).getString("profileImage", ""));
-                    Glide.with(profileImageView.getContext()).load(profileImageUrl).into(profileImageView);
+                    Glide.with(CreateStatusActivity.this)
+                            .load(profileImageUrl)
+                            .into(profileImageView);
                 }
             }
         });

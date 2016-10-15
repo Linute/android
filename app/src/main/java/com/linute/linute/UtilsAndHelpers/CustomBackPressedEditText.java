@@ -66,6 +66,8 @@ public class CustomBackPressedEditText extends EditText {
         mEnterAction = action;
     }
 
+
+
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         InputConnection conn = super.onCreateInputConnection(outAttrs);

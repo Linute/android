@@ -346,7 +346,7 @@ public class MainActivity extends BaseTaptActivity {
         //this will only run after drawer is fully closed
         //lags if we don't do this
         if (mDrawerLayout.isDrawerOpen(Gravity.LEFT)) {
-            mMainDrawerListener.setChangeFragmentOrActivityAction(new Runnable() {
+            mMainDrawerListener.setOnDrawerClosedRunnable(new Runnable() {
                 @Override
                 public void run() {
                     if (mSafeForFragmentTransaction) {
@@ -561,7 +561,7 @@ public class MainActivity extends BaseTaptActivity {
             super.onDrawerStateChanged(newState);
         }
 
-        public void setChangeFragmentOrActivityAction(Runnable action) {
+        public void setOnDrawerClosedRunnable(Runnable action) {
             mChangeFragmentOrActivityAction = action;
         }
     }
@@ -881,9 +881,13 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addFragmentToContainer(ChatFragment.newInstance(
-                        chat
-                ));
+
+                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
+                // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
+                if (mDrawerLayout.isDrawerOpen(mNavigationView))
+                    mDrawerLayout.closeDrawers();
+
+                addFragmentToContainer(ChatFragment.newInstance(chat));
                 sn.dismiss();
             }
         });
@@ -897,6 +901,12 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
+                // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
+                if (mDrawerLayout.isDrawerOpen(mNavigationView))
+                    mDrawerLayout.closeDrawers();
+
 
                 if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
                     addActivityFragment();
@@ -914,6 +924,11 @@ public class MainActivity extends BaseTaptActivity {
         sn.getView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO: NOT TESTED - Drawer might lag while closing if we add a fragment before it is fully closed
+                // to fix : use mMainDrawerListener.setOnDrawerClosedRunnable();
+                if (mDrawerLayout.isDrawerOpen(mNavigationView))
+                    mDrawerLayout.closeDrawers();
+
 
                 if (getSupportFragmentManager().findFragmentByTag(UpdatesFragment.TAG) == null)
                     addActivityFragment();

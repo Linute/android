@@ -3,8 +3,6 @@ package com.linute.linute.MainContent.FeedDetailFragment;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
-import android.text.SpannableString;
-import android.util.Log;
 
 import com.linute.linute.UtilsAndHelpers.Utils;
 

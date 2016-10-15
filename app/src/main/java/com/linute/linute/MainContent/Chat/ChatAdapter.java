@@ -459,7 +459,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             mRequestManager
                     .load(image)
                     .asBitmap()
-                    .dontAnimate()
+                    .centerCrop()
                     .placeholder(R.color.seperator_color)
                     .into(vImage);
         }

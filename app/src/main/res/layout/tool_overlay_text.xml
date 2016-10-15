@@ -59,13 +59,16 @@
         android:background="@color/edit_fragment_meme_text_bg"
         android:gravity="center"
         android:imeOptions="actionDone"
-        android:inputType="textCapSentences|textNoSuggestions|textMultiLine"
+        android:inputType="textCapSentences|textNoSuggestions"
         android:maxLines="1"
+        android:lines="1"
         android:minHeight="24dp"
-        android:padding="4dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:textColor="@color/pure_white"
         android:textSize="16dp"
-
     />
 
     <android.support.v4.widget.Space
