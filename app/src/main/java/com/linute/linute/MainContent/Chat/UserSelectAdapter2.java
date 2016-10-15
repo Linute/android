@@ -164,7 +164,7 @@ public class UserSelectAdapter2 extends HeadedSelectableListAdapter {
             boolean isSelected = status == ItemStatus.Selected;
             boolean isLocked = status == ItemStatus.Locked;
 
-            itemView.setBackgroundColor((isLocked ? 0x3384CFDF : isSelected ? 0x5584CFDF : 0));
+            itemView.setBackgroundColor((isLocked ? 0x33CCCCCC : isSelected ? 0x5584CFDF : 0));
 
             Glide.with(itemView.getContext())
                     .load(Utils.getImageUrlOfUser(user.userImage))
