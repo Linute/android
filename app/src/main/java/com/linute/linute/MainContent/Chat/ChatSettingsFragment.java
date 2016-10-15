@@ -404,6 +404,7 @@ room: id of room
             ((TextView) view.findViewById(R.id.dm_user_name)).setText(u.getFullName());
             ((TextView) view.findViewById(R.id.dm_user_college)).setText(u.collegeName);
         } else {
+            view.findViewById(R.id.setting_group_name_container).setVisibility(View.VISIBLE);
             groupNameSettingView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
