@@ -745,8 +745,8 @@ public class EditFragment extends BaseFragment {
                     case Chat:
                         cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
                         return new EditContentTool[]{
-                                cropTool,
                                 textTool,
+                                cropTool,
                                 stickersTool
                         };
                     case Comment:
