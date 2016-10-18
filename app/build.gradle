@@ -26,6 +26,7 @@ android {
         versionCode 39
         versionName "1.7.5.6.4"
         multiDexEnabled true
+        buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
     buildTypes {
         release {
