@@ -3,10 +3,8 @@ package com.linute.linute.MainContent.FindFriends.FindFriendsFragment;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.linute.linute.API.LSDKFriendSearch;
-import com.linute.linute.API.LSDKPeople;
 import com.linute.linute.UtilsAndHelpers.MvpBaseClasses.OnFinishedRequest;
 
 import org.json.JSONArray;
@@ -59,6 +57,10 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
 
                 else initList(context, params, onFinishedQuery);
             } else {
+                if(!loadMore){
+                    mCurrSkip = 0;
+                    mCurrLimit = mInitLimit;
+                }
                 search(context, params, loadMore, onFinishedQuery);
             }
         }
@@ -67,6 +69,8 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     private void initList(Context context, Map<String, Object> params, final OnFinishedRequest onFinishedQuery) {
         if (mInitCall != null)
             mInitCall.cancel();
+
+        mCurrSkip = 0;
 
         mInitCall = new LSDKFriendSearch(context).searchFriendByName(getFiltersAndParams(params, false), new Callback() {
                     @Override
@@ -173,7 +177,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
 
                                 boolean canLoadTemp;
                                 try {
-                                    canLoadTemp = object.getBoolean("lastRequest");
+                                    canLoadTemp = !object.getBoolean("lastRequest");
                                 }catch (JSONException e){
                                     e.printStackTrace();
                                     canLoadTemp = false;
