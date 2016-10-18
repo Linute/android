@@ -123,7 +123,7 @@ public class EditFragment extends BaseFragment {
     }
 
     public enum ContentSubType {
-        None, Post, Chat, Comment
+        None, Post, Chat, Comment, Comment_No_Anon
     }
 
     private Uri mUri;
@@ -759,6 +759,13 @@ public class EditFragment extends BaseFragment {
                                 textTool,
                                 stickersTool
                         };
+                    case Comment_No_Anon:
+                        cropTool = new CropTool(mUri, mContentType, overlay, (MoveZoomImageView) mContentView, mDimens, requestDisableToolListener, mContentView);
+                        return new EditContentTool[]{
+                                cropTool,
+                                textTool,
+                                stickersTool
+                        };
                 }
             case UploadedVideo:
             case Video:
@@ -785,9 +792,12 @@ public class EditFragment extends BaseFragment {
                                 textTool,
                                 stickersTool
                         };
+                    case Comment_No_Anon:
+                        return new EditContentTool[]{
+                                textTool,
+                                stickersTool
+                        };
                 }
-
-
         }
         return new EditContentTool[0];
     }
@@ -1332,6 +1342,5 @@ public class EditFragment extends BaseFragment {
     static interface RequestDisableToolListener {
         void requestDisable(Class<? extends EditContentTool> tool, boolean disable);
     }
-
 
 }
