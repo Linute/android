@@ -452,7 +452,7 @@ public class CropTool extends EditContentTool {
 
 
             ivLayout.setTag(i);
-            ivLayout.setOnClickListener(listener);
+            cropSettingLayout.setOnClickListener(listener);
 
 
 
@@ -478,8 +478,6 @@ public class CropTool extends EditContentTool {
                 mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                 PorterDuff.Mode.MULTIPLY
         ));
-
-
 
        /* mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.colorAccent),
