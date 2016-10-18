@@ -35,6 +35,8 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
     private int mCurrSkip;
     private int mCurrLimit;
 
+    private boolean mInitCanLoadMore;
+
     @Override
     public void query(Context context, Map<String, Object> params, boolean loadMore, final OnFinishedRequest onFinishedQuery) {
         if (mCall != null) mCall.cancel();
@@ -51,7 +53,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                         public void run() {
                             mCurrSkip = mInitSkip;
                             mCurrLimit = mInitLimit;
-                            onFinishedQuery.onSuccess(mUnfilteredList, mCurrLimit > 0, false);
+                            onFinishedQuery.onSuccess(mUnfilteredList, mInitCanLoadMore, false);
                         }
                     });
 
@@ -94,6 +96,13 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
 
                                 mCurrSkip = mInitSkip;
                                 mCurrLimit = mInitLimit;
+
+                                try {
+                                    mInitCanLoadMore = object.getBoolean("lastRequest");
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                    mInitCanLoadMore = false;
+                                }
 //
 //                                Log.i("test", "onResponse: "+mCurrLimit);
 //                                Log.i("test", "onResponse: "+mCurrSkip);
@@ -104,7 +113,7 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                                     @Override
                                     public void run() {
                                         if (mCall == null)
-                                            onFinishedQuery.onSuccess(mUnfilteredList, mCurrLimit > 0, false);
+                                            onFinishedQuery.onSuccess(mUnfilteredList, mInitCanLoadMore, false);
                                     }
                                 });
 
@@ -162,11 +171,21 @@ public class FindFriendsInteractor extends BaseFindFriendsInteratctor {
                                 mCurrLimit = object.getInt("limit");
                                 mCurrSkip = object.getInt("skip");
 
+                                boolean canLoadTemp;
+                                try {
+                                    canLoadTemp = object.getBoolean("lastRequest");
+                                }catch (JSONException e){
+                                    e.printStackTrace();
+                                    canLoadTemp = false;
+                                }
+
+                                final boolean canLoad = canLoadTemp;
+
                                 final ArrayList<FriendSearchUser> friendSearchUsers = parseJson(object);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        onFinishedQuery.onSuccess(friendSearchUsers, mCurrLimit > 0, loadMore);
+                                        onFinishedQuery.onSuccess(friendSearchUsers, canLoad, loadMore);
                                     }
                                 });
 

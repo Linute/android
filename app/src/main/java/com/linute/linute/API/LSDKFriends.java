@@ -64,8 +64,7 @@ public class LSDKFriends {
         Map<String, Object> param = new HashMap<>();
         param.put("timestamp", timeStamp);
 
-        return API_Methods.post("friends/download", header, param, callback);
+        return API_Methods.post("friends/followers", header, param, callback);
     }
-
 
 }
