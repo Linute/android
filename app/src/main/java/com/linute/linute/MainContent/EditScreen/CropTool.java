@@ -409,9 +409,11 @@ public class CropTool extends EditContentTool {
             int imgHeight = Math.min(rect.bottom, mContentView.getHeight()) - Math.max(rect.top, 0);
             if(imgHeight >= mContentView.getWidth()){
                 mCropModeViews[INDEX_SQUARE_CROP].setVisibility(View.VISIBLE);
-                selectCropMode(INDEX_CUSTOM_CROP);
             }else{
                 mCropModeViews[INDEX_SQUARE_CROP].setVisibility(View.GONE);
+                if(mSelected == INDEX_SQUARE_CROP){
+                    selectCropMode(INDEX_CUSTOM_CROP);
+                }
             }
         }
     }
@@ -478,7 +480,7 @@ public class CropTool extends EditContentTool {
             mCropModeViews[i] = cropSettingLayout;
         }
 
-        selectCropMode(2);
+        selectCropMode(0);
         updateCropperModes(imageBounds);
         return rootView;
     }
