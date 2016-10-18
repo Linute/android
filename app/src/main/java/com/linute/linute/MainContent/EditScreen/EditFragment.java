@@ -443,7 +443,7 @@ public class EditFragment extends BaseFragment {
     }
 
     protected void onToolSelected(int i) {
-        if (mIsDisabled[i] /*|| mSelectedTool == i*/) return;
+        if (mIsDisabled[i] || mSelectedTool == i) return;
 
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
