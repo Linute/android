@@ -133,11 +133,21 @@ public class CropTool extends EditContentTool {
                 ,        //no crop
                 new CropMode("Square", backingBitmap, true, displayWidth, displayWidth),   //square
                 new CropMode("Custom", backingBitmap, false, displayWidth / 16 * 9, height){
+                    boolean firstSelect = true;
                     @Override
                     public void onSelected() {
-                        int height = ((View) mOverlaysView.getParent()).getHeight();
-                        mTopY = mBotY = (height - minHeight) / 2;
+                        if(firstSelect) {
+                            int height = ((View) mOverlaysView.getParent()).getHeight();
+                            mTopY = mBotY = (height - minHeight) / 2;
+                            firstSelect = false;
+                        }
                         super.onSelected();
+                    }
+
+                    @Override
+                    public void onUnSelected() {
+                        super.onUnSelected();
+                        firstSelect = true;
                     }
                 } //freeform
         };
@@ -474,6 +484,7 @@ public class CropTool extends EditContentTool {
     }
 
     public void selectCropMode(int index) {
+        if(index == mSelected) return;
         int oldSelected = mSelected;
         mSelected = index;
 
