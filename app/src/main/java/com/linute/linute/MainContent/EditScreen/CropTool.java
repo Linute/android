@@ -132,7 +132,14 @@ public class CropTool extends EditContentTool {
                         new CropMode("Default",backingBitmap, true, (int) (displayWidth * dimenRatio), (int) (displayWidth * dimenRatio))
                 ,        //no crop
                 new CropMode("Square", backingBitmap, true, displayWidth, displayWidth),   //square
-                new CropMode("Custom", backingBitmap, false, displayWidth / 16 * 9, height) //freeform
+                new CropMode("Custom", backingBitmap, false, displayWidth / 16 * 9, height){
+                    @Override
+                    public void onSelected() {
+                        int height = ((View) mOverlaysView.getParent()).getHeight();
+                        mTopY = mBotY = (height - minHeight) / 2;
+                        super.onSelected();
+                    }
+                } //freeform
         };
 
         mActivatable.setManipulationListener(new MoveZoomImageView.ViewManipulationListener() {
@@ -451,7 +458,7 @@ public class CropTool extends EditContentTool {
             textView.setText(mode.name);
 
 
-            ivLayout.setTag(i);
+            cropSettingLayout.setTag(i);
             cropSettingLayout.setOnClickListener(listener);
 
 
@@ -565,7 +572,7 @@ public class CropTool extends EditContentTool {
 
         public void onSelected() {
             apply();
-            int height = ((View) mOverlaysView.getParent()).getHeight();
+//            int height = ((View) mOverlaysView.getParent()).getHeight();
 //            mTopY = mBotY = (height - MAX_SIZE) / 2;
             boundCropper();
 
