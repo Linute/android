@@ -58,7 +58,7 @@ public class CropTool extends EditContentTool {
 
     CropMode[] mCropModes;
     ViewGroup[] mCropModeViews;
-    private int mSelected;
+    private int mSelected = 0;
 
     Dimens mDimens;
 
@@ -480,24 +480,34 @@ public class CropTool extends EditContentTool {
             mCropModeViews[i] = cropSettingLayout;
         }
 
-        selectCropMode(0);
+        selectCropMode(INDEX_OG_CROP, true);
         updateCropperModes(imageBounds);
         return rootView;
     }
 
-    public void selectCropMode(int index) {
-        if(index == mSelected) return;
+    public void selectCropMode(int index){
+        selectCropMode(index, false);
+    }
+
+    public void selectCropMode(int index, boolean force) {
+        if(index == mSelected && !force) return;
         int oldSelected = mSelected;
         mSelected = index;
 
-        mCropModes[oldSelected].onUnSelected();
+        if(oldSelected >= 0 && oldSelected <=mCropModes.length) {
+            mCropModes[oldSelected].onUnSelected();
+            mCropModeViews[oldSelected].findViewById(R.id.layout_image_wrapper).getBackground().setColorFilter(null);
+            ((TextView)mCropModeViews[oldSelected].findViewById(R.id.text_crop_name)).setTextColor(mCropModeViews[oldSelected].getResources().getColor(R.color.pure_white));
+        }
         mCropModes[mSelected].onSelected();
 
-        mCropModeViews[oldSelected].findViewById(R.id.layout_image_wrapper).getBackground().setColorFilter(null);
+
         mCropModeViews[index].findViewById(R.id.layout_image_wrapper).getBackground().setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                 PorterDuff.Mode.MULTIPLY
         ));
+        ((TextView)mCropModeViews[index].findViewById(R.id.text_crop_name)).setTextColor(mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor));
+
 
        /* mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.colorAccent),
