@@ -3,7 +3,6 @@ package com.linute.linute.MainContent.EditScreen;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,20 +23,19 @@ public class CommentPrivacyTool extends EditContentTool {
 
     private boolean isAnonCommentsDisabled = ProcessingOptions.DEFAULT_ANON_COMMENTS_DISABLED;
     private boolean postAsAnon = ProcessingOptions.DEFAULT_POST_AS_ANON;
-    private final FrameLayout mMidTextTarget1;
+    private final FrameLayout mMidTextTarget;
 
     public CommentPrivacyTool(Uri uri, EditFragment.ContentType type, ViewGroup overlays, final EditFragment frag) {
         super(uri, type, overlays);
-        mMidTextTarget1 = new FrameLayout(overlays.getContext());
-        mMidTextTarget1.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mMidTextTarget1.setOnClickListener(new View.OnClickListener() {
+        mMidTextTarget = new FrameLayout(overlays.getContext());
+        mMidTextTarget.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mMidTextTarget.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("AAA", "say");
                 ((TextTool)frag.selectTool(TextTool.class)).selectTextMode(TextTool.MID_TEXT_INDEX);
             }
         });
-        mOverlaysView.addView(mMidTextTarget1);
+        mOverlaysView.addView(mMidTextTarget);
     }
 
     @Override
@@ -107,14 +105,13 @@ public class CommentPrivacyTool extends EditContentTool {
     @Override
     public void onOpen() {
         super.onOpen();
-        mMidTextTarget1.setClickable(true);
+        mMidTextTarget.setClickable(true);
     }
 
     @Override
     public void onClose() {
         super.onClose();
-        Log.i("AAA", "ay");
-        mMidTextTarget1.setClickable(false);
+        mMidTextTarget.setClickable(false);
     }
 
     @Override

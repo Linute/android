@@ -162,8 +162,8 @@ public class RoomsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     .diskCacheStrategy(DiskCacheStrategy.NONE) //only cache the scaled image
                     .into(vUserImage);
 
-            vUserName.setText(Utils.stripUnsupportedCharacters(room.getRoomName()));
-            vLastMessage.setText(Utils.stripUnsupportedCharacters(room.lastMessage));
+            vUserName.setText(room.getRoomName());
+            vLastMessage.setText(room.lastMessage);
             vTimeStamp.setText(Utils.getRoomDateFormat(room.time));
             vIsMuted.setVisibility(mRoom.isMuted ? View.VISIBLE : View.INVISIBLE);
 

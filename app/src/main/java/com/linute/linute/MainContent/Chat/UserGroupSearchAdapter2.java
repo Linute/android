@@ -134,7 +134,7 @@ public class UserGroupSearchAdapter2 extends UserSelectAdapter2 {
             boolean isSelected = status == ItemStatus.Selected;
             boolean isLocked = status == ItemStatus.Locked;
 
-            itemView.setBackgroundColor((isLocked ? 0x3384CFDF : isSelected ? 0x5584CFDF : 0));
+            itemView.setBackgroundColor((isLocked ? 0x33CCCCCC : isSelected ? 0x5584CFDF : 0));
 
 
             Glide.with(itemView.getContext())

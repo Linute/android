@@ -2,6 +2,7 @@ package com.linute.linute.MainContent.Chat;
 
 
 import com.linute.linute.MainContent.DiscoverFragment.Post;
+import com.linute.linute.UtilsAndHelpers.Utils;
 
 import java.util.Date;
 
@@ -81,7 +82,7 @@ public class Chat {
         mDate = date;
         mOwnerId = ownerId;
         mMessageId = messageId;
-        mMessage = message;
+        mMessage = Utils.stripUnsupportedCharacters(message);
         mIsRead = read;
         mType = isOwner ? TYPE_MESSAGE_ME : TYPE_MESSAGE_OTHER_PERSON;
     }

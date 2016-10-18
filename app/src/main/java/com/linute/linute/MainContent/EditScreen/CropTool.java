@@ -7,6 +7,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -434,7 +435,8 @@ public class CropTool extends EditContentTool {
             ImageView iv = (ImageView) ivLayout.findViewById(R.id.image_crop_mode);
 
             float r = (float) (i == 2 ? mode.minHeight : mode.maxHeight)/ mCropperLayout.getWidth();
-            int w = (int)((parent.getHeight()*1/2)/1.2);
+            float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 30, parent.getResources().getDisplayMetrics());
+            int w = (int)((parent.getHeight()- padding)/1.2);
             int h = (int)(w*r);
 
             iv.setImageBitmap(mode.icon);
@@ -450,7 +452,7 @@ public class CropTool extends EditContentTool {
 
 
             ivLayout.setTag(i);
-            ivLayout.setOnClickListener(listener);
+            cropSettingLayout.setOnClickListener(listener);
 
 
 
@@ -476,8 +478,6 @@ public class CropTool extends EditContentTool {
                 mCropModeViews[mSelected].getResources().getColor(R.color.secondaryColor),
                 PorterDuff.Mode.MULTIPLY
         ));
-
-
 
        /* mCropModeViews[index].setColorFilter(new PorterDuffColorFilter(
                 mCropModeViews[mSelected].getResources().getColor(R.color.colorAccent),

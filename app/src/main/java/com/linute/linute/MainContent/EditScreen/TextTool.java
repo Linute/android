@@ -9,7 +9,6 @@ import android.support.v4.widget.Space;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -117,7 +116,6 @@ public class TextTool extends EditContentTool {
         View.OnFocusChangeListener focusChangeListener = new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-
                 frag.selectTool(TextTool.this);
                 //topET.setCursorVisible(b);
                 //botET.setCursorVisible(b);

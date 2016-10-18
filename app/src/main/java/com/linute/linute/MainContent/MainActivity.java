@@ -816,8 +816,7 @@ public class MainActivity extends BaseTaptActivity {
 
                     TaptSocket.getInstance().emit(API_Methods.VERSION + ":badge");
                     final NewMessageEvent chatEvent = new NewMessageEvent(true);
-                    chatEvent.setRoomId(chat.roomId);
-                    chatEvent.setMessage(activity.getString("messageText"));
+                    chatEvent.setRoomId(chat.roomId);Utils.stripUnsupportedCharacters(activity.getString("messageText"));
                     NewMessageBus.getInstance().setNewMessage(chatEvent);
 
                 } else {

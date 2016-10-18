@@ -895,7 +895,7 @@ public class ChatFragment extends BaseFragment implements LoadMoreViewHolder.OnL
         if (rootV == null) return;
 
         Toolbar toolbae = (Toolbar) rootV.findViewById(R.id.chat_fragment_toolbar);
-        toolbae.setTitle(Utils.stripUnsupportedCharacters(getChatName()));
+        toolbae.setTitle(getChatName());
         View chatSettingsbutton = toolbae.findViewById(R.id.toolbar_chat_settings);
         chatSettingsbutton.setVisibility(mRoomExists == RoomExists.Exists ? View.VISIBLE : View.GONE);
     }

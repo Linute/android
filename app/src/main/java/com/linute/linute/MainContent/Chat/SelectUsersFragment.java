@@ -410,7 +410,7 @@ public class SelectUsersFragment extends Fragment implements UserGroupSearchAdap
 
     public void showName(boolean show) {
         firstUserName.setVisibility(show ? View.VISIBLE : View.GONE);
-        mSelectedRV.animate().x(show ? TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics()) : 0);
+        mSelectedRV.animate().x(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (show ? 16 : 2 ), getResources().getDisplayMetrics()));
         if (show) {
             firstUserName.setText(mSelectedUsers.get(0).getFullName());
         }
