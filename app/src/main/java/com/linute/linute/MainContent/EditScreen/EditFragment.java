@@ -445,6 +445,9 @@ public class EditFragment extends BaseFragment {
     protected void onToolSelected(int i) {
         if (mIsDisabled[i] || mSelectedTool == i) return;
 
+        //called so that cropper view updates bounds
+        mContentView.invalidate();
+
         int oldSelectedTool = mSelectedTool;
         mSelectedTool = i;
 

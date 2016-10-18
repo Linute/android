@@ -496,6 +496,8 @@ public class CropTool extends EditContentTool {
     @Override
     public void processContent(Uri uri, EditFragment.ContentType contentType, ProcessingOptions options) {
 
+        mActivatable.getImageBounds(imageBounds);
+        updateCropperBounds();
         boundCropper();
 
         options.topInset = mTopY;
