@@ -13,6 +13,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.linute.linute.API.API_Methods;
 import com.linute.linute.API.DeviceInfoSingleton;
+import com.linute.linute.BuildConfig;
 import com.linute.linute.Database.TaptUser;
 import com.linute.linute.LoginAndSignup.PreLoginActivity;
 import com.linute.linute.R;
@@ -24,6 +25,7 @@ import com.linute.linute.UtilsAndHelpers.WebViewActivity;
 
 import org.json.JSONObject;
 
+import java.util.Date;
 
 import io.realm.Realm;
 
@@ -129,7 +131,7 @@ public class SettingActivity extends BaseSocketActivity {
             mAbout = findPreference("version");
 
             DeviceInfoSingleton info = DeviceInfoSingleton.getInstance(getActivity());
-            mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION);
+            mAbout.setSummary("v" + info.getVersionCode() + "api" + API_Methods.VERSION + (API_Methods.IS_DEV_BUILD ? " @"+new Date(BuildConfig.TIMESTAMP).toLocaleString() : ""));
         }
 
         /* TODO: still need to add the following on click listeners:
