@@ -66,7 +66,7 @@ public class ManipulableImageView extends FrameLayout {
         mImageView.setY(y);
         mImageView.setLayoutParams(new FrameLayout.LayoutParams(200, 200));
 
-        mImageView.setBackgroundResource(R.drawable.bg_sticker);
+        mImageView.setBackgroundResource(0);
 
 
     /*    bPaint = new Paint();
